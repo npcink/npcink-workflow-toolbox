@@ -58,6 +58,19 @@ Run the configured default gates:
 composer quality:matrix:run
 ```
 
+Cloud is intentionally different from the five local WordPress repositories:
+the default run verifies GitHub source checks for the exact clean Cloud `HEAD`
+and does not assume MBA Docker. Use the slower runtime lane only when the
+milestone needs M4 evidence:
+
+```bash
+composer quality:matrix:m4
+```
+
+The runtime lane fails closed unless M4 reports the same accepted, clean
+revision. It reports `needs_deploy`, `needs_validation`, and
+`blocked_environment` separately from a failed test and never deploys M4.
+
 Gate-backed next-action brief:
 
 ```bash

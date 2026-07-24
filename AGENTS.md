@@ -94,6 +94,10 @@ implementing it inside Toolbox.
   explicitly changes the contract.
 - Update docs when public REST, ability ids, workflow shape, lifecycle, or
   product boundary changes.
+- For cross-repository Cloud closeout, use the exact-SHA GitHub source gate in
+  `composer quality:matrix:run`. Use `composer quality:matrix:m4` only when
+  explicit revision-bound M4 runtime evidence is required. Never restore an
+  implicit MBA Docker requirement or let the matrix deploy/synchronize M4.
 - Add or update `tests/run.php` static contracts for public behavior.
 - Stage only files changed for the current task. Do not use `git add -A`.
 - Before staging, inspect `git status --short` and `git diff --stat`. If
