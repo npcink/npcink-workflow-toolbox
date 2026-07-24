@@ -129,6 +129,7 @@ Start from the active documents below before changing code.
 - [ADR-006: Separate Native Editor Commit From Governed Batch Handoff](decisions/ADR-006-native-editor-commit-and-governed-batch-handoff.md)
 - [ADR-007: Let Toolbox Own Optional Suite Navigation](decisions/ADR-007-toolbox-owned-admin-navigation.md)
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
+- [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 
 ## Archived Closeouts
 

@@ -167,6 +167,24 @@ Before a multi-repo release or milestone closeout, run the gate matrix:
 composer quality:matrix:run
 ```
 
+This command does not require Docker on the MBA/M5. The five WordPress
+repositories run their configured local gates. Cloud source evidence comes from
+the required GitHub checks attached to the exact clean Cloud `HEAD`; dirty,
+unpushed, pending, or missing evidence is reported as `needs_validation`.
+
+When the milestone also requires M4 runtime acceptance, run the explicit
+revision-bound gate:
+
+```bash
+composer quality:matrix:m4
+```
+
+It first requires the exact-SHA GitHub source gate, then requires M4 to report
+the same accepted, clean revision before running the full remote contract/domain
+gate. It never deploys or synchronizes M4. A stale runtime reports
+`needs_deploy`, while unavailable GitHub, SSH, or M4 evidence reports
+`blocked_environment`; neither is mislabeled as a code-test failure.
+
 When you need the same decision queue after running gates, use:
 
 ```bash
@@ -174,15 +192,17 @@ composer quality:observe:run
 ```
 
 `composer quality:matrix` is status-only. `composer quality:matrix:run` runs the
-configured default gates. Add `--fail-on-dirty` for release closeouts that must
-prove no repository has hidden local edits:
+configured source gates, and `composer quality:matrix:m4` adds explicit M4
+runtime acceptance. Add `--fail-on-dirty` for release closeouts that must prove
+no repository has hidden local edits:
 
 ```bash
 php scripts/cross-repo-quality-matrix.php --run-gates --fail-on-dirty
 ```
 
-Both commands are read-only except when an explicit `--output=PATH` report file
-is requested. They must not fetch, stage, reset, or mutate WordPress.
+The commands do not fetch, stage, reset, deploy Cloud, synchronize M4, or mutate
+WordPress. An explicit `--output=PATH` may write a report, and the M4 command
+runs ephemeral remote test containers only after revision equality succeeds.
 
 ## Five-Plugin No-Credit Acceptance
 

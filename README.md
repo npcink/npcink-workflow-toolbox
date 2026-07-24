@@ -136,6 +136,7 @@ the [documentation index](docs/README.md). Start with:
 - [Architecture Decision Records](docs/decisions/)
 - [ADR-006: Native Editor Commit And Governed Batch Handoff](docs/decisions/ADR-006-native-editor-commit-and-governed-batch-handoff.md)
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](docs/decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
+- [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](docs/decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:

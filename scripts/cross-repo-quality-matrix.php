@@ -45,13 +45,15 @@ $repos = array(
 	array(
 		'name'       => 'npcink-ai-cloud',
 		'paths'      => array( 'npcink-ai-cloud' ),
-		'gate'       => 'npm run check:fast',
-		'gate_notes' => 'Cloud runtime fast contract, seam, perimeter, and anti-drift checks.',
+		'gate'       => 'GitHub CI checks for the exact clean Cloud HEAD',
+		'gate_kind'  => 'cloud_github_ci',
+		'gate_notes' => 'Cloud source authority is exact-SHA GitHub CI; optional M4 acceptance is revision-bound and explicit.',
 	),
 );
 
 $options = array(
 	'run_gates'     => false,
+	'cloud_m4'      => false,
 	'json'          => false,
 	'fail_on_dirty' => false,
 	'output'        => '',
@@ -61,6 +63,11 @@ $options = array(
 foreach ( array_slice( $_SERVER['argv'] ?? array(), 1 ) as $arg ) {
 	if ( '--run-gates' === $arg ) {
 		$options['run_gates'] = true;
+		continue;
+	}
+
+	if ( '--cloud-m4' === $arg ) {
+		$options['cloud_m4'] = true;
 		continue;
 	}
 
@@ -85,7 +92,7 @@ foreach ( array_slice( $_SERVER['argv'] ?? array(), 1 ) as $arg ) {
 	}
 
 	fwrite( STDERR, "Unknown option: {$arg}\n" );
-	fwrite( STDERR, "Usage: php scripts/cross-repo-quality-matrix.php [--run-gates] [--fail-on-dirty] [--json] [--output=PATH] [--repo=NAME]\n" );
+	fwrite( STDERR, "Usage: php scripts/cross-repo-quality-matrix.php [--run-gates] [--cloud-m4] [--fail-on-dirty] [--json] [--output=PATH] [--repo=NAME]\n" );
 	exit( 2 );
 }
 
@@ -165,6 +172,28 @@ function npcink_quality_matrix_tail( string $output, int $limit = 8 ): string {
 }
 
 /**
+ * Map helper exit codes to evidence-aware matrix states.
+ *
+ * @param int $exit_code Exit code.
+ * @return string
+ */
+function npcink_quality_matrix_gate_status( int $exit_code ): string {
+	if ( 0 === $exit_code ) {
+		return 'passed';
+	}
+	if ( 75 === $exit_code ) {
+		return 'blocked_environment';
+	}
+	if ( 78 === $exit_code ) {
+		return 'needs_validation';
+	}
+	if ( 79 === $exit_code ) {
+		return 'needs_deploy';
+	}
+	return 'failed';
+}
+
+/**
  * Resolve the first existing candidate repository path.
  *
  * @param string $family_root Repository family root.
@@ -226,12 +255,18 @@ foreach ( $repos as $repo ) {
 		'stash_count'   => null,
 		'worktrees'     => null,
 		'gate'          => $repo['gate'],
+		'gate_authority' => 'local',
 		'gate_notes'    => $repo['gate_notes'],
 		'gate_ran'      => false,
 		'gate_status'   => 'not_run',
 		'gate_exit'     => null,
 		'gate_duration' => null,
 		'gate_tail'     => '',
+		'runtime_gate_ran'      => false,
+		'runtime_gate_status'   => 'not_run',
+		'runtime_gate_exit'     => null,
+		'runtime_gate_duration' => null,
+		'runtime_gate_tail'     => '',
 	);
 
 	if ( ! $result['exists'] ) {
@@ -277,14 +312,40 @@ foreach ( $repos as $repo ) {
 
 	if ( $options['run_gates'] ) {
 		$result['gate_ran']      = true;
-		$gate                   = npcink_quality_matrix_run( $repo['gate'], $path );
+		$gate_command            = $repo['gate'];
+		if ( 'cloud_github_ci' === ( $repo['gate_kind'] ?? '' ) ) {
+			$result['gate_authority'] = 'github_ci';
+			$gate_command             = escapeshellarg( PHP_BINARY ) . ' '
+				. escapeshellarg( $root . '/scripts/check-cloud-github-ci.php' ) . ' '
+				. escapeshellarg( '--repo-path=' . $path );
+		}
+		$gate                    = npcink_quality_matrix_run( $gate_command, $path );
 		$result['gate_exit']     = $gate['exit_code'];
 		$result['gate_duration'] = $gate['duration_ms'];
 		$result['gate_tail']     = npcink_quality_matrix_tail( $gate['output'] );
-		$result['gate_status']   = 0 === $gate['exit_code'] ? 'passed' : 'failed';
+		$result['gate_status']   = npcink_quality_matrix_gate_status( $gate['exit_code'] );
 
 		if ( 0 !== $gate['exit_code'] ) {
 			++$failures;
+		}
+
+		if ( $options['cloud_m4'] && 'cloud_github_ci' === ( $repo['gate_kind'] ?? '' ) ) {
+			if ( 0 === $gate['exit_code'] ) {
+				$result['runtime_gate_ran'] = true;
+				$runtime_command            = escapeshellarg( PHP_BINARY ) . ' '
+					. escapeshellarg( $root . '/scripts/check-cloud-m4-runtime.php' ) . ' '
+					. escapeshellarg( '--repo-path=' . $path );
+				$runtime_gate               = npcink_quality_matrix_run( $runtime_command, $path );
+				$result['runtime_gate_exit'] = $runtime_gate['exit_code'];
+				$result['runtime_gate_duration'] = $runtime_gate['duration_ms'];
+				$result['runtime_gate_tail'] = npcink_quality_matrix_tail( $runtime_gate['output'] );
+				$result['runtime_gate_status'] = npcink_quality_matrix_gate_status( $runtime_gate['exit_code'] );
+				if ( 0 !== $runtime_gate['exit_code'] ) {
+					++$failures;
+				}
+			} else {
+				$result['runtime_gate_status'] = 'blocked_source_gate';
+			}
 		}
 	}
 
@@ -295,6 +356,7 @@ $report = array(
 	'generated_at' => gmdate( 'c' ),
 	'family_root'  => $family_root,
 	'run_gates'    => $options['run_gates'],
+	'cloud_m4'     => $options['cloud_m4'],
 	'results'      => $results,
 	'failures'     => $failures,
 );
@@ -312,6 +374,7 @@ if ( $options['json'] ) {
 	$lines[] = '- Generated: `' . $report['generated_at'] . '`';
 	$lines[] = '- Family root: `' . $family_root . '`';
 	$lines[] = '- Gates: `' . ( $options['run_gates'] ? 'run' : 'not_run' ) . '`';
+	$lines[] = '- M4 runtime acceptance: `' . ( $options['cloud_m4'] ? 'requested' : 'not_requested' ) . '`';
 	$lines[] = '';
 	$lines[] = '| Repo | Branch | Dirty | Ahead | Behind | Gate | Result |';
 	$lines[] = '| --- | --- | ---: | ---: | ---: | --- | --- |';
@@ -339,6 +402,7 @@ if ( $options['json'] ) {
 		$lines[] = '- Exists: `' . ( $result['exists'] ? 'yes' : 'no' ) . '`';
 		$lines[] = '- Git repo: `' . ( $result['is_git'] ? 'yes' : 'no' ) . '`';
 		$lines[] = '- Gate notes: ' . $result['gate_notes'];
+		$lines[] = '- Gate authority: `' . $result['gate_authority'] . '`';
 		if ( ! empty( $result['dirty_files'] ) ) {
 			$lines[] = '- Dirty files:';
 			foreach ( $result['dirty_files'] as $dirty_file ) {
@@ -351,6 +415,16 @@ if ( $options['json'] ) {
 			$lines[] = '```text';
 			$lines[] = $result['gate_tail'];
 			$lines[] = '```';
+		}
+		if ( 'not_run' !== $result['runtime_gate_status'] ) {
+			$lines[] = '- M4 runtime result: `' . $result['runtime_gate_status'] . '`';
+			if ( $result['runtime_gate_ran'] ) {
+				$lines[] = '- M4 runtime duration: `' . (string) $result['runtime_gate_duration'] . 'ms`';
+				$lines[] = '- M4 runtime tail:';
+				$lines[] = '```text';
+				$lines[] = $result['runtime_gate_tail'];
+				$lines[] = '```';
+			}
 		}
 	}
 
