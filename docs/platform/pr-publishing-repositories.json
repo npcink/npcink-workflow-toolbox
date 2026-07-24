@@ -1,0 +1,50 @@
+{
+  "schema_version": "npcink_pr_publishing_repositories.v1",
+  "publisher_sha256": "e26304ae61355e972eced7462fa1c8ec15f01d58b2c625775b68a5690682557f",
+  "required_sections": [
+    "Scope",
+    "Boundary",
+    "Verification",
+    "Risk"
+  ],
+  "repositories": [
+    {
+      "name": "npcink-abilities-toolkit",
+      "github": "npcink/npcink-abilities-toolkit",
+      "default_base": "master",
+      "publish_command": "composer pr:publish --"
+    },
+    {
+      "name": "npcink-governance-core",
+      "github": "npcink/npcink-governance-core",
+      "default_base": "master",
+      "publish_command": "composer pr:publish --"
+    },
+    {
+      "name": "npcink-ai-client-adapter",
+      "github": "npcink/npcink-ai-client-adapter",
+      "default_base": "master",
+      "publish_command": "composer pr:publish --"
+    },
+    {
+      "name": "npcink-workflow-toolbox",
+      "github": "npcink/npcink-workflow-toolbox",
+      "default_base": "master",
+      "publish_command": "composer pr:publish --"
+    },
+    {
+      "name": "npcink-cloud-addon",
+      "github": "npcink/npcink-cloud-addon",
+      "default_base": "master",
+      "publish_command": "composer pr:publish --"
+    },
+    {
+      "name": "npcink-ai-cloud",
+      "github": "npcink/npcink-ai-cloud",
+      "default_base": "master",
+      "publish_command": "pnpm run pr:publish --",
+      "production_base": "production",
+      "production_approval_sentence": "Approved for production validation by operator."
+    }
+  ]
+}

@@ -39,6 +39,7 @@ Start from the active documents below before changing code.
 - [Development Workflow](development-workflow.md)
 - [AI Development Quality Workflow](ai-development-quality-workflow.md)
 - [AI Change Envelope Template](ai-change-envelope-template.md)
+- [Pull Request Publishing Standard v1](platform/pr-publishing-standard-v1.md)
 - [GitHub Publishing Runbook](github-publishing-runbook.md)
 - [Security And Performance Release Gate](security-performance-release-gate.md)
 - [Cloud Addon Transport Release Gate](cloud-addon-transport-release-gate.md)

@@ -105,6 +105,17 @@ implementing it inside Toolbox.
   `git show --name-status --stat HEAD`. If unexpected files entered the commit,
   reset that commit with `git reset --mixed HEAD~1` and recommit the correct
   scope while preserving the working tree.
+- Publish a completed clean topic branch with
+  `composer pr:publish -- --title "<title>" --body-file <path>`. Start the body
+  from `.github/pull_request_template.md`; do not replace it with ad hoc
+  `gh pr create --body` text that omits `Scope`, `Boundary`, `Verification`, or
+  `Risk`.
+- The publisher checks the current `origin/master` baseline, creates the PR,
+  and requests protected squash auto-merge. It never bypasses required checks
+  and never deletes local or remote branches, because this repository commonly
+  uses multiple worktrees.
+- The authoritative cross-repository contract is
+  `docs/platform/pr-publishing-standard-v1.md`.
 
 ## Verification Gates
 

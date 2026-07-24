@@ -130,6 +130,7 @@ the [documentation index](docs/README.md). Start with:
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
 - [Development Workflow](docs/development-workflow.md)
+- [Pull Request Publishing Standard v1](docs/platform/pr-publishing-standard-v1.md)
 - [First Version Reference](docs/first-version-reference.md)
 - [WordPress.org Submission](docs/wordpress-org-submission.md)
 - [Architecture Decision Records](docs/decisions/)
