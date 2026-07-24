@@ -74,6 +74,7 @@ Start here before multi-repository design or implementation:
 - [Five-Plugin Hardening And Cloud-Offline Closeout - 2026-07-15](../five-plugin-hardening-and-cloud-offline-closeout-2026-07-15.md)
 - [AI Development Quality Workflow](../ai-development-quality-workflow.md)
 - [AI Change Envelope Template](../ai-change-envelope-template.md)
+- [Pull Request Publishing Standard v1](pr-publishing-standard-v1.md)
 - [Development Workflow](../development-workflow.md)
 
 Use Core docs only for governance-specific truth:

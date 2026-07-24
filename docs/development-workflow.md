@@ -262,6 +262,21 @@ objects that do not match the local commit SHA.
 For the detailed Git CLI publication path and timeout diagnostics, use the
 [GitHub Publishing Runbook](github-publishing-runbook.md).
 
+For completed, clean topic branches, follow the
+[Pull Request Publishing Standard v1](platform/pr-publishing-standard-v1.md)
+and publish with a completed copy of the checked-in PR template:
+
+```bash
+composer pr:publish -- \
+  --title "fix: describe the focused change" \
+  --body-file /absolute/path/to/completed-pr-body.md
+```
+
+The command validates the shared `Scope`, `Boundary`, `Verification`, and
+`Risk` headings before push, requires the latest `origin/master`, and requests
+protected squash auto-merge. It does not bypass required checks or delete
+branches from multi-worktree repositories.
+
 ## Publication Status Gate
 
 Local commit cleanup is not the same as publishing. Before calling a milestone
