@@ -425,6 +425,20 @@ ALT drafts, one bounded Toolbox REST request, and no Cloud, Core proposal, or
 WordPress content write path, then saves a review screenshot under
 `build/smoke/`.
 
+For the editor image recommendation modal, run:
+
+```bash
+NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-image-recommendation-browser
+```
+
+This opens the real Gutenberg sidebar on a disposable local draft and
+intercepts only image candidate reads with deterministic suggestion-only
+fixtures. It verifies source and hosted-image modes, reviewed generation
+settings, candidate selection, reversible large preview, and semantic
+regeneration that preserves existing candidates. It calls no Cloud or real
+provider, does not import media, create Core proposals, use Local Admin Consent,
+execute Adapter actions, or write the draft, and removes the fixture afterward.
+
 For the post-editor review artifact surface, run:
 
 ```bash

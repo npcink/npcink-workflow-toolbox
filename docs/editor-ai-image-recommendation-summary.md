@@ -251,6 +251,22 @@ Relevant static contracts should cover:
 - no direct Toolbox media import, media SEO write, or external featured-image
   write.
 
+Optional real-editor browser gate:
+
+```bash
+NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" \
+composer smoke:editor-image-recommendation-browser
+```
+
+This opens the real Gutenberg sidebar on a disposable local draft and
+intercepts only the image-candidate REST reads with deterministic
+suggestion-only fixtures. It verifies the left-grid/right-inspector layout,
+source and hosted-image modes, reviewed prompt settings, candidate selection,
+reversible large preview, and semantic regeneration without losing existing
+candidates. It does not call Cloud or a real provider, import media, create a
+Core proposal, use Local Admin Consent, execute Adapter actions, or write the
+draft. The disposable draft is removed after the run.
+
 ## Open Follow-Ups
 
 - Cloud should keep improving diversity of prompt direction candidates, but the
@@ -258,5 +274,3 @@ Relevant static contracts should cover:
   different.
 - Cloud should return localized direction labels when possible so Toolbox does
   less inference.
-- A browser smoke for the image modal would be useful after the layout stabilizes
-  because many regressions are visual rather than PHP-contract failures.
