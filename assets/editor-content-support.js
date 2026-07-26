@@ -8032,7 +8032,10 @@
 				if (result && (result.code || (result.data && result.data.cloud_error_code))) {
 					throw result;
 				}
-				setImageResultForSearchMode('generate', result);
+				const nextResult = preserveExistingCandidates
+					? mergeImageCandidateResults(imageGenerationResult || imageResultForSearchMode('generate'), result)
+					: result;
+				setImageResultForSearchMode('generate', nextResult);
 				setImageGuidance(__('Showing host-generated image candidates. Review and adopt through Core before importing or setting featured media.', 'npcink-workflow-toolbox'));
 			} catch (requestError) {
 				setImageError(formatImageErrorMessage(requestError, __('Hosted image candidate request failed.', 'npcink-workflow-toolbox')));
