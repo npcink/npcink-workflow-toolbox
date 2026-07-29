@@ -7289,3 +7289,71 @@ msgstr "正在显示最近一次本地缓存的热榜快照。"
 #: includes/Hot_Topic_Pool.php
 msgid "No local hot-topic snapshot is available yet. Refresh it when you want to contact Cloud."
 msgstr "尚无本地热榜快照。需要连接 Cloud 时请手动刷新。"
+
+#: assets/editor-content-support.js
+msgid "Site media library"
+msgstr "站内媒体库"
+
+#: assets/editor-content-support.js
+msgid "Enter a natural-language description before searching the site media library."
+msgstr "请先输入自然语言描述，再搜索站内媒体库。"
+
+#: assets/editor-content-support.js
+msgid "Scanning local images, adding visual evidence, and refreshing the rebuildable search projection..."
+msgstr "正在扫描本地图片、补充视觉证据并刷新可重建的搜索投影……"
+
+#: assets/editor-content-support.js
+msgid "Media search index refreshed: %1$d images, %2$d with visual evidence. Enter a description to search."
+msgstr "媒体搜索索引已刷新：共 %1$d 张图片，其中 %2$d 张有视觉证据。请输入描述开始搜索。"
+
+#: assets/editor-content-support.js
+msgid "Could not refresh the site media search index."
+msgstr "无法刷新站内媒体搜索索引。"
+
+#: assets/editor-content-support.js
+msgid "Search site media"
+msgstr "搜索站内媒体"
+
+#: assets/editor-content-support.js
+msgid "Refreshing site media search index..."
+msgstr "正在刷新站内媒体搜索索引……"
+
+#: assets/editor-content-support.js
+msgid "Describe the image you want to find in this site"
+msgstr "描述您想在本站找到的图片"
+
+#: assets/editor-content-support.js
+msgid "Refreshing media index"
+msgstr "正在刷新媒体索引"
+
+#: assets/editor-content-support.js
+msgid "Refresh media index"
+msgstr "刷新媒体索引"
+
+#: assets/editor-content-support.js
+msgid "Selecting existing media"
+msgstr "正在选择现有媒体"
+
+#: assets/editor-content-support.js
+msgid "Use existing media"
+msgstr "使用现有媒体"
+
+#: assets/editor-content-support.js
+msgid "Existing media selected"
+msgstr "已选择现有媒体"
+
+#: assets/editor-content-support.js
+msgid "The existing attachment is already available for this paragraph; no duplicate media was imported."
+msgstr "此附件已在媒体库中可供当前段落使用，没有重复导入媒体。"
+
+#: includes/Provider_Client.php
+msgid "Npcink Abilities Toolkit is required to read and revalidate the local media library."
+msgstr "读取并重新验证本地媒体库需要启用 Npcink Abilities Toolkit。"
+
+#: includes/Provider_Client.php
+msgid "The local media inventory ability is not callable."
+msgstr "本地媒体清单能力当前不可调用。"
+
+#: includes/Provider_Client.php
+msgid "The local media inventory ability returned an invalid response."
+msgstr "本地媒体清单能力返回了无效响应。"

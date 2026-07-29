@@ -1018,7 +1018,21 @@
       "Loaded %d blocks into the visible editor. Review them, then use WordPress Save draft or Publish to persist.": ["已将 %d 个区块载入当前可见编辑器。请审阅后使用 WordPress 保存草稿或发布来持久化。"],
       "Suggestion only; reviewed sections may load only into an empty editor and are never saved or published automatically": ["仅提供建议；已审阅章节只能载入空白编辑器，且绝不会自动保存或发布"],
       "Builds a reviewable writing pack from URL, manual, or mixed inputs. Reviewed sections may load only into an empty editor; nothing is saved or published automatically.": ["根据网址、手动需求或混合输入生成可审阅写作包。已审阅章节只能载入空白编辑器；不会自动保存或发布任何内容。"],
-      "Build or edit one writing pack, confirm it, then generate a plain-text draft preview. Reviewed sections may load only into an empty editor; nothing is saved or published automatically.": ["生成或编辑一个写作包并确认，再生成纯文本初稿预览。已审阅章节只能载入空白编辑器；不会自动保存或发布任何内容。"]
+      "Build or edit one writing pack, confirm it, then generate a plain-text draft preview. Reviewed sections may load only into an empty editor; nothing is saved or published automatically.": ["生成或编辑一个写作包并确认，再生成纯文本初稿预览。已审阅章节只能载入空白编辑器；不会自动保存或发布任何内容。"],
+      "Site media library": ["站内媒体库"],
+      "Enter a natural-language description before searching the site media library.": ["请先输入自然语言描述，再搜索站内媒体库。"],
+      "Scanning local images, adding visual evidence, and refreshing the rebuildable search projection...": ["正在扫描本地图片、补充视觉证据并刷新可重建的搜索投影……"],
+      "Media search index refreshed: %1$d images, %2$d with visual evidence. Enter a description to search.": ["媒体搜索索引已刷新：共 %1$d 张图片，其中 %2$d 张有视觉证据。请输入描述开始搜索。"],
+      "Could not refresh the site media search index.": ["无法刷新站内媒体搜索索引。"],
+      "Search site media": ["搜索站内媒体"],
+      "Refreshing site media search index...": ["正在刷新站内媒体搜索索引……"],
+      "Describe the image you want to find in this site": ["描述您想在本站找到的图片"],
+      "Refreshing media index": ["正在刷新媒体索引"],
+      "Refresh media index": ["刷新媒体索引"],
+      "Selecting existing media": ["正在选择现有媒体"],
+      "Use existing media": ["使用现有媒体"],
+      "Existing media selected": ["已选择现有媒体"],
+      "The existing attachment is already available for this paragraph; no duplicate media was imported.": ["此附件已在媒体库中可供当前段落使用，没有重复导入媒体。"]
     }
   }
 }

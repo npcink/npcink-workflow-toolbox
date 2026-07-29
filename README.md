@@ -234,6 +234,9 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync` (refresh-only bounded
   Cloud request; no rebuild/delete, indexing lifecycle, local queue, or
   collection controls)
+- `POST /wp-json/npcink-toolbox/v1/site-media/index-batch` (explicit batches of
+  at most 10 Toolkit-enumerated images; Cloud owns visual recognition,
+  embedding, and the rebuildable media projection)
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback/summary`
 - `POST /wp-json/npcink-toolbox/v1/ai/content-support`
@@ -277,6 +280,12 @@ High-risk entries are intentionally constrained:
   to Cloud. It must not add rebuild/delete modes, local indexing queues,
   stale-index policy, embedding configuration, vector database endpoints, or
   vector collection lifecycle ownership.
+- `/site-media/index-batch` is an explicit operator-triggered projection
+  refresh. Toolkit owns local attachment enumeration and revision evidence;
+  Cloud owns vision and vector execution. Repeated visual-evidence requests use
+  the bounded attachment fingerprints as an idempotency scope. The route does
+  not change attachment metadata, import media, delete files, or write post
+  content.
 - `/local-admin-consent/featured-image` is the only current direct local write
   exception. It is limited to one existing attachment on one current post with
   Core-owned audit and rollback, and it is not precedent for media import,

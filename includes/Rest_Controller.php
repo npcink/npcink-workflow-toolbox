@@ -42,6 +42,7 @@ final class Rest_Controller {
 		$this->post( '/web-search/diagnostics', 'web_search_diagnostics' );
 		$this->post( '/site-knowledge/search', 'site_knowledge_search' );
 		$this->post( '/site-knowledge/sync', 'site_knowledge_sync' );
+		$this->post( '/site-media/index-batch', 'site_media_index_batch' );
 		$this->post( '/agent-feedback', 'agent_feedback' );
 		$this->post( '/agent-feedback/summary', 'agent_feedback_summary' );
 		$this->post( '/ai/content-support', 'hosted_ai_content_support' );
@@ -138,6 +139,7 @@ final class Rest_Controller {
 			'/site-knowledge/status'                       => 'cap.toolbox.knowledge.read',
 			'/site-knowledge/search'                       => 'cap.toolbox.knowledge.search',
 			'/site-knowledge/sync'                         => 'cap.toolbox.knowledge.sync',
+			'/site-media/index-batch'                      => 'cap.toolbox.knowledge.sync',
 			'/agent-feedback'                              => 'cap.toolbox.feedback.write',
 			'/agent-feedback/summary'                      => 'cap.toolbox.feedback.read',
 			'/ai/content-support'                          => 'cap.toolbox.workflow_suggest',
@@ -326,6 +328,17 @@ final class Rest_Controller {
 					'manual_query'          => $query,
 					'refresh_variant'       => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
 					'visual_context'        => $this->image_visual_context_from_request( $request, $query ),
+				)
+			)
+		);
+	}
+
+	public function site_media_index_batch( WP_REST_Request $request ) {
+		return rest_ensure_response(
+			$this->client->refresh_site_media_index_batch(
+				array(
+					'page'     => max( 1, (int) ( $request->get_param( 'page' ) ?: 1 ) ),
+					'per_page' => max( 1, min( 10, (int) ( $request->get_param( 'per_page' ) ?: 10 ) ) ),
 				)
 			)
 		);

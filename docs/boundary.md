@@ -198,6 +198,7 @@ human-readable allowlist and must stay aligned with that table and
 - `/site-knowledge/status`
 - `/site-knowledge/search`
 - `/site-knowledge/sync`
+- `/site-media/index-batch`
 - `/agent-feedback`
 - `/agent-feedback/summary`
 - `/ai/content-support`
