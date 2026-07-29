@@ -64,10 +64,25 @@ final class Provider_Client {
 			return array();
 		}
 
+		$idempotency_key = $this->trace_id( 'image_context_evidence_request' );
+		if ( 'site_media_semantic_index' === (string) ( $request['idempotency_scope'] ?? '' ) ) {
+			$revision_parts = array();
+			foreach ( $items as $item ) {
+				if ( ! is_array( $item ) || empty( $item['attachment_id'] ) || empty( $item['media_fingerprint'] ) ) {
+					$revision_parts = array();
+					break;
+				}
+				$revision_parts[] = absint( $item['attachment_id'] ) . ':' . sanitize_text_field( (string) $item['media_fingerprint'] );
+			}
+			if ( ! empty( $revision_parts ) ) {
+				$idempotency_key = 'site_media_vision_v1_' . substr( hash( 'sha256', implode( '|', $revision_parts ) ), 0, 32 );
+			}
+		}
+
 		$result = $client->request_image_context_evidence(
 			$request,
 			$this->trace_id( 'image_context_evidence' ),
-			$this->trace_id( 'image_context_evidence_request' )
+			$idempotency_key
 		);
 		if (
 			is_wp_error( $result )
@@ -84,8 +99,12 @@ final class Provider_Client {
 
 	public function image_candidates( string $query, array $options = array() ) {
 		$provider = sanitize_key( (string) ( $options['provider'] ?? 'auto' ) );
-		if ( ! in_array( $provider, array( 'auto', 'cloud', 'unsplash', 'pixabay', 'pexels', 'ai_generated' ), true ) ) {
+		if ( ! in_array( $provider, array( 'auto', 'cloud', 'unsplash', 'pixabay', 'pexels', 'ai_generated', 'site_media' ), true ) ) {
 			$provider = 'auto';
+		}
+
+		if ( 'site_media' === $provider ) {
+			return $this->search_site_media_library( $query, $options );
 		}
 
 		if ( 'ai_generated' === $provider || $this->should_include_ai_generated_images( $options ) ) {
@@ -2194,6 +2213,7 @@ final class Provider_Client {
 						'duplicate_check',
 						'summary_context',
 						'writing_support_plan',
+						'media_library_search',
 					),
 					true
 				)
@@ -2280,6 +2300,264 @@ final class Provider_Client {
 			'site_knowledge_sync_request',
 			'site_knowledge_sync_request'
 		);
+	}
+
+	public function refresh_site_media_index_batch( array $input ) {
+		$page = max( 1, absint( $input['page'] ?? 1 ) );
+		$per_page = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );
+		$inventory = $this->toolkit_media_inventory(
+			array(
+				'mime_type' => 'image',
+				'page'      => $page,
+				'per_page'  => $per_page,
+			)
+		);
+		if ( is_wp_error( $inventory ) ) {
+			return $inventory;
+		}
+
+		$items = is_array( $inventory['items'] ?? null ) ? $inventory['items'] : array();
+		if ( empty( $items ) ) {
+			return array(
+				'artifact_type'          => 'site_media_index_batch.v1',
+				'contract_version'       => 'site_media_index_batch.v1',
+				'status'                 => 'empty',
+				'page'                   => $page,
+				'per_page'               => $per_page,
+				'total'                  => absint( $inventory['total'] ?? 0 ),
+				'indexed_items'          => 0,
+				'direct_wordpress_write' => false,
+			);
+		}
+
+		$evidence_request = array(
+			'contract_version'           => 'image_context_evidence_request.v1',
+			'artifact_type'              => 'image_context_evidence_request',
+			'runtime_owner'              => 'cloud_or_host_runtime',
+			'locale'                     => get_locale(),
+			'items'                      => array(),
+			'write_posture'              => 'suggestion_only',
+			'direct_wordpress_write'     => false,
+			'proposal_created'           => false,
+			'execution_created'          => false,
+			'no_local_model'             => true,
+			'no_media_write'             => true,
+			'source_policy'              => 'bounded_media_urls_for_visual_context_only',
+			'expected_response_contract' => 'image_context_evidence.v1',
+			'idempotency_scope'          => 'site_media_semantic_index',
+		);
+		foreach ( $items as $item ) {
+			if ( ! is_array( $item ) || empty( $item['attachment_id'] ) || empty( $item['url'] ) ) {
+				continue;
+			}
+			$evidence_request['items'][] = array(
+				'attachment_id'   => (string) absint( $item['attachment_id'] ),
+				'title'           => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'filename'        => sanitize_file_name( wp_basename( (string) $item['url'] ) ),
+				'mime_type'       => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'url'             => esc_url_raw( (string) $item['url'] ),
+				'media_fingerprint' => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'candidate_quality_flags' => array( 'semantic_index_refresh' ),
+			);
+		}
+		$evidence_request['requested_count'] = count( $evidence_request['items'] );
+		$evidence_request['max_items']       = $per_page;
+		$evidence_requested = ! empty( $evidence_request['items'] );
+		$evidence = $evidence_requested
+			? $this->request_image_context_evidence( $evidence_request )
+			: array();
+		$evidence_error = is_wp_error( $evidence ) ? $evidence : null;
+		if ( $evidence_error ) {
+			$evidence = array();
+		}
+		$evidence_by_id = array();
+		foreach ( (array) ( $evidence['items'] ?? array() ) as $evidence_item ) {
+			if ( is_array( $evidence_item ) ) {
+				$evidence_by_id[ absint( $evidence_item['attachment_id'] ?? 0 ) ] = $evidence_item;
+			}
+		}
+
+		$media_items = array();
+		foreach ( $items as $item ) {
+			$attachment_id = absint( is_array( $item ) ? ( $item['attachment_id'] ?? 0 ) : 0 );
+			if ( $attachment_id <= 0 ) {
+				continue;
+			}
+			$visual = is_array( $evidence_by_id[ $attachment_id ] ?? null ) ? $evidence_by_id[ $attachment_id ] : array();
+			$media_items[] = array(
+				'attachment_id'    => $attachment_id,
+				'mime_type'        => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'title'            => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'url'              => esc_url_raw( (string) ( $item['url'] ?? '' ) ),
+				'modified_gmt'     => sanitize_text_field( (string) ( $item['modified_gmt'] ?? '' ) ),
+				'media_fingerprint' => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'alt'              => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
+				'caption'          => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
+				'description'      => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
+				'visual_summary'   => sanitize_textarea_field( (string) ( $visual['visual_summary'] ?? '' ) ),
+				'visible_text'     => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
+				'subject_tags'     => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
+				'alt_text_basis'   => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
+			);
+		}
+
+		$sync = $this->execute_site_knowledge_cloud_request(
+			'npcink-cloud/site-knowledge-sync',
+			'site_knowledge_sync.v1',
+			'inline',
+			array(
+				'contract_version'       => 'site_knowledge_sync.v1',
+				'sync_mode'              => 'refresh',
+				'post_ids'               => array_column( $media_items, 'attachment_id' ),
+				'media_items'            => $media_items,
+				'write_posture'          => 'suggestion_only',
+				'direct_wordpress_write' => false,
+			),
+			'site_media_index_batch.v1',
+			'site_media_index_projection'
+		);
+		if ( is_wp_error( $sync ) ) {
+			return $sync;
+		}
+
+		$sync['page']                  = $page;
+		$sync['per_page']              = $per_page;
+		$sync['total']                 = absint( $inventory['total'] ?? count( $items ) );
+		$sync['indexed_items']         = count( $media_items );
+		$sync['visual_evidence_items'] = count( $evidence_by_id );
+		$sync['visual_evidence_status'] = ! $evidence_requested
+			? 'not_requested'
+			: ( empty( $evidence_by_id ) ? 'metadata_only_fallback' : 'ready' );
+		$sync['visual_evidence_error_code'] = $evidence_error
+			? sanitize_key( (string) $evidence_error->get_error_code() )
+			: ( $evidence_requested && empty( $evidence_by_id ) ? 'visual_evidence_unavailable' : '' );
+		$sync['has_more']              = $page * $per_page < $sync['total'];
+		return $sync;
+	}
+
+	private function search_site_media_library( string $query, array $options ) {
+		$knowledge = $this->search_site_knowledge(
+			array(
+				'query'              => $query,
+				'intent'             => 'media_library_search',
+				'max_results'        => max( 1, min( 10, absint( $options['per_page'] ?? 9 ) ) ),
+				'result_granularity' => 'document',
+				'filters'            => array(
+					'post_types'  => array( 'attachment' ),
+					'status'      => array( 'publish' ),
+					'source_types' => array( 'media' ),
+				),
+			)
+		);
+		if ( is_wp_error( $knowledge ) ) {
+			return $knowledge;
+		}
+		$results = is_array( $knowledge['results'] ?? null ) ? $knowledge['results'] : array();
+		$attachment_ids = array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						static fn( $result ): int => absint( is_array( $result ) ? ( $result['source_id'] ?? $result['post_id'] ?? 0 ) : 0 ),
+						$results
+					)
+				)
+			)
+		);
+		$inventory = $this->toolkit_media_inventory(
+			array(
+				'mime_type'      => 'image',
+				'attachment_ids' => array_slice( $attachment_ids, 0, 20 ),
+				'page'           => 1,
+				'per_page'       => 20,
+			)
+		);
+		if ( is_wp_error( $inventory ) ) {
+			return $inventory;
+		}
+		$rows = array();
+		foreach ( (array) ( $inventory['items'] ?? array() ) as $item ) {
+			if ( is_array( $item ) ) {
+				$rows[ absint( $item['attachment_id'] ?? 0 ) ] = $item;
+			}
+		}
+		$images = array();
+		foreach ( $results as $result ) {
+			$attachment_id = absint( is_array( $result ) ? ( $result['source_id'] ?? $result['post_id'] ?? 0 ) : 0 );
+			$item = is_array( $rows[ $attachment_id ] ?? null ) ? $rows[ $attachment_id ] : array();
+			if ( $attachment_id <= 0 || empty( $item['url'] ) ) {
+				continue;
+			}
+			$format = is_array( $item['format_inspection'] ?? null ) ? $item['format_inspection'] : array();
+			$images[] = array(
+				'id'                 => 'site-media-' . $attachment_id,
+				'attachment_id'      => $attachment_id,
+				'candidate_contract' => 'image_candidate.v1',
+				'provider'           => 'site_media',
+				'source'             => 'site_media_library',
+				'source_type'        => 'owned',
+				'provider_origin'    => 'wordpress_local',
+				'title'              => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'description'        => sanitize_textarea_field( (string) ( $result['chunk'] ?? $item['description'] ?? '' ) ),
+				'alt_description'    => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
+				'url'                => esc_url_raw( (string) $item['url'] ),
+				'preview_url'        => esc_url_raw( (string) $item['url'] ),
+				'download_url'       => esc_url_raw( (string) $item['url'] ),
+				'mime_type'          => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'width'              => absint( $format['width'] ?? 0 ),
+				'height'             => absint( $format['height'] ?? 0 ),
+				'match_score'        => (float) ( $result['score'] ?? 0 ),
+				'match_reason'       => sanitize_text_field( (string) ( $result['reason'] ?? '' ) ),
+				'media_fingerprint'  => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'requires_local_review' => true,
+				'direct_wordpress_write' => false,
+			);
+		}
+
+		return $this->normalize_image_source_candidates_response(
+			array(
+				'provider'       => 'site_media',
+				'provider_mode'  => 'site_media',
+				'active_sources' => array( array( 'provider' => 'site_media', 'count' => count( $images ) ) ),
+				'images'         => $images,
+				'status'         => sanitize_key( (string) ( $knowledge['status'] ?? 'ready' ) ),
+			),
+			$query,
+			'site_media',
+			array( 'input' => array( 'per_page' => max( 1, min( 10, absint( $options['per_page'] ?? 9 ) ) ) ) )
+		);
+	}
+
+	private function toolkit_media_inventory( array $input ) {
+		$ability_id = 'npcink-abilities-toolkit/get-media-inventory-health';
+		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) ) {
+			return new WP_Error(
+				'npcink_toolbox_site_media_toolkit_unavailable',
+				__( 'Npcink Abilities Toolkit is required to read and revalidate the local media library.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 503 )
+			);
+		}
+		$registered = npcink_abilities_toolkit_get_registered();
+		$ability = is_array( $registered ) ? ( $registered[ $ability_id ] ?? null ) : null;
+		$callback = is_array( $ability ) ? ( $ability['execute_callback'] ?? null ) : null;
+		if ( ! is_callable( $callback ) ) {
+			return new WP_Error(
+				'npcink_toolbox_site_media_ability_unavailable',
+				__( 'The local media inventory ability is not callable.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 503 )
+			);
+		}
+		$result = call_user_func( $callback, $input );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		if ( ! is_array( $result ) || false === (bool) ( $result['success'] ?? false ) ) {
+			return new WP_Error(
+				'npcink_toolbox_site_media_inventory_invalid',
+				__( 'The local media inventory ability returned an invalid response.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500 )
+			);
+		}
+		return is_array( $result['data'] ?? null ) ? $result['data'] : array();
 	}
 
 	private function cloud_web_search_notice(): array {
@@ -8411,6 +8689,12 @@ final class Provider_Client {
 						if ( ! $comment || 'approve' !== (string) $comment->comment_approved ) {
 							return false;
 						}
+					}
+					if ( 'media' === $source_type ) {
+						$mime_type = function_exists( 'get_post_mime_type' ) ? (string) get_post_mime_type( $post_id ) : '';
+						return 'attachment' === get_post_type( $post_id )
+							&& 0 === strpos( $mime_type, 'image/' )
+							&& current_user_can( 'edit_post', $post_id );
 					}
 
 					return 'publish' === get_post_status( $post_id )

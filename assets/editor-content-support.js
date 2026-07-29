@@ -187,6 +187,7 @@
 			intro: __('Uses the current article title, excerpt, and body context to recommend source images or request a host-generated featured image candidate. Paragraph selection is ignored for this entry.', 'npcink-workflow-toolbox'),
 			emptyTitle: __('Select a featured image candidate', 'npcink-workflow-toolbox'),
 			sourceModeLabel: __('Image source', 'npcink-workflow-toolbox'),
+			libraryModeLabel: __('Site media library', 'npcink-workflow-toolbox'),
 			generateModeLabel: __('Hosted image', 'npcink-workflow-toolbox'),
 			searchPlaceholder: __('Enter a scene, or leave blank to use article context', 'npcink-workflow-toolbox'),
 			generatePlaceholder: __('Review or enter a featured image prompt', 'npcink-workflow-toolbox'),
@@ -209,6 +210,7 @@
 			intro: __('Uses the currently selected paragraph as the primary image context, with nearby article context only for disambiguation.', 'npcink-workflow-toolbox'),
 			emptyTitle: __('Select an image for this paragraph', 'npcink-workflow-toolbox'),
 			sourceModeLabel: __('Recommend paragraph image', 'npcink-workflow-toolbox'),
+			libraryModeLabel: __('Site media library', 'npcink-workflow-toolbox'),
 			searchPlaceholder: __('Enter a scene, or leave blank to use the selected paragraph', 'npcink-workflow-toolbox'),
 			searchButtonLabel: __('Refresh recommendations', 'npcink-workflow-toolbox'),
 			searchBusyLabel: __('Recommending', 'npcink-workflow-toolbox'),
@@ -1884,6 +1886,7 @@
 			pexels: __('Pexels', 'npcink-workflow-toolbox'),
 			pixabay: __('Pixabay', 'npcink-workflow-toolbox'),
 			unsplash: __('Unsplash', 'npcink-workflow-toolbox'),
+			site_media: __('Site media library', 'npcink-workflow-toolbox'),
 			pre_publish_review: __('Pre-publish review', 'npcink-workflow-toolbox'),
 			seo_handoff: __('SEO handoff', 'npcink-workflow-toolbox'),
 			seo_meta_single_post_handoff: __('SEO handoff', 'npcink-workflow-toolbox'),
@@ -2573,13 +2576,16 @@
 		const proposalId = extractProposalId(core, 0);
 		const localConsent = Boolean(result.local_consent);
 		const mediaImportOnly = result.adoption_target === 'media_import';
+		const existingMediaOnly = result.adoption_target === 'existing_media';
 		const title = status === 'adopted'
-			? (mediaImportOnly ? __('Media imported', 'npcink-workflow-toolbox') : __('Featured image adopted', 'npcink-workflow-toolbox'))
+			? (existingMediaOnly ? __('Existing media selected', 'npcink-workflow-toolbox') : (mediaImportOnly ? __('Media imported', 'npcink-workflow-toolbox') : __('Featured image adopted', 'npcink-workflow-toolbox')))
 			: (status === 'submitted' ? __('Image Core proposal created', 'npcink-workflow-toolbox') : __('Image proposal unavailable', 'npcink-workflow-toolbox'));
 		const summary = status === 'adopted'
-			? (localConsent
+			? (existingMediaOnly
+				? __('The existing attachment is already available for this paragraph; no duplicate media was imported.', 'npcink-workflow-toolbox')
+				: (localConsent
 				? __('Existing media is now the featured image.', 'npcink-workflow-toolbox')
-				: (mediaImportOnly ? __('Media is imported and ready in the media library.', 'npcink-workflow-toolbox') : __('Image is imported and applied as the featured image.', 'npcink-workflow-toolbox')))
+				: (mediaImportOnly ? __('Media is imported and ready in the media library.', 'npcink-workflow-toolbox') : __('Image is imported and applied as the featured image.', 'npcink-workflow-toolbox'))))
 			: (status === 'submitted'
 				? __('Continue in Governance Core to review and execute the image adoption.', 'npcink-workflow-toolbox')
 				: __('The Core proposal was not created. Review the plan and try again.', 'npcink-workflow-toolbox'));
@@ -2788,6 +2794,7 @@
 		const activePicker = normalizeImagePickerOptions(picker || {});
 		const paragraphMode = activePicker.mode === 'paragraph';
 		const selectOnlyMode = activePicker.adoptionMode === 'select_only';
+		const existingAttachment = findAttachmentId(selectedImage, 0) > 0;
 		if (!selectedImage) {
 			return null;
 		}
@@ -2825,7 +2832,9 @@
 						disabled: adoptionRunning,
 						onClick: onImportOnly,
 					},
-					adoptionAction === 'import' ? __('Importing media', 'npcink-workflow-toolbox') : __('Import paragraph image', 'npcink-workflow-toolbox')
+					adoptionAction === 'import'
+						? (existingAttachment ? __('Selecting existing media', 'npcink-workflow-toolbox') : __('Importing media', 'npcink-workflow-toolbox'))
+						: (existingAttachment ? __('Use existing media', 'npcink-workflow-toolbox') : __('Import paragraph image', 'npcink-workflow-toolbox'))
 				) : createElement(
 					Button,
 					{
@@ -6903,6 +6912,7 @@
 			const [imageCompletionRunning, setImageCompletionRunning] = useState(false);
 			const [imageResult, setImageResult] = useState(null);
 			const [imageSourceResult, setImageSourceResult] = useState(null);
+			const [imageLibraryResult, setImageLibraryResult] = useState(null);
 			const [imageGenerationResult, setImageGenerationResult] = useState(null);
 			const [imageDirectionResult, setImageDirectionResult] = useState(null);
 			const [imageError, setImageError] = useState('');
@@ -7701,9 +7711,11 @@
 			}
 
 			function setImageResultForSearchMode(mode, resultValue, forceVisible) {
-				const normalizedMode = mode === 'generate' ? 'generate' : 'source';
+				const normalizedMode = mode === 'generate' ? 'generate' : (mode === 'library' ? 'library' : 'source');
 				if (normalizedMode === 'generate') {
 					setImageGenerationResult(resultValue || null);
+				} else if (normalizedMode === 'library') {
+					setImageLibraryResult(resultValue || null);
 				} else {
 					setImageSourceResult(resultValue || null);
 				}
@@ -7713,7 +7725,7 @@
 			}
 
 				function imageResultForSearchMode(mode) {
-					return mode === 'generate' ? imageGenerationResult : imageSourceResult;
+					return mode === 'generate' ? imageGenerationResult : (mode === 'library' ? imageLibraryResult : imageSourceResult);
 				}
 
 				function completeImageSourceCandidates(requestPayload, cacheKey, initialResult, requestSeq) {
@@ -7850,11 +7862,16 @@
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
 			const query = String(suggestedQuery || imageQuery || '').trim();
 			if (!query) {
+				if (imageSearchModeRef.current === 'library') {
+					setImageError(__('Enter a natural-language description before searching the site media library.', 'npcink-workflow-toolbox'));
+					return;
+				}
 				runAutoImageRecommendations(activePicker.mode, activePicker.context, activePicker, forceRefresh);
 				return;
 			}
+			const targetSearchMode = imageSearchModeRef.current === 'library' ? 'library' : 'source';
 			const imageContext = imagePickerRequestContext(postContext, activePicker);
-			const cacheKey = imageSearchCacheKey('manual', activePicker, query, imageContext);
+			const cacheKey = imageSearchCacheKey(targetSearchMode === 'library' ? 'library' : 'manual', activePicker, query, imageContext);
 			const cachedResult = forceRefresh ? null : readCachedImageResult(cacheKey);
 			setImageQuery(query);
 					if (cachedResult) {
@@ -7862,7 +7879,7 @@
 						setImageCompletionRunning(false);
 						setImageError('');
 						setImageGuidance('');
-						setImageResultForSearchMode('source', cachedResult, true);
+						setImageResultForSearchMode(targetSearchMode, cachedResult, true);
 					setSelectedImage(null);
 					setSelectedImageSeo(null);
 					setImagePreviewLightbox(null);
@@ -7877,7 +7894,7 @@
 					setImageCompletionRunning(false);
 					setImageError('');
 					setImageGuidance('');
-					setImageResultForSearchMode('source', null, true);
+					setImageResultForSearchMode(targetSearchMode, null, true);
 				setSelectedImage(null);
 			setSelectedImageSeo(null);
 			setImagePreviewLightbox(null);
@@ -7888,7 +7905,7 @@
 					const refreshVariant = forceRefresh ? imageRefreshVariant() : '';
 					const requestPayload = {
 						query,
-						provider: 'auto',
+						provider: targetSearchMode === 'library' ? 'site_media' : 'auto',
 						per_page: 9,
 					latency_mode: 'fast_first',
 						image_mode: activePicker.imageUse,
@@ -7899,8 +7916,12 @@
 					if (imageSourceRequestSeqRef.current !== requestSeq) {
 						return;
 					}
-					setImageResultForSearchMode('source', result);
-					completeImageSourceCandidates(requestPayload, cacheKey, result, requestSeq);
+					setImageResultForSearchMode(targetSearchMode, result);
+					if (targetSearchMode === 'source') {
+						completeImageSourceCandidates(requestPayload, cacheKey, result, requestSeq);
+					} else {
+						writeCachedImageResult(cacheKey, result);
+					}
 					} catch (requestError) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageError(formatImageErrorMessage(requestError, __('Cloud image search failed.', 'npcink-workflow-toolbox')));
@@ -7911,6 +7932,36 @@
 						}
 				}
 			}
+
+		async function refreshSiteMediaIndex() {
+			setImageRunning('index');
+			setImageError('');
+			setImageGuidance(__('Scanning local images, adding visual evidence, and refreshing the rebuildable search projection...', 'npcink-workflow-toolbox'));
+			try {
+				let page = 1;
+				let indexedItems = 0;
+				let visualEvidenceItems = 0;
+				let hasMore = true;
+				while (hasMore && page <= 20) {
+					const batch = await postJson('site-media/index-batch', { page, per_page: 10 });
+					indexedItems += parseInt(batch && batch.indexed_items ? batch.indexed_items : '0', 10) || 0;
+					visualEvidenceItems += parseInt(batch && batch.visual_evidence_items ? batch.visual_evidence_items : '0', 10) || 0;
+					hasMore = Boolean(batch && batch.has_more);
+					page += 1;
+				}
+				setImageGuidance(
+					sprintf(
+						__('Media search index refreshed: %1$d images, %2$d with visual evidence. Enter a description to search.', 'npcink-workflow-toolbox'),
+						indexedItems,
+						visualEvidenceItems
+					)
+				);
+			} catch (requestError) {
+				setImageError(formatImageErrorMessage(requestError, __('Could not refresh the site media search index.', 'npcink-workflow-toolbox')));
+			} finally {
+				setImageRunning('');
+			}
+		}
 
 		async function runMediaBrief() {
 			const postId = parseInt(postContext.post_id || '0', 10) || 0;
@@ -8098,12 +8149,14 @@
 		}
 
 			function switchImageSearchMode(mode) {
-				const nextMode = mode === 'generate' ? 'generate' : 'source';
-				const currentMode = imageSearchMode === 'generate' ? 'generate' : 'source';
+				const nextMode = mode === 'generate' ? 'generate' : (mode === 'library' ? 'library' : 'source');
+				const currentMode = imageSearchMode === 'generate' ? 'generate' : (imageSearchMode === 'library' ? 'library' : 'source');
 				imageSearchModeRef.current = nextMode;
 				if (imageResult) {
 					if (currentMode === 'generate') {
 						setImageGenerationResult(imageResult);
+					} else if (currentMode === 'library') {
+						setImageLibraryResult(imageResult);
 					} else {
 						setImageSourceResult(imageResult);
 					}
@@ -8148,6 +8201,7 @@
 					setImageGuidance('');
 					setImageCompletionRunning(false);
 					setImageSourceResult(null);
+					setImageLibraryResult(null);
 					setImageGenerationResult(null);
 					setImageDirectionResult(null);
 				setSelectedImage(null);
@@ -8571,6 +8625,17 @@
 				}
 
 				const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
+				if (!setFeaturedImage && activePicker.mode === 'paragraph' && findAttachmentId(selectedImage, 0) > 0) {
+					setImageAdoptionResult({
+						core: { success: true, status: 'completed' },
+						local_consent: true,
+						adoption_target: 'existing_media',
+					});
+					submitImplicitAgentFeedback(
+						editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'existing_media_selected', 'accepted', ['evidence_useful', 'operator_confidence_high'])
+					);
+					return;
+				}
 				const seoContext = imagePickerRequestContext(postContext, activePicker);
 				const seo = Object.assign({}, buildImageSeoFields(selectedImage, seoContext), selectedImageSeo || {});
 				const planInput = imageAdoptionPlanInput(seo, setFeaturedImage);
@@ -8628,11 +8693,13 @@
 
 			const images = extractImageCandidates(imageResult);
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
-			const activeSearchMode = activePicker.allowGeneration ? imageSearchMode : 'source';
+			const activeSearchMode = imageSearchMode === 'generate' && !activePicker.allowGeneration ? 'source' : imageSearchMode;
 			const imageQueryText = String(imageQuery || '').trim();
 			const sourceSubmitLabel = imageRunning === 'search' || imageRunning === 'auto'
 				? activePicker.searchBusyLabel
-				: (imageQueryText ? __('Search image sources', 'npcink-workflow-toolbox') : activePicker.searchButtonLabel);
+				: (activeSearchMode === 'library'
+					? __('Search site media', 'npcink-workflow-toolbox')
+					: (imageQueryText ? __('Search image sources', 'npcink-workflow-toolbox') : activePicker.searchButtonLabel));
 			const inspectorSeoContext = imagePickerRequestContext(postContext, activePicker);
 			const selectedImageStillVisible = selectedImage && images.some((image, index) => imageStableKey(image, index) === imageStableKey(selectedImage, index));
 			const selectedImageForInspector = selectedImageStillVisible ? selectedImage : null;
@@ -8641,11 +8708,13 @@
 			const canGenerateAiImage = activeSearchMode === 'generate' && Boolean(imageQueryText) && !Boolean(imageRunning);
 				const imageRunningLabel = imageRunning === 'generate'
 					? __('Requesting hosted image candidate...', 'npcink-workflow-toolbox')
-					: (imageRunning === 'brief' ? __('Generating image plan...', 'npcink-workflow-toolbox') : __('Loading cloud image candidates...', 'npcink-workflow-toolbox'));
+					: (imageRunning === 'brief'
+						? __('Generating image plan...', 'npcink-workflow-toolbox')
+						: (imageRunning === 'index' ? __('Refreshing site media search index...', 'npcink-workflow-toolbox') : __('Loading cloud image candidates...', 'npcink-workflow-toolbox')));
 				const imageCompletionNotice = activeSearchMode === 'source' && imageCompletionRunning && images.length < IMAGE_CANDIDATE_TARGET_COUNT
 					? createElement('div', { className: 'npcink-toolbox-editor-support__running npcink-toolbox-editor-support__image-completion-running' }, createElement(Spinner, null), createElement('span', null, __('Loading more image candidates...', 'npcink-workflow-toolbox')))
 					: null;
-			const imageModeControl = activePicker.allowGeneration ? createElement(
+			const imageModeControl = createElement(
 				'div',
 				{ className: 'npcink-toolbox-editor-support__image-mode', role: 'group', 'aria-label': __('Image candidate mode', 'npcink-workflow-toolbox') },
 				createElement(
@@ -8662,14 +8731,24 @@
 					'button',
 					{
 						type: 'button',
+						className: imageSearchMode === 'library' ? 'is-active' : '',
+						'aria-pressed': imageSearchMode === 'library' ? 'true' : 'false',
+						onClick: () => switchImageSearchMode('library'),
+					},
+					activePicker.libraryModeLabel || __('Site media library', 'npcink-workflow-toolbox')
+				),
+				activePicker.allowGeneration ? createElement(
+					'button',
+					{
+						type: 'button',
 						className: imageSearchMode === 'generate' ? 'is-active' : '',
 						'aria-pressed': imageSearchMode === 'generate' ? 'true' : 'false',
 						onClick: () => switchImageSearchMode('generate'),
 					},
 					activePicker.generateModeLabel
-				)
-			) : null;
-			const sourceSearchForm = activeSearchMode === 'source' ? createElement(
+				) : null
+			);
+			const sourceSearchForm = activeSearchMode === 'source' || activeSearchMode === 'library' ? createElement(
 				'form',
 				{ className: 'npcink-toolbox-editor-support__image-search', onSubmit: (event) => runImageSearch(event, null, true) },
 				createElement(
@@ -8678,7 +8757,9 @@
 					createElement('input', {
 						type: 'search',
 						value: imageQuery,
-						placeholder: activePicker.searchPlaceholder,
+						placeholder: activeSearchMode === 'library'
+							? __('Describe the image you want to find in this site', 'npcink-workflow-toolbox')
+							: activePicker.searchPlaceholder,
 						onChange: (event) => setImageQuery(event.target.value),
 					}),
 					createElement(
@@ -8691,7 +8772,18 @@
 							disabled: Boolean(imageRunning),
 						},
 						sourceSubmitLabel
-					)
+					),
+					activeSearchMode === 'library' ? createElement(
+						Button,
+						{
+							type: 'button',
+							variant: 'tertiary',
+							isBusy: imageRunning === 'index',
+							disabled: Boolean(imageRunning),
+							onClick: refreshSiteMediaIndex,
+						},
+						imageRunning === 'index' ? __('Refreshing media index', 'npcink-workflow-toolbox') : __('Refresh media index', 'npcink-workflow-toolbox')
+					) : null
 				)
 			) : null;
 				const generationDirectionPayload = imageDirectionResult || imageGenerationResult || imageSourceResult || imageResult;

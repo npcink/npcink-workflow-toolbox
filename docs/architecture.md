@@ -359,6 +359,7 @@ Current routes require `manage_options`:
 - `GET /wp-json/npcink-toolbox/v1/site-knowledge/status`
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/search`
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync`
+- `POST /wp-json/npcink-toolbox/v1/site-media/index-batch`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback/summary`
 - `POST /wp-json/npcink-toolbox/v1/ai/content-support`
