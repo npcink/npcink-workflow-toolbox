@@ -2775,6 +2775,15 @@ final class Provider_Client {
 			return $knowledge;
 		}
 		$results = is_array( $knowledge['results'] ?? null ) ? $knowledge['results'] : array();
+		$status = sanitize_key( (string) ( $knowledge['status'] ?? 'ready' ) );
+		$retrieval_readiness = is_array( $knowledge['retrieval_readiness'] ?? null ) ? $knowledge['retrieval_readiness'] : array();
+		$message = '';
+		if (
+			'not_ready' === $status
+			&& 'semantic_embedding_required' === sanitize_key( (string) ( $retrieval_readiness['status'] ?? '' ) )
+		) {
+			$message = __( 'Site media semantic search is not ready. Configure the development embedding service, then refresh the media index.', 'npcink-workflow-toolbox' );
+		}
 		$attachment_ids = array_values(
 			array_unique(
 				array_filter(
@@ -2878,7 +2887,9 @@ final class Provider_Client {
 				'provider_mode'  => 'site_media',
 				'active_sources' => array( array( 'provider' => 'site_media', 'count' => count( $images ) ) ),
 				'images'         => $images,
-				'status'         => sanitize_key( (string) ( $knowledge['status'] ?? 'ready' ) ),
+				'status'         => $status,
+				'message'        => $message,
+				'retrieval_readiness' => $this->sanitize_payload( $retrieval_readiness ),
 			),
 			$query,
 			'site_media',
@@ -6465,6 +6476,7 @@ final class Provider_Client {
 				'cloud_runtime'              => 'npcink_cloud_addon',
 				'status'                     => sanitize_key( (string) ( $result['status'] ?? $response['status'] ?? 'unknown' ) ),
 				'message'                    => sanitize_text_field( (string) ( $result['message'] ?? $result['error_message'] ?? $response['message'] ?? '' ) ),
+				'retrieval_readiness'        => is_array( $result['retrieval_readiness'] ?? null ) ? $this->sanitize_payload( $result['retrieval_readiness'] ) : array(),
 				'candidate_source_count'     => count( $images ),
 				'result_count'               => count( $contract_images ),
 				'active_sources'             => $active_sources,
@@ -8666,6 +8678,7 @@ final class Provider_Client {
 				'result_granularity' => sanitize_key( (string) ( $result['result_granularity'] ?? 'chunk' ) ),
 				'result_grouping'    => is_array( $result['result_grouping'] ?? null ) ? $this->sanitize_payload( $result['result_grouping'] ) : array(),
 				'evidence_gate'     => is_array( $result['evidence_gate'] ?? null ) ? $this->sanitize_payload( $result['evidence_gate'] ) : array(),
+				'retrieval_readiness' => is_array( $result['retrieval_readiness'] ?? null ) ? $this->sanitize_payload( $result['retrieval_readiness'] ) : array(),
 				'agent_handoff'     => $agent_handoff,
 				'handoff'           => $this->site_knowledge_handoff_for_display( $agent_handoff ),
 			),

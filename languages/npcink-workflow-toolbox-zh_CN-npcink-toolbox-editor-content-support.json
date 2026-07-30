@@ -1035,7 +1035,9 @@
       "The existing attachment is already available for this paragraph; no duplicate media was imported.": ["此附件已在媒体库中可供当前段落使用，没有重复导入媒体。"],
       "Why this image matches": ["为什么匹配这张图片"],
       "Suggested ALT text": ["建议的 ALT 文本"],
-      "Review the actual image and article context before using this ALT suggestion.": ["采用这条 ALT 建议前，请对照实际图片和文章上下文进行审阅。"]
+      "Review the actual image and article context before using this ALT suggestion.": ["采用这条 ALT 建议前，请对照实际图片和文章上下文进行审阅。"],
+      "Site media search is not ready.": ["站内媒体搜索尚未就绪。"],
+      "Configure the semantic embedding service, then refresh the media index before searching again.": ["请配置语义向量服务并刷新媒体索引，然后重新搜索。"]
     }
   }
 }

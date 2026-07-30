@@ -2469,6 +2469,8 @@
 			const source = imageResultSource(payload || {});
 			const status = String(source.status || '').toLowerCase();
 			const message = String(source.message || '');
+			const isSiteMedia = String(source.provider_mode || source.resolved_provider || '').toLowerCase() === 'site_media';
+			const isSemanticSearchNotReady = isSiteMedia && status === 'not_ready';
 			const hasProviderErrors = Array.isArray(source.provider_errors) && source.provider_errors.length > 0;
 			const isCloudError = status === 'error' || hasProviderErrors || message.toLowerCase().indexOf('connect npcink cloud') >= 0 || message.toLowerCase().indexOf('cloud') >= 0;
 			const cloudSuggestions = extractImageSearchSuggestions(payload);
@@ -2476,9 +2478,13 @@
 			return createElement(
 				'div',
 				{ className: 'npcink-toolbox-editor-support__empty' },
-				createElement('strong', null, isCloudError ? __('Cloud image search is unavailable.', 'npcink-workflow-toolbox') : __('No image-source candidates found.', 'npcink-workflow-toolbox')),
-				createElement('span', null, isCloudError ? __('Connect or verify Npcink Cloud Addon, then run image-source search again.', 'npcink-workflow-toolbox') : __('Try one of these shorter visual searches, or enter another concrete scene.', 'npcink-workflow-toolbox')),
-				isCloudError ? null : renderImageSuggestionButtons(suggestions, onUseSuggestion)
+				createElement('strong', null, isSemanticSearchNotReady
+					? __('Site media search is not ready.', 'npcink-workflow-toolbox')
+					: (isCloudError ? __('Cloud image search is unavailable.', 'npcink-workflow-toolbox') : __('No image-source candidates found.', 'npcink-workflow-toolbox'))),
+				createElement('span', null, isSemanticSearchNotReady
+					? __('Configure the semantic embedding service, then refresh the media index before searching again.', 'npcink-workflow-toolbox')
+					: (isCloudError ? __('Connect or verify Npcink Cloud Addon, then run image-source search again.', 'npcink-workflow-toolbox') : __('Try one of these shorter visual searches, or enter another concrete scene.', 'npcink-workflow-toolbox'))),
+				isCloudError || isSemanticSearchNotReady ? null : renderImageSuggestionButtons(suggestions, onUseSuggestion)
 			);
 		}
 
