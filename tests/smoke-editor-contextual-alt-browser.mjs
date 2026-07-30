@@ -175,6 +175,20 @@ try {
 	page = await context.newPage();
 	const requests = [];
 	const contextualResponses = [];
+	const feedbackPayloads = [];
+	await page.route('**/wp-json/npcink-toolbox/v1/agent-feedback', async (route) => {
+		const request = route.request();
+		try {
+			feedbackPayloads.push(request.postDataJSON());
+		} catch (error) {
+			feedbackPayloads.push(JSON.parse(request.postData() || '{}'));
+		}
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({ accepted: true }),
+		});
+	});
 	page.on('request', (request) => {
 		if (request.url().includes('/wp-json/')) {
 			requests.push({ url: request.url(), body: request.postData() || '' });
@@ -236,7 +250,7 @@ try {
 	assert((contextualRequests[0].body.match(new RegExp(String(fixture.attachmentId), 'g')) || []).length >= 2, 'The request preserves both occurrences of the reused attachment.');
 	assert(!requests.some((request) => /proposal|approve-and-execute|cloud/i.test(request.url)), 'The preview calls no Core proposal, execution, or Cloud route.');
 
-	await page.waitForSelector('text=/applied to the current editor|已应用到当前编辑器/', { timeout: 30000 });
+	await page.waitForSelector('text=/applied to the current editor|应用到当前编辑器/', { timeout: 30000 });
 	const appliedAltValues = await page.evaluate(() => window.wp.data.select('core/block-editor').getBlocks()
 		.filter((block) => block.name === 'core/image')
 		.map((block) => String(block.attributes.alt || '')));
@@ -244,11 +258,61 @@ try {
 	const editorDirty = await page.evaluate(() => Boolean(window.wp.data.select('core/editor').isEditedPostDirty()));
 	assert(editorDirty, 'Automatic missing-ALT application marks the Gutenberg post dirty for the native Save or Update action.');
 	assert(!requests.some((request) => /reviewed-action-intents|contextual-alt-audit|approve-and-execute/.test(request.url)), 'Native editor ALT apply sends no Core audit or hidden execution request.');
+	await waitForCount(
+		() => feedbackPayloads.filter((payload) => payload && payload.source_action_id === 'alt_suggestion_applied_to_editor').length,
+		1
+	);
+	const appliedFeedback = feedbackPayloads.find((payload) => payload && payload.source_action_id === 'alt_suggestion_applied_to_editor');
+	assert(
+		appliedFeedback
+			&& Array.isArray(appliedFeedback.feedback_labels)
+			&& appliedFeedback.feedback_labels.includes('alt_suggestion_applied')
+			&& Array.isArray(appliedFeedback.evidence_ref_ids)
+			&& appliedFeedback.evidence_ref_ids.length === 0,
+		'ALT draft apply emits one metadata-only quality event without evidence identifiers.'
+	);
 	const editedApplyButton = page.locator('button').filter({ hasText: /Apply edited ALT changes|应用编辑后的 ALT/ });
 	assert(await editedApplyButton.count() === 1, 'Manual apply remains optional for later ALT edits instead of blocking the automatic path.');
 	assert(!requests.some((request) => /\/wp-json\/wp\/v2\/(posts|media)\//.test(request.url) && request.body), 'The apply action does not save the post or mutate media through wp/v2.');
 	const attachmentAltAfter = wpCli(['eval', `echo (string) get_post_meta(${fixture.attachmentId}, '_wp_attachment_image_alt', true);`]);
 	assert(attachmentAltAfter === fixture.attachmentAlt, 'The contextual article ALT apply leaves attachment-global media ALT unchanged.');
+
+	const savedEditedAlt = `${values[0]}（人工微调）`;
+	await page.evaluate((nextAlt) => {
+		const imageBlock = window.wp.data.select('core/block-editor').getBlocks()
+			.find((block) => block.name === 'core/image' && String(block.attributes.alt || '') !== '人工填写的蓝色陶瓷杯 ALT');
+		window.wp.data.dispatch('core/block-editor').updateBlockAttributes(imageBlock.clientId, { alt: nextAlt });
+	}, savedEditedAlt);
+	await page.evaluate(async () => {
+		await window.wp.data.dispatch('core/editor').savePost();
+	});
+	await page.waitForFunction(
+		() => {
+			const editor = window.wp.data.select('core/editor');
+			return !editor.isSavingPost() && editor.didPostSaveRequestSucceed();
+		},
+		null,
+		{ timeout: 30000 }
+	);
+	await waitForCount(
+		() => feedbackPayloads.filter((payload) => payload && payload.source_action_id === 'alt_saved_edited').length,
+		1
+	);
+	const savedFeedback = feedbackPayloads.find((payload) => payload && payload.source_action_id === 'alt_saved_edited');
+	assert(
+		savedFeedback
+			&& Array.isArray(savedFeedback.feedback_labels)
+			&& savedFeedback.feedback_labels.includes('alt_saved_edited')
+			&& savedFeedback.source_object_id === appliedFeedback.source_object_id,
+		'Successful native WordPress save correlates the edited ALT outcome to its apply event.'
+	);
+	const serializedFeedback = JSON.stringify(feedbackPayloads);
+	assert(!serializedFeedback.includes(values[0]) && !serializedFeedback.includes(savedEditedAlt), 'ALT quality events contain no suggested or saved ALT text.');
+	const savedPostContent = wpCli(['post', 'get', String(postId), '--field=post_content']);
+	assert(savedPostContent.includes(savedEditedAlt), 'The temporary article persisted the edited block ALT through the native WordPress save.');
+	assert(!feedbackPayloads.some((payload) => payload && payload.source_action_id === 'alt_saved_unchanged'), 'An edited saved ALT is not misclassified as unchanged.');
+	const attachmentAltAfterSave = wpCli(['eval', `echo (string) get_post_meta(${fixture.attachmentId}, '_wp_attachment_image_alt', true);`]);
+	assert(attachmentAltAfterSave === fixture.attachmentAlt, 'Saving the article still leaves attachment-global media ALT unchanged.');
 
 	await page.screenshot({ path: screenshotPath, fullPage: true });
 	pass(`Contextual ALT screenshot: ${screenshotPath}`);
