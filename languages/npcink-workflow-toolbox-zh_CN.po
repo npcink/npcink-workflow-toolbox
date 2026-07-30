@@ -7369,3 +7369,15 @@ msgstr "建议的 ALT 文本"
 #: assets/editor-content-support.js
 msgid "Review the actual image and article context before using this ALT suggestion."
 msgstr "采用这条 ALT 建议前，请对照实际图片和文章上下文进行审阅。"
+
+#: includes/Provider_Client.php
+msgid "Site media semantic search is not ready. Configure the development embedding service, then refresh the media index."
+msgstr "站内媒体语义搜索尚未就绪。请配置开发环境向量服务，然后刷新媒体索引。"
+
+#: assets/editor-content-support.js
+msgid "Site media search is not ready."
+msgstr "站内媒体搜索尚未就绪。"
+
+#: assets/editor-content-support.js
+msgid "Configure the semantic embedding service, then refresh the media index before searching again."
+msgstr "请配置语义向量服务并刷新媒体索引，然后重新搜索。"
