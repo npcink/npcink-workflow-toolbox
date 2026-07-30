@@ -72,7 +72,9 @@ final class Provider_Client {
 					$revision_parts = array();
 					break;
 				}
-				$revision_parts[] = absint( $item['attachment_id'] ) . ':' . sanitize_text_field( (string) $item['media_fingerprint'] );
+				$revision_parts[] = absint( $item['attachment_id'] )
+					. ':' . sanitize_text_field( (string) $item['media_fingerprint'] )
+					. ':' . sanitize_text_field( (string) ( $item['source_artifact_id'] ?? '' ) );
 			}
 			if ( ! empty( $revision_parts ) ) {
 				$idempotency_key = 'site_media_vision_v1_' . substr( hash( 'sha256', implode( '|', $revision_parts ) ), 0, 32 );
@@ -95,6 +97,273 @@ final class Provider_Client {
 		}
 
 		return $this->sanitize_payload( $result );
+	}
+
+	/**
+	 * Reuses current Site Knowledge visual evidence and recognizes only misses.
+	 *
+	 * @param array<string,mixed> $request Image context evidence request.
+	 * @return array<string,mixed>
+	 */
+	private function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false ): array {
+		$requested_items = is_array( $request['items'] ?? null ) ? $request['items'] : array();
+		$prepared_items  = array();
+		$fingerprints    = array();
+		$local_sources   = array();
+		foreach ( $requested_items as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+			$attachment_id = absint( $item['attachment_id'] ?? 0 );
+			if ( 0 >= $attachment_id ) {
+				continue;
+			}
+			$source = $this->local_media_visual_source( $attachment_id );
+			if ( ! empty( $source ) ) {
+				$local_sources[ $attachment_id ] = $source;
+				$item['filename']          = $source['filename'];
+				$item['mime_type']         = $source['mime_type'];
+				$item['media_fingerprint'] = $source['media_fingerprint'];
+			} else {
+				$item['media_fingerprint'] = $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) );
+			}
+			$prepared_items[ $attachment_id ] = $item;
+			$fingerprints[ $attachment_id ]   = sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) );
+		}
+		if ( empty( $prepared_items ) ) {
+			return array();
+		}
+
+		$cached_by_id = array();
+		$status       = $this->get_site_knowledge_status(
+			array(
+				'media_attachment_ids' => array_keys( $prepared_items ),
+			)
+		);
+		if ( is_array( $status ) ) {
+			foreach ( (array) ( $status['media_evidence_items'] ?? array() ) as $cached_item ) {
+				if ( ! is_array( $cached_item ) ) {
+					continue;
+				}
+				$attachment_id = absint( $cached_item['attachment_id'] ?? 0 );
+				$visual        = is_array( $cached_item['visual_evidence'] ?? null ) ? $cached_item['visual_evidence'] : array();
+				if (
+					0 >= $attachment_id
+					|| 'ready' !== sanitize_key( (string) ( $visual['status'] ?? '' ) )
+					|| '' === (string) ( $fingerprints[ $attachment_id ] ?? '' )
+					|| (string) $fingerprints[ $attachment_id ] !== sanitize_text_field( (string) ( $cached_item['media_fingerprint'] ?? '' ) )
+				) {
+					continue;
+				}
+				$cached_by_id[ $attachment_id ] = array_merge(
+					$visual,
+					array(
+						'attachment_id'          => $attachment_id,
+						'media_fingerprint'       => $fingerprints[ $attachment_id ],
+						'evidence_reuse'          => 'site_knowledge_projection',
+						'write_posture'           => 'suggestion_only',
+						'direct_wordpress_write'  => false,
+					)
+				);
+			}
+		}
+
+		$miss_items = array();
+		foreach ( $prepared_items as $attachment_id => $item ) {
+			if ( isset( $cached_by_id[ $attachment_id ] ) ) {
+				continue;
+			}
+			$artifact = $this->upload_local_media_visual_artifact(
+				$attachment_id,
+				$fingerprints[ $attachment_id ] ?? '',
+				$local_sources[ $attachment_id ] ?? array()
+			);
+			if ( is_array( $artifact ) && ! empty( $artifact['artifact_id'] ) ) {
+				$item['source_artifact_id'] = sanitize_text_field( (string) $artifact['artifact_id'] );
+				unset( $item['url'], $item['thumbnail_url'] );
+			} elseif ( isset( $local_sources[ $attachment_id ] ) ) {
+				continue;
+			}
+			$miss_items[] = $item;
+		}
+
+		$fresh_by_id = array();
+		if ( ! empty( $miss_items ) ) {
+			$miss_request                    = $request;
+			$miss_request['items']           = $miss_items;
+			$miss_request['requested_count'] = count( $miss_items );
+			$miss_request['idempotency_scope'] = 'site_media_semantic_index';
+			$fresh                           = $this->request_image_context_evidence( $miss_request );
+			foreach ( (array) ( $fresh['items'] ?? array() ) as $fresh_item ) {
+				if ( ! is_array( $fresh_item ) ) {
+					continue;
+				}
+				$attachment_id = absint( $fresh_item['attachment_id'] ?? 0 );
+				if ( 0 >= $attachment_id || ! isset( $prepared_items[ $attachment_id ] ) ) {
+					continue;
+				}
+				$fresh_item['media_fingerprint']      = $fingerprints[ $attachment_id ];
+				$fresh_item['evidence_reuse']         = 'new_visual_recognition';
+				$fresh_item['write_posture']          = 'suggestion_only';
+				$fresh_item['direct_wordpress_write'] = false;
+				$fresh_by_id[ $attachment_id ]        = $fresh_item;
+			}
+		}
+		$projection_queued = $sync_fresh_projection && ! empty( $fresh_by_id )
+			? $this->queue_media_visual_evidence_projection( $prepared_items, $fresh_by_id )
+			: false;
+
+		$resolved_items = array();
+		foreach ( array_keys( $prepared_items ) as $attachment_id ) {
+			if ( isset( $cached_by_id[ $attachment_id ] ) ) {
+				$resolved_items[] = $cached_by_id[ $attachment_id ];
+			} elseif ( isset( $fresh_by_id[ $attachment_id ] ) ) {
+				$resolved_items[] = $fresh_by_id[ $attachment_id ];
+			}
+		}
+
+		return array(
+			'contract_version'       => 'image_context_evidence.v1',
+			'items'                  => $this->sanitize_payload( $resolved_items ),
+			'requested_count'        => count( $prepared_items ),
+			'reused_count'           => count( $cached_by_id ),
+			'recognized_count'       => count( $fresh_by_id ),
+			'projection_queued'      => $projection_queued,
+			'write_posture'          => 'suggestion_only',
+			'direct_wordpress_write' => false,
+		);
+	}
+
+	/**
+	 * @return array{path:string,filename:string,mime_type:string,media_fingerprint:string}|array{}
+	 */
+	private function local_media_visual_source( int $attachment_id ): array {
+		if ( 0 >= $attachment_id || ! function_exists( 'get_attached_file' ) || ! function_exists( 'wp_upload_dir' ) ) {
+			return array();
+		}
+		$path        = get_attached_file( $attachment_id );
+		$upload_dir  = wp_upload_dir();
+		$upload_root = realpath( (string) ( $upload_dir['basedir'] ?? '' ) );
+		$real_path   = is_string( $path ) ? realpath( $path ) : false;
+		if (
+			false === $upload_root
+			|| false === $real_path
+			|| ! is_file( $real_path )
+			|| ! is_readable( $real_path )
+			|| ( $upload_root !== $real_path && 0 !== strpos( $real_path, trailingslashit( $upload_root ) ) )
+		) {
+			return array();
+		}
+		$file_size = filesize( $real_path );
+		if ( false === $file_size || 0 >= $file_size || 8 * MB_IN_BYTES < $file_size ) {
+			return array();
+		}
+		$mime_type = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $real_path ) : '';
+		if ( ! is_string( $mime_type ) || ! in_array( $mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+			return array();
+		}
+		$fingerprint = hash_file( 'sha256', $real_path );
+		if ( ! is_string( $fingerprint ) || '' === $fingerprint ) {
+			return array();
+		}
+
+		return array(
+			'path'              => $real_path,
+			'filename'          => sanitize_file_name( basename( $real_path ) ),
+			'mime_type'         => $mime_type,
+			'media_fingerprint' => 'sha256:' . implode( ':', str_split( $fingerprint, 8 ) ),
+		);
+	}
+
+	/**
+	 * @return array<string,mixed>
+	 */
+	private function upload_local_media_visual_artifact( int $attachment_id, string $media_fingerprint, array $source = array() ): array {
+		if ( empty( $source ) ) {
+			$source = $this->local_media_visual_source( $attachment_id );
+		}
+		$client = $this->cloud_runtime_client();
+		if ( empty( $source ) || ! is_object( $client ) || ! method_exists( $client, 'upload_media_artifact' ) ) {
+			return array();
+		}
+		$contents = file_get_contents( $source['path'] );
+		if ( ! is_string( $contents ) || '' === $contents ) {
+			return array();
+		}
+		$result = array();
+		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
+			$result = $client->upload_media_artifact(
+				array(
+					'contents'  => $contents,
+					'filename'  => $source['filename'],
+					'mime_type' => $source['mime_type'],
+				),
+				$this->trace_id( 'site_media_visual_upload' ),
+				'site_media_visual_upload_v1_' . substr(
+					hash( 'sha256', $attachment_id . '|' . $media_fingerprint . '|' . wp_generate_uuid4() ),
+					0,
+					32
+				)
+			);
+			if ( ! is_wp_error( $result ) ) {
+				break;
+			}
+		}
+		unset( $contents );
+
+		return is_wp_error( $result ) || ! is_array( $result ) ? array() : $this->sanitize_payload( $result );
+	}
+
+	/**
+	 * @param array<int,array<string,mixed>> $prepared_items Prepared local items.
+	 * @param array<int,array<string,mixed>> $fresh_by_id Newly recognized evidence.
+	 */
+	private function queue_media_visual_evidence_projection( array $prepared_items, array $fresh_by_id ): bool {
+		$media_items = array();
+		foreach ( $fresh_by_id as $attachment_id => $visual ) {
+			$item = is_array( $prepared_items[ $attachment_id ] ?? null ) ? $prepared_items[ $attachment_id ] : array();
+			$url  = $this->runtime_safe_media_url( (string) ( $item['url'] ?? $item['thumbnail_url'] ?? '' ) );
+			if ( '' === $url ) {
+				continue;
+			}
+			$media_items[] = array(
+				'attachment_id'          => $attachment_id,
+				'mime_type'              => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'title'                  => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'url'                    => $url,
+				'media_fingerprint'      => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'visual_summary'         => sanitize_textarea_field( (string) ( $visual['visual_summary'] ?? '' ) ),
+				'visible_text'           => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
+				'subject_tags'           => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
+				'alt_text_basis'         => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
+				'vision_contract_version' => sanitize_text_field( (string) ( $visual['contract_version'] ?? '' ) ),
+				'vision_source'          => sanitize_key( (string) ( $visual['source'] ?? '' ) ),
+				'vision_model_id'        => sanitize_text_field( (string) ( $visual['model_id'] ?? '' ) ),
+				'vision_run_id'          => sanitize_text_field( (string) ( $visual['run_id'] ?? '' ) ),
+				'confidence'             => (float) ( $visual['confidence'] ?? 0 ),
+				'uncertainty_flags'      => $this->sanitize_string_list( $visual['uncertainty_flags'] ?? array() ),
+			);
+		}
+		if ( empty( $media_items ) ) {
+			return false;
+		}
+		$result = $this->execute_site_knowledge_cloud_request(
+			'npcink-cloud/site-knowledge-sync',
+			'site_knowledge_sync.v1',
+			'whole_run_offload',
+			array(
+				'contract_version'       => 'site_knowledge_sync.v1',
+				'sync_mode'              => 'refresh',
+				'post_ids'               => array_column( $media_items, 'attachment_id' ),
+				'media_items'            => $media_items,
+				'write_posture'          => 'suggestion_only',
+				'direct_wordpress_write' => false,
+			),
+			'site_media_visual_evidence_projection.v1',
+			'site_media_visual_evidence_projection'
+		);
+
+		return ! is_wp_error( $result );
 	}
 
 	public function image_candidates( string $query, array $options = array() ) {
@@ -2251,6 +2520,7 @@ final class Provider_Client {
 		$payload = array(
 			'contract_version'       => 'site_knowledge_status.v1',
 			'include_coverage'       => ! empty( $input['include_coverage'] ),
+			'media_attachment_ids'   => array_slice( $this->sanitize_absint_list( $input['media_attachment_ids'] ?? array() ), 0, 20 ),
 			'write_posture'          => 'suggestion_only',
 			'direct_wordpress_write' => false,
 		);
@@ -2356,7 +2626,7 @@ final class Provider_Client {
 				'filename'        => sanitize_file_name( wp_basename( (string) $item['url'] ) ),
 				'mime_type'       => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
 				'url'             => $this->runtime_safe_media_url( (string) $item['url'] ),
-				'media_fingerprint' => $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'media_fingerprint' => (string) ( $item['media_fingerprint'] ?? '' ),
 				'candidate_quality_flags' => array( 'semantic_index_refresh' ),
 			);
 		}
@@ -2364,7 +2634,7 @@ final class Provider_Client {
 		$evidence_request['max_items']       = $per_page;
 		$evidence_requested = ! empty( $evidence_request['items'] );
 		$evidence = $evidence_requested
-			? $this->request_image_context_evidence( $evidence_request )
+			? $this->resolve_media_image_context_evidence( $evidence_request )
 			: array();
 		$evidence_error = is_wp_error( $evidence ) ? $evidence : null;
 		if ( $evidence_error ) {
@@ -2384,13 +2654,21 @@ final class Provider_Client {
 				continue;
 			}
 			$visual = is_array( $evidence_by_id[ $attachment_id ] ?? null ) ? $evidence_by_id[ $attachment_id ] : array();
+			$visual_source = $this->local_media_visual_source( $attachment_id );
+			$media_fingerprint = sanitize_text_field(
+				(string) (
+					$visual['media_fingerprint']
+					?? $visual_source['media_fingerprint']
+					?? $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) )
+				)
+			);
 			$media_items[] = array(
 				'attachment_id'    => $attachment_id,
 				'mime_type'        => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
 				'title'            => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
 				'url'              => $this->runtime_safe_media_url( (string) ( $item['url'] ?? '' ) ),
 				'modified_gmt'     => sanitize_text_field( (string) ( $item['modified_gmt'] ?? '' ) ),
-				'media_fingerprint' => $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'media_fingerprint' => $media_fingerprint,
 				'alt'              => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
 				'caption'          => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
 				'description'      => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
@@ -2398,6 +2676,12 @@ final class Provider_Client {
 				'visible_text'     => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
 				'subject_tags'     => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
 				'alt_text_basis'   => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
+				'vision_contract_version' => sanitize_text_field( (string) ( $visual['contract_version'] ?? '' ) ),
+				'vision_source'    => sanitize_key( (string) ( $visual['source'] ?? '' ) ),
+				'vision_model_id'  => sanitize_text_field( (string) ( $visual['model_id'] ?? '' ) ),
+				'vision_run_id'    => sanitize_text_field( (string) ( $visual['run_id'] ?? '' ) ),
+				'confidence'       => (float) ( $visual['confidence'] ?? 0 ),
+				'uncertainty_flags' => $this->sanitize_string_list( $visual['uncertainty_flags'] ?? array() ),
 			);
 		}
 
@@ -2425,12 +2709,22 @@ final class Provider_Client {
 		$sync['total']                 = absint( $inventory['total'] ?? count( $items ) );
 		$sync['indexed_items']         = count( $media_items );
 		$sync['visual_evidence_items'] = count( $evidence_by_id );
+		$sync['visual_evidence_reused_items'] = absint( $evidence['reused_count'] ?? 0 );
+		$sync['visual_evidence_recognized_items'] = absint( $evidence['recognized_count'] ?? 0 );
 		$sync['visual_evidence_status'] = ! $evidence_requested
 			? 'not_requested'
-			: ( empty( $evidence_by_id ) ? 'metadata_only_fallback' : 'ready' );
+			: (
+				empty( $evidence_by_id )
+					? 'metadata_only_fallback'
+					: ( count( $evidence_by_id ) < count( $media_items ) ? 'partial' : 'ready' )
+			);
 		$sync['visual_evidence_error_code'] = $evidence_error
 			? sanitize_key( (string) $evidence_error->get_error_code() )
-			: ( $evidence_requested && empty( $evidence_by_id ) ? 'visual_evidence_unavailable' : '' );
+			: (
+				$evidence_requested && empty( $evidence_by_id )
+					? 'visual_evidence_unavailable'
+					: ( count( $evidence_by_id ) < count( $media_items ) ? 'visual_evidence_partial' : '' )
+			);
 		$sync['has_more']              = $page * $per_page < $sync['total'];
 		return $sync;
 	}
@@ -7407,7 +7701,7 @@ final class Provider_Client {
 
 	private function maybe_request_media_alt_caption_image_context_evidence( array $review_set ): array {
 		$request = is_array( $review_set['image_context_evidence_request'] ?? null ) ? $review_set['image_context_evidence_request'] : array();
-		return $this->request_image_context_evidence( $request );
+		return $this->resolve_media_image_context_evidence( $request, true );
 	}
 
 	private function media_alt_caption_index_image_context_evidence( array $image_context_evidence ): array {
@@ -8327,6 +8621,7 @@ final class Provider_Client {
 				'run_id'            => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
 				'results'           => $results,
 				'coverage'          => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
+				'media_evidence_items' => is_array( $result['media_evidence_items'] ?? null ) ? $this->sanitize_payload( $result['media_evidence_items'] ) : array(),
 				'sync'              => is_array( $result['sync'] ?? null ) ? $this->sanitize_payload( $result['sync'] ) : array(),
 				'progress'          => is_array( $result['progress'] ?? null ) ? $this->sanitize_payload( $result['progress'] ) : array(),
 				'active_run'        => is_array( $result['active_run'] ?? null ) ? $this->sanitize_payload( $result['active_run'] ) : array(),
