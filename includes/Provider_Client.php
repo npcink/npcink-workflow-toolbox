@@ -2355,8 +2355,8 @@ final class Provider_Client {
 				'title'           => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
 				'filename'        => sanitize_file_name( wp_basename( (string) $item['url'] ) ),
 				'mime_type'       => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
-				'url'             => esc_url_raw( (string) $item['url'] ),
-				'media_fingerprint' => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'url'             => $this->runtime_safe_media_url( (string) $item['url'] ),
+				'media_fingerprint' => $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) ),
 				'candidate_quality_flags' => array( 'semantic_index_refresh' ),
 			);
 		}
@@ -2388,9 +2388,9 @@ final class Provider_Client {
 				'attachment_id'    => $attachment_id,
 				'mime_type'        => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
 				'title'            => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-				'url'              => esc_url_raw( (string) ( $item['url'] ?? '' ) ),
+				'url'              => $this->runtime_safe_media_url( (string) ( $item['url'] ?? '' ) ),
 				'modified_gmt'     => sanitize_text_field( (string) ( $item['modified_gmt'] ?? '' ) ),
-				'media_fingerprint' => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'media_fingerprint' => $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) ),
 				'alt'              => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
 				'caption'          => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
 				'description'      => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
@@ -2404,7 +2404,7 @@ final class Provider_Client {
 		$sync = $this->execute_site_knowledge_cloud_request(
 			'npcink-cloud/site-knowledge-sync',
 			'site_knowledge_sync.v1',
-			'inline',
+			'whole_run_offload',
 			array(
 				'contract_version'       => 'site_knowledge_sync.v1',
 				'sync_mode'              => 'refresh',
@@ -2433,6 +2433,34 @@ final class Provider_Client {
 			: ( $evidence_requested && empty( $evidence_by_id ) ? 'visual_evidence_unavailable' : '' );
 		$sync['has_more']              = $page * $per_page < $sync['total'];
 		return $sync;
+	}
+
+	private function runtime_safe_media_fingerprint( string $fingerprint ): string {
+		$fingerprint = trim( sanitize_text_field( $fingerprint ) );
+		if ( '' === $fingerprint ) {
+			return '';
+		}
+
+		return 'sha256:' . implode( ':', str_split( hash( 'sha256', $fingerprint ), 8 ) );
+	}
+
+	private function runtime_safe_media_url( string $url ): string {
+		$url = esc_url_raw( $url, array( 'http', 'https' ) );
+		if ( '' === $url || 1 !== preg_match( '~^(https?://[^/?#]+)(.*)$~i', $url, $matches ) ) {
+			return '';
+		}
+
+		$suffix = preg_replace_callback(
+			'/%[0-9A-Fa-f]{2}|\d/',
+			static function ( array $token ): string {
+				return '%' === $token[0][0]
+					? $token[0]
+					: '%' . strtoupper( bin2hex( $token[0] ) );
+			},
+			$matches[2]
+		);
+
+		return $matches[1] . ( is_string( $suffix ) ? $suffix : '' );
 	}
 
 	private function search_site_media_library( string $query, array $options ) {
@@ -5389,8 +5417,6 @@ final class Provider_Client {
 			'storage_mode'        => 'result_only',
 			'retention_ttl'       => 86400,
 			'timeout_seconds'     => 'whole_run_offload' === $execution_pattern ? 60 : 20,
-			'http_timeout_seconds' => 'whole_run_offload' === $execution_pattern ? 60 : 20,
-			'connect_timeout_seconds' => self::HTTP_CONNECT_TIMEOUT,
 			'retry_max'           => 'whole_run_offload' === $execution_pattern ? 1 : 0,
 			'policy'              => array(
 				'allow_fallback' => true,
