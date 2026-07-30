@@ -7357,3 +7357,15 @@ msgstr "本地媒体清单能力当前不可调用。"
 #: includes/Provider_Client.php
 msgid "The local media inventory ability returned an invalid response."
 msgstr "本地媒体清单能力返回了无效响应。"
+
+#: assets/editor-content-support.js
+msgid "Why this image matches"
+msgstr "为什么匹配这张图片"
+
+#: assets/editor-content-support.js
+msgid "Suggested ALT text"
+msgstr "建议的 ALT 文本"
+
+#: assets/editor-content-support.js
+msgid "Review the actual image and article context before using this ALT suggestion."
+msgstr "采用这条 ALT 建议前，请对照实际图片和文章上下文进行审阅。"

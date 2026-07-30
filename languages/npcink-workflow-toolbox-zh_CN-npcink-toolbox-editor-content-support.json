@@ -1032,7 +1032,10 @@
       "Selecting existing media": ["正在选择现有媒体"],
       "Use existing media": ["使用现有媒体"],
       "Existing media selected": ["已选择现有媒体"],
-      "The existing attachment is already available for this paragraph; no duplicate media was imported.": ["此附件已在媒体库中可供当前段落使用，没有重复导入媒体。"]
+      "The existing attachment is already available for this paragraph; no duplicate media was imported.": ["此附件已在媒体库中可供当前段落使用，没有重复导入媒体。"],
+      "Why this image matches": ["为什么匹配这张图片"],
+      "Suggested ALT text": ["建议的 ALT 文本"],
+      "Review the actual image and article context before using this ALT suggestion.": ["采用这条 ALT 建议前，请对照实际图片和文章上下文进行审阅。"]
     }
   }
 }

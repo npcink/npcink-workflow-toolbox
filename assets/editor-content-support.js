@@ -2790,6 +2790,38 @@
 		return /^[a-z0-9_-]+$/i.test(text) ? formatMetaLabel(text) : text;
 	}
 
+	function renderSelectedImageEvidence(selectedImage) {
+		if (!selectedImage || typeof selectedImage !== 'object') {
+			return null;
+		}
+		const seoSuggestions = selectedImage.seo_suggestions && typeof selectedImage.seo_suggestions === 'object'
+			? selectedImage.seo_suggestions
+			: {};
+		const matchReason = truncateText(readableItemText(selectedImage.match_reason || '', ''), 240);
+		const suggestedAlt = truncateText(readableItemText(selectedImage.suggested_alt || seoSuggestions.alt || '', ''), 180);
+		if (!matchReason && !suggestedAlt) {
+			return null;
+		}
+
+		return createElement(
+			'div',
+			{ className: 'npcink-toolbox-editor-support__image-evidence' },
+			matchReason ? createElement(
+				'div',
+				{ className: 'npcink-toolbox-editor-support__image-evidence-item' },
+				createElement('strong', null, __('Why this image matches', 'npcink-workflow-toolbox')),
+				createElement('p', null, matchReason)
+			) : null,
+			suggestedAlt ? createElement(
+				'div',
+				{ className: 'npcink-toolbox-editor-support__image-evidence-item' },
+				createElement('strong', null, __('Suggested ALT text', 'npcink-workflow-toolbox')),
+				createElement('p', null, suggestedAlt)
+			) : null,
+			suggestedAlt ? createElement('small', null, __('Review the actual image and article context before using this ALT suggestion.', 'npcink-workflow-toolbox')) : null
+		);
+	}
+
 	function renderSelectedImagePanel(selectedImage, seoFields, adoptionRunning, adoptionAction, adoptionResult, adoptionError, picker, onSeoFieldChange, onAdoptFeatured, onImportOnly, onSelectOnly, feedbackRunning, feedbackStatus, onSubmitFeedback, regenerationRunning, onRegenerate) {
 		const activePicker = normalizeImagePickerOptions(picker || {});
 		const paragraphMode = activePicker.mode === 'paragraph';
@@ -2863,6 +2895,7 @@
 			adoptionError ? createElement(Notice, { status: 'error', isDismissible: false }, adoptionError) : null,
 			renderAdoptionResult(adoptionResult),
 			renderAiImageRegenerationControls(selectedImage, regenerationRunning, onRegenerate),
+			renderSelectedImageEvidence(selectedImage),
 			createElement(
 				'div',
 				{ className: 'npcink-toolbox-editor-support__seo-fields' },
