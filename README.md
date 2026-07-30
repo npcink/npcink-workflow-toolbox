@@ -282,10 +282,13 @@ High-risk entries are intentionally constrained:
   vector collection lifecycle ownership.
 - `/site-media/index-batch` is an explicit operator-triggered projection
   refresh. Toolkit owns local attachment enumeration and revision evidence;
-  Cloud owns vision and vector execution. Repeated visual-evidence requests use
-  the bounded attachment fingerprints as an idempotency scope. The route does
-  not change attachment metadata, import media, delete files, or write post
-  content.
+  Cloud owns vision and vector execution. Toolbox first reuses a matching
+  Cloud Site Knowledge visual-evidence projection; only misses use the existing
+  short-lived Cloud Addon Artifact upload and visual-recognition contract.
+  One byte-stable image fingerprint therefore supports both ALT review and
+  semantic media retrieval, while metadata-only changes re-embed without
+  rerunning vision. The route does not change attachment metadata, import
+  WordPress media, keep a second cache, delete files, or write post content.
 - `/local-admin-consent/featured-image` is the only current direct local write
   exception. It is limited to one existing attachment on one current post with
   Core-owned audit and rollback, and it is not precedent for media import,
@@ -538,8 +541,11 @@ build `npcink-abilities-toolkit/build-media-alt-apply-plan` through Adapter and
 submit the returned `media_alt_apply_plan.v1` to Core `/proposals/from-plan`.
 Toolbox stops after proposal creation and does not request
 `approve-and-execute`, poll, or treat candidate quality signals as
-authorization. Toolbox performs no media upload, media metadata write,
-approval, execution, or audit ownership. The legacy
+authorization. Toolbox performs no WordPress media import, media metadata
+write, approval, execution, or audit ownership. A visual-evidence miss may use
+the existing short-lived Cloud Addon Artifact transport; matching Site
+Knowledge evidence is reused first, including by media search indexing. The
+legacy
 `/flows/media-alt-caption-review-plan` remains a local diagnostic preview and
 is not sent to Core. For current
 article `core/image` occurrences only, the editor may automatically apply

@@ -44,9 +44,15 @@ Allowed from Toolbox:
   checks, and duplicate-risk checks.
 - `site_knowledge_status.v1` for read-only Cloud coverage, freshness, progress,
   quota, bridge status projection, and the read-only
-  `site_knowledge_cloud_boundary` owner/truth map.
+  `site_knowledge_cloud_boundary` owner/truth map. A bounded media workflow may
+  also request existing visual evidence for up to 20 attachment IDs and reuse
+  it only when the returned media fingerprint matches the current local image.
 - `site_knowledge_sync.v1` only with `sync_mode=refresh` for bounded public
   content refresh transport.
+- The existing Cloud Addon media Artifact upload for local image bytes when a
+  matching visual-evidence projection is absent. The Artifact is short-lived
+  transport for Cloud vision, not a WordPress media import, local cache, second
+  queue, or durable media store.
 
 Allowed from Cloud Addon:
 
@@ -95,6 +101,10 @@ Public refresh payloads may include only:
 - stable source identifiers such as post id, post type, permalink, modified
   time, and content hash;
 - payload limits and truncation metadata.
+- bounded public image-attachment metadata, a byte-stable image fingerprint,
+  and suggestion-only visual evidence. The same evidence may support both ALT
+  review and semantic media retrieval; metadata-only changes rebuild
+  embeddings without another vision request.
 
 Public refresh payloads must not include:
 
