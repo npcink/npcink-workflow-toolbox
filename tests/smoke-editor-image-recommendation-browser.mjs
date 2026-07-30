@@ -141,6 +141,35 @@ function sourcePayload() {
 	};
 }
 
+function siteMediaPayload() {
+	return {
+		artifact_type: 'image_source_candidates',
+		status: 'ready',
+		provider_mode: 'site_media',
+		resolved_provider: 'site_media',
+		candidate_count: 1,
+		images: [
+			{
+				...imageCandidate('site-media-501', '站内木质书桌工作空间', '#dcfce7', 'owned'),
+				attachment_id: 501,
+				provider: 'site_media',
+				provider_origin: 'wordpress_local',
+				match_reason: '图片中的木质书桌、笔记本电脑和自然光与文章描述一致。',
+				suggested_alt: '自然光下摆放笔记本电脑和绿植的木质书桌',
+				seo_suggestions: {
+					alt: '自然光下摆放笔记本电脑和绿植的木质书桌',
+				},
+				media_fingerprint: 'sha256:browser-fixture-501',
+				evidence_reuse: 'site_knowledge_projection',
+				requires_local_review: true,
+				direct_wordpress_write: false,
+			},
+		],
+		write_posture: 'suggestion_only',
+		direct_wordpress_write: false,
+	};
+}
+
 function generationPayload(requestBody, generationIndex) {
 	const count = Math.max(1, Math.min(4, parseInt(requestBody.n || '2', 10) || 2));
 	const prefix = generationIndex === 1 ? 'Generated candidate' : 'Revised candidate';
@@ -206,6 +235,7 @@ const { chromium } = await loadPlaywright();
 const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const artifactDir = env('SMOKE_ARTIFACT_DIR', 'build/smoke');
 const screenshotPath = `${artifactDir}/editor-image-recommendation-browser.png`;
+const libraryScreenshotPath = `${artifactDir}/editor-site-media-evidence-browser.png`;
 mkdirSync(artifactDir, { recursive: true });
 
 const browserOptions = { headless: process.env.HEADLESS !== '0' };
@@ -226,10 +256,18 @@ try {
 	browser = await chromium.launch(browserOptions);
 	const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1440, height: 1100 } });
 	const generationRequests = [];
+	const libraryRequests = [];
 	let generationIndex = 0;
 
 	await context.route('**/wp-json/npcink-toolbox/v1/image-candidates', async (route) => {
-		requests.push({ method: route.request().method(), url: route.request().url(), body: route.request().postData() || '' });
+		const request = route.request();
+		const body = request.postDataJSON();
+		requests.push({ method: request.method(), url: request.url(), body: request.postData() || '' });
+		if (body.provider === 'site_media') {
+			libraryRequests.push(body);
+			await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(siteMediaPayload()) });
+			return;
+		}
 		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(sourcePayload()) });
 	});
 	await context.route('**/wp-json/npcink-toolbox/v1/ai/image-generation', async (route) => {
@@ -286,6 +324,19 @@ try {
 	assert(await page.locator('.npcink-toolbox-editor-support__image-results').count() === 1, 'The modal renders the image grid in the left results pane.');
 	assert(await page.locator('.npcink-toolbox-editor-support__image-inspector').count() === 1, 'The modal renders mode and review controls in the right inspector.');
 	assert(await page.getByRole('button', { name: /Hosted image|托管图片/ }).count() === 1, 'Featured-image mode exposes the hosted-image option.');
+
+	await page.getByRole('button', { name: /Site media library|站内媒体库/ }).click();
+	const libraryQuery = '自然光下的木质书桌和笔记本电脑';
+	await page.locator('.npcink-toolbox-editor-support__image-inspector input[type="search"]').fill(libraryQuery);
+	await page.getByRole('button', { name: /Search site media|搜索站内媒体/ }).click();
+	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 1, null, { timeout: 10000 });
+	assert(libraryRequests.length === 1 && libraryRequests[0].provider === 'site_media', 'Site-media mode sends one natural-language local-library search request.');
+	assert(await page.getByText(/Why this image matches|为什么匹配这张图片/).count() === 1, 'The selected site-media candidate shows its semantic match reason.');
+	assert(await page.getByText(/Suggested ALT text|建议的 ALT 文本/).count() === 1, 'The selected site-media candidate shows the reused ALT suggestion.');
+	assert(await page.locator('.npcink-toolbox-editor-support__image-evidence-item p').filter({ hasText: '自然光下摆放笔记本电脑和绿植的木质书桌' }).count() === 1, 'The visible ALT suggestion comes from the candidate evidence.');
+	assert(await page.getByRole('button', { name: /Adopt|采用/ }).count() === 1, 'Existing site media keeps the explicit human adoption action.');
+	await page.screenshot({ path: libraryScreenshotPath, fullPage: true });
+	pass(`Site-media evidence browser smoke screenshot: ${libraryScreenshotPath}`);
 
 	await page.getByRole('button', { name: /Hosted image|托管图片/ }).click();
 	const prompt = 'Editorial home office with natural window light, wooden desk, laptop, plant and coffee, no text or logos.';

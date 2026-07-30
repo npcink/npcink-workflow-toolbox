@@ -2802,6 +2802,30 @@ final class Provider_Client {
 				$rows[ absint( $item['attachment_id'] ?? 0 ) ] = $item;
 			}
 		}
+		$evidence_by_attachment_id = array();
+		$status                    = $this->get_site_knowledge_status(
+			array(
+				'media_attachment_ids' => array_slice( $attachment_ids, 0, 20 ),
+			)
+		);
+		if ( is_array( $status ) ) {
+			foreach ( (array) ( $status['media_evidence_items'] ?? array() ) as $evidence_item ) {
+				if ( ! is_array( $evidence_item ) ) {
+					continue;
+				}
+				$evidence_attachment_id = absint( $evidence_item['attachment_id'] ?? 0 );
+				$visual_evidence        = is_array( $evidence_item['visual_evidence'] ?? null ) ? $evidence_item['visual_evidence'] : array();
+				if ( $evidence_attachment_id <= 0 || 'ready' !== sanitize_key( (string) ( $visual_evidence['status'] ?? '' ) ) ) {
+					continue;
+				}
+				$evidence_by_attachment_id[ $evidence_attachment_id ] = array(
+					'media_fingerprint' => sanitize_text_field( (string) ( $evidence_item['media_fingerprint'] ?? '' ) ),
+					'alt_text_basis'    => sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) ),
+					'visual_summary'    => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
+					'evidence_reuse'    => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? 'site_knowledge_projection' ) ),
+				);
+			}
+		}
 		$images = array();
 		foreach ( $results as $result ) {
 			$attachment_id = absint( is_array( $result ) ? ( $result['source_id'] ?? $result['post_id'] ?? 0 ) : 0 );
@@ -2809,7 +2833,16 @@ final class Provider_Client {
 			if ( $attachment_id <= 0 || empty( $item['url'] ) ) {
 				continue;
 			}
-			$format = is_array( $item['format_inspection'] ?? null ) ? $item['format_inspection'] : array();
+			$format            = is_array( $item['format_inspection'] ?? null ) ? $item['format_inspection'] : array();
+			$media_fingerprint = sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) );
+			$visual_evidence   = is_array( $evidence_by_attachment_id[ $attachment_id ] ?? null ) ? $evidence_by_attachment_id[ $attachment_id ] : array();
+			if (
+				'' === $media_fingerprint
+				|| $media_fingerprint !== (string) ( $visual_evidence['media_fingerprint'] ?? '' )
+			) {
+				$visual_evidence = array();
+			}
+			$suggested_alt = sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) );
 			$images[] = array(
 				'id'                 => 'site-media-' . $attachment_id,
 				'attachment_id'      => $attachment_id,
@@ -2829,7 +2862,11 @@ final class Provider_Client {
 				'height'             => absint( $format['height'] ?? 0 ),
 				'match_score'        => (float) ( $result['score'] ?? 0 ),
 				'match_reason'       => sanitize_text_field( (string) ( $result['reason'] ?? '' ) ),
-				'media_fingerprint'  => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'media_fingerprint'  => $media_fingerprint,
+				'suggested_alt'      => $suggested_alt,
+				'visual_summary'     => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
+				'evidence_reuse'     => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? '' ) ),
+				'seo_suggestions'    => '' !== $suggested_alt ? array( 'alt' => $suggested_alt ) : array(),
 				'requires_local_review' => true,
 				'direct_wordpress_write' => false,
 			);

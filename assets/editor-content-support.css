@@ -2124,6 +2124,32 @@
 	color: #646970;
 }
 
+.npcink-toolbox-editor-support__image-evidence {
+	display: grid;
+	gap: 8px;
+	padding: 10px 0;
+	border-top: 1px solid #f0f0f0;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.npcink-toolbox-editor-support__image-evidence-item {
+	display: grid;
+	gap: 3px;
+}
+
+.npcink-toolbox-editor-support__image-evidence-item strong {
+	color: #1d2327;
+	font-weight: 600;
+}
+
+.npcink-toolbox-editor-support__image-evidence-item p {
+	margin: 0;
+	color: #50575e;
+	font-size: 12px;
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+}
+
 .npcink-toolbox-editor-support__image-lightbox {
 	position: fixed;
 	z-index: 100001;

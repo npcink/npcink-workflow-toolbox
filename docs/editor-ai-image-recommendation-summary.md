@@ -101,6 +101,18 @@ The right inspector should keep primary actions close together:
 - button loading state must attach to the clicked action, not the neighboring
   action.
 
+For a selected site-media result, the same inspector also shows:
+
+- the semantic match reason returned by Cloud;
+- an ALT suggestion only when the stored visual evidence matches the current
+  local image-byte fingerprint;
+- a reminder to compare that suggestion with the actual image and article
+  context before adoption.
+
+This is a read-only reuse of the existing recognition result. Opening or
+selecting a candidate does not start another visual-model call and does not
+write attachment ALT.
+
 Details should be collapsed unless needed:
 
 - media SEO fields are under `More SEO fields`;
