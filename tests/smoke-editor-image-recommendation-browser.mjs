@@ -332,10 +332,27 @@ try {
 	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 1, null, { timeout: 10000 });
 	assert(libraryRequests.length === 1 && libraryRequests[0].provider === 'site_media', 'Site-media mode sends one natural-language local-library search request.');
 	assert(await page.getByText(/Why this image matches|为什么匹配这张图片/).count() === 1, 'The selected site-media candidate shows its semantic match reason.');
-	assert(await page.getByText(/Suggested ALT text|建议的 ALT 文本/).count() === 1, 'The selected site-media candidate shows the reused ALT suggestion.');
-	assert(await page.locator('.npcink-toolbox-editor-support__image-evidence-item p').filter({ hasText: '自然光下摆放笔记本电脑和绿植的木质书桌' }).count() === 1, 'The visible ALT suggestion comes from the candidate evidence.');
-	assert(await page.getByRole('button', { name: /Adopt|采用/ }).count() === 1, 'Existing site media keeps the explicit human adoption action.');
-	await page.screenshot({ path: libraryScreenshotPath, fullPage: true });
+		assert(await page.getByText(/Suggested ALT text|建议的 ALT 文本/).count() === 1, 'The selected site-media candidate shows the reused ALT suggestion.');
+		assert(await page.locator('.npcink-toolbox-editor-support__image-evidence-item p').filter({ hasText: '自然光下摆放笔记本电脑和绿植的木质书桌' }).count() === 1, 'The visible ALT suggestion comes from the candidate evidence.');
+		assert(await page.getByRole('button', { name: /Adopt|采用/ }).count() === 1, 'Existing site media keeps the explicit human adoption action.');
+		const mediaSearchFeedback = requests
+			.filter((item) => item.url.includes('/npcink-toolbox/v1/agent-feedback'))
+			.map((item) => {
+				try {
+					return JSON.parse(item.body || '{}');
+				} catch (error) {
+					return {};
+				}
+			})
+			.find((item) => item.source_action_id === 'media_search_completed');
+		assert(mediaSearchFeedback && mediaSearchFeedback.source_object_type === 'media_search_session', 'Site-media search emits one correlated metadata-only completion event.');
+		assert(mediaSearchFeedback.handoff_id.includes(mediaSearchFeedback.source_object_id), 'The search handoff uses the random quality session instead of an attachment identifier.');
+		assert(mediaSearchFeedback.feedback_labels.includes('media_search_has_results'), 'The search completion event records that local candidates were returned.');
+		assert(mediaSearchFeedback.source_reason_codes.includes('result_count_1_3'), 'The search completion event stores only a coarse result-count bucket.');
+		assert(Array.isArray(mediaSearchFeedback.evidence_ref_ids) && mediaSearchFeedback.evidence_ref_ids.length === 0, 'The search completion event omits attachment and candidate identifiers.');
+		assert(!JSON.stringify(mediaSearchFeedback).includes(libraryQuery), 'The metadata-only search event does not include the natural-language query.');
+		assert(!JSON.stringify(mediaSearchFeedback).includes('自然光下摆放笔记本电脑和绿植的木质书桌'), 'The metadata-only search event does not include the ALT suggestion.');
+		await page.screenshot({ path: libraryScreenshotPath, fullPage: true });
 	pass(`Site-media evidence browser smoke screenshot: ${libraryScreenshotPath}`);
 
 	await page.getByRole('button', { name: /Hosted image|托管图片/ }).click();

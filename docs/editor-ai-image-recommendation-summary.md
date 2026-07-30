@@ -113,6 +113,11 @@ This is a read-only reuse of the existing recognition result. Opening or
 selecting a candidate does not start another visual-model call and does not
 write attachment ALT.
 
+The editor may silently submit metadata-only quality events through the existing
+Agent Feedback route. A site-media search event carries only a random session
+id, result-count bucket, result/error status, entry surface, and later adoption
+status. It never carries the search text or ALT suggestion.
+
 Details should be collapsed unless needed:
 
 - media SEO fields are under `More SEO fields`;

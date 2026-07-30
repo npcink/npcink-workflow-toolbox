@@ -776,6 +776,14 @@ text, prompts, user email, provider secrets, free-form notes, SEO values,
 media write payloads, or WordPress write authorization. Cloud may use the
 events for eval and quality rollup only; Toolbox does not persist learning
 truth, approval truth, audit truth, prompt/router truth, or final write truth.
+Site-media search adds one random, short-lived correlation id and reports only
+completion, coarse result-count, runtime-error, and real adoption actions. It
+does not send the natural-language query. Contextual ALT review reports an
+applied suggestion first, then classifies unchanged, edited, decorative,
+cleared, or not-saved outcomes only after a successful non-autosave WordPress
+post save.
+ALT text is compared in the browser and is never included in feedback. This
+first metric covers saved `core/image` block ALT only, not attachment metadata.
 The image-source entry opens a Cloud recommendation modal that auto-searches
 from the selected paragraph or selected block when available, combines that
 focus with the current draft title/excerpt/body context, and also accepts a

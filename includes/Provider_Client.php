@@ -8885,10 +8885,20 @@ final class Provider_Client {
 			'good_but_needs_human_draft',
 			'not_relevant_to_site',
 			'source_or_license_risk',
-			'visual_quality_low',
-			'operator_confidence_high',
-			'operator_confidence_low',
-		);
+				'visual_quality_low',
+				'operator_confidence_high',
+				'operator_confidence_low',
+				'media_search_has_results',
+				'media_search_no_results',
+				'media_search_runtime_error',
+				'media_candidate_adopted',
+				'alt_suggestion_applied',
+				'alt_saved_unchanged',
+				'alt_saved_edited',
+				'alt_saved_decorative',
+				'alt_saved_cleared',
+				'alt_suggestion_not_saved',
+			);
 		$items = is_array( $labels ) ? $labels : array();
 		$normalized = array();
 		foreach ( $items as $label ) {

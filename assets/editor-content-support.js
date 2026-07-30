@@ -744,6 +744,40 @@
 		});
 	}
 
+	function mediaQualitySessionId(prefix) {
+		const namespace = sanitizeFeedbackAction(prefix || 'media');
+		if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.randomUUID === 'function') {
+			return (namespace + '_' + window.crypto.randomUUID().replace(/-/g, '')).slice(0, 191);
+		}
+		return (namespace + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 14)).slice(0, 191);
+	}
+
+	function mediaQualitySurface(picker, suffix) {
+		const activePicker = normalizeImagePickerOptions(picker || {});
+		const imageUse = activePicker.imageUse === 'paragraph' ? 'paragraph' : 'featured';
+		return ('editor_' + imageUse + '_image_' + sanitizeFeedbackAction(suffix || 'quality')).slice(0, 96);
+	}
+
+	function mediaResultCountBucket(count) {
+		const total = Math.max(0, parseInt(count || 0, 10) || 0);
+		if (total === 0) {
+			return 'result_count_0';
+		}
+		if (total <= 3) {
+			return 'result_count_1_3';
+		}
+		if (total <= 9) {
+			return 'result_count_4_9';
+		}
+		return 'result_count_10_plus';
+	}
+
+	function withMediaQualitySession(payload, sessionId) {
+		return Object.assign({}, payload && typeof payload === 'object' ? payload : {}, {
+			_media_quality_session_id: String(sessionId || mediaQualitySessionId('media_search')).slice(0, 191),
+		});
+	}
+
 	function adapterRestUrl(path) {
 		return joinRestUrl(config.adapterRestUrl || '/wp-json/npcink-openclaw-adapter/v1', path);
 	}
@@ -1463,11 +1497,14 @@
 		const sourceRuntime = aiGenerated ? 'ai_image_generation' : 'image_candidates';
 		const surface = feedbackOptions.localSurface || (aiGenerated ? 'editor_ai_image_generation_modal' : 'editor_image_candidate_modal');
 		const runId = payload && payload.run_id ? String(payload.run_id) : '';
+		const qualitySessionId = payload && payload._media_quality_session_id
+			? String(payload._media_quality_session_id).slice(0, 191)
+			: '';
 		const handoffId = [
 			sourceRuntime,
 			feedbackOptions.action || '',
 			activePicker.imageUse || activePicker.mode,
-			selectedImage ? imageStableKey(selectedImage, 0) : '',
+			qualitySessionId || (selectedImage ? imageStableKey(selectedImage, 0) : ''),
 			runId
 		].filter(Boolean).join(':') || sourceRuntime;
 
@@ -1485,6 +1522,10 @@
 			operator_note: '',
 			local_proposal_id: '',
 			evidence_ref_ids: imageAgentFeedbackEvidenceRefIds(payload || {}, selectedImage),
+			source_action_id: sanitizeFeedbackAction(feedbackOptions.action || ''),
+			source_object_type: qualitySessionId ? 'media_search_session' : '',
+			source_object_id: qualitySessionId,
+			source_reason_codes: Array.isArray(feedbackOptions.reasonCodes) ? feedbackOptions.reasonCodes.slice(0, 12) : [],
 			redaction_status: 'metadata_only',
 			retention_class: 'quality_eval',
 			created_at: new Date().toISOString()
@@ -1492,11 +1533,26 @@
 	}
 
 	function editorImageImplicitFeedbackPayload(payload, selectedImage, picker, action, outcome, labels) {
-		return editorImageAgentFeedbackPayload(payload, selectedImage, picker, outcome, labels, {
+		const eventPayload = editorImageAgentFeedbackPayload(payload, selectedImage, picker, outcome, labels, {
 			action,
 			handoffType: 'editor_image_candidate_' + sanitizeFeedbackAction(action),
-			localSurface: 'editor_image_candidate_modal_implicit',
+			localSurface: mediaQualitySurface(picker, 'candidate_modal_implicit'),
 		});
+		if (payload && payload._media_quality_session_id) {
+			eventPayload.evidence_ref_ids = [];
+		}
+		return eventPayload;
+	}
+
+	function editorMediaSearchFeedbackPayload(payload, picker, action, outcome, labels, resultCount) {
+		const eventPayload = editorImageAgentFeedbackPayload(payload, null, picker, outcome, labels, {
+			action,
+			handoffType: 'editor_media_search_' + sanitizeFeedbackAction(action),
+			localSurface: mediaQualitySurface(picker, 'search'),
+			reasonCodes: [mediaResultCountBucket(resultCount)],
+		});
+		eventPayload.evidence_ref_ids = [];
+		return eventPayload;
 	}
 
 	function contentSupportFeedbackEvidenceRefIds(payload) {
@@ -1555,6 +1611,7 @@
 			feedbackOptions.action || '',
 			activeIntent,
 			artifactType,
+			feedbackOptions.sourceObjectId || '',
 			runId || String(contentSupportFeedbackEvidenceRefIds(payload || {}).length)
 		].filter(Boolean).join(':');
 
@@ -1572,6 +1629,10 @@
 			operator_note: '',
 			local_proposal_id: localProposalId || '',
 			evidence_ref_ids: contentSupportFeedbackEvidenceRefIds(payload || {}),
+			source_action_id: sanitizeFeedbackAction(feedbackOptions.action || ''),
+			source_object_type: String(feedbackOptions.sourceObjectType || '').slice(0, 64),
+			source_object_id: String(feedbackOptions.sourceObjectId || '').slice(0, 191),
+			source_reason_codes: Array.isArray(feedbackOptions.reasonCodes) ? feedbackOptions.reasonCodes.slice(0, 12) : [],
 			redaction_status: 'metadata_only',
 			retention_class: 'quality_eval',
 			created_at: new Date().toISOString()
@@ -1598,6 +1659,38 @@
 			action,
 			handoffType: 'editor_content_support_' + sanitizeFeedbackAction(action),
 			localSurface: 'editor_content_support_sidebar_implicit',
+		});
+	}
+
+	function contextualAltFeedbackPayload(payload, telemetry, action, outcome, labels) {
+		const eventPayload = editorContentSupportFeedbackPayload(payload || {}, 'image_alt_suggestions', outcome, labels, '', {
+			action,
+			handoffType: 'editor_contextual_alt_' + sanitizeFeedbackAction(action),
+			localSurface: 'editor_contextual_alt',
+			sourceObjectType: 'editor_alt_occurrence_session',
+			sourceObjectId: telemetry.session_id,
+			reasonCodes: [
+				telemetry.automatic ? 'automatic_apply' : 'reviewed_apply',
+				telemetry.generation_basis || 'article_context',
+			],
+		});
+		eventPayload.evidence_ref_ids = [];
+		return eventPayload;
+	}
+
+	function contextualAltFollowupPayload(seed, action, outcome, labels) {
+		const normalizedAction = sanitizeFeedbackAction(action);
+		return Object.assign({}, seed || {}, {
+			handoff_id: [
+				'media_alt_caption',
+				normalizedAction,
+				String((seed && seed.source_object_id) || ''),
+			].filter(Boolean).join(':').slice(0, 191),
+			handoff_type: 'editor_contextual_alt_' + normalizedAction,
+			local_outcome: outcome,
+			feedback_labels: labels,
+			source_action_id: normalizedAction,
+			created_at: new Date().toISOString(),
 		});
 	}
 
@@ -7011,6 +7104,7 @@
 			const progressiveMountedRef = useRef(false);
 			const progressiveRequestSeqRef = useRef(0);
 			const progressiveCurrentKeyRef = useRef(progressiveKey);
+			const pendingContextualAltTelemetryRef = useRef({});
 			progressiveCurrentKeyRef.current = progressiveKey;
 			useEffect(() => {
 				progressiveMountedRef.current = true;
@@ -7018,6 +7112,68 @@
 					progressiveMountedRef.current = false;
 					progressiveRequestSeqRef.current += 1;
 				};
+			}, []);
+
+			useEffect(() => {
+				pendingContextualAltTelemetryRef.current = {};
+			}, [postContext.post_id]);
+
+			useEffect(() => {
+				if (!data.subscribe || !data.select) {
+					return undefined;
+				}
+				let wasSavingPost = false;
+				const unsubscribe = data.subscribe(() => {
+					const editorSelector = data.select('core/editor');
+					if (!editorSelector || typeof editorSelector.isSavingPost !== 'function') {
+						return;
+					}
+					const autosaving = typeof editorSelector.isAutosavingPost === 'function' && editorSelector.isAutosavingPost();
+					const savingPost = editorSelector.isSavingPost() && !autosaving;
+					if (wasSavingPost && !savingPost) {
+						const saveSucceeded = typeof editorSelector.didPostSaveRequestSucceed === 'function'
+							&& editorSelector.didPostSaveRequestSucceed();
+						if (saveSucceeded) {
+							const blockSelector = data.select('core/block-editor');
+							const pending = pendingContextualAltTelemetryRef.current;
+							Object.keys(pending).forEach((sessionId) => {
+								const telemetry = pending[sessionId];
+								const block = blockSelector && typeof blockSelector.getBlock === 'function'
+									? blockSelector.getBlock(telemetry.block_client_id)
+									: null;
+								let action = 'alt_suggestion_not_saved';
+								let outcome = 'ignored';
+								let labels = ['alt_suggestion_not_saved'];
+								if (block && block.name === 'core/image') {
+									const finalAlt = normalizeEditorAlt(block.attributes && block.attributes.alt);
+									if (!finalAlt && telemetry.decorative) {
+										action = 'alt_saved_decorative';
+										outcome = 'accepted';
+										labels = ['alt_saved_decorative'];
+									} else if (!finalAlt) {
+										action = 'alt_saved_cleared';
+										outcome = 'rejected';
+										labels = ['alt_saved_cleared'];
+									} else if (finalAlt === telemetry.suggested_alt) {
+										action = 'alt_saved_unchanged';
+										outcome = 'accepted';
+										labels = ['alt_saved_unchanged'];
+									} else {
+										action = 'alt_saved_edited';
+										outcome = 'edited_before_accept';
+										labels = ['alt_saved_edited'];
+									}
+								}
+								delete pending[sessionId];
+								submitImplicitAgentFeedback(
+									contextualAltFollowupPayload(telemetry.feedback_seed, action, outcome, labels)
+								);
+							});
+						}
+					}
+					wasSavingPost = savingPost;
+				});
+				return typeof unsubscribe === 'function' ? unsubscribe : undefined;
 			}, []);
 
 			useEffect(() => {
@@ -7462,13 +7618,14 @@
 						if (expectedOldAlt || !finalAlt) {
 							return;
 						}
-						changes.push({
+							changes.push({
 							occurrence_id: String(source.occurrence_id || ''),
 							block_client_id: String(source.block_client_id || ''),
 							block_name: 'core/image',
 							expected_old_alt: '',
-							final_alt: finalAlt,
-							decorative: false,
+								final_alt: finalAlt,
+								suggested_alt: finalAlt,
+								decorative: false,
 							context_fingerprint: String(source.context_fingerprint || ''),
 							generation_basis: source.visual_fallback_used ? 'silent_ai_vision_fallback' : 'article_context',
 						});
@@ -7495,13 +7652,14 @@
 						if (finalAlt === expectedOldAlt && !decorative) {
 							return;
 						}
-						changes.push({
+							changes.push({
 							occurrence_id: occurrenceId,
 							block_client_id: String(source.block_client_id || ''),
 							block_name: 'core/image',
 							expected_old_alt: expectedOldAlt,
-							final_alt: finalAlt,
-							decorative,
+								final_alt: finalAlt,
+								suggested_alt: normalizeEditorAlt(source.suggested_alt || ''),
+								decorative,
 							context_fingerprint: String(source.context_fingerprint || ''),
 							generation_basis: source.visual_fallback_used ? 'silent_ai_vision_fallback' : 'article_context',
 						});
@@ -7546,10 +7704,28 @@
 					if (unapplied) {
 						throw new Error(__('Gutenberg could not apply every reviewed ALT value.', 'npcink-workflow-toolbox'));
 					}
-					const appliedByOccurrence = {};
-					changes.forEach((change) => {
-						appliedByOccurrence[change.occurrence_id] = change.final_alt;
-					});
+						const appliedByOccurrence = {};
+						changes.forEach((change) => {
+							appliedByOccurrence[change.occurrence_id] = change.final_alt;
+							const telemetry = {
+								session_id: mediaQualitySessionId('alt_occurrence'),
+								block_client_id: change.block_client_id,
+								suggested_alt: change.suggested_alt,
+								generation_basis: change.generation_basis,
+								automatic,
+								decorative: change.decorative,
+							};
+							const feedbackSeed = contextualAltFeedbackPayload(
+								result || {},
+								telemetry,
+								'alt_suggestion_applied_to_editor',
+								'accepted',
+								['alt_suggestion_applied']
+							);
+							telemetry.feedback_seed = feedbackSeed;
+							pendingContextualAltTelemetryRef.current[telemetry.session_id] = telemetry;
+							submitImplicitAgentFeedback(feedbackSeed);
+						});
 					setResult((current) => {
 						const currentSection = current && current.sections ? current.sections.image_alt_suggestions : null;
 						if (!currentSection || !Array.isArray(currentSection.items)) {
@@ -7903,24 +8079,41 @@
 				return;
 			}
 			const targetSearchMode = imageSearchModeRef.current === 'library' ? 'library' : 'source';
+			const qualitySessionId = targetSearchMode === 'library' ? mediaQualitySessionId('media_search') : '';
 			const imageContext = imagePickerRequestContext(postContext, activePicker);
 			const cacheKey = imageSearchCacheKey(targetSearchMode === 'library' ? 'library' : 'manual', activePicker, query, imageContext);
 			const cachedResult = forceRefresh ? null : readCachedImageResult(cacheKey);
 			setImageQuery(query);
 					if (cachedResult) {
+						const displayedResult = targetSearchMode === 'library'
+							? withMediaQualitySession(cachedResult, qualitySessionId)
+							: cachedResult;
 						setImageRunning('');
 						setImageCompletionRunning(false);
 						setImageError('');
 						setImageGuidance('');
-						setImageResultForSearchMode(targetSearchMode, cachedResult, true);
+						setImageResultForSearchMode(targetSearchMode, displayedResult, true);
 					setSelectedImage(null);
 					setSelectedImageSeo(null);
 					setImagePreviewLightbox(null);
 					setImageAdoptionResult(null);
 				setImageAdoptionError('');
-					resetImageFeedbackState();
-					return;
-				}
+						resetImageFeedbackState();
+						if (targetSearchMode === 'library') {
+							const resultCount = extractImageCandidates(displayedResult).length;
+							submitImplicitAgentFeedback(
+								editorMediaSearchFeedbackPayload(
+									displayedResult,
+									activePicker,
+									'media_search_completed',
+									resultCount > 0 ? 'accepted' : 'rejected',
+									[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
+									resultCount
+								)
+							);
+						}
+						return;
+					}
 					const requestSeq = imageSourceRequestSeqRef.current + 1;
 					imageSourceRequestSeqRef.current = requestSeq;
 					setImageRunning('search');
@@ -7949,15 +8142,41 @@
 					if (imageSourceRequestSeqRef.current !== requestSeq) {
 						return;
 					}
-					setImageResultForSearchMode(targetSearchMode, result);
+					const displayedResult = targetSearchMode === 'library'
+						? withMediaQualitySession(result, qualitySessionId)
+						: result;
+					setImageResultForSearchMode(targetSearchMode, displayedResult);
 					if (targetSearchMode === 'source') {
 						completeImageSourceCandidates(requestPayload, cacheKey, result, requestSeq);
 					} else {
 						writeCachedImageResult(cacheKey, result);
+						const resultCount = extractImageCandidates(displayedResult).length;
+						submitImplicitAgentFeedback(
+							editorMediaSearchFeedbackPayload(
+								displayedResult,
+								activePicker,
+								'media_search_completed',
+								resultCount > 0 ? 'accepted' : 'rejected',
+								[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
+								resultCount
+							)
+						);
 					}
 					} catch (requestError) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageError(formatImageErrorMessage(requestError, __('Cloud image search failed.', 'npcink-workflow-toolbox')));
+							if (targetSearchMode === 'library') {
+								submitImplicitAgentFeedback(
+									editorMediaSearchFeedbackPayload(
+										withMediaQualitySession({ provider_mode: 'site_media' }, qualitySessionId),
+										activePicker,
+										'media_search_runtime_error',
+										'ignored',
+										['media_search_runtime_error'],
+										0
+									)
+								);
+							}
 						}
 					} finally {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
@@ -8304,7 +8523,7 @@
 			}
 
 			submitImplicitAgentFeedback(
-				editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'select_only', 'accepted', ['evidence_useful', 'operator_confidence_high'])
+				editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'select_only', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
 			);
 			setImageGuidance(__('Image source selected for the calling field.', 'npcink-workflow-toolbox'));
 			setImageAdoptionError('');
@@ -8651,9 +8870,9 @@
 					const local = await postLocalFeaturedImageConsent(localFeaturedImageConsentInput());
 					syncFeaturedMediaFromCore(local);
 					setImageAdoptionResult({ core: local, local_consent: true, adoption_target: 'featured_image' });
-					submitImplicitAgentFeedback(
-						editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, imagePicker || { mode: imageMode }, 'local_featured_image_adopt', 'accepted', ['evidence_useful', 'operator_confidence_high'])
-					);
+						submitImplicitAgentFeedback(
+							editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, imagePicker || { mode: imageMode }, 'local_featured_image_adopt', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
+						);
 					return;
 				}
 
@@ -8664,9 +8883,9 @@
 						local_consent: true,
 						adoption_target: 'existing_media',
 					});
-					submitImplicitAgentFeedback(
-						editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'existing_media_selected', 'accepted', ['evidence_useful', 'operator_confidence_high'])
-					);
+						submitImplicitAgentFeedback(
+							editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'existing_media_selected', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
+						);
 					return;
 				}
 				const seoContext = imagePickerRequestContext(postContext, activePicker);
@@ -8676,9 +8895,9 @@
 				try {
 					const core = await postAdapterAdoption(plan, planInput);
 					setImageAdoptionResult({ plan, core, adoption_target: setFeaturedImage ? 'featured_image' : 'media_import' });
-					submitImplicitAgentFeedback(
-						editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, setFeaturedImage ? 'featured_image_adopt' : 'media_import', 'accepted', ['evidence_useful', 'operator_confidence_high'])
-					);
+						submitImplicitAgentFeedback(
+							editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, setFeaturedImage ? 'featured_image_adopt' : 'media_import', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
+						);
 				} catch (coreError) {
 					setImageAdoptionResult({ plan, core_error: coreError, adoption_target: setFeaturedImage ? 'featured_image' : 'media_import' });
 				}
