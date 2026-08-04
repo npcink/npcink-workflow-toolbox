@@ -61,11 +61,6 @@ foreach (
 		'Cloud follow-up',
 		'Scheduled review queue',
 		'Score breakdown',
-		'Scheduled review feedback',
-		'data-toolbox-nightly-agent-feedback',
-		'wrong_priority',
-		'already_handled',
-		'source_reason_codes',
 		'score_breakdown',
 		'priority_queue',
 		'issue_groups',
@@ -80,6 +75,16 @@ foreach (
 	) as $required_js_text
 ) {
 	$assert_contains( $admin_js, $required_js_text, 'Nightly Inspection Cloud Runtime compatibility code keeps the submit/status/result flow observable for existing callers.' );
+}
+
+foreach (
+	array(
+		'appendNightlyCloudFeedbackControls',
+		'data-toolbox-nightly-agent-feedback',
+		'Scheduled review feedback',
+	) as $forbidden_feedback_text
+) {
+	$assert_not_contains( $admin_js, $forbidden_feedback_text, 'Nightly Inspection must not expose manual Cloud-eval feedback controls.' );
 }
 
 foreach (

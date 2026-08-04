@@ -1119,6 +1119,9 @@ msgstr "图库图片"
 msgid "Hosted image"
 msgstr "托管图片"
 
+msgid "AI generation"
+msgstr "AI 生成"
+
 msgid "Owned image"
 msgstr "自有图片"
 
@@ -2210,6 +2213,144 @@ msgstr "查找匹配的已有分类，不运行完整元数据流程。"
 
 msgid "Find matching existing tags without creating new vocabulary."
 msgstr "查找匹配的已有标签，不创建新词表。"
+
+msgid "Current draft and existing WordPress terms"
+msgstr "当前草稿和已有 WordPress 分类标签"
+
+msgid "Existing category or tag candidates and Toolkit ranking evidence"
+msgstr "已有分类或标签候选及 Toolkit 排序依据"
+
+msgid "Local Toolkit taxonomy suggestion runtime"
+msgstr "本地 Toolkit 分类标签建议运行时"
+
+msgid "No automatic term assignment or term creation"
+msgstr "不自动分配分类标签，也不创建新词条"
+
+msgid "Blocked when draft context is missing or no matching existing terms are available."
+msgstr "缺少草稿上下文或没有匹配的已有分类标签时阻塞。"
+
+msgid "More writing preferences"
+msgstr "更多写作偏好"
+
+msgid "Add more requirements"
+msgstr "补充更多需求"
+
+msgid "Review whether the new article repeats this coverage or needs a clearer angle."
+msgstr "检查新文章是否重复这些内容，或是否需要更清晰的新角度。"
+
+msgid "Provide materials"
+msgstr "提供资料"
+
+msgid "Confirm direction"
+msgstr "确认方向"
+
+msgid "Review draft"
+msgstr "审阅初稿"
+
+msgid "Drafting steps"
+msgstr "起草步骤"
+
+msgid "Source ready"
+msgstr "来源已就绪"
+
+msgid "Source needs attention"
+msgstr "来源需要处理"
+
+msgid "External article"
+msgstr "外部文章"
+
+msgid "Enough article text was captured to prepare a writing direction."
+msgstr "已获取足够的文章正文，可以准备写作方向。"
+
+msgid "The article body could not be confirmed. Try another public article URL."
+msgstr "无法确认文章正文，请尝试其他公开文章网址。"
+
+msgid "Source preview and technical details"
+msgstr "来源预览与技术详情"
+
+msgid "Related site articles"
+msgstr "相关本站文章"
+
+msgid "Source, risks, and detailed evidence"
+msgstr "来源、风险与详细依据"
+
+msgid "Verification and source notes"
+msgstr "核实项与来源说明"
+
+msgid "No verification notes returned."
+msgstr "没有返回待核实事项。"
+
+msgid "No source notes returned."
+msgstr "没有返回来源说明。"
+
+msgid "Choose a reference URL, a short brief, or both."
+msgstr "提供参考网址、简要需求，或同时提供两者。"
+
+msgid "How do you want to start?"
+msgstr "你想如何开始？"
+
+msgid "Continue to writing direction"
+msgstr "下一步：准备写作方向"
+
+msgid "Read source"
+msgstr "读取来源"
+
+msgid "Retry source"
+msgstr "重新读取来源"
+
+msgid "Use a manual brief instead"
+msgstr "改为手动填写"
+
+msgid "Confirm writing direction"
+msgstr "确认写作方向"
+
+msgid "Review the audience, goal, angle, and outline. Edit them before generating a draft."
+msgstr "审阅受众、目标、角度和提纲；生成初稿前可以直接修改。"
+
+msgid "The current source or brief is not sufficient for drafting. Review the detailed evidence or return to the source step."
+msgstr "当前来源或需求不足以生成初稿，请查看详细依据或返回来源步骤。"
+
+msgid "Back to source"
+msgstr "返回来源"
+
+msgid "Rebuild direction"
+msgstr "重新准备方向"
+
+msgid "Confirm direction and generate draft"
+msgstr "确认方向并生成初稿"
+
+msgid "Review the draft and choose how to continue. Nothing is saved or published automatically."
+msgstr "审阅初稿并选择后续操作；不会自动保存或发布。"
+
+msgid "Back to direction"
+msgstr "返回写作方向"
+
+msgid "Preparing article materials..."
+msgstr "正在准备文章材料…"
+
+msgid "Draft from source materials"
+msgstr "根据资料起草"
+
+msgid "Provide a reference URL or brief, confirm the writing direction, then generate a review-only draft. Nothing is saved or published automatically."
+msgstr "提供参考网址或简要需求，确认写作方向后生成可审阅初稿；不会自动保存或发布。"
+
+msgid "Toolbox prepares review material only. Final saving and publishing stay with WordPress and Core."
+msgstr "Toolbox 只准备审阅材料；最终保存和发布仍由 WordPress 与 Core 负责。"
+
+msgid "Draft ready for review"
+msgstr "初稿待审阅"
+
+msgid "Writing direction ready"
+msgstr "写作方向待确认"
+
+msgid "Not started"
+msgstr "尚未开始"
+
+msgid "Current status: "
+msgstr "当前状态："
+
+msgid "Continue"
+msgstr "继续"
 
 msgid "Recommend terms"
 msgstr "推荐分类标签"
@@ -5790,6 +5931,9 @@ msgstr "审阅图像文字和公开内容机会，不写入 WordPress。"
 msgid "Review only"
 msgstr "仅供审阅"
 
+msgid "External source"
+msgstr "外部来源"
+
 msgid "Toolbox drafts image text suggestions only. It does not edit media metadata or create proposals from this check."
 msgstr "Toolbox 只草拟图像文字建议。此检查不会编辑媒体元数据，也不会创建提案。"
 
@@ -6332,6 +6476,9 @@ msgstr "可通过媒体库批量操作预填所选图片 ID，也可以使用下
 
 msgid "Image source"
 msgstr "图片来源"
+
+msgid "External image library"
+msgstr "外部图库"
 
 msgid "This month's images"
 msgstr "本月图片"
@@ -7381,3 +7528,16 @@ msgstr "站内媒体搜索尚未就绪。"
 #: assets/editor-content-support.js
 msgid "Configure the semantic embedding service, then refresh the media index before searching again."
 msgstr "请配置语义向量服务并刷新媒体索引，然后重新搜索。"
+
+#: assets/editor-content-support.js
+msgid "Flow and boundary"
+msgstr "流程与边界"
+
+#: assets/editor-content-support.js
+msgid "The article changed while AI was reviewing the paragraph. The result was discarded; Toolbox did not apply any AI text. Select the paragraph and run the review again."
+msgstr "AI 审阅段落期间文章正文发生了变化，本次结果已丢弃；Toolbox 没有应用任何 AI 文本。请重新选择段落并再次运行审阅。"
+
+#: assets/editor-content-support.js
+#, php-format
+msgid "Content integrity verified: %d characters before and after the AI review; no article text was added, removed, or changed."
+msgstr "正文完整性已验证：AI 审阅前后均为 %d 个字符，未检测到正文增删改。"

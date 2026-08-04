@@ -2967,9 +2967,6 @@ final class Admin_Page {
 					<div class="npcink-toolbox__knowledge-summary" data-toolbox-site-knowledge-summary>
 						<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Status has not been loaded yet.', 'npcink-workflow-toolbox' ); ?></div>
 					</div>
-					<div class="npcink-toolbox__knowledge-summary" data-toolbox-agent-feedback-summary>
-						<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Agent feedback summary has not been loaded yet.', 'npcink-workflow-toolbox' ); ?></div>
-					</div>
 				</section>
 
 			<section class="npcink-toolbox__info-panel">

@@ -973,6 +973,7 @@ final class Rest_Controller {
 		if ( 'source_adaptation_review' === $intent ) {
 			$source_url   = (string) ( $context['source_url'] ?? '' );
 			$source_stage = (string) ( $context['source_stage'] ?? 'extract' );
+			$force_source_refresh = 'extract' === $source_stage && rest_sanitize_boolean( $request->get_param( 'force_refresh' ) );
 			if ( 'adapt' === $source_stage ) {
 				$source_stage = 'research_plan';
 			}
@@ -989,7 +990,8 @@ final class Rest_Controller {
 					'intent'       => 'source_extraction_preview',
 					'max_results'  => 1,
 					'recency_days' => 0,
-				)
+				),
+				$force_source_refresh
 			);
 			$external       = $this->editor_support_section( $external_raw );
 			$source_item    = ! is_wp_error( $external_raw ) && is_array( $external_raw['results'][0] ?? null ) ? $external_raw['results'][0] : array();
@@ -3101,29 +3103,50 @@ final class Rest_Controller {
 		);
 	}
 
-	private function editor_cached_cloud_web_search( array $input ) {
+	private function editor_cached_cloud_web_search( array $input, bool $force_refresh = false ) {
 		return $this->editor_cached_client_result(
 			'cloud_web_search',
 			$input,
 			function () use ( $input ) {
 				return $this->client->test_cloud_web_search( $input );
-			}
+			},
+			$force_refresh,
+			function ( array $result ) use ( $input ): bool {
+				return $this->editor_source_extraction_cacheable( $input, $result );
+			},
+			true
 		);
 	}
 
-	private function editor_cached_client_result( string $namespace, array $input, callable $callback, bool $force_refresh = false ) {
+	private function editor_source_extraction_cacheable( array $input, array $result ): bool {
+		if ( 'source_extraction_preview' !== sanitize_key( (string) ( $input['intent'] ?? '' ) ) ) {
+			return true;
+		}
+
+		return 'ready' === sanitize_key( (string) ( $result['status'] ?? '' ) )
+			&& 'matched' === sanitize_key( (string) ( $result['url_match'] ?? '' ) )
+			&& ! empty( $result['results'][0]['reader_excerpt'] ?? '' );
+	}
+
+	private function editor_cached_client_result( string $namespace, array $input, callable $callback, bool $force_refresh = false, ?callable $should_cache = null, bool $replace_cache_on_force = false ) {
 		$cache_key = $this->editor_flow_cache_key( $namespace, $input );
 		$cached    = $force_refresh ? false : get_transient( $cache_key );
 		if ( false !== $cached && is_array( $cached ) ) {
-			$cached['cache_status'] = 'hit';
-			return $cached;
+			if ( null === $should_cache || $should_cache( $cached ) ) {
+				$cached['cache_status'] = 'hit';
+				return $cached;
+			}
+			delete_transient( $cache_key );
 		}
 
 		$result = $callback();
 		if ( ! is_wp_error( $result ) && is_array( $result ) ) {
 			$result['cache_status'] = $force_refresh ? 'bypass' : 'miss';
-			if ( ! $force_refresh ) {
+			$cacheable = null === $should_cache || $should_cache( $result );
+			if ( $cacheable && ( ! $force_refresh || $replace_cache_on_force ) ) {
 				set_transient( $cache_key, $result, self::EDITOR_FLOW_CACHE_TTL );
+			} elseif ( $force_refresh && $replace_cache_on_force ) {
+				delete_transient( $cache_key );
 			}
 		}
 

@@ -10,6 +10,8 @@ const expose = `
 		articleDraftPreviewPlanInput,
 		editorBlockHasMeaningfulContent,
 		currentEditorBodyIsEmpty,
+		editorContentIntegritySnapshot,
+		editorContentIntegrityCheck,
 	};
 })(window.wp || {});`;
 const instrumented = source.replace(/\}\)\(window\.wp \|\| \{\}\);\s*$/, expose);
@@ -104,5 +106,37 @@ currentBlocks = [{ name: 'core/paragraph', attributes: { content: 'Existing body
 assert.equal(helpers.currentEditorBodyIsEmpty(''), false, 'Existing paragraph content blocks loading.');
 currentBlocks = [{ name: 'core/image', attributes: {}, innerBlocks: [] }];
 assert.equal(helpers.currentEditorBodyIsEmpty(''), false, 'Any non-paragraph block blocks loading.');
+
+const integritySnapshot = helpers.editorContentIntegritySnapshot(
+	'<!-- wp:paragraph --><p>保留原文🙂</p><!-- /wp:paragraph -->',
+	4311
+);
+assert.equal(integritySnapshot.character_count, 5, 'Integrity snapshots count visible Unicode characters.');
+assert.equal(
+	helpers.editorContentIntegrityCheck(
+		integritySnapshot,
+		'<!-- wp:paragraph --><p>保留原文🙂</p><!-- /wp:paragraph -->',
+		4311
+	).exact_match,
+	true,
+	'Paragraph review accepts only the same post and exact serialized editor body.'
+);
+const changedIntegrity = helpers.editorContentIntegrityCheck(
+	integritySnapshot,
+	'<!-- wp:paragraph --><p>保留原文</p><!-- /wp:paragraph -->',
+	4311
+);
+assert.equal(changedIntegrity.exact_match, false, 'Deleting one visible character fails the paragraph integrity guard.');
+assert.equal(changedIntegrity.before_character_count, 5, 'Integrity failure preserves the before character count.');
+assert.equal(changedIntegrity.after_character_count, 4, 'Integrity failure reports the changed character count.');
+assert.equal(
+	helpers.editorContentIntegrityCheck(
+		integritySnapshot,
+		'<!-- wp:paragraph --><p>保留原文🙂</p><!-- /wp:paragraph -->',
+		4312
+	).exact_match,
+	false,
+	'Moving the response to another post fails the paragraph integrity guard.'
+);
 
 console.log('Article draft native-editor JavaScript behavior: ok');

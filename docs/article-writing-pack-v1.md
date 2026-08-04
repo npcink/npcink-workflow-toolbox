@@ -126,10 +126,16 @@ keeps the best-ranked chunk for each source document, and returns unique article
 candidates with bounded chunk references. Toolbox consumes that result and does
 not implement a second semantic dedupe or relevance-scoring policy.
 
-The default editor shows only the URL, source-body readiness, confirmation, and
-draft actions. Input modes, audience/focus overrides, fact ledgers, overlap,
-rights, and outline details remain available under optional or advanced
-disclosures instead of occupying the main path.
+The default editor sidebar shows only the operator-facing `Draft from source
+materials` entry and current request-scoped status. Its wide work modal maps the
+existing stages to `Provide materials`, `Confirm direction`, and `Review draft`.
+The first step owns input mode and URL or brief fields; the direction step keeps
+audience, goal, focus, angle, and outline editable; the draft step owns review
+and adoption actions. Raw Reader output, fact ledgers, overlap, rights, runtime
+detail, and source notes remain available under compact lists or explicit
+disclosures instead of occupying the main path. A failed URL extraction keeps
+the first step recoverable: the operator may retry the same source or switch to
+the manual brief without closing the modal.
 
 ## Review Contract
 

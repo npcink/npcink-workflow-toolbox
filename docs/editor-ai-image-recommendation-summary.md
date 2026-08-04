@@ -122,7 +122,7 @@ Details should be collapsed unless needed:
 
 - media SEO fields are under `More SEO fields`;
 - source and attribution details are under `Source details`;
-- issue feedback is compact and secondary;
+- quality observation is passive and does not add manual feedback controls;
 - Core record links should point to Core instead of rendering raw audit JSON in
   Toolbox.
 

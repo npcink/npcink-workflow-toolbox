@@ -178,8 +178,9 @@ same Toolkit plan and Adapter execution profile.
 High-frequency article support belongs in the WordPress post editor as a
 Toolbox-owned panel, not only on the standalone Toolbox admin page. The editor
 panel defaults to fixed flows for publish preflight, internal-link candidates,
-current-article contextual ALT review, image candidates, article narration, and
-article audio summary. Summary, category, tag, outline, discoverability,
+current-article contextual ALT review, and image candidates. Article narration
+and article audio summary remain callable compatibility flows but are
+temporarily hidden from the default menu. Summary, category, tag, outline, discoverability,
 article-checkup, and related existing-post helpers remain supported route or rendering paths, not
 default visible buttons. They must keep the same suggestion-only and
 Core-governed write posture as the admin surface. Related existing-post review
@@ -204,9 +205,13 @@ the reviewed sections into the existing `article_write_plan`, submit that plan
 through Adapter to Core, and then stop with a proposal receipt and Core review
 link. Only approved Adapter/Toolkit execution may create a WordPress post with
 status `draft`; an author or editor still publishes it with native WordPress.
-The default interaction stays deliberately small: URL, body-readiness result,
-one writing-direction confirmation, draft review, and either optional Core
-handoff or empty-body adoption.
+The sidebar entry is named `Draft from source materials`, stays deliberately
+small, and reports only the current request-scoped status. A wide three-step
+modal owns source or brief input, writing-direction confirmation, and draft
+review. Reader output, related-site evidence, fact/rights risk, and runtime
+details stay behind compact secondary lists or disclosures. Draft review then
+offers either optional Core handoff or empty-body adoption without changing the
+write boundary.
 Detailed brief fields and evidence remain behind optional/advanced disclosure.
 Navigation or metadata-only reader output stops before hosted planning and can
 never be confirmed into a draft.
