@@ -495,6 +495,13 @@ rewriting or inserting text. Paragraph review lives in the selected-block
 toolbar.
 The `source_adaptation_review` route intent is deliberately retained for
 compatibility but now returns the planning artifact `article_writing_pack.v1`.
+Its editor projection is a request-scoped three-step modal over the existing
+`extract`, `research_plan`, and `draft` stages. The narrow sidebar owns only the
+entry and current status. The modal keeps source input, direction review, and
+draft review separate; raw Reader excerpts, Site Knowledge detail, fact/rights
+risk, and runtime diagnostics remain secondary disclosures rather than default
+operator content. This UI state is not a durable workflow run or approval
+record.
 Its default `extract` stage requests one exact-URL bounded Cloud
 `source_extraction_preview.v1` result and stops for operator verification. The
 canonical `research_plan` stage (`adapt` remains an input alias) queries related
@@ -766,12 +773,14 @@ imports media, publishes content, or writes SEO fields. The internal-link panel
 may copy reviewed links or open target articles, but it does not format editor
 text selections or run backend post-content patches. Write-like follow-up must
 still go through Core proposals and reusable WordPress abilities.
-The editor feedback surface is intentionally low-friction. Explicit rating
-buttons are folded behind `Report issue` and `Report image issue` details
-entries, while successful operator actions can send silent metadata-only
-Agent feedback through the existing `/agent-feedback` route. These events
-capture bounded action metadata such as handoff type, handoff id, outcome,
-fixed labels, run id, and evidence refs. They must not include article body
+The editor content-support surface does not expose manual rating or
+issue-report controls. Successful operator actions can send silent
+metadata-only Agent feedback through the existing `/agent-feedback` route.
+Image candidates, Site Knowledge, and Nightly Inspection also omit manual
+Cloud-eval controls and developer-oriented quality summaries from their
+operator-facing results. Passive events capture bounded action metadata such
+as handoff type, handoff id, outcome, fixed labels, run id, and evidence refs.
+They must not include article body
 text, prompts, user email, provider secrets, free-form notes, SEO values,
 media write payloads, or WordPress write authorization. Cloud may use the
 events for eval and quality rollup only; Toolbox does not persist learning
@@ -784,6 +793,10 @@ cleared, or not-saved outcomes only after a successful non-autosave WordPress
 post save.
 ALT text is compared in the browser and is never included in feedback. This
 first metric covers saved `core/image` block ALT only, not attachment metadata.
+The result view keeps flow ownership and runtime detail in a collapsed footer
+disclosure. Publish preflight groups its primary full-review action beside the
+secondary rerun action and presents readiness as compact rows rather than
+repeating developer-facing ownership metadata in the main result.
 The image-source entry opens a Cloud recommendation modal that auto-searches
 from the selected paragraph or selected block when available, combines that
 focus with the current draft title/excerpt/body context, and also accepts a

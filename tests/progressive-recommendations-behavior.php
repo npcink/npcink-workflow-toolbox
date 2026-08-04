@@ -15,6 +15,8 @@ $npcink_toolbox_progressive_transients = array();
 $npcink_toolbox_progressive_draft_inputs = array();
 $npcink_toolbox_progressive_writing_pack_inputs = array();
 $npcink_toolbox_progressive_site_knowledge_inputs = array();
+$npcink_toolbox_progressive_source_reader_calls = 0;
+$npcink_toolbox_progressive_source_reader_mode = 'ready';
 
 if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
@@ -127,6 +129,16 @@ function set_transient( string $key, $value, int $expiration = 0 ): bool {
 	return true;
 }
 
+function delete_transient( string $key ): bool {
+	global $npcink_toolbox_progressive_transients;
+	unset( $npcink_toolbox_progressive_transients[ $key ] );
+	return true;
+}
+
+function rest_sanitize_boolean( $value ): bool {
+	return in_array( $value, array( true, 1, '1', 'true' ), true );
+}
+
 function get_option( string $key, $default = false ) {
 	return $default;
 }
@@ -136,8 +148,31 @@ function apply_filters( string $hook, $value, ...$args ) {
 		return $value;
 	}
 	if ( 'npcink_toolbox_web_search_cloud_request' === $hook ) {
+		global $npcink_toolbox_progressive_source_reader_calls, $npcink_toolbox_progressive_source_reader_mode;
 		$runtime_input = is_array( $args[1] ?? null ) ? $args[1] : array();
 		$source_url = (string) ( $runtime_input['source_url'] ?? '' );
+		++$npcink_toolbox_progressive_source_reader_calls;
+		if ( 'blocked' === $npcink_toolbox_progressive_source_reader_mode ) {
+			return array(
+				'status' => 'ok',
+				'run_id' => 'writing-pack-source-blocked-run',
+				'data'   => array(
+					'result' => array(
+						'artifact_type'    => 'source_extraction_preview',
+						'contract_version' => 'source_extraction_preview.v1',
+						'output_contract'  => 'source_extraction_preview.v1',
+						'status'           => 'blocked',
+						'intent'           => 'source_extraction_preview',
+						'requested_url'    => $source_url,
+						'resolved_url'     => '',
+						'url_match'        => 'unavailable',
+						'char_count'       => 0,
+						'word_count'       => 0,
+						'results'          => array(),
+					),
+				),
+			);
+		}
 		return array(
 			'status' => 'ok',
 			'run_id' => 'writing-pack-source-run',
@@ -799,6 +834,60 @@ npcink_toolbox_progressive_assert(
 	'blocked' === ( $insufficient_source_pack['generation_admission']['status'] ?? '' )
 	&& in_array( 'source_body_evidence_insufficient', $insufficient_source_pack['generation_admission']['blocking_reasons'] ?? array(), true ),
 	'Article writing pack blocks navigation or metadata-only source evidence before draft generation.'
+);
+
+$npcink_toolbox_progressive_source_reader_mode = 'blocked';
+$source_reader_calls_before_failure = $npcink_toolbox_progressive_source_reader_calls;
+$blocked_source_response = $controller->editor_content_support(
+	new WP_REST_Request(
+		array(
+			'intent'       => 'source_adaptation_review',
+			'input_mode'   => 'url_reference',
+			'source_stage' => 'extract',
+			'source_url'   => 'https://example.com/transient-reader-failure',
+		)
+	)
+);
+$blocked_source_data = $blocked_source_response instanceof WP_REST_Response ? $blocked_source_response->get_data() : $blocked_source_response;
+$npcink_toolbox_progressive_source_reader_mode = 'ready';
+$recovered_source_response = $controller->editor_content_support(
+	new WP_REST_Request(
+		array(
+			'intent'       => 'source_adaptation_review',
+			'input_mode'   => 'url_reference',
+			'source_stage' => 'extract',
+			'source_url'   => 'https://example.com/transient-reader-failure',
+		)
+	)
+);
+$recovered_source_data = $recovered_source_response instanceof WP_REST_Response ? $recovered_source_response->get_data() : $recovered_source_response;
+npcink_toolbox_progressive_assert(
+	'blocked' === ( $blocked_source_data['sections']['source_article']['status'] ?? '' )
+	&& 'ready' === ( $recovered_source_data['sections']['source_article']['status'] ?? '' )
+	&& 'matched' === ( $recovered_source_data['sections']['source_article']['url_match'] ?? '' )
+	&& true === ( $recovered_source_data['sections']['source_article']['body_ready'] ?? false )
+	&& $npcink_toolbox_progressive_source_reader_calls === $source_reader_calls_before_failure + 2,
+	'Blocked exact-source Reader results are not cached and the next request can recover.'
+);
+
+$source_reader_calls_before_forced_retry = $npcink_toolbox_progressive_source_reader_calls;
+$forced_source_response = $controller->editor_content_support(
+	new WP_REST_Request(
+		array(
+			'intent'        => 'source_adaptation_review',
+			'input_mode'    => 'url_reference',
+			'source_stage'  => 'extract',
+			'source_url'    => 'https://example.com/transient-reader-failure',
+			'force_refresh' => true,
+		)
+	)
+);
+$forced_source_data = $forced_source_response instanceof WP_REST_Response ? $forced_source_response->get_data() : $forced_source_response;
+npcink_toolbox_progressive_assert(
+	'ready' === ( $forced_source_data['sections']['source_article']['status'] ?? '' )
+	&& 'bypass' === ( $forced_source_data['sections']['source_article']['cache_status'] ?? '' )
+	&& $npcink_toolbox_progressive_source_reader_calls === $source_reader_calls_before_forced_retry + 1,
+	'Explicit source retry bypasses and refreshes a previously cached Reader result.'
 );
 
 $unsupported_writing_pack_mode = $controller->editor_content_support(

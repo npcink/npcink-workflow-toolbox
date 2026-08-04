@@ -90,8 +90,9 @@ Overview, Site Profile, and Image Handling; Site Check, Site Knowledge, and
 Morning Brief remain hidden compatibility/deep-link panels. Overview should not
 render a single-post article-support work block.
 Article-specific jobs use the editor Content Support sidebar:
-publish preflight, internal links, image candidates, article narration, and
-article audio summary. Summary, category, tag, outline, discoverability,
+publish preflight, internal links, and image candidates. Article narration and
+article audio summary remain callable but are temporarily hidden from the
+default menu. Summary, category, tag, outline, discoverability,
 article-checkup, current-article ALT, and related existing-post helpers remain
 compatible route or rendering paths, so `writing_support` remains
 route-compatible but is not a default editor button.
@@ -266,16 +267,22 @@ Post editor content support:
 
 - `POST /wp-json/npcink-toolbox/v1/editor/content-support` runs one bounded
   fixed flow from the current draft context.
-- Supported intents are `writing_support`, `publish_preflight`,
+- Supported intents are `source_adaptation_review`, `writing_support`, `publish_preflight`,
   `summary_suggestions`, `category_suggestions`, `tag_suggestions`,
   `summary_terms_optimization`, `taxonomy_tags`, `internal_links`,
   `image_candidates`, selection-only paragraph review via `polish_notes`, and
   `discoverability`.
-- The editor UI shows default buttons for `publish_preflight`,
-  `internal_links`, `image_candidates`, `article_narration`, and
-  `article_audio_summary`; writing, summary, taxonomy/tag, outline,
-  discoverability, article-checkup, and current-article ALT helpers remain
-  supported route or rendering paths but are not default buttons.
+- The editor UI shows default buttons for `source_adaptation_review`,
+  `publish_preflight`, `category_suggestions`, `tag_suggestions`,
+  `internal_links`, `image_alt_suggestions`, and `image_candidates`.
+  `article_narration` and `article_audio_summary` remain callable but
+  temporarily hidden. Writing, summary, broader taxonomy, outline,
+  discoverability, and article-checkup helpers remain supported route or
+  rendering paths but are not default buttons.
+- `source_adaptation_review` opens a three-step work modal for source or brief
+  input, writing-direction confirmation, and draft review. The sidebar retains
+  only the entry and current request-scoped status; source/runtime diagnostics
+  remain collapsed in the modal.
 - Returned artifacts are `editor_content_support_flow` suggestions. They do not
   assign terms, insert links, import media, publish content, or write SEO fields.
 - The selected-block toolbar may trigger `polish_notes` for the current

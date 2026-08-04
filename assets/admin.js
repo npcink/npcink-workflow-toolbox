@@ -851,7 +851,6 @@
 			section.appendChild(meta);
 		}
 		renderImageList(section, payload.images);
-		appendImageAgentFeedbackControls(section, payload, 'toolbox_ai_image_generation');
 		section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Generated images are candidates only. Use editor image adoption and Core review before importing or inserting media.'));
 		section.appendChild(createRawDetails(payload, 'Hosted image candidate payload'));
 		container.appendChild(section);
@@ -1025,233 +1024,6 @@
 		container.appendChild(section);
 	}
 
-	function siteKnowledgeEvidenceRefIds(handoff) {
-		const proposalInput = handoff && handoff.proposal_input && typeof handoff.proposal_input === 'object' ? handoff.proposal_input : {};
-		const refs = Array.isArray(proposalInput.evidence_refs) ? proposalInput.evidence_refs : [];
-		const ids = [];
-		refs.forEach((ref, index) => {
-			if (!ref || typeof ref !== 'object') {
-				return;
-			}
-			let value = ref.id || ref.ref_id || '';
-			if (!value) {
-				const source = ref.source_type || 'evidence';
-				const sourceId = ref.source_id || ref.post_id || ref.url || (index + 1);
-				value = String(source) + ':' + String(sourceId);
-			}
-			if (value && ids.indexOf(value) === -1) {
-				ids.push(String(value).slice(0, 191));
-			}
-		});
-		return ids.slice(0, 24);
-	}
-
-	function siteKnowledgeAgentFeedbackPayload(handoff, outcome, labels) {
-		const proposalInput = handoff && handoff.proposal_input && typeof handoff.proposal_input === 'object' ? handoff.proposal_input : {};
-		const agentId = handoff.agent_id || proposalInput.agent_id || 'site_knowledge_suggestion_agent';
-		const handoffType = handoff.handoff_type || 'proposal_input';
-		const handoffId = handoff.handoff_id || [
-			'site_knowledge',
-			agentId,
-			handoff.workflow || proposalInput.workflow || '',
-			handoff.local_next_action || proposalInput.local_next_action || '',
-			handoff.evidence_count || siteKnowledgeEvidenceRefIds(handoff).length
-		].join(':');
-
-		return {
-			contract_version: 'cloud_agent_feedback.v1',
-			agent_id: agentId,
-			agent_version: handoff.agent_version || proposalInput.agent_version || '',
-			source_runtime: 'site_knowledge',
-			source_run_id: handoff.source_run_id || handoff.run_id || '',
-			handoff_id: handoffId,
-			handoff_type: handoffType,
-			local_surface: 'toolbox_site_knowledge',
-			local_outcome: outcome,
-			feedback_labels: labels,
-			operator_note: '',
-			local_proposal_id: '',
-			evidence_ref_ids: siteKnowledgeEvidenceRefIds(handoff),
-			redaction_status: 'metadata_only',
-			retention_class: 'quality_eval',
-			created_at: new Date().toISOString(),
-			handoff: handoff || {}
-		};
-	}
-
-	async function submitSiteKnowledgeAgentFeedback(statusNode, handoff, button, outcome, labels) {
-		const originalText = button ? button.textContent : '';
-		const root = button ? button.closest('[data-toolbox-site-knowledge]') : null;
-		if (button) {
-			button.disabled = true;
-			button.textContent = 'Sending...';
-		}
-		statusNode.className = 'npcink-toolbox__result-notice is-pending';
-		statusNode.textContent = 'Sending feedback to Cloud eval...';
-
-		try {
-			const receipt = await postJson(config.restUrl, 'agent-feedback', siteKnowledgeAgentFeedbackPayload(handoff, outcome, labels));
-			statusNode.className = 'npcink-toolbox__result-notice is-ok';
-			statusNode.textContent = receipt && receipt.accepted_for_eval
-				? 'Feedback accepted for Cloud eval. WordPress approval and writes remain local.'
-				: 'Feedback sent. WordPress approval and writes remain local.';
-			if (root) {
-				refreshAgentFeedbackSummary(root).catch(() => {});
-			}
-		} catch (error) {
-			statusNode.className = 'npcink-toolbox__result-notice is-error';
-			statusNode.textContent = (error && error.message ? error.message : 'Could not send Agent feedback.') + ' WordPress approval and writes remain local.';
-		} finally {
-			if (button) {
-				button.disabled = false;
-				button.textContent = originalText;
-			}
-		}
-	}
-
-	function appendSiteKnowledgeAgentFeedbackControls(section, handoff) {
-		const feedback = el('div', 'npcink-toolbox__result-feedback');
-		feedback.setAttribute('data-toolbox-site-knowledge-agent-feedback', 'true');
-		feedback.setAttribute('data-toolbox-agent-feedback-quick', 'true');
-		feedback.appendChild(el('h4', '', 'Quick Agent feedback'));
-		const actions = el('div', 'npcink-toolbox__result-actions');
-		const status = el('div', 'npcink-toolbox__result-notice is-pending', 'Feedback updates Cloud eval only. Core approval, preflight, and final WordPress writes stay local.');
-		const options = [
-			{ label: 'Useful', outcome: 'accepted', labels: ['evidence_useful', 'operator_confidence_high'] },
-			{ label: 'Edited and accepted', outcome: 'edited_before_accept', labels: ['evidence_useful', 'good_but_needs_human_draft'] },
-			{ label: 'Evidence weak', outcome: 'rejected', labels: ['evidence_weak', 'operator_confidence_low'] },
-			{ label: 'Wrong next step', outcome: 'rejected', labels: ['wrong_next_step'] },
-			{ label: 'Missing context', outcome: 'rejected', labels: ['missing_context', 'operator_confidence_low'] },
-			{ label: 'Not relevant', outcome: 'rejected', labels: ['not_relevant_to_site'] }
-		];
-		options.forEach((option) => {
-			const button = el('button', 'button', option.label);
-			button.type = 'button';
-			button.title = 'Send metadata-only Agent feedback to Cloud eval.';
-			button.setAttribute('data-toolbox-agent-feedback-outcome', option.outcome);
-			button.setAttribute('data-toolbox-agent-feedback-labels', option.labels.join(','));
-			button.addEventListener('click', () => submitSiteKnowledgeAgentFeedback(status, handoff, button, option.outcome, option.labels));
-			actions.appendChild(button);
-		});
-		feedback.appendChild(actions);
-		feedback.appendChild(status);
-		section.appendChild(feedback);
-	}
-
-	function imageAgentFeedbackEvidenceRefIds(payload) {
-		const images = Array.isArray(payload && payload.images) ? payload.images : [];
-		const ids = [];
-		images.slice(0, 12).forEach((image, index) => {
-			if (!image || typeof image !== 'object') {
-				return;
-			}
-			const provider = String(image.provider || payload.provider_mode || payload.resolved_provider || 'image').trim();
-			const sourceType = String(image.source_type || payload.provider_mode || 'candidate').trim();
-			const id = String(image.id || image.asset_id || image.suggested_filename || (index + 1)).trim();
-			const value = ['image', sourceType, provider, id].filter(Boolean).join(':').slice(0, 191);
-			if (value && ids.indexOf(value) === -1) {
-				ids.push(value);
-			}
-		});
-		if (!ids.length && payload && payload.run_id) {
-			ids.push(String('image_run:' + payload.run_id).slice(0, 191));
-		}
-		return ids.slice(0, 24);
-	}
-
-	function imageAgentFeedbackPayload(payload, localSurface, outcome, labels) {
-		const count = Array.isArray(payload && payload.images) ? payload.images.length : 0;
-		const surface = localSurface || 'toolbox_image_candidates';
-		const sourceRuntime = surface === 'toolbox_ai_image_generation' ? 'ai_image_generation' : 'image_candidates';
-		const runId = payload && payload.run_id ? String(payload.run_id) : '';
-		const handoffId = [
-			sourceRuntime,
-			payload && payload.provider_mode ? payload.provider_mode : '',
-			payload && payload.resolved_provider ? payload.resolved_provider : '',
-			runId || String(count)
-		].filter(Boolean).join(':') || sourceRuntime;
-
-		return {
-			contract_version: 'cloud_agent_feedback.v1',
-			agent_id: surface === 'toolbox_ai_image_generation' ? 'ai_image_generation_candidate_agent' : 'image_source_candidate_agent',
-			agent_version: payload && payload.candidate_contract_version ? String(payload.candidate_contract_version) : '',
-			source_runtime: sourceRuntime,
-			source_run_id: runId,
-			handoff_id: handoffId,
-			handoff_type: 'image_candidate_result',
-			local_surface: surface,
-			local_outcome: outcome,
-			feedback_labels: labels,
-			operator_note: '',
-			local_proposal_id: '',
-			evidence_ref_ids: imageAgentFeedbackEvidenceRefIds(payload || {}),
-			redaction_status: 'metadata_only',
-			retention_class: 'quality_eval',
-			created_at: new Date().toISOString()
-		};
-	}
-
-	function refreshVisibleAgentFeedbackSummaries() {
-		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
-			refreshAgentFeedbackSummary(root).catch(() => {});
-		});
-	}
-
-	async function submitImageAgentFeedback(statusNode, payload, localSurface, button, outcome, labels) {
-		const originalText = button ? button.textContent : '';
-		if (button) {
-			button.disabled = true;
-			button.textContent = 'Sending...';
-		}
-		statusNode.className = 'npcink-toolbox__result-notice is-pending';
-		statusNode.textContent = 'Sending image feedback to Cloud eval...';
-
-		try {
-			const receipt = await postJson(config.restUrl, 'agent-feedback', imageAgentFeedbackPayload(payload, localSurface, outcome, labels));
-			statusNode.className = 'npcink-toolbox__result-notice is-ok';
-			statusNode.textContent = receipt && receipt.accepted_for_eval
-				? 'Image feedback accepted for Cloud eval. WordPress media import and writes remain local.'
-				: 'Image feedback sent. WordPress media import and writes remain local.';
-			refreshVisibleAgentFeedbackSummaries();
-		} catch (error) {
-			statusNode.className = 'npcink-toolbox__result-notice is-error';
-			statusNode.textContent = (error && error.message ? error.message : 'Could not send image feedback.') + ' WordPress media import and writes remain local.';
-		} finally {
-			if (button) {
-				button.disabled = false;
-				button.textContent = originalText;
-			}
-		}
-	}
-
-	function appendImageAgentFeedbackControls(section, payload, localSurface) {
-		const feedback = el('div', 'npcink-toolbox__result-feedback');
-		feedback.setAttribute('data-toolbox-image-agent-feedback', 'true');
-		feedback.setAttribute('data-toolbox-agent-feedback-quick', 'true');
-		feedback.appendChild(el('h4', '', 'Quick image feedback'));
-		const actions = el('div', 'npcink-toolbox__result-actions');
-		const status = el('div', 'npcink-toolbox__result-notice is-pending', 'Feedback updates Cloud eval only. Core approval, media import, and final WordPress writes stay local.');
-		const options = [
-			{ label: 'Useful candidates', outcome: 'accepted', labels: ['evidence_useful', 'operator_confidence_high'] },
-			{ label: 'Adoption planned', outcome: 'accepted', labels: ['evidence_useful', 'good_but_needs_human_draft'] },
-			{ label: 'Low visual quality', outcome: 'rejected', labels: ['visual_quality_low', 'operator_confidence_low'] },
-			{ label: 'Source risk', outcome: 'rejected', labels: ['source_or_license_risk', 'operator_confidence_low'] },
-			{ label: 'Not relevant', outcome: 'rejected', labels: ['not_relevant_to_site'] }
-		];
-		options.forEach((option) => {
-			const button = el('button', 'button', option.label);
-			button.type = 'button';
-			button.title = 'Send metadata-only image feedback to Cloud eval.';
-			button.setAttribute('data-toolbox-image-feedback-outcome', option.outcome);
-			button.setAttribute('data-toolbox-image-feedback-labels', option.labels.join(','));
-			button.addEventListener('click', () => submitImageAgentFeedback(status, payload, localSurface, button, option.outcome, option.labels));
-			actions.appendChild(button);
-		});
-		feedback.appendChild(actions);
-		feedback.appendChild(status);
-		section.appendChild(feedback);
-	}
-
 	async function submitSiteKnowledgeReviewProposal(container, handoff, button) {
 		const form = container.closest('form');
 		if (!form) {
@@ -1359,7 +1131,6 @@
 				actions.appendChild(createLink(config.coreAdminUrl, 'Open Core review'));
 			}
 			section.appendChild(actions);
-			appendSiteKnowledgeAgentFeedbackControls(section, handoff);
 		}
 		if (handoff.proposal_input && typeof handoff.proposal_input === 'object' && Object.keys(handoff.proposal_input).length) {
 			const proposalInput = handoff.proposal_input;
@@ -1448,11 +1219,6 @@
 
 		result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Cloud returned image candidates only. Media import still requires editor image adoption and Core approval.'));
 		renderImageList(result, payload.images);
-		appendImageAgentFeedbackControls(
-			result,
-			payload,
-			payload.provider_mode === 'ai_generated' ? 'toolbox_ai_image_generation' : 'toolbox_image_candidates'
-		);
 		appendAiImageGenerationHandoff(form, result, payload);
 		if (payload.raw) {
 			result.appendChild(createRawDetails(payload.raw, 'Provider raw response'));
@@ -1567,126 +1333,6 @@
 	function siteKnowledgeProgressMessage(message) {
 		const text = String(message || '').trim();
 		return text ? t(text) : '';
-	}
-
-	function formatRate(value) {
-		const number = Number(value);
-		if (!Number.isFinite(number)) {
-			return '';
-		}
-		return Math.round(number * 1000) / 10 + '%';
-	}
-
-	function renderAgentFeedbackSummaryNode(container, payload) {
-		const outcomes = payload && payload.outcomes && typeof payload.outcomes === 'object' ? payload.outcomes : {};
-		const labels = payload && payload.labels && typeof payload.labels === 'object' ? payload.labels : {};
-		const rates = payload && payload.rates && typeof payload.rates === 'object' ? payload.rates : {};
-		const total = Number(payload && payload.events_total ? payload.events_total : 0);
-		clearNode(container);
-
-		container.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Agent feedback summary: ' + total + ' event' + (total === 1 ? '' : 's')));
-		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Window', payload && payload.window_hours ? String(payload.window_hours) + 'h' : '');
-		appendMeta(meta, 'Accepted', outcomes.accepted || outcomes.edited_before_accept ? String(Number(outcomes.accepted || 0) + Number(outcomes.edited_before_accept || 0)) : '');
-		appendMeta(meta, 'Rejected', outcomes.rejected);
-		appendMeta(meta, 'Ignored', outcomes.ignored);
-		appendMeta(meta, 'Accepted rate', formatRate(rates.accepted_rate));
-		appendMeta(meta, 'Evidence useful', formatRate(rates.evidence_useful_rate));
-		appendMeta(meta, 'Evidence weak', formatRate(rates.evidence_weak_rate));
-		appendMeta(meta, 'Wrong next step', formatRate(rates.wrong_next_step_rate));
-		appendMeta(meta, 'Write truth', payload && payload.final_write_truth ? formatLabel(payload.final_write_truth) : '');
-		if (meta.childNodes.length) {
-			container.appendChild(meta);
-		}
-
-		const importantLabels = ['evidence_useful', 'evidence_weak', 'wrong_next_step', 'wrong_priority', 'already_handled', 'missing_context', 'visual_quality_low', 'source_or_license_risk', 'operator_confidence_high', 'operator_confidence_low'];
-		const labelItems = importantLabels
-			.filter((label) => Number(labels[label] || 0) > 0)
-			.map((label) => ({ name: formatLabel(label), value: labels[label] }));
-		if (labelItems.length) {
-			renderSupportItems(container, 'Feedback labels', labelItems, 'No feedback labels returned.');
-		}
-
-		const lowQualityItems = Array.isArray(payload && payload.low_quality_labels) ? payload.low_quality_labels : [];
-		if (lowQualityItems.length) {
-			renderSupportItems(
-				container,
-				'Low quality labels',
-				lowQualityItems.map((item) => ({
-					name: formatLabel(item.label || ''),
-					value: item.count,
-				})),
-				'No low quality labels returned.'
-			);
-		}
-
-		const rejectedItems = Array.isArray(payload && payload.rejection_reasons) ? payload.rejection_reasons : [];
-		if (rejectedItems.length) {
-			renderSupportItems(
-				container,
-				'Rejected reasons',
-				rejectedItems.map((item) => ({
-					name: formatLabel(item.label || ''),
-					value: item.count,
-				})),
-				'No rejected reasons returned.'
-			);
-		}
-
-		const nightly = payload && payload.nightly_inspection && typeof payload.nightly_inspection === 'object' ? payload.nightly_inspection : {};
-		if (Number(nightly.events_total || 0) > 0) {
-			const nightlyMeta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(nightlyMeta, 'Nightly events', nightly.events_total);
-			appendMeta(nightlyMeta, 'Action feedback', nightly.action_feedback_total);
-			appendMeta(nightlyMeta, 'Avg source score', nightly.average_source_score);
-			appendMeta(nightlyMeta, 'Wrong priority', nightly.rates && nightly.rates.wrong_priority_rate !== undefined ? formatRate(nightly.rates.wrong_priority_rate) : '');
-			appendMeta(nightlyMeta, 'Already handled', nightly.rates && nightly.rates.already_handled_rate !== undefined ? formatRate(nightly.rates.already_handled_rate) : '');
-			if (nightlyMeta.childNodes.length) {
-				const section = createSection('Nightly Inspection feedback');
-				section.appendChild(nightlyMeta);
-				const rejectedReasonCodes = Array.isArray(nightly.rejected_reason_codes) ? nightly.rejected_reason_codes : [];
-				if (rejectedReasonCodes.length) {
-					renderSupportItems(
-						section,
-						'Rejected reason codes',
-						rejectedReasonCodes.map((item) => ({
-							name: formatLabel(item.label || ''),
-							value: item.count,
-						})),
-						'No rejected reason codes returned.'
-					);
-				}
-				container.appendChild(section);
-			}
-		}
-
-		const scenarios = Array.isArray(payload && payload.scenarios) ? payload.scenarios : [];
-		if (scenarios.length) {
-			renderSupportItems(
-				container,
-				'Scenarios',
-				scenarios.slice(0, 4).map((item) => ({
-					name: formatLabel(item.local_surface || item.source_runtime || 'Scenario'),
-					value: (item.events_total || 0) + ' events',
-					reason: 'Accepted ' + formatRate(item.accepted_rate) + ' · Weak evidence ' + formatRate(item.evidence_weak_rate) + ' · Wrong next step ' + formatRate(item.wrong_next_step_rate),
-				})),
-				'No scenario summary returned.'
-			);
-		}
-
-		const trend = Array.isArray(payload && payload.quality_trend) ? payload.quality_trend : [];
-		if (trend.length) {
-			renderSupportItems(
-				container,
-				'Quality trend',
-				trend.slice(-6).map((item) => ({
-					name: formatDateTime(item.bucket || ''),
-					value: (item.events_total || 0) + ' events',
-					reason: 'Accepted ' + (item.accepted || 0) + ' · Rejected ' + (item.rejected || 0) + ' · Weak evidence ' + (item.evidence_weak || 0) + ' · Wrong next step ' + (item.wrong_next_step || 0),
-				})),
-				'No quality trend returned.'
-			);
-		}
 	}
 
 	function siteKnowledgeChangeBridgePayload(payload) {
@@ -5423,27 +5069,6 @@
 			renderSiteKnowledgeStatusNode(summary, payload);
 			summary.appendChild(createRawDetails(payload, 'Status payload'));
 		}
-		refreshAgentFeedbackSummary(root).catch((error) => {
-			const feedbackSummary = root.querySelector('[data-toolbox-agent-feedback-summary]');
-			if (feedbackSummary) {
-				clearNode(feedbackSummary);
-				feedbackSummary.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', error.message || 'Agent feedback summary is unavailable.'));
-				feedbackSummary.appendChild(createRawDetails(error, 'Agent feedback summary error'));
-			}
-		});
-		return payload;
-	}
-
-	async function refreshAgentFeedbackSummary(root) {
-		const summary = root.querySelector('[data-toolbox-agent-feedback-summary]');
-		if (!summary) {
-			return null;
-		}
-		clearNode(summary);
-		summary.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Loading Agent feedback summary...'));
-		const payload = await postJson(config.restUrl, 'agent-feedback/summary', { window_hours: 24 });
-		renderAgentFeedbackSummaryNode(summary, payload);
-		summary.appendChild(createRawDetails(payload, 'Agent feedback summary payload'));
 		return payload;
 	}
 
@@ -5945,93 +5570,6 @@
 		return cloudResult.morning_brief && typeof cloudResult.morning_brief === 'object' ? cloudResult.morning_brief : {};
 	}
 
-	function nightlyCloudFeedbackPayload(payload, item, outcome, labels) {
-		const cloudResult = nightlyCloudResultPayload(payload);
-		const runId = nightlyCloudRunIdFromPayload(payload) || String(cloudResult.run_id || '');
-		const reasonCodes = Array.isArray(item && item.reason_codes) ? item.reason_codes.map((reason) => String(reason || '')).filter(Boolean).slice(0, 12) : [];
-		const actionId = String((item && item.action_id) || '').slice(0, 191);
-		const objectType = String((item && item.object_type) || '').slice(0, 64);
-		const objectId = String((item && item.object_id) || '').slice(0, 191);
-		return {
-			contract_version: 'cloud_agent_feedback.v1',
-			agent_id: 'nightly_site_inspection_cloud_runtime',
-			agent_version: String(cloudResult.agent_version || 'nightly_inspection_cloud_runtime.v1'),
-			source_runtime: 'nightly_site_inspection',
-			source_run_id: runId,
-			handoff_id: actionId || ['nightly_site_inspection', objectType, objectId].filter(Boolean).join(':') || 'nightly_site_inspection',
-			handoff_type: 'morning_brief_priority',
-			local_surface: 'toolbox_nightly_inspection_morning_brief',
-			local_outcome: outcome,
-			feedback_labels: labels,
-			operator_note: '',
-			local_proposal_id: '',
-			evidence_ref_ids: [actionId, objectType && objectId ? objectType + ':' + objectId : '', runId ? 'run:' + runId : ''].filter(Boolean).slice(0, 24),
-			source_action_id: actionId,
-			source_object_type: objectType,
-			source_object_id: objectId,
-			source_reason_codes: reasonCodes,
-			source_score: Number.isFinite(Number(item && item.score)) ? Number(item.score) : null,
-			source_severity: String((item && item.severity) || ''),
-			redaction_status: 'metadata_only',
-			retention_class: 'quality_eval',
-			created_at: new Date().toISOString()
-		};
-	}
-
-	async function submitNightlyCloudFeedback(statusNode, payload, item, button, outcome, labels) {
-		const originalText = button ? button.textContent : '';
-		if (button) {
-			button.disabled = true;
-			button.textContent = 'Sending...';
-		}
-		statusNode.className = 'npcink-toolbox__result-notice is-pending';
-		statusNode.textContent = 'Sending scheduled review feedback to Cloud eval...';
-		try {
-			const receipt = await postJson(config.restUrl, 'agent-feedback', nightlyCloudFeedbackPayload(payload, item, outcome, labels));
-			statusNode.className = 'npcink-toolbox__result-notice is-ok';
-			statusNode.textContent = receipt && receipt.accepted_for_eval
-				? 'Scheduled review feedback accepted for Cloud eval. WordPress approval and writes remain local.'
-				: 'Scheduled review feedback sent. WordPress approval and writes remain local.';
-			refreshVisibleAgentFeedbackSummaries();
-		} catch (error) {
-			statusNode.className = 'npcink-toolbox__result-notice is-error';
-			statusNode.textContent = (error && error.message ? error.message : 'Could not send scheduled review feedback.') + ' WordPress approval and writes remain local.';
-		} finally {
-			if (button) {
-				button.disabled = false;
-				button.textContent = originalText;
-			}
-		}
-	}
-
-	function appendNightlyCloudFeedbackControls(container, payload, item) {
-		const feedback = el('div', 'npcink-toolbox__result-feedback');
-		feedback.setAttribute('data-toolbox-nightly-agent-feedback', 'true');
-		feedback.setAttribute('data-toolbox-agent-feedback-quick', 'true');
-		feedback.appendChild(el('h4', '', 'Scheduled review feedback'));
-		const actions = el('div', 'npcink-toolbox__result-actions');
-		const status = el('div', 'npcink-toolbox__result-notice is-pending', 'Feedback updates Cloud eval only. Core approval, preflight, and final WordPress writes stay local.');
-		const options = [
-			{ label: 'Useful', outcome: 'accepted', labels: ['evidence_useful', 'operator_confidence_high'] },
-			{ label: 'Wrong priority', outcome: 'rejected', labels: ['wrong_priority', 'operator_confidence_low'] },
-			{ label: 'Already handled', outcome: 'rejected', labels: ['already_handled'] },
-			{ label: 'Evidence weak', outcome: 'rejected', labels: ['evidence_weak', 'operator_confidence_low'] },
-			{ label: 'Wrong next step', outcome: 'rejected', labels: ['wrong_next_step'] }
-		];
-		options.forEach((option) => {
-			const button = el('button', 'button button-small', option.label);
-			button.type = 'button';
-			button.title = 'Send metadata-only scheduled review feedback to Cloud eval.';
-			button.setAttribute('data-toolbox-nightly-feedback-outcome', option.outcome);
-			button.setAttribute('data-toolbox-nightly-feedback-labels', option.labels.join(','));
-			button.addEventListener('click', () => submitNightlyCloudFeedback(status, payload, item, button, option.outcome, option.labels));
-			actions.appendChild(button);
-		});
-		feedback.appendChild(actions);
-		feedback.appendChild(status);
-		container.appendChild(feedback);
-	}
-
 	function renderNightlyCloudMorningBrief(result, payload) {
 		const brief = nightlyCloudMorningBriefV2(payload);
 		const priorityQueue = Array.isArray(brief.priority_queue) ? brief.priority_queue : [];
@@ -6087,7 +5625,6 @@
 				if (itemMeta.childNodes.length) {
 					row.appendChild(itemMeta);
 				}
-				appendNightlyCloudFeedbackControls(row, payload, item);
 				list.appendChild(row);
 			});
 			section.appendChild(list);

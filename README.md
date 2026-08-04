@@ -33,15 +33,21 @@ The first version provides:
   confirmed plain-text draft preview, one explicit Core proposal handoff for a
   new WordPress `draft`, and optional empty-body-only Gutenberg loading that
   remains unsaved until the author's native WordPress action,
-  publish preflight, internal-link
-  candidates, current-article contextual ALT review, image candidates, and
-  article audio candidates. Generic title, summary, taxonomy/tag, outline, and
+  publish preflight, direct existing-category and existing-tag suggestions,
+  internal-link candidates, current-article contextual ALT review, and image
+  candidates.
+  Article narration and audio summary remain callable compatibility flows but
+  are temporarily hidden from the default menu. Generic title, summary,
+  broader taxonomy workflow, outline, and
   article-checkup support remains available through compatible route/rendering paths, plus
   selected-paragraph toolbar checks that do not replace body text;
-- the URL-writing path stays compact by default: URL, source-body readiness,
-  direction confirmation, draft review, and optional empty-editor loading.
-  Metadata/navigation-only extraction stops before planning; brief and evidence
-  details stay under optional or advanced disclosure;
+- the operator-facing **Draft from source materials** entry stays compact in
+  the sidebar and opens one three-step work modal: provide a URL or brief,
+  confirm the writing direction, then review the draft. Source previews,
+  related-site evidence, runtime detail, fact risk, and rights detail stay under
+  compact lists or explicit disclosure.
+  Metadata/navigation-only extraction stops before planning; optional
+  empty-editor loading remains a separate reviewed action;
 - a frontend article audio playback entry that renders only already adopted
   WordPress audio metadata near single posts; Cloud generation remains a
   candidate artifact path, and Toolbox may prepare a Core-governed article
@@ -181,7 +187,7 @@ expect to stay discoverable from the root README:
 The default button coverage gate is machine-readable in
 [Fixed Button Contract Table](docs/fixed-button-contract-table.json). It records
 the runtime owner, write lane, handoff owner, and current Adapter parity status
-for all ten default buttons; partial parity is reported
+for all twelve committed buttons; partial parity is reported
 rather than hidden. New default editor flows must add their own contract row.
 
 ### Boundary Exceptions Only
@@ -488,8 +494,9 @@ no active external-draft import workflow.
 
 The post editor also exposes **Npcink Content Support** as a plugin sidebar
 opened from the editor top toolbar. Its visible buttons run fixed Npcink flows
-for publish preflight, internal-link candidates, image-source candidates, and
-article audio candidates from the current draft context. Generic title,
+for publish preflight, internal-link candidates, and image-source candidates
+from the current draft context. Article narration and audio summary remain
+callable but are temporarily hidden from the default menu. Generic title,
 summary, category, tag, outline, article-checkup, discoverability,
 current-article ALT, and comment-reply support remains available through
 compatible REST/result-rendering paths, but those entries are not default
@@ -651,8 +658,9 @@ history.
 
 The post editor **Npcink Content Support** sidebar owns high-frequency Npcink
 review and handoff actions because those actions need the current article
-context: publish preflight, internal-link candidates, image candidates, and
-article audio candidates. Generic writing, metadata, article-checkup,
+context: publish preflight, internal-link candidates, and image candidates.
+Article narration and audio summary remain callable but temporarily hidden.
+Generic writing, metadata, article-checkup,
 discoverability, comment, and current-article ALT capabilities stay available
 as compatible route-only or result-rendering paths rather than default visible
 buttons. The admin
@@ -669,8 +677,9 @@ or an explicit selected review set. In all cases, Toolbox samples only the
 supplied public-site or media metadata, Cloud produces reviewable suggestions,
 and no media library, post, SEO, proposal, crawler, or queue state is changed
 locally.
-Publish preflight, internal-link candidates, image candidates, and article
-audio candidates are the default editor sidebar buttons. Summary suggestions,
+Publish preflight, internal-link candidates, and image candidates are the
+default editor sidebar buttons. Article narration and audio summary remain
+callable compatibility flows but are temporarily hidden. Summary suggestions,
 category suggestions, tag suggestions, article checkup, discoverability, and
 current-article ALT checks stay route-compatible but are demoted from the
 default button list to avoid duplicating generic AI plugin features.
