@@ -206,13 +206,17 @@ final class Settings {
 				$background_alpha = max( 0, min( 100, absint( $template['background_opacity'] ?? 35 ) ) ) / 100;
 				$background = sprintf( 'rgba(%d,%d,%d,%.2F)', (int) $background_rgb[0], (int) $background_rgb[1], (int) $background_rgb[2], $background_alpha );
 			}
+			$attachment_id = absint( $template['attachment_id'] ?? 0 );
+			if ( $attachment_id > 0 && function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) {
+				$attachment_id = 0;
+			}
 
 			$templates[] = array(
 				'id'            => $id,
 				'label'         => $name,
 				'type'          => $type,
 				'text'          => $text,
-				'attachment_id' => absint( $template['attachment_id'] ?? 0 ),
+				'attachment_id' => $attachment_id,
 				'position'      => $position,
 				'opacity'       => max( 0, min( 100, absint( $template['opacity'] ?? 80 ) ) ),
 				'scale'         => max( 1, min( 100, absint( $template['scale'] ?? 20 ) ) ),
@@ -224,7 +228,11 @@ final class Settings {
 		}
 
 		$allowed_defaults = array( 'none', 'toolbox_default', 'subtle_text', 'prominent_text', 'logo_corner' );
-		$allowed_defaults = array_merge( $allowed_defaults, array_column( $templates, 'id' ) );
+		foreach ( $templates as $template ) {
+			if ( 'image' !== (string) ( $template['type'] ?? '' ) || absint( $template['attachment_id'] ?? 0 ) > 0 ) {
+				$allowed_defaults[] = (string) $template['id'];
+			}
+		}
 		$default_template = sanitize_key( (string) ( $input['default_template'] ?? 'toolbox_default' ) );
 		if ( ! in_array( $default_template, $allowed_defaults, true ) ) {
 			$default_template = 'toolbox_default';

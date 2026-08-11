@@ -640,6 +640,10 @@
       "Use logo": ["使用此 Logo"],
       "Choose preview image": ["选择预览图片"],
       "Use image": ["使用此图片"],
+      "custom templates": ["个自定义模板"],
+      "Unsaved changes": ["有未保存的更改"],
+      "Copy of %s": ["%s 的副本"],
+      "Template removed. Save to apply: %s": ["已移除模板，保存后生效：%s"],
       "Normal": ["正常"],
       ", ": ["，"],
       " | ": ["｜"]

@@ -6936,6 +6936,27 @@
 			url.searchParams.set(key, value);
 		});
 		window.history.replaceState({}, '', url.toString());
+		document.querySelectorAll('form[action="options.php"]').forEach(syncSettingsFormReturnUrl);
+	}
+
+	function syncSettingsFormReturnUrl(form) {
+		if (!(form instanceof HTMLFormElement)) {
+			return;
+		}
+		const referer = form.querySelector('input[name="_wp_http_referer"]');
+		if (!(referer instanceof HTMLInputElement)) {
+			return;
+		}
+		const url = new URL(window.location.href);
+		url.searchParams.delete('settings-updated');
+		referer.value = url.pathname + url.search;
+	}
+
+	function initSettingsFormReturnUrls() {
+		document.querySelectorAll('form[action="options.php"]').forEach((form) => {
+			syncSettingsFormReturnUrl(form);
+			form.addEventListener('submit', () => syncSettingsFormReturnUrl(form));
+		});
 	}
 
 	function toolGroupForTool(workspace, target) {
@@ -7521,6 +7542,75 @@
 		return editor.querySelector('[data-template-field="' + key + '"]');
 	}
 
+	function activeWatermarkTemplateEditors(library) {
+		return Array.from(library.querySelectorAll('[data-toolbox-watermark-template-editor]'))
+			.filter((editor) => editor.getAttribute('data-pending-delete') !== '1');
+	}
+
+	function watermarkAttachmentPreviewUrl(attachment, preferredSizes) {
+		const sizes = attachment && attachment.sizes && typeof attachment.sizes === 'object' ? attachment.sizes : {};
+		for (let index = 0; index < preferredSizes.length; index += 1) {
+			const candidate = sizes[preferredSizes[index]];
+			if (candidate && candidate.url) {
+				return String(candidate.url);
+			}
+		}
+		return attachment && attachment.url ? String(attachment.url) : '';
+	}
+
+	function markWatermarkLibraryDirty(library) {
+		library.setAttribute('data-dirty', '1');
+		const status = library.querySelector('[data-toolbox-watermark-save-status]');
+		const discard = library.querySelector('[data-toolbox-watermark-discard]');
+		if (status) {
+			status.textContent = t('Unsaved changes');
+		}
+		if (discard instanceof HTMLButtonElement) {
+			discard.hidden = false;
+		}
+	}
+
+	function updateWatermarkLibraryLimits(library) {
+		const count = activeWatermarkTemplateEditors(library).length;
+		const max = Math.max(1, parseInt(library.getAttribute('data-max-templates') || '20', 10) || 20);
+		const countLabel = library.querySelector('[data-toolbox-watermark-template-count]');
+		if (countLabel) {
+			countLabel.textContent = String(count) + '/' + String(max) + ' ' + t('custom templates');
+		}
+		library.querySelectorAll('[data-toolbox-add-watermark-template], [data-toolbox-copy-watermark-template]').forEach((button) => {
+			if (button instanceof HTMLButtonElement) {
+				button.disabled = count >= max;
+			}
+		});
+		return count < max;
+	}
+
+	function updateWatermarkTemplateWarnings(library) {
+		const editors = activeWatermarkTemplateEditors(library);
+		const nameCounts = new Map();
+		editors.forEach((editor) => {
+			const label = watermarkTemplateEditorField(editor, 'label');
+			const normalized = label instanceof HTMLInputElement ? label.value.trim().toLocaleLowerCase() : '';
+			if (normalized) {
+				nameCounts.set(normalized, (nameCounts.get(normalized) || 0) + 1);
+			}
+		});
+		editors.forEach((editor) => {
+			const label = watermarkTemplateEditorField(editor, 'label');
+			const normalized = label instanceof HTMLInputElement ? label.value.trim().toLocaleLowerCase() : '';
+			const nameWarning = editor.querySelector('[data-template-name-warning]');
+			if (nameWarning) {
+				nameWarning.hidden = !normalized || (nameCounts.get(normalized) || 0) < 2;
+			}
+			const type = watermarkTemplateEditorField(editor, 'type');
+			const attachment = watermarkTemplateEditorField(editor, 'attachment_id');
+			const logoWarning = editor.querySelector('[data-template-logo-warning]');
+			if (logoWarning) {
+				logoWarning.hidden = !(type instanceof HTMLSelectElement && type.value === 'image') || (attachment instanceof HTMLInputElement && parseInt(attachment.value || '0', 10) > 0 && Boolean(editor.dataset.logoUrl));
+			}
+		});
+	}
+
 	function watermarkTemplateEditorDefinition(editor) {
 		const value = (key, fallback) => {
 			const field = watermarkTemplateEditorField(editor, key);
@@ -7550,8 +7640,9 @@
 	}
 
 	function reindexWatermarkTemplateEditors(library) {
-		library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((editor, index) => {
+		activeWatermarkTemplateEditors(library).forEach((editor, index) => {
 			editor.querySelectorAll('[name]').forEach((field) => {
+				field.disabled = false;
 				field.name = String(field.name || '').replace(/\[custom_templates\]\[\d+\]/, '[custom_templates][' + index + ']');
 			});
 		});
@@ -7564,7 +7655,7 @@
 		}
 		const selected = select.value;
 		select.querySelectorAll('[data-user-watermark-option]').forEach((option) => option.remove());
-		library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((editor) => {
+		activeWatermarkTemplateEditors(library).forEach((editor) => {
 			const idField = watermarkTemplateEditorField(editor, 'id');
 			const labelField = watermarkTemplateEditorField(editor, 'label');
 			if (!(idField instanceof HTMLInputElement) || !(labelField instanceof HTMLInputElement)) {
@@ -7574,13 +7665,44 @@
 			option.value = idField.value;
 			option.textContent = labelField.value.trim() || t('New template');
 			option.setAttribute('data-user-watermark-option', '1');
-			option.setAttribute('data-watermark-definition', JSON.stringify(watermarkTemplateEditorDefinition(editor)));
+			const definition = watermarkTemplateEditorDefinition(editor);
+			option.setAttribute('data-watermark-definition', JSON.stringify(definition));
 			if (editor.dataset.logoUrl) {
 				option.setAttribute('data-watermark-logo-url', editor.dataset.logoUrl);
 			}
+			if (definition.watermark.type === 'image' && !definition.watermark_attachment_id) {
+				option.disabled = true;
+				option.setAttribute('data-watermark-logo-missing', '1');
+			}
 			select.appendChild(option);
 		});
-		select.value = Array.from(select.options).some((option) => option.value === selected) ? selected : 'toolbox_default';
+		select.value = Array.from(select.options).some((option) => option.value === selected && !option.disabled) ? selected : 'toolbox_default';
+	}
+
+	function renderWatermarkLibraryDefinition(library, definition, label, logoUrl) {
+		const effect = library.querySelector('[data-toolbox-watermark-library-effect]');
+		const previewName = library.querySelector('[data-toolbox-watermark-preview-name]');
+		if (effect) {
+			if (definition && definition.watermark) {
+				renderWatermarkEffect(effect, definition.watermark, String(logoUrl || ''));
+			} else {
+				clearNode(effect);
+			}
+		}
+		if (previewName) {
+			previewName.textContent = String(label || '').trim() || t('No watermark effect');
+		}
+	}
+
+	function renderWatermarkLibraryOption(library, option) {
+		if (!(option instanceof HTMLOptionElement)) {
+			return;
+		}
+		let definition = null;
+		try {
+			definition = JSON.parse(String(option.getAttribute('data-watermark-definition') || ''));
+		} catch (error) {}
+		renderWatermarkLibraryDefinition(library, definition, option.textContent, option.getAttribute('data-watermark-logo-url'));
 	}
 
 	function syncWatermarkTemplateEditor(library, editor, preview) {
@@ -7610,16 +7732,16 @@
 			}
 		});
 		if (preview) {
-			const effect = library.querySelector('[data-toolbox-watermark-library-effect]');
-			const previewName = library.querySelector('[data-toolbox-watermark-preview-name]');
-			if (effect) {
-				renderWatermarkEffect(effect, watermarkTemplateEditorDefinition(editor).watermark, String(editor.dataset.logoUrl || ''));
-			}
-			if (previewName) {
-				previewName.textContent = labelField instanceof HTMLInputElement && labelField.value.trim() ? labelField.value.trim() : t('New template');
-			}
+			renderWatermarkLibraryDefinition(
+				library,
+				watermarkTemplateEditorDefinition(editor),
+				labelField instanceof HTMLInputElement && labelField.value.trim() ? labelField.value.trim() : t('New template'),
+				editor.dataset.logoUrl
+			);
 		}
 		syncWatermarkLibraryDefaultOptions(library);
+		updateWatermarkTemplateWarnings(library);
+		updateWatermarkLibraryLimits(library);
 	}
 
 	function applyWatermarkDefinitionToEditor(editor, definition, label) {
@@ -7649,6 +7771,9 @@
 	}
 
 	function appendWatermarkTemplateEditor(library, definition, label) {
+		if (!updateWatermarkLibraryLimits(library)) {
+			return null;
+		}
 		const prototype = library.querySelector('[data-toolbox-watermark-template-prototype]');
 		const list = library.querySelector('[data-toolbox-custom-watermark-template-list]');
 		if (!(prototype instanceof HTMLTemplateElement) || !list) {
@@ -7665,7 +7790,7 @@
 		}
 		applyWatermarkDefinitionToEditor(editor, definition || { watermark: { type: 'text' } }, label || t('New template'));
 		list.appendChild(fragment);
-		library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((item) => {
+		activeWatermarkTemplateEditors(library).forEach((item) => {
 			item.open = item === editor;
 		});
 		const empty = library.querySelector('[data-toolbox-watermark-template-empty]');
@@ -7674,6 +7799,7 @@
 		}
 		reindexWatermarkTemplateEditors(library);
 		syncWatermarkTemplateEditor(library, editor, true);
+		markWatermarkLibraryDirty(library);
 		return editor;
 	}
 
@@ -7681,13 +7807,19 @@
 		document.querySelectorAll('[data-toolbox-watermark-library]').forEach((library) => {
 			reindexWatermarkTemplateEditors(library);
 			syncWatermarkLibraryDefaultOptions(library);
-			library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((editor) => syncWatermarkTemplateEditor(library, editor, false));
+			activeWatermarkTemplateEditors(library).forEach((editor) => syncWatermarkTemplateEditor(library, editor, false));
+			updateWatermarkTemplateWarnings(library);
+			updateWatermarkLibraryLimits(library);
+			const initialDefault = library.querySelector('[data-toolbox-watermark-library-default]');
+			if (initialDefault instanceof HTMLSelectElement) {
+				renderWatermarkLibraryOption(library, initialDefault.options[initialDefault.selectedIndex]);
+			}
 			library.addEventListener('toggle', (event) => {
 				const editor = event.target;
 				if (!(editor instanceof HTMLDetailsElement) || !editor.matches('[data-toolbox-watermark-template-editor]') || !editor.open) {
 					return;
 				}
-				library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((sibling) => {
+				activeWatermarkTemplateEditors(library).forEach((sibling) => {
 					if (sibling !== editor) {
 						sibling.open = false;
 					}
@@ -7698,32 +7830,20 @@
 				const editor = event.target instanceof Element ? event.target.closest('[data-toolbox-watermark-template-editor]') : null;
 				if (editor) {
 					syncWatermarkTemplateEditor(library, editor, true);
+					markWatermarkLibraryDirty(library);
 				}
 			});
 			library.addEventListener('change', (event) => {
 				const editor = event.target instanceof Element ? event.target.closest('[data-toolbox-watermark-template-editor]') : null;
 				if (editor) {
 					syncWatermarkTemplateEditor(library, editor, true);
+					markWatermarkLibraryDirty(library);
 					return;
 				}
 				const select = event.target;
 				if (select instanceof HTMLSelectElement && select.matches('[data-toolbox-watermark-library-default]')) {
-					const option = select.options[select.selectedIndex];
-					const effect = library.querySelector('[data-toolbox-watermark-library-effect]');
-					const previewName = library.querySelector('[data-toolbox-watermark-preview-name]');
-					try {
-						const definition = JSON.parse(String(option.getAttribute('data-watermark-definition') || ''));
-						if (effect && definition.watermark) {
-							renderWatermarkEffect(effect, definition.watermark, String(option.getAttribute('data-watermark-logo-url') || ''));
-						}
-					} catch (error) {
-						if (effect) {
-							clearNode(effect);
-						}
-					}
-					if (previewName) {
-						previewName.textContent = String(option.textContent || '').trim();
-					}
+					renderWatermarkLibraryOption(library, select.options[select.selectedIndex]);
+					markWatermarkLibraryDirty(library);
 				}
 			});
 			library.addEventListener('click', (event) => {
@@ -7741,18 +7861,79 @@
 					try {
 						definition = JSON.parse(String(copyButton.getAttribute('data-template-definition') || ''));
 					} catch (error) {}
-					appendWatermarkTemplateEditor(library, definition, t('Copy of') + ' ' + String(copyButton.getAttribute('data-template-label') || ''));
+					appendWatermarkTemplateEditor(library, definition, t('Copy of %s').replace('%s', String(copyButton.getAttribute('data-template-label') || '')));
+					return;
+				}
+				const presetPreviewButton = event.target.closest('[data-toolbox-preview-watermark-template]');
+				if (presetPreviewButton) {
+					let definition = null;
+					try {
+						definition = JSON.parse(String(presetPreviewButton.getAttribute('data-template-definition') || ''));
+					} catch (error) {}
+					renderWatermarkLibraryDefinition(library, definition, presetPreviewButton.getAttribute('data-template-label'), presetPreviewButton.getAttribute('data-template-logo-url'));
 					return;
 				}
 				const deleteButton = event.target.closest('[data-toolbox-delete-watermark-template]');
 				if (deleteButton) {
-					deleteButton.closest('[data-toolbox-watermark-template-editor]')?.remove();
+					const editor = deleteButton.closest('[data-toolbox-watermark-template-editor]');
+					if (!editor) {
+						return;
+					}
+					const label = watermarkTemplateEditorField(editor, 'label');
+					const id = watermarkTemplateEditorField(editor, 'id');
+					const defaultSelect = library.querySelector('[data-toolbox-watermark-library-default]');
+					library.__npcinkDeletedDefaultTemplate = defaultSelect instanceof HTMLSelectElement && id instanceof HTMLInputElement && defaultSelect.value === id.value ? id.value : '';
+					editor.setAttribute('data-pending-delete', '1');
+					editor.hidden = true;
+					editor.querySelectorAll('[name]').forEach((field) => { field.disabled = true; });
+					library.__npcinkDeletedWatermarkEditor = editor;
 					reindexWatermarkTemplateEditors(library);
 					syncWatermarkLibraryDefaultOptions(library);
 					const empty = library.querySelector('[data-toolbox-watermark-template-empty]');
 					if (empty) {
-						empty.hidden = library.querySelectorAll('[data-toolbox-watermark-template-editor]').length > 0;
+						empty.hidden = activeWatermarkTemplateEditors(library).length > 0;
 					}
+					const undo = library.querySelector('[data-toolbox-watermark-undo]');
+					if (undo) {
+						const message = undo.querySelector('span');
+						if (message) {
+							message.textContent = t('Template removed. Save to apply: %s').replace('%s', label instanceof HTMLInputElement ? label.value : '');
+						}
+						undo.hidden = false;
+					}
+					updateWatermarkTemplateWarnings(library);
+					updateWatermarkLibraryLimits(library);
+					markWatermarkLibraryDirty(library);
+					return;
+				}
+				const undoDelete = event.target.closest('[data-toolbox-watermark-undo-delete]');
+				if (undoDelete) {
+					const editor = library.__npcinkDeletedWatermarkEditor;
+					if (editor instanceof HTMLDetailsElement) {
+						editor.removeAttribute('data-pending-delete');
+						editor.hidden = false;
+						editor.open = true;
+						reindexWatermarkTemplateEditors(library);
+						syncWatermarkTemplateEditor(library, editor, true);
+						const defaultSelect = library.querySelector('[data-toolbox-watermark-library-default]');
+						if (defaultSelect instanceof HTMLSelectElement && library.__npcinkDeletedDefaultTemplate) {
+							defaultSelect.value = library.__npcinkDeletedDefaultTemplate;
+							renderWatermarkLibraryOption(library, defaultSelect.options[defaultSelect.selectedIndex]);
+						}
+					}
+					const undo = library.querySelector('[data-toolbox-watermark-undo]');
+					if (undo) {
+						undo.hidden = true;
+					}
+					library.__npcinkDeletedWatermarkEditor = null;
+					library.__npcinkDeletedDefaultTemplate = '';
+					markWatermarkLibraryDirty(library);
+					return;
+				}
+				const discardButton = event.target.closest('[data-toolbox-watermark-discard]');
+				if (discardButton) {
+					library.removeAttribute('data-dirty');
+					window.location.reload();
 					return;
 				}
 				const logoButton = event.target.closest('[data-toolbox-select-template-logo]');
@@ -7767,7 +7948,7 @@
 						const idField = watermarkTemplateEditorField(editor, 'attachment_id');
 						if (idField instanceof HTMLInputElement && attachment) {
 							idField.value = String(attachment.id || 0);
-							editor.dataset.logoUrl = String(attachment.url || '');
+							editor.dataset.logoUrl = watermarkAttachmentPreviewUrl(attachment, ['medium', 'thumbnail']);
 							const name = editor.querySelector('[data-template-logo-name]');
 							if (name) {
 								name.textContent = String(attachment.filename || ('#' + attachment.id));
@@ -7785,14 +7966,25 @@
 						const attachment = frame.state().get('selection').first()?.toJSON();
 						const image = library.querySelector('[data-toolbox-watermark-preview-image-element]');
 						if (image instanceof HTMLImageElement && attachment) {
-							image.src = String(attachment.url || '');
+							image.src = watermarkAttachmentPreviewUrl(attachment, ['medium_large', 'large', 'medium']);
 							image.hidden = !image.src;
 						}
 					});
 					frame.open();
 				}
 			});
-			library.addEventListener('submit', () => reindexWatermarkTemplateEditors(library));
+			library.addEventListener('submit', () => {
+				reindexWatermarkTemplateEditors(library);
+				library.removeAttribute('data-dirty');
+				syncSettingsFormReturnUrl(library);
+			});
+		});
+		window.addEventListener('beforeunload', (event) => {
+			if (!document.querySelector('[data-toolbox-watermark-library][data-dirty="1"]')) {
+				return;
+			}
+			event.preventDefault();
+			event.returnValue = '';
 		});
 	}
 
@@ -8026,6 +8218,7 @@
 
 	initTopTabs();
 	initToolSwitcher();
+	initSettingsFormReturnUrls();
 	initContextSectionSwitcher();
 	initContextGroupSwitcher();
 	initSiteCheckTabs();

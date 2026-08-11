@@ -3071,6 +3071,12 @@ pre.npcink-toolbox__result {
 	gap: 2px;
 }
 
+.npcink-toolbox__watermark-preset-row > .npcink-toolbox__watermark-preset-actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
 .npcink-toolbox__watermark-preset-row small,
 .npcink-toolbox__watermark-template-editor summary small {
 	color: #646970;
@@ -3129,6 +3135,11 @@ pre.npcink-toolbox__result {
 	background: #f6f7f7;
 }
 
+.npcink-toolbox__field-warning {
+	margin: -6px 0 0 !important;
+	color: #b32d2e !important;
+}
+
 .npcink-toolbox__watermark-library-empty {
 	margin: 10px 0 0;
 	padding: 16px 0;
@@ -3169,6 +3180,50 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__watermark-library-preview > .description {
 	margin-top: 8px;
+}
+
+.npcink-toolbox__watermark-save-bar {
+	position: sticky;
+	z-index: 4;
+	bottom: 0;
+	display: flex;
+	gap: 18px;
+	align-items: center;
+	justify-content: space-between;
+	margin: 24px -24px -24px;
+	padding: 12px 24px;
+	border-top: 1px solid #c3c4c7;
+	background: #fff;
+	box-shadow: 0 -4px 12px rgba(0, 0, 0, .05);
+}
+
+.npcink-toolbox__watermark-save-bar > span {
+	color: #50575e;
+}
+
+.npcink-toolbox__watermark-save-bar > div {
+	display: flex;
+	gap: 14px;
+	align-items: center;
+}
+
+.npcink-toolbox__watermark-undo {
+	position: sticky;
+	z-index: 5;
+	bottom: 66px;
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 16px;
+	padding: 10px 12px;
+	border-left: 3px solid #dba617;
+	background: #fcf9e8;
+}
+
+.npcink-toolbox__watermark-undo[hidden],
+.npcink-toolbox__field-warning[hidden] {
+	display: none;
 }
 
 .npcink-toolbox__single-media-actions {
@@ -3714,5 +3769,18 @@ pre.npcink-toolbox__result {
 	.npcink-toolbox__watermark-preview-heading {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+
+	.npcink-toolbox__watermark-save-bar {
+		align-items: stretch;
+		flex-direction: column;
+		margin-right: -16px;
+		margin-left: -16px;
+		padding-right: 16px;
+		padding-left: 16px;
+	}
+
+	.npcink-toolbox__watermark-save-bar > div {
+		justify-content: space-between;
 	}
 }
