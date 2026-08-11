@@ -3840,7 +3840,7 @@ final class Admin_Page {
 					<span><?php esc_html_e( 'Position', 'npcink-workflow-toolbox' ); ?></span>
 					<select name="watermark_position">
 						<?php foreach ( array( 'top_left', 'top_right', 'center', 'bottom_left', 'bottom_right' ) as $position ) : ?>
-							<option value="<?php echo esc_attr( $position ); ?>" <?php selected( (string) ( $toolbox_policy['watermark_position'] ?? 'bottom_right' ), $position ); ?>><?php echo esc_html( ucwords( str_replace( '_', ' ', $position ) ) ); ?></option>
+							<option value="<?php echo esc_attr( $position ); ?>" <?php selected( (string) ( $toolbox_policy['watermark_position'] ?? 'bottom_right' ), $position ); ?>><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</label>
@@ -3904,7 +3904,7 @@ final class Admin_Page {
 					<span><?php esc_html_e( 'Crop anchor', 'npcink-workflow-toolbox' ); ?></span>
 					<select name="crop_position">
 						<?php foreach ( array( 'center', 'top', 'bottom', 'left', 'right', 'top_left', 'top_right', 'bottom_left', 'bottom_right' ) as $position ) : ?>
-							<option value="<?php echo esc_attr( $position ); ?>"><?php echo esc_html( ucwords( str_replace( '_', ' ', $position ) ) ); ?></option>
+							<option value="<?php echo esc_attr( $position ); ?>"><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</label>
@@ -3926,6 +3926,171 @@ final class Admin_Page {
 		<?php
 	}
 
+	private function media_derivative_position_label( string $position ): string {
+		$labels = array(
+			'top_left'     => __( 'Top left', 'npcink-workflow-toolbox' ),
+			'top'          => __( 'Top', 'npcink-workflow-toolbox' ),
+			'top_right'    => __( 'Top right', 'npcink-workflow-toolbox' ),
+			'left'         => __( 'Left', 'npcink-workflow-toolbox' ),
+			'center'       => __( 'Center', 'npcink-workflow-toolbox' ),
+			'right'        => __( 'Right', 'npcink-workflow-toolbox' ),
+			'bottom_left'  => __( 'Bottom left', 'npcink-workflow-toolbox' ),
+			'bottom'       => __( 'Bottom', 'npcink-workflow-toolbox' ),
+			'bottom_right' => __( 'Bottom right', 'npcink-workflow-toolbox' ),
+		);
+
+		return $labels[ $position ] ?? ucwords( str_replace( '_', ' ', $position ) );
+	}
+
+	private function media_derivative_color_input_value( string $value, string $fallback ): string {
+		$value = trim( $value );
+		if ( preg_match( '/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i', $value, $matches ) ) {
+			$hex = $matches[1];
+			if ( 3 === strlen( $hex ) ) {
+				$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+			}
+
+			return '#' . strtoupper( $hex );
+		}
+
+		if ( preg_match( '/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/i', $value, $matches ) ) {
+			return sprintf(
+				'#%02X%02X%02X',
+				min( 255, (int) $matches[1] ),
+				min( 255, (int) $matches[2] ),
+				min( 255, (int) $matches[3] )
+			);
+		}
+
+		return $fallback;
+	}
+
+	private function media_derivative_background_opacity_value( string $value ): int {
+		if ( preg_match( '/^rgba\([^,]+,[^,]+,[^,]+,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)$/i', trim( $value ), $matches ) ) {
+			return (int) round( (float) $matches[1] * 100 );
+		}
+
+		return 35;
+	}
+
+	private function render_single_media_output_options(): void {
+		?>
+		<label>
+			<span><?php esc_html_e( 'File naming', 'npcink-workflow-toolbox' ); ?></span>
+			<select name="output_filename_mode" data-toolbox-output-filename-mode>
+				<option value="custom"><?php esc_html_e( 'Custom name', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="md5" selected><?php esc_html_e( 'MD5 name', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="timestamp"><?php esc_html_e( 'Time name', 'npcink-workflow-toolbox' ); ?></option>
+			</select>
+		</label>
+		<label data-toolbox-custom-output-filename hidden>
+			<span><?php esc_html_e( 'Custom filename', 'npcink-workflow-toolbox' ); ?></span>
+			<input type="text" name="output_filename" maxlength="96" placeholder="<?php esc_attr_e( 'Example: product-guide-cover', 'npcink-workflow-toolbox' ); ?>" />
+		</label>
+		<p class="description"><?php esc_html_e( 'WordPress automatically handles the extension and duplicate filenames.', 'npcink-workflow-toolbox' ); ?></p>
+		<?php
+	}
+
+	private function render_single_media_watermark_options( array $toolbox_policy ): void {
+		$watermark_color      = $this->media_derivative_color_input_value( (string) ( $toolbox_policy['watermark_color'] ?? '#FFFFFF' ), '#FFFFFF' );
+		$watermark_background = (string) ( $toolbox_policy['watermark_background'] ?? 'rgba(0,0,0,0.35)' );
+		$background_color     = $this->media_derivative_color_input_value( $watermark_background, '#000000' );
+		$background_opacity   = $this->media_derivative_background_opacity_value( $watermark_background );
+		?>
+		<div data-toolbox-single-watermark-guidance>
+			<p class="description" data-toolbox-watermark-template-guidance><?php esc_html_e( 'The selected template is shown directly on the image as an effect preview.', 'npcink-workflow-toolbox' ); ?></p>
+		</div>
+		<div data-toolbox-custom-watermark-controls hidden>
+			<label>
+				<span><?php esc_html_e( 'Watermark type', 'npcink-workflow-toolbox' ); ?></span>
+				<select name="watermark_mode" data-toolbox-watermark-mode>
+					<option value="text"><?php esc_html_e( 'Text watermark', 'npcink-workflow-toolbox' ); ?></option>
+					<option value="image"><?php esc_html_e( 'Logo watermark', 'npcink-workflow-toolbox' ); ?></option>
+					<option value="off"><?php esc_html_e( 'No watermark', 'npcink-workflow-toolbox' ); ?></option>
+				</select>
+			</label>
+			<label>
+				<span><?php esc_html_e( 'Position', 'npcink-workflow-toolbox' ); ?></span>
+				<select name="watermark_position">
+					<?php foreach ( array( 'top_left', 'top_right', 'center', 'bottom_left', 'bottom_right' ) as $position ) : ?>
+						<option value="<?php echo esc_attr( $position ); ?>" <?php selected( (string) ( $toolbox_policy['watermark_position'] ?? 'bottom_right' ), $position ); ?>><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</label>
+			<div data-toolbox-text-watermark-fields>
+				<label>
+					<span><?php esc_html_e( 'Watermark text', 'npcink-workflow-toolbox' ); ?></span>
+					<input type="text" maxlength="64" name="watermark_text" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_text'] ?? 'AI' ) ); ?>" />
+				</label>
+				<div class="npcink-toolbox__split">
+					<label>
+						<span><?php esc_html_e( 'Font size', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="number" min="8" max="256" step="1" name="watermark_font_size" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_font_size'] ?? 48 ) ); ?>" />
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Text color', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="color" name="watermark_color" value="<?php echo esc_attr( $watermark_color ); ?>" />
+					</label>
+				</div>
+				<div class="npcink-toolbox__split">
+					<label>
+						<span><?php esc_html_e( 'Background color', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="color" name="watermark_background_color" value="<?php echo esc_attr( $background_color ); ?>" />
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Background opacity', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="range" min="0" max="100" step="1" name="watermark_background_opacity" value="<?php echo esc_attr( (string) $background_opacity ); ?>" data-toolbox-range-output="watermark-background-opacity" />
+						<output data-toolbox-range-value="watermark-background-opacity"><?php echo esc_html( (string) $background_opacity ); ?>%</output>
+					</label>
+				</div>
+			</div>
+			<div data-toolbox-logo-watermark-fields hidden>
+				<p class="description"><?php esc_html_e( 'Uses the logo configured in the Toolbox watermark settings.', 'npcink-workflow-toolbox' ); ?></p>
+				<label>
+					<span><?php esc_html_e( 'Logo size', 'npcink-workflow-toolbox' ); ?></span>
+					<input type="range" min="1" max="100" step="1" name="watermark_scale" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_scale'] ?? 20 ) ); ?>" data-toolbox-range-output="watermark-scale" />
+					<output data-toolbox-range-value="watermark-scale"><?php echo esc_html( (string) ( $toolbox_policy['watermark_scale'] ?? 20 ) ); ?>%</output>
+				</label>
+			</div>
+			<div class="npcink-toolbox__split">
+				<label>
+					<span><?php esc_html_e( 'Opacity', 'npcink-workflow-toolbox' ); ?></span>
+					<input type="range" min="0" max="100" step="1" name="watermark_opacity" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_opacity'] ?? 80 ) ); ?>" data-toolbox-range-output="watermark-opacity" />
+					<output data-toolbox-range-value="watermark-opacity"><?php echo esc_html( (string) ( $toolbox_policy['watermark_opacity'] ?? 80 ) ); ?>%</output>
+				</label>
+				<label>
+					<span><?php esc_html_e( 'Margin', 'npcink-workflow-toolbox' ); ?></span>
+					<input type="number" min="0" max="1000" step="1" name="watermark_margin" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_margin'] ?? 24 ) ); ?>" />
+				</label>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function render_single_media_crop_options(): void {
+		?>
+		<label>
+			<span><?php esc_html_e( 'Crop ratio', 'npcink-workflow-toolbox' ); ?></span>
+			<select name="crop_aspect_ratio">
+				<option value=""><?php esc_html_e( 'No crop', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="16:9"><?php esc_html_e( '16:9 landscape', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="4:3"><?php esc_html_e( '4:3 landscape', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="1:1"><?php esc_html_e( '1:1 square', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="3:4"><?php esc_html_e( '3:4 portrait', 'npcink-workflow-toolbox' ); ?></option>
+				<option value="9:16"><?php esc_html_e( '9:16 portrait', 'npcink-workflow-toolbox' ); ?></option>
+			</select>
+		</label>
+		<label>
+			<span><?php esc_html_e( 'Crop anchor', 'npcink-workflow-toolbox' ); ?></span>
+			<select name="crop_position">
+				<?php foreach ( array( 'center', 'top', 'bottom', 'left', 'right', 'top_left', 'top_right', 'bottom_left', 'bottom_right' ) as $position ) : ?>
+					<option value="<?php echo esc_attr( $position ); ?>"><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</label>
+		<?php
+	}
+
 	private function render_media_derivative_single_tool( int $attachment_id, array $toolbox_policy ): void {
 		$metadata   = wp_get_attachment_metadata( $attachment_id );
 		$metadata   = is_array( $metadata ) ? $metadata : array();
@@ -3934,6 +4099,9 @@ final class Admin_Page {
 		$preview_url = wp_get_attachment_image_url( $attachment_id, 'large' );
 		$edit_link  = get_edit_post_link( $attachment_id, 'raw' );
 		$templates  = is_array( $toolbox_policy['watermark_templates'] ?? null ) ? $toolbox_policy['watermark_templates'] : array();
+		$file_mtime = is_string( $file ) && is_readable( $file ) ? filemtime( $file ) : false;
+		$md5_name   = md5( implode( '|', array( (string) $attachment_id, (string) $file_size, (string) $file_mtime, basename( (string) $file ) ) ) );
+		$logo_url   = wp_get_attachment_image_url( absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ), 'medium' );
 		?>
 		<div
 			class="npcink-toolbox__single-media-workbench"
@@ -3943,6 +4111,8 @@ final class Admin_Page {
 			data-original-width="<?php echo esc_attr( (string) absint( $metadata['width'] ?? 0 ) ); ?>"
 			data-original-height="<?php echo esc_attr( (string) absint( $metadata['height'] ?? 0 ) ); ?>"
 			data-media-edit-url="<?php echo esc_url( (string) $edit_link ); ?>"
+			data-md5-filename-base="<?php echo esc_attr( $md5_name ); ?>"
+			data-watermark-logo-url="<?php echo esc_url( (string) $logo_url ); ?>"
 		>
 			<div class="npcink-toolbox__single-media-heading">
 				<div>
@@ -3960,7 +4130,11 @@ final class Admin_Page {
 					<div class="npcink-toolbox__single-media-comparison" data-toolbox-single-media-comparison>
 						<div class="npcink-toolbox__single-image-card" data-toolbox-original-media-card>
 							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span>
-							<?php if ( $preview_url ) : ?><img src="<?php echo esc_url( $preview_url ); ?>" alt="" /><?php endif; ?>
+							<div class="npcink-toolbox__single-image-frame">
+								<?php if ( $preview_url ) : ?><img src="<?php echo esc_url( $preview_url ); ?>" alt="" /><?php endif; ?>
+								<span class="npcink-toolbox__watermark-effect-label" data-toolbox-watermark-effect-label hidden><?php esc_html_e( 'Watermark effect preview', 'npcink-workflow-toolbox' ); ?></span>
+								<span class="npcink-toolbox__watermark-effect" data-toolbox-watermark-effect hidden></span>
+							</div>
 							<h3><?php echo esc_html( get_the_title( $attachment_id ) ?: basename( (string) $file ) ); ?></h3>
 							<div class="npcink-toolbox__original-image-meta">
 								<span>#<?php echo esc_html( (string) $attachment_id ); ?></span>
@@ -3972,7 +4146,11 @@ final class Admin_Page {
 						</div>
 						<div class="npcink-toolbox__single-image-card npcink-toolbox__single-image-card--optimized" data-toolbox-optimized-media-card hidden>
 							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Optimized', 'npcink-workflow-toolbox' ); ?></span>
-							<div class="npcink-toolbox__optimized-image-frame"><img alt="<?php esc_attr_e( 'Optimized preview', 'npcink-workflow-toolbox' ); ?>" data-toolbox-optimized-media-image /></div>
+							<div class="npcink-toolbox__optimized-image-frame">
+								<img alt="<?php esc_attr_e( 'Optimized preview', 'npcink-workflow-toolbox' ); ?>" data-toolbox-optimized-media-image />
+								<span class="npcink-toolbox__watermark-effect-label" data-toolbox-watermark-effect-label hidden><?php esc_html_e( 'Watermark effect preview', 'npcink-workflow-toolbox' ); ?></span>
+								<span class="npcink-toolbox__watermark-effect" data-toolbox-watermark-effect hidden></span>
+							</div>
 							<h3 data-toolbox-optimized-media-name><?php esc_html_e( 'Loading optimized preview', 'npcink-workflow-toolbox' ); ?></h3>
 							<div class="npcink-toolbox__original-image-meta" data-toolbox-optimized-media-meta></div>
 						</div>
@@ -3990,11 +4168,23 @@ final class Admin_Page {
 							<?php endforeach; ?>
 						</select>
 					</label>
+					<p class="npcink-toolbox__watermark-template-summary" data-toolbox-watermark-template-summary></p>
 					<details class="npcink-toolbox__single-media-advanced">
-						<summary><?php esc_html_e( 'Advanced options', 'npcink-workflow-toolbox' ); ?></summary>
-						<?php $this->render_media_derivative_output_controls(); ?>
-						<?php $this->render_media_derivative_watermark_controls( $toolbox_policy, true ); ?>
-						<?php $this->render_media_derivative_crop_controls(); ?>
+						<summary><?php esc_html_e( 'More settings (filename, watermark details, crop)', 'npcink-workflow-toolbox' ); ?></summary>
+						<div class="npcink-toolbox__single-media-option-list">
+							<details class="npcink-toolbox__single-media-option" data-toolbox-single-media-option data-toolbox-filename-option>
+								<summary><span><?php esc_html_e( 'File naming', 'npcink-workflow-toolbox' ); ?></span><small data-toolbox-output-filename-summary></small></summary>
+								<div class="npcink-toolbox__single-media-option-body"><?php $this->render_single_media_output_options(); ?></div>
+							</details>
+							<details class="npcink-toolbox__single-media-option" data-toolbox-single-media-option data-toolbox-watermark-option>
+								<summary><span><?php esc_html_e( 'Watermark details', 'npcink-workflow-toolbox' ); ?></span><small data-toolbox-watermark-details-summary></small></summary>
+								<div class="npcink-toolbox__single-media-option-body"><?php $this->render_single_media_watermark_options( $toolbox_policy ); ?></div>
+							</details>
+							<details class="npcink-toolbox__single-media-option" data-toolbox-single-media-option data-toolbox-crop-option>
+								<summary><span><?php esc_html_e( 'Crop settings', 'npcink-workflow-toolbox' ); ?></span><small data-toolbox-crop-summary></small></summary>
+								<div class="npcink-toolbox__single-media-option-body"><?php $this->render_single_media_crop_options(); ?></div>
+							</details>
+						</div>
 					</details>
 					<div class="npcink-toolbox__single-media-actions">
 						<button type="button" class="button" data-toolbox-run-media-derivative><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button>
