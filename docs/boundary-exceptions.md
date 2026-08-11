@@ -87,7 +87,24 @@ Primary contracts:
 - [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
 - [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
 
-## Exception 3 - Local Fallback WP-Cron Preview
+## Exception 3 - Single-Image Strong Local Media Replacement
+
+Status: accepted bounded Media Library transaction.
+
+Allowed scope: one present admin action, one image attachment, one exact
+same-origin derivative preview, one explicit `replace_current` confirmation,
+and Toolkit-owned backup/reference-repair/rollback execution.
+
+Hard stop: no batch, background, Adapter, Agent, Cloud callback, save-as-new,
+queue, approval store, or authorization of any Toolkit ability other than
+`adopt-cloud-media-derivative` for the current request.
+
+Primary contracts:
+
+- [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
+- [ADR-011: Single-Image Local Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
+
+## Exception 4 - Local Fallback WP-Cron Preview
 
 Status: accepted bounded fallback preview.
 

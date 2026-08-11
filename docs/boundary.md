@@ -553,9 +553,14 @@ projection consumes only the validated `media_derivative_result.v1.artifact`
 shape. Toolbox projects the local review POST transport separately and never
 adds it to the Cloud artifact. The `/media-derivative-optimization-payload`
 projection delegates proposal-payload
-construction to Cloud Addon and, for the single-image optimize flow, may submit
-the returned `from_plan_request` through Adapter so Core creates one
-batch proposal containing reviewed metadata and derivative adoption actions. It
+construction to Cloud Addon for governed batch flows. A contextual single-image
+flow does not call this projection: after exact same-origin preview verification
+and explicit confirmation it may call
+`/strong-local-confirmation/media-derivative`, which authorizes only the
+existing Toolkit adoption transaction for that request and returns backup,
+reference-repair, rollback, and verification evidence without a Core proposal.
+Batch selection and every background, delegated, or external-client flow remain
+Core-governed. The preview surface
 may POST `/media-derivative-local-review/{artifact_id}` for operator review.
 That queryless route requires an authenticated administrator and `X-WP-Nonce`,
 accepts only `{artifact: exact local11}` JSON with a matching path artifact id,
@@ -563,7 +568,8 @@ passes it to Cloud Addon for verified receive and delivery ACK, and returns
 no-store/nosniff bytes. The browser uses and revokes a short-lived Blob object
 URL; it accepts no query parameter, self-signed authorization, remote URL,
 token, or storage locator. The local review endpoint is not a public Cloud URL
-or a WordPress media write. Toolbox must not
+or a WordPress media write. Outside the documented ADR-011 request-scoped
+exception, Toolbox must not
 store site media policy truth, own Cloud credentials, create an artifact
 registry, approve proposals, execute proposals, replace attachment files, or
 update attachment metadata.

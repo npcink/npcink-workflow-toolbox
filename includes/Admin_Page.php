@@ -3803,25 +3803,29 @@ final class Admin_Page {
 		<?php
 	}
 
-	private function render_media_derivative_watermark_controls( array $toolbox_policy ): void {
+	private function render_media_derivative_watermark_controls( array $toolbox_policy, bool $advanced_only = false ): void {
 		$templates = is_array( $toolbox_policy['watermark_templates'] ?? null ) ? $toolbox_policy['watermark_templates'] : array();
 		?>
 		<div class="npcink-toolbox__batch-panel">
-			<input type="hidden" name="watermark_policy_enabled" value="<?php echo ! empty( $toolbox_policy['watermark_enabled'] ) ? '1' : '0'; ?>" />
-			<input type="hidden" name="watermark_policy_type" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_type'] ?? 'image' ) ); ?>" />
-			<input type="hidden" name="watermark_attachment_id" value="<?php echo esc_attr( (string) absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ) ); ?>" />
+			<?php if ( ! $advanced_only ) : ?>
+				<input type="hidden" name="watermark_policy_enabled" value="<?php echo ! empty( $toolbox_policy['watermark_enabled'] ) ? '1' : '0'; ?>" />
+				<input type="hidden" name="watermark_policy_type" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_type'] ?? 'image' ) ); ?>" />
+				<input type="hidden" name="watermark_attachment_id" value="<?php echo esc_attr( (string) absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ) ); ?>" />
+			<?php endif; ?>
 			<h3><?php esc_html_e( 'Watermark override', 'npcink-workflow-toolbox' ); ?></h3>
 			<p><?php esc_html_e( 'Choose a reusable Toolbox template, or use the detailed fields for this run. Text templates reuse the text below; logo templates use the configured Toolbox logo source.', 'npcink-workflow-toolbox' ); ?></p>
-			<label>
-				<span><?php esc_html_e( 'Watermark template', 'npcink-workflow-toolbox' ); ?></span>
-				<select name="watermark_template" data-toolbox-watermark-template>
-					<?php foreach ( $templates as $template ) : ?>
-						<?php if ( is_array( $template ) && '' !== (string) ( $template['id'] ?? '' ) ) : ?>
-							<option value="<?php echo esc_attr( (string) $template['id'] ); ?>" <?php selected( 'toolbox_default', (string) $template['id'] ); ?>><?php echo esc_html( (string) ( $template['label'] ?? $template['id'] ) ); ?></option>
-						<?php endif; ?>
-					<?php endforeach; ?>
-				</select>
-			</label>
+			<?php if ( ! $advanced_only ) : ?>
+				<label>
+					<span><?php esc_html_e( 'Watermark template', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="watermark_template" data-toolbox-watermark-template>
+						<?php foreach ( $templates as $template ) : ?>
+							<?php if ( is_array( $template ) && '' !== (string) ( $template['id'] ?? '' ) ) : ?>
+								<option value="<?php echo esc_attr( (string) $template['id'] ); ?>" <?php selected( 'toolbox_default', (string) $template['id'] ); ?>><?php echo esc_html( (string) ( $template['label'] ?? $template['id'] ) ); ?></option>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</select>
+				</label>
+			<?php endif; ?>
 			<div class="npcink-toolbox__split">
 				<label>
 					<span><?php esc_html_e( 'Watermark mode', 'npcink-workflow-toolbox' ); ?></span>
@@ -3918,32 +3922,74 @@ final class Admin_Page {
 				<input type="text" name="output_filename" maxlength="96" placeholder="<?php esc_attr_e( 'Example: product-guide-cover', 'npcink-workflow-toolbox' ); ?>" />
 			</label>
 			<p class="description"><?php esc_html_e( 'Enter a basename only. Toolbox removes unsafe path characters and matches the extension to the generated format; the WordPress write ability performs the final sanitize-and-unique check.', 'npcink-workflow-toolbox' ); ?></p>
-			<label>
-				<input type="checkbox" name="confirm_replace_current" value="1" data-toolbox-confirm-media-replacement />
-				<?php esc_html_e( 'I understand that Core approval will replace this attachment main file and keep governed backup/rollback evidence.', 'npcink-workflow-toolbox' ); ?>
-			</label>
-			<p class="description"><?php esc_html_e( 'Save as a new media-library attachment is not offered until a separate governed create-attachment ability exists. Toolbox never copies or renames files directly on disk.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 		<?php
 	}
 
 	private function render_media_derivative_single_tool( int $attachment_id, array $toolbox_policy ): void {
+		$metadata   = wp_get_attachment_metadata( $attachment_id );
+		$metadata   = is_array( $metadata ) ? $metadata : array();
+		$file       = get_attached_file( $attachment_id );
+		$file_size  = is_string( $file ) && is_readable( $file ) ? filesize( $file ) : false;
+		$preview_url = wp_get_attachment_image_url( $attachment_id, 'large' );
+		$edit_link  = get_edit_post_link( $attachment_id, 'raw' );
+		$templates  = is_array( $toolbox_policy['watermark_templates'] ?? null ) ? $toolbox_policy['watermark_templates'] : array();
 		?>
-		<div class="npcink-toolbox__batch-panel" data-toolbox-single-media-workbench>
-			<h3><?php esc_html_e( 'Optimize one image', 'npcink-workflow-toolbox' ); ?></h3>
-			<p><?php echo esc_html( sprintf( __( 'Attachment #%d is selected. Generate and visually verify one preview before submitting a replacement proposal to Core.', 'npcink-workflow-toolbox' ), $attachment_id ) ); ?></p>
+		<div class="npcink-toolbox__single-media-workbench" data-toolbox-single-media-workbench>
+			<div class="npcink-toolbox__single-media-heading">
+				<div>
+					<h2><?php esc_html_e( 'Optimize image', 'npcink-workflow-toolbox' ); ?></h2>
+					<p><?php esc_html_e( 'Generate an exact preview, compare it with the original, then apply it directly to this Media Library item.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+				<span class="npcink-toolbox__local-confirmation-badge"><?php esc_html_e( 'Local confirmation', 'npcink-workflow-toolbox' ); ?></span>
+			</div>
 			<input type="hidden" name="attachment_id" value="<?php echo esc_attr( (string) $attachment_id ); ?>" data-toolbox-media-attachment />
-			<?php $this->render_media_derivative_format_controls( $toolbox_policy ); ?>
-			<?php $this->render_media_derivative_output_controls(); ?>
-			<?php $this->render_media_derivative_watermark_controls( $toolbox_policy ); ?>
-			<details class="npcink-toolbox__result-details">
-				<summary><?php esc_html_e( 'Optional crop', 'npcink-workflow-toolbox' ); ?></summary>
-				<?php $this->render_media_derivative_crop_controls(); ?>
-			</details>
-			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'This workbench creates no WordPress write. Final replacement remains a separate Core approval and Adapter/Abilities execution with backup and rollback.', 'npcink-workflow-toolbox' ); ?></div>
-			<div class="npcink-toolbox__inline-actions">
-				<button type="button" class="button button-primary" data-toolbox-run-media-derivative><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="button" data-toolbox-submit-media-proposal disabled><?php esc_html_e( 'Submit replacement to Core review', 'npcink-workflow-toolbox' ); ?></button>
+			<input type="hidden" name="watermark_policy_enabled" value="<?php echo ! empty( $toolbox_policy['watermark_enabled'] ) ? '1' : '0'; ?>" />
+			<input type="hidden" name="watermark_policy_type" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_type'] ?? 'image' ) ); ?>" />
+			<input type="hidden" name="watermark_attachment_id" value="<?php echo esc_attr( (string) absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ) ); ?>" />
+			<div class="npcink-toolbox__single-media-grid">
+				<section class="npcink-toolbox__single-media-preview-column" aria-label="<?php esc_attr_e( 'Image comparison', 'npcink-workflow-toolbox' ); ?>">
+					<div class="npcink-toolbox__original-image-card">
+						<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span>
+						<?php if ( $preview_url ) : ?><img src="<?php echo esc_url( $preview_url ); ?>" alt="" /><?php endif; ?>
+						<h3><?php echo esc_html( get_the_title( $attachment_id ) ?: basename( (string) $file ) ); ?></h3>
+						<div class="npcink-toolbox__original-image-meta">
+							<span>#<?php echo esc_html( (string) $attachment_id ); ?></span>
+							<span><?php echo esc_html( (string) get_post_mime_type( $attachment_id ) ); ?></span>
+							<?php if ( ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) : ?><span><?php echo esc_html( (string) $metadata['width'] . ' × ' . (string) $metadata['height'] ); ?></span><?php endif; ?>
+							<?php if ( is_int( $file_size ) ) : ?><span><?php echo esc_html( size_format( $file_size ) ); ?></span><?php endif; ?>
+						</div>
+						<?php if ( $edit_link ) : ?><a href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'Open media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
+					</div>
+					<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+				</section>
+				<section class="npcink-toolbox__single-media-settings" aria-label="<?php esc_attr_e( 'Optimization settings', 'npcink-workflow-toolbox' ); ?>">
+					<h3><?php esc_html_e( 'Settings', 'npcink-workflow-toolbox' ); ?></h3>
+					<?php $this->render_media_derivative_format_controls( $toolbox_policy ); ?>
+					<label>
+						<span><?php esc_html_e( 'Watermark template', 'npcink-workflow-toolbox' ); ?></span>
+						<select name="watermark_template" data-toolbox-watermark-template>
+							<?php foreach ( $templates as $template ) : ?>
+								<?php if ( is_array( $template ) && '' !== (string) ( $template['id'] ?? '' ) ) : ?><option value="<?php echo esc_attr( (string) $template['id'] ); ?>" <?php selected( 'toolbox_default', (string) $template['id'] ); ?>><?php echo esc_html( (string) ( $template['label'] ?? $template['id'] ) ); ?></option><?php endif; ?>
+							<?php endforeach; ?>
+						</select>
+					</label>
+					<details class="npcink-toolbox__single-media-advanced">
+						<summary><?php esc_html_e( 'Advanced options', 'npcink-workflow-toolbox' ); ?></summary>
+						<?php $this->render_media_derivative_output_controls(); ?>
+						<?php $this->render_media_derivative_watermark_controls( $toolbox_policy, true ); ?>
+						<?php $this->render_media_derivative_crop_controls(); ?>
+					</details>
+					<div class="npcink-toolbox__single-media-actions">
+						<button type="button" class="button" data-toolbox-run-media-derivative><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button>
+						<label class="npcink-toolbox__single-media-confirmation">
+							<input type="checkbox" name="confirm_replace_current" value="1" data-toolbox-confirm-media-replacement />
+							<span><?php esc_html_e( 'I reviewed this exact preview. Replace the current attachment and create a restorable backup.', 'npcink-workflow-toolbox' ); ?></span>
+						</label>
+						<button type="button" class="button button-primary button-hero" data-toolbox-apply-media-derivative disabled><?php esc_html_e( 'Apply to Media Library', 'npcink-workflow-toolbox' ); ?></button>
+						<p class="description"><?php esc_html_e( 'This can affect posts that use the current image URL. Toolkit updates known content references and returns backup and verification evidence.', 'npcink-workflow-toolbox' ); ?></p>
+					</div>
+				</section>
 			</div>
 		</div>
 		<?php
@@ -4049,20 +4095,22 @@ final class Admin_Page {
 		$toolbox_policy      = $this->get_media_derivative_toolbox_policy();
 		$single_attachment_id = $this->media_derivative_single_attachment_id();
 		?>
-		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative <?php echo $active ? '' : 'hidden'; ?>>
-			<h2><?php echo esc_html( $title ); ?></h2>
-			<p><?php echo esc_html( $description ); ?></p>
-			<div class="npcink-toolbox__example is-ai">
-				<strong><?php esc_html_e( 'Review before submitting', 'npcink-workflow-toolbox' ); ?></strong>
-				<span><?php esc_html_e( 'This page prepares previews and submits selected rows to Core review only. Approval and execution happen from the governed Core/Adapter review path.', 'npcink-workflow-toolbox' ); ?></span>
-			</div>
-			<?php $this->render_media_derivative_toolbox_defaults( $toolbox_policy ); ?>
+		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch<?php echo $single_attachment_id > 0 ? ' npcink-toolbox__card--single-media' : ''; ?>" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative <?php echo $active ? '' : 'hidden'; ?>>
+			<?php if ( $single_attachment_id <= 0 ) : ?>
+				<h2><?php echo esc_html( $title ); ?></h2>
+				<p><?php echo esc_html( $description ); ?></p>
+				<div class="npcink-toolbox__example is-ai">
+					<strong><?php esc_html_e( 'Review before submitting', 'npcink-workflow-toolbox' ); ?></strong>
+					<span><?php esc_html_e( 'This page prepares previews and submits selected rows to Core review only. Approval and execution happen from the governed Core/Adapter review path.', 'npcink-workflow-toolbox' ); ?></span>
+				</div>
+				<?php $this->render_media_derivative_toolbox_defaults( $toolbox_policy ); ?>
+			<?php endif; ?>
 			<?php if ( $single_attachment_id > 0 ) : ?>
 				<?php $this->render_media_derivative_single_tool( $single_attachment_id, $toolbox_policy ); ?>
 			<?php else : ?>
 				<?php $this->render_media_derivative_batch_controls( $toolbox_policy ); ?>
 			<?php endif; ?>
-			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+			<?php if ( $single_attachment_id <= 0 ) : ?><div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div><?php endif; ?>
 		</form>
 		<?php
 	}
