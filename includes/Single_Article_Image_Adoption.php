@@ -224,10 +224,6 @@ final class Single_Article_Image_Adoption {
 	 * @return int|WP_Error
 	 */
 	private function import_candidate( array $candidate, int $post_id ) {
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-
 		$filename = $this->candidate_filename( $candidate );
 		$tmp_file = wp_tempnam( $filename );
 		if ( ! is_string( $tmp_file ) || '' === $tmp_file ) {
@@ -294,22 +290,55 @@ final class Single_Article_Image_Adoption {
 		}
 		$filename = preg_replace( '/\.[a-z0-9]+$/i', '', $filename ) . '.' . $extension;
 
-		$file_array = array(
-			'name'     => sanitize_file_name( $filename ),
-			'tmp_name' => $tmp_file,
+		$file_bytes = file_get_contents( $tmp_file );
+		wp_delete_file( $tmp_file );
+		if ( ! is_string( $file_bytes ) || '' === $file_bytes ) {
+			return new WP_Error(
+				'npcink_toolbox_image_adoption_tempfile_read_failed',
+				__( 'WordPress could not read the verified image for import.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$upload = wp_upload_bits( sanitize_file_name( $filename ), null, $file_bytes );
+		unset( $file_bytes );
+		if ( ! empty( $upload['error'] ) || empty( $upload['file'] ) || empty( $upload['url'] ) ) {
+			return new WP_Error(
+				'npcink_toolbox_image_adoption_upload_failed',
+				__( 'WordPress could not store the verified image in the Media Library.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$uploaded_file = (string) $upload['file'];
+		$attachment    = array(
+			'guid'           => esc_url_raw( (string) $upload['url'] ),
+			'post_mime_type' => $mime,
+			'post_title'     => '' !== (string) $candidate['title'] ? (string) $candidate['title'] : pathinfo( $filename, PATHINFO_FILENAME ),
+			'post_excerpt'   => (string) $candidate['caption'],
+			'post_content'   => (string) $candidate['description'],
+			'post_status'    => 'inherit',
 		);
-		$post_data = array(
-			'post_title'   => '' !== (string) $candidate['title'] ? (string) $candidate['title'] : pathinfo( $filename, PATHINFO_FILENAME ),
-			'post_excerpt' => (string) $candidate['caption'],
-			'post_content' => (string) $candidate['description'],
-		);
-		$attachment_id = media_handle_sideload( $file_array, $post_id, (string) $candidate['description'], $post_data );
+		$attachment_id = wp_insert_attachment( $attachment, $uploaded_file, $post_id, true );
 		if ( is_wp_error( $attachment_id ) ) {
-			@unlink( $tmp_file );
+			wp_delete_file( $uploaded_file );
 			return $attachment_id;
 		}
 
 		$attachment_id = absint( $attachment_id );
+		$metadata      = $this->attachment_metadata( $uploaded_file, $width, $height, $size );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+		if ( $metadata !== wp_get_attachment_metadata( $attachment_id ) ) {
+			$this->delete_generated_sizes( $uploaded_file, $metadata );
+			wp_delete_attachment( $attachment_id, true );
+
+			return new WP_Error(
+				'npcink_toolbox_image_adoption_metadata_failed',
+				__( 'WordPress could not finish the Media Library metadata for the verified image. The uploaded file was removed.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500, 'rollback_status' => 'completed' )
+			);
+		}
+
 		if ( '' !== (string) $candidate['alt'] ) {
 			update_post_meta( $attachment_id, '_wp_attachment_image_alt', (string) $candidate['alt'] );
 		}
@@ -324,6 +353,64 @@ final class Single_Article_Image_Adoption {
 		}
 
 		return $attachment_id;
+	}
+
+	/**
+	 * Builds core metadata and registered image sizes for an imported image.
+	 *
+	 * This uses the loaded WordPress image editor and registered size contract,
+	 * without loading admin-only media helpers.
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function attachment_metadata( string $file, int $width, int $height, int $filesize ): array {
+		$upload_dir    = wp_upload_dir();
+		$normalized    = wp_normalize_path( $file );
+		$base_dir      = wp_normalize_path( (string) ( $upload_dir['basedir'] ?? '' ) );
+		$relative_file = '' !== $base_dir && str_starts_with( $normalized, trailingslashit( $base_dir ) )
+			? ltrim( substr( $normalized, strlen( $base_dir ) ), '/' )
+			: wp_basename( $file );
+
+		$metadata = array(
+			'width'    => $width,
+			'height'   => $height,
+			'file'     => $relative_file,
+			'filesize' => $filesize,
+			'sizes'    => array(),
+		);
+
+		if ( ! function_exists( 'wp_get_image_editor' ) || ! function_exists( 'wp_get_registered_image_subsizes' ) ) {
+			return $metadata;
+		}
+
+		$editor = wp_get_image_editor( $file );
+		if ( is_wp_error( $editor ) ) {
+			return $metadata;
+		}
+
+		$generated_sizes = $editor->multi_resize( wp_get_registered_image_subsizes() );
+		if ( is_array( $generated_sizes ) ) {
+			$metadata['sizes'] = $generated_sizes;
+		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Removes exact generated image-size files during attachment rollback.
+	 *
+	 * @param array<string,mixed> $metadata Attachment metadata.
+	 */
+	private function delete_generated_sizes( string $file, array $metadata ): void {
+		$directory = trailingslashit( dirname( $file ) );
+		$sizes     = is_array( $metadata['sizes'] ?? null ) ? $metadata['sizes'] : array();
+
+		foreach ( $sizes as $size ) {
+			$generated_file = is_array( $size ) ? sanitize_file_name( (string) ( $size['file'] ?? '' ) ) : '';
+			if ( '' !== $generated_file ) {
+				wp_delete_file( $directory . $generated_file );
+			}
+		}
 	}
 
 	/**
