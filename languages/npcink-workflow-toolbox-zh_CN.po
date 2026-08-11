@@ -7770,3 +7770,39 @@ msgstr "应用到媒体库"
 #: includes/Admin_Page.php
 msgid "This can affect posts that use the current image URL. Toolkit updates known content references and returns backup and verification evidence."
 msgstr "这可能影响使用当前图片网址的文章。Toolkit 会更新已知内容引用，并返回备份与验证证据。"
+
+#: includes/Admin_Page.php
+msgid "Use default setting"
+msgstr "使用默认设置"
+
+#: includes/Admin_Page.php
+msgid "Max width"
+msgstr "最大宽度"
+
+#: includes/Admin_Page.php
+msgid "Image quality"
+msgstr "图片质量"
+
+#: includes/Admin_Page.php
+msgid "Optimized"
+msgstr "优化后"
+
+#: includes/Admin_Page.php
+msgid "Optimized preview"
+msgstr "优化预览"
+
+#: includes/Admin_Page.php
+msgid "Loading optimized preview"
+msgstr "正在加载优化预览"
+
+#: includes/Admin_Page.php
+msgid "Known post-content image references are updated in the same local transaction."
+msgstr "文章内容中的已知图片引用会在同一本地事务中更新。"
+
+#: includes/Admin_Page.php
+msgid "View media details"
+msgstr "查看媒体详情"
+
+#: includes/Admin_Page.php
+msgid "Continue optimizing this image"
+msgstr "继续优化此图片"
