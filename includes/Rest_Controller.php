@@ -55,6 +55,7 @@ final class Rest_Controller {
 		$this->post( '/flows/article-audio-adoption-plan', 'article_audio_adoption_plan' );
 		$this->post( '/local-admin-consent/featured-image', 'local_admin_consent_featured_image' );
 		$this->post( '/strong-local-confirmation/image-adoption', 'strong_local_confirmation_image_adoption' );
+		$this->post( '/strong-local-confirmation/media-derivative', 'strong_local_confirmation_media_derivative' );
 		$this->post( '/flows/site-knowledge-review-plan', 'site_knowledge_review_plan' );
 		$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' );
 		$this->post( '/flows/content-metadata-apply-plan', 'content_metadata_apply_plan' );
@@ -153,6 +154,7 @@ final class Rest_Controller {
 			'/flows/article-audio-adoption-plan'           => 'cap.toolbox.workflow_suggest',
 			'/local-admin-consent' . '/featured-image'     => 'cap.toolbox.local_admin_consent',
 			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
+			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -799,6 +801,12 @@ final class Rest_Controller {
 
 	public function strong_local_confirmation_image_adoption( WP_REST_Request $request ) {
 		$result = ( new Single_Article_Image_Adoption() )->execute( $request );
+
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function strong_local_confirmation_media_derivative( WP_REST_Request $request ) {
+		$result = ( new Single_Image_Media_Optimization() )->execute( $request );
 
 		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
@@ -1547,7 +1555,7 @@ final class Rest_Controller {
 	private function post( string $route, string $method, array $args = array() ): void {
 		$permission_callback = '/strong-local-confirmation/image-adoption' === $route
 			? array( $this, 'permission_single_article_image_adoption' )
-			: array( $this, 'permission' );
+			: ( '/strong-local-confirmation/media-derivative' === $route ? array( $this, 'permission_single_image_media_optimization' ) : array( $this, 'permission' ) );
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
 			$route,
@@ -1572,6 +1580,13 @@ final class Rest_Controller {
 		}
 
 		return Single_Article_Image_Adoption::ACTION_SET_FEATURED_EXISTING === $action;
+	}
+
+	public function permission_single_image_media_optimization( WP_REST_Request $request ): bool {
+		$input = $request->get_param( 'input' );
+		$attachment_id = is_array( $input ) ? absint( $input['attachment_id'] ?? 0 ) : 0;
+
+		return $attachment_id > 0 && current_user_can( 'upload_files' ) && current_user_can( 'edit_post', $attachment_id );
 	}
 
 

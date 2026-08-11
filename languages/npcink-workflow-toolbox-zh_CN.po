@@ -7734,3 +7734,39 @@ msgstr "此工作台不会写入 WordPress。最终替换仍需单独经过 Core
 #: includes/Admin_Page.php
 msgid "Submit replacement to Core review"
 msgstr "提交替换到 Core 审核"
+
+#: includes/Admin_Page.php
+msgid "Generate an exact preview, compare it with the original, then apply it directly to this Media Library item."
+msgstr "生成精确预览，与原图对比确认后，直接应用到当前媒体库项目。"
+
+#: includes/Admin_Page.php
+msgid "Local confirmation"
+msgstr "本地确认"
+
+#: includes/Admin_Page.php
+msgid "Image comparison"
+msgstr "图片对比"
+
+#: includes/Admin_Page.php
+msgid "Original"
+msgstr "原图"
+
+#: includes/Admin_Page.php
+msgid "Open media details"
+msgstr "打开媒体详情"
+
+#: includes/Admin_Page.php
+msgid "Optimization settings"
+msgstr "优化设置"
+
+#: includes/Admin_Page.php
+msgid "I reviewed this exact preview. Replace the current attachment and create a restorable backup."
+msgstr "我已核对此精确预览。替换当前附件并创建可恢复的备份。"
+
+#: includes/Admin_Page.php
+msgid "Apply to Media Library"
+msgstr "应用到媒体库"
+
+#: includes/Admin_Page.php
+msgid "This can affect posts that use the current image URL. Toolkit updates known content references and returns backup and verification evidence."
+msgstr "这可能影响使用当前图片网址的文章。Toolkit 会更新已知内容引用，并返回备份与验证证据。"

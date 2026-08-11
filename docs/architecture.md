@@ -372,6 +372,7 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
+- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`

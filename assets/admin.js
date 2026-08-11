@@ -2813,11 +2813,12 @@
 	}
 
 	function updateMediaDerivativeSubmitState(form, state) {
-		const submitButton = form.querySelector('[data-toolbox-submit-media-proposal]');
+		const submitButton = form.querySelector('[data-toolbox-submit-media-proposal], [data-toolbox-apply-media-derivative]');
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
 		const confirmed = !(confirmation instanceof HTMLInputElement) || confirmation.checked;
 		if (submitButton instanceof HTMLButtonElement) {
-			submitButton.disabled = !(state && state.proposalPayload && mediaDerivativeLocalReviewVerified(state) && confirmed);
+			const readyPayload = form.querySelector('[data-toolbox-single-media-workbench]') ? state && state.derivative : state && state.proposalPayload;
+			submitButton.disabled = !(readyPayload && mediaDerivativeLocalReviewVerified(state) && confirmed);
 		}
 	}
 
@@ -3737,7 +3738,7 @@
 			form,
 			{ provider: 'cloud runtime' },
 			'Media derivative preview',
-			message || 'Cloud generated a short-lived derivative artifact. Submit a Core replacement proposal before any local adoption.'
+			message || (form.querySelector('[data-toolbox-single-media-workbench]') ? 'Compare this exact result with the original, then confirm the local replacement.' : 'Cloud generated a short-lived derivative artifact. Submit a Core replacement proposal before any local adoption.')
 		);
 		if (!result) {
 			return;
@@ -3754,7 +3755,7 @@
 		appendMeta(meta, 'Crop', mediaDerivativeCropLabel(state.abilityInput));
 		appendMeta(meta, 'Watermark', mediaDerivativeWatermarkLabel(state.abilityInput));
 		result.appendChild(meta);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Cloud returned an exact artifact descriptor. Reading the image bytes is still required before Core handoff.'));
+		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', form.querySelector('[data-toolbox-single-media-workbench]') ? 'Cloud returned the exact result descriptor. The preview bytes must load successfully before local replacement is enabled.' : 'Cloud returned an exact artifact descriptor. Reading the image bytes is still required before Core handoff.'));
 
 		if (Array.isArray(derivative.processing_warnings) && derivative.processing_warnings.length) {
 			derivative.processing_warnings.forEach((warning) => {
@@ -3798,8 +3799,8 @@
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Preview uses artifact evidence only. The local review response did not return an exact POST transport.'));
 		}
 		renderArtifactSummary(result, 'Derivative artifact', derivative);
-		if (form.querySelector('[data-toolbox-single-media-workbench]') && state.proposalPayload) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'The verified derivative is ready for one governed replacement proposal. Confirm the rollback statement, then submit before the artifact expires.'));
+		if (form.querySelector('[data-toolbox-single-media-workbench]')) {
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'When the preview is visibly verified, confirm the replacement statement to enable local application. A restorable backup is mandatory.'));
 			appendMeta(meta, 'Output filename', mediaDerivativeFinalFilename(state.outputFilenameBase, derivative.mime_type) || derivative.suggested_filename || 'WordPress final suggestion');
 		} else if (state.fromPlanRequest) {
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Optimization plan is ready for one Core proposal approval. Next action: inspect the preview and preflight evidence, then submit before the artifact expires.'));
@@ -4589,6 +4590,7 @@
 		const input = asObject(resumeContext.input);
 		const mediaDetails = asObject(resumeContext.media_details);
 		const previewOnly = resumeContext.preview_only === true;
+		const localConfirmation = resumeContext.local_confirmation === true;
 		const outputFilenameBase = String(resumeContext.output_filename_base || '');
 		const createPayload = asObject(resumeContext.create);
 		const runId = String(resumeContext.run_id || createPayload.run_id || (createPayload.cloud_run && createPayload.cloud_run.run_id) || '');
@@ -4610,6 +4612,7 @@
 						media_details: mediaDetails,
 						output_filename_base: outputFilenameBase,
 						preview_only: previewOnly,
+						local_confirmation: localConfirmation,
 					},
 				});
 			}
@@ -4634,15 +4637,17 @@
 			localReview,
 		};
 		let preflightEnvelope = null;
-		try {
-			preflightEnvelope = await postJson(config.adapterRestUrl, 'run-read-ability', {
-				ability_id: 'npcink-abilities-toolkit/build-media-adoption-preflight-summary',
-				input: preflightInputFromState(preflightState),
-			});
-		} catch (error) {
-			preflightEnvelope = {
-				error: formatErrorMessage(error, 'Media adoption preflight is unavailable.'),
-			};
+		if (!localConfirmation) {
+			try {
+				preflightEnvelope = await postJson(config.adapterRestUrl, 'run-read-ability', {
+					ability_id: 'npcink-abilities-toolkit/build-media-adoption-preflight-summary',
+					input: preflightInputFromState(preflightState),
+				});
+			} catch (error) {
+				preflightEnvelope = {
+					error: formatErrorMessage(error, 'Media adoption preflight is unavailable.'),
+				};
+			}
 		}
 
 		if (previewOnly) {
@@ -4687,7 +4692,7 @@
 		};
 	}
 
-	async function createMediaDerivativePreview(input, mediaDetails, previewOnly, onProgress, outputFilenameBase) {
+	async function createMediaDerivativePreview(input, mediaDetails, previewOnly, onProgress, outputFilenameBase, localConfirmation) {
 		if (!input.attachment_id) {
 			throw { message: 'Select an image attachment before generating a preview.' };
 		}
@@ -4711,6 +4716,7 @@
 			media_details: mediaDetails || {},
 			output_filename_base: String(outputFilenameBase || ''),
 			preview_only: previewOnly === true,
+			local_confirmation: localConfirmation === true,
 		}, onProgress);
 	}
 
@@ -4722,22 +4728,64 @@
 		const input = mediaDerivativeInput(form);
 		const mediaDetails = mediaDetailsInput(form);
 		const outputFilenameBase = mediaDerivativeOutputFilename(form);
-		const previewOnly = form.hasAttribute('data-toolbox-media-derivative-preview-only');
+		const localConfirmation = Boolean(form.querySelector('[data-toolbox-single-media-workbench]'));
+		const previewOnly = form.hasAttribute('data-toolbox-media-derivative-preview-only') || localConfirmation;
 		form.__npcinkMediaDerivativeState = null;
 		form.__npcinkMediaDerivativePendingRun = null;
 		updateMediaDerivativeSubmitState(form, null);
 		renderMediaDerivativeProgress(form, 'upload', 'Preparing the selected source for Cloud processing.');
 		const state = await createMediaDerivativePreview(input, mediaDetails, previewOnly, (stage, detail) => {
 			renderMediaDerivativeProgress(form, stage, detail);
-		}, outputFilenameBase);
+		}, outputFilenameBase, localConfirmation);
+		state.localConfirmation = localConfirmation;
 		form.__npcinkMediaDerivativeState = state;
 		form.__npcinkMediaDerivativePendingRun = null;
 		updateMediaDerivativeSubmitState(form, state);
 		renderMediaDerivativeRun(
 			form,
 			state,
-			previewOnly ? 'Cloud generated a short-lived derivative preview. This check does not submit a Core proposal or write media.' : ''
+			localConfirmation ? 'Cloud generated a short-lived derivative preview for local confirmation. No media has been changed yet.' : (previewOnly ? 'Cloud generated a short-lived derivative preview. This check does not submit a Core proposal or write media.' : '')
 		);
+	}
+
+	async function applyMediaDerivativeLocally(form) {
+		const state = form.__npcinkMediaDerivativeState;
+		if (!state || !state.derivative || !mediaDerivativeLocalReviewVerified(state)) {
+			throw { message: 'Generate and visibly verify the exact preview before applying it.' };
+		}
+		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
+		if (!(confirmation instanceof HTMLInputElement) || !confirmation.checked) {
+			throw { message: 'Confirm the replacement and restorable-backup statement before applying it.' };
+		}
+		const abilityInput = proposalInputFromState(state);
+		const artifact = state.localReview && state.localReview.artifact ? state.localReview.artifact : abilityInput.derivative_artifact;
+		const input = {
+			attachment_id: abilityInput.attachment_id,
+			derivative_artifact: artifact,
+			expected_derivative_mime_type: abilityInput.expected_derivative_mime_type,
+		};
+		if (abilityInput.file_name) {
+			input.file_name = abilityInput.file_name;
+		}
+		renderTextResult(form, 'Applying the verified image and creating a restorable backup...', 'pending');
+		const payload = await postJson(config.restUrl, 'strong-local-confirmation/media-derivative', {
+			action: 'replace_current',
+			confirmed_action: 'replace_current',
+			confirmed_artifact_id: String(artifact.artifact_id || ''),
+			preview_verified: true,
+			input,
+		});
+		const result = renderShell(form, { provider: 'local WordPress' }, 'Image updated', 'The Media Library attachment now uses the reviewed derivative. Toolkit created backup and verification evidence.');
+		if (result) {
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Replacement completed without a Core proposal. Known content references were handled by the Toolkit transaction.'));
+			renderArtifactSummary(result, 'Backup', payload.backup || {});
+			renderArtifactSummary(result, 'Verification', payload.verification || {});
+			result.appendChild(createRawDetails(payload, 'Local replacement receipt'));
+		}
+		const button = form.querySelector('[data-toolbox-apply-media-derivative]');
+		if (button instanceof HTMLButtonElement) {
+			button.disabled = true;
+		}
 	}
 
 	async function continueMediaDerivativeRun(form, resumeContext) {
@@ -7222,6 +7270,15 @@
 					event.preventDefault();
 					submitMediaDerivativeProposal(form).catch((error) => {
 						renderMediaDerivativeFailure(form, error, 'proposal');
+					});
+					return;
+				}
+
+				const localApplyButton = event.target.closest('[data-toolbox-apply-media-derivative]');
+				if (localApplyButton && form.contains(localApplyButton)) {
+					event.preventDefault();
+					applyMediaDerivativeLocally(form).catch((error) => {
+						renderMediaDerivativeFailure(form, error, 'local replacement');
 					});
 					return;
 				}

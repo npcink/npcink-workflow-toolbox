@@ -62,22 +62,23 @@ Confirm the operator-facing path is still understandable:
   the contextual single-image workbench rather than the batch candidate form;
 - watermark templates expand to the existing canonical watermark input and do
   not add provider, workflow, or execution ownership;
-- an optional output basename is shown as proposal evidence, uses the generated
+- an optional output basename is shown as reviewed confirmation evidence, uses the generated
   MIME extension, and remains subject to final WordPress sanitize/unique rules;
-- the proposal button remains disabled until the preview image verifies and the
+- the **Apply to Media Library** button remains disabled until the preview image verifies and the
   operator confirms rollback-backed replacement semantics;
-- single-image flow says generate preview first, then submit Core optimization
-  review only after inspecting the derivative and adoption preflight;
-- replacement boundary explains that attachment adoption, post content URL
-  repair, and settings URL repair are separate governed actions;
+- single-image flow says generate preview first, then locally apply only after
+  inspecting the exact derivative and confirming the backup statement;
+- replacement receipt exposes Toolkit-owned attachment adoption, known content
+  reference repair, backup, and verification evidence;
 - batch flow says bounded review set, selected previews, and selected Core
   reviews, not one-click whole-site replacement;
 - batch flow defaults to a small review set and does not ask operators to run
   unattended whole-library replacement;
 - the generated preview image loads through the administrator-only local review
   route with a WordPress REST nonce, no-store, and nosniff headers;
-- no button or success state implies Toolbox or Cloud directly writes
-  WordPress media.
+- no batch button or success state implies Toolbox or Cloud bypasses Core;
+- no single-image path authorizes a Toolkit write other than the exact
+  `adopt-cloud-media-derivative` request.
 - no control claims **Save as new media item** until a separate governed
   create-attachment ability exists.
 

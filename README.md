@@ -111,8 +111,10 @@ write decisions are documented: the historical
 fully previewed image, and one current article. The latter may import one
 external or AI-generated image and optionally set it as featured, with native
 capability checks, safe external download or verified Cloud artifact delivery,
-and compensation rollback. Batch,
-background, external-Agent, publishing, replacement, taxonomy, settings, and
+and compensation rollback. ADR-011 separately allows one present administrator
+to replace one existing Media Library image after exact same-origin preview
+verification, explicit final confirmation, and Toolkit-owned backup/rollback.
+Batch, background, external-Agent, publishing, taxonomy, settings, and
 unrelated metadata writes continue through their governed paths.
 
 ADR-006 distinguishes a non-Toolbox write path: an author-reviewed value may be
@@ -147,6 +149,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](docs/decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](docs/decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [ADR-010: Strong Local Confirmation For Single-Article Image Adoption](docs/decisions/ADR-010-single-article-strong-local-image-adoption.md)
+- [ADR-011: Single-Image Local Media Replacement](docs/decisions/ADR-011-single-image-local-media-replacement.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:
@@ -260,6 +263,7 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
+- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
