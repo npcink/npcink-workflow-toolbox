@@ -868,6 +868,15 @@ detail. Toolbox keeps Cloud-backed calls inside explicit product workflows, and
 single-image Core proposal submission, URL repair handoffs, and batch proposal
 submission remain in **Image Handling**.
 
+When **Optimize this image** is opened for exactly one Media Library attachment,
+Toolbox shows a contextual single-image workbench inside the same fixed flow.
+It supports format/size overrides, optional crop, reusable text/logo watermark
+templates, and a safe output basename. The browser must verify the short-lived
+preview and the operator must confirm replacement semantics before Toolbox can
+submit one `adopt-cloud-media-derivative` proposal. The current contract replaces
+the selected attachment with backup and rollback evidence; Toolbox does not
+offer save-as-new until a separate governed create-attachment ability exists.
+
 Provider responses return normalized fields by default. Set **Include provider
 raw responses** to include redacted raw provider payloads for debugging.
 Production hosts can define `NPCINK_TOOLBOX_DISABLE_RAW_RESPONSES` to force raw

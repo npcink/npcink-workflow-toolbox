@@ -35,6 +35,9 @@ The plugin provides a WordPress admin surface and post-editor panel for:
 * internal-link candidates and source-coverage notes;
 * image-source candidates, reviewed hosted image candidates, current-article
   media ALT/caption review sets, and media planning handoff packets;
+* a contextual single-image optimization workbench with verified previews,
+  format/crop controls, reusable text or logo watermark templates, an optional
+  safe output basename, and rollback-backed Core replacement review;
 * Cloud-managed site knowledge search, status, and sync requests when a
   compatible host runtime is connected;
 * review-only Scheduled Review previews, with Cloud runtime inspection and recovery routed to Cloud Addon.

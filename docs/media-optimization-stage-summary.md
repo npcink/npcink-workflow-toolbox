@@ -59,8 +59,10 @@ Toolbox does not approve, execute, or directly write media files.
 
 The product should continue to present:
 
-- single image: select image, generate preview, review preflight, submit Core
-  optimization review;
+- single image: enter from the Media Library, choose a bounded format/crop/
+  watermark template and optional output basename, generate a verified preview,
+  confirm rollback-backed replacement, then submit one Core derivative-adoption
+  review;
 - content URL repair: separate governed action for hard-coded post content
   references;
 - settings URL repair: separate governed action for theme settings, plugin
@@ -74,6 +76,13 @@ scopes can find candidates, but visible language should keep the operator in a
 review-set workflow. The default review set should stay small, with an explicit
 upper bound, so the product feels like governed operator work instead of
 background automation.
+
+The single-image surface must not claim **Save as new media item**. The current
+write contract adopts the derivative as the selected attachment main file and
+records backup/rollback evidence. Creating a second attachment requires a
+future separate governed ability; Toolbox must not emulate that with a direct
+upload or filesystem copy. See
+[Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md).
 
 ## Why Not One-Click Whole-Site Replacement
 

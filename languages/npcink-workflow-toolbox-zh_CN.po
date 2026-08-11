@@ -7661,3 +7661,76 @@ msgstr "正在显示已验证的托管生成图片候选。导入或设置特色
 #: includes/Provider_Client.php
 msgid "The generated image preview set exceeds the local memory budget. Request fewer or smaller images."
 msgstr "生成图片预览集超过本地内存预算，请减少图片数量或请求更小的图片。"
+
+#: includes/Settings.php
+msgid "Toolbox default"
+msgstr "Toolbox 默认设置"
+
+#: includes/Settings.php
+msgid "Subtle text"
+msgstr "轻量文字水印"
+
+#: includes/Settings.php
+msgid "Prominent text"
+msgstr "醒目文字水印"
+
+#: includes/Settings.php
+msgid "Corner logo"
+msgstr "角落 Logo"
+
+#: includes/Settings.php
+msgid "Custom for this run"
+msgstr "本次自定义"
+
+#: includes/Admin_Page.php
+msgid "Choose a reusable Toolbox template, or use the detailed fields for this run. Text templates reuse the text below; logo templates use the configured Toolbox logo source."
+msgstr "请选择可复用的 Toolbox 模板，或为本次处理使用详细字段。文字模板复用下方文字，Logo 模板使用已配置的 Toolbox Logo 来源。"
+
+#: includes/Admin_Page.php
+msgid "Watermark template"
+msgstr "水印模板"
+
+#: includes/Admin_Page.php
+msgid "Output and replacement"
+msgstr "输出与替换"
+
+#: includes/Admin_Page.php
+msgid "Output filename (optional)"
+msgstr "输出文件名（可选）"
+
+#: includes/Admin_Page.php
+msgid "Example: product-guide-cover"
+msgstr "例如：product-guide-cover"
+
+#: includes/Admin_Page.php
+msgid "Enter a basename only. Toolbox removes unsafe path characters and matches the extension to the generated format; the WordPress write ability performs the final sanitize-and-unique check."
+msgstr "只需输入文件基本名称。Toolbox 会移除不安全的路径字符，并让扩展名匹配生成格式；WordPress 写入能力负责最终清洗与唯一性检查。"
+
+#: includes/Admin_Page.php
+msgid "I understand that Core approval will replace this attachment main file and keep governed backup/rollback evidence."
+msgstr "我了解：Core 批准后将替换此附件的主文件，并保留受治理的备份与回滚证据。"
+
+#: includes/Admin_Page.php
+msgid "Save as a new media-library attachment is not offered until a separate governed create-attachment ability exists. Toolbox never copies or renames files directly on disk."
+msgstr "在独立的受治理附件创建能力可用前，暂不提供“另存为新媒体附件”。Toolbox 绝不会直接在磁盘上复制或重命名文件。"
+
+#: includes/Admin_Page.php
+msgid "Optimize one image"
+msgstr "优化单张图片"
+
+#: includes/Admin_Page.php
+#, php-format
+msgid "Attachment #%d is selected. Generate and visually verify one preview before submitting a replacement proposal to Core."
+msgstr "已选择附件 #%d。请先生成并目视确认预览，再向 Core 提交替换提案。"
+
+#: includes/Admin_Page.php
+msgid "Optional crop"
+msgstr "可选裁剪"
+
+#: includes/Admin_Page.php
+msgid "This workbench creates no WordPress write. Final replacement remains a separate Core approval and Adapter/Abilities execution with backup and rollback."
+msgstr "此工作台不会写入 WordPress。最终替换仍需单独经过 Core 批准，并由 Adapter/Abilities 执行且保留备份与回滚。"
+
+#: includes/Admin_Page.php
+msgid "Submit replacement to Core review"
+msgstr "提交替换到 Core 审核"

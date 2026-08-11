@@ -86,6 +86,7 @@ Start from the active documents below before changing code.
 
 - [Media Optimization V1](media-optimization-v1.md)
 - [Media Optimization Stage Summary](media-optimization-stage-summary.md)
+- [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
 - [Media Optimization Release Checklist](media-optimization-release-checklist.md)
 - [Media ALT/Caption Review Set](media-alt-caption-review-set.md)
 - [Media ALT/Caption Toolkit Validation Plan](media-alt-caption-toolkit-validation-plan.md)

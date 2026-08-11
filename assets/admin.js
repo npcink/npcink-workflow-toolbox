@@ -2814,8 +2814,10 @@
 
 	function updateMediaDerivativeSubmitState(form, state) {
 		const submitButton = form.querySelector('[data-toolbox-submit-media-proposal]');
+		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
+		const confirmed = !(confirmation instanceof HTMLInputElement) || confirmation.checked;
 		if (submitButton instanceof HTMLButtonElement) {
-			submitButton.disabled = !(state && state.fromPlanRequest && mediaDerivativeLocalReviewVerified(state));
+			submitButton.disabled = !(state && state.proposalPayload && mediaDerivativeLocalReviewVerified(state) && confirmed);
 		}
 	}
 
@@ -2930,6 +2932,41 @@
 
 	function mediaDerivativeWatermarkInput(raw) {
 		raw = raw || {};
+		const template = String(raw.watermark_template || 'custom');
+		if (template === 'none') {
+			return {};
+		}
+		if (template === 'subtle_text' || template === 'prominent_text') {
+			const prominent = template === 'prominent_text';
+			return {
+				watermark: {
+					type: 'text',
+					text: String(raw.watermark_text || 'AI').trim().slice(0, 64) || 'AI',
+					position: 'bottom_right',
+					opacity: prominent ? 0.88 : 0.55,
+					font_size: prominent ? 48 : 28,
+					color: '#FFFFFF',
+					background: prominent ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.25)',
+					margin_px: prominent ? 24 : 18,
+				},
+			};
+		}
+		if (template === 'logo_corner') {
+			const attachmentId = parseInt(raw.watermark_attachment_id, 10) || 0;
+			const logoInput = {
+				watermark: {
+					type: 'image',
+					position: 'bottom_right',
+					opacity: 0.8,
+					scale_percent: 18,
+					margin_px: 24,
+				},
+			};
+			if (attachmentId > 0) {
+				logoInput.watermark_attachment_id = attachmentId;
+			}
+			return logoInput;
+		}
 		let mode = String(raw.watermark_mode || 'default');
 		if (mode === 'default') {
 			if (String(raw.watermark_policy_enabled || '') !== '1') {
@@ -3245,28 +3282,70 @@
 	function proposalInputFromState(state) {
 		const artifact = state.derivative || {};
 		const abilityInput = state.abilityInput || {};
-		return {
-			attachment_id: abilityInput.attachment_id,
-			derivative_artifact: {
+		let proposalArtifact = {};
+		if (state.proposalPayload && state.proposalPayload.artifact && typeof state.proposalPayload.artifact === 'object') {
+			proposalArtifact = Object.assign({}, state.proposalPayload.artifact);
+		} else if (state.localReview && state.localReview.artifact && typeof state.localReview.artifact === 'object') {
+			proposalArtifact = Object.assign({}, state.localReview.artifact);
+		} else {
+			proposalArtifact = {
 				artifact_id: artifact.artifact_id || artifact.id || '',
 				expires_at: artifact.expires_at || '',
-				expires_ts: artifact.expires_ts || '',
 				mime_type: artifact.mime_type || '',
 				format: artifact.format || '',
 				width: artifact.width || 0,
 				height: artifact.height || 0,
 				filesize_bytes: artifact.filesize_bytes || 0,
-				checksum: artifact.checksum || artifact.sha256 || '',
-				sha256: artifact.sha256 || artifact.checksum || '',
+				sha256: String(artifact.sha256 || artifact.checksum || '').replace(/^sha256:/, ''),
+				suggested_filename: artifact.suggested_filename || '',
+				filename_basis: artifact.filename_basis || {},
 				processing_warnings: Array.isArray(artifact.processing_warnings) ? artifact.processing_warnings : [],
-				cloud_run_id: state.runId || '',
-			},
+			};
+		}
+		const input = {
+			attachment_id: abilityInput.attachment_id,
+			derivative_artifact: proposalArtifact,
 			expected_derivative_mime_type: artifact.mime_type || '',
 			backup_suffix: 'npcink-cloud-backup',
 			dry_run: true,
 			commit: false,
 			idempotency_key: 'media-derivative-' + String(artifact.artifact_id || artifact.id || state.runId || Date.now()),
 		};
+		const fileName = mediaDerivativeFinalFilename(state.outputFilenameBase, proposalArtifact.mime_type || artifact.mime_type);
+		if (fileName) {
+			input.file_name = fileName;
+		}
+		return input;
+	}
+
+	function mediaDerivativeOutputFilename(form) {
+		const field = form.querySelector('[name="output_filename"]');
+		if (!(field instanceof HTMLInputElement)) {
+			return '';
+		}
+		return String(field.value || '')
+			.split(/[\\/]/).pop()
+			.replace(/\.[^.]+$/, '')
+			.replace(/[\u0000-\u001f\u007f<>:"|?*]+/g, '')
+			.replace(/\s+/g, '-')
+			.replace(/-+/g, '-')
+			.replace(/^[.\-_]+|[.\-_]+$/g, '')
+			.slice(0, 80);
+	}
+
+	function mediaDerivativeFinalFilename(basename, mimeType) {
+		basename = String(basename || '').trim();
+		if (!basename) {
+			return '';
+		}
+		const extensions = {
+			'image/avif': 'avif',
+			'image/jpeg': 'jpg',
+			'image/jpg': 'jpg',
+			'image/png': 'png',
+			'image/webp': 'webp',
+		};
+		return basename + '.' + (extensions[String(mimeType || '').toLowerCase()] || 'webp');
 	}
 
 	function preflightInputFromState(state) {
@@ -3719,7 +3798,10 @@
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Preview uses artifact evidence only. The local review response did not return an exact POST transport.'));
 		}
 		renderArtifactSummary(result, 'Derivative artifact', derivative);
-		if (state.fromPlanRequest) {
+		if (form.querySelector('[data-toolbox-single-media-workbench]') && state.proposalPayload) {
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'The verified derivative is ready for one governed replacement proposal. Confirm the rollback statement, then submit before the artifact expires.'));
+			appendMeta(meta, 'Output filename', mediaDerivativeFinalFilename(state.outputFilenameBase, derivative.mime_type) || derivative.suggested_filename || 'WordPress final suggestion');
+		} else if (state.fromPlanRequest) {
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Optimization plan is ready for one Core proposal approval. Next action: inspect the preview and preflight evidence, then submit before the artifact expires.'));
 			renderArtifactSummary(result, 'Media optimization plan', state.fromPlanRequest.plan || {});
 		} else if (state.proposalEnvelope) {
@@ -4507,6 +4589,7 @@
 		const input = asObject(resumeContext.input);
 		const mediaDetails = asObject(resumeContext.media_details);
 		const previewOnly = resumeContext.preview_only === true;
+		const outputFilenameBase = String(resumeContext.output_filename_base || '');
 		const createPayload = asObject(resumeContext.create);
 		const runId = String(resumeContext.run_id || createPayload.run_id || (createPayload.cloud_run && createPayload.cloud_run.run_id) || '');
 		if (!runId || !input.attachment_id) {
@@ -4525,6 +4608,7 @@
 						create: createPayload,
 						input,
 						media_details: mediaDetails,
+						output_filename_base: outputFilenameBase,
 						preview_only: previewOnly,
 					},
 				});
@@ -4547,6 +4631,7 @@
 			abilityInput: input,
 			runId,
 			derivative,
+			localReview,
 		};
 		let preflightEnvelope = null;
 		try {
@@ -4564,6 +4649,7 @@
 			return {
 				abilityInput: input,
 				mediaDetailsInput: mediaDetails || {},
+				outputFilenameBase,
 				create: createPayload,
 				result: resultPayload,
 				runId,
@@ -4587,6 +4673,7 @@
 		return {
 			abilityInput: input,
 			mediaDetailsInput: mediaDetails || {},
+			outputFilenameBase,
 			create: createPayload,
 			result: resultPayload,
 			runId,
@@ -4600,7 +4687,7 @@
 		};
 	}
 
-	async function createMediaDerivativePreview(input, mediaDetails, previewOnly, onProgress) {
+	async function createMediaDerivativePreview(input, mediaDetails, previewOnly, onProgress, outputFilenameBase) {
 		if (!input.attachment_id) {
 			throw { message: 'Select an image attachment before generating a preview.' };
 		}
@@ -4622,6 +4709,7 @@
 			create: createPayload,
 			input,
 			media_details: mediaDetails || {},
+			output_filename_base: String(outputFilenameBase || ''),
 			preview_only: previewOnly === true,
 		}, onProgress);
 	}
@@ -4633,6 +4721,7 @@
 
 		const input = mediaDerivativeInput(form);
 		const mediaDetails = mediaDetailsInput(form);
+		const outputFilenameBase = mediaDerivativeOutputFilename(form);
 		const previewOnly = form.hasAttribute('data-toolbox-media-derivative-preview-only');
 		form.__npcinkMediaDerivativeState = null;
 		form.__npcinkMediaDerivativePendingRun = null;
@@ -4640,7 +4729,7 @@
 		renderMediaDerivativeProgress(form, 'upload', 'Preparing the selected source for Cloud processing.');
 		const state = await createMediaDerivativePreview(input, mediaDetails, previewOnly, (stage, detail) => {
 			renderMediaDerivativeProgress(form, stage, detail);
-		});
+		}, outputFilenameBase);
 		form.__npcinkMediaDerivativeState = state;
 		form.__npcinkMediaDerivativePendingRun = null;
 		updateMediaDerivativeSubmitState(form, state);
@@ -5034,26 +5123,24 @@
 				message: 'The same-origin preview image must load successfully before Core submission.',
 			};
 		}
-		if (!state.fromPlanRequest) {
+		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
+		if (confirmation instanceof HTMLInputElement && !confirmation.checked) {
 			throw {
-				message: 'Reviewed media details are required before Toolbox can submit one media optimization proposal. Add title, alt, caption, description, or source type, then generate the preview again.',
-				data: state.proposalEnvelope,
+				message: 'Confirm the governed replacement and rollback statement before submitting this proposal.',
 			};
 		}
 
 		renderTextResult(form, 'Submitting Core optimization proposal...', 'pending');
-		const bridge = await postJson(config.adapterRestUrl, 'proposals/from-plan', Object.assign({}, state.fromPlanRequest, {
-			plan_input: {
-				attachment_id: state.abilityInput && state.abilityInput.attachment_id ? state.abilityInput.attachment_id : 0,
-				source_type: state.mediaDetailsInput && state.mediaDetailsInput.source_type ? state.mediaDetailsInput.source_type : '',
-			},
-			caller: {
-				external_thread_id: 'toolbox-media-optimization',
-			},
-		}));
+		const bridge = await postJson(config.adapterRestUrl, 'proposals', {
+			ability_id: 'npcink-abilities-toolkit/adopt-cloud-media-derivative',
+			title: 'Replace media file with reviewed Cloud derivative',
+			summary: 'Review one visually confirmed derivative, output filename, backup evidence, and rollback path before replacing the current attachment file.',
+			input: proposalInputFromState(state),
+			preview: state.proposalPayload,
+		});
 		renderProposalCreated(form, proposalFromPlanResponse(bridge), {
 			title: 'Media optimization proposal submitted',
-			summary: 'Core created one proposal for reviewed media details and the Cloud derivative adoption.',
+			summary: 'Core created one governed replacement proposal. Approval and execution remain outside Toolbox.',
 			rawTitle: 'Core media optimization response',
 		});
 	}
@@ -7013,6 +7100,10 @@
 			const selectedIdsField = form.querySelector('[data-toolbox-selected-attachment-ids]');
 			if (selectedIdsField instanceof HTMLInputElement) {
 				selectedIdsField.addEventListener('input', () => prefillSelectedAttachmentIds(form));
+			}
+			const replacementConfirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
+			if (replacementConfirmation instanceof HTMLInputElement) {
+				replacementConfirmation.addEventListener('change', () => updateMediaDerivativeSubmitState(form, form.__npcinkMediaDerivativeState || null));
 			}
 
 			form.addEventListener('click', (event) => {
