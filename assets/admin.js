@@ -463,7 +463,7 @@
 		result.appendChild(el(
 			'div',
 			'npcink-toolbox__result-notice is-pending',
-			'Current state: ' + String(detail || stages[activeIndex].label)
+			t('Current state:') + ' ' + String(detail || t(stages[activeIndex].label))
 		));
 	}
 
@@ -506,6 +506,13 @@
 	}
 
 	function renderMediaDerivativeFailure(form, error, context) {
+		if (form.querySelector('[data-toolbox-single-media-workbench]')) {
+			if (context === 'local replacement') {
+				setSingleImageWorkbenchPhase(form, 'review');
+			} else {
+				resetSingleImageWorkbench(form);
+			}
+		}
 		const result = renderShell(
 			form,
 			{ provider: context === 'proposal' ? 'core governance' : 'cloud runtime' },
@@ -2812,6 +2819,62 @@
 		);
 	}
 
+	function setSingleImageWorkbenchPhase(form, phase) {
+		const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+		if (!workbench) {
+			return;
+		}
+		const normalized = ['initial', 'previewing', 'review', 'applying', 'completed'].includes(phase) ? phase : 'initial';
+		workbench.setAttribute('data-toolbox-single-media-phase', normalized);
+		const reviewActions = workbench.querySelector('[data-toolbox-single-media-review-actions]');
+		const completeActions = workbench.querySelector('[data-toolbox-single-media-complete-actions]');
+		const runButton = workbench.querySelector('[data-toolbox-run-media-derivative]');
+		if (reviewActions) {
+			reviewActions.hidden = normalized !== 'review';
+		}
+		if (completeActions) {
+			completeActions.hidden = normalized !== 'completed';
+		}
+		if (runButton instanceof HTMLButtonElement) {
+			runButton.hidden = normalized === 'applying' || normalized === 'completed';
+			runButton.disabled = normalized === 'previewing';
+			runButton.textContent = t(normalized === 'review' ? 'Regenerate preview' : 'Generate preview');
+		}
+		workbench.querySelectorAll('.npcink-toolbox__single-media-settings input:not([data-toolbox-confirm-media-replacement]), .npcink-toolbox__single-media-settings select, .npcink-toolbox__single-media-settings textarea').forEach((control) => {
+			control.disabled = normalized === 'previewing' || normalized === 'applying' || normalized === 'completed';
+		});
+	}
+
+	function resetSingleImageWorkbench(form) {
+		const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+		if (!workbench) {
+			return;
+		}
+		const optimizedCard = workbench.querySelector('[data-toolbox-optimized-media-card]');
+		const optimizedImage = workbench.querySelector('[data-toolbox-optimized-media-image]');
+		const confirmation = workbench.querySelector('[data-toolbox-confirm-media-replacement]');
+		const result = form.querySelector('.npcink-toolbox__result');
+		if (optimizedImage instanceof HTMLImageElement) {
+			releaseMediaDerivativePreviewUrl(optimizedImage, false);
+			optimizedImage.removeAttribute('src');
+		}
+		if (optimizedCard) {
+			optimizedCard.hidden = true;
+		}
+		workbench.classList.remove('has-optimized-preview');
+		if (confirmation instanceof HTMLInputElement) {
+			confirmation.checked = false;
+		}
+		if (result) {
+			clearNode(result);
+			result.hidden = true;
+			result.classList.add('is-empty');
+		}
+		form.__npcinkMediaDerivativeState = null;
+		setSingleImageWorkbenchPhase(form, 'initial');
+		updateMediaDerivativeSubmitState(form, null);
+	}
+
 	function updateMediaDerivativeSubmitState(form, state) {
 		const submitButton = form.querySelector('[data-toolbox-submit-media-proposal], [data-toolbox-apply-media-derivative]');
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
@@ -3730,7 +3793,95 @@
 		return formatMediaBytes(originalBytes) + ' → ' + formatMediaBytes(previewBytes) + ' (' + (percent >= 0 ? '-' + String(percent) : '+' + String(Math.abs(percent))) + '%)';
 	}
 
+	function renderSingleImageDerivativeRun(form, state, message) {
+		const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+		const payload = state.result || state.create || {};
+		const derivative = state.derivative || derivativeFromResult(payload);
+		const localReview = state.localReview || localReviewFromResult(payload);
+		const result = renderShell(
+			form,
+			{ provider: 'cloud runtime' },
+			'Media derivative preview',
+			message || 'Compare the optimized preview with the original. No Media Library file has been changed.'
+		);
+		if (!result || !workbench) {
+			return;
+		}
+
+		const optimizedCard = workbench.querySelector('[data-toolbox-optimized-media-card]');
+		const image = workbench.querySelector('[data-toolbox-optimized-media-image]');
+		const name = workbench.querySelector('[data-toolbox-optimized-media-name]');
+		const meta = workbench.querySelector('[data-toolbox-optimized-media-meta]');
+		if (optimizedCard) {
+			optimizedCard.hidden = false;
+			optimizedCard.classList.add('is-loading');
+		}
+		workbench.classList.add('has-optimized-preview');
+		if (name) {
+			name.textContent = mediaDerivativeFinalFilename(state.outputFilenameBase, derivative.mime_type) || derivative.suggested_filename || t('Optimized image');
+		}
+		if (meta) {
+			clearNode(meta);
+			appendMeta(meta, 'Format', derivative.format ? String(derivative.format).toUpperCase() : derivative.mime_type);
+			appendMeta(meta, 'Dimensions', derivative.width && derivative.height ? derivative.width + ' × ' + derivative.height : '');
+			appendMeta(meta, 'File size', formatMediaBytes(derivative.filesize_bytes));
+		}
+
+		const previewStatus = el('div', 'npcink-toolbox__result-notice is-pending', 'Loading and verifying the optimized preview...');
+		result.appendChild(previewStatus);
+		if (Array.isArray(derivative.processing_warnings)) {
+			derivative.processing_warnings.forEach((warning) => result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', warning)));
+		}
+		result.appendChild(createRawDetails(payload, 'Technical details'));
+
+		if (!(image instanceof HTMLImageElement) || !startMediaDerivativePreviewImage(
+			image,
+			localReview,
+			() => {
+				state.localReviewStatus = 'verified';
+				if (optimizedCard) {
+					optimizedCard.classList.remove('is-loading');
+				}
+				previewStatus.classList.remove('is-pending');
+				previewStatus.classList.add('is-ok');
+				previewStatus.textContent = t('Preview verified. Review the comparison, then confirm the replacement.');
+				setSingleImageWorkbenchPhase(form, 'review');
+				updateMediaDerivativeSubmitState(form, state);
+			},
+			(error) => {
+				state.localReviewStatus = 'failed';
+				state.localReviewError = error || { message: 'Verified preview could not be displayed.' };
+				if (optimizedCard) {
+					optimizedCard.classList.remove('is-loading');
+					optimizedCard.hidden = true;
+				}
+				workbench.classList.remove('has-optimized-preview');
+				previewStatus.classList.remove('is-pending');
+				previewStatus.classList.add('is-warning');
+				previewStatus.textContent = t('Verified preview could not be displayed. ') + formatErrorMessage(error || {}, 'Retry the preview before artifact expiry.');
+				setSingleImageWorkbenchPhase(form, 'initial');
+				updateMediaDerivativeSubmitState(form, state);
+			}
+		)) {
+			state.localReviewStatus = 'failed';
+			if (optimizedCard) {
+				optimizedCard.classList.remove('is-loading');
+				optimizedCard.hidden = true;
+			}
+			workbench.classList.remove('has-optimized-preview');
+			previewStatus.classList.remove('is-pending');
+			previewStatus.classList.add('is-warning');
+			previewStatus.textContent = t('The optimized preview could not be securely loaded. Generate it again.');
+			setSingleImageWorkbenchPhase(form, 'initial');
+			updateMediaDerivativeSubmitState(form, state);
+		}
+	}
+
 	function renderMediaDerivativeRun(form, state, message) {
+		if (form.querySelector('[data-toolbox-single-media-workbench]')) {
+			renderSingleImageDerivativeRun(form, state, message);
+			return;
+		}
 		const payload = state.result || state.create || {};
 		const derivative = state.derivative || derivativeFromResult(payload);
 		const localReview = state.localReview || localReviewFromResult(payload);
@@ -4568,12 +4719,12 @@
 			}
 			if (lastStatus === 'succeeded' || lastStatus === 'complete' || lastStatus === 'completed') {
 				if (typeof onProgress === 'function') {
-					onProgress('read', 'Cloud processing finished. Reading and verifying the short-lived result.');
+					onProgress('read', t('Cloud processing finished. Reading and verifying the short-lived result.'));
 				}
 				return getJson(config.restUrl, 'media-derivative-preview/' + encodeURIComponent(runId) + '/result');
 			}
 			if (typeof onProgress === 'function' && attempt === 0) {
-				onProgress('process', 'Cloud run ' + String(runId) + ' is processing the uploaded source.');
+				onProgress('process', t('Cloud is processing the uploaded source.'));
 			}
 			await sleep(1500);
 		}
@@ -4628,7 +4779,7 @@
 			throw { message: 'Toolbox did not return a canonical local review projection for the Cloud artifact.' };
 		}
 		if (typeof onProgress === 'function') {
-			onProgress('read', 'Exact artifact and local review descriptors passed validation. Reading image bytes requires browser verification.');
+			onProgress('read', t('The result descriptor passed validation. Loading the image for visual verification.'));
 		}
 		const preflightState = {
 			abilityInput: input,
@@ -4698,7 +4849,7 @@
 		}
 
 		if (typeof onProgress === 'function') {
-			onProgress('upload', 'Uploading the selected WordPress source through Cloud Addon.');
+			onProgress('upload', t('Uploading the selected WordPress image through Cloud Addon.'));
 		}
 		const createPayload = await postJson(config.restUrl, 'media-derivative-preview', { input });
 		const runId = createPayload.run_id || (createPayload.cloud_run && createPayload.cloud_run.run_id) || '';
@@ -4706,7 +4857,7 @@
 			throw { message: 'Toolbox did not return a Cloud run id.' };
 		}
 		if (typeof onProgress === 'function') {
-			onProgress('process', 'Source accepted. Cloud run ' + String(runId) + ' is processing the derivative.');
+			onProgress('process', t('Source accepted. Cloud is generating the optimized image.'));
 		}
 		return finishMediaDerivativePreview({
 			contract_version: 'toolbox_media_derivative_resume.v1',
@@ -4730,10 +4881,14 @@
 		const outputFilenameBase = mediaDerivativeOutputFilename(form);
 		const localConfirmation = Boolean(form.querySelector('[data-toolbox-single-media-workbench]'));
 		const previewOnly = form.hasAttribute('data-toolbox-media-derivative-preview-only') || localConfirmation;
+		if (localConfirmation) {
+			resetSingleImageWorkbench(form);
+		}
 		form.__npcinkMediaDerivativeState = null;
 		form.__npcinkMediaDerivativePendingRun = null;
+		setSingleImageWorkbenchPhase(form, 'previewing');
 		updateMediaDerivativeSubmitState(form, null);
-		renderMediaDerivativeProgress(form, 'upload', 'Preparing the selected source for Cloud processing.');
+		renderMediaDerivativeProgress(form, 'upload', t('Preparing the selected image for Cloud processing.'));
 		const state = await createMediaDerivativePreview(input, mediaDetails, previewOnly, (stage, detail) => {
 			renderMediaDerivativeProgress(form, stage, detail);
 		}, outputFilenameBase, localConfirmation);
@@ -4744,8 +4899,74 @@
 		renderMediaDerivativeRun(
 			form,
 			state,
-			localConfirmation ? 'Cloud generated a short-lived derivative preview for local confirmation. No media has been changed yet.' : (previewOnly ? 'Cloud generated a short-lived derivative preview. This check does not submit a Core proposal or write media.' : '')
+			localConfirmation ? t('Cloud generated an optimized preview for local confirmation. No media has been changed yet.') : (previewOnly ? 'Cloud generated a short-lived derivative preview. This check does not submit a Core proposal or write media.' : '')
 		);
+	}
+
+	function renderSingleImageReplacementSuccess(form, state, payload) {
+		const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+		const replacement = asObject(payload.replacement);
+		const after = asObject(replacement.after);
+		const backup = asObject(payload.backup);
+		const verification = asObject(payload.verification);
+		const referenceRepairs = asObject(replacement.content_reference_repairs);
+		const derivative = asObject(state.derivative);
+		const originalBytes = workbench ? Number(workbench.getAttribute('data-original-filesize') || 0) : 0;
+		const optimizedBytes = Number(after.filesize_bytes || derivative.filesize_bytes || 0);
+		const filename = String(after.relative_file || replacement.proposed_filename || derivative.suggested_filename || '').split('/').pop();
+		const verified = verification.media_file_matches_expected === true
+			&& verification.media_mime_type_matches_expected === true
+			&& verification.backup_available === true;
+		const result = renderShell(
+			form,
+			{ provider: 'local WordPress' },
+			'Image updated',
+			'The reviewed image is now active in the Media Library. A restorable backup was created.'
+		);
+		if (!result) {
+			return;
+		}
+
+		const meta = el('div', 'npcink-toolbox__result-meta npcink-toolbox__single-media-result-meta');
+		appendMeta(meta, 'File name', filename);
+		appendMeta(meta, 'Format', after.mime_type ? String(after.mime_type).replace('image/', '').toUpperCase() : (derivative.format ? String(derivative.format).toUpperCase() : ''));
+		appendMeta(meta, 'Dimensions', (after.width || derivative.width) && (after.height || derivative.height) ? String(after.width || derivative.width) + ' × ' + String(after.height || derivative.height) : '');
+		appendMeta(meta, 'Original size', formatMediaBytes(originalBytes));
+		appendMeta(meta, 'Optimized size', formatMediaBytes(optimizedBytes));
+		if (originalBytes > 0 && optimizedBytes > 0) {
+			const savedPercent = Math.round((1 - (optimizedBytes / originalBytes)) * 100);
+			appendMeta(meta, savedPercent >= 0 ? 'Saved' : 'Size change', (savedPercent >= 0 ? '' : '+') + String(Math.abs(savedPercent)) + '%');
+		}
+		result.appendChild(meta);
+		const backupCreated = Boolean(backup.relative_file || verification.backup_available);
+		result.appendChild(el('div', backupCreated ? 'npcink-toolbox__result-notice is-ok' : 'npcink-toolbox__result-notice is-warning', backupCreated ? 'Backup created' : 'Backup evidence returned'));
+		const updatedCount = Number(verification.content_reference_updated_count || referenceRepairs.updated_count || 0);
+		const replacementCount = Number(verification.content_reference_actual_replacement_count || referenceRepairs.actual_replacement_count || 0);
+		result.appendChild(el(
+			'div',
+			'npcink-toolbox__result-notice is-ok',
+			updatedCount > 0 || replacementCount > 0
+				? t('Content references updated:') + ' ' + String(updatedCount) + ' ' + t('posts') + ', ' + String(replacementCount) + ' ' + t('replacements') + '.'
+				: 'No post-content image references needed updating.'
+		));
+		result.appendChild(el('div', verified ? 'npcink-toolbox__result-notice is-ok' : 'npcink-toolbox__result-notice is-warning', verified ? 'Replacement verified' : 'Review the technical verification details'));
+
+		const editUrl = workbench ? String(workbench.getAttribute('data-media-edit-url') || '') : '';
+		if (editUrl) {
+			const actions = el('div', 'npcink-toolbox__result-actions');
+			const link = createLink(editUrl, 'View media details');
+			link.className = 'button button-primary';
+			actions.appendChild(link);
+			result.appendChild(actions);
+		}
+		result.appendChild(createRawDetails(payload, 'Technical details'));
+
+		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
+		if (confirmation instanceof HTMLInputElement) {
+			confirmation.checked = false;
+		}
+		setSingleImageWorkbenchPhase(form, 'completed');
+		updateMediaDerivativeSubmitState(form, null);
 	}
 
 	async function applyMediaDerivativeLocally(form) {
@@ -4767,7 +4988,8 @@
 		if (abilityInput.file_name) {
 			input.file_name = abilityInput.file_name;
 		}
-		renderTextResult(form, 'Applying the verified image and creating a restorable backup...', 'pending');
+		setSingleImageWorkbenchPhase(form, 'applying');
+		renderTextResult(form, t('Applying the verified image and creating a restorable backup...'), 'pending');
 		const payload = await postJson(config.restUrl, 'strong-local-confirmation/media-derivative', {
 			action: 'replace_current',
 			confirmed_action: 'replace_current',
@@ -4775,17 +4997,7 @@
 			preview_verified: true,
 			input,
 		});
-		const result = renderShell(form, { provider: 'local WordPress' }, 'Image updated', 'The Media Library attachment now uses the reviewed derivative. Toolkit created backup and verification evidence.');
-		if (result) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Replacement completed without a Core proposal. Known content references were handled by the Toolkit transaction.'));
-			renderArtifactSummary(result, 'Backup', payload.backup || {});
-			renderArtifactSummary(result, 'Verification', payload.verification || {});
-			result.appendChild(createRawDetails(payload, 'Local replacement receipt'));
-		}
-		const button = form.querySelector('[data-toolbox-apply-media-derivative]');
-		if (button instanceof HTMLButtonElement) {
-			button.disabled = true;
-		}
+		renderSingleImageReplacementSuccess(form, state, payload);
 	}
 
 	async function continueMediaDerivativeRun(form, resumeContext) {
@@ -7153,6 +7365,19 @@
 			if (replacementConfirmation instanceof HTMLInputElement) {
 				replacementConfirmation.addEventListener('change', () => updateMediaDerivativeSubmitState(form, form.__npcinkMediaDerivativeState || null));
 			}
+			const singleWorkbench = form.querySelector('[data-toolbox-single-media-workbench]');
+			if (singleWorkbench) {
+				setSingleImageWorkbenchPhase(form, 'initial');
+				singleWorkbench.querySelector('.npcink-toolbox__single-media-settings')?.addEventListener('change', (event) => {
+					if (
+						event.target instanceof Element
+						&& !event.target.matches('[data-toolbox-confirm-media-replacement]')
+						&& singleWorkbench.getAttribute('data-toolbox-single-media-phase') === 'review'
+					) {
+						resetSingleImageWorkbench(form);
+					}
+				});
+			}
 
 			form.addEventListener('click', (event) => {
 				if (!(event.target instanceof Element)) {
@@ -7280,6 +7505,13 @@
 					applyMediaDerivativeLocally(form).catch((error) => {
 						renderMediaDerivativeFailure(form, error, 'local replacement');
 					});
+					return;
+				}
+
+				const reloadWorkbenchButton = event.target.closest('[data-toolbox-reload-media-workbench]');
+				if (reloadWorkbenchButton && form.contains(reloadWorkbenchButton)) {
+					event.preventDefault();
+					window.location.reload();
 					return;
 				}
 
