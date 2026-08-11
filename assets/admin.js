@@ -2882,6 +2882,19 @@
 		return String(select.options[select.selectedIndex].textContent || '').trim();
 	}
 
+	function syncWatermarkTemplateSelection(form) {
+		const select = form.querySelector('[data-toolbox-watermark-template]');
+		const definitionField = form.querySelector('[data-toolbox-watermark-template-definition]');
+		const logoUrlField = form.querySelector('[data-toolbox-watermark-template-logo-url]');
+		const option = select instanceof HTMLSelectElement && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+		if (definitionField instanceof HTMLInputElement) {
+			definitionField.value = option ? String(option.getAttribute('data-watermark-definition') || '') : '';
+		}
+		if (logoUrlField instanceof HTMLInputElement) {
+			logoUrlField.value = option ? String(option.getAttribute('data-watermark-logo-url') || '') : '';
+		}
+	}
+
 	function syncSingleImageOptionSummaries(form) {
 		const filenameMode = form.querySelector('[name="output_filename_mode"]');
 		const customFilename = form.querySelector('[data-toolbox-custom-output-filename]');
@@ -2936,7 +2949,9 @@
 			logoFields.hidden = !custom || customMode !== 'image';
 		}
 
-		const watermarkInput = mediaDerivativeWatermarkInput(serialize(form));
+		syncWatermarkTemplateSelection(form);
+		const raw = serialize(form);
+		const watermarkInput = mediaDerivativeWatermarkInput(raw);
 		const watermark = watermarkInput.watermark && typeof watermarkInput.watermark === 'object' ? watermarkInput.watermark : null;
 		const templateLabel = selectedOptionLabel(template);
 		const stateLabel = watermark ? t('Effect preview shown on image') : t('No watermark effect');
@@ -2947,36 +2962,15 @@
 			detailsSummary.textContent = custom ? t('Custom settings') : templateLabel;
 		}
 
-		const logoUrl = String(workbench.getAttribute('data-watermark-logo-url') || '');
+		const logoUrl = String(raw.watermark_template_logo_url || workbench.getAttribute('data-watermark-logo-url') || '');
 		workbench.querySelectorAll('[data-toolbox-watermark-effect]').forEach((effect) => {
-			clearNode(effect);
-			effect.classList.remove('is-logo');
-			effect.removeAttribute('style');
 			if (!watermark) {
+				clearNode(effect);
 				effect.hidden = true;
 				return;
 			}
 			effect.hidden = false;
-			effect.setAttribute('data-position', String(watermark.position || 'bottom_right'));
-			effect.style.setProperty('--watermark-margin', String(Math.max(0, Math.min(40, Number(watermark.margin_px ?? 18)))) + 'px');
-			effect.style.opacity = String(Math.max(0, Math.min(1, Number(watermark.opacity ?? 0.8))));
-			if (watermark.type === 'text') {
-				effect.textContent = String(watermark.text || 'AI');
-				effect.style.color = String(watermark.color || '#FFFFFF');
-				effect.style.background = String(watermark.background || 'rgba(0,0,0,0.35)');
-				effect.style.fontSize = String(Math.max(12, Math.min(32, Math.round(Number(watermark.font_size || 28) / 2)))) + 'px';
-				return;
-			}
-			effect.classList.add('is-logo');
-			effect.style.width = String(Math.max(14, Math.min(45, Number(watermark.scale_percent || 18)))) + '%';
-			if (logoUrl) {
-				const logo = el('img');
-				logo.src = logoUrl;
-				logo.alt = t('Configured watermark logo');
-				effect.appendChild(logo);
-			} else {
-				effect.textContent = t('Logo not configured');
-			}
+			renderWatermarkEffect(effect, watermark, logoUrl);
 		});
 		workbench.querySelectorAll('[data-toolbox-watermark-effect-label]').forEach((label) => {
 			label.hidden = !watermark;
@@ -2984,8 +2978,35 @@
 	}
 
 	function syncSingleImageOptions(form) {
+		syncWatermarkTemplateSelection(form);
 		syncSingleImageOptionSummaries(form);
 		syncSingleImageWatermarkPreview(form);
+	}
+
+	function renderWatermarkEffect(effect, watermark, logoUrl) {
+		clearNode(effect);
+		effect.classList.remove('is-logo');
+		effect.removeAttribute('style');
+		effect.setAttribute('data-position', String(watermark.position || 'bottom_right'));
+		effect.style.setProperty('--watermark-margin', String(Math.max(0, Math.min(40, Number(watermark.margin_px ?? 18)))) + 'px');
+		effect.style.opacity = String(Math.max(0, Math.min(1, Number(watermark.opacity ?? 0.8))));
+		if (watermark.type === 'text') {
+			effect.textContent = String(watermark.text || 'AI');
+			effect.style.color = String(watermark.color || '#FFFFFF');
+			effect.style.background = String(watermark.background || 'rgba(0,0,0,0.35)');
+			effect.style.fontSize = String(Math.max(12, Math.min(32, Math.round(Number(watermark.font_size || 28) / 2)))) + 'px';
+			return;
+		}
+		effect.classList.add('is-logo');
+		effect.style.width = String(Math.max(14, Math.min(45, Number(watermark.scale_percent || 18)))) + '%';
+		if (logoUrl) {
+			const logo = el('img');
+			logo.src = logoUrl;
+			logo.alt = t('Configured watermark logo');
+			effect.appendChild(logo);
+		} else {
+			effect.textContent = t('Logo not configured');
+		}
 	}
 
 	function updateMediaDerivativeSubmitState(form, state) {
@@ -3066,6 +3087,7 @@
 	}
 
 	function mediaDerivativeInput(form) {
+		syncWatermarkTemplateSelection(form);
 		const raw = serialize(form);
 		const input = {};
 		['attachment_id', 'quality'].forEach((key) => {
@@ -3112,6 +3134,21 @@
 		const template = String(raw.watermark_template || 'custom');
 		if (template === 'none') {
 			return {};
+		}
+		if (template !== 'custom' && raw.watermark_template_definition) {
+			try {
+				const definition = JSON.parse(String(raw.watermark_template_definition));
+				if (definition && definition.watermark && typeof definition.watermark === 'object') {
+					const input = { watermark: Object.assign({}, definition.watermark) };
+					const attachmentId = parseInt(definition.watermark_attachment_id, 10) || 0;
+					if (attachmentId > 0) {
+						input.watermark_attachment_id = attachmentId;
+					}
+					return input;
+				}
+			} catch (error) {
+				// Fall through to the bounded built-in/default behavior.
+			}
 		}
 		if (template === 'subtle_text' || template === 'prominent_text') {
 			const prominent = template === 'prominent_text';
@@ -3365,6 +3402,7 @@
 	}
 
 	function mediaDerivativeBatchPlanInput(form) {
+		syncWatermarkTemplateSelection(form);
 		const raw = serialize(form);
 		const scope = resolveMediaBatchScopePreset(raw);
 		const recipe = resolveMediaBatchRecipeDefaults(raw);
@@ -5343,6 +5381,7 @@
 		if (!candidates.length) {
 			throw { message: 'Select at least one batch candidate before generating previews.' };
 		}
+		syncWatermarkTemplateSelection(form);
 		const raw = serialize(form);
 		const cropInput = mediaDerivativeCropInput(raw);
 		const watermarkInput = mediaDerivativeWatermarkInput(raw);
@@ -7478,6 +7517,285 @@
 		preview.appendChild(el('span', '', 'Attachment selected'));
 	}
 
+	function watermarkTemplateEditorField(editor, key) {
+		return editor.querySelector('[data-template-field="' + key + '"]');
+	}
+
+	function watermarkTemplateEditorDefinition(editor) {
+		const value = (key, fallback) => {
+			const field = watermarkTemplateEditorField(editor, key);
+			return field instanceof HTMLInputElement || field instanceof HTMLSelectElement ? field.value : fallback;
+		};
+		const type = value('type', 'text') === 'image' ? 'image' : 'text';
+		const watermark = {
+			type,
+			position: value('position', 'bottom_right'),
+			opacity: Math.max(0, Math.min(100, Number(value('opacity', 80)))) / 100,
+			margin_px: Math.max(0, Math.min(1000, Number(value('margin', 24)))),
+		};
+		const definition = { watermark };
+		if (type === 'text') {
+			watermark.text = String(value('text', 'AI')).trim().slice(0, 64) || 'AI';
+			watermark.font_size = Math.max(8, Math.min(256, Number(value('font_size', 48))));
+			watermark.color = value('color', '#FFFFFF');
+			watermark.background = hexColorToRgba(value('background_color', '#000000'), Math.max(0, Math.min(100, Number(value('background_opacity', 35)))) / 100);
+		} else {
+			watermark.scale_percent = Math.max(1, Math.min(100, Number(value('scale', 20))));
+			const attachmentId = parseInt(value('attachment_id', '0'), 10) || 0;
+			if (attachmentId > 0) {
+				definition.watermark_attachment_id = attachmentId;
+			}
+		}
+		return definition;
+	}
+
+	function reindexWatermarkTemplateEditors(library) {
+		library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((editor, index) => {
+			editor.querySelectorAll('[name]').forEach((field) => {
+				field.name = String(field.name || '').replace(/\[custom_templates\]\[\d+\]/, '[custom_templates][' + index + ']');
+			});
+		});
+	}
+
+	function syncWatermarkLibraryDefaultOptions(library) {
+		const select = library.querySelector('[data-toolbox-watermark-library-default]');
+		if (!(select instanceof HTMLSelectElement)) {
+			return;
+		}
+		const selected = select.value;
+		select.querySelectorAll('[data-user-watermark-option]').forEach((option) => option.remove());
+		library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((editor) => {
+			const idField = watermarkTemplateEditorField(editor, 'id');
+			const labelField = watermarkTemplateEditorField(editor, 'label');
+			if (!(idField instanceof HTMLInputElement) || !(labelField instanceof HTMLInputElement)) {
+				return;
+			}
+			const option = el('option');
+			option.value = idField.value;
+			option.textContent = labelField.value.trim() || t('New template');
+			option.setAttribute('data-user-watermark-option', '1');
+			option.setAttribute('data-watermark-definition', JSON.stringify(watermarkTemplateEditorDefinition(editor)));
+			if (editor.dataset.logoUrl) {
+				option.setAttribute('data-watermark-logo-url', editor.dataset.logoUrl);
+			}
+			select.appendChild(option);
+		});
+		select.value = Array.from(select.options).some((option) => option.value === selected) ? selected : 'toolbox_default';
+	}
+
+	function syncWatermarkTemplateEditor(library, editor, preview) {
+		const typeField = watermarkTemplateEditorField(editor, 'type');
+		const labelField = watermarkTemplateEditorField(editor, 'label');
+		const type = typeField instanceof HTMLSelectElement ? typeField.value : 'text';
+		const textFields = editor.querySelector('[data-template-text-fields]');
+		const logoFields = editor.querySelector('[data-template-logo-fields]');
+		if (textFields) {
+			textFields.hidden = type !== 'text';
+		}
+		if (logoFields) {
+			logoFields.hidden = type !== 'image';
+		}
+		const name = editor.querySelector('[data-toolbox-watermark-template-name]');
+		const typeLabel = editor.querySelector('[data-toolbox-watermark-template-type-label]');
+		if (name) {
+			name.textContent = labelField instanceof HTMLInputElement && labelField.value.trim() ? labelField.value.trim() : t('New template');
+		}
+		if (typeLabel) {
+			typeLabel.textContent = type === 'image' ? t('Logo watermark') : t('Text watermark');
+		}
+		editor.querySelectorAll('input[type="range"]').forEach((range) => {
+			const output = range.parentElement ? range.parentElement.querySelector('output') : null;
+			if (output) {
+				output.textContent = String(range.value || '0') + '%';
+			}
+		});
+		if (preview) {
+			const effect = library.querySelector('[data-toolbox-watermark-library-effect]');
+			const previewName = library.querySelector('[data-toolbox-watermark-preview-name]');
+			if (effect) {
+				renderWatermarkEffect(effect, watermarkTemplateEditorDefinition(editor).watermark, String(editor.dataset.logoUrl || ''));
+			}
+			if (previewName) {
+				previewName.textContent = labelField instanceof HTMLInputElement && labelField.value.trim() ? labelField.value.trim() : t('New template');
+			}
+		}
+		syncWatermarkLibraryDefaultOptions(library);
+	}
+
+	function applyWatermarkDefinitionToEditor(editor, definition, label) {
+		const watermark = definition && definition.watermark && typeof definition.watermark === 'object' ? definition.watermark : {};
+		const set = (key, value) => {
+			const field = watermarkTemplateEditorField(editor, key);
+			if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+				field.value = String(value ?? '');
+			}
+		};
+		set('label', label || t('New template'));
+		set('type', watermark.type === 'image' ? 'image' : 'text');
+		set('text', watermark.text || 'AI');
+		set('position', watermark.position || 'bottom_right');
+		set('opacity', Math.round(Number(watermark.opacity ?? 0.8) * 100));
+		set('margin', watermark.margin_px ?? 24);
+		set('font_size', watermark.font_size ?? 48);
+		set('color', watermark.color || '#FFFFFF');
+		set('scale', watermark.scale_percent ?? 20);
+		set('attachment_id', definition.watermark_attachment_id || 0);
+		const background = String(watermark.background || 'rgba(0,0,0,0.35)');
+		const rgba = background.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?/i);
+		if (rgba) {
+			set('background_color', '#' + [rgba[1], rgba[2], rgba[3]].map((part) => Math.max(0, Math.min(255, Number(part))).toString(16).padStart(2, '0')).join(''));
+			set('background_opacity', Math.round(Number(rgba[4] ?? 1) * 100));
+		}
+	}
+
+	function appendWatermarkTemplateEditor(library, definition, label) {
+		const prototype = library.querySelector('[data-toolbox-watermark-template-prototype]');
+		const list = library.querySelector('[data-toolbox-custom-watermark-template-list]');
+		if (!(prototype instanceof HTMLTemplateElement) || !list) {
+			return null;
+		}
+		const fragment = prototype.content.cloneNode(true);
+		const editor = fragment.querySelector('[data-toolbox-watermark-template-editor]');
+		if (!(editor instanceof HTMLDetailsElement)) {
+			return null;
+		}
+		const idField = watermarkTemplateEditorField(editor, 'id');
+		if (idField instanceof HTMLInputElement) {
+			idField.value = 'user_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+		}
+		applyWatermarkDefinitionToEditor(editor, definition || { watermark: { type: 'text' } }, label || t('New template'));
+		list.appendChild(fragment);
+		library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((item) => {
+			item.open = item === editor;
+		});
+		const empty = library.querySelector('[data-toolbox-watermark-template-empty]');
+		if (empty) {
+			empty.hidden = true;
+		}
+		reindexWatermarkTemplateEditors(library);
+		syncWatermarkTemplateEditor(library, editor, true);
+		return editor;
+	}
+
+	function initWatermarkTemplateLibrary() {
+		document.querySelectorAll('[data-toolbox-watermark-library]').forEach((library) => {
+			reindexWatermarkTemplateEditors(library);
+			syncWatermarkLibraryDefaultOptions(library);
+			library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((editor) => syncWatermarkTemplateEditor(library, editor, false));
+			library.addEventListener('toggle', (event) => {
+				const editor = event.target;
+				if (!(editor instanceof HTMLDetailsElement) || !editor.matches('[data-toolbox-watermark-template-editor]') || !editor.open) {
+					return;
+				}
+				library.querySelectorAll('[data-toolbox-watermark-template-editor]').forEach((sibling) => {
+					if (sibling !== editor) {
+						sibling.open = false;
+					}
+				});
+				syncWatermarkTemplateEditor(library, editor, true);
+			}, true);
+			library.addEventListener('input', (event) => {
+				const editor = event.target instanceof Element ? event.target.closest('[data-toolbox-watermark-template-editor]') : null;
+				if (editor) {
+					syncWatermarkTemplateEditor(library, editor, true);
+				}
+			});
+			library.addEventListener('change', (event) => {
+				const editor = event.target instanceof Element ? event.target.closest('[data-toolbox-watermark-template-editor]') : null;
+				if (editor) {
+					syncWatermarkTemplateEditor(library, editor, true);
+					return;
+				}
+				const select = event.target;
+				if (select instanceof HTMLSelectElement && select.matches('[data-toolbox-watermark-library-default]')) {
+					const option = select.options[select.selectedIndex];
+					const effect = library.querySelector('[data-toolbox-watermark-library-effect]');
+					const previewName = library.querySelector('[data-toolbox-watermark-preview-name]');
+					try {
+						const definition = JSON.parse(String(option.getAttribute('data-watermark-definition') || ''));
+						if (effect && definition.watermark) {
+							renderWatermarkEffect(effect, definition.watermark, String(option.getAttribute('data-watermark-logo-url') || ''));
+						}
+					} catch (error) {
+						if (effect) {
+							clearNode(effect);
+						}
+					}
+					if (previewName) {
+						previewName.textContent = String(option.textContent || '').trim();
+					}
+				}
+			});
+			library.addEventListener('click', (event) => {
+				if (!(event.target instanceof Element)) {
+					return;
+				}
+				const addButton = event.target.closest('[data-toolbox-add-watermark-template]');
+				if (addButton) {
+					appendWatermarkTemplateEditor(library, null, t('New template'));
+					return;
+				}
+				const copyButton = event.target.closest('[data-toolbox-copy-watermark-template]');
+				if (copyButton) {
+					let definition = { watermark: { type: 'text' } };
+					try {
+						definition = JSON.parse(String(copyButton.getAttribute('data-template-definition') || ''));
+					} catch (error) {}
+					appendWatermarkTemplateEditor(library, definition, t('Copy of') + ' ' + String(copyButton.getAttribute('data-template-label') || ''));
+					return;
+				}
+				const deleteButton = event.target.closest('[data-toolbox-delete-watermark-template]');
+				if (deleteButton) {
+					deleteButton.closest('[data-toolbox-watermark-template-editor]')?.remove();
+					reindexWatermarkTemplateEditors(library);
+					syncWatermarkLibraryDefaultOptions(library);
+					const empty = library.querySelector('[data-toolbox-watermark-template-empty]');
+					if (empty) {
+						empty.hidden = library.querySelectorAll('[data-toolbox-watermark-template-editor]').length > 0;
+					}
+					return;
+				}
+				const logoButton = event.target.closest('[data-toolbox-select-template-logo]');
+				if (logoButton) {
+					const editor = logoButton.closest('[data-toolbox-watermark-template-editor]');
+					if (!editor || !window.wp || !window.wp.media) {
+						return;
+					}
+					const frame = window.wp.media({ title: t('Select logo'), button: { text: t('Use logo') }, library: { type: 'image' }, multiple: false });
+					frame.on('select', () => {
+						const attachment = frame.state().get('selection').first()?.toJSON();
+						const idField = watermarkTemplateEditorField(editor, 'attachment_id');
+						if (idField instanceof HTMLInputElement && attachment) {
+							idField.value = String(attachment.id || 0);
+							editor.dataset.logoUrl = String(attachment.url || '');
+							const name = editor.querySelector('[data-template-logo-name]');
+							if (name) {
+								name.textContent = String(attachment.filename || ('#' + attachment.id));
+							}
+							syncWatermarkTemplateEditor(library, editor, true);
+						}
+					});
+					frame.open();
+					return;
+				}
+				const previewButton = event.target.closest('[data-toolbox-watermark-preview-image]');
+				if (previewButton && window.wp && window.wp.media) {
+					const frame = window.wp.media({ title: t('Choose preview image'), button: { text: t('Use image') }, library: { type: 'image' }, multiple: false });
+					frame.on('select', () => {
+						const attachment = frame.state().get('selection').first()?.toJSON();
+						const image = library.querySelector('[data-toolbox-watermark-preview-image-element]');
+						if (image instanceof HTMLImageElement && attachment) {
+							image.src = String(attachment.url || '');
+							image.hidden = !image.src;
+						}
+					});
+					frame.open();
+				}
+			});
+			library.addEventListener('submit', () => reindexWatermarkTemplateEditors(library));
+		});
+	}
+
 	function initMediaDerivativeControls() {
 		document.querySelectorAll('[data-toolbox-media-derivative]').forEach((form) => {
 			const idField = form.querySelector('[data-toolbox-media-attachment]');
@@ -7716,6 +8034,7 @@
 	initWebSearchPresets();
 	initNightlyCloudBatch();
 	initSiteKnowledge();
+	initWatermarkTemplateLibrary();
 	initMediaDerivativeControls();
 	initMediaAltCaptionControls();
 	initUrlState();

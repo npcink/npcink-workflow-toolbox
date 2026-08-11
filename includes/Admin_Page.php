@@ -3405,6 +3405,16 @@ final class Admin_Page {
 				'button'      => __( 'Build ALT review preview', 'npcink-workflow-toolbox' ),
 				'custom'      => 'media_alt_caption_review',
 			),
+			array(
+				'surface'     => 'image',
+				'group'       => __( 'Watermarks', 'npcink-workflow-toolbox' ),
+				'group_id'    => 'watermark-library',
+				'id'          => 'watermark-templates',
+				'endpoint'    => '',
+				'title'       => __( 'Watermark Templates', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Choose a default, copy a preset, or manage reusable text and logo watermarks.', 'npcink-workflow-toolbox' ),
+				'custom'      => 'watermark_template_library',
+			),
 		);
 
 		$tools = array_values(
@@ -3427,6 +3437,10 @@ final class Admin_Page {
 			'image-text-review' => array(
 				'title'       => __( 'Batch Image ALT Review', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media.', 'npcink-workflow-toolbox' ),
+			),
+			'watermark-library' => array(
+				'title'       => __( 'Watermark Templates', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Reusable local defaults for single-image and batch preview requests.', 'npcink-workflow-toolbox' ),
 			),
 		);
 		$group_counts = array();
@@ -3556,6 +3570,10 @@ final class Admin_Page {
 							);
 							continue;
 						}
+						if ( 'watermark_template_library' === (string) ( $tool['custom'] ?? '' ) ) {
+							$this->render_watermark_template_library( (string) $tool['id'], 0 === $index );
+							continue;
+						}
 					$this->render_text_tool(
 						(string) $tool['endpoint'],
 						(string) $tool['title'],
@@ -3571,6 +3589,179 @@ final class Admin_Page {
 				?>
 			</div>
 		</div>
+		<?php
+	}
+
+	private function watermark_template_definition( array $template, int $fallback_attachment_id = 0, string $fallback_text = 'AI' ): array {
+		$type = (string) ( $template['type'] ?? '' );
+		if ( ! in_array( $type, array( 'text', 'image' ), true ) ) {
+			return array();
+		}
+
+		$definition = array(
+			'watermark' => array(
+				'type'      => $type,
+				'position'  => (string) ( $template['position'] ?? 'bottom_right' ),
+				'opacity'   => round( (int) ( $template['opacity'] ?? 80 ) / 100, 3 ),
+				'margin_px' => (int) ( $template['margin'] ?? 24 ),
+			),
+		);
+
+		if ( 'text' === $type ) {
+			$definition['watermark'] = array_merge(
+				$definition['watermark'],
+				array(
+					'text'       => (string) ( $template['text'] ?? $fallback_text ),
+					'font_size'  => (int) ( $template['font_size'] ?? 48 ),
+					'color'      => (string) ( $template['color'] ?? '#FFFFFF' ),
+					'background' => (string) ( $template['background'] ?? 'rgba(0,0,0,0.35)' ),
+				)
+			);
+		} else {
+			$definition['watermark']['scale_percent'] = (int) ( $template['scale'] ?? 20 );
+			$attachment_id = absint( $template['attachment_id'] ?? $fallback_attachment_id );
+			if ( $attachment_id > 0 ) {
+				$definition['watermark_attachment_id'] = $attachment_id;
+			}
+		}
+
+		return $definition;
+	}
+
+	private function render_watermark_template_options( array $templates, string $selected, int $fallback_attachment_id = 0, bool $include_run_custom = true, string $fallback_text = 'AI' ): void {
+		foreach ( $templates as $template ) {
+			if ( ! is_array( $template ) || '' === (string) ( $template['id'] ?? '' ) ) {
+				continue;
+			}
+			$id = (string) $template['id'];
+			if ( ! $include_run_custom && 'custom' === $id ) {
+				continue;
+			}
+			$definition    = $this->watermark_template_definition( $template, $fallback_attachment_id, $fallback_text );
+			$attachment_id = absint( $definition['watermark_attachment_id'] ?? 0 );
+			$logo_url      = $attachment_id > 0 ? wp_get_attachment_image_url( $attachment_id, 'medium' ) : '';
+			?>
+			<option
+				value="<?php echo esc_attr( $id ); ?>"
+				<?php selected( $selected, $id ); ?>
+				<?php echo ! empty( $template['user_defined'] ) ? ' data-user-watermark-option="1"' : ''; ?>
+				<?php echo $definition ? ' data-watermark-definition="' . esc_attr( (string) wp_json_encode( $definition ) ) . '"' : ''; ?>
+				<?php echo $logo_url ? ' data-watermark-logo-url="' . esc_url( (string) $logo_url ) . '"' : ''; ?>
+			><?php echo esc_html( (string) ( $template['label'] ?? $id ) ); ?></option>
+			<?php
+		}
+	}
+
+	private function render_watermark_template_library( string $tool_id, bool $active = false ): void {
+		$template_settings = $this->settings->get_watermark_template_settings();
+		$templates         = $this->settings->media_watermark_templates();
+		$custom_templates  = $template_settings['custom_templates'];
+		$built_in          = array_values(
+			array_filter(
+				$templates,
+				static function ( array $template ): bool {
+					return in_array( (string) ( $template['id'] ?? '' ), array( 'subtle_text', 'prominent_text', 'logo_corner' ), true );
+				}
+			)
+		);
+		?>
+		<form method="post" action="options.php" class="npcink-toolbox__card npcink-toolbox__watermark-library" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-watermark-library <?php echo $active ? '' : 'hidden'; ?>>
+			<?php settings_fields( 'npcink_toolbox_watermark_templates' ); ?>
+			<div class="npcink-toolbox__watermark-library-heading">
+				<div>
+					<h2><?php esc_html_e( 'Watermark Templates', 'npcink-workflow-toolbox' ); ?></h2>
+					<p><?php esc_html_e( 'Keep reusable watermarks here. Image tools only choose a template and preview the result.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+				<button type="button" class="button" data-toolbox-add-watermark-template><?php esc_html_e( 'Add template', 'npcink-workflow-toolbox' ); ?></button>
+			</div>
+
+			<div class="npcink-toolbox__watermark-library-summary">
+				<label>
+					<span><?php esc_html_e( 'Default template', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="<?php echo esc_attr( Plugin::WATERMARK_OPTION_NAME ); ?>[default_template]" data-toolbox-watermark-library-default>
+						<?php $this->render_watermark_template_options( $templates, (string) $template_settings['default_template'], 0, false ); ?>
+					</select>
+				</label>
+				<p><?php echo esc_html( sprintf( __( '%1$d built-in presets · %2$d custom templates', 'npcink-workflow-toolbox' ), count( $built_in ), count( $custom_templates ) ) ); ?></p>
+			</div>
+
+			<div class="npcink-toolbox__watermark-library-workspace">
+				<div class="npcink-toolbox__watermark-library-list">
+					<section>
+						<h3><?php esc_html_e( 'Built-in presets', 'npcink-workflow-toolbox' ); ?></h3>
+						<p class="description"><?php esc_html_e( 'Built-in presets cannot be edited. Copy one to create your own version.', 'npcink-workflow-toolbox' ); ?></p>
+						<div class="npcink-toolbox__watermark-preset-list">
+							<?php foreach ( $built_in as $template ) : ?>
+								<?php $definition = $this->watermark_template_definition( $template ); ?>
+								<div class="npcink-toolbox__watermark-preset-row">
+									<div><strong><?php echo esc_html( (string) $template['label'] ); ?></strong><small><?php echo esc_html( 'text' === (string) $template['type'] ? __( 'Text watermark', 'npcink-workflow-toolbox' ) : __( 'Logo watermark', 'npcink-workflow-toolbox' ) ); ?></small></div>
+									<button type="button" class="button button-small" data-toolbox-copy-watermark-template data-template-label="<?php echo esc_attr( (string) $template['label'] ); ?>" data-template-definition="<?php echo esc_attr( (string) wp_json_encode( $definition ) ); ?>"><?php esc_html_e( 'Copy', 'npcink-workflow-toolbox' ); ?></button>
+								</div>
+							<?php endforeach; ?>
+						</div>
+					</section>
+
+					<section>
+						<h3><?php esc_html_e( 'My templates', 'npcink-workflow-toolbox' ); ?></h3>
+						<div data-toolbox-custom-watermark-template-list>
+							<?php foreach ( $custom_templates as $index => $template ) : ?>
+								<?php $this->render_watermark_template_editor( $template, (int) $index ); ?>
+							<?php endforeach; ?>
+						</div>
+						<p class="npcink-toolbox__watermark-library-empty" data-toolbox-watermark-template-empty <?php echo $custom_templates ? 'hidden' : ''; ?>><?php esc_html_e( 'No custom templates yet. Copy a preset or add a blank template.', 'npcink-workflow-toolbox' ); ?></p>
+					</section>
+				</div>
+
+				<aside class="npcink-toolbox__watermark-library-preview">
+					<div class="npcink-toolbox__watermark-preview-heading">
+						<div><h3><?php esc_html_e( 'Effect preview', 'npcink-workflow-toolbox' ); ?></h3><p><?php esc_html_e( 'Guidance only. The exact Cloud result still requires visual confirmation.', 'npcink-workflow-toolbox' ); ?></p></div>
+						<button type="button" class="button button-small" data-toolbox-watermark-preview-image><?php esc_html_e( 'Choose preview image', 'npcink-workflow-toolbox' ); ?></button>
+					</div>
+					<div class="npcink-toolbox__watermark-preview-frame" data-toolbox-watermark-library-preview>
+						<img alt="" data-toolbox-watermark-preview-image-element hidden />
+						<span class="npcink-toolbox__watermark-effect" data-toolbox-watermark-library-effect></span>
+					</div>
+					<p class="description" data-toolbox-watermark-preview-name><?php esc_html_e( 'Select or edit a template to preview it.', 'npcink-workflow-toolbox' ); ?></p>
+				</aside>
+			</div>
+
+			<template data-toolbox-watermark-template-prototype><?php $this->render_watermark_template_editor( array(), 0 ); ?></template>
+			<?php submit_button( __( 'Save watermark templates', 'npcink-workflow-toolbox' ) ); ?>
+		</form>
+		<?php
+	}
+
+	private function render_watermark_template_editor( array $template, int $index ): void {
+		$template = array_merge(
+			array( 'id' => '', 'label' => '', 'type' => 'text', 'text' => 'AI', 'attachment_id' => 0, 'position' => 'bottom_right', 'opacity' => 80, 'scale' => 20, 'font_size' => 48, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.35)', 'margin' => 24 ),
+			$template
+		);
+		$base               = Plugin::WATERMARK_OPTION_NAME . '[custom_templates][' . $index . ']';
+		$background_color   = $this->media_derivative_color_input_value( (string) $template['background'], '#000000' );
+		$background_opacity = $this->media_derivative_background_opacity_value( (string) $template['background'] );
+		$logo_url           = wp_get_attachment_image_url( absint( $template['attachment_id'] ), 'thumbnail' );
+		?>
+		<details class="npcink-toolbox__watermark-template-editor" data-toolbox-watermark-template-editor<?php echo $logo_url ? ' data-logo-url="' . esc_url( (string) $logo_url ) . '"' : ''; ?>>
+			<summary><span data-toolbox-watermark-template-name><?php echo esc_html( (string) ( $template['label'] ?: __( 'New template', 'npcink-workflow-toolbox' ) ) ); ?></span><small data-toolbox-watermark-template-type-label><?php echo esc_html( 'image' === (string) $template['type'] ? __( 'Logo watermark', 'npcink-workflow-toolbox' ) : __( 'Text watermark', 'npcink-workflow-toolbox' ) ); ?></small></summary>
+			<div class="npcink-toolbox__watermark-template-editor-body">
+				<input type="hidden" name="<?php echo esc_attr( $base . '[id]' ); ?>" value="<?php echo esc_attr( (string) $template['id'] ); ?>" data-template-field="id" />
+				<label><span><?php esc_html_e( 'Template name', 'npcink-workflow-toolbox' ); ?></span><input type="text" maxlength="40" name="<?php echo esc_attr( $base . '[label]' ); ?>" value="<?php echo esc_attr( (string) $template['label'] ); ?>" data-template-field="label" required /></label>
+				<label><span><?php esc_html_e( 'Watermark type', 'npcink-workflow-toolbox' ); ?></span><select name="<?php echo esc_attr( $base . '[type]' ); ?>" data-template-field="type"><option value="text" <?php selected( 'text', (string) $template['type'] ); ?>><?php esc_html_e( 'Text watermark', 'npcink-workflow-toolbox' ); ?></option><option value="image" <?php selected( 'image', (string) $template['type'] ); ?>><?php esc_html_e( 'Logo watermark', 'npcink-workflow-toolbox' ); ?></option></select></label>
+				<div data-template-text-fields <?php echo 'text' === (string) $template['type'] ? '' : 'hidden'; ?>>
+					<label><span><?php esc_html_e( 'Watermark text', 'npcink-workflow-toolbox' ); ?></span><input type="text" maxlength="64" name="<?php echo esc_attr( $base . '[text]' ); ?>" value="<?php echo esc_attr( (string) $template['text'] ); ?>" data-template-field="text" /></label>
+					<div class="npcink-toolbox__split"><label><span><?php esc_html_e( 'Font size', 'npcink-workflow-toolbox' ); ?></span><input type="number" min="8" max="256" name="<?php echo esc_attr( $base . '[font_size]' ); ?>" value="<?php echo esc_attr( (string) $template['font_size'] ); ?>" data-template-field="font_size" /></label><label><span><?php esc_html_e( 'Text color', 'npcink-workflow-toolbox' ); ?></span><input type="color" name="<?php echo esc_attr( $base . '[color]' ); ?>" value="<?php echo esc_attr( $this->media_derivative_color_input_value( (string) $template['color'], '#FFFFFF' ) ); ?>" data-template-field="color" /></label></div>
+					<div class="npcink-toolbox__split"><label><span><?php esc_html_e( 'Background color', 'npcink-workflow-toolbox' ); ?></span><input type="color" name="<?php echo esc_attr( $base . '[background_color]' ); ?>" value="<?php echo esc_attr( $background_color ); ?>" data-template-field="background_color" /></label><label><span><?php esc_html_e( 'Background opacity', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="0" max="100" name="<?php echo esc_attr( $base . '[background_opacity]' ); ?>" value="<?php echo esc_attr( (string) $background_opacity ); ?>" data-template-field="background_opacity" /><output><?php echo esc_html( (string) $background_opacity ); ?>%</output></label></div>
+				</div>
+				<div data-template-logo-fields <?php echo 'image' === (string) $template['type'] ? '' : 'hidden'; ?>>
+					<input type="hidden" name="<?php echo esc_attr( $base . '[attachment_id]' ); ?>" value="<?php echo esc_attr( (string) absint( $template['attachment_id'] ) ); ?>" data-template-field="attachment_id" />
+					<div class="npcink-toolbox__watermark-logo-picker"><span data-template-logo-name><?php echo $logo_url ? esc_html( basename( (string) get_attached_file( absint( $template['attachment_id'] ) ) ) ) : esc_html__( 'No logo selected', 'npcink-workflow-toolbox' ); ?></span><button type="button" class="button" data-toolbox-select-template-logo><?php esc_html_e( 'Select logo', 'npcink-workflow-toolbox' ); ?></button></div>
+					<label><span><?php esc_html_e( 'Logo size', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="1" max="100" name="<?php echo esc_attr( $base . '[scale]' ); ?>" value="<?php echo esc_attr( (string) $template['scale'] ); ?>" data-template-field="scale" /><output><?php echo esc_html( (string) $template['scale'] ); ?>%</output></label>
+				</div>
+				<label><span><?php esc_html_e( 'Position', 'npcink-workflow-toolbox' ); ?></span><select name="<?php echo esc_attr( $base . '[position]' ); ?>" data-template-field="position"><?php foreach ( array( 'top_left', 'top_right', 'center', 'bottom_left', 'bottom_right' ) as $position ) : ?><option value="<?php echo esc_attr( $position ); ?>" <?php selected( $position, (string) $template['position'] ); ?>><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option><?php endforeach; ?></select></label>
+				<div class="npcink-toolbox__split"><label><span><?php esc_html_e( 'Opacity', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="0" max="100" name="<?php echo esc_attr( $base . '[opacity]' ); ?>" value="<?php echo esc_attr( (string) $template['opacity'] ); ?>" data-template-field="opacity" /><output><?php echo esc_html( (string) $template['opacity'] ); ?>%</output></label><label><span><?php esc_html_e( 'Margin', 'npcink-workflow-toolbox' ); ?></span><input type="number" min="0" max="1000" name="<?php echo esc_attr( $base . '[margin]' ); ?>" value="<?php echo esc_attr( (string) $template['margin'] ); ?>" data-template-field="margin" /></label></div>
+				<button type="button" class="button-link-delete" data-toolbox-delete-watermark-template><?php esc_html_e( 'Delete template', 'npcink-workflow-toolbox' ); ?></button>
+			</div>
+		</details>
 		<?php
 	}
 
@@ -3811,6 +4002,8 @@ final class Admin_Page {
 				<input type="hidden" name="watermark_policy_enabled" value="<?php echo ! empty( $toolbox_policy['watermark_enabled'] ) ? '1' : '0'; ?>" />
 				<input type="hidden" name="watermark_policy_type" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_type'] ?? 'image' ) ); ?>" />
 				<input type="hidden" name="watermark_attachment_id" value="<?php echo esc_attr( (string) absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ) ); ?>" />
+				<input type="hidden" name="watermark_template_definition" data-toolbox-watermark-template-definition />
+				<input type="hidden" name="watermark_template_logo_url" data-toolbox-watermark-template-logo-url />
 			<?php endif; ?>
 			<h3><?php esc_html_e( 'Watermark override', 'npcink-workflow-toolbox' ); ?></h3>
 			<p><?php esc_html_e( 'Choose a reusable Toolbox template, or use the detailed fields for this run. Text templates reuse the text below; logo templates use the configured Toolbox logo source.', 'npcink-workflow-toolbox' ); ?></p>
@@ -3818,11 +4011,7 @@ final class Admin_Page {
 				<label>
 					<span><?php esc_html_e( 'Watermark template', 'npcink-workflow-toolbox' ); ?></span>
 					<select name="watermark_template" data-toolbox-watermark-template>
-						<?php foreach ( $templates as $template ) : ?>
-							<?php if ( is_array( $template ) && '' !== (string) ( $template['id'] ?? '' ) ) : ?>
-								<option value="<?php echo esc_attr( (string) $template['id'] ); ?>" <?php selected( 'toolbox_default', (string) $template['id'] ); ?>><?php echo esc_html( (string) ( $template['label'] ?? $template['id'] ) ); ?></option>
-							<?php endif; ?>
-						<?php endforeach; ?>
+						<?php $this->render_watermark_template_options( $templates, (string) ( $toolbox_policy['default_watermark_template'] ?? 'toolbox_default' ), absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ), true, (string) ( $toolbox_policy['watermark_text'] ?? 'AI' ) ); ?>
 					</select>
 				</label>
 			<?php endif; ?>
@@ -4125,6 +4314,8 @@ final class Admin_Page {
 			<input type="hidden" name="watermark_policy_enabled" value="<?php echo ! empty( $toolbox_policy['watermark_enabled'] ) ? '1' : '0'; ?>" />
 			<input type="hidden" name="watermark_policy_type" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_type'] ?? 'image' ) ); ?>" />
 			<input type="hidden" name="watermark_attachment_id" value="<?php echo esc_attr( (string) absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ) ); ?>" />
+			<input type="hidden" name="watermark_template_definition" data-toolbox-watermark-template-definition />
+			<input type="hidden" name="watermark_template_logo_url" data-toolbox-watermark-template-logo-url />
 			<div class="npcink-toolbox__single-media-grid">
 				<section class="npcink-toolbox__single-media-preview-column" aria-label="<?php esc_attr_e( 'Image comparison', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__single-media-comparison" data-toolbox-single-media-comparison>
@@ -4163,9 +4354,7 @@ final class Admin_Page {
 					<label>
 						<span><?php esc_html_e( 'Watermark template', 'npcink-workflow-toolbox' ); ?></span>
 						<select name="watermark_template" data-toolbox-watermark-template>
-							<?php foreach ( $templates as $template ) : ?>
-								<?php if ( is_array( $template ) && '' !== (string) ( $template['id'] ?? '' ) ) : ?><option value="<?php echo esc_attr( (string) $template['id'] ); ?>" <?php selected( 'toolbox_default', (string) $template['id'] ); ?>><?php echo esc_html( (string) ( $template['label'] ?? $template['id'] ) ); ?></option><?php endif; ?>
-							<?php endforeach; ?>
+							<?php $this->render_watermark_template_options( $templates, (string) ( $toolbox_policy['default_watermark_template'] ?? 'toolbox_default' ), absint( $toolbox_policy['watermark_attachment_id'] ?? 0 ), true, (string) ( $toolbox_policy['watermark_text'] ?? 'AI' ) ); ?>
 						</select>
 					</label>
 					<p class="npcink-toolbox__watermark-template-summary" data-toolbox-watermark-template-summary></p>

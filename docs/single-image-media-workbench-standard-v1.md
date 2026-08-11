@@ -44,7 +44,7 @@ Templates are a bounded Toolbox convenience catalog. A template expands in the
 browser to the existing canonical watermark object; Cloud does not receive a
 Toolbox-only template id.
 
-The initial catalog is:
+The built-in catalog is:
 
 - no watermark;
 - current Toolbox default;
@@ -52,6 +52,18 @@ The initial catalog is:
 - prominent bottom-right text;
 - restrained bottom-right configured logo;
 - custom values for the current run.
+
+Toolbox also owns a bounded local user-template catalog. Administrators may
+copy a built-in preset, create a text or logo template, rename it, edit its
+canonical watermark fields, delete it, and choose one saved template as the
+default. User templates are stored in a dedicated Settings API option, are
+limited to twenty entries, and may reference only a local Media Library image
+attachment for a logo. Built-in presets remain immutable.
+
+Template management lives under **Image Handling → Watermark Templates**, not
+inside the high-frequency single-image form. The manager shows preset and user
+rows beside one immediate browser-side effect preview. It may use a temporary
+Media Library image as the preview background, but that choice is not saved.
 
 Templates do not create a provider preset registry, workflow registry, or
 execution policy. Logo templates may reference only the existing local
@@ -115,6 +127,8 @@ external-image adoption exception.
   and crop summary rows. Expand at most one row at a time.
 - Keep the watermark template in the default settings view and translate every
   watermark-position and crop-anchor label for the active locale.
+- Keep template creation and maintenance in the dedicated watermark-template
+  tab. The single-image workbench only selects a default or one-run template.
 - Keep the original and generated preview in the same comparison column.
 - Batch mode retains Core proposal wording and behavior.
 

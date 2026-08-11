@@ -64,9 +64,26 @@ npcink_fixed_button_check( $editor_table_count === count( array_unique( $editor_
 
 $admin_source = file_get_contents( $root . '/includes/Admin_Page.php' );
 $admin_block  = false !== $admin_source && preg_match( '/private function render_tool_cards.*?\$tools = array\((.*?)\n\t\t\);/s', $admin_source, $admin_match ) ? $admin_match[1] : '';
-preg_match_all( "/'id'\s*=>\s*'([^']+)'/", $admin_block, $admin_ids );
+$admin_tool_blocks = preg_split( '/\n\s*\),\n\s*array\(/', trim( $admin_block ) ) ?: array();
+$admin_execution_ids = array();
+$admin_local_settings_ids = array();
+foreach ( $admin_tool_blocks as $admin_tool_block ) {
+	if ( 1 !== preg_match( "/'id'\s*=>\s*'([^']+)'/", $admin_tool_block, $admin_id_match ) ) {
+		continue;
+	}
+	$admin_tool_id = (string) $admin_id_match[1];
+	$admin_endpoint = 1 === preg_match( "/'endpoint'\s*=>\s*'([^']*)'/", $admin_tool_block, $admin_endpoint_match )
+		? (string) $admin_endpoint_match[1]
+		: '';
+	if ( '' === $admin_endpoint ) {
+		$admin_local_settings_ids[] = $admin_tool_id;
+		continue;
+	}
+	$admin_execution_ids[] = $admin_tool_id;
+}
 $admin_table_count = count( array_filter( $buttons, static fn( array $button ): bool => 'admin_image_handling' === ( $button['surface'] ?? '' ) ) );
-npcink_fixed_button_check( $admin_table_count === count( array_unique( $admin_ids[1] ?? array() ) ), 'Every committed Image Handling tool has one fixed-button contract row' );
+npcink_fixed_button_check( $admin_table_count === count( array_unique( $admin_execution_ids ) ), 'Every executable Image Handling tool has one fixed-button contract row' );
+npcink_fixed_button_check( array( 'watermark-templates' ) === $admin_local_settings_ids, 'Image Handling local settings tabs stay outside fixed-button runtime contracts' );
 
 $adr = file_get_contents( $root . '/docs/decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md' );
 foreach ( array( 'No further broad ownership migration', 'External clients do not inherit this exception', 'consumer-conformance test', 'must not add a channel' ) as $marker ) {
