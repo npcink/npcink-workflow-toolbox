@@ -41,6 +41,16 @@ final class Settings {
 			)
 		);
 
+		register_setting(
+			'npcink_toolbox_watermark_templates',
+			Plugin::WATERMARK_OPTION_NAME,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_watermark_template_settings' ),
+				'default'           => $this->watermark_template_defaults(),
+			)
+		);
+
 		$this->maybe_migrate_core_media_policy();
 	}
 
@@ -95,12 +105,14 @@ final class Settings {
 
 	public function media_optimization_policy_summary(): array {
 		$settings = $this->get_media_optimization_settings();
+		$template_settings = $this->get_watermark_template_settings();
 
 		return array_merge(
 			$settings,
 			array(
 				'watermark_configured' => $this->media_watermark_configured( $settings ),
 				'watermark_templates'  => $this->media_watermark_templates(),
+				'default_watermark_template' => $template_settings['default_template'],
 				'policy_owner'         => 'npcink_toolbox',
 				'final_write_owner'    => 'local_wordpress_host',
 			)
@@ -113,13 +125,114 @@ final class Settings {
 	 * @return array<int,array<string,mixed>>
 	 */
 	public function media_watermark_templates(): array {
-		return array(
+		$templates = array(
 			array( 'id' => 'none', 'label' => __( 'No watermark', 'npcink-workflow-toolbox' ) ),
 			array( 'id' => 'toolbox_default', 'label' => __( 'Toolbox default', 'npcink-workflow-toolbox' ) ),
 			array( 'id' => 'subtle_text', 'label' => __( 'Subtle text', 'npcink-workflow-toolbox' ), 'type' => 'text', 'position' => 'bottom_right', 'opacity' => 55, 'font_size' => 28, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.25)', 'margin' => 18 ),
 			array( 'id' => 'prominent_text', 'label' => __( 'Prominent text', 'npcink-workflow-toolbox' ), 'type' => 'text', 'position' => 'bottom_right', 'opacity' => 88, 'font_size' => 48, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.55)', 'margin' => 24 ),
 			array( 'id' => 'logo_corner', 'label' => __( 'Corner logo', 'npcink-workflow-toolbox' ), 'type' => 'image', 'position' => 'bottom_right', 'opacity' => 80, 'scale' => 18, 'margin' => 24 ),
-			array( 'id' => 'custom', 'label' => __( 'Custom for this run', 'npcink-workflow-toolbox' ) ),
+		);
+
+		foreach ( $this->get_watermark_template_settings()['custom_templates'] as $template ) {
+			$templates[] = array_merge( $template, array( 'user_defined' => true ) );
+		}
+
+		$templates[] = array( 'id' => 'custom', 'label' => __( 'Custom for this run', 'npcink-workflow-toolbox' ) );
+
+		return $templates;
+	}
+
+	public function watermark_template_defaults(): array {
+		return array(
+			'default_template' => 'toolbox_default',
+			'custom_templates' => array(),
+		);
+	}
+
+	public function get_watermark_template_settings(): array {
+		$value = get_option( Plugin::WATERMARK_OPTION_NAME, array() );
+
+		return $this->sanitize_watermark_template_settings(
+			array_merge( $this->watermark_template_defaults(), is_array( $value ) ? $value : array() )
+		);
+	}
+
+	public function sanitize_watermark_template_settings( $input ): array {
+		$input     = is_array( $input ) ? $input : array();
+		$templates = array();
+		$seen      = array();
+
+		foreach ( array_slice( is_array( $input['custom_templates'] ?? null ) ? $input['custom_templates'] : array(), 0, 20 ) as $index => $template ) {
+			if ( ! is_array( $template ) ) {
+				continue;
+			}
+
+			$name = trim( sanitize_text_field( (string) ( $template['label'] ?? '' ) ) );
+			$name = function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 40 ) : substr( $name, 0, 40 );
+			if ( '' === $name ) {
+				continue;
+			}
+
+			$id = sanitize_key( (string) ( $template['id'] ?? '' ) );
+			if ( 0 !== strpos( $id, 'user_' ) ) {
+				$id = 'user_' . substr( md5( $name . '|' . (string) $index ), 0, 12 );
+			}
+			if ( isset( $seen[ $id ] ) ) {
+				$id .= '_' . (string) $index;
+			}
+			$seen[ $id ] = true;
+
+			$type = sanitize_key( (string) ( $template['type'] ?? 'text' ) );
+			if ( ! in_array( $type, array( 'text', 'image' ), true ) ) {
+				$type = 'text';
+			}
+
+			$position = sanitize_key( (string) ( $template['position'] ?? 'bottom_right' ) );
+			if ( ! in_array( $position, $this->allowed_media_watermark_positions(), true ) ) {
+				$position = 'bottom_right';
+			}
+
+			$text = trim( sanitize_text_field( (string) ( $template['text'] ?? 'AI' ) ) );
+			$text = function_exists( 'mb_substr' ) ? mb_substr( $text, 0, 64 ) : substr( $text, 0, 64 );
+			if ( '' === $text ) {
+				$text = 'AI';
+			}
+
+			$background = $template['background'] ?? 'rgba(0,0,0,0.35)';
+			if ( isset( $template['background_color'] ) ) {
+				$background_hex = $this->sanitize_media_derivative_watermark_color( $template['background_color'], '#000000' );
+				$background_hex = 7 === strlen( $background_hex ) ? $background_hex : '#000000';
+				$background_rgb = sscanf( substr( $background_hex, 1 ), '%02x%02x%02x' );
+				$background_alpha = max( 0, min( 100, absint( $template['background_opacity'] ?? 35 ) ) ) / 100;
+				$background = sprintf( 'rgba(%d,%d,%d,%.2F)', (int) $background_rgb[0], (int) $background_rgb[1], (int) $background_rgb[2], $background_alpha );
+			}
+
+			$templates[] = array(
+				'id'            => $id,
+				'label'         => $name,
+				'type'          => $type,
+				'text'          => $text,
+				'attachment_id' => absint( $template['attachment_id'] ?? 0 ),
+				'position'      => $position,
+				'opacity'       => max( 0, min( 100, absint( $template['opacity'] ?? 80 ) ) ),
+				'scale'         => max( 1, min( 100, absint( $template['scale'] ?? 20 ) ) ),
+				'font_size'     => max( 8, min( 256, absint( $template['font_size'] ?? 48 ) ) ),
+				'color'         => $this->sanitize_media_derivative_watermark_color( $template['color'] ?? '#FFFFFF', '#FFFFFF' ),
+				'background'    => $this->sanitize_media_derivative_watermark_color( $background, 'rgba(0,0,0,0.35)' ),
+				'margin'        => max( 0, min( 1000, absint( $template['margin'] ?? 24 ) ) ),
+			);
+		}
+
+		$allowed_defaults = array( 'none', 'toolbox_default', 'subtle_text', 'prominent_text', 'logo_corner' );
+		$allowed_defaults = array_merge( $allowed_defaults, array_column( $templates, 'id' ) );
+		$default_template = sanitize_key( (string) ( $input['default_template'] ?? 'toolbox_default' ) );
+		if ( ! in_array( $default_template, $allowed_defaults, true ) ) {
+			$default_template = 'toolbox_default';
+		}
+
+		return array(
+			'default_template' => $default_template,
+			'custom_templates' => $templates,
 		);
 	}
 

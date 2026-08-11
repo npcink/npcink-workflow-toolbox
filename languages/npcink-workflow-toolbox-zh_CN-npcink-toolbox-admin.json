@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-06-06 00:00+0800",
+  "translation-revision-date": "2026-08-11 00:00+0800",
   "generator": "Codex",
   "domain": "messages",
   "locale_data": {
@@ -632,6 +632,14 @@
       "Review execution records in Core if needed.": ["如有需要，请在 Core 中查看执行记录。"],
       "If Core policy blocked execution, adjust policy or complete review in Core rather than retrying from Toolbox.": ["如果 Core 策略阻止了执行，请调整策略或在 Core 中完成审核，不要在 Toolbox 中反复重试。"],
       "Core submission and execution details": ["Core 提交和执行详情"],
+      "New template": ["新模板"],
+      "Logo watermark": ["Logo 水印"],
+      "Text watermark": ["文本水印"],
+      "Copy of": ["副本："],
+      "Select logo": ["选择 Logo"],
+      "Use logo": ["使用此 Logo"],
+      "Choose preview image": ["选择预览图片"],
+      "Use image": ["使用此图片"],
       "Normal": ["正常"],
       ", ": ["，"],
       " | ": ["｜"]
