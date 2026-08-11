@@ -64,6 +64,12 @@ Template management lives under **Image Handling → Watermark Templates**, not
 inside the high-frequency single-image form. The manager shows preset and user
 rows beside one immediate browser-side effect preview. It may use a temporary
 Media Library image as the preview background, but that choice is not saved.
+The Settings API return URL must preserve this exact tab and tool after save;
+the page shows the standard save result instead of returning to Overview.
+The current default renders on first paint, the custom-template count stays
+visible against the twenty-template limit, and deleted templates remain
+undoable until the settings form is saved. Missing or deleted logo attachments
+fail closed and cannot remain the selected custom default.
 
 Templates do not create a provider preset registry, workflow registry, or
 execution policy. Logo templates may reference only the existing local

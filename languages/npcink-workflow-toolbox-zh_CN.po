@@ -8006,3 +8006,47 @@ msgstr "选择 Logo"
 #: includes/Admin_Page.php
 msgid "Delete template"
 msgstr "删除模板"
+
+#: includes/Admin_Page.php
+msgid "%d built-in presets"
+msgstr "%d 个内置预设"
+
+#: includes/Admin_Page.php
+msgid "%1$d/%2$d custom templates"
+msgstr "%1$d/%2$d 个自定义模板"
+
+#: includes/Admin_Page.php
+msgid "All changes saved"
+msgstr "所有更改均已保存"
+
+#: includes/Admin_Page.php
+msgid "Discard changes"
+msgstr "放弃更改"
+
+#: includes/Admin_Page.php
+msgid "Undo"
+msgstr "撤销"
+
+#: includes/Admin_Page.php
+msgid "Another template already uses this name."
+msgstr "已有其他模板使用这个名称。"
+
+#: includes/Admin_Page.php
+msgid "Select a local Media Library image before using this logo template."
+msgstr "使用此 Logo 模板前，请先从本地媒体库选择一张图片。"
+
+#: assets/admin.js
+msgid "custom templates"
+msgstr "个自定义模板"
+
+#: assets/admin.js
+msgid "Unsaved changes"
+msgstr "有未保存的更改"
+
+#: assets/admin.js
+msgid "Copy of %s"
+msgstr "%s 的副本"
+
+#: assets/admin.js
+msgid "Template removed. Save to apply: %s"
+msgstr "已移除模板，保存后生效：%s"

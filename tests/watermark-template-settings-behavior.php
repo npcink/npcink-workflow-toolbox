@@ -4,6 +4,7 @@
 namespace {
 	define( 'ABSPATH', __DIR__ . '/wp-stub/' );
 	$npcink_toolbox_test_options = array();
+	$npcink_toolbox_test_image_ids = array( 77 );
 
 	function __( string $value ): string { return $value; }
 	function sanitize_text_field( string $value ): string { return trim( strip_tags( $value ) ); }
@@ -12,6 +13,10 @@ namespace {
 	function get_option( string $name, $default = false ) {
 		global $npcink_toolbox_test_options;
 		return array_key_exists( $name, $npcink_toolbox_test_options ) ? $npcink_toolbox_test_options[ $name ] : $default;
+	}
+	function wp_attachment_is_image( int $attachment_id ): bool {
+		global $npcink_toolbox_test_image_ids;
+		return in_array( $attachment_id, $npcink_toolbox_test_image_ids, true );
 	}
 
 	function watermark_template_assert( bool $condition, string $message ): void {
@@ -69,6 +74,17 @@ namespace {
 	watermark_template_assert( 100 === $sanitized['custom_templates'][0]['opacity'] && 256 === $sanitized['custom_templates'][0]['font_size'] && 1000 === $sanitized['custom_templates'][0]['margin'], 'Numeric template fields are bounded.' );
 	watermark_template_assert( 'rgba(18,52,86,0.42)' === $sanitized['custom_templates'][0]['background'], 'Operator-friendly background color and opacity normalize to the canonical RGBA contract.' );
 	watermark_template_assert( 0 === strpos( $sanitized['custom_templates'][1]['id'], 'user_' ) && 77 === $sanitized['custom_templates'][1]['attachment_id'], 'Unsafe ids are replaced while a bounded local logo attachment id is retained.' );
+
+	$invalid_logo = $settings->sanitize_watermark_template_settings(
+		array(
+			'default_template' => 'user_invalid_logo',
+			'custom_templates' => array(
+				array( 'id' => 'user_invalid_logo', 'label' => 'Invalid logo', 'type' => 'image', 'attachment_id' => 88 ),
+			),
+		)
+	);
+	watermark_template_assert( 0 === $invalid_logo['custom_templates'][0]['attachment_id'], 'Deleted or non-image logo attachments fail closed before entering the runtime catalog.' );
+	watermark_template_assert( 'toolbox_default' === $invalid_logo['default_template'], 'A custom logo template with no valid local image cannot remain the default.' );
 
 	$overflow_templates = array();
 	for ( $index = 0; $index < 25; ++$index ) {
