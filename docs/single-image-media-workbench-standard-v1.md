@@ -14,7 +14,8 @@ The operator path is:
 
 1. Open **Optimize this image** from the Media Library.
 2. Choose format and optional crop or watermark template.
-3. Optionally enter an output basename.
+3. Choose custom, MD5, or time-based output naming; enter a basename only for
+   the custom option.
 4. Generate and visually verify the short-lived derivative preview.
 5. Confirm the replacement and rollback statement.
 6. Apply the verified derivative to the selected Media Library attachment.
@@ -57,12 +58,25 @@ execution policy. Logo templates may reference only the existing local
 watermark attachment selector. Watermark remains off unless the operator picks
 a template or an enabled Toolbox default.
 
+The single-image workbench shows an immediate browser-side watermark effect
+preview over the selected image. This preview is guidance only. The exact
+Cloud-generated derivative remains the evidence that must load successfully
+before local replacement can be confirmed. Custom watermark controls reveal
+only the fields relevant to the selected text, logo, or off mode.
+
 ## Filename Rules
 
-The UI accepts an optional basename, not a path. It removes path separators,
-control characters, unsafe filename punctuation, surrounding separators, and
-an operator-supplied extension. The extension is derived from the verified
-artifact MIME type.
+The single-image UI offers exactly three naming choices:
+
+- custom basename;
+- deterministic MD5 name derived from the current attachment revision facts;
+- local date-and-time name captured when preview generation starts.
+
+For a custom basename, the UI accepts a basename, not a path. It removes path
+separators, control characters, unsafe filename punctuation, surrounding
+separators, and an operator-supplied extension. The extension is derived from
+the verified artifact MIME type. WordPress remains responsible for final
+collision handling for every naming choice.
 
 The resulting `file_name` is reviewed local-confirmation evidence only. The
 Toolkit write ability remains responsible for final `sanitize_file_name`, MIME/extension
@@ -97,6 +111,10 @@ external-image adoption exception.
   the one bounded local transaction.
 - Keep optional crop and detailed watermark fields secondary to the quick
   choices.
+- Opening **More settings** reveals only compact filename, watermark-detail,
+  and crop summary rows. Expand at most one row at a time.
+- Keep the watermark template in the default settings view and translate every
+  watermark-position and crop-anchor label for the active locale.
 - Keep the original and generated preview in the same comparison column.
 - Batch mode retains Core proposal wording and behavior.
 

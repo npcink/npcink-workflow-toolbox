@@ -2875,6 +2875,119 @@
 		updateMediaDerivativeSubmitState(form, null);
 	}
 
+	function selectedOptionLabel(select) {
+		if (!(select instanceof HTMLSelectElement) || select.selectedIndex < 0) {
+			return '';
+		}
+		return String(select.options[select.selectedIndex].textContent || '').trim();
+	}
+
+	function syncSingleImageOptionSummaries(form) {
+		const filenameMode = form.querySelector('[name="output_filename_mode"]');
+		const customFilename = form.querySelector('[data-toolbox-custom-output-filename]');
+		const filenameSummary = form.querySelector('[data-toolbox-output-filename-summary]');
+		if (customFilename) {
+			customFilename.hidden = !(filenameMode instanceof HTMLSelectElement) || filenameMode.value !== 'custom';
+		}
+		if (filenameSummary) {
+			filenameSummary.textContent = selectedOptionLabel(filenameMode);
+		}
+
+		const cropRatio = form.querySelector('[name="crop_aspect_ratio"]');
+		const cropPosition = form.querySelector('[name="crop_position"]');
+		const cropSummary = form.querySelector('[data-toolbox-crop-summary]');
+		if (cropSummary) {
+			cropSummary.textContent = cropRatio instanceof HTMLSelectElement && cropRatio.value
+				? selectedOptionLabel(cropRatio) + ' · ' + selectedOptionLabel(cropPosition)
+				: t('No crop');
+		}
+
+		form.querySelectorAll('[data-toolbox-range-output]').forEach((range) => {
+			const key = range.getAttribute('data-toolbox-range-output');
+			const output = key ? form.querySelector('[data-toolbox-range-value="' + key + '"]') : null;
+			if (output) {
+				output.textContent = String(range.value || '0') + '%';
+			}
+		});
+	}
+
+	function syncSingleImageWatermarkPreview(form) {
+		const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+		const template = form.querySelector('[data-toolbox-watermark-template]');
+		const mode = form.querySelector('[data-toolbox-watermark-mode]');
+		const customControls = form.querySelector('[data-toolbox-custom-watermark-controls]');
+		const textFields = form.querySelector('[data-toolbox-text-watermark-fields]');
+		const logoFields = form.querySelector('[data-toolbox-logo-watermark-fields]');
+		const templateSummary = form.querySelector('[data-toolbox-watermark-template-summary]');
+		const detailsSummary = form.querySelector('[data-toolbox-watermark-details-summary]');
+		if (!workbench || !(template instanceof HTMLSelectElement)) {
+			return;
+		}
+
+		const custom = template.value === 'custom';
+		const customMode = mode instanceof HTMLSelectElement ? mode.value : 'text';
+		if (customControls) {
+			customControls.hidden = !custom;
+		}
+		if (textFields) {
+			textFields.hidden = !custom || customMode !== 'text';
+		}
+		if (logoFields) {
+			logoFields.hidden = !custom || customMode !== 'image';
+		}
+
+		const watermarkInput = mediaDerivativeWatermarkInput(serialize(form));
+		const watermark = watermarkInput.watermark && typeof watermarkInput.watermark === 'object' ? watermarkInput.watermark : null;
+		const templateLabel = selectedOptionLabel(template);
+		const stateLabel = watermark ? t('Effect preview shown on image') : t('No watermark effect');
+		if (templateSummary) {
+			templateSummary.textContent = t('Current template:') + ' ' + templateLabel + ' · ' + stateLabel;
+		}
+		if (detailsSummary) {
+			detailsSummary.textContent = custom ? t('Custom settings') : templateLabel;
+		}
+
+		const logoUrl = String(workbench.getAttribute('data-watermark-logo-url') || '');
+		workbench.querySelectorAll('[data-toolbox-watermark-effect]').forEach((effect) => {
+			clearNode(effect);
+			effect.classList.remove('is-logo');
+			effect.removeAttribute('style');
+			if (!watermark) {
+				effect.hidden = true;
+				return;
+			}
+			effect.hidden = false;
+			effect.setAttribute('data-position', String(watermark.position || 'bottom_right'));
+			effect.style.setProperty('--watermark-margin', String(Math.max(0, Math.min(40, Number(watermark.margin_px ?? 18)))) + 'px');
+			effect.style.opacity = String(Math.max(0, Math.min(1, Number(watermark.opacity ?? 0.8))));
+			if (watermark.type === 'text') {
+				effect.textContent = String(watermark.text || 'AI');
+				effect.style.color = String(watermark.color || '#FFFFFF');
+				effect.style.background = String(watermark.background || 'rgba(0,0,0,0.35)');
+				effect.style.fontSize = String(Math.max(12, Math.min(32, Math.round(Number(watermark.font_size || 28) / 2)))) + 'px';
+				return;
+			}
+			effect.classList.add('is-logo');
+			effect.style.width = String(Math.max(14, Math.min(45, Number(watermark.scale_percent || 18)))) + '%';
+			if (logoUrl) {
+				const logo = el('img');
+				logo.src = logoUrl;
+				logo.alt = t('Configured watermark logo');
+				effect.appendChild(logo);
+			} else {
+				effect.textContent = t('Logo not configured');
+			}
+		});
+		workbench.querySelectorAll('[data-toolbox-watermark-effect-label]').forEach((label) => {
+			label.hidden = !watermark;
+		});
+	}
+
+	function syncSingleImageOptions(form) {
+		syncSingleImageOptionSummaries(form);
+		syncSingleImageWatermarkPreview(form);
+	}
+
 	function updateMediaDerivativeSubmitState(form, state) {
 		const submitButton = form.querySelector('[data-toolbox-submit-media-proposal], [data-toolbox-apply-media-derivative]');
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
@@ -3031,7 +3144,7 @@
 			}
 			return logoInput;
 		}
-		let mode = String(raw.watermark_mode || 'default');
+		let mode = template === 'custom' ? String(raw.watermark_mode || 'text') : 'default';
 		if (mode === 'default') {
 			if (String(raw.watermark_policy_enabled || '') !== '1') {
 				return {};
@@ -3050,6 +3163,9 @@
 		const position = String(raw.watermark_position || 'bottom_right');
 		if (mode === 'text') {
 			const text = String(raw.watermark_text || 'AI').trim().slice(0, 64) || 'AI';
+			const background = raw.watermark_background_color
+				? hexColorToRgba(raw.watermark_background_color, clampInteger(raw.watermark_background_opacity, 35, 0, 100) / 100)
+				: String(raw.watermark_background || 'rgba(0,0,0,0.35)').trim() || 'rgba(0,0,0,0.35)';
 			return {
 				watermark: {
 					type: 'text',
@@ -3058,7 +3174,7 @@
 					opacity,
 					font_size: clampInteger(raw.watermark_font_size, 48, 8, 256),
 					color: String(raw.watermark_color || '#FFFFFF').trim() || '#FFFFFF',
-					background: String(raw.watermark_background || 'rgba(0,0,0,0.35)').trim() || 'rgba(0,0,0,0.35)',
+					background,
 					margin_px: margin,
 				},
 			};
@@ -3078,6 +3194,15 @@
 			imageInput.watermark_attachment_id = watermarkAttachmentId;
 		}
 		return imageInput;
+	}
+
+	function hexColorToRgba(value, alpha) {
+		const normalized = String(value || '#000000').trim().replace(/^#/, '');
+		const hex = /^[0-9a-f]{6}$/i.test(normalized) ? normalized : '000000';
+		const red = parseInt(hex.slice(0, 2), 16);
+		const green = parseInt(hex.slice(2, 4), 16);
+		const blue = parseInt(hex.slice(4, 6), 16);
+		return 'rgba(' + red + ',' + green + ',' + blue + ',' + Math.max(0, Math.min(1, Number(alpha) || 0)).toFixed(2) + ')';
 	}
 
 	function mediaDerivativeCropInput(raw) {
@@ -3383,6 +3508,15 @@
 	}
 
 	function mediaDerivativeOutputFilename(form) {
+		const modeField = form.querySelector('[name="output_filename_mode"]');
+		const mode = modeField instanceof HTMLSelectElement ? String(modeField.value || 'md5') : 'custom';
+		if (mode === 'md5') {
+			const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+			return workbench ? String(workbench.getAttribute('data-md5-filename-base') || '') : '';
+		}
+		if (mode === 'timestamp') {
+			return mediaDerivativeTimestampFilenameBase(new Date());
+		}
 		const field = form.querySelector('[name="output_filename"]');
 		if (!(field instanceof HTMLInputElement)) {
 			return '';
@@ -3395,6 +3529,17 @@
 			.replace(/-+/g, '-')
 			.replace(/^[.\-_]+|[.\-_]+$/g, '')
 			.slice(0, 80);
+	}
+
+	function mediaDerivativeTimestampFilenameBase(date) {
+		const pad = (value) => String(value).padStart(2, '0');
+		return String(date.getFullYear())
+			+ pad(date.getMonth() + 1)
+			+ pad(date.getDate())
+			+ '-'
+			+ pad(date.getHours())
+			+ pad(date.getMinutes())
+			+ pad(date.getSeconds());
 	}
 
 	function mediaDerivativeFinalFilename(basename, mimeType) {
@@ -7368,7 +7513,33 @@
 			const singleWorkbench = form.querySelector('[data-toolbox-single-media-workbench]');
 			if (singleWorkbench) {
 				setSingleImageWorkbenchPhase(form, 'initial');
-				singleWorkbench.querySelector('.npcink-toolbox__single-media-settings')?.addEventListener('change', (event) => {
+				syncSingleImageOptions(form);
+				singleWorkbench.querySelectorAll('[data-toolbox-single-media-option]').forEach((option) => {
+					option.addEventListener('toggle', () => {
+						if (!option.open) {
+							return;
+						}
+						singleWorkbench.querySelectorAll('[data-toolbox-single-media-option]').forEach((sibling) => {
+							if (sibling !== option) {
+								sibling.open = false;
+							}
+						});
+					});
+				});
+				const singleSettings = singleWorkbench.querySelector('.npcink-toolbox__single-media-settings');
+				singleSettings?.addEventListener('input', () => syncSingleImageOptions(form));
+				singleSettings?.addEventListener('change', (event) => {
+					syncSingleImageOptions(form);
+					if (event.target instanceof HTMLSelectElement && event.target.matches('[data-toolbox-watermark-template]') && event.target.value === 'custom') {
+						const advanced = singleWorkbench.querySelector('.npcink-toolbox__single-media-advanced');
+						const watermarkOption = singleWorkbench.querySelector('[data-toolbox-watermark-option]');
+						if (advanced instanceof HTMLDetailsElement) {
+							advanced.open = true;
+						}
+						if (watermarkOption instanceof HTMLDetailsElement) {
+							watermarkOption.open = true;
+						}
+					}
 					if (
 						event.target instanceof Element
 						&& !event.target.matches('[data-toolbox-confirm-media-replacement]')

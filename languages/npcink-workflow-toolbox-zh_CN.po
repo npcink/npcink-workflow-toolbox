@@ -7806,3 +7806,111 @@ msgstr "查看媒体详情"
 #: includes/Admin_Page.php
 msgid "Continue optimizing this image"
 msgstr "继续优化此图片"
+
+#: includes/Admin_Page.php
+msgid "Top left"
+msgstr "左上角"
+
+#: includes/Admin_Page.php
+msgid "Top"
+msgstr "顶部"
+
+#: includes/Admin_Page.php
+msgid "Top right"
+msgstr "右上角"
+
+#: includes/Admin_Page.php
+msgid "Left"
+msgstr "左侧"
+
+#: includes/Admin_Page.php
+msgid "Center"
+msgstr "居中"
+
+#: includes/Admin_Page.php
+msgid "Right"
+msgstr "右侧"
+
+#: includes/Admin_Page.php
+msgid "Bottom left"
+msgstr "左下角"
+
+#: includes/Admin_Page.php
+msgid "Bottom"
+msgstr "底部"
+
+#: includes/Admin_Page.php
+msgid "Bottom right"
+msgstr "右下角"
+
+#: includes/Admin_Page.php
+msgid "File naming"
+msgstr "文件命名"
+
+#: includes/Admin_Page.php
+msgid "Custom name"
+msgstr "自定义名称"
+
+#: includes/Admin_Page.php
+msgid "MD5 name"
+msgstr "MD5 名称"
+
+#: includes/Admin_Page.php
+msgid "Time name"
+msgstr "时间名称"
+
+#: includes/Admin_Page.php
+msgid "Custom filename"
+msgstr "自定义文件名"
+
+#: includes/Admin_Page.php
+msgid "WordPress automatically handles the extension and duplicate filenames."
+msgstr "WordPress 会自动处理扩展名和重复文件名。"
+
+#: includes/Admin_Page.php
+msgid "Watermark type"
+msgstr "水印类型"
+
+#: includes/Admin_Page.php
+msgid "Logo watermark"
+msgstr "Logo 水印"
+
+#: includes/Admin_Page.php
+msgid "Watermark text"
+msgstr "水印文字"
+
+#: includes/Admin_Page.php
+msgid "Background color"
+msgstr "背景颜色"
+
+#: includes/Admin_Page.php
+msgid "Background opacity"
+msgstr "背景透明度"
+
+#: includes/Admin_Page.php
+msgid "Logo size"
+msgstr "Logo 大小"
+
+#: includes/Admin_Page.php
+msgid "Uses the logo configured in the Toolbox watermark settings."
+msgstr "使用 Toolbox 水印设置中配置的 Logo。"
+
+#: includes/Admin_Page.php
+msgid "The selected template is shown directly on the image as an effect preview."
+msgstr "所选模板会直接显示在图片上作为效果预览。"
+
+#: includes/Admin_Page.php
+msgid "Watermark effect preview"
+msgstr "水印效果示意"
+
+#: includes/Admin_Page.php
+msgid "More settings (filename, watermark details, crop)"
+msgstr "更多设置（文件名、水印细节、裁剪）"
+
+#: includes/Admin_Page.php
+msgid "Watermark details"
+msgstr "水印细节"
+
+#: includes/Admin_Page.php
+msgid "Crop settings"
+msgstr "裁剪设置"
