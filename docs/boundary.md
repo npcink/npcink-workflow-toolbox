@@ -257,6 +257,17 @@ write-like changes keep using Core proposal handoff or Adapter/Core/Abilities
 user actions until a separate boundary decision defines the specific local
 write and audit contract.
 
+ADR-010 adds a separate `strong_local_confirmation` route:
+`/strong-local-confirmation/image-adoption`. It allows one present editor to
+import one fully previewed external HTTPS image or AI-generated Cloud artifact
+and optionally set it as the current article's featured image. Import requires
+`upload_files`; all actions require `edit_post`, an exact confirmed action,
+safe remote download or signed artifact delivery, image MIME/checksum/dimension
+limits, and compensation rollback.
+This route is unavailable to batch, background, Cloud callback, Adapter, Agent,
+CLI, publishing, replacement, or cross-object flows. Cloud remains candidate
+runtime/transport only and receives no WordPress write authority.
+
 `/flows/article-plan` prepares a Core-ready `article_write_plan` for
 `npcink-toolbox/build-article-write-plan`. It is a planning artifact route,
 not a WordPress write route and not a Core proposal execution route.
@@ -494,13 +505,12 @@ Editor image candidate review may delegate already retrieved candidates to
 still owns the image-source UX and Cloud/provider request; Toolkit does not
 search providers, generate images, download files, import media, or write
 WordPress state.
-When a selected candidate is already an existing WordPress image attachment,
-`/local-admin-consent/featured-image` may set it as the current post's featured
-image without creating a Core proposal. This is not media adoption: it is a
-single-object local write with Core audit. External URLs, generated image URLs,
-media import, metadata updates, and combined import-plus-featured-image actions
-must keep using `/flows/image-candidate-adoption-plan` and the
-Adapter/Core/Abilities path.
+When a selected candidate belongs to the current editor's one-image workflow,
+`/strong-local-confirmation/image-adoption` may import it or set it as featured
+without creating a Core proposal. `/local-admin-consent/featured-image` remains
+the historical existing-attachment proof. External/background callers,
+multi-image or multi-post requests, replacement, publishing, and incomplete
+previews keep using governed paths.
 Editor-side adoption may submit that plan through Adapter `/proposals/from-plan`,
 display the Core receipt and governance link, then stop. Core stays the
 approval, preflight, proposal, and audit owner, and Abilities stay the final

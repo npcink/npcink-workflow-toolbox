@@ -50,6 +50,8 @@ final class Operation_Classifier {
 	public const KIND_UPDATE_METADATA         = 'update_metadata';
 	public const KIND_UPDATE_EXISTING_TERMS   = 'update_existing_terms';
 	public const KIND_SET_FEATURED_IMAGE      = 'set_featured_image';
+	public const KIND_IMPORT_MEDIA            = 'import_media';
+	public const KIND_ADOPT_REVIEWED_IMAGE    = 'adopt_reviewed_image';
 	public const KIND_PUBLISH                 = 'publish';
 	public const KIND_UNPUBLISH               = 'unpublish';
 	public const KIND_DELETE                  = 'delete';
@@ -170,6 +172,8 @@ final class Operation_Classifier {
 			self::KIND_UPDATE_METADATA,
 			self::KIND_UPDATE_EXISTING_TERMS,
 			self::KIND_SET_FEATURED_IMAGE,
+			self::KIND_IMPORT_MEDIA,
+			self::KIND_ADOPT_REVIEWED_IMAGE,
 			self::KIND_PUBLISH,
 			self::KIND_UNPUBLISH,
 			self::KIND_DELETE,
@@ -232,7 +236,7 @@ final class Operation_Classifier {
 	}
 
 	private function is_high_impact_single_object_kind( string $kind ): bool {
-		return in_array( $kind, array( self::KIND_PUBLISH, self::KIND_UNPUBLISH, self::KIND_REPLACE_FILE, self::KIND_OVERWRITE_CONTENT ), true );
+		return in_array( $kind, array( self::KIND_IMPORT_MEDIA, self::KIND_ADOPT_REVIEWED_IMAGE, self::KIND_PUBLISH, self::KIND_UNPUBLISH, self::KIND_REPLACE_FILE, self::KIND_OVERWRITE_CONTENT ), true );
 	}
 
 	/**

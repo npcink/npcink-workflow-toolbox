@@ -1088,7 +1088,16 @@
       "Suggested ALT text": ["建议的 ALT 文本"],
       "Review the actual image and article context before using this ALT suggestion.": ["采用这条 ALT 建议前，请对照实际图片和文章上下文进行审阅。"],
       "Site media search is not ready.": ["站内媒体搜索尚未就绪。"],
-      "Configure the semantic embedding service, then refresh the media index before searching again.": ["请配置语义向量服务并刷新媒体索引，然后重新搜索。"]
+      "Configure the semantic embedding service, then refresh the media index before searching again.": ["请配置语义向量服务并刷新媒体索引，然后重新搜索。"],
+      "The reviewed image is now in the Media Library. Paragraph and inline actions also add it to the visible editor draft.": ["已审阅图片现已导入媒体库；段落和行内操作也会将它加入当前可见的编辑器草稿。"],
+      "The reviewed image is now the featured image.": ["已审阅图片现已设为特色图片。"],
+      "Import this one reviewed image into the Media Library and set it as the featured image of the current article?": ["将这张已审阅图片导入媒体库，并设为当前文章的特色图片？"],
+      "Set this existing Media Library image as the featured image of the current article?": ["将这张媒体库现有图片设为当前文章的特色图片？"],
+      "Import this one reviewed image into the Media Library?": ["将这张已审阅图片导入媒体库？"],
+      "Could not insert the selected Media Library image into the current editor.": ["无法将所选媒体库图片插入当前编辑器。"],
+      "The image action was cancelled. No WordPress data changed.": ["图片操作已取消，WordPress 数据没有发生变化。"],
+      "The image was imported, but it could not be inserted into the visible editor draft. It remains available in the Media Library.": ["图片已导入，但无法插入当前可见的编辑器草稿；它仍可在媒体库中使用。"],
+      "Showing verified host-generated image candidates. Review one image before importing it or setting featured media.": ["正在显示已验证的托管生成图片候选。导入或设置特色图片前，请审阅其中一张图片。"]
     }
   }
 }

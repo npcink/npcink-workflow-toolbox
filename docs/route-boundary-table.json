@@ -216,6 +216,17 @@
       "boundary_note": "Only accepted local write proof: present admin sets one existing image attachment as one current post's featured image with Core-owned audit."
     },
     {
+      "route": "/strong-local-confirmation/image-adoption",
+      "documented_route": "/strong-local-confirmation/image-adoption",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "toolbox_single_article_editor",
+      "write_posture": "strong_local_confirmation",
+      "direct_wordpress_write": true,
+      "boundary_exception": "ADR-010",
+      "boundary_note": "One present editor may import one reviewed HTTPS image or set one reviewed attachment as the current article featured image; batch, background, external, and publishing actions are forbidden."
+    },
+    {
       "route": "/flows/site-knowledge-review-plan",
       "documented_route": "/flows/site-knowledge-review-plan",
       "methods": ["POST"],

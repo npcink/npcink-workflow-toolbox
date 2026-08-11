@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	fwrite( STDERR, "FAIL: Run this script through WP-CLI eval-file so WordPress is loaded.\n" );
 	exit( 1 );
 }
+if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+	define( 'DISABLE_WP_CRON', true );
+}
 
 function toolbox_ai_image_cloud_addon_smoke_pass( string $message ): void {
 	echo "PASS: {$message}\n";
@@ -69,8 +72,17 @@ $had_original = false !== get_option( $option_name, false );
 $original_settings = get_option( $option_name, false );
 $captured_payload = array();
 $captured_url = '';
+$captured_urls = array();
 $unexpected_urls = array();
 $expected_url = 'http://127.0.0.1:8010/v1/runtime/execute';
+$image_bytes = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=', true );
+$artifact_id = 'art_' . str_repeat( 'a', 32 );
+$delivery_id = 'mdl_' . str_repeat( 'b', 32 );
+$checksum = is_string( $image_bytes ) ? 'sha256:' . hash( 'sha256', $image_bytes ) : '';
+$expires_at = gmdate( 'Y-m-d\TH:i:s\Z', time() + 1800 );
+$ack_deadline = gmdate( 'Y-m-d\TH:i:s\Z', time() + 600 );
+$pull_url = 'http://127.0.0.1:8010/v1/runtime/media/artifacts/' . $artifact_id . '/download';
+$ack_url = 'http://127.0.0.1:8010/v1/runtime/media/artifacts/' . $artifact_id . '/delivery-ack';
 $http_filter = null;
 $settings_filter = null;
 $failure_message = '';
@@ -120,10 +132,51 @@ try {
 	);
 
 	$http_filter =
-		static function ( $preempt, $parsed_args, $url ) use ( &$captured_payload, &$captured_url, &$unexpected_urls, $expected_url ) {
-			if ( $expected_url !== (string) $url ) {
+		static function ( $preempt, $parsed_args, $url ) use ( &$captured_payload, &$captured_url, &$captured_urls, &$unexpected_urls, $expected_url, $pull_url, $ack_url, $image_bytes, $artifact_id, $delivery_id, $checksum, $expires_at, $ack_deadline ) {
+			$captured_urls[] = (string) $url;
+			if ( ! in_array( (string) $url, array( $expected_url, $pull_url, $ack_url ), true ) ) {
 				$unexpected_urls[] = (string) $url;
 				return new WP_Error( 'toolbox_ai_image_cloud_addon_smoke_unexpected_http', 'Unexpected outbound HTTP request during no-credit transport smoke.' );
+			}
+			if ( $pull_url === (string) $url ) {
+				return array(
+					'headers' => array(
+						'content-type'                   => 'image/png',
+						'content-length'                 => (string) strlen( (string) $image_bytes ),
+						'x-npcink-artifact-id'           => $artifact_id,
+						'x-npcink-artifact-checksum'     => $checksum,
+						'x-npcink-delivery-id'           => $delivery_id,
+						'x-npcink-delivery-ack-deadline' => $ack_deadline,
+					),
+					'response' => array( 'code' => 200, 'message' => 'OK' ),
+					'body' => (string) $image_bytes,
+				);
+			}
+			if ( $ack_url === (string) $url ) {
+				$ack_body = wp_json_encode(
+					array(
+						'status' => 'ok',
+						'data' => array(
+							'contract_version'     => 'media_artifact_delivery_ack.v1',
+							'delivery_id'          => $delivery_id,
+							'artifact_id'          => $artifact_id,
+							'status'               => 'acknowledged',
+							'received_byte_size'   => strlen( (string) $image_bytes ),
+							'received_checksum'    => $checksum,
+							'byte_size_verified'   => true,
+							'checksum_verified'    => true,
+							'acknowledged_at'      => gmdate( 'Y-m-d\TH:i:s\Z' ),
+							'artifact_expires_at'  => $expires_at,
+							'idempotent_replay'    => false,
+							'acknowledgement_scope' => 'verified_transfer_only',
+						),
+					)
+				);
+				return array(
+					'headers' => array( 'content-type' => 'application/json; charset=utf-8' ),
+					'response' => array( 'code' => 200, 'message' => 'OK' ),
+					'body' => is_string( $ack_body ) ? $ack_body : '{}',
+				);
 			}
 
 			$captured_url = (string) $url;
@@ -135,16 +188,28 @@ try {
 					'run_id' => 'run_toolbox_ai_image_smoke',
 					'data'   => array(
 						'result' => array(
-							'status'     => 'ready',
-							'model_id'   => 'Tongyi-MAI/Z-Image-Turbo',
-							'profile_id' => 'grok-imagine-image-quality',
-							'images'     => array(
+							'contract_version'      => 'image_generation_result.v1',
+							'artifact_type'         => 'image_generation_artifacts',
+							'operation'             => 'image.generate.v1',
+							'suggestion_only'       => true,
+							'requires_local_review' => true,
+							'model_id'              => 'Tongyi-MAI/Z-Image-Turbo',
+							'profile_id'            => 'grok-imagine-image-quality',
+							'artifacts'             => array(
 								array(
-									'id'          => 'cloud-addon-smoke-image',
-									'regular_url' => 'https://example.test/generated/cloud-addon-smoke.jpg',
-									'title'       => 'Prompt-like generated title that should be replaced',
-									'alt'         => 'Prompt-like generated alt that should be replaced',
-									'prompt'      => 'Create a featured image for a WordPress article.',
+									'artifact_id'        => $artifact_id,
+									'artifact_reference' => array( 'artifact_id' => $artifact_id ),
+									'status'             => 'available',
+									'media_kind'         => 'image',
+									'operation'          => 'image.generate.v1',
+									'content_type'       => 'image/png',
+									'format'             => 'png',
+									'width'              => 1,
+									'height'             => 1,
+									'filesize_bytes'     => strlen( (string) $image_bytes ),
+									'checksum'           => $checksum,
+									'expires_at'         => $expires_at,
+									'purged_at'          => null,
 								),
 							),
 						),
@@ -223,12 +288,15 @@ try {
 	toolbox_ai_image_cloud_addon_smoke_assert( 'result_only' === (string) ( $captured_payload['storage_mode'] ?? '' ), 'Cloud runtime payload stays result-only.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( false === (bool) ( $captured_payload['policy']['allow_fallback'] ?? true ), 'Cloud runtime payload does not allow provider fallback from Toolbox policy.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( array() === $unexpected_urls, 'No unexpected or real outbound HTTP request is attempted.' );
+	toolbox_ai_image_cloud_addon_smoke_assert( array( $expected_url, $pull_url, $ack_url ) === $captured_urls, 'Cloud Addon performs only runtime execute, signed artifact pull, and verified delivery ACK.' );
 
 	$image = $data['images'][0] ?? array();
 	toolbox_ai_image_cloud_addon_smoke_assert( is_array( $image ) && 'ai_generated' === (string) ( $image['source_type'] ?? '' ), 'Toolbox returns an AI-generated image candidate.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'cloud' === (string) ( $image['provider_origin'] ?? '' ), 'Toolbox candidate records Cloud as the provider origin.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'grok-imagine-image-quality' === (string) ( $image['hosted_profile'] ?? '' ), 'Toolbox candidate preserves the hosted profile.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'Tongyi-MAI/Z-Image-Turbo' === (string) ( $image['generation_model'] ?? '' ), 'Toolbox candidate preserves the generation model.' );
+	toolbox_ai_image_cloud_addon_smoke_assert( $artifact_id === (string) ( $image['cloud_artifact']['artifact_id'] ?? '' ), 'Toolbox candidate preserves the Cloud artifact reference.' );
+	toolbox_ai_image_cloud_addon_smoke_assert( str_starts_with( (string) ( $image['preview_url'] ?? '' ), 'data:image/png;base64,' ), 'Toolbox candidate contains verified request-scoped preview bytes.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'reviewed_article_context' === (string) ( $image['seo_suggestions']['basis'] ?? '' ), 'Toolbox keeps media SEO suggestions based on reviewed article context.' );
 } catch ( Throwable $error ) {
 	$failure_message = $error->getMessage();

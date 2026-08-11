@@ -1,7 +1,7 @@
 # Boundary Exceptions Registry
 
 Npcink Workflow Toolbox is a fixed-button, review-only operator surface. This
-registry records the two current exceptions that are intentionally allowed to
+registry records the current exceptions that are intentionally allowed to
 exist inside the plugin without changing that product posture.
 
 An entry here is not a precedent for new direct writes, schedulers, queues,
@@ -53,7 +53,41 @@ Primary decision record:
 
 - [ADR-003: Local Admin Consent Requires A Separate Write Boundary](decisions/ADR-003-local-admin-consent-boundary.md)
 
-## Exception 2 - Local Fallback WP-Cron Preview
+ADR-003's no-import stop remains true for this legacy route. ADR-010 defines a
+separate route, classification, permission model, and compensation contract;
+it does not silently widen `/local-admin-consent/featured-image`.
+
+## Exception 2 - Single-Article Strong Local Image Adoption
+
+Status: accepted bounded editor transaction.
+
+Owner: Toolbox editor UI and local WordPress write; Cloud Addon is candidate
+runtime transport only.
+
+Allowed scope:
+
+- one logged-in editor with `edit_post` and, for import, `upload_files`;
+- one current article and one fully previewed image;
+- `import_only`, `set_featured_existing`, or `import_and_set_featured`;
+- exact source, license state, media fields, and final action shown before one
+  explicit confirmation;
+- safe HTTPS download, MIME and dimension verification, and 10 MiB limit;
+- deletion of a newly created attachment and featured-image restoration when a
+  combined transaction fails.
+
+Hard stop:
+
+- no batch, background, cron, CLI, Adapter, Agent, or Cloud callback execution;
+- no publish, attachment replacement, unrelated attachment mutation, taxonomy,
+  settings, permissions, SEO, or cross-object write;
+- no custom audit table, approval store, retry worker, or local run history.
+
+Primary contracts:
+
+- [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
+- [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
+
+## Exception 3 - Local Fallback WP-Cron Preview
 
 Status: accepted bounded fallback preview.
 

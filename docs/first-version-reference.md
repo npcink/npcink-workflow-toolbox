@@ -501,6 +501,7 @@ The first-version route matrix is exact:
 - `POST /flows/article-plan`
 - `POST /flows/image-candidate-adoption-plan`
 - `POST /local-admin-consent/featured-image`
+- `POST /strong-local-confirmation/image-adoption`
 - `POST /flows/site-knowledge-review-plan`
 - `POST /flows/nightly-inspection-review-plan`
 - `POST /flows/content-metadata-apply-plan`

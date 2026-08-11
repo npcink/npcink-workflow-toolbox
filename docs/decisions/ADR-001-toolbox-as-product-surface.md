@@ -104,9 +104,11 @@ Rejected as the only surface. Host/runtime integration remains a future option.
 - Unsplash, Pixabay, and Pexels must be treated as image-source connectors with
   attribution/source metadata, not as AI image-generation providers. Unsplash
   candidates must preserve download tracking. AI-generated image candidates are
-  a separate explicit mode that may normalize a reviewed generated-image URL or
-  use a host runtime seam; Toolbox must not own model routing, prompt
-  management, provider billing, media import, or featured-image writes.
+  a separate explicit mode that may use a host runtime seam. Toolbox must not
+  own model routing, prompt management, or provider billing. ADR-010 supersedes
+  this ADR's original blanket prohibition on media import and featured-image
+  writes only for one editor-present, fully reviewed, strongly confirmed image
+  adoption transaction; every broader media write remains outside Toolbox.
 - Vector provider configuration, embedding, indexing, re-index jobs, rerank,
   and vector collection lifecycle belong to Cloud-managed Site Knowledge, not
   local Toolbox settings.

@@ -16,6 +16,7 @@ final class Provider_Client {
 	private const SITE_KNOWLEDGE_CONTENT_CHARS = 30000;
 	private const SITE_KNOWLEDGE_SYNC_MAX_BYTES = 750000;
 	private const AI_IMAGE_PROMPT_CHARS = 4000;
+	private const AI_IMAGE_PREVIEW_TOTAL_BYTES = 20971520;
 	private const AUDIO_GENERATION_TEXT_CHARS = 5000;
 	private const ARTICLE_PLAN_CONTENT_CHARS = 60000;
 	private const ARTICLE_PLAN_NOTES_CHARS = 12000;
@@ -547,7 +548,6 @@ final class Provider_Client {
 			'task'             => 'image_generation',
 			'prompt'           => sanitize_textarea_field( (string) ( $input['prompt'] ?? '' ) ),
 			'n'                => max( 1, min( 4, (int) ( $input['n'] ?? 1 ) ) ),
-			'response_format'  => sanitize_key( (string) ( $input['response_format'] ?? 'url' ) ),
 			'aspect_ratio'     => sanitize_text_field( (string) ( $input['aspect_ratio'] ?? '16:9' ) ),
 			'resolution'       => sanitize_key( (string) ( $input['resolution'] ?? 'high' ) ),
 			'source_surface'   => 'toolbox_featured_image',
@@ -2126,6 +2126,13 @@ final class Provider_Client {
 		if ( ! is_array( $result ) ) {
 			return array();
 		}
+		if (
+			'image_generation_artifacts' === (string) ( $result['artifact_type'] ?? '' )
+			&& 'image_generation_result.v1' === (string) ( $result['contract_version'] ?? '' )
+			&& is_array( $result['artifacts'] ?? null )
+		) {
+			return array_values( array_filter( $result['artifacts'], 'is_array' ) );
+		}
 
 		if ( is_array( $result['images'] ?? null ) ) {
 			return array_values( array_filter( $result['images'], 'is_array' ) );
@@ -2152,6 +2159,14 @@ final class Provider_Client {
 	}
 
 	private function normalize_ai_generated_image_candidate( array $candidate, string $query, string $fallback_prompt, array $media_context = array() ): array {
+		$cloud_artifact = array();
+		$artifact_candidate = is_array( $candidate['cloud_artifact'] ?? null ) ? $candidate['cloud_artifact'] : $candidate;
+		if ( isset( $artifact_candidate['artifact_id'], $artifact_candidate['artifact_reference'] ) ) {
+			$validated_artifact = ( new Cloud_Image_Artifact_Transport() )->validate_artifact( $artifact_candidate );
+			if ( ! is_wp_error( $validated_artifact ) ) {
+				$cloud_artifact = $artifact_candidate;
+			}
+		}
 		$url = $this->first_non_empty_url(
 			array(
 				$candidate['regular_url'] ?? '',
@@ -2221,7 +2236,7 @@ final class Provider_Client {
 			$risk_flags[] = 'temporary_provider_url';
 		}
 
-		return array(
+		$normalized = array(
 			'id'                            => sanitize_text_field( (string) ( $candidate['id'] ?? ( '' !== $url ? md5( $url ) : '' ) ) ),
 			'provider'                      => 'ai_generated',
 			'provider_name'                 => $provider,
@@ -2252,6 +2267,12 @@ final class Provider_Client {
 			'warnings'                      => array_values( array_unique( $warnings ) ),
 			'risk_flags'                    => array_values( array_unique( $risk_flags ) ),
 		);
+		if ( array() !== $cloud_artifact ) {
+			$normalized['artifact_id']    = sanitize_text_field( (string) $cloud_artifact['artifact_id'] );
+			$normalized['cloud_artifact'] = $this->sanitize_payload( $cloud_artifact );
+		}
+
+		return $normalized;
 	}
 
 	private function ai_image_media_context_from_input( array $input, string $prompt ): array {
@@ -6265,7 +6286,7 @@ final class Provider_Client {
 		);
 	}
 
-	private function normalize_ai_image_generation_response( array $response, array $runtime_payload ): array {
+	private function normalize_ai_image_generation_response( array $response, array $runtime_payload ) {
 		$result = $this->extract_cloud_runtime_result( $response );
 		$input  = is_array( $runtime_payload['input'] ?? null ) ? $runtime_payload['input'] : array();
 		$prompt = trim( sanitize_textarea_field( (string) ( $input['prompt'] ?? '' ) ) );
@@ -6281,9 +6302,15 @@ final class Provider_Client {
 
 		$candidates = $this->extract_ai_generated_image_candidates( $result );
 		$images     = array();
+		$artifact_transport = new Cloud_Image_Artifact_Transport();
+		$trace_id = sanitize_text_field( (string) ( $response['trace_id'] ?? $response['data']['trace_id'] ?? $result['trace_id'] ?? '' ) );
+		$preview_total_bytes = 0;
 		foreach ( array_slice( $candidates, 0, max( 1, min( 4, (int) ( $input['n'] ?? 1 ) ) ) ) as $candidate ) {
 			if ( ! is_array( $candidate ) ) {
 				continue;
+			}
+			if ( isset( $candidate['artifact_id'], $candidate['artifact_reference'] ) ) {
+				$candidate['cloud_artifact'] = $candidate;
 			}
 			$candidate['provider_origin']     = 'cloud';
 			$candidate['hosted_profile']      = $hosted_profile;
@@ -6291,7 +6318,24 @@ final class Provider_Client {
 			$candidate['generation_model']    = sanitize_text_field( (string) ( $candidate['generation_model'] ?? $model ) );
 			$candidate['generation_prompt']   = sanitize_textarea_field( (string) ( $candidate['generation_prompt'] ?? $prompt ) );
 			$normalized = $this->normalize_ai_generated_image_candidate( $candidate, $prompt, $prompt, $media_context );
-			if ( '' !== (string) ( $normalized['regular_url'] ?? '' ) ) {
+			if ( is_array( $normalized['cloud_artifact'] ?? null ) ) {
+				$projected_preview_bytes = $preview_total_bytes + absint( $normalized['cloud_artifact']['filesize_bytes'] ?? 0 );
+				if ( $projected_preview_bytes > self::AI_IMAGE_PREVIEW_TOTAL_BYTES ) {
+					return new WP_Error(
+						'npcink_toolbox_ai_image_preview_budget_exceeded',
+						__( 'The generated image preview set exceeds the local memory budget. Request fewer or smaller images.', 'npcink-workflow-toolbox' ),
+						array( 'status' => 413 )
+					);
+				}
+				$received = $artifact_transport->receive( $normalized['cloud_artifact'], $trace_id );
+				if ( is_wp_error( $received ) ) {
+					return $received;
+				}
+				$preview_total_bytes = $projected_preview_bytes;
+				$normalized['id']          = sanitize_text_field( (string) $received['artifact_id'] );
+				$normalized['preview_url'] = 'data:' . sanitize_text_field( (string) $received['content_type'] ) . ';base64,' . base64_encode( (string) $received['body'] );
+			}
+			if ( '' !== (string) ( $normalized['regular_url'] ?? '' ) || '' !== (string) ( $normalized['preview_url'] ?? '' ) ) {
 				$images[] = $this->normalize_image_candidate_contract( $normalized );
 			}
 		}

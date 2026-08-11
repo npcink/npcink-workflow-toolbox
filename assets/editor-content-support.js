@@ -1142,6 +1142,10 @@
 		return postJson('local-admin-consent/featured-image', input);
 	}
 
+	async function postStrongLocalImageAdoption(input) {
+		return postJson('strong-local-confirmation/image-adoption', input);
+	}
+
 	async function postAdapterAdoption(plan, planInput) {
 		const bridge = await postJsonToUrl(adapterRestUrl('proposals/from-plan'), {
 			plan_ability_id: 'npcink-abilities-toolkit/build-image-candidate-adoption-plan',
@@ -2749,6 +2753,42 @@
 		}
 	}
 
+	function insertImageAttachmentIntoEditor(media, picker) {
+		if (!createBlock || !data.dispatch || !data.select) {
+			return false;
+		}
+		const attachmentId = findAttachmentId(media, 0);
+		const url = String((media && (media.url || media.regular_url || media.download_url || media.thumbnail_url)) || '').trim();
+		if (attachmentId <= 0 || !url) {
+			return false;
+		}
+
+		const blockDispatch = data.dispatch('core/block-editor');
+		const blockSelect = data.select('core/block-editor');
+		if (!blockDispatch || typeof blockDispatch.insertBlocks !== 'function') {
+			return false;
+		}
+
+		const imageBlock = createBlock('core/image', {
+			id: attachmentId,
+			url,
+			alt: String((media && media.alt) || '').trim(),
+			caption: String((media && media.caption) || '').trim(),
+		});
+		let index;
+		let rootClientId;
+		const selectedClientId = blockSelect && typeof blockSelect.getSelectedBlockClientId === 'function'
+			? blockSelect.getSelectedBlockClientId()
+			: '';
+		if (selectedClientId) {
+			const selectedIndex = typeof blockSelect.getBlockIndex === 'function' ? blockSelect.getBlockIndex(selectedClientId) : -1;
+			index = selectedIndex >= 0 ? selectedIndex + 1 : undefined;
+			rootClientId = typeof blockSelect.getBlockRootClientId === 'function' ? blockSelect.getBlockRootClientId(selectedClientId) : undefined;
+		}
+		blockDispatch.insertBlocks(imageBlock, index, rootClientId);
+		return true;
+	}
+
 	function renderAdoptionResult(result) {
 		if (!result || typeof result !== 'object') {
 			return null;
@@ -2757,7 +2797,7 @@
 		const status = adoptionStatus(result);
 		const core = adoptionCorePayload(result);
 		const proposalId = extractProposalId(core, 0);
-		const localConsent = Boolean(result.local_consent);
+		const localConsent = Boolean(result.local_consent || result.local_confirmation);
 		const mediaImportOnly = result.adoption_target === 'media_import';
 		const existingMediaOnly = result.adoption_target === 'existing_media';
 		const title = status === 'adopted'
@@ -2767,7 +2807,7 @@
 			? (existingMediaOnly
 				? __('The existing attachment is already available for this paragraph; no duplicate media was imported.', 'npcink-workflow-toolbox')
 				: (localConsent
-				? __('Existing media is now the featured image.', 'npcink-workflow-toolbox')
+				? (mediaImportOnly ? __('The reviewed image is now in the Media Library. Paragraph and inline actions also add it to the visible editor draft.', 'npcink-workflow-toolbox') : __('The reviewed image is now the featured image.', 'npcink-workflow-toolbox'))
 				: (mediaImportOnly ? __('Media is imported and ready in the media library.', 'npcink-workflow-toolbox') : __('Image is imported and applied as the featured image.', 'npcink-workflow-toolbox'))))
 			: (status === 'submitted'
 				? __('Continue in Governance Core to review and execute the image adoption.', 'npcink-workflow-toolbox')
@@ -8480,7 +8520,7 @@
 					? mergeImageCandidateResults(imageGenerationResult || imageResultForSearchMode('generate'), result)
 					: result;
 				setImageResultForSearchMode('generate', nextResult);
-				setImageGuidance(__('Showing host-generated image candidates. Review and adopt through Core before importing or setting featured media.', 'npcink-workflow-toolbox'));
+				setImageGuidance(__('Showing verified host-generated image candidates. Review one image before importing it or setting featured media.', 'npcink-workflow-toolbox'));
 			} catch (requestError) {
 				setImageError(formatImageErrorMessage(requestError, __('Hosted image candidate request failed.', 'npcink-workflow-toolbox')));
 			} finally {
@@ -9171,26 +9211,45 @@
 			}
 		}
 
-		function imageAdoptionPlanInput(seo, setFeaturedImage) {
-			return Object.assign({}, seo, {
-				post_id: postContext.post_id || 0,
-				post_type: postContext.post_type || 'post',
-				image_candidate: selectedImage,
-				set_featured_image: Boolean(setFeaturedImage),
-			});
-		}
-
-		function localFeaturedImageConsentInput() {
+		function strongLocalImageAdoptionInput(action, seo) {
 			const attachmentId = findAttachmentId(selectedImage, 0);
+			const candidate = Object.assign({}, selectedImage || {}, {
+				download_url: imageDownloadUrl(selectedImage),
+				source_url: imageSourceUrl(selectedImage),
+				title: String((seo && seo.title) || imageTitle(selectedImage) || '').trim(),
+				alt: String((seo && seo.alt) || '').trim(),
+				caption: String((seo && seo.caption) || '').trim(),
+				description: String((seo && seo.description) || '').trim(),
+			});
+			if (candidate.cloud_artifact) {
+				candidate.download_url = '';
+				candidate.regular_url = '';
+				candidate.small_url = '';
+				candidate.thumbnail_url = '';
+				candidate.thumb_url = '';
+				candidate.preview_url = '';
+				candidate.url = '';
+			}
 			return {
+				action,
+				confirmed_action: action,
 				post_id: postContext.post_id || 0,
 				attachment_id: attachmentId,
-				candidate: {
-					title: imageTitle(selectedImage),
-					source: imageCandidateSourceLabel(selectedImage),
-					url: imagePreviewUrl(selectedImage) || imageSourceUrl(selectedImage),
-				},
+				candidate,
 			};
+		}
+
+		function confirmStrongLocalImageAction(action) {
+			if (typeof window === 'undefined' || typeof window.confirm !== 'function') {
+				return true;
+			}
+			if (action === 'import_and_set_featured') {
+				return window.confirm(__('Import this one reviewed image into the Media Library and set it as the featured image of the current article?', 'npcink-workflow-toolbox'));
+			}
+			if (action === 'set_featured_existing') {
+				return window.confirm(__('Set this existing Media Library image as the featured image of the current article?', 'npcink-workflow-toolbox'));
+			}
+			return window.confirm(__('Import this one reviewed image into the Media Library?', 'npcink-workflow-toolbox'));
 		}
 
 		async function adoptSelectedImage(setFeaturedImage) {
@@ -9199,46 +9258,56 @@
 				return;
 			}
 
+			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
+			const existingAttachment = findAttachmentId(selectedImage, 0) > 0;
+			const editorInsertMode = !setFeaturedImage && (activePicker.mode === 'paragraph' || activePicker.mode === 'inline');
+			if (editorInsertMode && existingAttachment) {
+				const inserted = insertImageAttachmentIntoEditor(selectedImage, activePicker);
+				if (!inserted) {
+					setImageAdoptionError(__('Could not insert the selected Media Library image into the current editor.', 'npcink-workflow-toolbox'));
+					return;
+				}
+				setImageAdoptionResult({
+					core: { success: true, status: 'completed', attachment_id: findAttachmentId(selectedImage, 0) },
+					local_consent: true,
+					adoption_target: 'existing_media',
+				});
+				submitImplicitAgentFeedback(
+					editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'existing_media_inserted', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
+				);
+				return;
+			}
+
+			const action = setFeaturedImage
+				? (existingAttachment ? 'set_featured_existing' : 'import_and_set_featured')
+				: 'import_only';
+			if (!confirmStrongLocalImageAction(action)) {
+				setImageAdoptionError(__('The image action was cancelled. No WordPress data changed.', 'npcink-workflow-toolbox'));
+				return;
+			}
+
 			setImageAdoptionRunning(true);
 			setImageAdoptionAction(setFeaturedImage ? 'adopt' : 'import');
 			setImageAdoptionError('');
 			setImageAdoptionResult(null);
 			try {
-				if (setFeaturedImage && findAttachmentId(selectedImage, 0) > 0) {
-					const local = await postLocalFeaturedImageConsent(localFeaturedImageConsentInput());
-					syncFeaturedMediaFromCore(local);
-					setImageAdoptionResult({ core: local, local_consent: true, adoption_target: 'featured_image' });
-						submitImplicitAgentFeedback(
-							editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, imagePicker || { mode: imageMode }, 'local_featured_image_adopt', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
-						);
-					return;
-				}
-
-				const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
-				if (!setFeaturedImage && activePicker.mode === 'paragraph' && findAttachmentId(selectedImage, 0) > 0) {
-					setImageAdoptionResult({
-						core: { success: true, status: 'completed' },
-						local_consent: true,
-						adoption_target: 'existing_media',
-					});
-						submitImplicitAgentFeedback(
-							editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, 'existing_media_selected', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
-						);
-					return;
-				}
 				const seoContext = imagePickerRequestContext(postContext, activePicker);
 				const seo = Object.assign({}, buildImageSeoFields(selectedImage, seoContext), selectedImageSeo || {});
-				const planInput = imageAdoptionPlanInput(seo, setFeaturedImage);
-				const plan = await postJson('flows/image-candidate-adoption-plan', planInput);
-				try {
-					const core = await postAdapterAdoption(plan, planInput);
-					setImageAdoptionResult({ plan, core, adoption_target: setFeaturedImage ? 'featured_image' : 'media_import' });
-						submitImplicitAgentFeedback(
-							editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, setFeaturedImage ? 'featured_image_adopt' : 'media_import', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
-						);
-				} catch (coreError) {
-					setImageAdoptionResult({ plan, core_error: coreError, adoption_target: setFeaturedImage ? 'featured_image' : 'media_import' });
+				const local = await postStrongLocalImageAdoption(strongLocalImageAdoptionInput(action, seo));
+				if (setFeaturedImage) {
+					syncFeaturedMediaFromCore(local);
 				}
+				if (editorInsertMode && !insertImageAttachmentIntoEditor(local, activePicker)) {
+					setImageAdoptionError(__('The image was imported, but it could not be inserted into the visible editor draft. It remains available in the Media Library.', 'npcink-workflow-toolbox'));
+				}
+				setImageAdoptionResult({
+					core: local,
+					local_confirmation: true,
+					adoption_target: setFeaturedImage ? 'featured_image' : 'media_import',
+				});
+				submitImplicitAgentFeedback(
+					editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, setFeaturedImage ? 'featured_image_adopt' : 'media_import', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
+				);
 			} catch (requestError) {
 				setImageAdoptionError(requestError && requestError.message ? requestError.message : __('Could not adopt the selected image.', 'npcink-workflow-toolbox'));
 			} finally {

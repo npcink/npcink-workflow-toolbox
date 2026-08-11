@@ -54,6 +54,7 @@ final class Rest_Controller {
 		$this->post( '/flows/image-candidate-adoption-plan', 'image_candidate_adoption_plan' );
 		$this->post( '/flows/article-audio-adoption-plan', 'article_audio_adoption_plan' );
 		$this->post( '/local-admin-consent/featured-image', 'local_admin_consent_featured_image' );
+		$this->post( '/strong-local-confirmation/image-adoption', 'strong_local_confirmation_image_adoption' );
 		$this->post( '/flows/site-knowledge-review-plan', 'site_knowledge_review_plan' );
 		$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' );
 		$this->post( '/flows/content-metadata-apply-plan', 'content_metadata_apply_plan' );
@@ -151,6 +152,7 @@ final class Rest_Controller {
 			'/flows/image-candidate-adoption-plan'         => 'cap.toolbox.workflow_suggest',
 			'/flows/article-audio-adoption-plan'           => 'cap.toolbox.workflow_suggest',
 			'/local-admin-consent' . '/featured-image'     => 'cap.toolbox.local_admin_consent',
+			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -793,6 +795,12 @@ final class Rest_Controller {
 				),
 			)
 		);
+	}
+
+	public function strong_local_confirmation_image_adoption( WP_REST_Request $request ) {
+		$result = ( new Single_Article_Image_Adoption() )->execute( $request );
+
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
 	public function site_knowledge_review_plan( WP_REST_Request $request ) {
@@ -1537,16 +1545,33 @@ final class Rest_Controller {
 	}
 
 	private function post( string $route, string $method, array $args = array() ): void {
+		$permission_callback = '/strong-local-confirmation/image-adoption' === $route
+			? array( $this, 'permission_single_article_image_adoption' )
+			: array( $this, 'permission' );
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
 			$route,
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, $method ),
-				'permission_callback' => array( $this, 'permission' ),
+				'permission_callback' => $permission_callback,
 				'args'                => $args,
 			)
 		);
+	}
+
+	public function permission_single_article_image_adoption( WP_REST_Request $request ): bool {
+		$post_id = absint( $request->get_param( 'post_id' ) );
+		if ( $post_id <= 0 || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$action = sanitize_key( (string) $request->get_param( 'action' ) );
+		if ( in_array( $action, array( Single_Article_Image_Adoption::ACTION_IMPORT_ONLY, Single_Article_Image_Adoption::ACTION_IMPORT_AND_SET_FEATURED ), true ) ) {
+			return current_user_can( 'upload_files' );
+		}
+
+		return Single_Article_Image_Adoption::ACTION_SET_FEATURED_EXISTING === $action;
 	}
 
 
