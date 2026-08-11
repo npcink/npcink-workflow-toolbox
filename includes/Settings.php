@@ -100,9 +100,26 @@ final class Settings {
 			$settings,
 			array(
 				'watermark_configured' => $this->media_watermark_configured( $settings ),
+				'watermark_templates'  => $this->media_watermark_templates(),
 				'policy_owner'         => 'npcink_toolbox',
 				'final_write_owner'    => 'local_wordpress_host',
 			)
+		);
+	}
+
+	/**
+	 * Returns bounded convenience presets for the existing watermark contract.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public function media_watermark_templates(): array {
+		return array(
+			array( 'id' => 'none', 'label' => __( 'No watermark', 'npcink-workflow-toolbox' ) ),
+			array( 'id' => 'toolbox_default', 'label' => __( 'Toolbox default', 'npcink-workflow-toolbox' ) ),
+			array( 'id' => 'subtle_text', 'label' => __( 'Subtle text', 'npcink-workflow-toolbox' ), 'type' => 'text', 'position' => 'bottom_right', 'opacity' => 55, 'font_size' => 28, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.25)', 'margin' => 18 ),
+			array( 'id' => 'prominent_text', 'label' => __( 'Prominent text', 'npcink-workflow-toolbox' ), 'type' => 'text', 'position' => 'bottom_right', 'opacity' => 88, 'font_size' => 48, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.55)', 'margin' => 24 ),
+			array( 'id' => 'logo_corner', 'label' => __( 'Corner logo', 'npcink-workflow-toolbox' ), 'type' => 'image', 'position' => 'bottom_right', 'opacity' => 80, 'scale' => 18, 'margin' => 24 ),
+			array( 'id' => 'custom', 'label' => __( 'Custom for this run', 'npcink-workflow-toolbox' ) ),
 		);
 	}
 

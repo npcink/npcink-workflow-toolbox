@@ -104,14 +104,16 @@ The first version provides:
 
 ## Boundary
 
-Toolbox returns suggestions and planning artifacts. It does not directly update
-posts, upload media, publish content, or bypass governance except for the
-single documented `/local-admin-consent/featured-image` exception: one existing
-attachment, one current post, a present administrator click, Core-owned audit,
-rollback on completion-audit failure, and no media import, metadata write, post
-content change, SEO write, publish, `confirm_token`, or `write_confirmed`
-behavior. All other WordPress writes should continue through WordPress
-abilities and Core proposal approval.
+Toolbox primarily returns suggestions and planning artifacts. Two bounded local
+write decisions are documented: the historical
+`/local-admin-consent/featured-image` existing-attachment proof, and ADR-010's
+`/strong-local-confirmation/image-adoption` lane for one present editor, one
+fully previewed image, and one current article. The latter may import one
+external or AI-generated image and optionally set it as featured, with native
+capability checks, safe external download or verified Cloud artifact delivery,
+and compensation rollback. Batch,
+background, external-Agent, publishing, replacement, taxonomy, settings, and
+unrelated metadata writes continue through their governed paths.
 
 ADR-006 distinguishes a non-Toolbox write path: an author-reviewed value may be
 placed into the current article's visible, editable editor state and persisted
@@ -140,9 +142,11 @@ the [documentation index](docs/README.md). Start with:
 - [First Version Reference](docs/first-version-reference.md)
 - [WordPress.org Submission](docs/wordpress-org-submission.md)
 - [Architecture Decision Records](docs/decisions/)
+- [Single-Article Editor Tools Development Standard v1](docs/single-article-editor-tools-development-standard-v1.md)
 - [ADR-006: Native Editor Commit And Governed Batch Handoff](docs/decisions/ADR-006-native-editor-commit-and-governed-batch-handoff.md)
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](docs/decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](docs/decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
+- [ADR-010: Strong Local Confirmation For Single-Article Image Adoption](docs/decisions/ADR-010-single-article-strong-local-image-adoption.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:
@@ -255,6 +259,7 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/flows/image-candidate-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
+- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
@@ -295,11 +300,14 @@ High-risk entries are intentionally constrained:
   semantic media retrieval, while metadata-only changes re-embed without
   rerunning vision. The route does not change attachment metadata, import
   WordPress media, keep a second cache, delete files, or write post content.
-- `/local-admin-consent/featured-image` is the only current direct local write
-  exception. It is limited to one existing attachment on one current post with
-  Core-owned audit and rollback, and it is not precedent for media import,
-  metadata writes, post content changes, SEO writes, publish, `confirm_token`,
-  or `write_confirmed` behavior.
+- `/local-admin-consent/featured-image` remains the historical ADR-003 direct
+  write proof for one existing attachment with Core-owned audit.
+- `/strong-local-confirmation/image-adoption` is the ADR-010 editor-present
+  lane. It accepts only `import_only`, `set_featured_existing`, or
+  `import_and_set_featured` for one current article and one fully reviewed
+  image. It uses `edit_post`, `upload_files` when importing, safe HTTPS download
+  checks, MIME/dimension limits, and compensation rollback. It is not available
+  to background, Cloud callback, Adapter, Agent, batch, or publishing flows.
 - Nightly Inspection Cloud Batch routes are compatibility bridges to
   Cloud-owned runtime runs. Toolbox must not store server-side run history,
   own retry policy, expose a recovery workspace, schedule work, create Core
@@ -548,8 +556,10 @@ build `npcink-abilities-toolkit/build-media-alt-apply-plan` through Adapter and
 submit the returned `media_alt_apply_plan.v1` to Core `/proposals/from-plan`.
 Toolbox stops after proposal creation and does not request
 `approve-and-execute`, poll, or treat candidate quality signals as
-authorization. Toolbox performs no WordPress media import, media metadata
-write, approval, execution, or audit ownership. A visual-evidence miss may use
+authorization. The ALT/caption review flow performs no WordPress media import,
+media metadata write, approval, execution, or audit ownership. ADR-010
+separately permits one fully reviewed image adoption for the current article;
+it does not authorize ALT/caption batch writes. A visual-evidence miss may use
 the existing short-lived Cloud Addon Artifact transport; matching Site
 Knowledge evidence is reused first, including by media search indexing. The
 legacy
@@ -603,30 +613,21 @@ Cloud for reranking, and return media SEO suggestions; these are runtime
 details, not local vector/index or provider ownership. Returned images remain
 `image_candidate.v1` suggestions with provider, attribution, source,
 license-review, and Unsplash download tracking metadata preserved. Editor review
-projection is delegated to
-`npcink-abilities-toolkit/build-image-candidate-review-artifact`; media import
-still flows through a governed adoption plan. When the selected candidate is an
-existing WordPress image attachment, the editor may set that one attachment as
-the current post's featured image through Local Admin Consent: the logged-in
-administrator sees the selected image, clicks one button, Toolbox records
-Core-owned audit evidence before and after the write, and no Core proposal is
-created. External image URLs, media import, media metadata writes, and
-multi-action adoption still use the Adapter/Core/Abilities path.
+projection may use
+`npcink-abilities-toolkit/build-image-candidate-review-artifact` when installed.
+For one editor-present article action, ADR-010 allows Toolbox to import the
+reviewed external or AI-generated candidate and optionally set it as featured
+through strong local confirmation. Existing attachments may also be selected
+and inserted into visible editor state or set as featured. Batch, background,
+external-Agent, replacement, and multi-object adoption still use the
+Adapter/Core/Abilities path.
 When Cloud includes an `ai_generation_handoff`, the Toolbox result can show a
 reviewed-prompt hosted image candidate request. The action calls the Cloud
 Addon runtime seam with `grok-imagine-image-quality`, returns host-generated
-`image_candidate.v1` candidates, and still requires the local adoption/Core
-review path before any media import or featured-image write.
-Toolbox builds the adoption plan with proposed media title, alt text,
-description, attribution, filename, and featured-image step, submits it through
-Adapter's plan-to-proposal bridge, shows the proposal receipt and Governance
-Core link, then stops. Toolbox does not retain proposal ids on the draft,
-approve or execute the proposal, import media, mutate SEO/meta fields, or set
-the featured image directly.
-The only direct featured-image write exception is
-`/local-admin-consent/featured-image`, and it accepts existing image
-attachments only. If Core audit is unavailable or completion audit fails,
-Toolbox fails closed and rolls back the featured-image change.
+`image_candidate.v1` candidates. The editor reviews the prompt, image, source,
+license state, filename, title, ALT, description, and final action before the
+ADR-010 route may import one image. Cloud Addon remains transport only and does
+not receive WordPress write authority.
 The high-risk contrast remains governed: reviewed article/media batch plans
 that include draft creation, media upload, media metadata, and featured-image
 actions are submitted to Core as one `plan_to_proposal_batch` through
@@ -653,8 +654,9 @@ dedupe near-identical candidates, filter low-quality or watermarked images,
 return license/source/attribution evidence, and provide short query rewrites
 when no images are found. Toolbox may cache recent modal results for a few
 minutes and show those Cloud signals, but it must not own provider routing,
-image indexing, media-library writes, settings writes, or long-term adoption
-history.
+image indexing, settings writes, or long-term adoption history. The only local
+media-library write in this picker is ADR-010's one-image, current-article,
+strong-local-confirmation adoption transaction.
 
 The post editor **Npcink Content Support** sidebar owns high-frequency Npcink
 review and handoff actions because those actions need the current article
@@ -768,12 +770,13 @@ candidate list, match reasons, and optional media SEO suggestions.
 Supported image-use labels include featured, paragraph, inline, and setting
 image contexts. The label informs Cloud ranking and UI copy; it does not grant
 write authority.
-`ai_generated` remains explicit: callers may provide a reviewed generated image
-URL, or a host may handle `npcink_toolbox_ai_image_generation_request` and
-return host-generated image candidates. The route and ability ids keep legacy
-"image-generation" names for compatibility only; Toolbox still does not own
-model routing, prompt management, provider billing, media import, or final
-WordPress writes.
+`ai_generated` remains explicit: the hosted path returns
+`image_generation_result.v1` artifact references through Cloud Addon signed
+transport. The route and ability ids keep legacy "image-generation" names for
+compatibility only; Toolbox still does not own model routing, prompt
+management, or provider billing. ADR-010 permits Toolbox to import exactly one
+reviewed artifact and optionally set it as the current article's featured
+image; all other final WordPress writes remain outside this exception.
 
 Every returned image candidate is normalized to `image_candidate.v1` while
 preserving legacy URL fields for existing callers. The normalized fields include
@@ -864,6 +867,15 @@ diagnostics, entitlement, quota, billing, request logs, and service health
 detail. Toolbox keeps Cloud-backed calls inside explicit product workflows, and
 single-image Core proposal submission, URL repair handoffs, and batch proposal
 submission remain in **Image Handling**.
+
+When **Optimize this image** is opened for exactly one Media Library attachment,
+Toolbox shows a contextual single-image workbench inside the same fixed flow.
+It supports format/size overrides, optional crop, reusable text/logo watermark
+templates, and a safe output basename. The browser must verify the short-lived
+preview and the operator must confirm replacement semantics before Toolbox can
+submit one `adopt-cloud-media-derivative` proposal. The current contract replaces
+the selected attachment with backup and rollback evidence; Toolbox does not
+offer save-as-new until a separate governed create-attachment ability exists.
 
 Provider responses return normalized fields by default. Set **Include provider
 raw responses** to include redacted raw provider payloads for debugging.

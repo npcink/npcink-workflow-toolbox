@@ -371,6 +371,7 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/flows/image-candidate-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
+- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
@@ -812,18 +813,20 @@ The modal renders image candidates with previews, source links,
 attribution, provider metadata, license-review state, and preserved Unsplash
 download tracking when present. It does not upload media, set featured images,
 or create a write proposal directly.
-The exception is an already-imported image attachment selected in the editor:
-that can be set as the current post featured image through the
-Local Admin Consent route with Core audit. External URLs, generated URLs,
-media import, metadata writes, and multi-image operations still use governed
-handoff paths.
+ADR-010 adds a separate single-article transaction: after exact preview and one
+explicit editor confirmation, Toolbox may safely import one external or
+AI-generated image and optionally set it as featured. The service performs the
+HTTPS fetch or Cloud Addon signed artifact pull/ACK, byte/MIME/checksum/dimension
+validation, attachment creation, bounded metadata persistence, and compensation rollback. Multi-image, background,
+external, replacement, and cross-object operations still use governed paths.
 The selected-block toolbar exposes selection-only paragraph review and paragraph
 image shortcuts. Paragraph review returns clarity, fact-boundary, tone, and
 editing-direction notes without replacement copy. The image shortcut opens the
 same modal as an image-icon paragraph image suggestion shortcut. In that mode
 the selected paragraph or block is the primary image context and the default
-reviewed action is media import only; the sidebar image-source entry stays the
-article-level featured-image path.
+reviewed action imports one image and inserts a `core/image` block into visible
+editor state; article content persists only on the normal WordPress save. The
+sidebar image-source entry remains the article-level featured-image path.
 The modal is implemented as a reusable image-source picker. Future settings or
 other image fields can open it with a manual query and optional context, then
 listen for the selected `image_candidate.v1` and media SEO payload. That

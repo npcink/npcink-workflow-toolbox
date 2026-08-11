@@ -58,6 +58,14 @@ Npcink AI -> Toolbox -> Image Handling -> Batch Optimize Images
 
 Confirm the operator-facing path is still understandable:
 
+- opening **Optimize this image** for exactly one Media Library attachment shows
+  the contextual single-image workbench rather than the batch candidate form;
+- watermark templates expand to the existing canonical watermark input and do
+  not add provider, workflow, or execution ownership;
+- an optional output basename is shown as proposal evidence, uses the generated
+  MIME extension, and remains subject to final WordPress sanitize/unique rules;
+- the proposal button remains disabled until the preview image verifies and the
+  operator confirms rollback-backed replacement semantics;
 - single-image flow says generate preview first, then submit Core optimization
   review only after inspecting the derivative and adoption preflight;
 - replacement boundary explains that attachment adoption, post content URL
@@ -70,6 +78,8 @@ Confirm the operator-facing path is still understandable:
   route with a WordPress REST nonce, no-store, and nosniff headers;
 - no button or success state implies Toolbox or Cloud directly writes
   WordPress media.
+- no control claims **Save as new media item** until a separate governed
+  create-attachment ability exists.
 
 Before expanding the media surface, complete the
 [Media Optimization Operator Trial](archive/2026-06/media-optimization-operator-trial.md) on a

@@ -104,11 +104,12 @@ Every new AI feature should define these artifacts before implementation:
 | --- | --- | --- |
 | `suggestion_only` | Produces advice, candidates, summaries, scores, plans, or source evidence only | Toolbox/Cloud |
 | `local_admin_consent` | Narrow present-admin local write with explicit audit contract | Only allowed by prior ADR |
-| `strong_local_confirmation` | Future narrow direct apply class requiring exact preview and fail-closed audit | Requires separate design |
-| `core_proposal_required` | Any durable WordPress write, batch write, media import, SEO mutation, publishing, or taxonomy mutation | Core + Abilities |
+| `strong_local_confirmation` | Narrow present-editor direct apply with exact preview, native capabilities, and compensation | Toolbox only when an accepted ADR defines the exact action; ADR-010 covers one image |
+| `core_proposal_required` | Batch, background, external, incomplete-preview, replacement, publishing, taxonomy, settings, or otherwise unbounded durable writes | Core + Abilities |
 
-Default to `suggestion_only`. Escalate to `core_proposal_required` when a
-WordPress write is involved.
+Default to `suggestion_only`. A WordPress write escalates to
+`core_proposal_required` unless a prior ADR defines a narrower local lane and
+the implementation satisfies every condition in that contract.
 
 ADR-006 narrows one pre-classification case: a reviewed value placed into the
 current article's visible editor state and persisted only by native WordPress

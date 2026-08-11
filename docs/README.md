@@ -13,6 +13,7 @@ Start from the active documents below before changing code.
 - [Roadmap](roadmap.md)
 - [First Version Reference](first-version-reference.md)
 - [Feature Ownership And Plugin Boundary](feature-ownership-and-plugin-boundary.md)
+- [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
 - [Cross-Repo Boundary Matrix](cross-repo-boundary-matrix.md)
 - [Cross-Repo Database Boundary](cross-repo-database-boundary.md)
 - [Cross-Repo Database Boundary Closeout](cross-repo-database-boundary-closeout-2026-07-08.md)
@@ -85,6 +86,7 @@ Start from the active documents below before changing code.
 
 - [Media Optimization V1](media-optimization-v1.md)
 - [Media Optimization Stage Summary](media-optimization-stage-summary.md)
+- [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
 - [Media Optimization Release Checklist](media-optimization-release-checklist.md)
 - [Media ALT/Caption Review Set](media-alt-caption-review-set.md)
 - [Media ALT/Caption Toolkit Validation Plan](media-alt-caption-toolkit-validation-plan.md)
@@ -130,6 +132,7 @@ Start from the active documents below before changing code.
 - [ADR-007: Let Toolbox Own Optional Suite Navigation](decisions/ADR-007-toolbox-owned-admin-navigation.md)
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
+- [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
 
 ## Archived Closeouts
 

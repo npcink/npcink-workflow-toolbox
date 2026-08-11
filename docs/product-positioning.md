@@ -45,14 +45,18 @@ The product has two intentionally different commit paths:
   visible and editable editor state. They become durable only when the author
   uses normal WordPress Publish or Update. This `native_editor_commit` path
   does not create a Core proposal or Core audit record.
+- For one fully previewed image in the current article, an editor-present
+  `strong_local_confirmation` action may import one external or AI-generated
+  image and optionally set it as featured under ADR-010.
 - In plugin-admin batch execution surfaces, selected writes become Core
   proposals. Toolbox then stops and links or navigates to the governance
   surface; approval and execution do not occur in Toolbox.
 
-The editor rule applies only to the current article and the native save
-transaction. Hidden post-save execution, media import or mutation,
-cross-object/global writes, external/background actions, and batches remain on
-the Core proposal path. See ADR-006 for the complete eligibility test.
+The native-editor rule applies only to the current article and its normal save
+transaction. ADR-010 separately permits one immediate, reversible media import
+for the same present editor after an exact preview and explicit confirmation.
+Hidden post-save execution, replacement, cross-object/global writes,
+external/background actions, and batches remain on the Core proposal path.
 
 Toolbox must not fork the flow
 into a separate approval path, media registry, prompt/model control plane, or
@@ -241,8 +245,9 @@ download tracking metadata. Host-generated image candidates are a separate
 explicit candidate mode: callers may provide reviewed generated image URLs, or
 a host may provide a bounded generated-image runtime seam. The legacy
 route/ability ids may still say "image-generation" for compatibility, but
-Toolbox must not own model routing, prompt management, provider billing, or
-media import. Keep this seam aligned with
+Toolbox must not own model routing, prompt management, or provider billing.
+One reviewed local import may use ADR-010; Cloud still owns only candidate
+runtime and transport. Keep this seam aligned with
 `docs/adversarial-boundary-review.md` and `docs/boundary-exceptions.md` so the
 compatibility name does not become new runtime ownership.
 
