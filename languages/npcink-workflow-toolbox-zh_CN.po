@@ -357,6 +357,9 @@ msgstr "此 WordPress 站点的只读 Cloud 覆盖摘要。"
 msgid "Refresh status"
 msgstr "刷新状态"
 
+msgid "Run retrieval acceptance"
+msgstr "执行检索验收"
+
 msgid "Connect Cloud Addon before reading Site Knowledge coverage."
 msgstr "读取站点知识覆盖范围前请先连接 Cloud Addon。"
 
@@ -7754,6 +7757,12 @@ msgstr "关闭大图"
 
 msgid "Side by side"
 msgstr "左右对比"
+
+msgid "Side-by-side comparison"
+msgstr "左右对比"
+
+msgid "Stacked comparison"
+msgstr "叠放对比"
 
 msgid "Slider comparison"
 msgstr "滑杆对比"

@@ -2952,16 +2952,33 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__comparison-mode-switcher {
 	display: flex;
-	justify-content: center;
-	gap: 14px;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	gap: 0;
 	margin-top: 16px;
 	padding-top: 12px;
 	border-top: 1px solid #e2e4e7;
 }
 
-.npcink-toolbox__comparison-mode-switcher .is-active {
-	font-weight: 700;
-	text-decoration: underline;
+.npcink-toolbox__comparison-mode-switcher .button {
+	min-height: 36px;
+	margin: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.npcink-toolbox__comparison-mode-switcher .button:first-child {
+	border-radius: 4px 0 0 4px;
+}
+
+.npcink-toolbox__comparison-mode-switcher .button:last-child {
+	border-radius: 0 4px 4px 0;
+}
+
+.npcink-toolbox__comparison-mode-switcher .button.is-active {
+	background: #3858e9;
+	border-color: #3858e9;
+	color: #fff;
 }
 
 .npcink-toolbox__comparison-slider-frame {
@@ -2990,6 +3007,10 @@ pre.npcink-toolbox__result {
 	width: 50%;
 	overflow: hidden;
 	border-right: 2px solid #3858e9;
+}
+
+.npcink-toolbox__comparison-slider-backup[style*="100%"] {
+	border-right-color: transparent;
 }
 
 .npcink-toolbox__comparison-slider-backup::after {
@@ -3032,6 +3053,10 @@ pre.npcink-toolbox__result {
 	margin: 0;
 	opacity: 0;
 	cursor: ew-resize;
+}
+
+.npcink-toolbox__comparison-slider-frame input[type="range"]:disabled {
+	display: none;
 }
 
 .npcink-toolbox__single-image-frame,

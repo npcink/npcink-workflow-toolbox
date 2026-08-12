@@ -7423,29 +7423,33 @@
 		const current = form.querySelector('[data-toolbox-original-media-card] img');
 		const backup = form.querySelector('[data-toolbox-backup-image]');
 		if (!mode || !slider || !comparison || !current || !backup || !backup.src) return;
-		mode.hidden = false;
-		comparison.hidden = true;
-		slider.hidden = false;
 		const input = slider.querySelector('[data-toolbox-comparison-slider-input]');
 		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
 		const backupImage = slider.querySelector('[data-toolbox-slider-backup]');
-		mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((button) => button.addEventListener('click', () => {
-			const isCurrent = button.dataset.toolboxComparisonModeButton === 'current';
-			if (input) input.value = isCurrent ? '0' : '100';
-			if (layer) layer.style.width = isCurrent ? '0%' : '100%';
-			mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((item) => item.classList.toggle('is-active', item === button));
-			const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
-			const sliderBackup = slider.querySelector('[data-toolbox-slider-backup]');
-			if (sliderCurrent) sliderCurrent.src = current.src;
-			if (sliderBackup) sliderBackup.src = backup.src;
-		}));
+		const frame = slider.querySelector('.npcink-toolbox__comparison-slider-frame');
 		const syncSlider = () => {
 			if (input && layer) layer.style.width = input.value + '%';
-			if (backupImage) backupImage.style.width = slider.querySelector('.npcink-toolbox__comparison-slider-frame').clientWidth + 'px';
+			if (backupImage && frame) backupImage.style.width = frame.clientWidth + 'px';
 		};
 		if (input && layer) input.addEventListener('input', syncSlider);
-		window.addEventListener('resize', syncSlider);
-		syncSlider();
+		const setMode = (name) => {
+			const isSide = name === 'side-by-side';
+			const isSlider = name === 'slider';
+			comparison.hidden = !isSide;
+			slider.hidden = isSide;
+			if (input) input.disabled = !isSlider;
+			if (layer) layer.style.width = isSlider ? (input ? input.value : 50) + '%' : (name === 'stacked' ? '100%' : '0%');
+			mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((item) => item.classList.toggle('is-active', item.dataset.toolboxComparisonModeButton === name));
+			syncSlider();
+		};
+		mode.hidden = false;
+		const buttons = mode.querySelectorAll('[data-toolbox-comparison-mode-button]');
+		buttons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.toolboxComparisonModeButton || 'stacked')));
+		const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
+		if (sliderCurrent) sliderCurrent.src = current.src;
+		if (backupImage) backupImage.src = backup.src;
+		setMode('stacked');
+		window.addEventListener('resize', syncSlider, { passive: true });
 	}
 
 	function initMediaAltCaptionControls() {
