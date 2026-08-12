@@ -4426,10 +4426,10 @@ final class Admin_Page {
 						<div data-toolbox-single-media-review-actions hidden>
 							<label class="npcink-toolbox__single-media-confirmation">
 								<input type="checkbox" name="confirm_replace_current" value="1" data-toolbox-confirm-media-replacement />
-								<span><?php esc_html_e( 'I reviewed this exact preview. Replace the current attachment and create a restorable backup.', 'npcink-workflow-toolbox' ); ?></span>
+								<span><?php esc_html_e( 'I confirmed the processed image. Replace the current image and automatically back up the original so it can be restored.', 'npcink-workflow-toolbox' ); ?></span>
 							</label>
 							<button type="button" class="button button-primary button-hero" data-toolbox-apply-media-derivative disabled><?php esc_html_e( 'Apply to Media Library', 'npcink-workflow-toolbox' ); ?></button>
-							<p class="description"><?php esc_html_e( 'Known post-content image references are updated in the same local transaction.', 'npcink-workflow-toolbox' ); ?></p>
+							<p class="description"><?php esc_html_e( 'The backup is kept outside the Media Library and is used only to restore the original image. Known post-content image references are updated in the same local transaction.', 'npcink-workflow-toolbox' ); ?></p>
 						</div>
 						<div class="npcink-toolbox__single-media-complete-actions" data-toolbox-single-media-complete-actions hidden>
 							<?php if ( $edit_link ) : ?><a class="button button-primary" href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'View media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>

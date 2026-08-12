@@ -17,10 +17,11 @@ The operator path is:
 3. Choose custom, MD5, or time-based output naming; enter a basename only for
    the custom option.
 4. Generate and visually verify the short-lived derivative preview.
-5. Confirm the replacement and rollback statement.
+5. Confirm the replacement and the automatic-backup statement. Backup is mandatory and cannot be disabled for this transaction.
 6. Apply the verified derivative to the selected Media Library attachment.
 7. Inspect the returned backup, reference-repair, and verification receipt;
-   restore through the existing Toolkit recovery path if necessary.
+   restore through the existing Toolkit recovery path if necessary. The backup
+   is kept outside the Media Library and is not a second visible attachment.
 
 ## Ownership
 
@@ -127,6 +128,9 @@ external-image adoption exception.
 - Preview verification is mandatory before **Apply to Media Library** enables.
 - Replacement confirmation is mandatory and the final button click performs
   the one bounded local transaction.
+- The original-image backup is created automatically for every replacement;
+  the operator is not asked to choose whether to back it up, and Toolbox does
+  not expose a disable-backup option.
 - Keep optional crop and detailed watermark fields secondary to the quick
   choices.
 - Opening **More settings** reveals only compact filename, watermark-detail,
