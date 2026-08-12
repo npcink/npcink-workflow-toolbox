@@ -7836,6 +7836,13 @@ msgstr "90 天"
 msgid "Save backup retention"
 msgstr "保存备份保留设置"
 
+#: includes/Admin_Page.php
+msgid "Image Settings"
+msgstr "图片设置"
+
+msgid "Image settings"
+msgstr "图片设置"
+
 
 #: includes/Admin_Page.php
 msgid "View media details"

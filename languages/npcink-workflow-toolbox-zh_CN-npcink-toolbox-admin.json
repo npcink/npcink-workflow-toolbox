@@ -666,6 +666,8 @@
       "30 days (recommended)": ["30 天（推荐）"],
       "90 days": ["90 天"],
       "Save backup retention": ["保存备份保留设置"]
+      ,"Image Settings": ["图片设置"]
+      ,"Image settings": ["图片设置"]
     }
   }
 }
