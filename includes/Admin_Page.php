@@ -3497,7 +3497,7 @@ final class Admin_Page {
 			'scope_description' => __( 'Find images, review previews, then submit only the selected items. Nothing is written automatically.', 'npcink-workflow-toolbox' ),
 		);
 		?>
-		<div class="npcink-toolbox__panel-header">
+		<div class="npcink-toolbox__panel-header npcink-toolbox__panel-header--compact">
 			<h2><?php echo esc_html( (string) $surface_header['title'] ); ?></h2>
 			<p><?php echo esc_html( (string) $surface_header['description'] ); ?></p>
 		</div>
