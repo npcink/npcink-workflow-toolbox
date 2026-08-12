@@ -4420,6 +4420,17 @@ final class Admin_Page {
 			<input type="hidden" name="watermark_template_logo_url" data-toolbox-watermark-template-logo-url />
 			<div class="npcink-toolbox__single-media-grid">
 				<section class="npcink-toolbox__single-media-preview-column" aria-label="<?php esc_attr_e( 'Image comparison', 'npcink-workflow-toolbox' ); ?>">
+					<div class="npcink-toolbox__comparison-toolbar">
+						<h3><?php esc_html_e( 'Image comparison', 'npcink-workflow-toolbox' ); ?></h3>
+						<div class="npcink-toolbox__comparison-mode-switcher" data-toolbox-comparison-mode hidden>
+							<span class="npcink-toolbox__comparison-mode-label"><?php esc_html_e( 'View mode', 'npcink-workflow-toolbox' ); ?></span>
+							<div class="npcink-toolbox__comparison-mode-buttons">
+								<button type="button" class="button" data-toolbox-comparison-mode-button="side-by-side"><?php esc_html_e( 'Side-by-side comparison', 'npcink-workflow-toolbox' ); ?></button>
+								<button type="button" class="button is-active" data-toolbox-comparison-mode-button="stacked"><?php esc_html_e( 'Stacked comparison', 'npcink-workflow-toolbox' ); ?></button>
+								<button type="button" class="button" data-toolbox-comparison-mode-button="slider"><?php esc_html_e( 'Slider comparison', 'npcink-workflow-toolbox' ); ?></button>
+							</div>
+						</div>
+					</div>
 					<div class="npcink-toolbox__single-media-comparison" data-toolbox-single-media-comparison>
 						<div class="npcink-toolbox__single-image-card" data-toolbox-original-media-card>
 							<div class="npcink-toolbox__image-card-heading"><span class="npcink-toolbox__eyebrow" data-toolbox-current-image-label><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span><button type="button" class="button-link" data-toolbox-view-image><?php esc_html_e( 'View large image', 'npcink-workflow-toolbox' ); ?></button></div>
