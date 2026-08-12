@@ -4461,8 +4461,8 @@ final class Admin_Page {
 						</div>
 					</div>
 					<div class="npcink-toolbox__comparison-mode-switcher" data-toolbox-comparison-mode hidden>
-						<button type="button" class="button-link is-active" data-toolbox-comparison-mode-button="side-by-side"><?php esc_html_e( 'Side by side', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="button-link" data-toolbox-comparison-mode-button="slider"><?php esc_html_e( 'Slider comparison', 'npcink-workflow-toolbox' ); ?></button>
+						<button type="button" class="button-link is-active" data-toolbox-comparison-mode-button="backup"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></button>
+						<button type="button" class="button-link" data-toolbox-comparison-mode-button="current"><?php esc_html_e( 'Current image', 'npcink-workflow-toolbox' ); ?></button>
 					</div>
 						<div class="npcink-toolbox__comparison-slider" data-toolbox-comparison-slider hidden>
 						<div class="npcink-toolbox__comparison-slider-frame"><img data-toolbox-slider-current alt="" /><div class="npcink-toolbox__comparison-slider-backup"><img data-toolbox-slider-backup alt="" /></div><span class="npcink-toolbox__comparison-slider-label is-left"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span><span class="npcink-toolbox__comparison-slider-label is-right"><?php esc_html_e( 'Current image', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="0" max="100" value="50" data-toolbox-comparison-slider-input aria-label="<?php esc_attr_e( 'Comparison position', 'npcink-workflow-toolbox' ); ?>" /></div>
