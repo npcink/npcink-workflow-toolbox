@@ -4408,7 +4408,7 @@ final class Admin_Page {
 					<h2><?php esc_html_e( 'Optimize image', 'npcink-workflow-toolbox' ); ?></h2>
 					<p><?php esc_html_e( 'Generate an exact preview, compare it with the original, then apply it directly to this Media Library item.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
-				<span class="npcink-toolbox__local-confirmation-badge"><?php esc_html_e( 'Local confirmation', 'npcink-workflow-toolbox' ); ?></span>
+				<span class="npcink-toolbox__local-confirmation-badge"><?php esc_html_e( 'Needs confirmation', 'npcink-workflow-toolbox' ); ?></span>
 			</div>
 			<input type="hidden" name="attachment_id" value="<?php echo esc_attr( (string) $attachment_id ); ?>" data-toolbox-media-attachment />
 			<input type="hidden" name="watermark_policy_enabled" value="<?php echo ! empty( $toolbox_policy['watermark_enabled'] ) ? '1' : '0'; ?>" />

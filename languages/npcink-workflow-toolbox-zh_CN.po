@@ -7743,6 +7743,9 @@ msgstr "生成精确预览，与原图对比确认后，直接应用到当前媒
 msgid "Local confirmation"
 msgstr "本地确认"
 
+msgid "Needs confirmation"
+msgstr "需要确认"
+
 #: includes/Admin_Page.php
 msgid "Image comparison"
 msgstr "图片对比"

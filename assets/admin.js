@@ -7374,10 +7374,7 @@
 				button.hidden = false;
 				setSingleImageWorkbenchPhase(form, 'completed');
 				if (summary) {
-					const before = latest.before && typeof latest.before === 'object' ? latest.before : {};
-					const size = latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '';
-					summary.hidden = false;
-					summary.innerHTML = '<strong>' + t('Original image backup available') + '</strong>' + t('Backup time') + ': ' + (latest.created_at_gmt || t('Unknown')) + (before.mime_type ? ' · ' + t('Format') + ': ' + String(before.mime_type).replace('image/', '').toUpperCase() : '') + (size ? ' · ' + t('Size') + ': ' + size : '');
+					summary.hidden = true;
 				}
 				if (backupCard) {
 					const image = backupCard.querySelector('[data-toolbox-backup-image]');
@@ -7387,7 +7384,7 @@
 						image.src = String(latest.backup_url || '');
 					}
 					if (meta) {
-						meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', latest.created_at_gmt || ''].filter(Boolean).join(' · ');
+						meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', formatDateTime(latest.created_at_gmt)].filter(Boolean).join(' · ');
 					}
 				}
 				renderTextResult(form, t('A restorable original-image backup is available. Use Restore original image to continue.'), 'ok');
