@@ -3418,11 +3418,11 @@ final class Admin_Page {
 			),
 			array(
 				'surface'     => 'image',
-				'group'       => __( 'Batch ALT Review', 'npcink-workflow-toolbox' ),
+				'group'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
 				'group_id'    => 'image-text-review',
 				'id'          => 'media-alt-caption-review',
 				'endpoint'    => 'ai/site-helpers',
-				'title'       => __( 'Review ALT Suggestions', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Build a local review preview for missing or weak ALT text. Cloud visual evidence is optional.', 'npcink-workflow-toolbox' ),
 				'intent'      => 'media_alt_suggestions',
 				'button'      => __( 'Build ALT review preview', 'npcink-workflow-toolbox' ),
@@ -3473,7 +3473,7 @@ final class Admin_Page {
 				'description' => __( 'Preview selected images before submitting an optimization request.', 'npcink-workflow-toolbox' ),
 			),
 			'image-text-review' => array(
-				'title'       => __( 'Batch Image ALT Review', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media.', 'npcink-workflow-toolbox' ),
 			),
 			'image-settings' => array(
@@ -3643,7 +3643,7 @@ final class Admin_Page {
 			</div>
 		<?php
 		$this->render_media_backup_retention_settings();
-		$this->render_watermark_template_library( 'watermark-templates', true );
+		$this->render_watermark_template_library( '', true );
 		?>
 		</div>
 		<?php
@@ -3752,7 +3752,7 @@ final class Admin_Page {
 			)
 		);
 		?>
-		<form method="post" action="options.php" class="npcink-toolbox__card npcink-toolbox__watermark-library" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-watermark-library data-max-templates="20" <?php echo $active ? '' : 'hidden'; ?>>
+		<form method="post" action="options.php" class="npcink-toolbox__card npcink-toolbox__watermark-library"<?php echo '' !== $tool_id ? ' data-toolbox-tool-panel="' . esc_attr( $tool_id ) . '"' : ''; ?> data-toolbox-watermark-library data-max-templates="20" <?php echo $active ? '' : 'hidden'; ?>>
 			<?php settings_fields( 'npcink_toolbox_watermark_templates' ); ?>
 			<div class="npcink-toolbox__watermark-library-heading">
 				<div>

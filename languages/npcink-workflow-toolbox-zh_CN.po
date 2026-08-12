@@ -7852,6 +7852,9 @@ msgstr "水印模板与备份保留时间。"
 msgid "Manage low-frequency image defaults here. Review and execution tools remain in their own tabs."
 msgstr "在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"
 
+msgid "Image ALT Review"
+msgstr "图片 ALT 审核"
+
 
 #: includes/Admin_Page.php
 msgid "View media details"
