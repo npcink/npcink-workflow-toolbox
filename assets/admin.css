@@ -2816,6 +2816,19 @@ pre.npcink-toolbox__result {
 	align-items: start;
 }
 
+.npcink-toolbox__comparison-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.npcink-toolbox__comparison-toolbar > h3 {
+	margin: 0;
+	font-size: 16px;
+}
+
 .npcink-toolbox__single-media-workbench.has-optimized-preview .npcink-toolbox__single-media-comparison {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -2952,33 +2965,59 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__comparison-mode-switcher {
 	display: flex;
-	justify-content: flex-start;
+	align-items: center;
+	justify-content: flex-end;
 	flex-wrap: wrap;
-	gap: 0;
-	margin-top: 16px;
-	padding-top: 12px;
-	border-top: 1px solid #e2e4e7;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
 }
 
-.npcink-toolbox__comparison-mode-switcher .button {
+.npcink-toolbox__comparison-mode-label {
+	color: #50575e;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.npcink-toolbox__comparison-mode-buttons {
+	display: inline-flex;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.npcink-toolbox__comparison-mode-buttons .button {
 	min-height: 36px;
 	margin: 0;
 	border-radius: 0;
 	box-shadow: none;
+	border: 0;
+	border-right: 1px solid #dcdcde;
 }
 
-.npcink-toolbox__comparison-mode-switcher .button:first-child {
-	border-radius: 4px 0 0 4px;
+.npcink-toolbox__comparison-mode-buttons .button:last-child {
+	border-right: 0;
 }
 
-.npcink-toolbox__comparison-mode-switcher .button:last-child {
-	border-radius: 0 4px 4px 0;
-}
-
-.npcink-toolbox__comparison-mode-switcher .button.is-active {
+.npcink-toolbox__comparison-mode-buttons .button.is-active {
 	background: #3858e9;
-	border-color: #3858e9;
 	color: #fff;
+}
+
+@media (max-width: 782px) {
+	.npcink-toolbox__comparison-toolbar {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.npcink-toolbox__comparison-mode-switcher {
+		justify-content: flex-start;
+	}
+
+	.npcink-toolbox__comparison-mode-buttons {
+		max-width: 100%;
+		overflow-x: auto;
+	}
 }
 
 .npcink-toolbox__comparison-slider-frame {
@@ -2989,14 +3028,14 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__comparison-slider .npcink-toolbox__comparison-slider-frame {
-	min-height: 360px;
+	min-height: 320px;
 }
 
 .npcink-toolbox__comparison-slider-frame > img,
 .npcink-toolbox__comparison-slider-backup img {
 	display: block;
 	width: 100%;
-	height: 360px;
+	height: 320px;
 	object-fit: contain;
 	background: #f0f0f1;
 }
