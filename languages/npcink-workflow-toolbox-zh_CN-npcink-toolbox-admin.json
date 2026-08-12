@@ -672,6 +672,20 @@
       ,"Watermark templates and backup retention.": ["水印模板与备份保留时间。"]
       ,"Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.": ["在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"]
       ,"Image ALT Review": ["图片 ALT 审核"]
+      ,"Core authorization": ["Core 一次性授权"]
+      ,"Media read authorization required": ["需要授权读取媒体"]
+      ,"Core will record a one-time read authorization. Confirm the scope to build the candidate list.": ["Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"]
+      ,"Request ID": ["请求编号"]
+      ,"Data scope": ["数据范围"]
+      ,"Media and attachment metadata": ["媒体与附件元数据"]
+      ,"Privacy": ["隐私处理"]
+      ,"Strict redaction": ["严格脱敏"]
+      ,"Writes": ["写入"]
+      ,"None": ["无"]
+      ,"This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.": ["此授权仅适用于当前筛选条件，且只能使用一次。不包含上传、提案或 WordPress 修改权限。"]
+      ,"Authorize and build list": ["授权并生成列表"]
+      ,"Open Core": ["打开 Core"]
+      ,"No image candidates have been read yet. Authorize the request to continue.": ["尚未读取图片候选。请先授权后继续。"]
     }
   }
 }

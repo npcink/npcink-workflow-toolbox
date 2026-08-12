@@ -3661,6 +3661,7 @@ final class Admin_Page {
 						<p><?php esc_html_e( 'Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed.', 'npcink-workflow-toolbox' ); ?></p>
 					</div>
 				</div>
+				<div class="npcink-toolbox__retention-control">
 				<label>
 					<span><?php esc_html_e( 'Keep backups for', 'npcink-workflow-toolbox' ); ?></span>
 					<select name="<?php echo esc_attr( Plugin::MEDIA_OPTION_NAME ); ?>[backup_retention_days]">
@@ -3668,7 +3669,10 @@ final class Admin_Page {
 						<option value="90" <?php selected( 90, (int) $settings['backup_retention_days'] ); ?>><?php esc_html_e( '90 days', 'npcink-workflow-toolbox' ); ?></option>
 					</select>
 				</label>
-				<?php submit_button( __( 'Save backup retention', 'npcink-workflow-toolbox' ), 'secondary', 'submit', false ); ?>
+				<div class="npcink-toolbox__retention-actions">
+					<?php submit_button( __( 'Save backup retention', 'npcink-workflow-toolbox' ), 'secondary', 'submit', false ); ?>
+				</div>
+				</div>
 			</form>
 		</section>
 		<?php

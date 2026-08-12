@@ -7836,6 +7836,45 @@ msgstr "90 天"
 msgid "Save backup retention"
 msgstr "保存备份保留设置"
 
+msgid "Core authorization"
+msgstr "Core 一次性授权"
+
+msgid "Media read authorization required"
+msgstr "需要授权读取媒体"
+
+msgid "Core will record a one-time read authorization. Confirm the scope to build the candidate list."
+msgstr "Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"
+
+msgid "Request ID"
+msgstr "请求编号"
+
+msgid "Data scope"
+msgstr "数据范围"
+
+msgid "Media and attachment metadata"
+msgstr "媒体与附件元数据"
+
+msgid "Privacy"
+msgstr "隐私处理"
+
+msgid "Strict redaction"
+msgstr "严格脱敏"
+
+msgid "None"
+msgstr "无"
+
+msgid "This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes."
+msgstr "此授权仅适用于当前筛选条件，且只能使用一次。不包含上传、提案或 WordPress 修改权限。"
+
+msgid "Authorize and build list"
+msgstr "授权并生成列表"
+
+msgid "Open Core"
+msgstr "打开 Core"
+
+msgid "No image candidates have been read yet. Authorize the request to continue."
+msgstr "尚未读取图片候选。请先授权后继续。"
+
 #: includes/Admin_Page.php
 msgid "Image Settings"
 msgstr "图片设置"

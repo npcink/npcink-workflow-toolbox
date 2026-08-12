@@ -5360,29 +5360,30 @@
 		const result = renderShell(
 			form,
 			{ provider: 'core governance' },
-			'Bounded media read needs authorization',
-			'Core owns this one-time authorization. Review the stated scope, then explicitly authorize it before Toolbox reads local media candidates.'
+			t('Media read authorization required'),
+			t('Core will record a one-time read authorization. Confirm the scope to build the candidate list.')
 		);
 		if (!result) {
 			return;
 		}
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Request', requestId);
-		appendMeta(meta, 'Data', 'Media and attachment metadata');
-		appendMeta(meta, 'Redaction', 'Strict');
-		appendMeta(meta, 'Writes', 'None');
+		appendMeta(meta, t('Request ID'), requestId);
+		appendMeta(meta, t('Data scope'), t('Media and attachment metadata'));
+		appendMeta(meta, t('Privacy'), t('Strict redaction'));
+		appendMeta(meta, t('Writes'), t('None'));
 		result.appendChild(meta);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'This approval is bound to the current filters and can be used once. It does not authorize Cloud upload, a Core proposal, or a WordPress write.'));
+		result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.')));
+		// Boundary contract: It does not authorize Cloud upload, a Core proposal, or a WordPress write.
 		const actions = el('div', 'npcink-toolbox__result-actions');
-		const approveButton = el('button', 'button button-primary', 'Authorize bounded read and build list');
+		const approveButton = el('button', 'button button-primary', t('Authorize and build list'));
 		approveButton.type = 'button';
 		approveButton.setAttribute('data-toolbox-authorize-media-batch-read', '');
 		actions.appendChild(approveButton);
 		if (config.coreAdminUrl) {
-			actions.appendChild(createLink(config.coreAdminUrl, 'Open Core governance'));
+			actions.appendChild(createLink(config.coreAdminUrl, t('Open Core')));
 		}
 		result.appendChild(actions);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'No media candidates or bytes have been returned yet.'));
+		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('No image candidates have been read yet. Authorize the request to continue.')));
 	}
 
 	async function authorizeMediaDerivativeBatchRead(form, button) {
