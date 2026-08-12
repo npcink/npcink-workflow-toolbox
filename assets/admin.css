@@ -3031,6 +3031,28 @@ pre.npcink-toolbox__result {
 	min-height: 320px;
 }
 
+.npcink-toolbox__single-media-comparison[hidden],
+.npcink-toolbox__comparison-slider[hidden] {
+	display: none !important;
+}
+
+.npcink-toolbox__stacked-toggle {
+	display: flex;
+	justify-content: center;
+	gap: 0;
+	margin: 0 auto 10px;
+}
+
+.npcink-toolbox__stacked-toggle .button {
+	border-radius: 0;
+	margin: 0;
+	box-shadow: none;
+}
+
+.npcink-toolbox__stacked-toggle .button:first-child { border-radius: 4px 0 0 4px; }
+.npcink-toolbox__stacked-toggle .button:last-child { border-radius: 0 4px 4px 0; }
+.npcink-toolbox__stacked-toggle .button.is-active { background: #3858e9; border-color: #3858e9; color: #fff; }
+
 .npcink-toolbox__comparison-slider-frame > img,
 .npcink-toolbox__comparison-slider-backup img {
 	display: block;
