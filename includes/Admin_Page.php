@@ -1861,7 +1861,7 @@ final class Admin_Page {
 			'media'             => array( __( 'Open media library', 'npcink-workflow-toolbox' ), admin_url( 'upload.php' ) ),
 			'taxonomy'          => array( __( 'Review categories', 'npcink-workflow-toolbox' ), admin_url( 'edit-tags.php?taxonomy=category' ) ),
 			'site_context'      => array( __( 'Open site profile', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=context' ) ),
-			'site_knowledge'    => array( __( 'Open Site Knowledge in Cloud Addon', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
+			'site_knowledge'    => array( __( 'Open content library usage', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-knowledge' ) ),
 			'content_freshness' => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
 			'content_quality'   => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
 			'internal_link_health' => array( __( 'Open posts for link review', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
@@ -2968,6 +2968,148 @@ final class Admin_Page {
 		}
 
 		return __( 'Check Cloud Addon transport before running hosted execution.', 'npcink-workflow-toolbox' );
+	}
+
+	private function render_site_knowledge_panel( bool $cloud_ready ): void {
+		?>
+		<div class="npcink-toolbox__panel-header">
+			<h2><?php esc_html_e( 'Content Library Usage', 'npcink-workflow-toolbox' ); ?></h2>
+			<p><?php esc_html_e( 'Toolbox uses Cloud-managed Site Knowledge as suggestion context for fixed best-practice flows. Connection, refresh, indexing, and diagnostics live in Cloud Addon.', 'npcink-workflow-toolbox' ); ?></p>
+		</div>
+
+		<div class="npcink-toolbox__site-knowledge" data-toolbox-site-knowledge>
+				<section class="npcink-toolbox__card">
+					<div class="npcink-toolbox__section-heading">
+						<div>
+							<h3><?php esc_html_e( 'Library status', 'npcink-workflow-toolbox' ); ?></h3>
+							<p><?php esc_html_e( 'Read-only coverage summary for public content AI can use as suggestion context.', 'npcink-workflow-toolbox' ); ?></p>
+						</div>
+						<div class="npcink-toolbox__inline-actions">
+							<button type="button" class="button" data-toolbox-site-knowledge-status <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Refresh status', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="button button-primary" data-toolbox-site-knowledge-acceptance <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Run retrieval acceptance', 'npcink-workflow-toolbox' ); ?></button>
+						</div>
+					</div>
+					<?php if ( ! $cloud_ready ) : ?>
+						<div class="npcink-toolbox__result-notice is-warning"><?php esc_html_e( 'Connect the AI service before reading content library coverage.', 'npcink-workflow-toolbox' ); ?></div>
+					<?php endif; ?>
+					<div class="npcink-toolbox__knowledge-summary" data-toolbox-site-knowledge-summary>
+						<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Status has not been loaded yet.', 'npcink-workflow-toolbox' ); ?></div>
+					</div>
+					<form class="screen-reader-text" data-toolbox-site-knowledge-acceptance-form>
+						<input type="text" name="query" value="site knowledge retrieval acceptance" />
+						<input type="hidden" name="intent" value="site_search" />
+						<input type="hidden" name="max_results" value="8" />
+					</form>
+				</section>
+
+			<section class="npcink-toolbox__info-panel">
+				<h3><?php esc_html_e( 'Manage content library in Cloud Addon', 'npcink-workflow-toolbox' ); ?></h3>
+				<p><?php esc_html_e( 'Use Cloud Addon for connector state, public content refresh requests, and Site Knowledge delivery diagnostics. Toolbox keeps only the review and suggestion workflows that consume those results.', 'npcink-workflow-toolbox' ); ?></p>
+				<div class="npcink-toolbox__inline-actions">
+					<a class="button button-primary" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Cloud Addon', 'npcink-workflow-toolbox' ); ?></a>
+				</div>
+				<p class="description"><?php esc_html_e( 'The compatibility ability and REST contracts remain available for existing callers, but daily index operations are no longer surfaced in Toolbox.', 'npcink-workflow-toolbox' ); ?></p>
+			</section>
+
+			<section class="npcink-toolbox__info-panel">
+				<h3><?php esc_html_e( 'Review handoff', 'npcink-workflow-toolbox' ); ?></h3>
+				<p><?php esc_html_e( 'When AI returns evidence-backed review input, Toolbox can prepare one blocked review proposal. A person still completes and approves it.', 'npcink-workflow-toolbox' ); ?></p>
+				<ul class="npcink-toolbox__usage-list">
+					<li>
+						<strong><?php esc_html_e( 'Evidence first', 'npcink-workflow-toolbox' ); ?></strong>
+						<span><?php esc_html_e( 'The handoff appears only after the content library returns proposal input with evidence references.', 'npcink-workflow-toolbox' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'Core review only', 'npcink-workflow-toolbox' ); ?></strong>
+						<span><?php esc_html_e( 'Submit Core review proposal creates a blocked proposal that still needs a human title and content.', 'npcink-workflow-toolbox' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'No direct write', 'npcink-workflow-toolbox' ); ?></strong>
+						<span><?php esc_html_e( 'Approval, preflight, audit, and final WordPress writes stay in local Core governance.', 'npcink-workflow-toolbox' ); ?></span>
+					</li>
+				</ul>
+			</section>
+
+			<section class="npcink-toolbox__info-panel">
+				<div class="npcink-toolbox__section-heading">
+					<div>
+						<h3><?php esc_html_e( 'Where this helps', 'npcink-workflow-toolbox' ); ?></h3>
+						<p><?php esc_html_e( 'After the library is ready, article suggestions can find related public content without showing index settings to daily users.', 'npcink-workflow-toolbox' ); ?></p>
+					</div>
+				</div>
+				<ul class="npcink-toolbox__usage-list">
+					<li>
+						<strong><?php esc_html_e( 'Internal Link Candidates', 'npcink-workflow-toolbox' ); ?></strong>
+						<span><?php esc_html_e( 'Find related public posts and pages for editor-reviewed links.', 'npcink-workflow-toolbox' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'Publish Preflight', 'npcink-workflow-toolbox' ); ?></strong>
+						<span><?php esc_html_e( 'Check duplicate risk, source coverage, and missing site references before publishing.', 'npcink-workflow-toolbox' ); ?></span>
+					</li>
+					<li>
+						<strong><?php esc_html_e( 'Discoverability Brief', 'npcink-workflow-toolbox' ); ?></strong>
+						<span><?php esc_html_e( 'Ground SEO, AEO, and GEO suggestions in existing site context.', 'npcink-workflow-toolbox' ); ?></span>
+					</li>
+						<li>
+							<strong><?php esc_html_e( 'External AI workflows', 'npcink-workflow-toolbox' ); ?></strong>
+							<span><?php esc_html_e( 'Use the same Cloud-managed knowledge ability for API callers and natural-language requests.', 'npcink-workflow-toolbox' ); ?></span>
+						</li>
+				</ul>
+				<p class="description"><?php esc_html_e( 'Final WordPress edits still require the normal Core proposal and editor approval path.', 'npcink-workflow-toolbox' ); ?></p>
+			</section>
+		</div>
+		<?php
+	}
+
+	private function render_site_knowledge_search_check( bool $advanced = false, bool $cloud_ready = true ): void {
+		?>
+		<form class="npcink-toolbox__inline-form" data-toolbox-site-knowledge-search>
+			<h3><?php echo esc_html( $advanced ? __( 'Advanced search check', 'npcink-workflow-toolbox' ) : __( 'Search check', 'npcink-workflow-toolbox' ) ); ?></h3>
+			<p><?php esc_html_e( 'Run a read-only query against Cloud-managed site knowledge.', 'npcink-workflow-toolbox' ); ?></p>
+			<?php if ( ! $cloud_ready ) : ?>
+				<div class="npcink-toolbox__result-notice is-warning"><?php esc_html_e( 'Connect Cloud Addon before running Site Knowledge checks.', 'npcink-workflow-toolbox' ); ?></div>
+			<?php endif; ?>
+			<label>
+				<span><?php esc_html_e( 'Query', 'npcink-workflow-toolbox' ); ?></span>
+				<input type="text" name="query" placeholder="<?php esc_attr_e( 'Search public site knowledge', 'npcink-workflow-toolbox' ); ?>" />
+			</label>
+			<?php if ( $advanced ) : ?>
+				<div class="npcink-toolbox__split">
+					<label>
+						<span><?php esc_html_e( 'Intent', 'npcink-workflow-toolbox' ); ?></span>
+						<select name="intent">
+							<option value="site_search"><?php esc_html_e( 'Site search', 'npcink-workflow-toolbox' ); ?></option>
+							<option value="faq_candidates"><?php esc_html_e( 'FAQ candidates', 'npcink-workflow-toolbox' ); ?></option>
+							<option value="content_gap_analysis"><?php esc_html_e( 'Content gaps', 'npcink-workflow-toolbox' ); ?></option>
+							<option value="duplicate_check"><?php esc_html_e( 'Duplicate check', 'npcink-workflow-toolbox' ); ?></option>
+							<option value="internal_links"><?php esc_html_e( 'Internal links', 'npcink-workflow-toolbox' ); ?></option>
+						</select>
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Source types', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="text" name="source_types" value="post,page" />
+					</label>
+				</div>
+				<div class="npcink-toolbox__split">
+					<label>
+						<span><?php esc_html_e( 'Current post ID', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="number" name="current_post_id" min="0" value="0" />
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Max results', 'npcink-workflow-toolbox' ); ?></span>
+						<input type="number" name="max_results" min="1" max="20" value="8" />
+					</label>
+				</div>
+				<?php else : ?>
+					<input type="hidden" name="intent" value="site_search" />
+					<input type="hidden" name="source_types" value="post,page" />
+					<input type="hidden" name="current_post_id" value="0" />
+					<input type="hidden" name="max_results" value="8" />
+				<?php endif; ?>
+				<button type="submit" class="button" <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php echo esc_html( $advanced ? __( 'Search index', 'npcink-workflow-toolbox' ) : __( 'Run check', 'npcink-workflow-toolbox' ) ); ?></button>
+				<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+			</form>
+			<?php
 	}
 
 	private function render_morning_brief_panel( array $settings, bool $cloud_ready, ?array $nightly_preview, bool $embedded = false ): void {
@@ -4323,11 +4465,12 @@ final class Admin_Page {
 							<div class="npcink-toolbox__original-image-meta" data-toolbox-optimized-media-meta></div>
 						</div>
 					</div>
-					<div class="npcink-toolbox__comparison-slider" data-toolbox-comparison-slider hidden>
-						<div class="npcink-toolbox__stacked-toggle" data-toolbox-stacked-toggle hidden>
-							<button type="button" class="button is-active" data-toolbox-stacked-image="backup"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></button>
-							<button type="button" class="button" data-toolbox-stacked-image="current"><?php esc_html_e( 'Current image', 'npcink-workflow-toolbox' ); ?></button>
-						</div>
+					<div class="npcink-toolbox__comparison-mode-switcher" data-toolbox-comparison-mode hidden>
+						<button type="button" class="button" data-toolbox-comparison-mode-button="side-by-side"><?php esc_html_e( 'Side-by-side comparison', 'npcink-workflow-toolbox' ); ?></button>
+						<button type="button" class="button is-active" data-toolbox-comparison-mode-button="stacked"><?php esc_html_e( 'Stacked comparison', 'npcink-workflow-toolbox' ); ?></button>
+						<button type="button" class="button" data-toolbox-comparison-mode-button="slider"><?php esc_html_e( 'Slider comparison', 'npcink-workflow-toolbox' ); ?></button>
+					</div>
+						<div class="npcink-toolbox__comparison-slider" data-toolbox-comparison-slider hidden>
 						<div class="npcink-toolbox__comparison-slider-frame"><img data-toolbox-slider-current alt="" /><div class="npcink-toolbox__comparison-slider-backup"><img data-toolbox-slider-backup alt="" /></div><span class="npcink-toolbox__comparison-slider-label is-left"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span><span class="npcink-toolbox__comparison-slider-label is-right"><?php esc_html_e( 'Current image', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="0" max="100" value="50" data-toolbox-comparison-slider-input aria-label="<?php esc_attr_e( 'Comparison position', 'npcink-workflow-toolbox' ); ?>" /></div>
 					</div>
 					<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>

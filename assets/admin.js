@@ -5628,6 +5628,27 @@
 		});
 	}
 
+	async function refreshSiteKnowledgeStatus(root) {
+		const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
+		if (summary) {
+			clearNode(summary);
+			summary.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Checking Cloud index status...'));
+		}
+		const payload = await getJson(config.restUrl, 'site-knowledge/status');
+		if (summary) {
+			renderSiteKnowledgeStatusNode(summary, payload);
+			summary.appendChild(createRawDetails(payload, 'Status payload'));
+		}
+		return payload;
+	}
+
+	async function runSiteKnowledgeForm(form, endpoint) {
+		renderTextResult(form, config.labels && config.labels.running ? config.labels.running : 'Running...', 'pending');
+		const payload = await postJson(config.restUrl, endpoint, serialize(form));
+		renderStructuredResult(form, payload);
+		return payload;
+	}
+
 	function nightlyCloudSettingValue(name, fallback) {
 		const input = document.querySelector('[name="' + name + '"]');
 		if (!input) {
@@ -6647,6 +6668,91 @@
 		});
 	}
 
+	function setSiteKnowledgeButtonsBusy(root, busy) {
+		root.querySelectorAll('[data-toolbox-site-knowledge-status]').forEach((button) => {
+			button.disabled = busy;
+			button.setAttribute('aria-busy', busy ? 'true' : 'false');
+		});
+	}
+
+	function siteKnowledgeStatusStillActive(payload) {
+		const status = String(payload && payload.status ? payload.status : '').toLowerCase();
+		return status === 'queued' || status === 'running' || status === 'syncing';
+	}
+
+	function siteKnowledgeActiveStatusMessage(payload) {
+		const status = String(payload && payload.status ? payload.status : '').toLowerCase();
+		if (status === 'queued') {
+			return 'Index refresh is queued in Cloud. Search results may not include the latest changes yet.';
+		}
+		return 'Cloud is still indexing. Search results may not include the latest changes until status is ready.';
+	}
+
+	function initSiteKnowledge() {
+		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
+			const renderStatusError = (error) => {
+				const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
+				if (summary) {
+					clearNode(summary);
+					summary.appendChild(el('div', 'npcink-toolbox__result-notice is-error', error.message || 'Site knowledge status failed.'));
+					summary.appendChild(createRawDetails(error, 'Status error'));
+				}
+			};
+			root.querySelectorAll('[data-toolbox-site-knowledge-status]').forEach((statusButton) => {
+				statusButton.addEventListener('click', async () => {
+					setSiteKnowledgeButtonsBusy(root, true);
+					try {
+						await refreshSiteKnowledgeStatus(root);
+					} catch (error) {
+						renderStatusError(error);
+					} finally {
+						setSiteKnowledgeButtonsBusy(root, false);
+					}
+				});
+			});
+
+			const searchForm = root.querySelector('[data-toolbox-site-knowledge-search]');
+			if (searchForm) {
+				searchForm.addEventListener('submit', async (event) => {
+					event.preventDefault();
+					try {
+						await runSiteKnowledgeForm(searchForm, 'site-knowledge/search');
+					} catch (error) {
+						renderTextResult(searchForm, error.message || 'Site knowledge search failed.', 'error');
+					}
+				});
+			}
+			const acceptanceButton = root.querySelector('[data-toolbox-site-knowledge-acceptance]');
+			const acceptanceForm = root.querySelector('[data-toolbox-site-knowledge-acceptance-form]');
+			if (acceptanceButton && acceptanceForm) {
+				acceptanceButton.addEventListener('click', async () => {
+					acceptanceButton.disabled = true;
+					try {
+						await runSiteKnowledgeForm(acceptanceForm, 'site-knowledge/search');
+						await refreshSiteKnowledgeStatus(root);
+					} catch (error) {
+						renderTextResult(acceptanceForm, error.message || 'Site knowledge acceptance failed.', 'error');
+					} finally {
+						acceptanceButton.disabled = false;
+					}
+				});
+			}
+		});
+	}
+
+	function refreshAllSiteKnowledgeStatus() {
+		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
+			const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
+			refreshSiteKnowledgeStatus(root).catch((error) => {
+				if (summary) {
+					clearNode(summary);
+					summary.appendChild(el('div', 'npcink-toolbox__result-notice is-error', error.message || 'Site knowledge status failed.'));
+					summary.appendChild(createRawDetails(error, 'Status error'));
+				}
+			});
+		});
+	}
+
 	async function submitMediaReferenceRepairProposal(form) {
 		if (!config.adapterRestUrl) {
 			throw { message: 'Npcink Adapter REST URL is unavailable.' };
@@ -7026,6 +7132,9 @@
 		if (updateUrl) {
 			updateUrlForTopTab(target);
 		}
+		if (target === 'site-knowledge') {
+			refreshAllSiteKnowledgeStatus();
+		}
 		return true;
 	}
 
@@ -7318,8 +7427,6 @@
 		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
 		const backupImage = slider.querySelector('[data-toolbox-slider-backup]');
 		const frame = slider.querySelector('.npcink-toolbox__comparison-slider-frame');
-		const stackedToggle = slider.querySelector('[data-toolbox-stacked-toggle]');
-		const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
 		const syncSlider = () => {
 			if (input && layer) layer.style.width = input.value + '%';
 			if (backupImage && frame) backupImage.style.width = frame.clientWidth + 'px';
@@ -7331,7 +7438,6 @@
 			comparison.hidden = !isSide;
 			slider.hidden = isSide;
 			if (input) input.disabled = !isSlider;
-			if (stackedToggle) stackedToggle.hidden = ! (name === 'stacked');
 			if (layer) layer.style.width = isSlider ? (input ? input.value : 50) + '%' : (name === 'stacked' ? '100%' : '0%');
 			mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((item) => item.classList.toggle('is-active', item.dataset.toolboxComparisonModeButton === name));
 			syncSlider();
@@ -7339,13 +7445,9 @@
 		mode.hidden = false;
 		const buttons = mode.querySelectorAll('[data-toolbox-comparison-mode-button]');
 		buttons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.toolboxComparisonModeButton || 'stacked')));
+		const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
 		if (sliderCurrent) sliderCurrent.src = current.src;
 		if (backupImage) backupImage.src = backup.src;
-		if (stackedToggle) stackedToggle.querySelectorAll('[data-toolbox-stacked-image]').forEach((button) => button.addEventListener('click', () => {
-			const showBackup = button.dataset.toolboxStackedImage === 'backup';
-			if (layer) layer.style.width = showBackup ? '100%' : '0%';
-			stackedToggle.querySelectorAll('[data-toolbox-stacked-image]').forEach((item) => item.classList.toggle('is-active', item === button));
-		}));
 		setMode('stacked');
 		window.addEventListener('resize', syncSlider, { passive: true });
 	}
@@ -8325,6 +8427,7 @@
 	initContextDrafts();
 	initWebSearchPresets();
 	initNightlyCloudBatch();
+	initSiteKnowledge();
 	initWatermarkTemplateLibrary();
 	initMediaDerivativeControls();
 	initMediaAltCaptionControls();
