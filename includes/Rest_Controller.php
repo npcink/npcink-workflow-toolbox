@@ -57,6 +57,7 @@ final class Rest_Controller {
 		$this->post( '/strong-local-confirmation/image-adoption', 'strong_local_confirmation_image_adoption' );
 		$this->post( '/strong-local-confirmation/media-derivative', 'strong_local_confirmation_media_derivative' );
 		$this->post( '/strong-local-confirmation/media-derivative-restore', 'strong_local_confirmation_media_derivative_restore' );
+		$this->get( '/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)', 'strong_local_confirmation_media_derivative_backups' );
 		$this->post( '/flows/site-knowledge-review-plan', 'site_knowledge_review_plan' );
 		$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' );
 		$this->post( '/flows/content-metadata-apply-plan', 'content_metadata_apply_plan' );
@@ -157,6 +158,7 @@ final class Rest_Controller {
 			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative-restore' => 'cap.toolbox.image_adoption',
+			'/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)' => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -1595,6 +1597,15 @@ final class Rest_Controller {
 		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
 
 		return $attachment_id > 0 && current_user_can( 'upload_files' ) && current_user_can( 'edit_post', $attachment_id );
+	}
+
+	public function strong_local_confirmation_media_derivative_backups( WP_REST_Request $request ) {
+		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
+		if ( $attachment_id <= 0 || ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return new WP_Error( 'npcink_toolbox_media_backup_permission_denied', __( 'You do not have permission to view image backups.', 'npcink-workflow-toolbox' ), array( 'status' => 403 ) );
+		}
+		$result = ( new Single_Image_Media_Optimization() )->list_backups( $attachment_id );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
 	public function strong_local_confirmation_media_derivative_restore( WP_REST_Request $request ) {

@@ -7842,6 +7842,18 @@ msgstr "Core 一次性授权"
 msgid "About Toolbox"
 msgstr "工具箱说明"
 
+msgid "Restore image"
+msgstr "恢复图片"
+
+msgid "View backups and restore"
+msgstr "查看备份并恢复"
+
+msgid "Open the image workbench to review available backups before restoring."
+msgstr "打开图片工作区，查看可用备份后再恢复。"
+
+msgid "Npcink restore"
+msgstr "Npcink 恢复"
+
 msgid "Media read authorization required"
 msgstr "需要授权读取媒体"
 

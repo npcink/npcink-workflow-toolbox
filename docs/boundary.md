@@ -1,5 +1,7 @@
 # Npcink Toolbox Boundary
 
+The read-only `/strong-local-confirmation/media-derivative-backups/{attachment_id}` route lists Toolkit-owned backups for one editable attachment so the existing local restore workbench can be reopened. It does not restore, delete, or modify media.
+
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 
 ADR-006 is the active authority for choosing between native editor commit and

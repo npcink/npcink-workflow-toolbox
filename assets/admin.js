@@ -7326,6 +7326,9 @@
 		if (attachmentId <= 0) {
 			return;
 		}
+		if (new URL(window.location.href).searchParams.get('restore') === '1') {
+			form.setAttribute('data-toolbox-restore-mode', '1');
+		}
 		const attachmentUrl = params.get('attachment_url') || '';
 		renderSelectedMedia(form, {
 			id: attachmentId,
@@ -7333,6 +7336,26 @@
 			url: attachmentUrl,
 			alt: '',
 		});
+		if (form.getAttribute('data-toolbox-restore-mode') === '1') {
+			loadMediaBackupsForRestore(form, attachmentId);
+		}
+	}
+
+	async function loadMediaBackupsForRestore(form, attachmentId) {
+		try {
+			const payload = await getJson(config.restUrl, 'strong-local-confirmation/media-derivative-backups/' + encodeURIComponent(String(attachmentId)));
+			const backups = Array.isArray(payload.backups) ? payload.backups : [];
+			const latest = backups.find((item) => item && item.file_exists && item.backup_id);
+			const button = form.querySelector('[data-toolbox-restore-media-backup]');
+			if (button instanceof HTMLButtonElement && latest) {
+				button.dataset.attachmentId = String(attachmentId);
+				button.dataset.backupId = String(latest.backup_id);
+				button.hidden = false;
+				setSingleImageWorkbenchPhase(form, 'completed');
+			}
+		} catch (error) {
+			// The workbench remains usable for optimization when backup lookup is unavailable.
+		}
 	}
 
 	function initMediaAltCaptionControls() {

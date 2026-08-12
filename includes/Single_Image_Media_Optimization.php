@@ -205,6 +205,14 @@ final class Single_Image_Media_Optimization {
 		);
 	}
 
+	public function list_backups( int $attachment_id ) {
+		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) ) {
+			return new WP_Error( 'npcink_toolbox_single_image_toolkit_unavailable', __( 'Npcink Abilities Toolkit is required to view image backups.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );
+		}
+		$result = $this->run_registered_ability( self::LIST_BACKUPS_ABILITY_ID, array( 'attachment_id' => $attachment_id ) );
+		return is_wp_error( $result ) ? $result : array( 'attachment_id' => $attachment_id, 'backups' => (array) ( $result['data']['backups'] ?? $result['backups'] ?? array() ) );
+	}
+
 	/** @return array<string,mixed>|WP_Error */
 	private function run_ability( array $input ) {
 		return $this->run_registered_ability( self::ABILITY_ID, $input );

@@ -1,5 +1,7 @@
 # Npcink Workflow Toolbox
 
+Single-image recovery remains attachment-scoped. Media Library attachment details and row actions can reopen the existing workbench, which reads available backups through `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` before the administrator explicitly confirms restoration. This lookup does not restore, delete, or modify media.
+
 Npcink Workflow Toolbox turns proven AI-assisted WordPress operations into
 fixed, review-only buttons for site operators, including Cloud-managed web
 search, Cloud-managed image-source candidates, Cloud-managed site knowledge,

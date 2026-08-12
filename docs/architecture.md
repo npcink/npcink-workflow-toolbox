@@ -1,5 +1,7 @@
 # Architecture
 
+Attachment-scoped recovery lookup uses `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` to reopen the existing single-image workbench without adding a backup registry or write owner.
+
 ## Authoritative Write-Lane Split
 
 ADR-006 supersedes older editor handoff assumptions in this document. A value

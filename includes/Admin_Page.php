@@ -228,7 +228,7 @@ final class Admin_Page {
 			return $form_fields;
 		}
 
-		$form_fields['npcink_toolbox_ai_image_optimization'] = array(
+			$form_fields['npcink_toolbox_ai_image_optimization'] = array(
 			'label' => __( 'Npcink AI', 'npcink-workflow-toolbox' ),
 			'input' => 'html',
 			'html'  => sprintf(
@@ -238,9 +238,14 @@ final class Admin_Page {
 				esc_html__( 'Complete ALT for this image', 'npcink-workflow-toolbox' ),
 				esc_url( $this->image_batch_tool_url( 'batch-optimize', array( $attachment_id ) ) ),
 				esc_html__( 'Optimize this image', 'npcink-workflow-toolbox' ),
-				esc_html__( 'For multiple images, select them in the Media Library list and use the Npcink bulk actions.', 'npcink-workflow-toolbox' )
-			),
-		);
+								esc_html__( 'For multiple images, select them in the Media Library list and use the Npcink bulk actions.', 'npcink-workflow-toolbox' )
+							),
+			);
+			$form_fields['npcink_toolbox_restore'] = array(
+				'label' => __( 'Restore image', 'npcink-workflow-toolbox' ),
+				'input' => 'html',
+				'html'  => sprintf( '<a class="button" href="%1$s">%2$s</a><p class="description">%3$s</p>', esc_url( add_query_arg( array( 'toolbox_tab' => 'tools', 'toolbox_tool' => 'media-batch-optimize', 'attachment_id' => $attachment_id, 'restore' => '1' ), admin_url( 'admin.php?page=' . self::MENU_SLUG ) ) ), esc_html__( 'View backups and restore', 'npcink-workflow-toolbox' ), esc_html__( 'Open the image workbench to review available backups before restoring.', 'npcink-workflow-toolbox' ) ),
+			);
 
 		return $form_fields;
 	}
@@ -272,6 +277,8 @@ final class Admin_Page {
 			esc_url( $this->image_batch_tool_url( 'batch-optimize', array( $attachment_id ) ) ),
 			esc_html__( 'Npcink optimize', 'npcink-workflow-toolbox' )
 		);
+		$restore_url = add_query_arg( array( 'toolbox_tab' => 'tools', 'toolbox_tool' => 'media-batch-optimize', 'attachment_id' => $attachment_id, 'restore' => '1' ), admin_url( 'admin.php?page=' . self::MENU_SLUG ) );
+		$actions['npcink_toolbox_restore'] = sprintf( '<a href="%1$s">%2$s</a>', esc_url( $restore_url ), esc_html__( 'Npcink restore', 'npcink-workflow-toolbox' ) );
 
 		return $actions;
 	}

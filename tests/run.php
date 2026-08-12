@@ -1627,7 +1627,7 @@ foreach ( array( 'publish', 'delivery', 'workflow-run', 'workflow_run', 'queue',
 		if ( 'featured-image' === $forbidden_fragment && '/local-admin-consent/featured-image' === $route ) {
 			continue;
 		}
-		if ( 'confirm' === $forbidden_fragment && in_array( $route, array( '/strong-local-confirmation/image-adoption', '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore' ), true ) ) {
+		if ( 'confirm' === $forbidden_fragment && in_array( $route, array( '/strong-local-confirmation/image-adoption', '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore', '/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)' ), true ) ) {
 			continue;
 		}
 		$has_forbidden_route = $has_forbidden_route || str_contains( $route, $forbidden_fragment );
