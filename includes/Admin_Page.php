@@ -537,10 +537,7 @@ final class Admin_Page {
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
-			<details class="npcink-toolbox__scope-info">
-				<summary aria-label="<?php esc_attr_e( 'About Toolbox', 'npcink-workflow-toolbox' ); ?>">i</summary>
-				<p><?php esc_html_e( 'Improve images and prepare safe AI suggestions without changing WordPress automatically.', 'npcink-workflow-toolbox' ); ?></p>
-			</details>
+			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Improve images and prepare safe AI suggestions without changing WordPress automatically.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php
 			if ( ! $cloud_ready ) {
 				$this->render_cloud_runtime_notice();
