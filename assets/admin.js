@@ -392,6 +392,7 @@
 
 		result.hidden = false;
 		result.classList.remove('is-empty');
+		result.classList.remove('is-authorization');
 		clearNode(result);
 
 		const summaryNode = el('div', 'npcink-toolbox__result-summary');
@@ -5366,6 +5367,7 @@
 		if (!result) {
 			return;
 		}
+		result.classList.add('is-authorization');
 		const meta = el('div', 'npcink-toolbox__result-meta');
 		appendMeta(meta, t('Request ID'), requestId);
 		appendMeta(meta, t('Data scope'), t('Media and attachment metadata'));
