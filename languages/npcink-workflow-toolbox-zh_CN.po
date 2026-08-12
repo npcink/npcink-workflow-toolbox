@@ -7818,6 +7818,26 @@ msgid "The selected backup is no longer available for restore."
 msgstr "所选备份已不可用于恢复。"
 
 #: includes/Admin_Page.php
+msgid "Original image backup retention"
+msgstr "原图备份保留时间"
+
+msgid "Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed."
+msgstr "选择自动创建的单图备份可用于恢复的时长。过期文件会从隐藏备份目录中移除，但不会删除媒体库中的当前图片。"
+
+msgid "Keep backups for"
+msgstr "备份保留时间"
+
+msgid "30 days (recommended)"
+msgstr "30 天（推荐）"
+
+msgid "90 days"
+msgstr "90 天"
+
+msgid "Save backup retention"
+msgstr "保存备份保留设置"
+
+
+#: includes/Admin_Page.php
 msgid "View media details"
 msgstr "查看媒体详情"
 

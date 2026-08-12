@@ -74,6 +74,20 @@ final class Plugin {
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_with_npcink_abilities_toolkit' ), 1 );
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_native_category' ) );
 		add_action( 'wp_abilities_api_init', array( $this->abilities, 'register_native_abilities' ) );
+		add_filter( 'npcink_abilities_toolkit_media_backup_retention_days', array( $this, 'media_backup_retention_days' ) );
+	}
+
+	/**
+	 * Projects the local image backup retention choice to the Toolkit cleanup hook.
+	 *
+	 * @param mixed $days Toolkit default retention.
+	 * @return int
+	 */
+	public function media_backup_retention_days( $days ): int {
+		$settings = $this->settings->get_media_optimization_settings();
+		$value    = absint( $settings['backup_retention_days'] ?? 30 );
+
+		return in_array( $value, array( 30, 90 ), true ) ? $value : absint( $days );
 	}
 
 	/**

@@ -659,7 +659,13 @@
       "Restoring the original image and backing up the current image...": ["正在恢复原图，并备份当前图片……"],
       "Original image restored": ["原图已恢复"],
       "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["媒体库中已重新启用原图。优化图已自动备份。"],
-      "Restore verified": ["恢复已验证"]
+      "Restore verified": ["恢复已验证"],
+      "Original image backup retention": ["原图备份保留时间"],
+      "Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed.": ["选择自动创建的单图备份可用于恢复的时长。过期文件会从隐藏备份目录中移除，但不会删除媒体库中的当前图片。"],
+      "Keep backups for": ["备份保留时间"],
+      "30 days (recommended)": ["30 天（推荐）"],
+      "90 days": ["90 天"],
+      "Save backup retention": ["保存备份保留设置"]
     }
   }
 }

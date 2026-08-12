@@ -3498,6 +3498,7 @@ final class Admin_Page {
 			<h2><?php echo esc_html( (string) $surface_header['title'] ); ?></h2>
 			<p><?php echo esc_html( (string) $surface_header['description'] ); ?></p>
 		</div>
+		<?php $this->render_media_backup_retention_settings(); ?>
 		<div class="npcink-toolbox__tool-workspace" data-toolbox-tools>
 			<div class="npcink-toolbox__workflow-scope">
 				<strong><?php echo esc_html( (string) $surface_header['scope_title'] ); ?></strong>
@@ -3624,6 +3625,31 @@ final class Admin_Page {
 				?>
 			</div>
 		</div>
+		<?php
+	}
+
+	private function render_media_backup_retention_settings(): void {
+		$settings = $this->settings->get_media_optimization_settings();
+		?>
+		<section class="npcink-toolbox__card npcink-toolbox__card--compact" data-toolbox-media-backup-retention>
+			<form method="post" action="options.php" class="npcink-toolbox__settings-form">
+				<?php settings_fields( 'npcink_toolbox_media_optimization' ); ?>
+				<div class="npcink-toolbox__section-heading">
+					<div>
+						<h3><?php esc_html_e( 'Original image backup retention', 'npcink-workflow-toolbox' ); ?></h3>
+						<p><?php esc_html_e( 'Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed.', 'npcink-workflow-toolbox' ); ?></p>
+					</div>
+				</div>
+				<label>
+					<span><?php esc_html_e( 'Keep backups for', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="<?php echo esc_attr( Plugin::MEDIA_OPTION_NAME ); ?>[backup_retention_days]">
+						<option value="30" <?php selected( 30, (int) $settings['backup_retention_days'] ); ?>><?php esc_html_e( '30 days (recommended)', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="90" <?php selected( 90, (int) $settings['backup_retention_days'] ); ?>><?php esc_html_e( '90 days', 'npcink-workflow-toolbox' ); ?></option>
+					</select>
+				</label>
+				<?php submit_button( __( 'Save backup retention', 'npcink-workflow-toolbox' ), 'secondary', 'submit', false ); ?>
+			</form>
+		</section>
 		<?php
 	}
 

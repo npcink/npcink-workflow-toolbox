@@ -135,6 +135,9 @@ external-image adoption exception.
 - Restore is available only from the completed single-image result while the
   selected backup file is still within retention. Expired backups remain in
   history as summaries but cannot be restored.
+- Image Handling exposes one simple retention choice: **30 days (recommended)**
+  or **90 days**. Toolbox stores this local setting and projects it to Toolkit;
+  no Cloud or Core setting is involved.
 - Keep optional crop and detailed watermark fields secondary to the quick
   choices.
 - Opening **More settings** reveals only compact filename, watermark-detail,

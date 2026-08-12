@@ -78,6 +78,7 @@ final class Settings {
 	public function media_optimization_defaults(): array {
 		return array(
 			'enabled'                  => false,
+			'backup_retention_days'    => 30,
 			'target_format'            => 'webp',
 			'max_width'                => 1600,
 			'quality'                  => 82,
@@ -589,6 +590,7 @@ final class Settings {
 		$text = function_exists( 'mb_substr' ) ? mb_substr( $text, 0, 64 ) : substr( $text, 0, 64 );
 
 		return array(
+			'backup_retention_days'    => in_array( absint( $input['backup_retention_days'] ?? 30 ), array( 30, 90 ), true ) ? absint( $input['backup_retention_days'] ?? 30 ) : 30,
 			'enabled'                  => ! empty( $input['enabled'] ),
 			'target_format'            => $format,
 			'max_width'                => max( 320, min( 7680, absint( $input['max_width'] ?? 1600 ) ) ),
