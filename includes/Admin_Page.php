@@ -4420,7 +4420,7 @@ final class Admin_Page {
 				<section class="npcink-toolbox__single-media-preview-column" aria-label="<?php esc_attr_e( 'Image comparison', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__single-media-comparison" data-toolbox-single-media-comparison>
 						<div class="npcink-toolbox__single-image-card" data-toolbox-original-media-card>
-							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span>
+							<span class="npcink-toolbox__eyebrow" data-toolbox-current-image-label><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span>
 							<div class="npcink-toolbox__single-image-frame">
 								<?php if ( $preview_url ) : ?><img src="<?php echo esc_url( $preview_url ); ?>" alt="" /><?php endif; ?>
 								<span class="npcink-toolbox__watermark-effect-label" data-toolbox-watermark-effect-label hidden><?php esc_html_e( 'Watermark effect preview', 'npcink-workflow-toolbox' ); ?></span>
@@ -4435,6 +4435,12 @@ final class Admin_Page {
 							</div>
 							<?php if ( $edit_link ) : ?><a href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'Open media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
 						</div>
+						<div class="npcink-toolbox__single-image-card npcink-toolbox__backup-image-card" data-toolbox-backup-image-card hidden>
+							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span>
+							<div class="npcink-toolbox__single-image-frame"><img alt="<?php esc_attr_e( 'Backup original preview', 'npcink-workflow-toolbox' ); ?>" data-toolbox-backup-image /></div>
+							<h3><?php esc_html_e( 'Original image backup', 'npcink-workflow-toolbox' ); ?></h3>
+							<div class="npcink-toolbox__original-image-meta" data-toolbox-backup-image-meta></div>
+						</div>
 						<div class="npcink-toolbox__single-image-card npcink-toolbox__single-image-card--optimized" data-toolbox-optimized-media-card hidden>
 							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Optimized', 'npcink-workflow-toolbox' ); ?></span>
 							<div class="npcink-toolbox__optimized-image-frame">
@@ -4448,7 +4454,7 @@ final class Admin_Page {
 					</div>
 					<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
 				</section>
-				<section class="npcink-toolbox__single-media-settings" aria-label="<?php esc_attr_e( 'Optimization settings', 'npcink-workflow-toolbox' ); ?>">
+				<section class="npcink-toolbox__single-media-settings" data-toolbox-single-media-settings aria-label="<?php esc_attr_e( 'Optimization settings', 'npcink-workflow-toolbox' ); ?>">
 					<h3><?php esc_html_e( 'Settings', 'npcink-workflow-toolbox' ); ?></h3>
 					<?php $this->render_media_derivative_format_controls( $toolbox_policy, true ); ?>
 					<label>
@@ -4487,8 +4493,8 @@ final class Admin_Page {
 							<p class="description"><?php esc_html_e( 'The backup is kept outside the Media Library and is used only to restore the original image. Known post-content image references are updated in the same local transaction.', 'npcink-workflow-toolbox' ); ?></p>
 						</div>
 						<div class="npcink-toolbox__single-media-complete-actions" data-toolbox-single-media-complete-actions hidden>
-							<?php if ( $edit_link ) : ?><a class="button button-primary" href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'View media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
-							<button type="button" class="button" data-toolbox-restore-media-backup hidden><?php esc_html_e( 'Restore original image', 'npcink-workflow-toolbox' ); ?></button>
+							<?php if ( $edit_link ) : ?><a class="button" href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'View media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
+							<button type="button" class="button button-primary" data-toolbox-restore-media-backup hidden><?php esc_html_e( 'Restore original image', 'npcink-workflow-toolbox' ); ?></button>
 							<button type="button" class="button" data-toolbox-reload-media-workbench><?php esc_html_e( 'Continue optimizing this image', 'npcink-workflow-toolbox' ); ?></button>
 						</div>
 					</div>

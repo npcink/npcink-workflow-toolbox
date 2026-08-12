@@ -7328,6 +7328,22 @@
 		}
 		if (params.get('restore') === '1') {
 			form.setAttribute('data-toolbox-restore-mode', '1');
+			const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+			if (workbench) {
+				workbench.classList.add('is-restore-mode');
+				const heading = workbench.querySelector('.npcink-toolbox__single-media-heading h2');
+				const description = workbench.querySelector('.npcink-toolbox__single-media-heading p');
+				if (heading) {
+					heading.textContent = t('Restore original image');
+				}
+				if (description) {
+					description.textContent = t('Compare the current image with the original-image backup, then confirm the restore.');
+				}
+			}
+			const currentLabel = form.querySelector('[data-toolbox-current-image-label]');
+			if (currentLabel) {
+				currentLabel.textContent = t('Current image');
+			}
 		}
 		if (!idField.value) {
 			const attachmentUrl = params.get('attachment_url') || '';
@@ -7351,6 +7367,7 @@
 			const latest = backups.find((item) => item && item.file_exists && item.backup_id);
 			const button = form.querySelector('[data-toolbox-restore-media-backup]');
 			const summary = form.querySelector('[data-toolbox-restore-summary]');
+			const backupCard = form.querySelector('[data-toolbox-backup-image-card]');
 			if (button instanceof HTMLButtonElement && latest) {
 				button.dataset.attachmentId = String(attachmentId);
 				button.dataset.backupId = String(latest.backup_id);
@@ -7361,6 +7378,17 @@
 					const size = latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '';
 					summary.hidden = false;
 					summary.innerHTML = '<strong>' + t('Original image backup available') + '</strong>' + t('Backup time') + ': ' + (latest.created_at_gmt || t('Unknown')) + (before.mime_type ? ' · ' + t('Format') + ': ' + String(before.mime_type).replace('image/', '').toUpperCase() : '') + (size ? ' · ' + t('Size') + ': ' + size : '');
+				}
+				if (backupCard) {
+					const image = backupCard.querySelector('[data-toolbox-backup-image]');
+					const meta = backupCard.querySelector('[data-toolbox-backup-image-meta]');
+					backupCard.hidden = false;
+					if (image instanceof HTMLImageElement) {
+						image.src = String(latest.backup_url || '');
+					}
+					if (meta) {
+						meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', latest.created_at_gmt || ''].filter(Boolean).join(' · ');
+					}
 				}
 				renderTextResult(form, t('A restorable original-image backup is available. Use Restore original image to continue.'), 'ok');
 				return;

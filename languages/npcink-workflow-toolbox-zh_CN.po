@@ -7875,6 +7875,21 @@ msgstr "备份时间"
 msgid "Size"
 msgstr "大小"
 
+msgid "Backup original"
+msgstr "备份原图"
+
+msgid "Backup original preview"
+msgstr "备份原图预览"
+
+msgid "Original image backup"
+msgstr "原图备份"
+
+msgid "Current image"
+msgstr "当前图片"
+
+msgid "Compare the current image with the original-image backup, then confirm the restore."
+msgstr "对比当前图片和备份原图，确认无误后再恢复。"
+
 msgid "Media read authorization required"
 msgstr "需要授权读取媒体"
 
