@@ -29,6 +29,22 @@ request only, it authorizes exactly
 callback, and removes the filter in `finally`. Toolbox does not duplicate file,
 metadata, reference-repair, or rollback implementation.
 
+The same workbench exposes `POST /strong-local-confirmation/media-derivative-restore`
+for one present administrator to restore a still-available recorded backup.
+Toolbox validates the attachment, backup id, exact confirmation fields, and
+Toolkit backup availability, then temporarily authorizes only
+`npcink-abilities-toolkit/restore-media-backup` for the request. The Toolkit
+backs up the currently active optimized file before restoring the selected
+backup. This is a local confirmation exception, not Core/Adapter approval.
+
+Backups remain outside the Media Library in the dedicated Toolkit backup
+directory. A daily maintenance cron uses a default 30-day retention period
+(bounded by the `npcink_abilities_toolkit_media_backup_retention_days` filter;
+90 days is an allowed deployment override). Expiry removes only the backup
+file, retains the history summary with `backup_expired`, and never removes the
+current attachment. There is intentionally no manual delete or backup-manager
+surface in this version.
+
 ## Consequences and Stops
 
 The single-image UI says **Apply to Media Library** and creates no Core
@@ -37,6 +53,6 @@ Core-governed. The exception does not permit save-as-new, background execution,
 external Agent execution, queues, retries, approval storage, provider control,
 or authorization of another Toolkit write ability.
 
-The route fails closed on unknown fields, mismatched actions, unverified
+The routes fail closed on unknown fields, mismatched actions, unverified
 preview state, artifact mismatch, non-image attachment, missing capabilities,
 classifier drift, Toolkit dry-run failure, or artifact delivery failure.

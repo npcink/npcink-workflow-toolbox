@@ -559,6 +559,9 @@ and explicit confirmation it may call
 `/strong-local-confirmation/media-derivative`, which authorizes only the
 existing Toolkit adoption transaction for that request and returns backup,
 reference-repair, rollback, and verification evidence without a Core proposal.
+The paired `/strong-local-confirmation/media-derivative-restore` route restores
+one still-available recorded Toolkit backup after the same present-admin
+confirmation, backing up the current file first; expired backups fail closed.
 Batch selection and every background, delegated, or external-client flow remain
 Core-governed. The preview surface
 may POST `/media-derivative-local-review/{artifact_id}` for operator review.

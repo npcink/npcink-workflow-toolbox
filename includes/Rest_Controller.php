@@ -56,6 +56,7 @@ final class Rest_Controller {
 		$this->post( '/local-admin-consent/featured-image', 'local_admin_consent_featured_image' );
 		$this->post( '/strong-local-confirmation/image-adoption', 'strong_local_confirmation_image_adoption' );
 		$this->post( '/strong-local-confirmation/media-derivative', 'strong_local_confirmation_media_derivative' );
+		$this->post( '/strong-local-confirmation/media-derivative-restore', 'strong_local_confirmation_media_derivative_restore' );
 		$this->post( '/flows/site-knowledge-review-plan', 'site_knowledge_review_plan' );
 		$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' );
 		$this->post( '/flows/content-metadata-apply-plan', 'content_metadata_apply_plan' );
@@ -155,6 +156,7 @@ final class Rest_Controller {
 			'/local-admin-consent' . '/featured-image'     => 'cap.toolbox.local_admin_consent',
 			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
+			'/strong-local-confirmation/media-derivative-restore' => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -1555,7 +1557,7 @@ final class Rest_Controller {
 	private function post( string $route, string $method, array $args = array() ): void {
 		$permission_callback = '/strong-local-confirmation/image-adoption' === $route
 			? array( $this, 'permission_single_article_image_adoption' )
-			: ( '/strong-local-confirmation/media-derivative' === $route ? array( $this, 'permission_single_image_media_optimization' ) : array( $this, 'permission' ) );
+			: ( '/strong-local-confirmation/media-derivative' === $route ? array( $this, 'permission_single_image_media_optimization' ) : ( '/strong-local-confirmation/media-derivative-restore' === $route ? array( $this, 'permission_single_image_media_derivative_restore' ) : array( $this, 'permission' ) ) );
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
 			$route,
@@ -1587,6 +1589,18 @@ final class Rest_Controller {
 		$attachment_id = is_array( $input ) ? absint( $input['attachment_id'] ?? 0 ) : 0;
 
 		return $attachment_id > 0 && current_user_can( 'upload_files' ) && current_user_can( 'edit_post', $attachment_id );
+	}
+
+	public function permission_single_image_media_derivative_restore( WP_REST_Request $request ): bool {
+		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
+
+		return $attachment_id > 0 && current_user_can( 'upload_files' ) && current_user_can( 'edit_post', $attachment_id );
+	}
+
+	public function strong_local_confirmation_media_derivative_restore( WP_REST_Request $request ) {
+		$result = ( new Single_Image_Media_Optimization() )->restore( $request );
+
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
 

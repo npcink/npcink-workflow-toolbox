@@ -4433,6 +4433,7 @@ final class Admin_Page {
 						</div>
 						<div class="npcink-toolbox__single-media-complete-actions" data-toolbox-single-media-complete-actions hidden>
 							<?php if ( $edit_link ) : ?><a class="button button-primary" href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'View media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
+							<button type="button" class="button" data-toolbox-restore-media-backup hidden><?php esc_html_e( 'Restore original image', 'npcink-workflow-toolbox' ); ?></button>
 							<button type="button" class="button" data-toolbox-reload-media-workbench><?php esc_html_e( 'Continue optimizing this image', 'npcink-workflow-toolbox' ); ?></button>
 						</div>
 					</div>

@@ -5142,6 +5142,12 @@
 			actions.appendChild(link);
 			result.appendChild(actions);
 		}
+		const restoreButton = workbench ? workbench.querySelector('[data-toolbox-restore-media-backup]') : null;
+		if (restoreButton instanceof HTMLButtonElement && backupCreated && replacement.replacement_id) {
+			restoreButton.hidden = false;
+			restoreButton.dataset.attachmentId = String(replacement.attachment_id || state.abilityInput.attachment_id || '');
+			restoreButton.dataset.backupId = String(replacement.replacement_id || '');
+		}
 		result.appendChild(createRawDetails(payload, 'Technical details'));
 
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
@@ -5150,6 +5156,36 @@
 		}
 		setSingleImageWorkbenchPhase(form, 'completed');
 		updateMediaDerivativeSubmitState(form, null);
+	}
+
+	async function restoreMediaBackup(form, button) {
+		const attachmentId = String(button.getAttribute('data-attachment-id') || '');
+		const backupId = String(button.getAttribute('data-backup-id') || '');
+		if (!attachmentId || !backupId) {
+			throw { message: 'The original-image backup is no longer available.' };
+		}
+		if (!window.confirm(t('Restore the original image? The current optimized image will be backed up first.'))) {
+			return;
+		}
+		button.disabled = true;
+		renderTextResult(form, t('Restoring the original image and backing up the current image...'), 'pending');
+		try {
+			const payload = await postJson(config.restUrl, 'strong-local-confirmation/media-derivative-restore', {
+				attachment_id: Number(attachmentId),
+				backup_id: backupId,
+				confirmed_backup_id: backupId,
+				preview_verified: true,
+				confirm_restore: true,
+			});
+			const result = renderShell(form, { provider: 'local WordPress' }, 'Original image restored', 'The original image is active again in the Media Library. The optimized image was backed up automatically.');
+			if (result) {
+				result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Restore verified'));
+				result.appendChild(createRawDetails(payload, 'Technical details'));
+			}
+			button.hidden = true;
+		} finally {
+			button.disabled = false;
+		}
 	}
 
 	async function applyMediaDerivativeLocally(form) {
@@ -8189,6 +8225,15 @@
 					return;
 				}
 
+				const restoreButton = event.target.closest('[data-toolbox-restore-media-backup]');
+				if (restoreButton && form.contains(restoreButton)) {
+					event.preventDefault();
+					restoreMediaBackup(form, restoreButton).catch((error) => {
+						renderMediaDerivativeFailure(form, error, 'restore');
+					});
+					return;
+				}
+
 				const reloadWorkbenchButton = event.target.closest('[data-toolbox-reload-media-workbench]');
 				if (reloadWorkbenchButton && form.contains(reloadWorkbenchButton)) {
 					event.preventDefault();
@@ -8243,6 +8288,7 @@
 			if (renderOperatorFeedback(form, error)) {
 				return;
 			}
+
 			renderErrorResult(form, error, config.labels && config.labels.error ? config.labels.error : 'Request failed.');
 		});
 	});

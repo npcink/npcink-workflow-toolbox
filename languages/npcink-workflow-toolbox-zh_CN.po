@@ -7804,6 +7804,20 @@ msgid "Known post-content image references are updated in the same local transac
 msgstr "文章内容中的已知图片引用会在同一本地事务中更新。"
 
 #: includes/Admin_Page.php
+msgid "Restore original image"
+msgstr "恢复原图"
+
+#: includes/Single_Image_Media_Optimization.php
+msgid "Review and confirm the original-image restore before continuing."
+msgstr "请先确认恢复原图，再继续。"
+
+msgid "The selected backup does not match the confirmed restore target."
+msgstr "所选备份与已确认的恢复目标不匹配。"
+
+msgid "The selected backup is no longer available for restore."
+msgstr "所选备份已不可用于恢复。"
+
+#: includes/Admin_Page.php
 msgid "View media details"
 msgstr "查看媒体详情"
 

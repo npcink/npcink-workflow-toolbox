@@ -739,6 +739,7 @@ toolbox_assert( false !== strpos( $admin_page, 'requested_toolbox_tool' ) && fal
 toolbox_assert( false !== strpos( $admin_page, 'data-max-templates="20"' ) && false !== strpos( $admin_page, 'data-toolbox-watermark-save-status' ) && false !== strpos( $admin_page, 'data-toolbox-watermark-undo-delete' ) && false !== strpos( $admin_page, 'data-template-logo-warning' ), 'Watermark template management exposes a bounded catalog, sticky save state, reversible deletion, and missing-logo guidance.' );
 toolbox_assert( false !== strpos( $admin_page, 'name="output_filename"' ) && false !== strpos( $admin_page, 'data-toolbox-confirm-media-replacement' ) && false !== strpos( $admin_page, 'automatically back up the original' ) && false !== strpos( $admin_page, 'kept outside the Media Library' ), 'The single-image workbench makes mandatory, hidden-from-library original-image backup clear before replacement.' );
 toolbox_assert( false !== strpos( $admin_page, 'data-toolbox-single-media-phase="initial"' ) && false !== strpos( $admin_page, 'data-toolbox-original-media-card' ) && false !== strpos( $admin_page, 'data-toolbox-optimized-media-card' ) && false !== strpos( $admin_page, 'data-original-filesize' ) && false !== strpos( $admin_page, 'data-media-edit-url' ), 'The single-image workbench exposes stable comparison slots and original attachment facts for reviewed result summaries.' );
+toolbox_assert( false !== strpos( $admin_page, 'data-toolbox-restore-media-backup' ), 'Completed single-image results expose a local restore action.' );
 toolbox_assert( false !== strpos( $admin_page, 'data-toolbox-single-media-review-actions' ) && false !== strpos( $admin_page, 'data-toolbox-single-media-complete-actions' ) && false !== strpos( $admin_page, 'Continue optimizing this image' ), 'The single-image workbench separates initial, review, and completed action surfaces.' );
 toolbox_assert( false !== strpos( $admin_page, 'More settings (filename, watermark details, crop)' ) && false !== strpos( $admin_page, 'data-toolbox-filename-option' ) && false !== strpos( $admin_page, 'data-toolbox-watermark-option' ) && false !== strpos( $admin_page, 'data-toolbox-crop-option' ), 'Single-image low-frequency settings open as three compact independently disclosed operator tasks.' );
 toolbox_assert( false !== strpos( $admin_page, 'name="output_filename_mode"' ) && false !== strpos( $admin_page, 'value="custom"' ) && false !== strpos( $admin_page, 'value="md5" selected' ) && false !== strpos( $admin_page, 'value="timestamp"' ) && false !== strpos( $admin_page, 'data-md5-filename-base' ), 'Single-image output naming offers custom, MD5, and time modes with MD5 as the low-effort default.' );
@@ -1424,7 +1425,7 @@ foreach ( $route_boundary_rows as $route_boundary_row ) {
 	toolbox_assert( '' !== (string) ( $route_boundary_row['write_posture'] ?? '' ), 'Route boundary row records write posture: ' . $route );
 	toolbox_assert( '' !== (string) ( $route_boundary_row['boundary_note'] ?? '' ), 'Route boundary row records a boundary note: ' . $route );
 	if ( $direct_write ) {
-		$expected_direct_write_adr = '/local-admin-consent/featured-image' === $route ? 'ADR-003' : ( '/strong-local-confirmation/image-adoption' === $route ? 'ADR-010' : ( '/strong-local-confirmation/media-derivative' === $route ? 'ADR-011' : '' ) );
+		$expected_direct_write_adr = '/local-admin-consent/featured-image' === $route ? 'ADR-003' : ( '/strong-local-confirmation/image-adoption' === $route ? 'ADR-010' : ( in_array( $route, array( '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore' ), true ) ? 'ADR-011' : '' ) );
 		toolbox_assert( '' !== $expected_direct_write_adr && $expected_direct_write_adr === (string) ( $route_boundary_row['boundary_exception'] ?? '' ), 'Direct-write route is limited to an accepted ADR: ' . $route );
 	} else {
 		toolbox_assert( 'local_admin_consent_exception' !== (string) ( $route_boundary_row['write_posture'] ?? '' ), 'Non-write routes do not claim local admin consent posture: ' . $route );
@@ -1504,7 +1505,7 @@ toolbox_assert( false !== strpos( $rest, "'operation_classification' => \$classi
 toolbox_assert( 1 === substr_count( $rest, "'/local-admin-consent/" ), 'REST controller keeps only one legacy Local Admin Consent route.' );
 toolbox_assert( in_array( '/local-admin-consent/featured-image', $registered_rest_routes, true ), 'REST Local Admin Consent route is limited to featured-image.' );
 toolbox_assert( in_array( '/strong-local-confirmation/image-adoption', $registered_rest_routes, true ), 'REST registers one ADR-010 strong-local-confirmation image adoption route.' );
-toolbox_assert( in_array( '/strong-local-confirmation/media-derivative', $registered_rest_routes, true ) && false !== strpos( $rest, 'permission_single_image_media_optimization' ), 'REST registers the ADR-011 single-image media replacement route with attachment-scoped permissions.' );
+toolbox_assert( in_array( '/strong-local-confirmation/media-derivative', $registered_rest_routes, true ) && in_array( '/strong-local-confirmation/media-derivative-restore', $registered_rest_routes, true ) && false !== strpos( $rest, 'permission_single_image_media_optimization' ) && false !== strpos( $rest, 'permission_single_image_media_derivative_restore' ), 'REST registers the ADR-011 single-image replacement and restore routes with attachment-scoped permissions.' );
 foreach ( array( '/local-admin-consent/metadata', '/local-admin-consent/seo', '/local-admin-consent/media', '/local-admin-consent/settings', '/local-admin-consent/batch' ) as $forbidden_local_consent_route ) {
 	toolbox_assert( ! in_array( $forbidden_local_consent_route, $registered_rest_routes, true ), 'REST Local Admin Consent excludes route: ' . $forbidden_local_consent_route );
 }
@@ -1620,7 +1621,7 @@ foreach ( array( 'publish', 'delivery', 'workflow-run', 'workflow_run', 'queue',
 		if ( 'featured-image' === $forbidden_fragment && '/local-admin-consent/featured-image' === $route ) {
 			continue;
 		}
-		if ( 'confirm' === $forbidden_fragment && in_array( $route, array( '/strong-local-confirmation/image-adoption', '/strong-local-confirmation/media-derivative' ), true ) ) {
+		if ( 'confirm' === $forbidden_fragment && in_array( $route, array( '/strong-local-confirmation/image-adoption', '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore' ), true ) ) {
 			continue;
 		}
 		$has_forbidden_route = $has_forbidden_route || str_contains( $route, $forbidden_fragment );

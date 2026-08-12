@@ -16,6 +16,8 @@ final class Single_Image_Media_Optimization {
 	public const CONTRACT_VERSION = 'single_image_media_optimization_result.v1';
 	public const ACTION_REPLACE_CURRENT = 'replace_current';
 	private const ABILITY_ID = 'npcink-abilities-toolkit/adopt-cloud-media-derivative';
+	private const RESTORE_ABILITY_ID = 'npcink-abilities-toolkit/restore-media-backup';
+	private const LIST_BACKUPS_ABILITY_ID = 'npcink-abilities-toolkit/list-media-backups';
 
 	/**
 	 * Executes one exact, visually confirmed media replacement.
@@ -130,13 +132,90 @@ final class Single_Image_Media_Optimization {
 		);
 	}
 
+	/**
+	 * Restores one recorded backup after the same present-admin confirmation
+	 * used by the single-image replacement lane.
+	 *
+	 * @return array<string,mixed>|WP_Error
+	 */
+	public function restore( WP_REST_Request $request ) {
+		$json = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$json = is_array( $json ) ? $json : array();
+		$allowed = array( 'attachment_id', 'backup_id', 'confirmed_backup_id', 'preview_verified', 'confirm_restore' );
+		if ( count( $json ) !== count( $allowed ) || array_diff( array_keys( $json ), $allowed ) || array_diff( $allowed, array_keys( $json ) ) ) {
+			return $this->invalid_request();
+		}
+		$attachment_id = absint( $json['attachment_id'] );
+		$backup_id = sanitize_text_field( (string) $json['backup_id'] );
+		if ( $attachment_id <= 0 || '' === $backup_id || ! hash_equals( $backup_id, sanitize_text_field( (string) $json['confirmed_backup_id'] ) ) ) {
+			return new WP_Error( 'npcink_toolbox_media_restore_unconfirmed', __( 'The selected backup does not match the confirmed restore target.', 'npcink-workflow-toolbox' ), array( 'status' => 409 ) );
+		}
+		if ( true !== ( $json['preview_verified'] ?? null ) || true !== ( $json['confirm_restore'] ?? null ) ) {
+			return new WP_Error( 'npcink_toolbox_media_restore_unconfirmed', __( 'Review and confirm the original-image restore before continuing.', 'npcink-workflow-toolbox' ), array( 'status' => 409 ) );
+		}
+		if ( 'attachment' !== get_post_type( $attachment_id ) || ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'npcink_toolbox_single_image_attachment_invalid', __( 'Choose one valid Media Library image.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
+		}
+		$backups = $this->run_registered_ability( self::LIST_BACKUPS_ABILITY_ID, array( 'attachment_id' => $attachment_id ) );
+		if ( is_wp_error( $backups ) ) {
+			return $backups;
+		}
+		$data = is_array( $backups['data'] ?? null ) ? $backups['data'] : $backups;
+		$selected = array_values( array_filter( (array) ( $data['backups'] ?? array() ), static fn( $row ): bool => is_array( $row ) && $backup_id === (string) ( $row['backup_id'] ?? '' ) && ! empty( $row['file_exists'] ) ) );
+		if ( 1 !== count( $selected ) ) {
+			return new WP_Error( 'npcink_toolbox_media_backup_unavailable', __( 'The selected backup is no longer available for restore.', 'npcink-workflow-toolbox' ), array( 'status' => 409 ) );
+		}
+		$current = is_array( $data['current_file'] ?? null ) ? $data['current_file'] : array();
+		$input = array(
+			'attachment_id' => $attachment_id,
+			'backup_id' => $backup_id,
+			'expected_current_relative_file' => sanitize_text_field( (string) ( $current['relative_file'] ?? '' ) ),
+			'expected_current_mime_type' => sanitize_text_field( (string) ( $current['mime_type'] ?? '' ) ),
+			'target_conflict_mode' => 'fail',
+			'dry_run' => true,
+			'commit' => false,
+		);
+		$preview = $this->run_registered_ability( self::RESTORE_ABILITY_ID, $input );
+		if ( is_wp_error( $preview ) ) {
+			return $preview;
+		}
+		$authorize = static function ( bool $allowed, string $ability_id ): bool {
+			return self::RESTORE_ABILITY_ID === $ability_id ? true : $allowed;
+		};
+		add_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10, 2 );
+		try {
+			$input['dry_run'] = false;
+			$input['commit'] = true;
+			$result = $this->run_registered_ability( self::RESTORE_ABILITY_ID, $input );
+		} finally {
+			remove_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10 );
+		}
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return array(
+			'contract_version' => 'single_image_media_restore_result.v1',
+			'status' => 'completed',
+			'attachment_id' => $attachment_id,
+			'backup_id' => $backup_id,
+			'validation_preview' => $preview,
+			'restore' => $result,
+			'core_proposal_required' => false,
+			'direct_wordpress_write' => true,
+		);
+	}
+
 	/** @return array<string,mixed>|WP_Error */
 	private function run_ability( array $input ) {
+		return $this->run_registered_ability( self::ABILITY_ID, $input );
+	}
+
+	private function run_registered_ability( string $ability_id, array $input ) {
 		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) ) {
 			return new WP_Error( 'npcink_toolbox_single_image_toolkit_unavailable', __( 'Npcink Abilities Toolkit is required for local image replacement.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );
 		}
 		$registered = npcink_abilities_toolkit_get_registered();
-		$definition = is_array( $registered[ self::ABILITY_ID ] ?? null ) ? $registered[ self::ABILITY_ID ] : array();
+		$definition = is_array( $registered[ $ability_id ] ?? null ) ? $registered[ $ability_id ] : array();
 		$callback = $definition['execute_callback'] ?? null;
 		if ( ! is_callable( $callback ) ) {
 			return new WP_Error( 'npcink_toolbox_single_image_ability_unavailable', __( 'The Toolkit image replacement ability is unavailable.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );

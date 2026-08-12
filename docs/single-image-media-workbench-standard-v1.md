@@ -19,8 +19,9 @@ The operator path is:
 4. Generate and visually verify the short-lived derivative preview.
 5. Confirm the replacement and the automatic-backup statement. Backup is mandatory and cannot be disabled for this transaction.
 6. Apply the verified derivative to the selected Media Library attachment.
-7. Inspect the returned backup, reference-repair, and verification receipt;
-   restore through the existing Toolkit recovery path if necessary. The backup
+7. Inspect the returned backup, reference-repair, and verification receipt. If
+   needed, use **Restore original image** in the completed result area; the
+   current optimized file is backed up automatically before restore. The backup
    is kept outside the Media Library and is not a second visible attachment.
 
 ## Ownership
@@ -131,6 +132,9 @@ external-image adoption exception.
 - The original-image backup is created automatically for every replacement;
   the operator is not asked to choose whether to back it up, and Toolbox does
   not expose a disable-backup option.
+- Restore is available only from the completed single-image result while the
+  selected backup file is still within retention. Expired backups remain in
+  history as summaries but cannot be restored.
 - Keep optional crop and detailed watermark fields secondary to the quick
   choices.
 - Opening **More settings** reveals only compact filename, watermark-detail,

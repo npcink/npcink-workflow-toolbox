@@ -357,6 +357,12 @@
 	  "Replacement verified": ["替换验证通过"],
 	  "Review the technical verification details": ["请检查技术验证详情"],
 	  "View media details": ["查看媒体详情"],
+	  "Restore original image": ["恢复原图"],
+	  "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？系统会先自动备份当前优化后的图片。"],
+	  "Restoring the original image and backing up the current image...": ["正在恢复原图并备份当前图片……"],
+	  "Original image restored": ["原图已恢复"],
+	  "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["原图已重新应用到媒体库，并已自动备份优化后的图片。"],
+	  "Restore verified": ["恢复验证通过"],
 	  "Applying the verified image and automatically backing up the original...": ["正在应用已验证图片并自动备份原图……"],
 	  "Generating media preview": ["正在生成图片预览"],
 	  "Upload source": ["上传源图片"],
@@ -647,7 +653,13 @@
       "Template removed. Save to apply: %s": ["已移除模板，保存后生效：%s"],
       "Normal": ["正常"],
       ", ": ["，"],
-      " | ": ["｜"]
+      " | ": ["｜"],
+      "Restore original image": ["恢复原图"],
+      "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？当前优化图会先自动备份。"],
+      "Restoring the original image and backing up the current image...": ["正在恢复原图，并备份当前图片……"],
+      "Original image restored": ["原图已恢复"],
+      "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["媒体库中已重新启用原图。优化图已自动备份。"],
+      "Restore verified": ["恢复已验证"]
     }
   }
 }
