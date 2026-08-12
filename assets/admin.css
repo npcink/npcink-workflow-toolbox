@@ -2863,6 +2863,31 @@ pre.npcink-toolbox__result {
 	padding: 8px 10px;
 }
 
+.npcink-toolbox__single-media-workbench.is-restore-mode [data-toolbox-card-media-details],
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__single-media-settings {
+	display: none;
+}
+
+.npcink-toolbox__restore-actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+	margin-top: 16px;
+}
+
+.npcink-toolbox__restore-actions[hidden] {
+	display: none;
+}
+
+.npcink-toolbox__restore-actions .button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	min-height: 40px;
+	margin: 0;
+}
+
 .npcink-toolbox__single-media-workbench.is-restore-mode [data-toolbox-run-media-derivative],
 .npcink-toolbox__single-media-workbench.is-restore-mode [data-toolbox-reload-media-workbench],
 .npcink-toolbox__single-media-workbench.is-restore-mode [data-toolbox-watermark-effect],
@@ -3419,6 +3444,10 @@ pre.npcink-toolbox__result {
 }
 
 @media (max-width: 680px) {
+	.npcink-toolbox__restore-actions {
+		grid-template-columns: 1fr;
+	}
+
 	.npcink-toolbox__retention-control {
 		grid-template-columns: 1fr;
 	}

@@ -7365,10 +7365,14 @@
 			const payload = await getJson(config.restUrl, 'strong-local-confirmation/media-derivative-backups/' + encodeURIComponent(String(attachmentId)));
 			const backups = Array.isArray(payload.backups) ? payload.backups : [];
 			const latest = backups.find((item) => item && item.file_exists && item.backup_id);
-			const button = form.querySelector('[data-toolbox-restore-media-backup]');
+			const restoreActions = form.querySelector('[data-toolbox-restore-actions]');
+			const button = restoreActions ? restoreActions.querySelector('[data-toolbox-restore-media-backup]') : form.querySelector('[data-toolbox-restore-media-backup]');
 			const summary = form.querySelector('[data-toolbox-restore-summary]');
 			const backupCard = form.querySelector('[data-toolbox-backup-image-card]');
 			if (button instanceof HTMLButtonElement && latest) {
+				if (restoreActions) {
+					restoreActions.hidden = false;
+				}
 				button.dataset.attachmentId = String(attachmentId);
 				button.dataset.backupId = String(latest.backup_id);
 				button.hidden = false;

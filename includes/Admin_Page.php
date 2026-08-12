@@ -4433,7 +4433,7 @@ final class Admin_Page {
 								<?php if ( ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) : ?><span><?php echo esc_html( (string) $metadata['width'] . ' × ' . (string) $metadata['height'] ); ?></span><?php endif; ?>
 								<?php if ( is_int( $file_size ) ) : ?><span><?php echo esc_html( size_format( $file_size ) ); ?></span><?php endif; ?>
 							</div>
-							<?php if ( $edit_link ) : ?><a href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'Open media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
+							<?php if ( $edit_link ) : ?><a data-toolbox-card-media-details href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'Open media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
 						</div>
 						<div class="npcink-toolbox__single-image-card npcink-toolbox__backup-image-card" data-toolbox-backup-image-card hidden>
 							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span>
@@ -4453,6 +4453,10 @@ final class Admin_Page {
 						</div>
 					</div>
 					<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+					<div class="npcink-toolbox__restore-actions" data-toolbox-restore-actions hidden>
+						<?php if ( $edit_link ) : ?><a class="button" href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'View media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
+						<button type="button" class="button button-primary" data-toolbox-restore-media-backup hidden><?php esc_html_e( 'Restore original image', 'npcink-workflow-toolbox' ); ?></button>
+					</div>
 				</section>
 				<section class="npcink-toolbox__single-media-settings" data-toolbox-single-media-settings aria-label="<?php esc_attr_e( 'Optimization settings', 'npcink-workflow-toolbox' ); ?>">
 					<h3><?php esc_html_e( 'Settings', 'npcink-workflow-toolbox' ); ?></h3>
