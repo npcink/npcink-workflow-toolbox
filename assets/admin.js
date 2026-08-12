@@ -7391,6 +7391,7 @@
 						meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', formatDateTime(latest.created_at_gmt)].filter(Boolean).join(' · ');
 					}
 				}
+				initComparisonMode(form);
 				renderTextResult(form, t('A restorable original-image backup is available. Use Restore original image to continue.'), 'ok');
 				return;
 			}
@@ -7398,6 +7399,29 @@
 		} catch (error) {
 			renderTextResult(form, error && error.message ? error.message : t('Could not check image backups.'), 'error');
 		}
+	}
+
+	function initComparisonMode(form) {
+		const mode = form.querySelector('[data-toolbox-comparison-mode]');
+		const slider = form.querySelector('[data-toolbox-comparison-slider]');
+		const comparison = form.querySelector('[data-toolbox-single-media-comparison]');
+		const current = form.querySelector('[data-toolbox-original-media-card] img');
+		const backup = form.querySelector('[data-toolbox-backup-image]');
+		if (!mode || !slider || !comparison || !current || !backup || !backup.src) return;
+		mode.hidden = false;
+		mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((button) => button.addEventListener('click', () => {
+			const isSlider = button.dataset.toolboxComparisonModeButton === 'slider';
+			comparison.hidden = isSlider;
+			slider.hidden = !isSlider;
+			mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((item) => item.classList.toggle('is-active', item === button));
+			const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
+			const sliderBackup = slider.querySelector('[data-toolbox-slider-backup]');
+			if (sliderCurrent) sliderCurrent.src = current.src;
+			if (sliderBackup) sliderBackup.src = backup.src;
+		}));
+		const input = slider.querySelector('[data-toolbox-comparison-slider-input]');
+		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
+		if (input && layer) input.addEventListener('input', () => { layer.style.width = input.value + '%'; });
 	}
 
 	function initMediaAltCaptionControls() {
@@ -8097,6 +8121,15 @@
 
 	function initMediaDerivativeControls() {
 		document.querySelectorAll('[data-toolbox-media-derivative]').forEach((form) => {
+			let lightbox = form.querySelector('[data-toolbox-image-lightbox]');
+			if (!lightbox) {
+				lightbox = document.createElement('div');
+				lightbox.className = 'npcink-toolbox__image-lightbox';
+				lightbox.setAttribute('data-toolbox-image-lightbox', '');
+				lightbox.hidden = true;
+				lightbox.innerHTML = '<button type="button" class="npcink-toolbox__image-lightbox-close" data-toolbox-close-image-lightbox aria-label="' + t('Close large image') + '">×</button><img alt="" data-toolbox-lightbox-image />';
+				form.appendChild(lightbox);
+			}
 			const idField = form.querySelector('[data-toolbox-media-attachment]');
 			const repairButton = form.querySelector('[data-toolbox-submit-reference-repair]');
 			const settingsRepairButton = form.querySelector('[data-toolbox-submit-settings-repair]');
@@ -8168,6 +8201,22 @@
 			}
 
 			form.addEventListener('click', (event) => {
+				const viewImageButton = event.target.closest('[data-toolbox-view-image]');
+				if (viewImageButton && form.contains(viewImageButton)) {
+					event.preventDefault();
+					const card = viewImageButton.closest('.npcink-toolbox__single-image-card');
+					const source = card && card.querySelector('img');
+					const target = lightbox.querySelector('[data-toolbox-lightbox-image]');
+					if (source && target && source.src) {
+						target.src = source.src;
+						target.alt = source.alt || '';
+						lightbox.hidden = false;
+					}
+					return;
+				}
+				if (event.target.closest('[data-toolbox-close-image-lightbox]') || event.target === lightbox) {
+					lightbox.hidden = true;
+				}
 				if (!(event.target instanceof Element)) {
 					return;
 				}
@@ -8331,6 +8380,14 @@
 			});
 		});
 	}
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') {
+			document.querySelectorAll('[data-toolbox-image-lightbox]').forEach((lightbox) => {
+				lightbox.hidden = true;
+			});
+		}
+	});
 
 	initTopTabs();
 	initToolSwitcher();

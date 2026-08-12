@@ -7746,6 +7746,21 @@ msgstr "本地确认"
 msgid "Needs confirmation"
 msgstr "需要确认"
 
+msgid "View large image"
+msgstr "查看大图"
+
+msgid "Close large image"
+msgstr "关闭大图"
+
+msgid "Side by side"
+msgstr "左右对比"
+
+msgid "Slider comparison"
+msgstr "滑杆对比"
+
+msgid "Comparison position"
+msgstr "对比位置"
+
 #: includes/Admin_Page.php
 msgid "Image comparison"
 msgstr "图片对比"

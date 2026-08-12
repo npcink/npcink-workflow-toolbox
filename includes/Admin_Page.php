@@ -4420,7 +4420,7 @@ final class Admin_Page {
 				<section class="npcink-toolbox__single-media-preview-column" aria-label="<?php esc_attr_e( 'Image comparison', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__single-media-comparison" data-toolbox-single-media-comparison>
 						<div class="npcink-toolbox__single-image-card" data-toolbox-original-media-card>
-							<span class="npcink-toolbox__eyebrow" data-toolbox-current-image-label><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span>
+							<div class="npcink-toolbox__image-card-heading"><span class="npcink-toolbox__eyebrow" data-toolbox-current-image-label><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></span><button type="button" class="button-link" data-toolbox-view-image><?php esc_html_e( 'View large image', 'npcink-workflow-toolbox' ); ?></button></div>
 							<div class="npcink-toolbox__single-image-frame">
 								<?php if ( $preview_url ) : ?><img src="<?php echo esc_url( $preview_url ); ?>" alt="" /><?php endif; ?>
 								<span class="npcink-toolbox__watermark-effect-label" data-toolbox-watermark-effect-label hidden><?php esc_html_e( 'Watermark effect preview', 'npcink-workflow-toolbox' ); ?></span>
@@ -4436,7 +4436,7 @@ final class Admin_Page {
 							<?php if ( $edit_link ) : ?><a data-toolbox-card-media-details href="<?php echo esc_url( $edit_link ); ?>"><?php esc_html_e( 'Open media details', 'npcink-workflow-toolbox' ); ?></a><?php endif; ?>
 						</div>
 						<div class="npcink-toolbox__single-image-card npcink-toolbox__backup-image-card" data-toolbox-backup-image-card hidden>
-							<span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span>
+							<div class="npcink-toolbox__image-card-heading"><span class="npcink-toolbox__eyebrow"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span><button type="button" class="button-link" data-toolbox-view-image><?php esc_html_e( 'View large image', 'npcink-workflow-toolbox' ); ?></button></div>
 							<div class="npcink-toolbox__single-image-frame"><img alt="<?php esc_attr_e( 'Backup original preview', 'npcink-workflow-toolbox' ); ?>" data-toolbox-backup-image /></div>
 							<h3><?php esc_html_e( 'Original image backup', 'npcink-workflow-toolbox' ); ?></h3>
 							<div class="npcink-toolbox__original-image-meta" data-toolbox-backup-image-meta></div>
@@ -4451,6 +4451,13 @@ final class Admin_Page {
 							<h3 data-toolbox-optimized-media-name><?php esc_html_e( 'Loading optimized preview', 'npcink-workflow-toolbox' ); ?></h3>
 							<div class="npcink-toolbox__original-image-meta" data-toolbox-optimized-media-meta></div>
 						</div>
+					</div>
+					<div class="npcink-toolbox__comparison-mode-switcher" data-toolbox-comparison-mode hidden>
+						<button type="button" class="button-link is-active" data-toolbox-comparison-mode-button="side-by-side"><?php esc_html_e( 'Side by side', 'npcink-workflow-toolbox' ); ?></button>
+						<button type="button" class="button-link" data-toolbox-comparison-mode-button="slider"><?php esc_html_e( 'Slider comparison', 'npcink-workflow-toolbox' ); ?></button>
+					</div>
+					<div class="npcink-toolbox__comparison-slider" data-toolbox-comparison-slider hidden>
+						<div class="npcink-toolbox__comparison-slider-frame"><img data-toolbox-slider-current alt="" /><div class="npcink-toolbox__comparison-slider-backup"><img data-toolbox-slider-backup alt="" /></div><input type="range" min="0" max="100" value="50" data-toolbox-comparison-slider-input aria-label="<?php esc_attr_e( 'Comparison position', 'npcink-workflow-toolbox' ); ?>" /></div>
 					</div>
 					<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
 					<div class="npcink-toolbox__restore-actions" data-toolbox-restore-actions hidden>
