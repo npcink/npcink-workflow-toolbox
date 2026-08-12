@@ -13,8 +13,10 @@ add unnecessary product and ownership complexity.
 
 ## Decision
 
-Add one Settings API field under Toolbox **Image Handling → Original image
-backup retention** with exactly two values:
+Add one Settings API field under Toolbox **Image Handling → Settings → Original
+image backup retention** with exactly two values. The same internal Settings
+tab owns Watermark Templates, keeping low-frequency configuration separate from
+the optimization and ALT review tabs:
 
 - 30 days (recommended);
 - 90 days.

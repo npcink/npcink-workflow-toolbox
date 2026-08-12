@@ -551,7 +551,6 @@ final class Admin_Page {
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Overview', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'context' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="context" aria-selected="<?php echo 'context' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'context' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site Profile', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Handling', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'image-settings' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="image-settings" aria-selected="<?php echo 'image-settings' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'image-settings' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Settings', 'npcink-workflow-toolbox' ); ?></button>
 			</nav>
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="start" aria-label="<?php esc_attr_e( 'Toolbox start', 'npcink-workflow-toolbox' ); ?>"<?php echo 'start' === $active_tab ? '' : ' hidden'; ?>>
@@ -570,9 +569,6 @@ final class Admin_Page {
 				<?php $this->render_tool_cards( $cloud_ready, 'image' ); ?>
 			</section>
 
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="image-settings" aria-label="<?php esc_attr_e( 'Image settings', 'npcink-workflow-toolbox' ); ?>"<?php echo 'image-settings' === $active_tab ? '' : ' hidden'; ?>>
-				<?php $this->render_image_settings_panel(); ?>
-			</section>
 
 			<section class="npcink-toolbox__panel npcink-toolbox__panel--secondary" data-toolbox-tab-panel="site-knowledge" aria-label="<?php esc_attr_e( 'Content library usage', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-knowledge' === $active_tab ? '' : ' hidden'; ?>>
 				<?php $this->render_site_knowledge_panel( $cloud_ready ); ?>
@@ -591,9 +587,6 @@ final class Admin_Page {
 		if ( 'image' === $requested ) {
 			$requested = 'tools';
 		}
-		if ( 'settings' === $requested || 'image-settings' === $requested || 'image_settings' === $requested ) {
-			$requested = 'image-settings';
-		}
 		if ( 'content' === $requested || 'content-preparation' === $requested ) {
 			$requested = 'operations-insights';
 		}
@@ -608,7 +601,6 @@ final class Admin_Page {
 			'start'               => true,
 			'context'             => true,
 			'tools'               => true,
-			'image-settings'      => true,
 			'operations-insights' => true,
 			'site-knowledge'      => true,
 		);
@@ -643,6 +635,8 @@ final class Admin_Page {
 			'media-derivative' => 'media-batch-optimize',
 			'batch-optimize'   => 'media-batch-optimize',
 			'bulk-alt'         => 'media-alt-caption-review',
+			'settings'         => 'image-settings',
+			'image_settings'   => 'image-settings',
 		);
 
 		return $aliases[ $requested ] ?? $requested;
@@ -3434,6 +3428,16 @@ final class Admin_Page {
 				'button'      => __( 'Build ALT review preview', 'npcink-workflow-toolbox' ),
 				'custom'      => 'media_alt_caption_review',
 			),
+			array(
+				'surface'     => 'image',
+				'group'       => __( 'Settings', 'npcink-workflow-toolbox' ),
+				'group_id'    => 'image-settings',
+				'id'          => 'image-settings',
+				'endpoint'    => '',
+				'title'       => __( 'Settings', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Manage watermark templates and original-image backup retention.', 'npcink-workflow-toolbox' ),
+				'custom'      => 'image_settings',
+			),
 		);
 
 		$tools = array_values(
@@ -3471,6 +3475,10 @@ final class Admin_Page {
 			'image-text-review' => array(
 				'title'       => __( 'Batch Image ALT Review', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media.', 'npcink-workflow-toolbox' ),
+			),
+			'image-settings' => array(
+				'title'       => __( 'Settings', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Watermark templates and backup retention.', 'npcink-workflow-toolbox' ),
 			),
 		);
 		$group_counts = array();
@@ -3604,6 +3612,10 @@ final class Admin_Page {
 							$this->render_watermark_template_library( (string) $tool['id'], $active_tool_id === (string) $tool['id'] );
 							continue;
 						}
+						if ( 'image_settings' === (string) ( $tool['custom'] ?? '' ) ) {
+							$this->render_image_settings_panel( (string) $tool['id'], $active_tool_id === (string) $tool['id'] );
+							continue;
+						}
 					$this->render_text_tool(
 						(string) $tool['endpoint'],
 						(string) $tool['title'],
@@ -3622,9 +3634,19 @@ final class Admin_Page {
 		<?php
 	}
 
-	private function render_image_settings_panel(): void {
+	private function render_image_settings_panel( string $tool_id, bool $active = false ): void {
+		?>
+		<div class="npcink-toolbox__image-settings" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" <?php echo $active ? '' : 'hidden'; ?>>
+			<div class="npcink-toolbox__panel-header">
+				<h2><?php esc_html_e( 'Image Settings', 'npcink-workflow-toolbox' ); ?></h2>
+				<p><?php esc_html_e( 'Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.', 'npcink-workflow-toolbox' ); ?></p>
+			</div>
+		<?php
 		$this->render_media_backup_retention_settings();
 		$this->render_watermark_template_library( 'watermark-templates', true );
+		?>
+		</div>
+		<?php
 	}
 
 	private function render_media_backup_retention_settings(): void {

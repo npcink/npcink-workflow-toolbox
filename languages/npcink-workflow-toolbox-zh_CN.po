@@ -7843,6 +7843,15 @@ msgstr "图片设置"
 msgid "Image settings"
 msgstr "图片设置"
 
+msgid "Manage watermark templates and original-image backup retention."
+msgstr "管理水印模板和原图备份保留时间。"
+
+msgid "Watermark templates and backup retention."
+msgstr "水印模板与备份保留时间。"
+
+msgid "Manage low-frequency image defaults here. Review and execution tools remain in their own tabs."
+msgstr "在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"
+
 
 #: includes/Admin_Page.php
 msgid "View media details"

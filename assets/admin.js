@@ -6887,18 +6887,12 @@
 		if (tab === 'tools') {
 			return 'image';
 		}
-		if (tab === 'image-settings') {
-			return 'image-settings';
-		}
 		return tab;
 	}
 
 	function toolboxTabFromPublicTab(tab) {
 		if (tab === 'image') {
 			return 'tools';
-		}
-		if (tab === 'settings' || tab === 'image-settings' || tab === 'image_settings') {
-			return 'image-settings';
 		}
 		if (tab === 'content' || tab === 'content-preparation') {
 			return 'operations-insights';
@@ -6941,6 +6935,9 @@
 		}
 		if (tool === 'batch-optimize') {
 			return 'media-batch-optimize';
+		}
+		if (tool === 'settings' || tool === 'image_settings') {
+			return 'image-settings';
 		}
 		return tool;
 	}
@@ -7050,16 +7047,6 @@
 		if (target === 'tools') {
 			const workspace = toolWorkspaceForTab(target);
 			updateToolboxUrl(toolUrlState(workspace, workspace ? activeTarget(workspace, '[data-toolbox-tool-target]', 'data-toolbox-tool-target') : ''));
-			return;
-		}
-		if (target === 'image-settings') {
-			updateToolboxUrl({
-				tab: 'image-settings',
-				tool: null,
-				toolbox_tab: null,
-				toolbox_tool: null,
-				site_check_tab: null,
-			});
 			return;
 		}
 

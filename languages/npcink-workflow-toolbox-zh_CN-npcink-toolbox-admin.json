@@ -668,6 +668,9 @@
       "Save backup retention": ["保存备份保留设置"]
       ,"Image Settings": ["图片设置"]
       ,"Image settings": ["图片设置"]
+      ,"Manage watermark templates and original-image backup retention.": ["管理水印模板和原图备份保留时间。"]
+      ,"Watermark templates and backup retention.": ["水印模板与备份保留时间。"]
+      ,"Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.": ["在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"]
     }
   }
 }
