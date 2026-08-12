@@ -2992,6 +2992,19 @@ pre.npcink-toolbox__result {
 	max-width: none;
 }
 
+.npcink-toolbox__comparison-slider-label {
+	position: absolute;
+	top: 10px;
+	z-index: 3;
+	padding: 4px 8px;
+	background: rgba(0,0,0,.62);
+	color: #fff;
+	font-size: 12px;
+}
+
+.npcink-toolbox__comparison-slider-label.is-left { left: 10px; }
+.npcink-toolbox__comparison-slider-label.is-right { right: 10px; }
+
 .npcink-toolbox__comparison-slider-frame input[type="range"] {
 	position: absolute;
 	inset: auto 12px 10px;

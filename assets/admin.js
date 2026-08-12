@@ -6722,6 +6722,21 @@
 					}
 				});
 			}
+			const acceptanceButton = root.querySelector('[data-toolbox-site-knowledge-acceptance]');
+			const acceptanceForm = root.querySelector('[data-toolbox-site-knowledge-acceptance-form]');
+			if (acceptanceButton && acceptanceForm) {
+				acceptanceButton.addEventListener('click', async () => {
+					acceptanceButton.disabled = true;
+					try {
+						await runSiteKnowledgeForm(acceptanceForm, 'site-knowledge/search');
+						await refreshSiteKnowledgeStatus(root);
+					} catch (error) {
+						renderTextResult(acceptanceForm, error.message || 'Site knowledge acceptance failed.', 'error');
+					} finally {
+						acceptanceButton.disabled = false;
+					}
+				});
+			}
 		});
 	}
 
@@ -7421,7 +7436,14 @@
 		}));
 		const input = slider.querySelector('[data-toolbox-comparison-slider-input]');
 		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
-		if (input && layer) input.addEventListener('input', () => { layer.style.width = input.value + '%'; });
+		const backupImage = slider.querySelector('[data-toolbox-slider-backup]');
+		const syncSlider = () => {
+			if (input && layer) layer.style.width = input.value + '%';
+			if (backupImage) backupImage.style.width = slider.querySelector('.npcink-toolbox__comparison-slider-frame').clientWidth + 'px';
+		};
+		if (input && layer) input.addEventListener('input', syncSlider);
+		window.addEventListener('resize', syncSlider);
+		syncSlider();
 	}
 
 	function initMediaAltCaptionControls() {

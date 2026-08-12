@@ -2990,7 +2990,10 @@ final class Admin_Page {
 							<h3><?php esc_html_e( 'Library status', 'npcink-workflow-toolbox' ); ?></h3>
 							<p><?php esc_html_e( 'Read-only coverage summary for public content AI can use as suggestion context.', 'npcink-workflow-toolbox' ); ?></p>
 						</div>
-						<button type="button" class="button" data-toolbox-site-knowledge-status <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Refresh status', 'npcink-workflow-toolbox' ); ?></button>
+						<div class="npcink-toolbox__inline-actions">
+							<button type="button" class="button" data-toolbox-site-knowledge-status <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Refresh status', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="button button-primary" data-toolbox-site-knowledge-acceptance <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Run retrieval acceptance', 'npcink-workflow-toolbox' ); ?></button>
+						</div>
 					</div>
 					<?php if ( ! $cloud_ready ) : ?>
 						<div class="npcink-toolbox__result-notice is-warning"><?php esc_html_e( 'Connect the AI service before reading content library coverage.', 'npcink-workflow-toolbox' ); ?></div>
@@ -2998,6 +3001,11 @@ final class Admin_Page {
 					<div class="npcink-toolbox__knowledge-summary" data-toolbox-site-knowledge-summary>
 						<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Status has not been loaded yet.', 'npcink-workflow-toolbox' ); ?></div>
 					</div>
+					<form class="screen-reader-text" data-toolbox-site-knowledge-acceptance-form>
+						<input type="text" name="query" value="site knowledge retrieval acceptance" />
+						<input type="hidden" name="intent" value="site_search" />
+						<input type="hidden" name="max_results" value="8" />
+					</form>
 				</section>
 
 			<section class="npcink-toolbox__info-panel">
@@ -4456,8 +4464,8 @@ final class Admin_Page {
 						<button type="button" class="button-link is-active" data-toolbox-comparison-mode-button="side-by-side"><?php esc_html_e( 'Side by side', 'npcink-workflow-toolbox' ); ?></button>
 						<button type="button" class="button-link" data-toolbox-comparison-mode-button="slider"><?php esc_html_e( 'Slider comparison', 'npcink-workflow-toolbox' ); ?></button>
 					</div>
-					<div class="npcink-toolbox__comparison-slider" data-toolbox-comparison-slider hidden>
-						<div class="npcink-toolbox__comparison-slider-frame"><img data-toolbox-slider-current alt="" /><div class="npcink-toolbox__comparison-slider-backup"><img data-toolbox-slider-backup alt="" /></div><input type="range" min="0" max="100" value="50" data-toolbox-comparison-slider-input aria-label="<?php esc_attr_e( 'Comparison position', 'npcink-workflow-toolbox' ); ?>" /></div>
+						<div class="npcink-toolbox__comparison-slider" data-toolbox-comparison-slider hidden>
+						<div class="npcink-toolbox__comparison-slider-frame"><img data-toolbox-slider-current alt="" /><div class="npcink-toolbox__comparison-slider-backup"><img data-toolbox-slider-backup alt="" /></div><span class="npcink-toolbox__comparison-slider-label is-left"><?php esc_html_e( 'Backup original', 'npcink-workflow-toolbox' ); ?></span><span class="npcink-toolbox__comparison-slider-label is-right"><?php esc_html_e( 'Current image', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="0" max="100" value="50" data-toolbox-comparison-slider-input aria-label="<?php esc_attr_e( 'Comparison position', 'npcink-workflow-toolbox' ); ?>" /></div>
 					</div>
 					<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
 					<div class="npcink-toolbox__restore-actions" data-toolbox-restore-actions hidden>
