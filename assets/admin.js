@@ -7318,30 +7318,33 @@
 
 	function prefillSingleMediaFromUrl(form) {
 		const idField = form.querySelector('[data-toolbox-media-attachment]');
-		if (!(idField instanceof HTMLInputElement) || idField.value) {
+		if (!(idField instanceof HTMLInputElement)) {
 			return;
 		}
 		const params = new URL(window.location.href).searchParams;
-		const attachmentId = parseInt(params.get('attachment_id') || '0', 10) || 0;
+		const attachmentId = parseInt(idField.value || params.get('attachment_id') || '0', 10) || 0;
 		if (attachmentId <= 0) {
 			return;
 		}
-		if (new URL(window.location.href).searchParams.get('restore') === '1') {
+		if (params.get('restore') === '1') {
 			form.setAttribute('data-toolbox-restore-mode', '1');
 		}
-		const attachmentUrl = params.get('attachment_url') || '';
-		renderSelectedMedia(form, {
-			id: attachmentId,
-			filename: attachmentUrl ? attachmentUrl.split('/').pop() : 'Attachment #' + String(attachmentId),
-			url: attachmentUrl,
-			alt: '',
-		});
+		if (!idField.value) {
+			const attachmentUrl = params.get('attachment_url') || '';
+			renderSelectedMedia(form, {
+				id: attachmentId,
+				filename: attachmentUrl ? attachmentUrl.split('/').pop() : 'Attachment #' + String(attachmentId),
+				url: attachmentUrl,
+				alt: '',
+			});
+		}
 		if (form.getAttribute('data-toolbox-restore-mode') === '1') {
 			loadMediaBackupsForRestore(form, attachmentId);
 		}
 	}
 
 	async function loadMediaBackupsForRestore(form, attachmentId) {
+		renderTextResult(form, t('Checking available image backups...'), 'pending');
 		try {
 			const payload = await getJson(config.restUrl, 'strong-local-confirmation/media-derivative-backups/' + encodeURIComponent(String(attachmentId)));
 			const backups = Array.isArray(payload.backups) ? payload.backups : [];
@@ -7352,9 +7355,12 @@
 				button.dataset.backupId = String(latest.backup_id);
 				button.hidden = false;
 				setSingleImageWorkbenchPhase(form, 'completed');
+				renderTextResult(form, t('A restorable original-image backup is available. Use Restore original image to continue.'), 'ok');
+				return;
 			}
+			renderTextResult(form, t('No restorable backup is available for this image.'), 'warning');
 		} catch (error) {
-			// The workbench remains usable for optimization when backup lookup is unavailable.
+			renderTextResult(form, error && error.message ? error.message : t('Could not check image backups.'), 'error');
 		}
 	}
 

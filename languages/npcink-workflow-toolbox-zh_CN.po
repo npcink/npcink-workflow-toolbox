@@ -7854,6 +7854,18 @@ msgstr "打开图片工作区，查看可用备份后再恢复。"
 msgid "Npcink restore"
 msgstr "Npcink 恢复"
 
+msgid "Checking available image backups..."
+msgstr "正在查询可用的图片备份……"
+
+msgid "A restorable original-image backup is available. Use Restore original image to continue."
+msgstr "已找到可恢复的原图备份。请点击“恢复原图”继续。"
+
+msgid "No restorable backup is available for this image."
+msgstr "这张图片目前没有可恢复的备份。"
+
+msgid "Could not check image backups."
+msgstr "无法查询图片备份。"
+
 msgid "Media read authorization required"
 msgstr "需要授权读取媒体"
 
