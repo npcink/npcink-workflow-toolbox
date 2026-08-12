@@ -537,7 +537,10 @@ final class Admin_Page {
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
-			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Improve images and prepare safe AI suggestions without changing WordPress automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			<details class="npcink-toolbox__scope-info">
+				<summary aria-label="<?php esc_attr_e( 'About Toolbox', 'npcink-workflow-toolbox' ); ?>">i</summary>
+				<p><?php esc_html_e( 'Improve images and prepare safe AI suggestions without changing WordPress automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			</details>
 			<?php
 			if ( ! $cloud_ready ) {
 				$this->render_cloud_runtime_notice();
@@ -3497,15 +3500,10 @@ final class Admin_Page {
 			'scope_description' => __( 'Find images, review previews, then submit only the selected items. Nothing is written automatically.', 'npcink-workflow-toolbox' ),
 		);
 		?>
-		<div class="npcink-toolbox__panel-header npcink-toolbox__panel-header--compact">
+		<div class="npcink-toolbox__panel-header npcink-toolbox__panel-header--compact" aria-label="<?php echo esc_attr( (string) $surface_header['title'] ); ?>">
 			<h2><?php echo esc_html( (string) $surface_header['title'] ); ?></h2>
-			<p><?php echo esc_html( (string) $surface_header['description'] ); ?></p>
 		</div>
 		<div class="npcink-toolbox__tool-workspace" data-toolbox-tools>
-			<div class="npcink-toolbox__workflow-scope">
-				<strong><?php echo esc_html( (string) $surface_header['scope_title'] ); ?></strong>
-				<span><?php echo esc_html( (string) $surface_header['scope_description'] ); ?></span>
-			</div>
 			<div class="npcink-toolbox__tool-group-tabs" aria-label="<?php esc_attr_e( 'Tool groups', 'npcink-workflow-toolbox' ); ?>">
 				<?php
 				$rendered_groups = array();

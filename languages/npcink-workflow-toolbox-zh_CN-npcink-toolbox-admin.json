@@ -673,6 +673,7 @@
       ,"Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.": ["在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"]
       ,"Image ALT Review": ["图片 ALT 审核"]
       ,"Core authorization": ["Core 一次性授权"]
+      ,"About Toolbox": ["工具箱说明"]
       ,"Media read authorization required": ["需要授权读取媒体"]
       ,"Core will record a one-time read authorization. Confirm the scope to build the candidate list.": ["Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"]
       ,"Request ID": ["请求编号"]

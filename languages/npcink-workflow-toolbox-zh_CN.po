@@ -7839,6 +7839,9 @@ msgstr "保存备份保留设置"
 msgid "Core authorization"
 msgstr "Core 一次性授权"
 
+msgid "About Toolbox"
+msgstr "工具箱说明"
+
 msgid "Media read authorization required"
 msgstr "需要授权读取媒体"
 
