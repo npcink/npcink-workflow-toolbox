@@ -7760,8 +7760,12 @@ msgid "Optimization settings"
 msgstr "优化设置"
 
 #: includes/Admin_Page.php
-msgid "I reviewed this exact preview. Replace the current attachment and create a restorable backup."
-msgstr "我已核对此精确预览。替换当前附件并创建可恢复的备份。"
+msgid "I confirmed the processed image. Replace the current image and automatically back up the original so it can be restored."
+msgstr "我已确认处理后的图片。替换当前图片前，系统会自动备份原图，以便需要时恢复。"
+
+#: includes/Admin_Page.php
+msgid "The backup is kept outside the Media Library and is used only to restore the original image. Known post-content image references are updated in the same local transaction."
+msgstr "备份不会显示在媒体库中，仅用于恢复原图。已知文章内容中的图片引用会在同一笔本地事务中更新。"
 
 #: includes/Admin_Page.php
 msgid "Apply to Media Library"

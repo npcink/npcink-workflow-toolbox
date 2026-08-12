@@ -4134,7 +4134,7 @@
 		}
 		renderArtifactSummary(result, 'Derivative artifact', derivative);
 		if (form.querySelector('[data-toolbox-single-media-workbench]')) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'When the preview is visibly verified, confirm the replacement statement to enable local application. A restorable backup is mandatory.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'When the preview is visibly verified, confirm the replacement statement to enable local application. The original image is backed up automatically.'));
 			appendMeta(meta, 'Output filename', mediaDerivativeFinalFilename(state.outputFilenameBase, derivative.mime_type) || derivative.suggested_filename || 'WordPress final suggestion');
 		} else if (state.fromPlanRequest) {
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Optimization plan is ready for one Core proposal approval. Next action: inspect the preview and preflight evidence, then submit before the artifact expires.'));
@@ -5104,7 +5104,7 @@
 			form,
 			{ provider: 'local WordPress' },
 			'Image updated',
-			'The reviewed image is now active in the Media Library. A restorable backup was created.'
+			'The reviewed image is now active in the Media Library. The original was backed up automatically for restoration.'
 		);
 		if (!result) {
 			return;
@@ -5159,7 +5159,7 @@
 		}
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
 		if (!(confirmation instanceof HTMLInputElement) || !confirmation.checked) {
-			throw { message: 'Confirm the replacement and restorable-backup statement before applying it.' };
+			throw { message: 'Confirm the replacement and automatic-backup statement before applying it.' };
 		}
 		const abilityInput = proposalInputFromState(state);
 		const artifact = state.localReview && state.localReview.artifact ? state.localReview.artifact : abilityInput.derivative_artifact;
@@ -5172,7 +5172,7 @@
 			input.file_name = abilityInput.file_name;
 		}
 		setSingleImageWorkbenchPhase(form, 'applying');
-		renderTextResult(form, t('Applying the verified image and creating a restorable backup...'), 'pending');
+		renderTextResult(form, t('Applying the verified image and automatically backing up the original...'), 'pending');
 		const payload = await postJson(config.restUrl, 'strong-local-confirmation/media-derivative', {
 			action: 'replace_current',
 			confirmed_action: 'replace_current',
