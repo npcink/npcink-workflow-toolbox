@@ -4476,6 +4476,7 @@ final class Admin_Page {
 						</div>
 					</details>
 					<div class="npcink-toolbox__single-media-actions">
+						<div class="npcink-toolbox__restore-summary" data-toolbox-restore-summary hidden></div>
 						<button type="button" class="button" data-toolbox-run-media-derivative><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button>
 						<div data-toolbox-single-media-review-actions hidden>
 							<label class="npcink-toolbox__single-media-confirmation">

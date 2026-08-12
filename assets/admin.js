@@ -7350,11 +7350,18 @@
 			const backups = Array.isArray(payload.backups) ? payload.backups : [];
 			const latest = backups.find((item) => item && item.file_exists && item.backup_id);
 			const button = form.querySelector('[data-toolbox-restore-media-backup]');
+			const summary = form.querySelector('[data-toolbox-restore-summary]');
 			if (button instanceof HTMLButtonElement && latest) {
 				button.dataset.attachmentId = String(attachmentId);
 				button.dataset.backupId = String(latest.backup_id);
 				button.hidden = false;
 				setSingleImageWorkbenchPhase(form, 'completed');
+				if (summary) {
+					const before = latest.before && typeof latest.before === 'object' ? latest.before : {};
+					const size = latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '';
+					summary.hidden = false;
+					summary.innerHTML = '<strong>' + t('Original image backup available') + '</strong>' + t('Backup time') + ': ' + (latest.created_at_gmt || t('Unknown')) + (before.mime_type ? ' · ' + t('Format') + ': ' + String(before.mime_type).replace('image/', '').toUpperCase() : '') + (size ? ' · ' + t('Size') + ': ' + size : '');
+				}
 				renderTextResult(form, t('A restorable original-image backup is available. Use Restore original image to continue.'), 'ok');
 				return;
 			}

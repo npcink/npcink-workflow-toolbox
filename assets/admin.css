@@ -3294,8 +3294,10 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__single-media-actions > .button {
-	width: 100%;
+	display: flex;
+	align-items: center;
 	justify-content: center;
+	width: 100%;
 	margin-bottom: 10px;
 }
 
@@ -3310,6 +3312,23 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__single-media-complete-actions {
 	display: grid;
 	gap: 0;
+}
+
+.npcink-toolbox__restore-summary {
+	margin: 0 0 14px;
+	padding: 12px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-left: 3px solid #2271b1;
+	color: #50575e;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.npcink-toolbox__restore-summary strong {
+	display: block;
+	margin-bottom: 4px;
+	color: #1d2327;
 }
 
 .npcink-toolbox__single-media-complete-actions[hidden],

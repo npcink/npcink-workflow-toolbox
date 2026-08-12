@@ -7866,6 +7866,15 @@ msgstr "这张图片目前没有可恢复的备份。"
 msgid "Could not check image backups."
 msgstr "无法查询图片备份。"
 
+msgid "Original image backup available"
+msgstr "原图备份可用"
+
+msgid "Backup time"
+msgstr "备份时间"
+
+msgid "Size"
+msgstr "大小"
+
 msgid "Media read authorization required"
 msgstr "需要授权读取媒体"
 
