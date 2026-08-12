@@ -2952,6 +2952,7 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__comparison-mode-switcher {
 	display: flex;
+	justify-content: center;
 	gap: 14px;
 	margin-top: 16px;
 	padding-top: 12px;
@@ -2970,6 +2971,10 @@ pre.npcink-toolbox__result {
 	background: #f0f0f1;
 }
 
+.npcink-toolbox__comparison-slider .npcink-toolbox__comparison-slider-frame {
+	min-height: 360px;
+}
+
 .npcink-toolbox__comparison-slider-frame > img,
 .npcink-toolbox__comparison-slider-backup img {
 	display: block;
@@ -2985,6 +2990,19 @@ pre.npcink-toolbox__result {
 	width: 50%;
 	overflow: hidden;
 	border-right: 2px solid #3858e9;
+}
+
+.npcink-toolbox__comparison-slider-backup::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: -13px;
+	width: 26px;
+	height: 26px;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	background: #3858e9;
+	box-shadow: 0 1px 4px rgba(0,0,0,.25);
 }
 
 .npcink-toolbox__comparison-slider-backup img {
@@ -3007,8 +3025,13 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__comparison-slider-frame input[type="range"] {
 	position: absolute;
-	inset: auto 12px 10px;
-	width: calc(100% - 24px);
+	z-index: 4;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: ew-resize;
 }
 
 .npcink-toolbox__single-image-frame,

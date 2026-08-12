@@ -7424,6 +7424,7 @@
 		const backup = form.querySelector('[data-toolbox-backup-image]');
 		if (!mode || !slider || !comparison || !current || !backup || !backup.src) return;
 		mode.hidden = false;
+		const defaultSlider = form.getAttribute('data-toolbox-restore-mode') === '1';
 		mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((button) => button.addEventListener('click', () => {
 			const isSlider = button.dataset.toolboxComparisonModeButton === 'slider';
 			comparison.hidden = isSlider;
@@ -7434,6 +7435,10 @@
 			if (sliderCurrent) sliderCurrent.src = current.src;
 			if (sliderBackup) sliderBackup.src = backup.src;
 		}));
+		if (defaultSlider) {
+			const sliderButton = mode.querySelector('[data-toolbox-comparison-mode-button="slider"]');
+			if (sliderButton) sliderButton.click();
+		}
 		const input = slider.querySelector('[data-toolbox-comparison-slider-input]');
 		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
 		const backupImage = slider.querySelector('[data-toolbox-slider-backup]');
