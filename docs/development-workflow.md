@@ -22,10 +22,17 @@ Read:
 - `docs/boundary-exceptions.md`
 - `docs/adversarial-boundary-review.md`
 - `docs/adversarial-boundary-findings-triage.md`
+- `docs/ai-development-and-operations-standard-v1.md`
 - `docs/decisions/ADR-001-toolbox-as-product-surface.md`
 - `docs/decisions/ADR-003-local-admin-consent-boundary.md`
 
 Then state the focused module and boundary before editing.
+
+For cross-repository runtime incidents, media recovery, real WordPress smoke,
+M4 tunnel diagnosis, contract-projection drift, and milestone closeout, follow
+[AI Development And Operations Standard v1](ai-development-and-operations-standard-v1.md).
+The evidence and lessons that produced this standard are recorded in
+[Toolbox Development Closeout And History - 2026-08-13](closeout-development-history-2026-08-13.md).
 
 ## Default Gate
 

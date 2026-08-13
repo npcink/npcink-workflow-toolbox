@@ -25,6 +25,7 @@ Start from the active documents below before changing code.
 - [Platform Boundary And Development Summary](platform-boundary-and-development-summary-2026-07-12.md)
 - [Project History And Development Thinking](project-history-and-development-thinking-2026-07-12.md)
 - [Five-Plugin Hardening And Cloud-Offline Closeout](five-plugin-hardening-and-cloud-offline-closeout-2026-07-15.md)
+- [Toolbox Development Closeout And History - 2026-08-13](closeout-development-history-2026-08-13.md)
 - [Reference Learning Migration Closeout](reference-learning-migration-closeout-2026-07-08.md)
 - [Reference Plugin Evaluation Checklist](reference-plugin-evaluation-checklist.md)
 - [Reference Plugin Evaluation Record Template](reference-plugin-evaluation-record-template.md)
@@ -39,6 +40,7 @@ Start from the active documents below before changing code.
 
 - [Development Workflow](development-workflow.md)
 - [AI Development Quality Workflow](ai-development-quality-workflow.md)
+- [AI Development And Operations Standard v1](ai-development-and-operations-standard-v1.md)
 - [AI Change Envelope Template](ai-change-envelope-template.md)
 - [Pull Request Publishing Standard v1](platform/pr-publishing-standard-v1.md)
 - [GitHub Publishing Runbook](github-publishing-runbook.md)
@@ -135,6 +137,9 @@ Start from the active documents below before changing code.
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
+- [ADR-011: Allow Strong Local Confirmation For Single-Image Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
+- [ADR-012: Expose A Bounded Media Backup Retention Setting](decisions/ADR-012-media-backup-retention-setting.md)
+- [ADR-013: Keep M4 Tunnel Failures In The Cloud Operations Boundary](decisions/ADR-013-m4-tunnel-failure-ownership.md)
 
 ## Archived Closeouts
 

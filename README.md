@@ -142,6 +142,8 @@ the [documentation index](docs/README.md). Start with:
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
 - [Development Workflow](docs/development-workflow.md)
+- [AI Development And Operations Standard v1](docs/ai-development-and-operations-standard-v1.md)
+- [Toolbox Development Closeout And History - 2026-08-13](docs/closeout-development-history-2026-08-13.md)
 - [Pull Request Publishing Standard v1](docs/platform/pr-publishing-standard-v1.md)
 - [First Version Reference](docs/first-version-reference.md)
 - [WordPress.org Submission](docs/wordpress-org-submission.md)
@@ -153,6 +155,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-010: Strong Local Confirmation For Single-Article Image Adoption](docs/decisions/ADR-010-single-article-strong-local-image-adoption.md)
 - [ADR-011: Single-Image Local Media Replacement](docs/decisions/ADR-011-single-image-local-media-replacement.md)
 - [ADR-012: Bounded Media Backup Retention Setting](docs/decisions/ADR-012-media-backup-retention-setting.md)
+- [ADR-013: M4 Tunnel Failure Ownership](docs/decisions/ADR-013-m4-tunnel-failure-ownership.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:

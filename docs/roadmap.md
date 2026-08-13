@@ -14,6 +14,27 @@ editor contains no hidden proposal-intent/post-save executor, Toolkit remains
 the single reusable workflow-definition owner, Adapter owner wording is generic
 with OpenClaw-first compatibility, and all six repository gates pass.
 
+## Completed Priority - Single-Image Recovery And Contract Closeout
+
+The attachment-scoped optimization flow now includes mandatory backup,
+request-scoped restore authorization, exact visible confirmation, fail-closed
+result verification, and a real WordPress restore smoke. The Cloud media
+preview 502 incident was traced to a missing local M4 tunnel rather than a
+Toolbox defect, and the Workflow readiness projection was realigned with the
+seven visible editor flows while keeping article audio hidden compatibility.
+
+Preserve the resulting standards and evidence:
+
+- [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md);
+- [AI Development And Operations Standard v1](ai-development-and-operations-standard-v1.md);
+- [Toolbox Development Closeout And History - 2026-08-13](closeout-development-history-2026-08-13.md);
+- [ADR-013: M4 Tunnel Failure Ownership](decisions/ADR-013-m4-tunnel-failure-ownership.md).
+
+The next bounded product sequence remains media ALT/caption review set,
+taxonomy/tag review set, then internal-link review set. Do not reopen media
+runtime ownership, restore mechanics, or Workflow readiness defaults without
+new evidence and an explicit boundary decision.
+
 ## Stage 0 - Project Contract
 
 Goal: make the standalone plugin understandable to future sessions.
