@@ -34,14 +34,6 @@ final class Provider_Client {
 		$this->settings = $settings;
 	}
 
-	private function cloud_runtime_client() {
-		if ( function_exists( 'npcink_cloud_addon_runtime_client' ) ) {
-			return npcink_cloud_addon_runtime_client();
-		}
-
-		return null;
-	}
-
 	/**
 	 * Requests bounded Cloud-owned visual evidence without exposing the runtime
 	 * client or adding another Toolbox route.
@@ -60,8 +52,7 @@ final class Provider_Client {
 			return array();
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'request_image_context_evidence' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_request_image_context_evidence' ) ) {
 			return array();
 		}
 
@@ -82,7 +73,7 @@ final class Provider_Client {
 			}
 		}
 
-		$result = $client->request_image_context_evidence(
+		$result = npcink_cloud_addon_request_image_context_evidence(
 			$request,
 			$this->trace_id( 'image_context_evidence' ),
 			$idempotency_key
@@ -283,8 +274,7 @@ final class Provider_Client {
 		if ( empty( $source ) ) {
 			$source = $this->local_media_visual_source( $attachment_id );
 		}
-		$client = $this->cloud_runtime_client();
-		if ( empty( $source ) || ! is_object( $client ) || ! method_exists( $client, 'upload_media_artifact' ) ) {
+		if ( empty( $source ) || ! function_exists( 'npcink_cloud_addon_upload_toolbox_site_media_visual_source' ) ) {
 			return array();
 		}
 		$contents = file_get_contents( $source['path'] );
@@ -293,7 +283,7 @@ final class Provider_Client {
 		}
 		$result = array();
 		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
-			$result = $client->upload_media_artifact(
+			$result = npcink_cloud_addon_upload_toolbox_site_media_visual_source(
 				array(
 					'contents'  => $contents,
 					'filename'  => $source['filename'],
@@ -514,30 +504,11 @@ final class Provider_Client {
 			return $this->normalize_ai_image_generation_response( is_array( $response ) ? $response : array(), $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( is_object( $client ) && method_exists( $client, 'execute_toolbox_image_generation_runtime' ) ) {
-			$response = $client->execute_toolbox_image_generation_runtime( $request, $trace_id, $idempotency_key );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-
-			return $this->normalize_ai_image_generation_response( is_array( $response ) ? $response : array(), $runtime_payload );
-		}
-
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_ai_image_generation_cloud_unavailable',
-				__( 'Connect Npcink Cloud before generating AI image candidates.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$response        = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		return $this->normalize_ai_image_generation_response( is_array( $response ) ? $response : array(), $runtime_payload );
+		return new WP_Error(
+			'npcink_toolbox_ai_image_generation_cloud_unavailable',
+			__( 'Connect Npcink Cloud before generating AI image candidates.', 'npcink-workflow-toolbox' ),
+			array( 'status' => 503 )
+		);
 	}
 
 	private function toolbox_image_generation_runtime_request( array $runtime_payload ): array {
@@ -647,7 +618,6 @@ final class Provider_Client {
 			return $this->normalize_audio_generation_response( $handled, $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
 		$trace_id        = $this->trace_id( 'audio_generation' );
 		$idempotency_key = $this->trace_id( 'audio_generation_request' );
 		$request         = $this->toolbox_audio_generation_runtime_request( $runtime_payload );
@@ -661,29 +631,11 @@ final class Provider_Client {
 			return $this->normalize_audio_generation_response( is_array( $response ) ? $response : array(), $runtime_payload );
 		}
 
-		if ( is_object( $client ) && method_exists( $client, 'execute_toolbox_audio_generation_runtime' ) ) {
-			$response = $client->execute_toolbox_audio_generation_runtime( $request, $trace_id, $idempotency_key );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-
-			return $this->normalize_audio_generation_response( is_array( $response ) ? $response : array(), $runtime_payload );
-		}
-
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_audio_generation_cloud_unavailable',
-				__( 'Connect Npcink Cloud before generating article audio.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$response = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		return $this->normalize_audio_generation_response( is_array( $response ) ? $response : array(), $runtime_payload );
+		return new WP_Error(
+			'npcink_toolbox_audio_generation_cloud_unavailable',
+			__( 'Connect Npcink Cloud before generating article audio.', 'npcink-workflow-toolbox' ),
+			array( 'status' => 503 )
+		);
 	}
 
 	private function toolbox_audio_generation_runtime_request( array $runtime_payload ): array {
@@ -721,8 +673,7 @@ final class Provider_Client {
 			return $this->normalize_agent_feedback_response( $handled, $payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'send_agent_feedback_event' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_send_agent_feedback_event' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_agent_feedback_cloud_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before sending Agent feedback.', 'npcink-workflow-toolbox' ),
@@ -732,7 +683,7 @@ final class Provider_Client {
 
 		$trace_id        = $this->trace_id( 'agent_feedback' );
 		$idempotency_key = 'agent-feedback-' . substr( md5( (string) wp_json_encode( $payload ) ), 0, 24 );
-		$response        = $client->send_agent_feedback_event( $payload, $trace_id, $idempotency_key );
+		$response        = npcink_cloud_addon_send_agent_feedback_event( $payload, $trace_id, $idempotency_key );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -790,30 +741,11 @@ final class Provider_Client {
 			return $this->normalize_site_ops_cloud_analysis_response( is_array( $response ) ? $response : array(), $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( is_object( $client ) && method_exists( $client, 'execute_toolbox_site_ops_cloud_analysis_runtime' ) ) {
-			$response = $client->execute_toolbox_site_ops_cloud_analysis_runtime( $request, $trace_id, $idempotency_key );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-
-			return $this->normalize_site_ops_cloud_analysis_response( is_array( $response ) ? $response : array(), $runtime_payload );
-		}
-
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_site_ops_cloud_analysis_unavailable',
-					__( 'Connect Npcink Cloud before running Cloud Site Check detail.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$response = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		return $this->normalize_site_ops_cloud_analysis_response( is_array( $response ) ? $response : array(), $runtime_payload );
+		return new WP_Error(
+			'npcink_toolbox_site_ops_cloud_analysis_unavailable',
+			__( 'Connect Npcink Cloud before running Cloud Site Check detail.', 'npcink-workflow-toolbox' ),
+			array( 'status' => 503 )
+		);
 	}
 
 	private function toolbox_site_ops_cloud_analysis_runtime_request( array $runtime_payload ): array {
@@ -863,8 +795,7 @@ final class Provider_Client {
 			return $this->normalize_agent_feedback_summary_response( $handled, $window_hours );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'get_agent_feedback_summary' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_get_agent_feedback_summary' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_agent_feedback_summary_cloud_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before reading Agent feedback summary.', 'npcink-workflow-toolbox' ),
@@ -872,7 +803,7 @@ final class Provider_Client {
 			);
 		}
 
-		$response = $client->get_agent_feedback_summary( $window_hours, $this->trace_id( 'agent_feedback_summary' ) );
+		$response = npcink_cloud_addon_get_agent_feedback_summary( $window_hours, $this->trace_id( 'agent_feedback_summary' ) );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -894,8 +825,7 @@ final class Provider_Client {
 			return $this->normalize_nightly_inspection_cloud_batch_response( $handled, $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_submit_toolbox_nightly_inspection' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_batch_unavailable',
 				__( 'Connect Npcink Cloud before submitting Pro Nightly Inspection batches.', 'npcink-workflow-toolbox' ),
@@ -909,7 +839,7 @@ final class Provider_Client {
 			$idempotency_key = 'nightly-inspection-cloud-batch-' . substr( md5( (string) wp_json_encode( $runtime_payload['input'] ?? array() ) ), 0, 24 );
 		}
 
-		$response = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
+		$response = npcink_cloud_addon_submit_toolbox_nightly_inspection( $runtime_payload, $trace_id, $idempotency_key );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -928,8 +858,7 @@ final class Provider_Client {
 			return $this->normalize_nightly_inspection_cloud_recent_runs_response( $handled, $limit );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'get_recent_nightly_inspection_runs' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_get_toolbox_nightly_inspection_recent_runs' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_recent_runs_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before reading recent Nightly Inspection runs.', 'npcink-workflow-toolbox' ),
@@ -937,7 +866,7 @@ final class Provider_Client {
 			);
 		}
 
-		$response = $client->get_recent_nightly_inspection_runs( $limit, $this->trace_id( 'nightly_inspection_cloud_recent_runs' ) );
+		$response = npcink_cloud_addon_get_toolbox_nightly_inspection_recent_runs( $limit, $this->trace_id( 'nightly_inspection_cloud_recent_runs' ) );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -963,8 +892,7 @@ final class Provider_Client {
 			return $this->normalize_nightly_inspection_cloud_batch_status_response( $handled, $run_id );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'get_run' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_get_toolbox_runtime_run' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_batch_status_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before reading Cloud Batch status.', 'npcink-workflow-toolbox' ),
@@ -972,7 +900,7 @@ final class Provider_Client {
 			);
 		}
 
-		$response = $client->get_run( $run_id, $this->trace_id( 'nightly_inspection_cloud_batch_status' ) );
+		$response = npcink_cloud_addon_get_toolbox_runtime_run( $run_id, $this->trace_id( 'nightly_inspection_cloud_batch_status' ) );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -998,8 +926,7 @@ final class Provider_Client {
 			return $this->normalize_nightly_inspection_cloud_batch_response( $handled, array(), $morning_brief );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'get_run_result' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_get_toolbox_runtime_run_result' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_batch_result_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before reading Cloud Batch results.', 'npcink-workflow-toolbox' ),
@@ -1007,7 +934,7 @@ final class Provider_Client {
 			);
 		}
 
-		$response = $client->get_run_result( $run_id, $this->trace_id( 'nightly_inspection_cloud_batch_result' ) );
+		$response = npcink_cloud_addon_get_toolbox_runtime_run_result( $run_id, $this->trace_id( 'nightly_inspection_cloud_batch_result' ) );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -1038,8 +965,7 @@ final class Provider_Client {
 			return $this->normalize_nightly_inspection_cloud_batch_retry_response( $handled, $run_id, $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'retry_run' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_retry_toolbox_nightly_inspection' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_batch_retry_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before retrying Pro Nightly Inspection runs.', 'npcink-workflow-toolbox' ),
@@ -1052,7 +978,7 @@ final class Provider_Client {
 			$idempotency_key = 'nightly-inspection-cloud-retry-' . substr( md5( $run_id . '|' . (string) wp_json_encode( $runtime_payload['input'] ?? array() ) . '|' . microtime( true ) ), 0, 24 );
 		}
 
-		$response = $client->retry_run( $run_id, is_array( $runtime_payload['input'] ?? null ) ? $runtime_payload['input'] : array(), $this->trace_id( 'nightly_inspection_cloud_batch_retry' ), $idempotency_key );
+		$response = npcink_cloud_addon_retry_toolbox_nightly_inspection( $run_id, is_array( $runtime_payload['input'] ?? null ) ? $runtime_payload['input'] : array(), $this->trace_id( 'nightly_inspection_cloud_batch_retry' ), $idempotency_key );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -1069,8 +995,7 @@ final class Provider_Client {
 			return $this->normalize_nightly_inspection_cloud_runtime_entitlement_response( $handled );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'get_current_entitlement' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_get_toolbox_runtime_entitlement' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_entitlement_unavailable',
 				__( 'Connect an updated Npcink Cloud Addon before reading Pro Cloud Runtime entitlement.', 'npcink-workflow-toolbox' ),
@@ -1078,7 +1003,7 @@ final class Provider_Client {
 			);
 		}
 
-		$response = $client->get_current_entitlement( $this->trace_id( 'nightly_inspection_entitlement' ) );
+		$response = npcink_cloud_addon_get_toolbox_runtime_entitlement( $this->trace_id( 'nightly_inspection_entitlement' ) );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -3095,30 +3020,11 @@ final class Provider_Client {
 			return $this->normalize_cloud_web_search_response( is_array( $response ) ? $response : array(), $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( is_object( $client ) && method_exists( $client, 'execute_toolbox_web_search_runtime' ) ) {
-			$response = $client->execute_toolbox_web_search_runtime( $request, $trace_id, $idempotency_key );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-
-			return $this->normalize_cloud_web_search_response( is_array( $response ) ? $response : array(), $runtime_payload );
-		}
-
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_web_search_cloud_unavailable',
-				__( 'Connect Npcink Cloud before testing managed web search.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$response = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		return $this->normalize_cloud_web_search_response( is_array( $response ) ? $response : array(), $runtime_payload );
+		return new WP_Error(
+			'npcink_toolbox_web_search_cloud_unavailable',
+			__( 'Connect Npcink Cloud before testing managed web search.', 'npcink-workflow-toolbox' ),
+			array( 'status' => 503 )
+		);
 	}
 
 	private function toolbox_web_search_runtime_request( array $runtime_payload ): array {
@@ -5007,8 +4913,7 @@ final class Provider_Client {
 			return $this->normalize_hosted_ai_content_support_response( $handled, $runtime_payload, $intent );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_content_support_runtime' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_hosted_ai_cloud_unavailable',
 				__( 'Connect Npcink Cloud before using hosted AI tools.', 'npcink-workflow-toolbox' ),
@@ -5018,7 +4923,7 @@ final class Provider_Client {
 
 		$trace_id        = $this->trace_id( 'hosted_ai' );
 		$idempotency_key = $this->trace_id( 'hosted_ai_content_support' );
-		$response        = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
+		$response        = npcink_cloud_addon_execute_toolbox_content_support_runtime( $runtime_payload, $trace_id, $idempotency_key );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -5401,8 +5306,7 @@ final class Provider_Client {
 			return $this->local_media_alt_caption_review_response( $runtime_payload, $media_alt_caption_review_set );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_site_helper_runtime' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_hosted_ai_site_helper_cloud_unavailable',
 				__( 'Connect Npcink Cloud before using AI site helpers.', 'npcink-workflow-toolbox' ),
@@ -5412,7 +5316,7 @@ final class Provider_Client {
 
 		$trace_id        = $this->trace_id( 'hosted_ai_site_helper' );
 		$idempotency_key = $this->trace_id( 'hosted_ai_site_helper_' . $intent );
-		$response        = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
+		$response        = npcink_cloud_addon_execute_toolbox_site_helper_runtime( $runtime_payload, $trace_id, $idempotency_key );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -5803,8 +5707,7 @@ final class Provider_Client {
 			return $this->normalize_site_knowledge_cloud_response( $handled, $artifact_type, $composition_role, $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_dispatch_site_knowledge_runtime' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_site_knowledge_cloud_unavailable',
 				__( 'Connect Npcink Cloud before using site knowledge abilities.', 'npcink-workflow-toolbox' ),
@@ -5814,7 +5717,7 @@ final class Provider_Client {
 
 		$trace_id        = $this->trace_id( 'site_knowledge' );
 		$idempotency_key = $this->trace_id( str_replace( '.', '_', $contract_version ) );
-		$response        = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
+		$response        = npcink_cloud_addon_dispatch_site_knowledge_runtime( $runtime_payload, $ability_name, $contract_version );
 		if ( is_wp_error( $response ) ) {
 			if ( $this->is_cloud_concurrency_error( $response ) ) {
 				return $this->site_knowledge_active_run_response( $artifact_type, $composition_role, $runtime_payload );
@@ -5913,30 +5816,11 @@ final class Provider_Client {
 			return $this->normalize_image_source_candidates_response( is_array( $response ) ? $response : array(), $query, $provider, $runtime_payload );
 		}
 
-		$client = $this->cloud_runtime_client();
-		if ( is_object( $client ) && method_exists( $client, 'execute_toolbox_image_source_runtime' ) ) {
-			$response = $client->execute_toolbox_image_source_runtime( $request, $trace_id, $idempotency_key );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-
-			return $this->normalize_image_source_candidates_response( is_array( $response ) ? $response : array(), $query, $provider, $runtime_payload );
-		}
-
-		if ( ! is_object( $client ) || ! method_exists( $client, 'execute_runtime' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_image_source_cloud_unavailable',
-				__( 'Connect Npcink Cloud before searching managed image-source candidates. Reviewed image URLs can still be adopted from the editor image sidebar.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$response = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		return $this->normalize_image_source_candidates_response( is_array( $response ) ? $response : array(), $query, $provider, $runtime_payload );
+		return new WP_Error(
+			'npcink_toolbox_image_source_cloud_unavailable',
+			__( 'Connect Npcink Cloud before searching managed image-source candidates. Reviewed image URLs can still be adopted from the editor image sidebar.', 'npcink-workflow-toolbox' ),
+			array( 'status' => 503 )
+		);
 	}
 
 	private function toolbox_image_source_runtime_request( array $runtime_payload ): array {

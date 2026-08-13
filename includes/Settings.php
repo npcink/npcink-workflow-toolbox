@@ -486,8 +486,12 @@ final class Settings {
 			return true;
 		}
 
-		$client = $this->cloud_runtime_client();
-		return is_object( $client ) && method_exists( $client, 'execute_runtime' );
+		if ( ! function_exists( 'npcink_cloud_addon_get_connection_state' ) ) {
+			return false;
+		}
+
+		$state = npcink_cloud_addon_get_connection_state();
+		return is_array( $state ) && ! empty( $state['verified'] );
 	}
 
 	public function cloud_runtime_unavailable_reason(): string {
@@ -495,7 +499,7 @@ final class Settings {
 			return '';
 		}
 
-		if ( ! function_exists( 'npcink_cloud_addon_runtime_client' ) ) {
+		if ( ! function_exists( 'npcink_cloud_addon_get_connection_state' ) ) {
 			return 'cloud_addon_not_installed';
 		}
 
@@ -504,14 +508,6 @@ final class Settings {
 		}
 
 		return 'cloud_runtime_unavailable';
-	}
-
-	private function cloud_runtime_client() {
-		if ( function_exists( 'npcink_cloud_addon_runtime_client' ) ) {
-			return npcink_cloud_addon_runtime_client();
-		}
-
-		return null;
 	}
 
 	public function cloud_runtime_status(): array {

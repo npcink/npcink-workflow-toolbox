@@ -242,7 +242,7 @@
       "local_entrypoints": ["/nightly-inspection/cloud-runtime-entitlement", "/nightly-inspection/cloud-batch/recent", "/nightly-inspection/cloud-batch/{run_id}", "/nightly-inspection/cloud-batch/{run_id}/result", "/nightly-inspection/cloud-batch/{run_id}/retry"],
       "source_owner": "nightly_inspection_compatibility_bridge",
       "cloud_owner": "cloud_addon_runtime_runs",
-      "execution_path": "cloud_addon_runtime_methods",
+      "execution_path": "cloud_addon_scenario_facades",
       "cloud_ability": "cloud-runtime-runs",
       "contract_version": "pro_cloud_runtime_entitlement_status.v1",
       "result_contracts": ["nightly_site_inspection_recent_runs.v1", "cloud_batch_runtime_status.v1", "cloud_batch_runtime_retry.v1"],
@@ -256,7 +256,7 @@
       "direct_wordpress_write": false,
       "toolbox_control_plane_owner": false,
       "toolbox_must_not_own": ["server_side_run_history", "run_recovery_workspace", "cloud_scheduler_truth", "retry_policy_truth", "proposal_followup"],
-      "source_markers": ["get_nightly_inspection_cloud_recent_runs", "get_run_result", "cloud_batch_runtime_retry.v1"]
+      "source_markers": ["npcink_cloud_addon_get_toolbox_nightly_inspection_recent_runs", "npcink_cloud_addon_get_toolbox_runtime_run_result", "cloud_batch_runtime_retry.v1"]
     },
     {
       "bridge_id": "agent-feedback-cloud-eval",
