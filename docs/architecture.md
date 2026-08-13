@@ -466,10 +466,11 @@ support flows. It accepts current draft context plus one intent:
 `taxonomy_tags`, `internal_links`, `image_candidates`, or
 `image_alt_suggestions`.
 The editor UI groups the default buttons around the author workflow. Common
-default buttons are now Npcink review and handoff actions: publish preflight,
-URL-reference article writing pack, internal-link candidates,
-current-article contextual ALT review, image
-candidates, and article audio candidates. Contextual ALT operates on each image
+default buttons are now Npcink review and handoff actions: URL-reference article
+writing pack, publish preflight, direct existing-category and existing-tag
+suggestions, internal-link candidates, current-article contextual ALT review,
+and image candidates. Article narration and audio summary remain callable but
+hidden compatibility flows. Contextual ALT operates on each image
 occurrence and uses the nearest heading, adjacent article text, and caption as
 the primary source. Missing ALT is automatically applied to the current
 Gutenberg editor state as Native Commit state. Only when useful occurrence context is
@@ -738,11 +739,12 @@ Batch entry points use `tab=image&tool=bulk-alt` and
 `tab=image&tool=batch-optimize`; deprecated `tool=optimize` and legacy
 `toolbox_tool=media-derivative` URLs remain accepted only as compatibility
 aliases that canonicalize to Batch Optimize Images.
-Publish preflight, internal-link candidates, image candidates, and article audio
-candidates stay as default post editor buttons. Summary suggestions, category
-suggestions, tag suggestions, article checkup, discoverability, current-article
-ALT checks, outline, and comment-reply support stay route-compatible but are not
-default editor buttons.
+The writing-pack entry, publish preflight, direct existing-category and
+existing-tag suggestions, internal-link candidates, current-article ALT review,
+and image candidates stay as default post editor buttons. Article narration and
+audio summary stay callable but hidden. Summary suggestions, combined taxonomy
+support, article checkup, discoverability, outline, and comment-reply support
+stay route-compatible but are not default editor buttons.
 
 Toolbox also renders additive `operator_feedback` payloads from governed
 handoff failures, including reasons, revision fields, next steps, retry state,
