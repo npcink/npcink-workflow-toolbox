@@ -103,6 +103,7 @@ $permission->setAccessible( true );
 
 $assert( 'cap.toolbox.knowledge.search' === $route_scope->invoke( $rest_controller, '/site-knowledge/search' ), 'Site Knowledge search maps to the knowledge search scope.' );
 $assert( 'cap.toolbox.nightly_inspection' === $route_scope->invoke( $rest_controller, '/nightly-inspection/cloud-batch/run_abc/result' ), 'Nightly dynamic result route maps to the nightly scope.' );
+$assert( 'cap.toolbox.image_adoption' === $route_scope->invoke( $rest_controller, '/strong-local-confirmation/media-derivative-backups/42' ), 'Dynamic media backup route maps to the image adoption scope.' );
 $assert( 'cap.toolbox.admin' === $route_scope->invoke( $rest_controller, '/unexpected-route' ), 'Unknown REST route falls back to the admin scope.' );
 
 $allowed = $permission->invoke( $rest_controller, new WP_REST_Request( '/npcink-toolbox/v1/site-knowledge/search' ) );

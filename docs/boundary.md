@@ -212,6 +212,10 @@ human-readable allowlist and must stay aligned with that table and
 - `/flows/image-candidate-adoption-plan`
 - `/flows/article-audio-adoption-plan`
 - `/local-admin-consent/featured-image`
+- `/strong-local-confirmation/image-adoption`
+- `/strong-local-confirmation/media-derivative`
+- `/strong-local-confirmation/media-derivative-restore`
+- `/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `/flows/site-knowledge-review-plan`
 - `/flows/nightly-inspection-review-plan`
 - `/flows/content-metadata-apply-plan`

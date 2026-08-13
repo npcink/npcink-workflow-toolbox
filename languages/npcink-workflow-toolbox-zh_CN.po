@@ -7887,14 +7887,20 @@ msgstr "Npcink 恢复"
 msgid "Checking available image backups..."
 msgstr "正在查询可用的图片备份……"
 
-msgid "A restorable original-image backup is available. Use Restore original image to continue."
-msgstr "已找到可恢复的原图备份。请点击“恢复原图”继续。"
+msgid "The latest restorable original-image backup is visibly loaded. Use Restore original image to continue."
+msgstr "最新可恢复的原图备份已成功显示。请点击“恢复原图”继续。"
 
 msgid "No restorable backup is available for this image."
 msgstr "这张图片目前没有可恢复的备份。"
 
 msgid "Could not check image backups."
 msgstr "无法查询图片备份。"
+
+msgid "This restore is outside the strong local confirmation boundary."
+msgstr "此恢复操作超出了强本地确认边界。"
+
+msgid "The Toolkit did not return complete verification for the restored image and its new rollback backup."
+msgstr "Toolkit 未返回恢复后图片及其新回滚备份的完整验证结果。"
 
 msgid "Original image backup available"
 msgstr "原图备份可用"

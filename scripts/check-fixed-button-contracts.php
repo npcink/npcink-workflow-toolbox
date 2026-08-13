@@ -83,7 +83,7 @@ foreach ( $admin_tool_blocks as $admin_tool_block ) {
 }
 $admin_table_count = count( array_filter( $buttons, static fn( array $button ): bool => 'admin_image_handling' === ( $button['surface'] ?? '' ) ) );
 npcink_fixed_button_check( $admin_table_count === count( array_unique( $admin_execution_ids ) ), 'Every executable Image Handling tool has one fixed-button contract row' );
-npcink_fixed_button_check( array( 'watermark-templates' ) === $admin_local_settings_ids, 'Image Handling local settings tabs stay outside fixed-button runtime contracts' );
+npcink_fixed_button_check( array( 'image-settings' ) === $admin_local_settings_ids, 'Image Handling local settings tabs stay outside fixed-button runtime contracts' );
 
 $adr = file_get_contents( $root . '/docs/decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md' );
 foreach ( array( 'No further broad ownership migration', 'External clients do not inherit this exception', 'consumer-conformance test', 'must not add a channel' ) as $marker ) {

@@ -37,8 +37,12 @@ The operator path is:
 
 Toolbox must never implement replacement mechanics, rename files directly, or
 update `_wp_attached_file` or attachment metadata itself. Its local route may
-authorize only `npcink-abilities-toolkit/adopt-cloud-media-derivative`, only for
-the current exact request, and must remove that authorization in `finally`.
+authorize only `npcink-abilities-toolkit/adopt-cloud-media-derivative` or
+`npcink-abilities-toolkit/restore-media-backup`, only for the current exact
+request, and must remove that authorization in `finally`. Backup discovery is
+read-only through `npcink-abilities-toolkit/list-media-backups`; Toolbox must
+not create a parallel backup registry or enable restore before the selected
+same-origin backup preview has loaded with non-zero dimensions.
 
 ## Watermark Templates
 

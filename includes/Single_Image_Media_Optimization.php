@@ -156,6 +156,20 @@ final class Single_Image_Media_Optimization {
 		if ( 'attachment' !== get_post_type( $attachment_id ) || ! wp_attachment_is_image( $attachment_id ) ) {
 			return new WP_Error( 'npcink_toolbox_single_image_attachment_invalid', __( 'Choose one valid Media Library image.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
 		}
+		$classification = ( new Operation_Classifier() )->classify(
+			array(
+				'request_source'          => Operation_Classifier::SOURCE_WP_ADMIN_UI,
+				'actor_presence'         => Operation_Classifier::ACTOR_PRESENT_CLICK,
+				'preview_completeness'   => Operation_Classifier::PREVIEW_EXACT_FINAL,
+				'scope'                  => Operation_Classifier::SCOPE_ONE_OBJECT,
+				'reversibility'          => Operation_Classifier::REVERSIBILITY_BACKUP_RESTORE,
+				'operation_kind'         => Operation_Classifier::KIND_REPLACE_FILE,
+				'writes_wordpress_state' => true,
+			)
+		);
+		if ( Operation_Classifier::STRONG_LOCAL_CONFIRMATION !== (string) ( $classification['classification'] ?? '' ) ) {
+			return new WP_Error( 'npcink_toolbox_media_restore_classification_rejected', __( 'This restore is outside the strong local confirmation boundary.', 'npcink-workflow-toolbox' ), array( 'status' => 422, 'classification' => $classification ) );
+		}
 		$backups = $this->run_registered_ability( self::LIST_BACKUPS_ABILITY_ID, array( 'attachment_id' => $attachment_id ) );
 		if ( is_wp_error( $backups ) ) {
 			return $backups;
@@ -193,15 +207,43 @@ final class Single_Image_Media_Optimization {
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
+		$verification = is_array( $result['verification'] ?? null ) ? $result['verification'] : array();
+		$references = (array) ( $verification['post_references_verified'] ?? array() );
+		$references_verified = true;
+		foreach ( $references as $reference ) {
+			if ( ! is_array( $reference ) || empty( $reference['old_url_absent'] ) || empty( $reference['new_url_present'] ) ) {
+				$references_verified = false;
+				break;
+			}
+		}
+		if (
+			empty( $result['restored'] )
+			|| empty( $result['rolled_back'] )
+			|| empty( $verification['media_file_matches_expected'] )
+			|| empty( $verification['media_mime_type_matches_expected'] )
+			|| empty( $verification['backup_available'] )
+			|| empty( $verification['rollback_available'] )
+			|| ! $references_verified
+		) {
+			return new WP_Error( 'npcink_toolbox_media_restore_verification_failed', __( 'The Toolkit did not return complete verification for the restored image and its new rollback backup.', 'npcink-workflow-toolbox' ), array( 'status' => 502 ) );
+		}
 		return array(
 			'contract_version' => 'single_image_media_restore_result.v1',
 			'status' => 'completed',
 			'attachment_id' => $attachment_id,
 			'backup_id' => $backup_id,
+			'classification' => $classification,
 			'validation_preview' => $preview,
 			'restore' => $result,
 			'core_proposal_required' => false,
 			'direct_wordpress_write' => true,
+			'write_owner' => 'npcink-abilities-toolkit',
+			'confirmation_receipt' => array(
+				'confirmed_at_gmt' => gmdate( 'c' ),
+				'user_id' => get_current_user_id(),
+				'preview_verified' => true,
+				'backup_required' => true,
+			),
 		);
 	}
 

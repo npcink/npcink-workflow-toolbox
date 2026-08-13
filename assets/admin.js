@@ -5143,12 +5143,17 @@
 			actions.appendChild(link);
 			result.appendChild(actions);
 		}
-		const restoreButton = workbench ? workbench.querySelector('[data-toolbox-restore-media-backup]') : null;
-		if (restoreButton instanceof HTMLButtonElement && backupCreated && replacement.replacement_id) {
+		const restoreButtons = workbench ? workbench.querySelectorAll('[data-toolbox-restore-media-backup]') : [];
+		restoreButtons.forEach((restoreButton) => {
+			if (!(restoreButton instanceof HTMLButtonElement) || !backupCreated || !replacement.replacement_id) {
+				return;
+			}
 			restoreButton.hidden = false;
+			restoreButton.disabled = false;
 			restoreButton.dataset.attachmentId = String(replacement.attachment_id || state.abilityInput.attachment_id || '');
 			restoreButton.dataset.backupId = String(replacement.replacement_id || '');
-		}
+			restoreButton.dataset.previewVerified = '0';
+		});
 		result.appendChild(createRawDetails(payload, 'Technical details'));
 
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
@@ -5162,7 +5167,18 @@
 	async function restoreMediaBackup(form, button) {
 		const attachmentId = String(button.getAttribute('data-attachment-id') || '');
 		const backupId = String(button.getAttribute('data-backup-id') || '');
-		if (!attachmentId || !backupId) {
+		const previewVerified = button.getAttribute('data-preview-verified') === '1';
+		if (!attachmentId) {
+			throw { message: 'The original-image backup is no longer available.' };
+		}
+		if (!previewVerified) {
+			const restoreUrl = new URL(window.location.href);
+			restoreUrl.searchParams.set('attachment_id', attachmentId);
+			restoreUrl.searchParams.set('restore', '1');
+			window.location.assign(restoreUrl.toString());
+			return;
+		}
+		if (!backupId) {
 			throw { message: 'The original-image backup is no longer available.' };
 		}
 		if (!window.confirm(t('Restore the original image? The current optimized image will be backed up first.'))) {
@@ -5626,27 +5642,6 @@
 			summary: 'Core created one governed replacement proposal. Approval and execution remain outside Toolbox.',
 			rawTitle: 'Core media optimization response',
 		});
-	}
-
-	async function refreshSiteKnowledgeStatus(root) {
-		const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
-		if (summary) {
-			clearNode(summary);
-			summary.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Checking Cloud index status...'));
-		}
-		const payload = await getJson(config.restUrl, 'site-knowledge/status');
-		if (summary) {
-			renderSiteKnowledgeStatusNode(summary, payload);
-			summary.appendChild(createRawDetails(payload, 'Status payload'));
-		}
-		return payload;
-	}
-
-	async function runSiteKnowledgeForm(form, endpoint) {
-		renderTextResult(form, config.labels && config.labels.running ? config.labels.running : 'Running...', 'pending');
-		const payload = await postJson(config.restUrl, endpoint, serialize(form));
-		renderStructuredResult(form, payload);
-		return payload;
 	}
 
 	function nightlyCloudSettingValue(name, fallback) {
@@ -6668,91 +6663,6 @@
 		});
 	}
 
-	function setSiteKnowledgeButtonsBusy(root, busy) {
-		root.querySelectorAll('[data-toolbox-site-knowledge-status]').forEach((button) => {
-			button.disabled = busy;
-			button.setAttribute('aria-busy', busy ? 'true' : 'false');
-		});
-	}
-
-	function siteKnowledgeStatusStillActive(payload) {
-		const status = String(payload && payload.status ? payload.status : '').toLowerCase();
-		return status === 'queued' || status === 'running' || status === 'syncing';
-	}
-
-	function siteKnowledgeActiveStatusMessage(payload) {
-		const status = String(payload && payload.status ? payload.status : '').toLowerCase();
-		if (status === 'queued') {
-			return 'Index refresh is queued in Cloud. Search results may not include the latest changes yet.';
-		}
-		return 'Cloud is still indexing. Search results may not include the latest changes until status is ready.';
-	}
-
-	function initSiteKnowledge() {
-		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
-			const renderStatusError = (error) => {
-				const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
-				if (summary) {
-					clearNode(summary);
-					summary.appendChild(el('div', 'npcink-toolbox__result-notice is-error', error.message || 'Site knowledge status failed.'));
-					summary.appendChild(createRawDetails(error, 'Status error'));
-				}
-			};
-			root.querySelectorAll('[data-toolbox-site-knowledge-status]').forEach((statusButton) => {
-				statusButton.addEventListener('click', async () => {
-					setSiteKnowledgeButtonsBusy(root, true);
-					try {
-						await refreshSiteKnowledgeStatus(root);
-					} catch (error) {
-						renderStatusError(error);
-					} finally {
-						setSiteKnowledgeButtonsBusy(root, false);
-					}
-				});
-			});
-
-			const searchForm = root.querySelector('[data-toolbox-site-knowledge-search]');
-			if (searchForm) {
-				searchForm.addEventListener('submit', async (event) => {
-					event.preventDefault();
-					try {
-						await runSiteKnowledgeForm(searchForm, 'site-knowledge/search');
-					} catch (error) {
-						renderTextResult(searchForm, error.message || 'Site knowledge search failed.', 'error');
-					}
-				});
-			}
-			const acceptanceButton = root.querySelector('[data-toolbox-site-knowledge-acceptance]');
-			const acceptanceForm = root.querySelector('[data-toolbox-site-knowledge-acceptance-form]');
-			if (acceptanceButton && acceptanceForm) {
-				acceptanceButton.addEventListener('click', async () => {
-					acceptanceButton.disabled = true;
-					try {
-						await runSiteKnowledgeForm(acceptanceForm, 'site-knowledge/search');
-						await refreshSiteKnowledgeStatus(root);
-					} catch (error) {
-						renderTextResult(acceptanceForm, error.message || 'Site knowledge acceptance failed.', 'error');
-					} finally {
-						acceptanceButton.disabled = false;
-					}
-				});
-			}
-		});
-	}
-
-	function refreshAllSiteKnowledgeStatus() {
-		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
-			const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
-			refreshSiteKnowledgeStatus(root).catch((error) => {
-				if (summary) {
-					clearNode(summary);
-					summary.appendChild(el('div', 'npcink-toolbox__result-notice is-error', error.message || 'Site knowledge status failed.'));
-					summary.appendChild(createRawDetails(error, 'Status error'));
-				}
-			});
-		});
-	}
-
 	async function submitMediaReferenceRepairProposal(form) {
 		if (!config.adapterRestUrl) {
 			throw { message: 'Npcink Adapter REST URL is unavailable.' };
@@ -7138,9 +7048,6 @@
 		if (updateUrl) {
 			updateUrlForTopTab(target);
 		}
-		if (target === 'site-knowledge') {
-			refreshAllSiteKnowledgeStatus();
-		}
 		return true;
 	}
 
@@ -7382,38 +7289,79 @@
 
 	async function loadMediaBackupsForRestore(form, attachmentId) {
 		renderTextResult(form, t('Checking available image backups...'), 'pending');
+		const requestToken = String(Date.now()) + ':' + String(Math.random());
+		form.__npcinkMediaBackupRequestToken = requestToken;
+		const restoreActions = form.querySelector('[data-toolbox-restore-actions]');
+		const buttons = form.querySelectorAll('[data-toolbox-restore-media-backup]');
+		const backupCard = form.querySelector('[data-toolbox-backup-image-card]');
+		const backupImage = backupCard ? backupCard.querySelector('[data-toolbox-backup-image]') : null;
+		buttons.forEach((button) => {
+			if (button instanceof HTMLButtonElement) {
+				button.hidden = true;
+				button.disabled = true;
+				delete button.dataset.attachmentId;
+				delete button.dataset.backupId;
+				delete button.dataset.previewVerified;
+			}
+		});
+		if (restoreActions) {
+			restoreActions.hidden = true;
+		}
+		if (backupCard) backupCard.hidden = true;
+		if (backupImage instanceof HTMLImageElement) backupImage.removeAttribute('src');
 		try {
 			const payload = await getJson(config.restUrl, 'strong-local-confirmation/media-derivative-backups/' + encodeURIComponent(String(attachmentId)));
 			const backups = Array.isArray(payload.backups) ? payload.backups : [];
-			const latest = backups.find((item) => item && item.file_exists && item.backup_id);
-			const restoreActions = form.querySelector('[data-toolbox-restore-actions]');
+			const available = backups.filter((item) => item && item.file_exists && item.backup_id && item.backup_url);
+			available.sort((left, right) => {
+				const leftTime = Date.parse(String(left.created_at_gmt || '')) || 0;
+				const rightTime = Date.parse(String(right.created_at_gmt || '')) || 0;
+				return rightTime - leftTime;
+			});
+			const latest = available[0];
 			const button = restoreActions ? restoreActions.querySelector('[data-toolbox-restore-media-backup]') : form.querySelector('[data-toolbox-restore-media-backup]');
-			const backupCard = form.querySelector('[data-toolbox-backup-image-card]');
-			if (button instanceof HTMLButtonElement && latest) {
-				if (restoreActions) {
-					restoreActions.hidden = false;
+			const image = backupImage;
+			if (button instanceof HTMLButtonElement && latest && image instanceof HTMLImageElement) {
+				const backupUrl = String(latest.backup_url);
+				await new Promise((resolve, reject) => {
+					const loaded = () => image.naturalWidth > 0 && image.naturalHeight > 0 ? resolve() : reject(new Error('Backup preview is empty.'));
+					image.addEventListener('load', loaded, { once: true });
+					image.addEventListener('error', () => reject(new Error('Backup preview could not be loaded.')), { once: true });
+					image.src = backupUrl;
+					if (image.complete) {
+						loaded();
+					}
+				});
+				if (form.__npcinkMediaBackupRequestToken !== requestToken || image.getAttribute('src') !== backupUrl) {
+					return;
 				}
+				if (restoreActions) restoreActions.hidden = false;
 				button.dataset.attachmentId = String(attachmentId);
 				button.dataset.backupId = String(latest.backup_id);
+				button.dataset.previewVerified = '1';
 				button.hidden = false;
+				button.disabled = false;
 				setSingleImageWorkbenchPhase(form, 'completed');
-				if (backupCard) {
-					const image = backupCard.querySelector('[data-toolbox-backup-image]');
-					const meta = backupCard.querySelector('[data-toolbox-backup-image-meta]');
-					backupCard.hidden = false;
-					if (image instanceof HTMLImageElement) {
-						image.src = String(latest.backup_url || '');
-					}
-					if (meta) {
-						meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', formatDateTime(latest.created_at_gmt)].filter(Boolean).join(' · ');
-					}
-				}
+				if (backupCard) backupCard.hidden = false;
+				const meta = backupCard ? backupCard.querySelector('[data-toolbox-backup-image-meta]') : null;
+				if (meta) meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', formatDateTime(latest.created_at_gmt)].filter(Boolean).join(' · ');
 				initComparisonMode(form);
-				renderTextResult(form, t('A restorable original-image backup is available. Use Restore original image to continue.'), 'ok');
+				renderTextResult(form, t('The latest restorable original-image backup is visibly loaded. Use Restore original image to continue.'), 'ok');
 				return;
 			}
 			renderTextResult(form, t('No restorable backup is available for this image.'), 'warning');
 		} catch (error) {
+			if (form.__npcinkMediaBackupRequestToken !== requestToken) {
+				return;
+			}
+			buttons.forEach((button) => {
+				if (button instanceof HTMLButtonElement) {
+					button.hidden = true;
+					button.disabled = true;
+					delete button.dataset.previewVerified;
+				}
+			});
+			if (restoreActions) restoreActions.hidden = true;
 			renderTextResult(form, error && error.message ? error.message : t('Could not check image backups.'), 'error');
 		}
 	}
@@ -8437,7 +8385,6 @@
 	initContextDrafts();
 	initWebSearchPresets();
 	initNightlyCloudBatch();
-	initSiteKnowledge();
 	initWatermarkTemplateLibrary();
 	initMediaDerivativeControls();
 	initMediaAltCaptionControls();

@@ -152,6 +152,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](docs/decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [ADR-010: Strong Local Confirmation For Single-Article Image Adoption](docs/decisions/ADR-010-single-article-strong-local-image-adoption.md)
 - [ADR-011: Single-Image Local Media Replacement](docs/decisions/ADR-011-single-image-local-media-replacement.md)
+- [ADR-012: Bounded Media Backup Retention Setting](docs/decisions/ADR-012-media-backup-retention-setting.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:
@@ -267,6 +268,7 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-restore`
+- `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
@@ -879,9 +881,12 @@ Toolbox shows a contextual single-image workbench inside the same fixed flow.
 It supports format/size overrides, optional crop, reusable text/logo watermark
 templates, and a safe output basename. The browser must verify the short-lived
 preview and the operator must confirm replacement semantics before Toolbox can
-submit one `adopt-cloud-media-derivative` proposal. The current contract replaces
-the selected attachment with backup and rollback evidence; Toolbox does not
-offer save-as-new until a separate governed create-attachment ability exists.
+authorize one request-scoped `adopt-cloud-media-derivative` Toolkit transaction.
+The current contract replaces the selected attachment with backup, reference-
+repair, verification, and rollback evidence without creating a Core proposal.
+The completed workbench can list Toolkit-owned backups and restore one visibly
+loaded, explicitly confirmed backup while backing up the current file first.
+Toolbox does not offer save-as-new or own backup lifecycle execution.
 
 Provider responses return normalized fields by default. Set **Include provider
 raw responses** to include redacted raw provider payloads for debugging.

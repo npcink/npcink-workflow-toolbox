@@ -679,7 +679,7 @@
       ,"Open the image workbench to review available backups before restoring.": ["打开图片工作区，查看可用备份后再恢复。"]
       ,"Npcink restore": ["Npcink 恢复"]
       ,"Checking available image backups...": ["正在查询可用的图片备份……"]
-      ,"A restorable original-image backup is available. Use Restore original image to continue.": ["已找到可恢复的原图备份。请点击“恢复原图”继续。"]
+      ,"The latest restorable original-image backup is visibly loaded. Use Restore original image to continue.": ["最新可恢复的原图备份已成功显示。请点击“恢复原图”继续。"]
       ,"No restorable backup is available for this image.": ["这张图片目前没有可恢复的备份。"]
       ,"Could not check image backups.": ["无法查询图片备份。"]
       ,"Original image backup available": ["原图备份可用"]
