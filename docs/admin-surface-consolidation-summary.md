@@ -56,9 +56,9 @@ panel for report URLs, nonce-protected scan links, and Cloud detail review.
 Cloud diagnostics no longer render as a Toolbox panel. Cloud connection,
 hosted runtime, search/image-source, entitlement, quota, and service health
 checks belong in Cloud Addon or Cloud service-plane surfaces. Site Knowledge
-connection, refresh, indexing, and delivery detail belong in Cloud Addon; the
-secondary **Content Library Usage** panel remains a compatibility/read-only
-usage surface and is not linked from Site Check. Site Check is now the direct
+connection, refresh, indexing, retrieval acceptance, and delivery detail belong
+in Cloud Addon. Toolbox does not render a standalone Site Knowledge panel.
+Site Check is now the direct
 top-level review tab; the former Advanced route may remain only as a
 compatibility alias into Site Check instead of showing Site Check detail,
 Scheduled Review preview, and Cloud run recovery as parallel choices.

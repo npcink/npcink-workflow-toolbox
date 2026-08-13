@@ -6853,7 +6853,13 @@
 		buttons.forEach((button) => {
 			const active = button.getAttribute(targetAttribute) === target;
 			button.classList.toggle('is-active', active);
+			button.classList.toggle('npcink-ai-tab-active', active);
 			button.setAttribute('aria-selected', active ? 'true' : 'false');
+			if (active) {
+				button.setAttribute('aria-current', 'page');
+			} else {
+				button.removeAttribute('aria-current');
+			}
 		});
 
 		panels.forEach((panel) => {
@@ -7382,7 +7388,6 @@
 			const latest = backups.find((item) => item && item.file_exists && item.backup_id);
 			const restoreActions = form.querySelector('[data-toolbox-restore-actions]');
 			const button = restoreActions ? restoreActions.querySelector('[data-toolbox-restore-media-backup]') : form.querySelector('[data-toolbox-restore-media-backup]');
-			const summary = form.querySelector('[data-toolbox-restore-summary]');
 			const backupCard = form.querySelector('[data-toolbox-backup-image-card]');
 			if (button instanceof HTMLButtonElement && latest) {
 				if (restoreActions) {
@@ -7392,9 +7397,6 @@
 				button.dataset.backupId = String(latest.backup_id);
 				button.hidden = false;
 				setSingleImageWorkbenchPhase(form, 'completed');
-				if (summary) {
-					summary.hidden = true;
-				}
 				if (backupCard) {
 					const image = backupCard.querySelector('[data-toolbox-backup-image]');
 					const meta = backupCard.querySelector('[data-toolbox-backup-image-meta]');
@@ -7427,6 +7429,7 @@
 		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
 		const backupImage = slider.querySelector('[data-toolbox-slider-backup]');
 		const frame = slider.querySelector('.npcink-toolbox__comparison-slider-frame');
+		const stackedToggle = form.querySelector('[data-toolbox-stacked-toggle]');
 		const syncSlider = () => {
 			if (input && layer) layer.style.width = input.value + '%';
 			if (backupImage && frame) backupImage.style.width = frame.clientWidth + 'px';
@@ -7438,7 +7441,8 @@
 			comparison.hidden = !isSide;
 			slider.hidden = isSide;
 			if (input) input.disabled = !isSlider;
-			if (layer) layer.style.width = isSlider ? (input ? input.value : 50) + '%' : (name === 'stacked' ? '100%' : '0%');
+			if (stackedToggle) stackedToggle.hidden = !isSlider;
+			if (layer) layer.style.width = isSlider ? (input ? input.value : 50) + '%' : '0%';
 			mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((item) => item.classList.toggle('is-active', item.dataset.toolboxComparisonModeButton === name));
 			syncSlider();
 		};
@@ -7448,7 +7452,13 @@
 		const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
 		if (sliderCurrent) sliderCurrent.src = current.src;
 		if (backupImage) backupImage.src = backup.src;
-		setMode('stacked');
+		if (stackedToggle) stackedToggle.querySelectorAll('[data-toolbox-stacked-image]').forEach((button) => button.addEventListener('click', () => {
+			const showBackup = button.dataset.toolboxStackedImage === 'backup';
+			if (input) input.value = showBackup ? '100' : '0';
+			if (layer) layer.style.width = showBackup ? '100%' : '0%';
+			stackedToggle.querySelectorAll('[data-toolbox-stacked-image]').forEach((item) => item.classList.toggle('is-active', item === button));
+		}));
+		setMode('slider');
 		window.addEventListener('resize', syncSlider, { passive: true });
 	}
 

@@ -2769,7 +2769,7 @@ pre.npcink-toolbox__result {
 	justify-content: space-between;
 	gap: 24px;
 	align-items: flex-start;
-	padding: 24px 28px 20px;
+	padding: 16px 28px 14px;
 	border-bottom: 1px solid #e2e4e7;
 }
 
@@ -2779,8 +2779,17 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__single-media-heading p {
-	margin-top: 6px;
+	margin-top: 3px;
+	font-size: 13px;
 	color: #50575e;
+}
+
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__single-media-heading {
+	padding-block: 14px 12px;
+}
+
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__single-media-heading h2 {
+	font-size: 20px;
 }
 
 .npcink-toolbox__local-confirmation-badge {
@@ -2824,6 +2833,11 @@ pre.npcink-toolbox__result {
 	margin-bottom: 16px;
 }
 
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__comparison-toolbar {
+	margin-top: 0;
+	margin-bottom: 12px;
+}
+
 .npcink-toolbox__comparison-toolbar > h3 {
 	margin: 0;
 	font-size: 16px;
@@ -2864,7 +2878,18 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__result {
 	min-height: 0;
-	margin-top: 14px;
+	margin-top: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__result:empty {
+	display: none;
+}
+
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__result.is-empty {
+	display: none !important;
 }
 
 .npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__restore-summary {
@@ -2874,6 +2899,10 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__result-notice {
 	margin-top: 0;
 	padding: 8px 10px;
+}
+
+.npcink-toolbox__single-media-workbench.is-restore-mode .npcink-toolbox__result .npcink-toolbox__result-notice.is-ok {
+	display: none;
 }
 
 .npcink-toolbox__single-media-workbench.is-restore-mode [data-toolbox-card-media-details],
@@ -2910,7 +2939,7 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__single-image-card {
 	min-width: 0;
-	padding: 16px;
+	padding: 12px;
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 4px;
@@ -2968,15 +2997,9 @@ pre.npcink-toolbox__result {
 	align-items: center;
 	justify-content: flex-end;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: 0;
 	margin: 0;
 	padding: 0;
-}
-
-.npcink-toolbox__comparison-mode-label {
-	color: #50575e;
-	font-size: 12px;
-	font-weight: 600;
 }
 
 .npcink-toolbox__comparison-mode-buttons {
@@ -3030,6 +3053,61 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__comparison-slider .npcink-toolbox__comparison-slider-frame {
 	min-height: 320px;
 }
+
+.npcink-toolbox__stacked-toggle {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0;
+	margin: 0;
+}
+
+.npcink-toolbox__stacked-toggle[hidden],
+.npcink-toolbox__result[hidden],
+.npcink-toolbox__result:empty {
+	display: none !important;
+}
+
+.npcink-toolbox__image-card-meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 4px 10px;
+	margin-top: 8px;
+	color: #50575e;
+	font-size: 12px;
+}
+
+.npcink-toolbox__image-card-meta > div {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 4px 10px;
+	min-width: 0;
+}
+
+.npcink-toolbox__image-card-meta .button-link {
+	flex: 0 0 auto;
+}
+
+.npcink-toolbox__image-card-meta strong {
+	color: #1d2327;
+	font-size: 13px;
+}
+
+.npcink-toolbox__stacked-toggle .button {
+	margin: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.npcink-toolbox__stacked-toggle .button:first-child { border-radius: 4px 0 0 4px; }
+.npcink-toolbox__stacked-toggle .button:last-child { border-radius: 0 4px 4px 0; }
+.npcink-toolbox__stacked-toggle .button.is-active { background: #3858e9; border-color: #3858e9; color: #fff; }
+
+.npcink-toolbox__single-media-comparison[hidden],
+.npcink-toolbox__comparison-slider[hidden] { display: none !important; }
+
 
 .npcink-toolbox__comparison-slider-frame > img,
 .npcink-toolbox__comparison-slider-backup img {
@@ -3150,7 +3228,7 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__single-media-preview-column > .npcink-toolbox__result {
-	margin-top: 18px;
+	margin-top: 0;
 	background: #fff;
 }
 

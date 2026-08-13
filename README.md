@@ -862,12 +862,11 @@ operator-facing connection, refresh, indexing, and detailed delivery status
 live in Cloud Addon. Toolbox does not store provider credentials, run embeddings
 locally, own the index lifecycle, or write WordPress content.
 
-The secondary **Content Library Usage** panel is read-only from a daily
-operator perspective. It displays coverage/status returned by Cloud-managed
-Site Knowledge and points setup or refresh work to Cloud Addon. Toolbox keeps
-the best-practice flows that consume those results, such as internal-link
-candidates, duplicate checks, publish preflight context, and governed review
-handoff preparation.
+Site Knowledge has one operator-facing home: Cloud Addon. It owns connection,
+refresh, indexing, delivery status, retrieval acceptance, and diagnostics.
+Toolbox keeps only the workflows that consume Cloud-managed results, such as
+internal-link candidates, duplicate checks, publish preflight context, and
+governed review handoff preparation.
 Standalone Cloud diagnostics are not exposed in Toolbox. Cloud Addon owns the
 WordPress-side Cloud connection, hosted runtime status, search/image-source
 diagnostics, entitlement, quota, billing, request logs, and service health

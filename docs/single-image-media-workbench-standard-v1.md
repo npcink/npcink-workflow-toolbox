@@ -151,6 +151,35 @@ external-image adoption exception.
 
 ## Verification
 
+## Recovery comparison UI rules
+
+The completed single-image recovery view is a focused visual confirmation
+surface, not a second settings page. Keep these rules stable when adjusting
+the layout:
+
+- The current attachment is always the left comparison subject; the retained
+  original backup is always the right comparison subject. Use the same order
+  in side-by-side cards and in slider labels.
+- Expose only two top-level comparison modes: **Side-by-side comparison** and
+  **Slider comparison**. The former shows the two complete cards; the latter
+  shows one shared canvas with a draggable divider.
+- The slider-only **Backup original / Current image** buttons belong beside the
+  mode buttons and must be hidden in side-by-side mode. They set the slider to
+  100% or 0% respectively and must visibly update the active state.
+- Do not place labels, filenames, metadata, or actions over image pixels. Card
+  headings and **View large image** stay outside the image frame; compact
+  metadata sits below the image.
+- Empty result containers must be `display:none` and must not retain borders,
+  padding, minimum height, or background. Only actionable warning/error
+  feedback may allocate a result row.
+- A top-level Toolbox tab is mutually exclusive. Activation must update
+  `is-active`, the shared active class, `aria-selected`, `aria-current`, and
+  panel `hidden` state together; stale active classes are not allowed.
+
+These rules came from repeated operator visual checks: controls that overlay
+image pixels reduce confidence, empty result shells consume vertical space,
+and stale active classes make two top-level surfaces appear open at once.
+
 Static contracts must prove:
 
 - contextual single-image routing does not restore a second top-level tool;

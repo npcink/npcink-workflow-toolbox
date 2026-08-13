@@ -710,10 +710,10 @@ Check's Scheduled Review sub tab. Cloud run status, result reads, recent runs,
 and recovery live in Cloud Addon Runtime Runs. They do not live inside Cloud
 Checks. That keeps recurring inspection preview and Cloud run recovery separate
 from ordinary connection diagnostics without restoring a default Site Check
-entry. Site Knowledge
-connection, refresh, indexing, and deep delivery detail live in
-`npcink-cloud-addon`; Toolbox keeps only a secondary **Content Library Usage**
-panel for read-only status and best-practice result consumption.
+entry. All Site Knowledge operator management lives in `npcink-cloud-addon`,
+including connection, refresh, indexing, retrieval acceptance, and deep
+delivery detail. Toolbox only consumes Site Knowledge results inside its other
+workflows.
 
 The admin **Image Handling** tab groups image-first buttons by operator job and
 defaults to **Image Optimization**, with **Batch Optimize Images** as the first

@@ -6675,6 +6675,9 @@ msgstr "内容库状态"
 msgid "Manage content library in Cloud Addon"
 msgstr "在 Cloud Addon 管理内容库"
 
+msgid "Open Site Knowledge in Cloud Addon"
+msgstr "在 Cloud Addon 打开站点知识库"
+
 msgid "Use Cloud Addon for connector state, public content refresh requests, and Site Knowledge delivery diagnostics. Toolbox keeps only the review and suggestion workflows that consume those results."
 msgstr "使用 Cloud Addon 管理连接状态、公开内容刷新请求和 Site Knowledge 交付诊断。Toolbox 只保留消费这些结果的复核和建议流程。"
 
