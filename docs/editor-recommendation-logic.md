@@ -50,7 +50,7 @@ must still behave like a single-action tool.
 
 ## First-Stage Closed Loops
 
-The first editor stage keeps five default fixed buttons and supporting route
+The first editor stage keeps seven default fixed buttons and supporting route
 paths:
 
 - the editor prefetches `progressive_recommendations` from local WordPress
@@ -71,8 +71,8 @@ paths:
   show target, anchor, and placement hints, then offer copy-link and open-target
   actions; they do not create backend post-content patches or mutate the current
   draft;
-- article narration and audio summary generate review-only listening candidates
-  whose adoption stays on the Core-governed article-audio handoff path;
+- article narration and audio summary remain callable hidden compatibility
+  flows whose adoption stays on the Core-governed article-audio handoff path;
 - publish preflight aggregates readiness issues and routes operators back to
   the focused tools. It is a closing checklist, not a replacement editing
   workspace.

@@ -6846,8 +6846,8 @@ msgstr "请使用站点画像和图片处理完成当前支持的运营任务。
 msgid "V1 defaults are Publish Preflight, Internal Link Candidates, Image Candidates, and Article Audio Candidates."
 msgstr "V1 默认入口是发布预检、内链候选、图片候选和文章音频候选。"
 
-msgid "V1 defaults are Publish Preflight, Internal Link Candidates, Image Candidates, Article Audio Candidates, and Article Image ALT (SEO)."
-msgstr "V1 默认入口是发布预检、内链候选、图片候选、文章音频候选和文章图片 ALT（SEO）。"
+msgid "V1 defaults are Draft From Source Materials, Publish Preflight, Category Suggestions, Tag Suggestions, Internal Link Candidates, Image Candidates, and Article Image ALT (SEO). Article audio remains hidden compatibility."
+msgstr "V1 默认入口是从来源材料起草、发布预检、分类建议、标签建议、内链候选、图片候选和文章图片 ALT（SEO）。文章音频仍为隐藏兼容功能。"
 
 msgid "No image blocks were found in the current article. Add an image block before previewing contextual ALT."
 msgstr "当前文章中没有找到图片区块。请先添加图片区块，再预览上下文 ALT。"
