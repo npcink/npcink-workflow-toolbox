@@ -60,7 +60,7 @@ foreach ( array( "'direct_wordpress_write'", "'final_write_path'", "'core_propos
 }
 
 $provider = (string) file_get_contents( $root . '/includes/Provider_Client.php' );
-foreach ( array( "'cloud_role'            => 'runtime_detail'", "'cloud_scheduler_truth'        => false", "'core_proposal_created'        => false", "'direct_wordpress_write'       => false", 'get_run( $run_id', 'get_run_result( $run_id' ) as $required_provider_text ) {
+foreach ( array( "'cloud_role'            => 'runtime_detail'", "'cloud_scheduler_truth'        => false", "'core_proposal_created'        => false", "'direct_wordpress_write'       => false", 'npcink_cloud_addon_get_toolbox_runtime_run(', 'npcink_cloud_addon_get_toolbox_runtime_run_result(' ) as $required_provider_text ) {
 	$assert_contains( $provider, $required_provider_text, 'Provider client keeps Cloud Batch as runtime/detail bridge.' );
 }
 
