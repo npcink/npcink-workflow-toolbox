@@ -357,6 +357,9 @@ msgstr "此 WordPress 站点的只读 Cloud 覆盖摘要。"
 msgid "Refresh status"
 msgstr "刷新状态"
 
+msgid "Run retrieval acceptance"
+msgstr "执行检索验收"
+
 msgid "Connect Cloud Addon before reading Site Knowledge coverage."
 msgstr "读取站点知识覆盖范围前请先连接 Cloud Addon。"
 
@@ -6672,6 +6675,9 @@ msgstr "内容库状态"
 msgid "Manage content library in Cloud Addon"
 msgstr "在 Cloud Addon 管理内容库"
 
+msgid "Open Site Knowledge in Cloud Addon"
+msgstr "在 Cloud Addon 打开站点知识库"
+
 msgid "Use Cloud Addon for connector state, public content refresh requests, and Site Knowledge delivery diagnostics. Toolbox keeps only the review and suggestion workflows that consume those results."
 msgstr "使用 Cloud Addon 管理连接状态、公开内容刷新请求和 Site Knowledge 交付诊断。Toolbox 只保留消费这些结果的复核和建议流程。"
 
@@ -7743,6 +7749,30 @@ msgstr "生成精确预览，与原图对比确认后，直接应用到当前媒
 msgid "Local confirmation"
 msgstr "本地确认"
 
+msgid "Needs confirmation"
+msgstr "需要确认"
+
+msgid "View large image"
+msgstr "查看大图"
+
+msgid "Close large image"
+msgstr "关闭大图"
+
+msgid "Side by side"
+msgstr "左右对比"
+
+msgid "Side-by-side comparison"
+msgstr "左右对比"
+
+msgid "Stacked comparison"
+msgstr "叠放对比"
+
+msgid "Slider comparison"
+msgstr "滑杆对比"
+
+msgid "Comparison position"
+msgstr "对比位置"
+
 #: includes/Admin_Page.php
 msgid "Image comparison"
 msgstr "图片对比"
@@ -7802,6 +7832,155 @@ msgstr "正在加载优化预览"
 #: includes/Admin_Page.php
 msgid "Known post-content image references are updated in the same local transaction."
 msgstr "文章内容中的已知图片引用会在同一本地事务中更新。"
+
+#: includes/Admin_Page.php
+msgid "Restore original image"
+msgstr "恢复原图"
+
+#: includes/Single_Image_Media_Optimization.php
+msgid "Review and confirm the original-image restore before continuing."
+msgstr "请先确认恢复原图，再继续。"
+
+msgid "The selected backup does not match the confirmed restore target."
+msgstr "所选备份与已确认的恢复目标不匹配。"
+
+msgid "The selected backup is no longer available for restore."
+msgstr "所选备份已不可用于恢复。"
+
+#: includes/Admin_Page.php
+msgid "Original image backup retention"
+msgstr "原图备份保留时间"
+
+msgid "Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed."
+msgstr "选择自动创建的单图备份可用于恢复的时长。过期文件会从隐藏备份目录中移除，但不会删除媒体库中的当前图片。"
+
+msgid "Keep backups for"
+msgstr "备份保留时间"
+
+msgid "30 days (recommended)"
+msgstr "30 天（推荐）"
+
+msgid "90 days"
+msgstr "90 天"
+
+msgid "Save backup retention"
+msgstr "保存备份保留设置"
+
+msgid "Core authorization"
+msgstr "Core 一次性授权"
+
+msgid "About Toolbox"
+msgstr "工具箱说明"
+
+msgid "Restore image"
+msgstr "恢复图片"
+
+msgid "View backups and restore"
+msgstr "查看备份并恢复"
+
+msgid "Open the image workbench to review available backups before restoring."
+msgstr "打开图片工作区，查看可用备份后再恢复。"
+
+msgid "Npcink restore"
+msgstr "Npcink 恢复"
+
+msgid "Checking available image backups..."
+msgstr "正在查询可用的图片备份……"
+
+msgid "The latest restorable original-image backup is visibly loaded. Use Restore original image to continue."
+msgstr "最新可恢复的原图备份已成功显示。请点击“恢复原图”继续。"
+
+msgid "No restorable backup is available for this image."
+msgstr "这张图片目前没有可恢复的备份。"
+
+msgid "Could not check image backups."
+msgstr "无法查询图片备份。"
+
+msgid "This restore is outside the strong local confirmation boundary."
+msgstr "此恢复操作超出了强本地确认边界。"
+
+msgid "The Toolkit did not return complete verification for the restored image and its new rollback backup."
+msgstr "Toolkit 未返回恢复后图片及其新回滚备份的完整验证结果。"
+
+msgid "Original image backup available"
+msgstr "原图备份可用"
+
+msgid "Backup time"
+msgstr "备份时间"
+
+msgid "Size"
+msgstr "大小"
+
+msgid "Backup original"
+msgstr "备份原图"
+
+msgid "Backup original preview"
+msgstr "备份原图预览"
+
+msgid "Original image backup"
+msgstr "原图备份"
+
+msgid "Current image"
+msgstr "当前图片"
+
+msgid "Compare the current image with the original-image backup, then confirm the restore."
+msgstr "对比当前图片和备份原图，确认无误后再恢复。"
+
+msgid "Media read authorization required"
+msgstr "需要授权读取媒体"
+
+msgid "Core will record a one-time read authorization. Confirm the scope to build the candidate list."
+msgstr "Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"
+
+msgid "Request ID"
+msgstr "请求编号"
+
+msgid "Data scope"
+msgstr "数据范围"
+
+msgid "Media and attachment metadata"
+msgstr "媒体与附件元数据"
+
+msgid "Privacy"
+msgstr "隐私处理"
+
+msgid "Strict redaction"
+msgstr "严格脱敏"
+
+msgid "None"
+msgstr "无"
+
+msgid "This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes."
+msgstr "此授权仅适用于当前筛选条件，且只能使用一次。不包含上传、提案或 WordPress 修改权限。"
+
+msgid "Authorize and build list"
+msgstr "授权并生成列表"
+
+msgid "Open Core"
+msgstr "打开 Core"
+
+msgid "No image candidates have been read yet. Authorize the request to continue."
+msgstr "尚未读取图片候选。请先授权后继续。"
+
+#: includes/Admin_Page.php
+msgid "Image Settings"
+msgstr "图片设置"
+
+msgid "Image settings"
+msgstr "图片设置"
+
+msgid "Manage watermark templates and original-image backup retention."
+msgstr "管理水印模板和原图备份保留时间。"
+
+msgid "Watermark templates and backup retention."
+msgstr "水印模板与备份保留时间。"
+
+msgid "Manage low-frequency image defaults here. Review and execution tools remain in their own tabs."
+msgstr "在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"
+
+msgid "Image ALT Review"
+msgstr "图片 ALT 审核"
+
 
 #: includes/Admin_Page.php
 msgid "View media details"

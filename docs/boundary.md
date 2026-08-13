@@ -1,5 +1,7 @@
 # Npcink Toolbox Boundary
 
+The read-only `/strong-local-confirmation/media-derivative-backups/{attachment_id}` route lists Toolkit-owned backups for one editable attachment so the existing local restore workbench can be reopened. It does not restore, delete, or modify media.
+
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 
 ADR-006 is the active authority for choosing between native editor commit and
@@ -210,6 +212,10 @@ human-readable allowlist and must stay aligned with that table and
 - `/flows/image-candidate-adoption-plan`
 - `/flows/article-audio-adoption-plan`
 - `/local-admin-consent/featured-image`
+- `/strong-local-confirmation/image-adoption`
+- `/strong-local-confirmation/media-derivative`
+- `/strong-local-confirmation/media-derivative-restore`
+- `/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `/flows/site-knowledge-review-plan`
 - `/flows/nightly-inspection-review-plan`
 - `/flows/content-metadata-apply-plan`
@@ -559,6 +565,9 @@ and explicit confirmation it may call
 `/strong-local-confirmation/media-derivative`, which authorizes only the
 existing Toolkit adoption transaction for that request and returns backup,
 reference-repair, rollback, and verification evidence without a Core proposal.
+The paired `/strong-local-confirmation/media-derivative-restore` route restores
+one still-available recorded Toolkit backup after the same present-admin
+confirmation, backing up the current file first; expired backups fail closed.
 Batch selection and every background, delegated, or external-client flow remain
 Core-governed. The preview surface
 may POST `/media-derivative-local-review/{artifact_id}` for operator review.

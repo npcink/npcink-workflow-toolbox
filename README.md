@@ -1,5 +1,7 @@
 # Npcink Workflow Toolbox
 
+Single-image recovery remains attachment-scoped. Media Library attachment details and row actions can reopen the existing workbench, which reads available backups through `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` before the administrator explicitly confirms restoration. This lookup does not restore, delete, or modify media.
+
 Npcink Workflow Toolbox turns proven AI-assisted WordPress operations into
 fixed, review-only buttons for site operators, including Cloud-managed web
 search, Cloud-managed image-source candidates, Cloud-managed site knowledge,
@@ -150,6 +152,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](docs/decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [ADR-010: Strong Local Confirmation For Single-Article Image Adoption](docs/decisions/ADR-010-single-article-strong-local-image-adoption.md)
 - [ADR-011: Single-Image Local Media Replacement](docs/decisions/ADR-011-single-image-local-media-replacement.md)
+- [ADR-012: Bounded Media Backup Retention Setting](docs/decisions/ADR-012-media-backup-retention-setting.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:
@@ -264,6 +267,8 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative`
+- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-restore`
+- `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
@@ -859,12 +864,11 @@ operator-facing connection, refresh, indexing, and detailed delivery status
 live in Cloud Addon. Toolbox does not store provider credentials, run embeddings
 locally, own the index lifecycle, or write WordPress content.
 
-The secondary **Content Library Usage** panel is read-only from a daily
-operator perspective. It displays coverage/status returned by Cloud-managed
-Site Knowledge and points setup or refresh work to Cloud Addon. Toolbox keeps
-the best-practice flows that consume those results, such as internal-link
-candidates, duplicate checks, publish preflight context, and governed review
-handoff preparation.
+Site Knowledge has one operator-facing home: Cloud Addon. It owns connection,
+refresh, indexing, delivery status, retrieval acceptance, and diagnostics.
+Toolbox keeps only the workflows that consume Cloud-managed results, such as
+internal-link candidates, duplicate checks, publish preflight context, and
+governed review handoff preparation.
 Standalone Cloud diagnostics are not exposed in Toolbox. Cloud Addon owns the
 WordPress-side Cloud connection, hosted runtime status, search/image-source
 diagnostics, entitlement, quota, billing, request logs, and service health
@@ -877,9 +881,12 @@ Toolbox shows a contextual single-image workbench inside the same fixed flow.
 It supports format/size overrides, optional crop, reusable text/logo watermark
 templates, and a safe output basename. The browser must verify the short-lived
 preview and the operator must confirm replacement semantics before Toolbox can
-submit one `adopt-cloud-media-derivative` proposal. The current contract replaces
-the selected attachment with backup and rollback evidence; Toolbox does not
-offer save-as-new until a separate governed create-attachment ability exists.
+authorize one request-scoped `adopt-cloud-media-derivative` Toolkit transaction.
+The current contract replaces the selected attachment with backup, reference-
+repair, verification, and rollback evidence without creating a Core proposal.
+The completed workbench can list Toolkit-owned backups and restore one visibly
+loaded, explicitly confirmed backup while backing up the current file first.
+Toolbox does not offer save-as-new or own backup lifecycle execution.
 
 Provider responses return normalized fields by default. Set **Include provider
 raw responses** to include redacted raw provider payloads for debugging.

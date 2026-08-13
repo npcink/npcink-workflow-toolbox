@@ -357,6 +357,12 @@
 	  "Replacement verified": ["替换验证通过"],
 	  "Review the technical verification details": ["请检查技术验证详情"],
 	  "View media details": ["查看媒体详情"],
+	  "Restore original image": ["恢复原图"],
+	  "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？系统会先自动备份当前优化后的图片。"],
+	  "Restoring the original image and backing up the current image...": ["正在恢复原图并备份当前图片……"],
+	  "Original image restored": ["原图已恢复"],
+	  "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["原图已重新应用到媒体库，并已自动备份优化后的图片。"],
+	  "Restore verified": ["恢复验证通过"],
 	  "Applying the verified image and automatically backing up the original...": ["正在应用已验证图片并自动备份原图……"],
 	  "Generating media preview": ["正在生成图片预览"],
 	  "Upload source": ["上传源图片"],
@@ -647,7 +653,64 @@
       "Template removed. Save to apply: %s": ["已移除模板，保存后生效：%s"],
       "Normal": ["正常"],
       ", ": ["，"],
-      " | ": ["｜"]
+      " | ": ["｜"],
+      "Restore original image": ["恢复原图"],
+      "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？当前优化图会先自动备份。"],
+      "Restoring the original image and backing up the current image...": ["正在恢复原图，并备份当前图片……"],
+      "Original image restored": ["原图已恢复"],
+      "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["媒体库中已重新启用原图。优化图已自动备份。"],
+      "Restore verified": ["恢复已验证"],
+      "Original image backup retention": ["原图备份保留时间"],
+      "Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed.": ["选择自动创建的单图备份可用于恢复的时长。过期文件会从隐藏备份目录中移除，但不会删除媒体库中的当前图片。"],
+      "Keep backups for": ["备份保留时间"],
+      "30 days (recommended)": ["30 天（推荐）"],
+      "90 days": ["90 天"],
+      "Save backup retention": ["保存备份保留设置"]
+      ,"Image Settings": ["图片设置"]
+      ,"Image settings": ["图片设置"]
+      ,"Manage watermark templates and original-image backup retention.": ["管理水印模板和原图备份保留时间。"]
+      ,"Watermark templates and backup retention.": ["水印模板与备份保留时间。"]
+      ,"Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.": ["在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"]
+      ,"Image ALT Review": ["图片 ALT 审核"]
+      ,"Core authorization": ["Core 一次性授权"]
+      ,"About Toolbox": ["工具箱说明"]
+      ,"Restore image": ["恢复图片"]
+      ,"View backups and restore": ["查看备份并恢复"]
+      ,"Open the image workbench to review available backups before restoring.": ["打开图片工作区，查看可用备份后再恢复。"]
+      ,"Npcink restore": ["Npcink 恢复"]
+      ,"Checking available image backups...": ["正在查询可用的图片备份……"]
+      ,"The latest restorable original-image backup is visibly loaded. Use Restore original image to continue.": ["最新可恢复的原图备份已成功显示。请点击“恢复原图”继续。"]
+      ,"No restorable backup is available for this image.": ["这张图片目前没有可恢复的备份。"]
+      ,"Could not check image backups.": ["无法查询图片备份。"]
+      ,"Original image backup available": ["原图备份可用"]
+      ,"Backup time": ["备份时间"]
+      ,"Unknown": ["未知"]
+      ,"Format": ["格式"]
+      ,"Size": ["大小"]
+      ,"Backup original": ["备份原图"]
+      ,"Backup original preview": ["备份原图预览"]
+      ,"Original image backup": ["原图备份"]
+      ,"Current image": ["当前图片"]
+      ,"Needs confirmation": ["需要确认"]
+      ,"View large image": ["查看大图"]
+      ,"Close large image": ["关闭大图"]
+      ,"Side by side": ["左右对比"]
+      ,"Slider comparison": ["滑杆对比"]
+      ,"Comparison position": ["对比位置"]
+      ,"Compare the current image with the original-image backup, then confirm the restore.": ["对比当前图片和备份原图，确认无误后再恢复。"]
+      ,"Media read authorization required": ["需要授权读取媒体"]
+      ,"Core will record a one-time read authorization. Confirm the scope to build the candidate list.": ["Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"]
+      ,"Request ID": ["请求编号"]
+      ,"Data scope": ["数据范围"]
+      ,"Media and attachment metadata": ["媒体与附件元数据"]
+      ,"Privacy": ["隐私处理"]
+      ,"Strict redaction": ["严格脱敏"]
+      ,"Writes": ["写入"]
+      ,"None": ["无"]
+      ,"This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.": ["此授权仅适用于当前筛选条件，且只能使用一次。不包含上传、提案或 WordPress 修改权限。"]
+      ,"Authorize and build list": ["授权并生成列表"]
+      ,"Open Core": ["打开 Core"]
+      ,"No image candidates have been read yet. Authorize the request to continue.": ["尚未读取图片候选。请先授权后继续。"]
     }
   }
 }

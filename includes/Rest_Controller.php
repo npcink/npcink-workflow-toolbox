@@ -56,6 +56,8 @@ final class Rest_Controller {
 		$this->post( '/local-admin-consent/featured-image', 'local_admin_consent_featured_image' );
 		$this->post( '/strong-local-confirmation/image-adoption', 'strong_local_confirmation_image_adoption' );
 		$this->post( '/strong-local-confirmation/media-derivative', 'strong_local_confirmation_media_derivative' );
+		$this->post( '/strong-local-confirmation/media-derivative-restore', 'strong_local_confirmation_media_derivative_restore' );
+		$this->get( '/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)', 'strong_local_confirmation_media_derivative_backups' );
 		$this->post( '/flows/site-knowledge-review-plan', 'site_knowledge_review_plan' );
 		$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' );
 		$this->post( '/flows/content-metadata-apply-plan', 'content_metadata_apply_plan' );
@@ -111,7 +113,11 @@ final class Rest_Controller {
 		$route          = $request instanceof WP_REST_Request ? $this->normalize_route_for_scope( (string) $request->get_route() ) : '';
 		$required_scope = $this->rest_route_scope( $route );
 
-		return (bool) apply_filters( 'npcink_toolbox_rest_permission', current_user_can( 'manage_options' ), $request, $required_scope, $route );
+		return $this->filtered_rest_permission( current_user_can( 'manage_options' ), $request, $required_scope, $route );
+	}
+
+	private function filtered_rest_permission( bool $allowed, $request, string $required_scope, string $route ): bool {
+		return (bool) apply_filters( 'npcink_toolbox_rest_permission', $allowed, $request, $required_scope, $route );
 	}
 
 	private function normalize_route_for_scope( string $route ): string {
@@ -129,6 +135,9 @@ final class Rest_Controller {
 		}
 		if ( preg_match( '#^/nightly-inspection/cloud-batch/[A-Za-z0-9._:-]+(?:/result|/retry)?$#', $route ) ) {
 			return 'cap.toolbox.nightly_inspection';
+		}
+		if ( preg_match( '#^/strong-local-confirmation/media-derivative-backups/[0-9]+$#', $route ) ) {
+			return 'cap.toolbox.image_adoption';
 		}
 
 		$scopes = array(
@@ -155,6 +164,7 @@ final class Rest_Controller {
 			'/local-admin-consent' . '/featured-image'     => 'cap.toolbox.local_admin_consent',
 			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
+			'/strong-local-confirmation/media-derivative-restore' => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -1555,7 +1565,7 @@ final class Rest_Controller {
 	private function post( string $route, string $method, array $args = array() ): void {
 		$permission_callback = '/strong-local-confirmation/image-adoption' === $route
 			? array( $this, 'permission_single_article_image_adoption' )
-			: ( '/strong-local-confirmation/media-derivative' === $route ? array( $this, 'permission_single_image_media_optimization' ) : array( $this, 'permission' ) );
+			: ( '/strong-local-confirmation/media-derivative' === $route ? array( $this, 'permission_single_image_media_optimization' ) : ( '/strong-local-confirmation/media-derivative-restore' === $route ? array( $this, 'permission_single_image_media_derivative_restore' ) : array( $this, 'permission' ) ) );
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
 			$route,
@@ -1585,8 +1595,39 @@ final class Rest_Controller {
 	public function permission_single_image_media_optimization( WP_REST_Request $request ): bool {
 		$input = $request->get_param( 'input' );
 		$attachment_id = is_array( $input ) ? absint( $input['attachment_id'] ?? 0 ) : 0;
+		$route = '/strong-local-confirmation/media-derivative';
+		$allowed = $attachment_id > 0
+			&& current_user_can( 'manage_options' )
+			&& current_user_can( 'upload_files' )
+			&& current_user_can( 'edit_post', $attachment_id );
 
-		return $attachment_id > 0 && current_user_can( 'upload_files' ) && current_user_can( 'edit_post', $attachment_id );
+		return $allowed && $this->filtered_rest_permission( true, $request, $this->rest_route_scope( $route ), $route );
+	}
+
+	public function permission_single_image_media_derivative_restore( WP_REST_Request $request ): bool {
+		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
+		$route = '/strong-local-confirmation/media-derivative-restore';
+		$allowed = $attachment_id > 0
+			&& current_user_can( 'manage_options' )
+			&& current_user_can( 'upload_files' )
+			&& current_user_can( 'edit_post', $attachment_id );
+
+		return $allowed && $this->filtered_rest_permission( true, $request, $this->rest_route_scope( $route ), $route );
+	}
+
+	public function strong_local_confirmation_media_derivative_backups( WP_REST_Request $request ) {
+		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
+		if ( $attachment_id <= 0 || ! current_user_can( 'manage_options' ) || ! current_user_can( 'upload_files' ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return new WP_Error( 'npcink_toolbox_media_backup_permission_denied', __( 'You do not have permission to view image backups.', 'npcink-workflow-toolbox' ), array( 'status' => 403 ) );
+		}
+		$result = ( new Single_Image_Media_Optimization() )->list_backups( $attachment_id );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function strong_local_confirmation_media_derivative_restore( WP_REST_Request $request ) {
+		$result = ( new Single_Image_Media_Optimization() )->restore( $request );
+
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
 

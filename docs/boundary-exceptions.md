@@ -93,11 +93,14 @@ Status: accepted bounded Media Library transaction.
 
 Allowed scope: one present admin action, one image attachment, one exact
 same-origin derivative preview, one explicit `replace_current` confirmation,
-and Toolkit-owned backup/reference-repair/rollback execution.
+Toolkit-owned backup/reference-repair/rollback execution, read-only listing of
+that attachment's Toolkit backups, and one explicitly confirmed restore of an
+available backup after its same-origin preview loads successfully.
 
 Hard stop: no batch, background, Adapter, Agent, Cloud callback, save-as-new,
-queue, approval store, or authorization of any Toolkit ability other than
-`adopt-cloud-media-derivative` for the current request.
+queue, approval store, backup registry, or authorization of any Toolkit ability
+other than `adopt-cloud-media-derivative`, `list-media-backups`, and
+`restore-media-backup` for the exact request being handled.
 
 Primary contracts:
 

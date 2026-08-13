@@ -392,6 +392,7 @@
 
 		result.hidden = false;
 		result.classList.remove('is-empty');
+		result.classList.remove('is-authorization');
 		clearNode(result);
 
 		const summaryNode = el('div', 'npcink-toolbox__result-summary');
@@ -5142,6 +5143,17 @@
 			actions.appendChild(link);
 			result.appendChild(actions);
 		}
+		const restoreButtons = workbench ? workbench.querySelectorAll('[data-toolbox-restore-media-backup]') : [];
+		restoreButtons.forEach((restoreButton) => {
+			if (!(restoreButton instanceof HTMLButtonElement) || !backupCreated || !replacement.replacement_id) {
+				return;
+			}
+			restoreButton.hidden = false;
+			restoreButton.disabled = false;
+			restoreButton.dataset.attachmentId = String(replacement.attachment_id || state.abilityInput.attachment_id || '');
+			restoreButton.dataset.backupId = String(replacement.replacement_id || '');
+			restoreButton.dataset.previewVerified = '0';
+		});
 		result.appendChild(createRawDetails(payload, 'Technical details'));
 
 		const confirmation = form.querySelector('[data-toolbox-confirm-media-replacement]');
@@ -5150,6 +5162,47 @@
 		}
 		setSingleImageWorkbenchPhase(form, 'completed');
 		updateMediaDerivativeSubmitState(form, null);
+	}
+
+	async function restoreMediaBackup(form, button) {
+		const attachmentId = String(button.getAttribute('data-attachment-id') || '');
+		const backupId = String(button.getAttribute('data-backup-id') || '');
+		const previewVerified = button.getAttribute('data-preview-verified') === '1';
+		if (!attachmentId) {
+			throw { message: 'The original-image backup is no longer available.' };
+		}
+		if (!previewVerified) {
+			const restoreUrl = new URL(window.location.href);
+			restoreUrl.searchParams.set('attachment_id', attachmentId);
+			restoreUrl.searchParams.set('restore', '1');
+			window.location.assign(restoreUrl.toString());
+			return;
+		}
+		if (!backupId) {
+			throw { message: 'The original-image backup is no longer available.' };
+		}
+		if (!window.confirm(t('Restore the original image? The current optimized image will be backed up first.'))) {
+			return;
+		}
+		button.disabled = true;
+		renderTextResult(form, t('Restoring the original image and backing up the current image...'), 'pending');
+		try {
+			const payload = await postJson(config.restUrl, 'strong-local-confirmation/media-derivative-restore', {
+				attachment_id: Number(attachmentId),
+				backup_id: backupId,
+				confirmed_backup_id: backupId,
+				preview_verified: true,
+				confirm_restore: true,
+			});
+			const result = renderShell(form, { provider: 'local WordPress' }, 'Original image restored', 'The original image is active again in the Media Library. The optimized image was backed up automatically.');
+			if (result) {
+				result.appendChild(el('div', 'npcink-toolbox__result-notice is-ok', 'Restore verified'));
+				result.appendChild(createRawDetails(payload, 'Technical details'));
+			}
+			button.hidden = true;
+		} finally {
+			button.disabled = false;
+		}
 	}
 
 	async function applyMediaDerivativeLocally(form) {
@@ -5324,29 +5377,31 @@
 		const result = renderShell(
 			form,
 			{ provider: 'core governance' },
-			'Bounded media read needs authorization',
-			'Core owns this one-time authorization. Review the stated scope, then explicitly authorize it before Toolbox reads local media candidates.'
+			t('Media read authorization required'),
+			t('Core will record a one-time read authorization. Confirm the scope to build the candidate list.')
 		);
 		if (!result) {
 			return;
 		}
+		result.classList.add('is-authorization');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Request', requestId);
-		appendMeta(meta, 'Data', 'Media and attachment metadata');
-		appendMeta(meta, 'Redaction', 'Strict');
-		appendMeta(meta, 'Writes', 'None');
+		appendMeta(meta, t('Request ID'), requestId);
+		appendMeta(meta, t('Data scope'), t('Media and attachment metadata'));
+		appendMeta(meta, t('Privacy'), t('Strict redaction'));
+		appendMeta(meta, t('Writes'), t('None'));
 		result.appendChild(meta);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'This approval is bound to the current filters and can be used once. It does not authorize Cloud upload, a Core proposal, or a WordPress write.'));
+		result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.')));
+		// Boundary contract: It does not authorize Cloud upload, a Core proposal, or a WordPress write.
 		const actions = el('div', 'npcink-toolbox__result-actions');
-		const approveButton = el('button', 'button button-primary', 'Authorize bounded read and build list');
+		const approveButton = el('button', 'button button-primary', t('Authorize and build list'));
 		approveButton.type = 'button';
 		approveButton.setAttribute('data-toolbox-authorize-media-batch-read', '');
 		actions.appendChild(approveButton);
 		if (config.coreAdminUrl) {
-			actions.appendChild(createLink(config.coreAdminUrl, 'Open Core governance'));
+			actions.appendChild(createLink(config.coreAdminUrl, t('Open Core')));
 		}
 		result.appendChild(actions);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'No media candidates or bytes have been returned yet.'));
+		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('No image candidates have been read yet. Authorize the request to continue.')));
 	}
 
 	async function authorizeMediaDerivativeBatchRead(form, button) {
@@ -5587,27 +5642,6 @@
 			summary: 'Core created one governed replacement proposal. Approval and execution remain outside Toolbox.',
 			rawTitle: 'Core media optimization response',
 		});
-	}
-
-	async function refreshSiteKnowledgeStatus(root) {
-		const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
-		if (summary) {
-			clearNode(summary);
-			summary.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Checking Cloud index status...'));
-		}
-		const payload = await getJson(config.restUrl, 'site-knowledge/status');
-		if (summary) {
-			renderSiteKnowledgeStatusNode(summary, payload);
-			summary.appendChild(createRawDetails(payload, 'Status payload'));
-		}
-		return payload;
-	}
-
-	async function runSiteKnowledgeForm(form, endpoint) {
-		renderTextResult(form, config.labels && config.labels.running ? config.labels.running : 'Running...', 'pending');
-		const payload = await postJson(config.restUrl, endpoint, serialize(form));
-		renderStructuredResult(form, payload);
-		return payload;
 	}
 
 	function nightlyCloudSettingValue(name, fallback) {
@@ -6629,76 +6663,6 @@
 		});
 	}
 
-	function setSiteKnowledgeButtonsBusy(root, busy) {
-		root.querySelectorAll('[data-toolbox-site-knowledge-status]').forEach((button) => {
-			button.disabled = busy;
-			button.setAttribute('aria-busy', busy ? 'true' : 'false');
-		});
-	}
-
-	function siteKnowledgeStatusStillActive(payload) {
-		const status = String(payload && payload.status ? payload.status : '').toLowerCase();
-		return status === 'queued' || status === 'running' || status === 'syncing';
-	}
-
-	function siteKnowledgeActiveStatusMessage(payload) {
-		const status = String(payload && payload.status ? payload.status : '').toLowerCase();
-		if (status === 'queued') {
-			return 'Index refresh is queued in Cloud. Search results may not include the latest changes yet.';
-		}
-		return 'Cloud is still indexing. Search results may not include the latest changes until status is ready.';
-	}
-
-	function initSiteKnowledge() {
-		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
-			const renderStatusError = (error) => {
-				const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
-				if (summary) {
-					clearNode(summary);
-					summary.appendChild(el('div', 'npcink-toolbox__result-notice is-error', error.message || 'Site knowledge status failed.'));
-					summary.appendChild(createRawDetails(error, 'Status error'));
-				}
-			};
-			root.querySelectorAll('[data-toolbox-site-knowledge-status]').forEach((statusButton) => {
-				statusButton.addEventListener('click', async () => {
-					setSiteKnowledgeButtonsBusy(root, true);
-					try {
-						await refreshSiteKnowledgeStatus(root);
-					} catch (error) {
-						renderStatusError(error);
-					} finally {
-						setSiteKnowledgeButtonsBusy(root, false);
-					}
-				});
-			});
-
-			const searchForm = root.querySelector('[data-toolbox-site-knowledge-search]');
-			if (searchForm) {
-				searchForm.addEventListener('submit', async (event) => {
-					event.preventDefault();
-					try {
-						await runSiteKnowledgeForm(searchForm, 'site-knowledge/search');
-					} catch (error) {
-						renderTextResult(searchForm, error.message || 'Site knowledge search failed.', 'error');
-					}
-				});
-			}
-		});
-	}
-
-	function refreshAllSiteKnowledgeStatus() {
-		document.querySelectorAll('[data-toolbox-site-knowledge]').forEach((root) => {
-			const summary = root.querySelector('[data-toolbox-site-knowledge-summary]');
-			refreshSiteKnowledgeStatus(root).catch((error) => {
-				if (summary) {
-					clearNode(summary);
-					summary.appendChild(el('div', 'npcink-toolbox__result-notice is-error', error.message || 'Site knowledge status failed.'));
-					summary.appendChild(createRawDetails(error, 'Status error'));
-				}
-			});
-		});
-	}
-
 	async function submitMediaReferenceRepairProposal(form) {
 		if (!config.adapterRestUrl) {
 			throw { message: 'Npcink Adapter REST URL is unavailable.' };
@@ -6799,7 +6763,13 @@
 		buttons.forEach((button) => {
 			const active = button.getAttribute(targetAttribute) === target;
 			button.classList.toggle('is-active', active);
+			button.classList.toggle('npcink-ai-tab-active', active);
 			button.setAttribute('aria-selected', active ? 'true' : 'false');
+			if (active) {
+				button.setAttribute('aria-current', 'page');
+			} else {
+				button.removeAttribute('aria-current');
+			}
 		});
 
 		panels.forEach((panel) => {
@@ -6899,6 +6869,9 @@
 		}
 		if (tool === 'batch-optimize') {
 			return 'media-batch-optimize';
+		}
+		if (tool === 'settings' || tool === 'image_settings') {
+			return 'image-settings';
 		}
 		return tool;
 	}
@@ -7074,9 +7047,6 @@
 
 		if (updateUrl) {
 			updateUrlForTopTab(target);
-		}
-		if (target === 'site-knowledge') {
-			refreshAllSiteKnowledgeStatus();
 		}
 		return true;
 	}
@@ -7276,21 +7246,168 @@
 
 	function prefillSingleMediaFromUrl(form) {
 		const idField = form.querySelector('[data-toolbox-media-attachment]');
-		if (!(idField instanceof HTMLInputElement) || idField.value) {
+		if (!(idField instanceof HTMLInputElement)) {
 			return;
 		}
 		const params = new URL(window.location.href).searchParams;
-		const attachmentId = parseInt(params.get('attachment_id') || '0', 10) || 0;
+		const attachmentId = parseInt(idField.value || params.get('attachment_id') || '0', 10) || 0;
 		if (attachmentId <= 0) {
 			return;
 		}
-		const attachmentUrl = params.get('attachment_url') || '';
-		renderSelectedMedia(form, {
-			id: attachmentId,
-			filename: attachmentUrl ? attachmentUrl.split('/').pop() : 'Attachment #' + String(attachmentId),
-			url: attachmentUrl,
-			alt: '',
+		if (params.get('restore') === '1') {
+			form.setAttribute('data-toolbox-restore-mode', '1');
+			const workbench = form.querySelector('[data-toolbox-single-media-workbench]');
+			if (workbench) {
+				workbench.classList.add('is-restore-mode');
+				const heading = workbench.querySelector('.npcink-toolbox__single-media-heading h2');
+				const description = workbench.querySelector('.npcink-toolbox__single-media-heading p');
+				if (heading) {
+					heading.textContent = t('Restore original image');
+				}
+				if (description) {
+					description.textContent = t('Compare the current image with the original-image backup, then confirm the restore.');
+				}
+			}
+			const currentLabel = form.querySelector('[data-toolbox-current-image-label]');
+			if (currentLabel) {
+				currentLabel.textContent = t('Current image');
+			}
+		}
+		if (!idField.value) {
+			const attachmentUrl = params.get('attachment_url') || '';
+			renderSelectedMedia(form, {
+				id: attachmentId,
+				filename: attachmentUrl ? attachmentUrl.split('/').pop() : 'Attachment #' + String(attachmentId),
+				url: attachmentUrl,
+				alt: '',
+			});
+		}
+		if (form.getAttribute('data-toolbox-restore-mode') === '1') {
+			loadMediaBackupsForRestore(form, attachmentId);
+		}
+	}
+
+	async function loadMediaBackupsForRestore(form, attachmentId) {
+		renderTextResult(form, t('Checking available image backups...'), 'pending');
+		const requestToken = String(Date.now()) + ':' + String(Math.random());
+		form.__npcinkMediaBackupRequestToken = requestToken;
+		const restoreActions = form.querySelector('[data-toolbox-restore-actions]');
+		const buttons = form.querySelectorAll('[data-toolbox-restore-media-backup]');
+		const backupCard = form.querySelector('[data-toolbox-backup-image-card]');
+		const backupImage = backupCard ? backupCard.querySelector('[data-toolbox-backup-image]') : null;
+		buttons.forEach((button) => {
+			if (button instanceof HTMLButtonElement) {
+				button.hidden = true;
+				button.disabled = true;
+				delete button.dataset.attachmentId;
+				delete button.dataset.backupId;
+				delete button.dataset.previewVerified;
+			}
 		});
+		if (restoreActions) {
+			restoreActions.hidden = true;
+		}
+		if (backupCard) backupCard.hidden = true;
+		if (backupImage instanceof HTMLImageElement) backupImage.removeAttribute('src');
+		try {
+			const payload = await getJson(config.restUrl, 'strong-local-confirmation/media-derivative-backups/' + encodeURIComponent(String(attachmentId)));
+			const backups = Array.isArray(payload.backups) ? payload.backups : [];
+			const available = backups.filter((item) => item && item.file_exists && item.backup_id && item.backup_url);
+			available.sort((left, right) => {
+				const leftTime = Date.parse(String(left.created_at_gmt || '')) || 0;
+				const rightTime = Date.parse(String(right.created_at_gmt || '')) || 0;
+				return rightTime - leftTime;
+			});
+			const latest = available[0];
+			const button = restoreActions ? restoreActions.querySelector('[data-toolbox-restore-media-backup]') : form.querySelector('[data-toolbox-restore-media-backup]');
+			const image = backupImage;
+			if (button instanceof HTMLButtonElement && latest && image instanceof HTMLImageElement) {
+				const backupUrl = String(latest.backup_url);
+				await new Promise((resolve, reject) => {
+					const loaded = () => image.naturalWidth > 0 && image.naturalHeight > 0 ? resolve() : reject(new Error('Backup preview is empty.'));
+					image.addEventListener('load', loaded, { once: true });
+					image.addEventListener('error', () => reject(new Error('Backup preview could not be loaded.')), { once: true });
+					image.src = backupUrl;
+					if (image.complete) {
+						loaded();
+					}
+				});
+				if (form.__npcinkMediaBackupRequestToken !== requestToken || image.getAttribute('src') !== backupUrl) {
+					return;
+				}
+				if (restoreActions) restoreActions.hidden = false;
+				button.dataset.attachmentId = String(attachmentId);
+				button.dataset.backupId = String(latest.backup_id);
+				button.dataset.previewVerified = '1';
+				button.hidden = false;
+				button.disabled = false;
+				setSingleImageWorkbenchPhase(form, 'completed');
+				if (backupCard) backupCard.hidden = false;
+				const meta = backupCard ? backupCard.querySelector('[data-toolbox-backup-image-meta]') : null;
+				if (meta) meta.textContent = [latest.mime_type || '', latest.width && latest.height ? String(latest.width) + ' × ' + String(latest.height) : '', latest.filesize_bytes ? formatMediaBytes(latest.filesize_bytes) : '', formatDateTime(latest.created_at_gmt)].filter(Boolean).join(' · ');
+				initComparisonMode(form);
+				renderTextResult(form, t('The latest restorable original-image backup is visibly loaded. Use Restore original image to continue.'), 'ok');
+				return;
+			}
+			renderTextResult(form, t('No restorable backup is available for this image.'), 'warning');
+		} catch (error) {
+			if (form.__npcinkMediaBackupRequestToken !== requestToken) {
+				return;
+			}
+			buttons.forEach((button) => {
+				if (button instanceof HTMLButtonElement) {
+					button.hidden = true;
+					button.disabled = true;
+					delete button.dataset.previewVerified;
+				}
+			});
+			if (restoreActions) restoreActions.hidden = true;
+			renderTextResult(form, error && error.message ? error.message : t('Could not check image backups.'), 'error');
+		}
+	}
+
+	function initComparisonMode(form) {
+		const mode = form.querySelector('[data-toolbox-comparison-mode]');
+		const slider = form.querySelector('[data-toolbox-comparison-slider]');
+		const comparison = form.querySelector('[data-toolbox-single-media-comparison]');
+		const current = form.querySelector('[data-toolbox-original-media-card] img');
+		const backup = form.querySelector('[data-toolbox-backup-image]');
+		if (!mode || !slider || !comparison || !current || !backup || !backup.src) return;
+		const input = slider.querySelector('[data-toolbox-comparison-slider-input]');
+		const layer = slider.querySelector('.npcink-toolbox__comparison-slider-backup');
+		const backupImage = slider.querySelector('[data-toolbox-slider-backup]');
+		const frame = slider.querySelector('.npcink-toolbox__comparison-slider-frame');
+		const stackedToggle = form.querySelector('[data-toolbox-stacked-toggle]');
+		const syncSlider = () => {
+			if (input && layer) layer.style.width = input.value + '%';
+			if (backupImage && frame) backupImage.style.width = frame.clientWidth + 'px';
+		};
+		if (input && layer) input.addEventListener('input', syncSlider);
+		const setMode = (name) => {
+			const isSide = name === 'side-by-side';
+			const isSlider = name === 'slider';
+			comparison.hidden = !isSide;
+			slider.hidden = isSide;
+			if (input) input.disabled = !isSlider;
+			if (stackedToggle) stackedToggle.hidden = !isSlider;
+			if (layer) layer.style.width = isSlider ? (input ? input.value : 50) + '%' : '0%';
+			mode.querySelectorAll('[data-toolbox-comparison-mode-button]').forEach((item) => item.classList.toggle('is-active', item.dataset.toolboxComparisonModeButton === name));
+			syncSlider();
+		};
+		mode.hidden = false;
+		const buttons = mode.querySelectorAll('[data-toolbox-comparison-mode-button]');
+		buttons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.toolboxComparisonModeButton || 'stacked')));
+		const sliderCurrent = slider.querySelector('[data-toolbox-slider-current]');
+		if (sliderCurrent) sliderCurrent.src = current.src;
+		if (backupImage) backupImage.src = backup.src;
+		if (stackedToggle) stackedToggle.querySelectorAll('[data-toolbox-stacked-image]').forEach((button) => button.addEventListener('click', () => {
+			const showBackup = button.dataset.toolboxStackedImage === 'backup';
+			if (input) input.value = showBackup ? '100' : '0';
+			if (layer) layer.style.width = showBackup ? '100%' : '0%';
+			stackedToggle.querySelectorAll('[data-toolbox-stacked-image]').forEach((item) => item.classList.toggle('is-active', item === button));
+		}));
+		setMode('slider');
+		window.addEventListener('resize', syncSlider, { passive: true });
 	}
 
 	function initMediaAltCaptionControls() {
@@ -7990,6 +8107,15 @@
 
 	function initMediaDerivativeControls() {
 		document.querySelectorAll('[data-toolbox-media-derivative]').forEach((form) => {
+			let lightbox = form.querySelector('[data-toolbox-image-lightbox]');
+			if (!lightbox) {
+				lightbox = document.createElement('div');
+				lightbox.className = 'npcink-toolbox__image-lightbox';
+				lightbox.setAttribute('data-toolbox-image-lightbox', '');
+				lightbox.hidden = true;
+				lightbox.innerHTML = '<button type="button" class="npcink-toolbox__image-lightbox-close" data-toolbox-close-image-lightbox aria-label="' + t('Close large image') + '">×</button><img alt="" data-toolbox-lightbox-image />';
+				form.appendChild(lightbox);
+			}
 			const idField = form.querySelector('[data-toolbox-media-attachment]');
 			const repairButton = form.querySelector('[data-toolbox-submit-reference-repair]');
 			const settingsRepairButton = form.querySelector('[data-toolbox-submit-settings-repair]');
@@ -8061,6 +8187,22 @@
 			}
 
 			form.addEventListener('click', (event) => {
+				const viewImageButton = event.target.closest('[data-toolbox-view-image]');
+				if (viewImageButton && form.contains(viewImageButton)) {
+					event.preventDefault();
+					const card = viewImageButton.closest('.npcink-toolbox__single-image-card');
+					const source = card && card.querySelector('img');
+					const target = lightbox.querySelector('[data-toolbox-lightbox-image]');
+					if (source && target && source.src) {
+						target.src = source.src;
+						target.alt = source.alt || '';
+						lightbox.hidden = false;
+					}
+					return;
+				}
+				if (event.target.closest('[data-toolbox-close-image-lightbox]') || event.target === lightbox) {
+					lightbox.hidden = true;
+				}
 				if (!(event.target instanceof Element)) {
 					return;
 				}
@@ -8189,6 +8331,15 @@
 					return;
 				}
 
+				const restoreButton = event.target.closest('[data-toolbox-restore-media-backup]');
+				if (restoreButton && form.contains(restoreButton)) {
+					event.preventDefault();
+					restoreMediaBackup(form, restoreButton).catch((error) => {
+						renderMediaDerivativeFailure(form, error, 'restore');
+					});
+					return;
+				}
+
 				const reloadWorkbenchButton = event.target.closest('[data-toolbox-reload-media-workbench]');
 				if (reloadWorkbenchButton && form.contains(reloadWorkbenchButton)) {
 					event.preventDefault();
@@ -8216,6 +8367,14 @@
 		});
 	}
 
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') {
+			document.querySelectorAll('[data-toolbox-image-lightbox]').forEach((lightbox) => {
+				lightbox.hidden = true;
+			});
+		}
+	});
+
 	initTopTabs();
 	initToolSwitcher();
 	initSettingsFormReturnUrls();
@@ -8226,7 +8385,6 @@
 	initContextDrafts();
 	initWebSearchPresets();
 	initNightlyCloudBatch();
-	initSiteKnowledge();
 	initWatermarkTemplateLibrary();
 	initMediaDerivativeControls();
 	initMediaAltCaptionControls();
@@ -8243,6 +8401,7 @@
 			if (renderOperatorFeedback(form, error)) {
 				return;
 			}
+
 			renderErrorResult(form, error, config.labels && config.labels.error ? config.labels.error : 'Request failed.');
 		});
 	});

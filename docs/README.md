@@ -87,6 +87,8 @@ Start from the active documents below before changing code.
 - [Media Optimization V1](media-optimization-v1.md)
 - [Media Optimization Stage Summary](media-optimization-stage-summary.md)
 - [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
+- [ADR-011: Single-Image Local Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
+- [ADR-012: Bounded Media Backup Retention Setting](decisions/ADR-012-media-backup-retention-setting.md)
 - [Media Optimization Release Checklist](media-optimization-release-checklist.md)
 - [Media ALT/Caption Review Set](media-alt-caption-review-set.md)
 - [Media ALT/Caption Toolkit Validation Plan](media-alt-caption-toolkit-validation-plan.md)

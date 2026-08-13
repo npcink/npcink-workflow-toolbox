@@ -37,7 +37,8 @@ The plugin provides a WordPress admin surface and post-editor panel for:
   media ALT/caption review sets, and media planning handoff packets;
 * a contextual single-image optimization workbench with verified previews,
   format/crop controls, reusable text or logo watermark templates, an optional
-  safe output basename, and rollback-backed Core replacement review;
+  safe output basename, request-scoped Toolkit replacement, automatic rollback
+  backups, visible restore review, and a bounded 30- or 90-day retention choice;
 * Cloud-managed site knowledge search, status, and sync requests when a
   compatible host runtime is connected;
 * review-only Scheduled Review previews, with Cloud runtime inspection and recovery routed to Cloud Addon.
@@ -218,6 +219,10 @@ outside Toolbox.
 
 = 0.1.1 =
 
+* Added attachment-scoped single-image replacement and restore through
+  request-scoped Abilities Toolkit transactions with exact preview confirmation.
+* Added automatic rollback backups and a bounded 30-day or 90-day retention
+  setting while keeping backup files, cleanup, and restore execution in Toolkit.
 * Added the review-only Dashboard `知乎热榜选题` topic-pool surface for daily
   research selection.
 * Added read-only Zhihu capability checks for connected Cloud search, hot-list,

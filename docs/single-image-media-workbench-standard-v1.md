@@ -19,8 +19,9 @@ The operator path is:
 4. Generate and visually verify the short-lived derivative preview.
 5. Confirm the replacement and the automatic-backup statement. Backup is mandatory and cannot be disabled for this transaction.
 6. Apply the verified derivative to the selected Media Library attachment.
-7. Inspect the returned backup, reference-repair, and verification receipt;
-   restore through the existing Toolkit recovery path if necessary. The backup
+7. Inspect the returned backup, reference-repair, and verification receipt. If
+   needed, use **Restore original image** in the completed result area; the
+   current optimized file is backed up automatically before restore. The backup
    is kept outside the Media Library and is not a second visible attachment.
 
 ## Ownership
@@ -36,8 +37,12 @@ The operator path is:
 
 Toolbox must never implement replacement mechanics, rename files directly, or
 update `_wp_attached_file` or attachment metadata itself. Its local route may
-authorize only `npcink-abilities-toolkit/adopt-cloud-media-derivative`, only for
-the current exact request, and must remove that authorization in `finally`.
+authorize only `npcink-abilities-toolkit/adopt-cloud-media-derivative` or
+`npcink-abilities-toolkit/restore-media-backup`, only for the current exact
+request, and must remove that authorization in `finally`. Backup discovery is
+read-only through `npcink-abilities-toolkit/list-media-backups`; Toolbox must
+not create a parallel backup registry or enable restore before the selected
+same-origin backup preview has loaded with non-zero dimensions.
 
 ## Watermark Templates
 
@@ -131,6 +136,12 @@ external-image adoption exception.
 - The original-image backup is created automatically for every replacement;
   the operator is not asked to choose whether to back it up, and Toolbox does
   not expose a disable-backup option.
+- Restore is available only from the completed single-image result while the
+  selected backup file is still within retention. Expired backups remain in
+  history as summaries but cannot be restored.
+- Image Handling exposes one simple retention choice: **30 days (recommended)**
+  or **90 days**. Toolbox stores this local setting and projects it to Toolkit;
+  no Cloud or Core setting is involved.
 - Keep optional crop and detailed watermark fields secondary to the quick
   choices.
 - Opening **More settings** reveals only compact filename, watermark-detail,
@@ -143,6 +154,35 @@ external-image adoption exception.
 - Batch mode retains Core proposal wording and behavior.
 
 ## Verification
+
+## Recovery comparison UI rules
+
+The completed single-image recovery view is a focused visual confirmation
+surface, not a second settings page. Keep these rules stable when adjusting
+the layout:
+
+- The current attachment is always the left comparison subject; the retained
+  original backup is always the right comparison subject. Use the same order
+  in side-by-side cards and in slider labels.
+- Expose only two top-level comparison modes: **Side-by-side comparison** and
+  **Slider comparison**. The former shows the two complete cards; the latter
+  shows one shared canvas with a draggable divider.
+- The slider-only **Backup original / Current image** buttons belong beside the
+  mode buttons and must be hidden in side-by-side mode. They set the slider to
+  100% or 0% respectively and must visibly update the active state.
+- Do not place labels, filenames, metadata, or actions over image pixels. Card
+  headings and **View large image** stay outside the image frame; compact
+  metadata sits below the image.
+- Empty result containers must be `display:none` and must not retain borders,
+  padding, minimum height, or background. Only actionable warning/error
+  feedback may allocate a result row.
+- A top-level Toolbox tab is mutually exclusive. Activation must update
+  `is-active`, the shared active class, `aria-selected`, `aria-current`, and
+  panel `hidden` state together; stale active classes are not allowed.
+
+These rules came from repeated operator visual checks: controls that overlay
+image pixels reduce confidence, empty result shells consume vertical space,
+and stale active classes make two top-level surfaces appear open at once.
 
 Static contracts must prove:
 

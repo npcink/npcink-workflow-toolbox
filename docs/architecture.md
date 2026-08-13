@@ -1,5 +1,7 @@
 # Architecture
 
+Attachment-scoped recovery lookup uses `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` to reopen the existing single-image workbench without adding a backup registry or write owner.
+
 ## Authoritative Write-Lane Split
 
 ADR-006 supersedes older editor handoff assumptions in this document. A value
@@ -373,6 +375,8 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
 - `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative`
+- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-restore`
+- `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
@@ -707,10 +711,10 @@ Check's Scheduled Review sub tab. Cloud run status, result reads, recent runs,
 and recovery live in Cloud Addon Runtime Runs. They do not live inside Cloud
 Checks. That keeps recurring inspection preview and Cloud run recovery separate
 from ordinary connection diagnostics without restoring a default Site Check
-entry. Site Knowledge
-connection, refresh, indexing, and deep delivery detail live in
-`npcink-cloud-addon`; Toolbox keeps only a secondary **Content Library Usage**
-panel for read-only status and best-practice result consumption.
+entry. All Site Knowledge operator management lives in `npcink-cloud-addon`,
+including connection, refresh, indexing, retrieval acceptance, and deep
+delivery detail. Toolbox only consumes Site Knowledge results inside its other
+workflows.
 
 The admin **Image Handling** tab groups image-first buttons by operator job and
 defaults to **Image Optimization**, with **Batch Optimize Images** as the first

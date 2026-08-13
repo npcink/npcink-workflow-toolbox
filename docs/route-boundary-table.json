@@ -238,6 +238,27 @@
       "boundary_note": "One present administrator may replace one exactly previewed image attachment through the Toolkit backup/rollback transaction; batch, background, delegated, external, and save-as-new actions are forbidden."
     },
     {
+      "route": "/strong-local-confirmation/media-derivative-restore",
+      "documented_route": "/strong-local-confirmation/media-derivative-restore",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "toolbox_single_image_workbench",
+      "write_posture": "strong_local_confirmation",
+      "direct_wordpress_write": true,
+      "boundary_exception": "ADR-011",
+      "boundary_note": "One present administrator may restore one verified recorded image backup; the current optimized file is backed up first, expired backups are unavailable, and batch, background, delegated, external, and manual backup deletion actions are forbidden."
+    },
+    {
+      "route": "/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)",
+      "documented_route": "/strong-local-confirmation/media-derivative-backups/{attachment_id}",
+      "methods": ["GET"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "toolbox_single_image_workbench",
+      "write_posture": "read_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Lists available Toolkit-owned backups for one editable image attachment so a present administrator can reopen the existing restore workbench; it does not restore, delete, or modify media."
+    },
+    {
       "route": "/flows/site-knowledge-review-plan",
       "documented_route": "/flows/site-knowledge-review-plan",
       "methods": ["POST"],

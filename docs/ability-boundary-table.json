@@ -218,6 +218,9 @@
     "npcink-abilities-toolkit/create-draft",
     "npcink-abilities-toolkit/upload-media-from-url",
     "npcink-abilities-toolkit/update-media-details",
-    "npcink-abilities-toolkit/set-post-featured-image"
+    "npcink-abilities-toolkit/set-post-featured-image",
+    "npcink-abilities-toolkit/adopt-cloud-media-derivative",
+    "npcink-abilities-toolkit/list-media-backups",
+    "npcink-abilities-toolkit/restore-media-backup"
   ]
 }
