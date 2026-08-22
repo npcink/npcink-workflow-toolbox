@@ -467,6 +467,19 @@
 			blockedLabel: __('Blocked when the draft has too little context or related content evidence is unavailable.', 'npcink-workflow-toolbox'),
 		},
 		{
+			intent: 'related_articles',
+			label: __('Find related articles', 'npcink-workflow-toolbox'),
+			description: __('Recommend published articles that are semantically related to this draft for review, reading, or manual citation.', 'npcink-workflow-toolbox'),
+			group: 'review_handoff',
+			sourceLabel: __('Current draft plus Cloud Site Knowledge vector evidence', 'npcink-workflow-toolbox'),
+			evidenceLabel: __('Article title, excerpt, relevance reason, score, and evidence refs', 'npcink-workflow-toolbox'),
+			actionLabel: __('Open / copy / ignore manually', 'npcink-workflow-toolbox'),
+			ownerLabel: __('Toolbox UI; Cloud Site Knowledge for semantic retrieval', 'npcink-workflow-toolbox'),
+			runtimeLabel: __('Cloud Site Knowledge related-content vector runtime', 'npcink-workflow-toolbox'),
+			writePostureLabel: __('Suggestion only; no body insertion or frontend related-articles block', 'npcink-workflow-toolbox'),
+			blockedLabel: __('Blocked when Cloud related-content evidence is unavailable or the draft has too little context.', 'npcink-workflow-toolbox'),
+		},
+		{
 			intent: 'image_alt_suggestions',
 			label: __('Article image ALT (SEO)', 'npcink-workflow-toolbox'),
 			description: __('Draft ALT for each image occurrence from its nearest heading and adjacent article text.', 'npcink-workflow-toolbox'),
@@ -5136,7 +5149,8 @@
 			'article_audio_summary',
 			'tag_suggestions',
 			'category_suggestions',
-				'internal_links',
+			'internal_links',
+			'related_articles',
 				'writing_support',
 				'zhihu_research',
 				'zhihu_hot_topics',
@@ -5169,6 +5183,9 @@
 		}
 		if (intent === 'internal_links') {
 			return __('Example: prefer tutorials over announcement posts.', 'npcink-workflow-toolbox');
+		}
+		if (intent === 'related_articles') {
+			return __('Example: prefer practical tutorials and recently updated articles.', 'npcink-workflow-toolbox');
 		}
 		if (intent === 'article_checkup') {
 			return __('Example: focus on structure and factual claims, not style preference.', 'npcink-workflow-toolbox');
@@ -5669,6 +5686,20 @@
 				action_policy: 'operator_review_only_no_insert',
 				target_field: 'post_content',
 			};
+		}));
+	}
+
+	function relatedArticleCandidateItems(section) {
+		const items = section && Array.isArray(section.items) ? section.items : [];
+		return items.map((item, index) => ({
+			id: readableItemText(item && (item.id || item.post_id), String(index + 1)),
+			title: readableItemText(item && item.title, __('Related article', 'npcink-workflow-toolbox')),
+			targetUrl: readableItemText(item && (item.url || item.target_url || item.permalink), ''),
+			excerpt: readableItemText(item && item.excerpt, ''),
+			reason: readableItemText(item && item.reason, __('Semantically related by Cloud Site Knowledge.', 'npcink-workflow-toolbox')),
+			score: item && item.score,
+			candidateSource: readableItemText(item && item.candidate_source, ''),
+			evidenceRefs: Array.isArray(item && item.evidence_refs) ? item.evidence_refs : [],
 		}));
 	}
 
@@ -6714,6 +6745,41 @@
 			);
 	}
 
+	function renderRelatedArticleCandidateSection(section, controls) {
+		const candidates = relatedArticleCandidateItems(section);
+		const actionControls = controls && controls.relatedArticles ? controls.relatedArticles : {};
+		const ignored = actionControls.ignored || {};
+		const visibleCandidates = candidates.filter((item) => !ignored[String(item.id || '')]).slice(0, 5);
+		return createElement(
+			'section',
+			{ className: 'npcink-toolbox-editor-support__metadata-compact-section npcink-toolbox-editor-support__related-articles' },
+			createElement('h4', null, __('Recommended related articles', 'npcink-workflow-toolbox')),
+			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Cloud vector retrieval supplies these suggestions. Review them for reading or manual citation; nothing is inserted into the draft automatically.', 'npcink-workflow-toolbox')),
+			visibleCandidates.length
+				? createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, visibleCandidates.map((item, index) => {
+					const key = String(index) + '-' + item.title;
+					const hasUrl = Boolean(item.targetUrl);
+					return createElement('li', { key, className: 'npcink-toolbox-editor-support__internal-link-card' },
+						createElement('strong', null, item.title),
+						item.excerpt ? createElement('p', null, truncateText(item.excerpt, 140)) : null,
+						createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Related because: ', 'npcink-workflow-toolbox') + truncateText(item.reason, 140)),
+						createElement('div', { className: 'npcink-toolbox-editor-support__internal-link-meta' },
+							item.score ? createElement('span', null, __('Score ', 'npcink-workflow-toolbox') + item.score) : null,
+							section.candidate_source ? createElement('span', null, formatMetaLabel(section.candidate_source)) : null
+						),
+						createElement('div', { className: 'npcink-toolbox-editor-support__internal-link-actions' },
+							createElement(Button, { type: 'button', variant: 'primary', disabled: !hasUrl || Boolean(actionControls.running), isBusy: actionControls.running === key + ':copy', onClick: () => actionControls.copy && actionControls.copy(item, key) }, __('Copy link', 'npcink-workflow-toolbox')),
+							createElement(Button, { type: 'button', variant: 'tertiary', onClick: () => actionControls.ignore && actionControls.ignore(item) }, __('Ignore', 'npcink-workflow-toolbox')),
+							createElement(Button, { type: 'button', variant: 'tertiary', disabled: !hasUrl, onClick: () => actionControls.open && actionControls.open(item) }, __('Open article', 'npcink-workflow-toolbox'))
+						)
+					);
+				}))
+				: createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, candidates.length ? __('All related article candidates have been ignored.', 'npcink-workflow-toolbox') : __('No related articles returned.', 'npcink-workflow-toolbox')),
+			actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message) : null,
+			createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, __('Suggestions are review-only and do not create a frontend related-articles section.', 'npcink-workflow-toolbox'))
+		);
+	}
+
 	function renderEvidenceDetails(blocks, controls) {
 		if (!Array.isArray(blocks) || !blocks.length) {
 			return null;
@@ -7286,6 +7352,10 @@
 			blocks.push(renderInternalLinkCandidateSection(sections.internal_links, metadataHandoffControls));
 		}
 
+		if (sections.related_articles) {
+			blocks.push(renderRelatedArticleCandidateSection(sections.related_articles, metadataHandoffControls));
+		}
+
 		if (sections.site_knowledge && !sections.internal_links) {
 			blocks.push(createElement('h4', { key: 'links-title' }, __('Site Knowledge', 'npcink-workflow-toolbox')));
 			blocks.push(renderItems(extractKnowledgeItems(sections.site_knowledge), __('No related content returned.', 'npcink-workflow-toolbox')));
@@ -7458,6 +7528,9 @@
 			const [internalLinkStatus, setInternalLinkStatus] = useState(null);
 			const [internalLinkUndo, setInternalLinkUndo] = useState(null);
 			const [internalLinkIgnored, setInternalLinkIgnored] = useState({});
+			const [relatedArticleRunning, setRelatedArticleRunning] = useState('');
+			const [relatedArticleStatus, setRelatedArticleStatus] = useState(null);
+			const [relatedArticleIgnored, setRelatedArticleIgnored] = useState({});
 			const [contextualAltApplyRunning, setContextualAltApplyRunning] = useState(false);
 			const [contextualAltApplyStatus, setContextualAltApplyStatus] = useState(null);
 			const [flowInstructions, setFlowInstructions] = useState({});
@@ -8296,6 +8369,40 @@
 			} finally {
 				setInternalLinkRunning('');
 			}
+		}
+
+		async function copyRelatedArticleCandidate(candidate, key) {
+			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
+			if (!url) {
+				setRelatedArticleStatus({ status: 'error', message: __('This related article has no URL to copy.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			setRelatedArticleRunning(String(key || 'article') + ':copy');
+			try {
+				await copyTextToClipboard(url);
+				submitContentImplicitFeedback('related_article_copy', 'accepted', ['evidence_useful', 'operator_confidence_high']);
+				setRelatedArticleStatus({ status: 'success', message: __('Article link copied.', 'npcink-workflow-toolbox') });
+			} catch (copyError) {
+				setRelatedArticleStatus({ status: 'error', message: __('Could not copy the article link. Open it and copy manually.', 'npcink-workflow-toolbox') });
+			} finally {
+				setRelatedArticleRunning('');
+			}
+		}
+
+		function ignoreRelatedArticleCandidate(candidate) {
+			setRelatedArticleIgnored((current) => Object.assign({}, current || {}, { [String(candidate && candidate.id || '')]: true }));
+			submitContentImplicitFeedback('related_article_ignored', 'rejected', ['candidate_not_adopted'], { sourceObjectId: String(candidate && candidate.id || '') });
+			setRelatedArticleStatus({ status: 'info', message: __('Related article suggestion ignored.', 'npcink-workflow-toolbox') });
+		}
+
+		function openRelatedArticleCandidate(candidate) {
+			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
+			if (!url) {
+				setRelatedArticleStatus({ status: 'error', message: __('This related article has no URL to open.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			submitContentImplicitFeedback('related_article_open', 'accepted', ['evidence_useful', 'operator_confidence_high']);
+			window.open(url, '_blank', 'noopener,noreferrer');
 		}
 
 		function applyInternalLinkCandidate(candidate) {
@@ -9868,6 +9975,14 @@
 					ignored: internalLinkIgnored,
 					undo: internalLinkUndo ? undoInternalLinkCandidate : null,
 					open: openInternalLinkCandidate,
+				},
+				relatedArticles: {
+					running: relatedArticleRunning,
+					status: relatedArticleStatus,
+					copy: copyRelatedArticleCandidate,
+					ignore: ignoreRelatedArticleCandidate,
+					ignored: relatedArticleIgnored,
+					open: openRelatedArticleCandidate,
 				},
 				contextualAltApply: {
 					apply: applyContextualAltToDraft,
