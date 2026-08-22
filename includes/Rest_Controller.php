@@ -4565,6 +4565,7 @@ final class Rest_Controller {
 			'candidate_limit'          => 8,
 			'max_targets'              => 6,
 			'related_content_evidence' => $related_content_evidence,
+			'candidate_source'         => empty( $related_content_evidence ) ? 'local_fallback' : 'cloud_vector',
 			'content_blocks'            => is_array( $context['content_blocks'] ?? null ) ? $context['content_blocks'] : array(),
 		);
 		if ( 0 >= (int) $input['current_post_id'] ) {
@@ -4836,8 +4837,9 @@ final class Rest_Controller {
 					'quality_score'        => $quality_score,
 					'quality_issues'       => $quality_issues,
 						'evidence_refs'        => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
-						'source_match'         => $source_match,
-						'priority_reason'      => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
+					'source_match'         => $source_match,
+					'candidate_source'     => sanitize_key( (string) ( $item['candidate_source'] ?? '' ) ),
+					'priority_reason'      => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
 						'link_graph_issues'    => is_array( $item['link_graph_issues'] ?? null ) ? $item['link_graph_issues'] : array(),
 						'shared_terms'         => is_array( $item['shared_terms'] ?? null ) ? $item['shared_terms'] : array(),
 						'incoming_count'       => absint( $item['incoming_count'] ?? 0 ),
@@ -6016,6 +6018,9 @@ final class Rest_Controller {
 
 		if ( '' !== (string) ( $args['source_candidate_ref'] ?? '' ) ) {
 			$candidate['source_candidate_ref'] = sanitize_text_field( (string) $args['source_candidate_ref'] );
+		}
+		if ( '' !== (string) ( $args['candidate_source'] ?? '' ) ) {
+			$candidate['candidate_source'] = sanitize_key( (string) $args['candidate_source'] );
 		}
 		if ( is_array( $args['target_ref'] ?? null ) ) {
 			$target_ref = $args['target_ref'];
