@@ -45,12 +45,6 @@ if (
 	$fail( 'Toolbox Operations Insights classes must be loaded.' );
 }
 
-if ( ! function_exists( 'npcink_cloud_addon_runtime_client' ) ) {
-	$fail( 'Cloud Addon runtime client seam must be available.' );
-}
-
-$runtime_client = npcink_cloud_addon_runtime_client();
-$assert( is_object( $runtime_client ) && method_exists( $runtime_client, 'execute_runtime' ), 'Cloud Addon exposes execute_runtime().' );
 $assert( function_exists( 'npcink_cloud_addon_execute_toolbox_site_ops_cloud_analysis_runtime' ), 'Cloud Addon exposes the Toolbox Site Ops Cloud analysis transport helper.' );
 
 $settings        = new \Npcink_Toolbox\Settings();

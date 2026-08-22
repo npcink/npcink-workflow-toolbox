@@ -12,10 +12,13 @@ defined( 'ABSPATH' ) || exit;
 final class Ability_Surface_Metadata {
 	public static function definitions(): array {
 		return array(
+			'source_adaptation_review' => self::definition( __( 'Draft from source materials', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'cloud_reader_site_knowledge_and_hosted_ai_via_addon', 'native_editor_or_article_plan_core_handoff', 'npcink_owned_default' ),
 			'publish_preflight'        => self::definition( __( 'Publish Preflight', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolbox_local_optional_cloud', 'seo_meta_core_handoff_preview', 'npcink_owned_default' ),
+			'category_suggestions'      => self::definition( __( 'Category suggestions', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_owned_default' ),
+			'tag_suggestions'           => self::definition( __( 'Tag suggestions', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_owned_default' ),
 			'internal_link_candidates' => self::definition( __( 'Internal Link Candidates', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_with_optional_site_knowledge', 'manual_editor_review', 'npcink_owned_default' ),
 			'image_candidates'         => self::definition( __( 'Image Candidates', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'cloud_runtime_via_addon', 'image_candidate_adoption_plan', 'npcink_owned_default' ),
-			'article_audio_candidates' => self::definition( __( 'Article Audio Candidates', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'cloud_runtime_via_addon', 'article_audio_adoption_plan', 'npcink_owned_default' ),
+			'article_audio_candidates' => self::definition( __( 'Article Audio Candidates', 'npcink-workflow-toolbox' ), 'editor_hidden_compatibility', false, 'cloud_runtime_via_addon', 'article_audio_adoption_plan', 'npcink_supporting_surface' ),
 			'full_site_insights'       => self::definition( __( 'Site Check', 'npcink-workflow-toolbox' ), 'admin_hidden_compatibility', false, 'local_snapshot_optional_cloud_detail', 'site_ops_cloud_analysis_request', 'npcink_supporting_surface' ),
 			'site_profile'             => self::definition( __( 'Site Profile', 'npcink-workflow-toolbox' ), 'admin_support_context', false, 'local_wordpress_option', 'read_only_context', 'npcink_supporting_surface' ),
 			'site_knowledge'           => self::definition( __( 'Site Knowledge', 'npcink-workflow-toolbox' ), 'admin_support_context', false, 'cloud_runtime_via_addon', 'search_or_sync_request', 'npcink_supporting_surface' ),
@@ -58,7 +61,7 @@ final class Ability_Surface_Metadata {
 				'label'       => __( 'Default entries', 'npcink-workflow-toolbox' ),
 				'status'      => 'ok',
 				'status_text' => __( 'Npcink workflows', 'npcink-workflow-toolbox' ),
-				'description' => __( 'V1 defaults are Publish Preflight, Internal Link Candidates, Image Candidates, Article Audio Candidates, and Article Image ALT (SEO).', 'npcink-workflow-toolbox' ),
+				'description' => __( 'V1 defaults are Draft From Source Materials, Publish Preflight, Category Suggestions, Tag Suggestions, Internal Link Candidates, Image Candidates, and Article Image ALT (SEO). Article audio remains hidden compatibility.', 'npcink-workflow-toolbox' ),
 			),
 			array(
 				'id'          => 'route_only_compatibility',

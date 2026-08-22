@@ -436,10 +436,8 @@ function wp_get_attachment_url( int $attachment_id ): string {
 	return 'https://example.test/workflow.jpg';
 }
 
-function npcink_cloud_addon_runtime_client() {
-	global $npcink_toolbox_progressive_cloud_calls;
-	++$npcink_toolbox_progressive_cloud_calls;
-	return null;
+function npcink_cloud_addon_get_connection_state(): array {
+	return array( 'configured' => false, 'verified' => false );
 }
 
 if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
