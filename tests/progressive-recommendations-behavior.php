@@ -88,6 +88,10 @@ function __( string $text, string $domain = 'default' ): string {
 	return $text;
 }
 
+function get_locale(): string {
+	return 'zh_CN';
+}
+
 function absint( $value ): int {
 	return max( 0, (int) $value );
 }
@@ -499,6 +503,7 @@ npcink_toolbox_progressive_assert( isset( $data['sections']['progressive_recomme
 npcink_toolbox_progressive_assert( 'editor_progressive_recommendations.v1' === ( $data['sections']['progressive_recommendations']['artifact_type'] ?? '' ), 'Progressive section declares the v1 artifact.' );
 npcink_toolbox_progressive_assert( false === ( $data['sections']['progressive_recommendations']['remote_execution_policy']['cloud_calls'] ?? true ), 'Progressive section declares no Cloud calls.' );
 npcink_toolbox_progressive_assert( 'editor_recommendation_set.v1' === ( $data['recommendation_set']['contract_version'] ?? '' ), 'Progressive response includes the recommendation set wrapper.' );
+npcink_toolbox_progressive_assert( 'zh_CN' === ( $data['content_context']['language'] ?? '' ), 'Progressive response projects the WordPress locale into its content context.' );
 npcink_toolbox_progressive_assert( 0 === $npcink_toolbox_progressive_cloud_calls, 'Progressive response does not touch the Cloud runtime.' );
 
 $response = $controller->editor_content_support(

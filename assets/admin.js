@@ -1320,6 +1320,7 @@
 		if (meta.childNodes.length) {
 			container.appendChild(meta);
 		}
+		renderSiteKnowledgeArticleIndexStatuses(container, payload && Array.isArray(payload.article_index_statuses) ? payload.article_index_statuses : []);
 
 		if (coverage.post_type_coverage || coverage.source_type_coverage) {
 			const details = el('details', 'npcink-toolbox__result-details');
@@ -1338,9 +1339,48 @@
 		renderSiteKnowledgeCloudBoundary(container, siteKnowledgeCloudBoundaryPayload(payload));
 	}
 
+	function renderSiteKnowledgeArticleIndexStatuses(container, statuses) {
+		if (!Array.isArray(statuses) || !statuses.length) {
+			return;
+		}
+
+		const notIndexed = statuses.filter((item) => item && item.status === 'not_indexed');
+		const summary = el('div', 'npcink-toolbox__result-notice ' + (notIndexed.length ? 'is-warning' : 'is-ok'));
+		summary.textContent = t('文章索引覆盖：已索引 %s 篇，未索引 %s 篇。')
+			.replace('%s', String(statuses.length - notIndexed.length))
+			.replace('%s', String(notIndexed.length));
+		container.appendChild(summary);
+
+		const details = el('details', 'npcink-toolbox__result-details');
+		details.appendChild(el('summary', '', '查看文章索引状态'));
+		const list = el('div', 'npcink-toolbox__result-meta');
+		const visible = [...notIndexed, ...statuses.filter((item) => item && item.status !== 'not_indexed')].slice(0, 50);
+		visible.forEach((item) => {
+			const title = item && item.title ? item.title : t('未命名文章');
+			const state = item && item.status === 'indexed' ? t('已索引') : t('未索引');
+			const value = item && item.url ? title + ' · ' + state : state;
+			appendMeta(list, item && item.post_id ? '#' + String(item.post_id) : t('文章'), value);
+		});
+		if (statuses.length > visible.length) {
+			list.appendChild(el('small', 'description', '仅显示前 50 篇，未索引文章优先。'));
+		}
+		details.appendChild(list);
+		container.appendChild(details);
+	}
+
 	function siteKnowledgeProgressMessage(message) {
 		const text = String(message || '').trim();
-		return text ? t(text) : '';
+		if (!text) {
+			return '';
+		}
+		if (text.toLowerCase().indexOf('no longer in the local delivery buffer') >= 0) {
+			const countMatch = text.match(/^(\d+)\s+change notifications/i);
+			const count = countMatch ? countMatch[1] : '';
+			return count
+				? t('%s 条变更记录已不在本地投递缓冲区，建议刷新公开内容以重新核对。').replace('%s', count)
+				: t('部分变更记录已不在本地投递缓冲区，建议刷新公开内容以重新核对。');
+		}
+		return t(text);
 	}
 
 	function siteKnowledgeChangeBridgePayload(payload) {
@@ -1443,7 +1483,7 @@
 		if (status === 'disabled') {
 			return {
 				kind: 'warning',
-				message: health.message || 'Cloud Addon change bridge is disabled until Cloud settings are verified.',
+				message: siteKnowledgeBridgeMessage(health.message || 'Cloud Addon change bridge is disabled until Cloud settings are verified.'),
 			};
 		}
 		if (status === 'delayed' || health.wp_cron_disabled === true || siteKnowledgeChangeBridgeDue(health, bufferCount)) {
@@ -1462,6 +1502,18 @@
 			kind: 'ok',
 			message: 'Cloud Addon change bridge is idle. No public-content changes are waiting.',
 		};
+	}
+
+	function siteKnowledgeBridgeMessage(message) {
+		const text = String(message || '').trim();
+		if (text.toLowerCase().indexOf('no longer in the local delivery buffer') >= 0) {
+			const countMatch = text.match(/^(\d+)\s+change notifications/i);
+			const count = countMatch ? countMatch[1] : '';
+			return count
+				? t('%s 条变更记录已不在本地投递缓冲区，建议刷新公开内容以重新核对。').replace('%s', count)
+				: t('部分变更记录已不在本地投递缓冲区，建议刷新公开内容以重新核对。');
+		}
+		return t(text);
 	}
 
 	function siteKnowledgeChangeBridgeMeaning(health, status, bufferCount) {

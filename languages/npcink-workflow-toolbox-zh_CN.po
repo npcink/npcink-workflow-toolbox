@@ -8233,3 +8233,71 @@ msgstr "%s 的副本"
 #: assets/admin.js
 msgid "Template removed. Save to apply: %s"
 msgstr "已移除模板，保存后生效：%s"
+
+#: assets/editor-content-support.js
+msgid "Found in draft: "
+msgstr "草稿中找到："
+
+#: assets/editor-content-support.js
+msgid "Apply to editor"
+msgstr "应用到编辑器"
+
+#: assets/editor-content-support.js
+msgid "Ignore"
+msgstr "忽略"
+
+#: assets/editor-content-support.js
+msgid "Undo last link"
+msgstr "撤销上一条内链"
+
+#: assets/editor-content-support.js
+msgid "This suggestion no longer has an exact editable phrase."
+msgstr "这条建议已找不到可编辑的精确短语。"
+
+#: assets/editor-content-support.js
+msgid "The article changed after this review. Run internal links again."
+msgstr "文章在本次审阅后发生了变化，请重新运行内链建议。"
+
+#: assets/editor-content-support.js
+msgid "The exact anchor phrase is no longer available."
+msgstr "精确锚文本已不存在。"
+
+#: assets/editor-content-support.js
+msgid "That phrase already contains a link."
+msgstr "该短语已经包含链接。"
+
+#: assets/editor-content-support.js
+msgid "This article already links to that target."
+msgstr "本文已经链接到该目标文章。"
+
+#: assets/editor-content-support.js
+msgid "This article has reached its reviewed internal-link limit."
+msgstr "本文已达到审阅后的内链数量上限。"
+
+#: assets/editor-content-support.js
+msgid "This paragraph already contains two links. Choose a different placement."
+msgstr "该段落已经包含两条链接，请选择其他位置。"
+
+#: assets/editor-content-support.js
+msgid "Link added to the visible editor. Update or publish normally to save it."
+msgstr "链接已添加到当前可见编辑器；请照常更新或发布以保存。"
+
+#: assets/editor-content-support.js
+msgid "The block changed after the link was applied. Use the editor history to undo safely."
+msgstr "应用链接后区块又发生了变化，请使用编辑器历史记录安全撤销。"
+
+#: assets/editor-content-support.js
+msgid "The last internal link was removed from the editor."
+msgstr "上一条内链已从编辑器中移除。"
+
+#: assets/editor-content-support.js
+msgid "Suggestion ignored."
+msgstr "已忽略该建议。"
+
+#: includes/Rest_Controller.php assets/editor-content-support.js
+msgid "Semantically related by Cloud Site Knowledge."
+msgstr "Cloud 向量检索判定该文章与当前内容语义相关。"
+
+#: assets/editor-content-support.js
+msgid "All internal link candidates have been ignored."
+msgstr "所有内链候选均已忽略。"

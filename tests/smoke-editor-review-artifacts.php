@@ -307,34 +307,66 @@ $base_params = array(
 	'context_scope'  => 'full_article',
 );
 
-$internal_links_result = toolbox_editor_review_smoke_rest( array( 'intent' => 'internal_links' ) + $base_params );
+$internal_link_phrase = 'Internal link smoke anchor';
+$internal_links_result = toolbox_editor_review_smoke_rest(
+	array(
+		'intent'         => 'internal_links',
+		'selected_text'  => $internal_link_phrase,
+		'content_blocks' => array(
+			array(
+				'client_id'  => 'editor-review-smoke-block',
+				'block_name' => 'core/paragraph',
+				'text'       => 'Prefix ' . $internal_link_phrase . ' suffix.',
+			),
+		),
+	) + $base_params
+);
 $internal_links        = is_array( $internal_links_result['sections']['internal_links'] ?? null ) ? $internal_links_result['sections']['internal_links'] : array();
 $internal_items        = is_array( $internal_links['items'] ?? null ) ? $internal_links['items'] : array();
 $internal_projection   = is_array( $internal_links['recommendation_candidates'] ?? null ) ? $internal_links['recommendation_candidates'] : array();
 $internal_handoff      = is_array( $internal_links['handoff'] ?? null ) ? $internal_links['handoff'] : array();
+$target_projection     = array_values(
+	array_filter(
+		$internal_projection,
+		static fn( $candidate ): bool => $target_post_id === absint( $candidate['target_ref']['post_id'] ?? 0 )
+	)
+);
 
 toolbox_editor_review_smoke_assert( 'editor_content_support_flow' === (string) ( $internal_links_result['artifact_type'] ?? '' ), 'Internal-links result declares editor_content_support_flow.' );
 toolbox_editor_review_smoke_assert( 'internal_links' === (string) ( $internal_links_result['intent'] ?? '' ), 'Internal-links result preserves the fixed intent.' );
 toolbox_editor_review_smoke_assert( false === (bool) ( $internal_links_result['direct_wordpress_write'] ?? true ), 'Internal-links flow disables direct WordPress writes.' );
 toolbox_editor_review_smoke_assert( 'internal_link_candidates.v1' === (string) ( $internal_links['artifact_type'] ?? '' ), 'Internal-links section returns the structured candidate artifact.' );
-toolbox_editor_review_smoke_assert( 'operator_review_only_no_insert' === (string) ( $internal_links['final_write_path'] ?? '' ), 'Internal-link candidates remain operator-review only without insertion.' );
+toolbox_editor_review_smoke_assert( 'native_editor_commit' === (string) ( $internal_links['final_write_path'] ?? '' ), 'Internal-link candidates permit only visible editor-state adoption.' );
 toolbox_editor_review_smoke_assert( false === (bool) ( $internal_links['direct_wordpress_write'] ?? true ), 'Internal-link section disables direct WordPress writes.' );
 toolbox_editor_review_smoke_assert( ! empty( $internal_items ), 'Internal-link section returns at least one candidate from mocked Site Knowledge.' );
-toolbox_editor_review_smoke_assert( $target_post_id === absint( $internal_items[0]['target_post_id'] ?? 0 ), 'Internal-link candidate points to the public target post.' );
+toolbox_editor_review_smoke_assert( in_array( $target_post_id, array_map( 'absint', array_column( $internal_items, 'target_post_id' ) ), true ), 'Internal-link candidates include the public target post.' );
 toolbox_editor_review_smoke_assert( 'review_only_candidate' === (string) ( $internal_items[0]['status'] ?? '' ), 'Internal-link candidate is review-only.' );
 toolbox_editor_review_smoke_assert( 'recommendation_candidate.v1' === (string) ( $internal_links['candidate_contract'] ?? '' ), 'Internal-link section declares the shared recommendation candidate projection.' );
 toolbox_editor_review_smoke_assert( ! empty( $internal_projection ), 'Internal-link section returns recommendation candidate projections.' );
 toolbox_editor_review_smoke_assert( 'recommendation_candidate.v1' === (string) ( $internal_projection[0]['contract'] ?? '' ), 'Internal-link projection uses recommendation_candidate.v1.' );
 toolbox_editor_review_smoke_assert( 'internal_link' === (string) ( $internal_projection[0]['kind'] ?? '' ), 'Internal-link projection keeps the internal_link candidate kind.' );
-toolbox_editor_review_smoke_assert( 'operator_review_only_no_insert' === (string) ( $internal_projection[0]['action_policy'] ?? '' ), 'Internal-link projection keeps the no-insert action policy.' );
+toolbox_editor_review_smoke_assert( 'operator_confirmed_visible_editor_apply' === (string) ( $internal_projection[0]['action_policy'] ?? '' ), 'Internal-link projection requires an operator-confirmed visible editor apply.' );
 toolbox_editor_review_smoke_assert( 'human_editor' === (string) ( $internal_links['owner_label'] ?? '' ), 'Internal-link section names the human editor as the placement owner.' );
-toolbox_editor_review_smoke_assert( 'copy_or_open_then_place_manually' === (string) ( $internal_links['next_safe_action'] ?? '' ), 'Internal-link section exposes the safe manual next action.' );
-toolbox_editor_review_smoke_assert( is_array( $internal_projection[0]['target_ref'] ?? null ) && $target_post_id === absint( $internal_projection[0]['target_ref']['post_id'] ?? 0 ), 'Internal-link projection exposes a bounded target_ref.' );
+toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (string) ( $internal_links['next_safe_action'] ?? '' ), 'Internal-link section exposes the reviewed visible-editor action.' );
+toolbox_editor_review_smoke_assert( ! empty( $target_projection ) && is_array( $target_projection[0]['target_ref'] ?? null ), 'Internal-link projection exposes a bounded target_ref for the Cloud target.' );
+toolbox_editor_review_smoke_assert( 'editor-review-smoke-block' === (string) ( $target_projection[0]['source_match']['block_client_id'] ?? '' ), 'Internal-link projection preserves the exact editor block match.' );
+toolbox_editor_review_smoke_assert( $internal_link_phrase === (string) ( $target_projection[0]['source_match']['matched_text'] ?? '' ), 'Internal-link projection preserves the exact reviewed anchor phrase.' );
+toolbox_editor_review_smoke_assert( 'Prefix ' . $internal_link_phrase . ' suffix.' === (string) ( $target_projection[0]['source_match']['expected_text'] ?? '' ), 'Internal-link projection preserves stale-block comparison text.' );
 toolbox_editor_review_smoke_assert( '' !== (string) ( $internal_projection[0]['anchor_or_context'] ?? '' ), 'Internal-link projection exposes the suggested anchor or review context.' );
 toolbox_editor_review_smoke_assert( '' !== (string) ( $internal_projection[0]['evidence_note'] ?? '' ), 'Internal-link projection exposes a review evidence note.' );
 toolbox_editor_review_smoke_assert( 'human_editor' === (string) ( $internal_projection[0]['owner_label'] ?? '' ), 'Internal-link projection keeps placement ownership with the human editor.' );
-toolbox_editor_review_smoke_assert( 'copy_or_open_then_place_manually' === (string) ( $internal_projection[0]['next_safe_action'] ?? '' ), 'Internal-link projection exposes a copy/open manual placement action.' );
-toolbox_editor_review_smoke_assert( in_array( 'no_link_insertion_in_toolbox', (array) ( $internal_handoff['blocked_actions'] ?? array() ), true ), 'Internal-link handoff blocks Toolbox link insertion.' );
+toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (string) ( $internal_projection[0]['next_safe_action'] ?? '' ), 'Internal-link projection exposes reviewed visible-editor placement.' );
+toolbox_editor_review_smoke_assert( in_array( 'no_backend_post_content_patch', (array) ( $internal_handoff['blocked_actions'] ?? array() ), true ), 'Internal-link handoff blocks backend post-content patching.' );
+
+$related_articles_result = toolbox_editor_review_smoke_rest( array( 'intent' => 'related_articles' ) + $base_params );
+$related_articles        = is_array( $related_articles_result['sections']['related_articles'] ?? null ) ? $related_articles_result['sections']['related_articles'] : array();
+$related_set             = is_array( $related_articles_result['recommendation_set'] ?? null ) ? $related_articles_result['recommendation_set'] : array();
+toolbox_editor_review_smoke_assert( 'related_article_candidates.v1' === (string) ( $related_articles['artifact_type'] ?? '' ), 'Related-article section returns the dedicated candidate artifact.' );
+toolbox_editor_review_smoke_assert( 'document' === (string) ( $related_articles['result_granularity'] ?? '' ), 'Related-article candidates are returned at document granularity.' );
+toolbox_editor_review_smoke_assert( false === (bool) ( $related_articles['direct_wordpress_write'] ?? true ), 'Related-article candidates disable direct WordPress writes.' );
+toolbox_editor_review_smoke_assert( 'content_context.v1' === (string) ( $related_articles_result['content_context']['contract_version'] ?? '' ) && 'wordpress' === (string) ( $related_articles_result['content_context']['platform'] ?? '' ), 'Editor response exposes the canonical WordPress content context.' );
+toolbox_editor_review_smoke_assert( 'recommendation_set.v1' === (string) ( $related_set['canonical_contract'] ?? '' ) && 'editor_recommendation_set.v1' === (string) ( $related_set['compatibility_contract'] ?? '' ), 'Recommendation set exposes canonical and compatibility contract names.' );
+toolbox_editor_review_smoke_assert( isset( $related_set['artifact_counts']['related_articles'] ), 'Recommendation set counts related-article candidates.' );
 
 $publish_result  = toolbox_editor_review_smoke_rest( array( 'intent' => 'publish_preflight' ) + $base_params );
 $review          = is_array( $publish_result['sections']['pre_publish_review'] ?? null ) ? $publish_result['sections']['pre_publish_review'] : array();

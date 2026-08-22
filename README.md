@@ -197,7 +197,7 @@ expect to stay discoverable from the root README:
 The default button coverage gate is machine-readable in
 [Fixed Button Contract Table](docs/fixed-button-contract-table.json). It records
 the runtime owner, write lane, handoff owner, and current Adapter parity status
-for all twelve committed buttons; partial parity is reported
+for all thirteen committed buttons; partial parity is reported
 rather than hidden. New default editor flows must add their own contract row.
 
 ### Boundary Exceptions Only

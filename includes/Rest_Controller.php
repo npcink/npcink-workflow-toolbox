@@ -255,7 +255,7 @@ final class Rest_Controller {
 					'route'          => '/editor/content-support',
 					'artifact_type'  => 'editor_content_support_flow',
 					'source_layers'  => array( 'local_editor_context', 'cloud_site_knowledge', 'cloud_web_search', 'hosted_ai' ),
-					'intents'        => array( 'progressive_recommendations', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ),
+					'intents'        => array( 'progressive_recommendations', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'related_articles', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ),
 					'feedback_scope' => 'editor_content_support',
 				),
 				'nightly_inspection'     => array(
@@ -376,13 +376,16 @@ final class Rest_Controller {
 	}
 
 	public function site_knowledge_status( WP_REST_Request $request ) {
+		$public_post_ids = $this->public_site_knowledge_post_ids();
 		$status = $this->client->get_site_knowledge_status(
 			array(
 				'include_coverage' => true,
+				'post_ids'         => $public_post_ids,
 			)
 		);
 
 		if ( is_array( $status ) ) {
+			$status['article_index_statuses'] = $this->site_knowledge_article_index_statuses( $status, $public_post_ids );
 			$change_bridge = Site_Knowledge_Auto_Sync::health_snapshot();
 			$status['change_bridge'] = $change_bridge;
 			$status['auto_sync']     = $change_bridge;
@@ -395,6 +398,65 @@ final class Rest_Controller {
 		}
 
 		return rest_ensure_response( $status );
+	}
+
+	/**
+	 * Returns the bounded local manifest used to compare public WordPress posts
+	 * with the Cloud-owned indexed ID projection.
+	 *
+	 * @return int[]
+	 */
+	private function public_site_knowledge_post_ids(): array {
+		$posts = get_posts(
+			array(
+				'post_type'              => array( 'post', 'page' ),
+				'post_status'            => 'publish',
+				'posts_per_page'         => 1000,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'orderby'                => 'modified',
+				'order'                  => 'DESC',
+				'ignore_sticky_posts'    => true,
+			)
+		);
+
+		return array_values( array_filter( array_map( 'absint', is_array( $posts ) ? $posts : array() ) ) );
+	}
+
+	/**
+	 * @param array<string,mixed> $status          Cloud status response.
+	 * @param int[]               $public_post_ids Local comparison manifest sent to Cloud.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function site_knowledge_article_index_statuses( array $status, array $public_post_ids ): array {
+		$coverage = is_array( $status['coverage'] ?? null ) ? $status['coverage'] : array();
+		$public_post_ids = array_values( array_unique( array_filter( array_map( 'absint', $public_post_ids ) ) ) );
+		if (
+			array() !== $public_post_ids
+			&& (
+				! is_array( $coverage['indexed_post_ids'] ?? null )
+				|| count( $public_post_ids ) !== absint( $coverage['indexed_post_ids_requested'] ?? 0 )
+			)
+		) {
+			return array();
+		}
+		$indexed_ids = array_fill_keys( array_map( 'absint', is_array( $coverage['indexed_post_ids'] ?? null ) ? $coverage['indexed_post_ids'] : array() ), true );
+		$statuses = array();
+		foreach ( $public_post_ids as $post_id ) {
+			$post = get_post( $post_id );
+			if ( ! $post ) {
+				continue;
+			}
+			$statuses[] = array(
+				'post_id'       => $post_id,
+				'title'         => sanitize_text_field( get_the_title( $post ) ),
+				'url'           => esc_url_raw( get_permalink( $post ) ),
+				'modified_gmt'  => sanitize_text_field( (string) $post->post_modified_gmt ),
+				'status'        => isset( $indexed_ids[ $post_id ] ) ? 'indexed' : 'not_indexed',
+			);
+		}
+
+		return $statuses;
 	}
 
 	public function web_search_test( WP_REST_Request $request ) {
@@ -885,7 +947,7 @@ final class Rest_Controller {
 
 	public function editor_content_support( WP_REST_Request $request ) {
 		$intent = sanitize_key( (string) ( $request->get_param( 'intent' ) ?: '' ) );
-		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ), true ) ) {
+		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'related_articles', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_editor_support_intent',
 				__( 'A supported editor content-support intent is required.', 'npcink-workflow-toolbox' ),
@@ -973,6 +1035,7 @@ final class Rest_Controller {
 			'final_write_path'       => 'core_proposal_required',
 			'direct_wordpress_write' => false,
 			'post_context'           => $context,
+			'content_context'        => $this->editor_content_context( $context ),
 			'query'                  => $query,
 			'sections'               => array(),
 			'remote_execution_policy' => array(
@@ -1201,6 +1264,10 @@ final class Rest_Controller {
 
 		if ( 'internal_links' === $intent ) {
 			$result['sections']['internal_links'] = $this->editor_internal_link_candidates( $context, $query );
+		}
+
+		if ( 'related_articles' === $intent ) {
+			$result['sections']['related_articles'] = $this->editor_related_article_candidates( $context, $query );
 		}
 
 		if ( 'image_candidates' === $intent ) {
@@ -1713,6 +1780,7 @@ final class Rest_Controller {
 			'tag_ids'             => $this->csv_absint_list( (string) $request->get_param( 'tag_ids' ) ),
 			'featured_media'      => absint( $request->get_param( 'featured_media' ) ),
 			'media_items'         => $this->editor_media_items_from_request( $request ),
+			'content_blocks'      => $this->editor_content_blocks_from_request( $request ),
 			'comment_id'          => absint( $request->get_param( 'comment_id' ) ),
 			'comment_author'      => sanitize_text_field( (string) $request->get_param( 'comment_author' ) ),
 			'comment_text'        => sanitize_textarea_field( $this->editor_trim_chars( trim( wp_strip_all_tags( (string) $request->get_param( 'comment_text' ) ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) ),
@@ -1724,6 +1792,7 @@ final class Rest_Controller {
 		if ( ! is_array( $raw ) ) {
 			$raw = array();
 		}
+
 		$defaults = array(
 			'tone'     => 'calm',
 			'pace'     => 'normal',
@@ -1742,6 +1811,25 @@ final class Rest_Controller {
 			$preferences[ $key ] = in_array( $value, $allowed[ $key ], true ) ? $value : $default;
 		}
 		return $preferences;
+	}
+
+	private function editor_content_blocks_from_request( WP_REST_Request $request ): array {
+		$blocks = $request->get_param( 'content_blocks' );
+		if ( ! is_array( $blocks ) ) {
+			return array();
+		}
+		$items = array();
+		foreach ( array_slice( $blocks, 0, 80 ) as $block ) {
+			if ( ! is_array( $block ) ) {
+				continue;
+			}
+			$client_id = sanitize_text_field( (string) ( $block['client_id'] ?? '' ) );
+			$text = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1600 ) );
+			if ( '' !== $client_id && '' !== $text ) {
+				$items[] = array( 'client_id' => $client_id, 'block_name' => sanitize_text_field( (string) ( $block['block_name'] ?? '' ) ), 'text' => $text );
+			}
+		}
+		return $items;
 	}
 
 	private function editor_audio_text_from_raw_content( string $content, array $audio_preferences ): string {
@@ -2712,6 +2800,7 @@ final class Rest_Controller {
 			'tags'           => $this->editor_recommendation_count_by_kind( $sections, 'tag' ),
 			'featured_image' => $this->editor_recommendation_count_by_kind( $sections, 'image' ),
 			'internal_links' => $this->editor_recommendation_count_by_kind( $sections, 'internal_link' ),
+			'related_articles' => $this->editor_recommendation_count_by_kind( $sections, 'related_article' ),
 			'preflight'      => $this->editor_recommendation_count_by_kind( $sections, 'preflight' ),
 		);
 		$retrieval_sources   = $this->editor_recommendation_set_sources( $sections );
@@ -2720,10 +2809,13 @@ final class Rest_Controller {
 		return array(
 			'recommendation_set_id' => 'rec_' . substr( hash( 'sha256', $content_fingerprint . '|' . $intent . '|' . wp_json_encode( $artifact_counts ) ), 0, 20 ),
 			'contract_version'      => 'editor_recommendation_set.v1',
+			'canonical_contract'    => 'recommendation_set.v1',
+			'compatibility_contract' => 'editor_recommendation_set.v1',
 			'generated_at'          => gmdate( 'c' ),
 			'source_layer'          => $this->editor_recommendation_set_source_layer( $sections ),
 			'latency_profile'       => 'progressive_recommendations' === $intent ? 'local_300ms' : 'focused_intent',
 			'content_fingerprint'   => $content_fingerprint,
+			'content_context'       => $this->editor_content_context( $context ),
 			'intent'                => sanitize_key( $intent ),
 			'artifacts'             => $artifact_counts,
 			'artifact_counts'       => $artifact_counts,
@@ -2761,10 +2853,41 @@ final class Rest_Controller {
 		return 'sha256:' . hash( 'sha256', (string) wp_json_encode( $payload ) );
 	}
 
+	private function editor_content_context( array $context ): array {
+		$post_id = absint( $context['post_id'] ?? 0 );
+		return array(
+			'contract_version'    => 'content_context.v1',
+			'platform'            => 'wordpress',
+			'site_id'             => function_exists( 'get_current_blog_id' ) ? absint( get_current_blog_id() ) : 0,
+			'post_id'             => $post_id,
+			'post_type'           => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+			'post_status'         => sanitize_key( (string) ( $context['post_status'] ?? '' ) ),
+			'canonical_url'       => $post_id > 0 && function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post_id ) ) : '',
+			'language'            => function_exists( 'determine_locale' ) ? sanitize_text_field( determine_locale() ) : sanitize_text_field( (string) get_locale() ),
+			'context_scope'       => sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) ),
+			'title'               => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+			'excerpt'             => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
+			'content_text'        => sanitize_textarea_field( (string) ( $context['content_text'] ?? '' ) ),
+			'selected_text'       => sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ),
+			'selected_block_text' => sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ),
+			'category_ids'        => array_values( array_map( 'absint', is_array( $context['category_ids'] ?? null ) ? $context['category_ids'] : array() ) ),
+			'tag_ids'             => array_values( array_map( 'absint', is_array( $context['tag_ids'] ?? null ) ? $context['tag_ids'] : array() ) ),
+			'content_fingerprint' => $this->editor_content_fingerprint( $context ),
+			'write_owner'         => 'wordpress_local',
+			'direct_wordpress_write' => false,
+		);
+	}
+
 	private function editor_recommendation_count_by_kind( array $sections, string $kind ): int {
 		$count = 0;
 		foreach ( $sections as $section ) {
-			if ( ! is_array( $section ) || ! is_array( $section['recommendation_candidates'] ?? null ) ) {
+			if ( ! is_array( $section ) ) {
+				continue;
+			}
+			if ( 'related_article' === $kind && 'related_articles' === (string) ( $section['candidate_type'] ?? '' ) ) {
+				$count += count( is_array( $section['items'] ?? null ) ? $section['items'] : array() );
+			}
+			if ( ! is_array( $section['recommendation_candidates'] ?? null ) ) {
 				continue;
 			}
 			foreach ( $section['recommendation_candidates'] as $candidate ) {
@@ -2797,23 +2920,42 @@ final class Rest_Controller {
 	private function editor_recommendation_set_candidate_refs( array $sections ): array {
 		$refs = array();
 		foreach ( $sections as $section ) {
-			if ( ! is_array( $section ) || ! is_array( $section['recommendation_candidates'] ?? null ) ) {
+			if ( ! is_array( $section ) ) {
 				continue;
 			}
-			foreach ( $section['recommendation_candidates'] as $candidate ) {
-				if ( ! is_array( $candidate ) ) {
-					continue;
+			if ( is_array( $section['recommendation_candidates'] ?? null ) ) {
+				foreach ( $section['recommendation_candidates'] as $candidate ) {
+					if ( ! is_array( $candidate ) ) {
+						continue;
+					}
+					$id = sanitize_key( (string) ( $candidate['id'] ?? '' ) );
+					if ( '' === $id ) {
+						continue;
+					}
+					$refs[] = array(
+						'candidate_id'  => $id,
+						'kind'          => sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) ),
+						'target_field'  => sanitize_key( (string) ( $candidate['target_field'] ?? '' ) ),
+						'action_policy' => sanitize_key( (string) ( $candidate['action_policy'] ?? 'suggestion_only' ) ),
+					);
 				}
-				$id = sanitize_key( (string) ( $candidate['id'] ?? '' ) );
-				if ( '' === $id ) {
-					continue;
+			}
+			if ( 'related_articles' === (string) ( $section['candidate_type'] ?? '' ) && is_array( $section['items'] ?? null ) ) {
+				foreach ( array_slice( $section['items'], 0, 5 ) as $item ) {
+					if ( ! is_array( $item ) ) {
+						continue;
+					}
+					$id = sanitize_key( (string) ( $item['id'] ?? $item['post_id'] ?? '' ) );
+					if ( '' === $id ) {
+						continue;
+					}
+					$refs[] = array(
+						'candidate_id'  => $id,
+						'kind'          => 'related_article',
+						'target_field'  => 'article_reference',
+						'action_policy' => 'operator_review_only_no_write',
+					);
 				}
-				$refs[] = array(
-					'candidate_id'  => $id,
-					'kind'          => sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) ),
-					'target_field'  => sanitize_key( (string) ( $candidate['target_field'] ?? '' ) ),
-					'action_policy' => sanitize_key( (string) ( $candidate['action_policy'] ?? 'suggestion_only' ) ),
-				);
 			}
 		}
 		return $refs;
@@ -2859,7 +3001,7 @@ final class Rest_Controller {
 
 	private function editor_recommendation_set_source_layer( array $sections ): string {
 		foreach ( $sections as $section ) {
-			if ( is_array( $section ) && ! empty( $section['provider_execution'] ) ) {
+			if ( is_array( $section ) && ( ! empty( $section['provider_execution'] ) || 'cloud_vector' === (string) ( $section['candidate_source'] ?? '' ) ) ) {
 				return 'cloud';
 			}
 		}
@@ -2909,6 +3051,9 @@ final class Rest_Controller {
 			}
 			if ( ! empty( $section['provider_execution'] ) ) {
 				$sources[] = sanitize_key( (string) $section['provider_execution'] );
+			}
+			if ( ! empty( $section['candidate_source'] ) ) {
+				$sources[] = sanitize_key( (string) $section['candidate_source'] );
 			}
 			if ( ! empty( $section['ranking_context']['related_content_terms'] ) || ! empty( $section['related_context_summary'] ) ) {
 				$sources[] = 'site_knowledge';
@@ -4527,7 +4672,10 @@ final class Rest_Controller {
 				)
 			)
 		);
-		$related_content_evidence = $this->editor_internal_link_related_content_evidence( $source_knowledge );
+		$related_content_evidence = $this->editor_internal_link_graph_evidence(
+			$this->editor_internal_link_related_content_evidence( $source_knowledge ),
+			absint( $context['post_id'] ?? 0 )
+		);
 		$input = array(
 			'current_post_id'          => absint( $context['post_id'] ?? 0 ),
 			'post_type'                => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
@@ -4541,6 +4689,8 @@ final class Rest_Controller {
 			'candidate_limit'          => 8,
 			'max_targets'              => 6,
 			'related_content_evidence' => $related_content_evidence,
+			'candidate_source'         => empty( $related_content_evidence ) ? 'local_fallback' : 'cloud_vector',
+			'content_blocks'            => is_array( $context['content_blocks'] ?? null ) ? $context['content_blocks'] : array(),
 		);
 		if ( 0 >= (int) $input['current_post_id'] ) {
 			unset( $input['current_post_id'] );
@@ -4573,11 +4723,11 @@ final class Rest_Controller {
 		$artifact['source_knowledge'] = $source_knowledge;
 		$artifact['toolkit_artifact'] = $data;
 		$artifact['recommendation_candidates'] = $this->editor_internal_link_recommendation_candidates( $items );
-		$artifact['final_write_path'] = 'operator_review_only_no_insert';
+		$artifact['final_write_path'] = 'native_editor_commit';
 		$artifact['direct_wordpress_write'] = false;
 		$artifact['owner_label'] = 'human_editor';
-		$artifact['next_safe_action'] = 'copy_or_open_then_place_manually';
-		$artifact['action_policy'] = 'operator_review_only_no_insert';
+		$artifact['next_safe_action'] = 'review_and_apply_to_visible_editor';
+		$artifact['action_policy'] = 'operator_confirmed_visible_editor_apply';
 		$artifact['review_policy'] = array_merge(
 			is_array( $artifact['review_policy'] ?? null ) ? $artifact['review_policy'] : array(),
 			array(
@@ -4589,14 +4739,14 @@ final class Rest_Controller {
 		);
 		$handoff = is_array( $artifact['handoff'] ?? null ) ? $artifact['handoff'] : array();
 		$blocked_actions = is_array( $handoff['blocked_actions'] ?? null ) ? $handoff['blocked_actions'] : array();
-		$handoff['final_writes'] = 'operator_review_only_no_insert';
+		$handoff['final_writes'] = 'native_editor_commit';
 		$handoff['direct_wordpress_write'] = false;
 		$handoff['blocked_actions'] = array_values(
 			array_unique(
 				array_merge(
 					$blocked_actions,
 					array(
-						'no_link_insertion_in_toolbox',
+						'no_backend_post_content_patch',
 						'no_patch_post_content_handoff_yet',
 						'no_automatic_anchor_insertion',
 					)
@@ -4606,6 +4756,87 @@ final class Rest_Controller {
 		$artifact['handoff'] = $handoff;
 
 		return $artifact;
+	}
+
+	private function editor_related_article_candidates( array $context, string $query ): array {
+		$source_knowledge = $this->editor_support_section(
+			$this->editor_cached_site_knowledge(
+				array(
+					'query'              => $query,
+					'intent'             => 'related_content',
+					'current_post_id'    => absint( $context['post_id'] ?? 0 ),
+					'max_results'        => 8,
+					'result_granularity' => 'document',
+				)
+			)
+		);
+		$current_post_id = absint( $context['post_id'] ?? 0 );
+		$source_items     = $this->editor_related_content_items( $source_knowledge );
+		$cloud_status     = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
+		$source_status    = 'cloud_vector';
+		$retrieval_status = 'cloud_vector_evidence';
+		if ( 'error' === $cloud_status || 'failed' === $cloud_status ) {
+			$source_status    = 'cloud_unavailable';
+			$retrieval_status = 'cloud_unavailable';
+		} elseif ( empty( $source_items ) ) {
+			$source_status    = 'no_cloud_evidence';
+			$retrieval_status = 'no_cloud_evidence';
+		}
+		$excluded_current_post_count = 0;
+		$invalid_candidate_count     = 0;
+		$items = array();
+		foreach ( $source_items as $index => $item ) {
+			$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
+			if ( $current_post_id > 0 && $post_id === $current_post_id ) {
+				$excluded_current_post_count++;
+				continue;
+			}
+			$title = sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) );
+			$url   = esc_url_raw( (string) ( $item['url'] ?? $item['permalink'] ?? $item['link'] ?? $item['source_url'] ?? '' ) );
+			if ( '' === $title || '' === $url ) {
+				$invalid_candidate_count++;
+				continue;
+			}
+			$items[] = array(
+				'id'               => (string) ( $post_id ?: ( $item['id'] ?? $index + 1 ) ),
+				'post_id'          => $post_id,
+				'title'            => $title,
+				'url'              => $url,
+				'excerpt'          => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 45, '' ) ),
+				'reason'           => __( 'Semantically related by Cloud Site Knowledge.', 'npcink-workflow-toolbox' ),
+				'score'            => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
+				'evidence_refs'    => array( 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: ( $item['id'] ?? $index + 1 ) ) ) ),
+				'candidate_source' => 'cloud_vector',
+			);
+			if ( count( $items ) >= 5 ) {
+				break;
+			}
+		}
+		if ( empty( $items ) && 0 < $excluded_current_post_count && 'cloud_vector_evidence' === $retrieval_status ) {
+			$source_status    = 'only_current_post';
+			$retrieval_status = 'only_current_post';
+		}
+
+		return array(
+			'artifact_type'          => 'related_article_candidates.v1',
+			'candidate_type'         => 'related_articles',
+			'candidate_contract'     => 'recommendation_candidate.v1',
+			'write_posture'          => 'suggestion_only',
+			'direct_wordpress_write' => false,
+			'result_granularity'     => 'document',
+			'candidate_source'        => $source_status,
+			'source_status'           => $retrieval_status,
+			'retrieval_status'        => $retrieval_status,
+			'cloud_result_count'       => count( $source_items ),
+			'excluded_current_post_count' => $excluded_current_post_count,
+			'invalid_candidate_count'  => $invalid_candidate_count,
+			'candidate_count'          => count( $items ),
+			'current_post_excluded'   => true,
+			'items'                   => $items,
+			'source_knowledge'        => $source_knowledge,
+			'action_policy'           => 'operator_review_only_no_write',
+			'next_safe_action'        => 'review_open_or_copy',
+		);
 	}
 
 	private function editor_internal_link_related_content_evidence( array $source_knowledge ): array {
@@ -4628,6 +4859,63 @@ final class Rest_Controller {
 				static fn( array $item ): bool => '' !== (string) ( $item['title'] ?? '' ) || '' !== (string) ( $item['url'] ?? '' ) || 0 < absint( $item['post_id'] ?? 0 )
 			)
 		);
+	}
+
+	private function editor_internal_link_graph_evidence( array $evidence, int $current_post_id ): array {
+		$ability_id = 'npcink-abilities-toolkit/get-internal-link-graph-health';
+		if ( empty( $evidence ) || ! function_exists( 'npcink_abilities_toolkit_get_registered' ) || ! current_user_can( 'edit_posts' ) ) {
+			return $evidence;
+		}
+
+		$registered = npcink_abilities_toolkit_get_registered();
+		$definition = is_array( $registered[ $ability_id ] ?? null ) ? $registered[ $ability_id ] : array();
+		$callback   = $definition['execute_callback'] ?? null;
+		if ( ! is_callable( $callback ) ) {
+			return $evidence;
+		}
+
+		$result = call_user_func(
+			$callback,
+			array(
+				'post_type'          => 'post',
+				'status'             => 'publish',
+				'per_page'           => 100,
+				'page'               => 1,
+				'min_outbound_links' => 1,
+				'max_outbound_links' => 20,
+			)
+		);
+		if ( is_wp_error( $result ) || ! is_array( $result ) || empty( $result['success'] ) || ! is_array( $result['data'] ?? null ) ) {
+			return $evidence;
+		}
+
+		$data = $result['data'];
+		$rows = array();
+		foreach ( is_array( $data['items'] ?? null ) ? $data['items'] : array() as $row ) {
+			$post_id = absint( $row['post_id'] ?? 0 );
+			if ( $post_id > 0 ) {
+				$rows[ $post_id ] = $row;
+			}
+		}
+		$pairs = array();
+		foreach ( is_array( $data['candidate_pairs'] ?? null ) ? $data['candidate_pairs'] : array() as $pair ) {
+			if ( $current_post_id === absint( $pair['source_post_id'] ?? 0 ) ) {
+				$pairs[ absint( $pair['target_post_id'] ?? 0 ) ] = $pair;
+			}
+		}
+
+		foreach ( $evidence as &$item ) {
+			$post_id = absint( $item['post_id'] ?? 0 );
+			$row     = is_array( $rows[ $post_id ] ?? null ) ? $rows[ $post_id ] : array();
+			$pair    = is_array( $pairs[ $post_id ] ?? null ) ? $pairs[ $post_id ] : array();
+			$item['incoming_count'] = absint( $row['incoming_count'] ?? 0 );
+			$item['link_graph_issues'] = array_values( array_filter( array_map( 'sanitize_key', is_array( $row['issues'] ?? null ) ? $row['issues'] : array() ) ) );
+			$item['shared_terms'] = array_slice( array_values( array_filter( array_map( 'sanitize_text_field', is_array( $pair['shared_terms'] ?? null ) ? $pair['shared_terms'] : array() ) ) ), 0, 3 );
+			$item['graph_evidence_available'] = ! empty( $row );
+		}
+		unset( $item );
+
+		return $evidence;
 	}
 
 	private function editor_toolkit_internal_link_candidates( array $input ) {
@@ -4672,7 +4960,7 @@ final class Rest_Controller {
 			'candidate_type'         => 'internal_link_candidates',
 			'candidate_contract'     => 'recommendation_candidate.v1',
 			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'operator_review_only_no_insert',
+			'final_write_path'       => 'native_editor_commit',
 			'direct_wordpress_write' => false,
 			'source_ability_id'      => 'npcink-abilities-toolkit/resolve-internal-link-targets',
 			'toolkit_required'       => true,
@@ -4682,7 +4970,7 @@ final class Rest_Controller {
 			'recommendation_candidates' => array(),
 			'owner_label'            => 'human_editor',
 			'next_safe_action'       => 'fix_toolkit_or_retry_later',
-			'action_policy'          => 'operator_review_only_no_insert',
+			'action_policy'          => 'operator_confirmed_visible_editor_apply',
 			'source_knowledge'       => $source_knowledge,
 			'review_policy'          => array(
 				'link_insertion_owner'       => 'human_editor',
@@ -4691,10 +4979,10 @@ final class Rest_Controller {
 				'current_post_excluded'      => true,
 			),
 			'handoff'                => array(
-				'final_writes'           => 'operator_review_only_no_insert',
+				'final_writes'           => 'native_editor_commit',
 				'direct_wordpress_write' => false,
 				'blocked_actions'        => array(
-					'no_link_insertion_in_toolbox',
+					'no_backend_post_content_patch',
 					'no_patch_post_content_handoff_yet',
 					'no_automatic_anchor_insertion',
 				),
@@ -4710,7 +4998,8 @@ final class Rest_Controller {
 			$url    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
 			$target_post_id = absint( $item['target_post_id'] ?? 0 );
 			$placement_hint = sanitize_text_field( (string) ( $item['placement_hint'] ?? '' ) );
-			$reason = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
+			$reason       = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
+			$source_match = is_array( $item['source_match'] ?? null ) ? $item['source_match'] : array();
 			if ( '' === $title && '' === $anchor && '' === $url ) {
 				continue;
 			}
@@ -4739,7 +5028,7 @@ final class Rest_Controller {
 					'reason'               => $reason,
 					'confidence'           => $has_score && $score > 0 && $score <= 1 ? $score : null,
 					'target_field'         => 'post_content',
-					'action_policy'        => 'operator_review_only_no_insert',
+					'action_policy'        => 'operator_confirmed_visible_editor_apply',
 					'target_ref'           => array(
 						'post_id' => $target_post_id,
 						'title'   => $title,
@@ -4748,11 +5037,17 @@ final class Rest_Controller {
 					'anchor_or_context'    => '' !== $anchor ? $anchor : $placement_hint,
 					'evidence_note'        => '' !== $reason ? $reason : __( 'Related content candidate for manual internal-link review.', 'npcink-workflow-toolbox' ),
 					'owner_label'          => 'human_editor',
-					'next_safe_action'     => 'copy_or_open_then_place_manually',
+					'next_safe_action'     => 'review_and_apply_to_visible_editor',
 					'quality_status'       => $quality_score >= 60 && '' !== $url ? 'review' : 'weak',
 					'quality_score'        => $quality_score,
 					'quality_issues'       => $quality_issues,
-					'evidence_refs'        => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
+						'evidence_refs'        => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
+					'source_match'         => $source_match,
+					'candidate_source'     => sanitize_key( (string) ( $item['candidate_source'] ?? '' ) ),
+					'priority_reason'      => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
+						'link_graph_issues'    => is_array( $item['link_graph_issues'] ?? null ) ? $item['link_graph_issues'] : array(),
+						'shared_terms'         => is_array( $item['shared_terms'] ?? null ) ? $item['shared_terms'] : array(),
+						'incoming_count'       => absint( $item['incoming_count'] ?? 0 ),
 					'source_candidate_ref' => '' !== $url ? $url : 'internal_link_item_' . ( $index + 1 ),
 				)
 			);
@@ -5929,6 +6224,9 @@ final class Rest_Controller {
 		if ( '' !== (string) ( $args['source_candidate_ref'] ?? '' ) ) {
 			$candidate['source_candidate_ref'] = sanitize_text_field( (string) $args['source_candidate_ref'] );
 		}
+		if ( '' !== (string) ( $args['candidate_source'] ?? '' ) ) {
+			$candidate['candidate_source'] = sanitize_key( (string) $args['candidate_source'] );
+		}
 		if ( is_array( $args['target_ref'] ?? null ) ) {
 			$target_ref = $args['target_ref'];
 			$candidate['target_ref'] = array(
@@ -5949,6 +6247,32 @@ final class Rest_Controller {
 		if ( '' !== (string) ( $args['next_safe_action'] ?? '' ) ) {
 			$candidate['next_safe_action'] = sanitize_key( (string) $args['next_safe_action'] );
 		}
+		if ( is_array( $args['source_match'] ?? null ) ) {
+			$source_match = $args['source_match'];
+			$client_id    = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
+			$matched_text = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
+			$expected_text = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $source_match['expected_text'] ?? '' ) ), 1600 ) );
+			if ( '' !== $client_id && '' !== $matched_text && '' !== $expected_text ) {
+				$candidate['source_match'] = array(
+					'block_client_id' => $client_id,
+					'block_name'      => sanitize_text_field( (string) ( $source_match['block_name'] ?? '' ) ),
+					'matched_text'    => $matched_text,
+					'text_offset'     => absint( $source_match['text_offset'] ?? 0 ),
+					'expected_text'   => $expected_text,
+					'match_basis'     => sanitize_key( (string) ( $source_match['match_basis'] ?? '' ) ),
+				);
+			}
+		}
+		if ( '' !== (string) ( $args['priority_reason'] ?? '' ) ) {
+			$candidate['priority_reason'] = sanitize_text_field( (string) $args['priority_reason'] );
+		}
+		if ( is_array( $args['link_graph_issues'] ?? null ) ) {
+			$candidate['link_graph_issues'] = array_values( array_filter( array_map( 'sanitize_key', $args['link_graph_issues'] ) ) );
+		}
+		if ( is_array( $args['shared_terms'] ?? null ) ) {
+			$candidate['shared_terms'] = array_slice( array_values( array_filter( array_map( 'sanitize_text_field', $args['shared_terms'] ) ) ), 0, 3 );
+		}
+		$candidate['incoming_count'] = absint( $args['incoming_count'] ?? 0 );
 
 		return $candidate;
 	}

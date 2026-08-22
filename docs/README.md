@@ -67,6 +67,7 @@ Start from the active documents below before changing code.
 - [Editor Progressive Recommendations Trial](editor-progressive-recommendations-trial.md)
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
+- [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)
 - [Editor Summary Generation Performance](editor-summary-generation-performance.md)
 
 ## Ability And Workflow Contracts
@@ -77,6 +78,7 @@ Start from the active documents below before changing code.
 - [Content Metadata Governed Handoff Summary](content-metadata-governed-handoff-summary.md)
 - [Scoped Permissions First Version](scoped-permissions-first-version.md)
 - [Recommendation Candidate Contract](recommendation-candidate-contract.md)
+- [WordPress-First AI Content Platform Development Standard v1](wordpress-first-ai-content-platform-development-standard-v1.md)
 - [Recommendation Eval](recommendation-eval.md)
 - [Summary Eval](summary-eval.md)
 - [Site Ops Cloud Analysis Contract](site-ops-cloud-analysis-contract.md)
@@ -135,6 +137,7 @@ Start from the active documents below before changing code.
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
+- [ADR-013: WordPress-First Content And Recommendation Contracts](decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
 
 ## Archived Closeouts
 
