@@ -2390,6 +2390,12 @@
 		if (value === 'tag_suggestions') {
 			return __('Tag suggestions', 'npcink-workflow-toolbox');
 		}
+		if (value === 'internal_links') {
+			return __('Internal link candidates', 'npcink-workflow-toolbox');
+		}
+		if (value === 'related_articles') {
+			return __('Related articles', 'npcink-workflow-toolbox');
+		}
 		return formatMetaLabel(value);
 	}
 
@@ -2399,6 +2405,9 @@
 		}
 		if (value === 'writing_support') {
 			return __('Finds similar published content first, then helps you decide how this draft should differ.', 'npcink-workflow-toolbox');
+		}
+		if (value === 'related_articles') {
+			return __('Finds semantically related published articles for reading or manual citation. It does not insert content into the draft.', 'npcink-workflow-toolbox');
 		}
 		if (value === 'zhihu_research') {
 			return __('解决写作前“不知道用户真正关心什么、反对什么、该从哪个角度切入”的问题。它只返回知乎来源候选，供你人工判断、改写和引用。', 'npcink-workflow-toolbox');
@@ -10156,8 +10165,7 @@
 							createElement('span', null, __('Running content support flow...', 'npcink-workflow-toolbox'))
 						) : null,
 						error ? createElement(Notice, { status: 'error', isDismissible: false }, error) : null,
-						result ? renderResult(result, resultControls) : null,
-						rerunIntent ? renderFlowBoundaryDisclosure(flowByIntent(rerunIntent)) : null
+						result ? renderResult(result, resultControls) : null
 					) : createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__menu-view' },
