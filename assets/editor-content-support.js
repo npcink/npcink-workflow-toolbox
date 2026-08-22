@@ -6680,7 +6680,7 @@
 								},
 								__('Copy link', 'npcink-workflow-toolbox')
 							),
-							item.sourceMatch && item.sourceMatch.block_client_id ? createElement(
+							item.sourceMatch && item.sourceMatch.block_client_id && item.sourceMatch.matched_text ? createElement(
 								Button,
 								{
 									type: 'button',

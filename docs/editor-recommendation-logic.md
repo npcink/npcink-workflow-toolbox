@@ -69,9 +69,11 @@ paths:
 - internal-link recommendations pass editor context, optional Cloud Site
   Knowledge evidence, and bounded local link-graph evidence to
   `npcink-abilities-toolkit/resolve-internal-link-targets`. Exact draft phrases
-  may be applied to visible Gutenberg state after duplicate-target, existing
+  in body-text blocks may be applied to visible Gutenberg state after
+  duplicate-target, existing
   link, article-density, and paragraph-density checks. Persistence still occurs
-  only through native Update or Publish;
+  only through native Update or Publish. Heading blocks and unselected generic
+  terms remain review/copy-only candidates;
 - article narration and audio summary generate review-only listening candidates
   whose adoption stays on the Core-governed article-audio handoff path;
 - publish preflight aggregates readiness issues and routes operators back to
