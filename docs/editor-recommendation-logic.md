@@ -66,11 +66,12 @@ paths:
 - image recommendations use the current article or selected paragraph plus the
   operator image preference text, then continue through `image_candidate.v1`
   review and the existing media adoption path;
-- internal-link recommendations pass editor context and optional Cloud Site
-  Knowledge evidence to `npcink-abilities-toolkit/resolve-internal-link-targets`,
-  show target, anchor, and placement hints, then offer copy-link and open-target
-  actions; they do not create backend post-content patches or mutate the current
-  draft;
+- internal-link recommendations pass editor context, optional Cloud Site
+  Knowledge evidence, and bounded local link-graph evidence to
+  `npcink-abilities-toolkit/resolve-internal-link-targets`. Exact draft phrases
+  may be applied to visible Gutenberg state after duplicate-target, existing
+  link, article-density, and paragraph-density checks. Persistence still occurs
+  only through native Update or Publish;
 - article narration and audio summary generate review-only listening candidates
   whose adoption stays on the Core-governed article-audio handoff path;
 - publish preflight aggregates readiness issues and routes operators back to
@@ -86,11 +87,17 @@ author loop:
   terms through the Core review handoff;
 - image candidates stay in the image-source modal and continue through the
   existing media adoption flow;
-- internal-link candidates show target article, anchor text, and placement
-  evidence with explicit actions to copy the link or open the target. The
+- internal-link candidates show target article, anchor text, placement
+  evidence, and bounded orphan/topic-overlap priority evidence with explicit
+  apply, undo, ignore, copy, and open actions. The
   machine-readable preview exposes `target_ref`, `anchor_or_context`,
   `evidence_note`, `owner_label=human_editor`, and
-  `next_safe_action=copy_or_open_then_place_manually`. Toolbox must not insert links or patch post content in the background;
+  `next_safe_action=review_and_apply_to_visible_editor`. Toolbox must not patch
+  post content in the backend or save the editor in the background;
+- internal-link actions emit only the existing Cloud Agent Feedback metadata
+  contract. Accepted, ignored, undone, and rejected outcomes use bounded reason
+  labels and a candidate type/id; article text, query text, anchor text, URLs,
+  and raw provider output are excluded.
 - publish preflight renders a suggested handling list that routes operators
   back to the focused tools. It must not create a parallel apply surface or
   bypass Core proposals.

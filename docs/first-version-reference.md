@@ -289,8 +289,9 @@ Post editor content support:
   selection or paragraph only. It returns clarity, fact-gap, tone, and editing
   direction notes; it does not return replacement copy or update the block.
 - `internal_links` returns `internal_link_candidates.v1`: related internal
-  targets, suggested anchor text, placement hints, and Site Knowledge evidence
-  for manual editor review only.
+  targets, exact existing-draft phrase matches, placement hints, and Site
+  Knowledge evidence. An operator may apply one verified match to visible
+  Gutenberg state; native Update or Publish remains the only persistence step.
 - `publish_preflight` returns `pre_publish_review.v1` as the unified readiness
   panel, plus duplicate-risk evidence and a `seo_meta_handoff_preview.v1`
   single-post Core proposal payload when a title and description candidate are

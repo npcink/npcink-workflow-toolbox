@@ -1097,7 +1097,23 @@
       "Could not insert the selected Media Library image into the current editor.": ["无法将所选媒体库图片插入当前编辑器。"],
       "The image action was cancelled. No WordPress data changed.": ["图片操作已取消，WordPress 数据没有发生变化。"],
       "The image was imported, but it could not be inserted into the visible editor draft. It remains available in the Media Library.": ["图片已导入，但无法插入当前可见的编辑器草稿；它仍可在媒体库中使用。"],
-      "Showing verified host-generated image candidates. Review one image before importing it or setting featured media.": ["正在显示已验证的托管生成图片候选。导入或设置特色图片前，请审阅其中一张图片。"]
+      "Showing verified host-generated image candidates. Review one image before importing it or setting featured media.": ["正在显示已验证的托管生成图片候选。导入或设置特色图片前，请审阅其中一张图片。"],
+      "Found in draft: ": ["草稿中找到："],
+      "Apply to editor": ["应用到编辑器"],
+      "Ignore": ["忽略"],
+      "Undo last link": ["撤销上一条内链"],
+      "This suggestion no longer has an exact editable phrase.": ["这条建议已找不到可编辑的精确短语。"],
+      "The article changed after this review. Run internal links again.": ["文章在本次审阅后发生了变化，请重新运行内链建议。"],
+      "The exact anchor phrase is no longer available.": ["精确锚文本已不存在。"],
+      "That phrase already contains a link.": ["该短语已经包含链接。"],
+      "This article already links to that target.": ["本文已经链接到该目标文章。"],
+      "This article has reached its reviewed internal-link limit.": ["本文已达到审阅后的内链数量上限。"],
+      "This paragraph already contains two links. Choose a different placement.": ["该段落已经包含两条链接，请选择其他位置。"],
+      "Link added to the visible editor. Update or publish normally to save it.": ["链接已添加到当前可见编辑器；请照常更新或发布以保存。"],
+      "The block changed after the link was applied. Use the editor history to undo safely.": ["应用链接后区块又发生了变化，请使用编辑器历史记录安全撤销。"],
+      "The last internal link was removed from the editor.": ["上一条内链已从编辑器中移除。"],
+      "Suggestion ignored.": ["已忽略该建议。"],
+      "All internal link candidates have been ignored.": ["所有内链候选均已忽略。"]
     }
   }
 }
