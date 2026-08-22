@@ -2541,6 +2541,7 @@ final class Provider_Client {
 		$payload = array(
 			'contract_version'       => 'site_knowledge_status.v1',
 			'include_coverage'       => ! empty( $input['include_coverage'] ),
+			'post_ids'               => array_slice( $this->sanitize_absint_list( $input['post_ids'] ?? array() ), 0, 1000 ),
 			'media_attachment_ids'   => array_slice( $this->sanitize_absint_list( $input['media_attachment_ids'] ?? array() ), 0, 20 ),
 			'write_posture'          => 'suggestion_only',
 			'direct_wordpress_write' => false,

@@ -67,6 +67,7 @@ Start from the active documents below before changing code.
 - [Editor Progressive Recommendations Trial](editor-progressive-recommendations-trial.md)
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
+- [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)
 - [Editor Summary Generation Performance](editor-summary-generation-performance.md)
 
 ## Ability And Workflow Contracts

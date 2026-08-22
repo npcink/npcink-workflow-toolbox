@@ -6759,11 +6759,19 @@
 		const actionControls = controls && controls.relatedArticles ? controls.relatedArticles : {};
 		const ignored = actionControls.ignored || {};
 		const visibleCandidates = candidates.filter((item) => !ignored[String(item.id || '')]).slice(0, 5);
+		const retrievalStatus = String(section && (section.retrieval_status || section.source_status) || '');
+		const emptyMessage = retrievalStatus === 'cloud_unavailable'
+			? __('Cloud 相关文章检索暂不可用，请检查站点知识库连接后重试。', 'npcink-workflow-toolbox')
+			: retrievalStatus === 'only_current_post'
+				? __('Cloud 只命中了当前文章；请确认其他已发布文章已完成站点知识库索引。', 'npcink-workflow-toolbox')
+			: retrievalStatus === 'no_cloud_evidence'
+				? __('暂未找到相关已发布文章，请确认其他文章已发布且站点知识库已完成索引。', 'npcink-workflow-toolbox')
+				: __('暂未找到相关已发布文章。', 'npcink-workflow-toolbox');
 		return createElement(
 			'section',
 			{ className: 'npcink-toolbox-editor-support__metadata-compact-section npcink-toolbox-editor-support__related-articles' },
 			createElement('h4', null, __('Recommended related articles', 'npcink-workflow-toolbox')),
-			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Cloud vector retrieval supplies these suggestions. Review them for reading or manual citation; nothing is inserted into the draft automatically.', 'npcink-workflow-toolbox')),
+			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Cloud 向量推荐，仅供阅读或手动引用。', 'npcink-workflow-toolbox')),
 			visibleCandidates.length
 				? createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, visibleCandidates.map((item, index) => {
 					const key = String(index) + '-' + item.title;
@@ -6783,9 +6791,8 @@
 						)
 					);
 				}))
-				: createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, candidates.length ? __('All related article candidates have been ignored.', 'npcink-workflow-toolbox') : __('No related articles returned.', 'npcink-workflow-toolbox')),
+				: createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, candidates.length ? __('相关文章候选已全部忽略。', 'npcink-workflow-toolbox') : emptyMessage),
 			actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message) : null,
-			createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, __('Suggestions are review-only and do not create a frontend related-articles section.', 'npcink-workflow-toolbox'))
 		);
 	}
 

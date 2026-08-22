@@ -8294,6 +8294,10 @@ msgstr "上一条内链已从编辑器中移除。"
 msgid "Suggestion ignored."
 msgstr "已忽略该建议。"
 
+#: includes/Rest_Controller.php assets/editor-content-support.js
+msgid "Semantically related by Cloud Site Knowledge."
+msgstr "Cloud 向量检索判定该文章与当前内容语义相关。"
+
 #: assets/editor-content-support.js
 msgid "All internal link candidates have been ignored."
 msgstr "所有内链候选均已忽略。"

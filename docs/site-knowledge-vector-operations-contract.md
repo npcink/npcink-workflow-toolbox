@@ -47,6 +47,14 @@ Allowed from Toolbox:
   `site_knowledge_cloud_boundary` owner/truth map. A bounded media workflow may
   also request existing visual evidence for up to 20 attachment IDs and reuse
   it only when the returned media fingerprint matches the current local image.
+- `site_knowledge_status.v1` may include a bounded list of local public `post_ids`.
+  Cloud returns only the matching `indexed_post_ids`; Toolbox combines that
+  result with the same local manifest only when
+  `indexed_post_ids_requested` confirms the complete comparison. Missing or
+  mismatched evidence produces no article-level status rows. Toolbox combines
+  the confirmed result with its local published-post manifest to expose article-level
+  `indexed` or `not_indexed` status. Cloud remains index truth, while
+  WordPress remains source-content and title/URL display truth.
 - `site_knowledge_sync.v1` only with `sync_mode=refresh` for bounded public
   content refresh transport.
 - The existing Cloud Addon media Artifact upload for local image bytes when a

@@ -376,13 +376,16 @@ final class Rest_Controller {
 	}
 
 	public function site_knowledge_status( WP_REST_Request $request ) {
+		$public_post_ids = $this->public_site_knowledge_post_ids();
 		$status = $this->client->get_site_knowledge_status(
 			array(
 				'include_coverage' => true,
+				'post_ids'         => $public_post_ids,
 			)
 		);
 
 		if ( is_array( $status ) ) {
+			$status['article_index_statuses'] = $this->site_knowledge_article_index_statuses( $status, $public_post_ids );
 			$change_bridge = Site_Knowledge_Auto_Sync::health_snapshot();
 			$status['change_bridge'] = $change_bridge;
 			$status['auto_sync']     = $change_bridge;
@@ -395,6 +398,65 @@ final class Rest_Controller {
 		}
 
 		return rest_ensure_response( $status );
+	}
+
+	/**
+	 * Returns the bounded local manifest used to compare public WordPress posts
+	 * with the Cloud-owned indexed ID projection.
+	 *
+	 * @return int[]
+	 */
+	private function public_site_knowledge_post_ids(): array {
+		$posts = get_posts(
+			array(
+				'post_type'              => array( 'post', 'page' ),
+				'post_status'            => 'publish',
+				'posts_per_page'         => 1000,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'orderby'                => 'modified',
+				'order'                  => 'DESC',
+				'ignore_sticky_posts'    => true,
+			)
+		);
+
+		return array_values( array_filter( array_map( 'absint', is_array( $posts ) ? $posts : array() ) ) );
+	}
+
+	/**
+	 * @param array<string,mixed> $status          Cloud status response.
+	 * @param int[]               $public_post_ids Local comparison manifest sent to Cloud.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function site_knowledge_article_index_statuses( array $status, array $public_post_ids ): array {
+		$coverage = is_array( $status['coverage'] ?? null ) ? $status['coverage'] : array();
+		$public_post_ids = array_values( array_unique( array_filter( array_map( 'absint', $public_post_ids ) ) ) );
+		if (
+			array() !== $public_post_ids
+			&& (
+				! is_array( $coverage['indexed_post_ids'] ?? null )
+				|| count( $public_post_ids ) !== absint( $coverage['indexed_post_ids_requested'] ?? 0 )
+			)
+		) {
+			return array();
+		}
+		$indexed_ids = array_fill_keys( array_map( 'absint', is_array( $coverage['indexed_post_ids'] ?? null ) ? $coverage['indexed_post_ids'] : array() ), true );
+		$statuses = array();
+		foreach ( $public_post_ids as $post_id ) {
+			$post = get_post( $post_id );
+			if ( ! $post ) {
+				continue;
+			}
+			$statuses[] = array(
+				'post_id'       => $post_id,
+				'title'         => sanitize_text_field( get_the_title( $post ) ),
+				'url'           => esc_url_raw( get_permalink( $post ) ),
+				'modified_gmt'  => sanitize_text_field( (string) $post->post_modified_gmt ),
+				'status'        => isset( $indexed_ids[ $post_id ] ) ? 'indexed' : 'not_indexed',
+			);
+		}
+
+		return $statuses;
 	}
 
 	public function web_search_test( WP_REST_Request $request ) {
@@ -4710,36 +4772,49 @@ final class Rest_Controller {
 		);
 		$current_post_id = absint( $context['post_id'] ?? 0 );
 		$source_items     = $this->editor_related_content_items( $source_knowledge );
+		$cloud_status     = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
 		$source_status    = 'cloud_vector';
-		if ( 'error' === (string) ( $source_knowledge['status'] ?? '' ) || empty( $source_items ) ) {
-			$source_status = 'local_fallback';
+		$retrieval_status = 'cloud_vector_evidence';
+		if ( 'error' === $cloud_status || 'failed' === $cloud_status ) {
+			$source_status    = 'cloud_unavailable';
+			$retrieval_status = 'cloud_unavailable';
+		} elseif ( empty( $source_items ) ) {
+			$source_status    = 'no_cloud_evidence';
+			$retrieval_status = 'no_cloud_evidence';
 		}
+		$excluded_current_post_count = 0;
+		$invalid_candidate_count     = 0;
 		$items = array();
 		foreach ( $source_items as $index => $item ) {
 			$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
 			if ( $current_post_id > 0 && $post_id === $current_post_id ) {
+				$excluded_current_post_count++;
 				continue;
 			}
 			$title = sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) );
 			$url   = esc_url_raw( (string) ( $item['url'] ?? $item['permalink'] ?? $item['link'] ?? $item['source_url'] ?? '' ) );
 			if ( '' === $title || '' === $url ) {
+				$invalid_candidate_count++;
 				continue;
 			}
-			$reason = sanitize_text_field( (string) ( $item['reason'] ?? $item['evidence_note'] ?? $item['explanation'] ?? '' ) );
 			$items[] = array(
 				'id'               => (string) ( $post_id ?: ( $item['id'] ?? $index + 1 ) ),
 				'post_id'          => $post_id,
 				'title'            => $title,
 				'url'              => $url,
 				'excerpt'          => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 45, '' ) ),
-				'reason'           => '' !== $reason ? $reason : __( 'Semantically related by Cloud Site Knowledge.', 'npcink-workflow-toolbox' ),
+				'reason'           => __( 'Semantically related by Cloud Site Knowledge.', 'npcink-workflow-toolbox' ),
 				'score'            => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
 				'evidence_refs'    => array( 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: ( $item['id'] ?? $index + 1 ) ) ) ),
-				'candidate_source' => $source_status,
+				'candidate_source' => 'cloud_vector',
 			);
 			if ( count( $items ) >= 5 ) {
 				break;
 			}
+		}
+		if ( empty( $items ) && 0 < $excluded_current_post_count && 'cloud_vector_evidence' === $retrieval_status ) {
+			$source_status    = 'only_current_post';
+			$retrieval_status = 'only_current_post';
 		}
 
 		return array(
@@ -4750,7 +4825,12 @@ final class Rest_Controller {
 			'direct_wordpress_write' => false,
 			'result_granularity'     => 'document',
 			'candidate_source'        => $source_status,
-			'source_status'           => 'cloud_vector' === $source_status ? 'cloud_vector_evidence' : 'cloud_unavailable',
+			'source_status'           => $retrieval_status,
+			'retrieval_status'        => $retrieval_status,
+			'cloud_result_count'       => count( $source_items ),
+			'excluded_current_post_count' => $excluded_current_post_count,
+			'invalid_candidate_count'  => $invalid_candidate_count,
+			'candidate_count'          => count( $items ),
 			'current_post_excluded'   => true,
 			'items'                   => $items,
 			'source_knowledge'        => $source_knowledge,
