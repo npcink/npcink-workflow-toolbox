@@ -358,6 +358,16 @@ toolbox_editor_review_smoke_assert( 'human_editor' === (string) ( $internal_proj
 toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (string) ( $internal_projection[0]['next_safe_action'] ?? '' ), 'Internal-link projection exposes reviewed visible-editor placement.' );
 toolbox_editor_review_smoke_assert( in_array( 'no_backend_post_content_patch', (array) ( $internal_handoff['blocked_actions'] ?? array() ), true ), 'Internal-link handoff blocks backend post-content patching.' );
 
+$related_articles_result = toolbox_editor_review_smoke_rest( array( 'intent' => 'related_articles' ) + $base_params );
+$related_articles        = is_array( $related_articles_result['sections']['related_articles'] ?? null ) ? $related_articles_result['sections']['related_articles'] : array();
+$related_set             = is_array( $related_articles_result['recommendation_set'] ?? null ) ? $related_articles_result['recommendation_set'] : array();
+toolbox_editor_review_smoke_assert( 'related_article_candidates.v1' === (string) ( $related_articles['artifact_type'] ?? '' ), 'Related-article section returns the dedicated candidate artifact.' );
+toolbox_editor_review_smoke_assert( 'document' === (string) ( $related_articles['result_granularity'] ?? '' ), 'Related-article candidates are returned at document granularity.' );
+toolbox_editor_review_smoke_assert( false === (bool) ( $related_articles['direct_wordpress_write'] ?? true ), 'Related-article candidates disable direct WordPress writes.' );
+toolbox_editor_review_smoke_assert( 'content_context.v1' === (string) ( $related_articles_result['content_context']['contract_version'] ?? '' ) && 'wordpress' === (string) ( $related_articles_result['content_context']['platform'] ?? '' ), 'Editor response exposes the canonical WordPress content context.' );
+toolbox_editor_review_smoke_assert( 'recommendation_set.v1' === (string) ( $related_set['canonical_contract'] ?? '' ) && 'editor_recommendation_set.v1' === (string) ( $related_set['compatibility_contract'] ?? '' ), 'Recommendation set exposes canonical and compatibility contract names.' );
+toolbox_editor_review_smoke_assert( isset( $related_set['artifact_counts']['related_articles'] ), 'Recommendation set counts related-article candidates.' );
+
 $publish_result  = toolbox_editor_review_smoke_rest( array( 'intent' => 'publish_preflight' ) + $base_params );
 $review          = is_array( $publish_result['sections']['pre_publish_review'] ?? null ) ? $publish_result['sections']['pre_publish_review'] : array();
 $seo_handoff     = is_array( $publish_result['sections']['seo_handoff'] ?? null ) ? $publish_result['sections']['seo_handoff'] : array();

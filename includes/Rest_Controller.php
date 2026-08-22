@@ -973,6 +973,7 @@ final class Rest_Controller {
 			'final_write_path'       => 'core_proposal_required',
 			'direct_wordpress_write' => false,
 			'post_context'           => $context,
+			'content_context'        => $this->editor_content_context( $context ),
 			'query'                  => $query,
 			'sections'               => array(),
 			'remote_execution_policy' => array(
@@ -2737,6 +2738,7 @@ final class Rest_Controller {
 			'tags'           => $this->editor_recommendation_count_by_kind( $sections, 'tag' ),
 			'featured_image' => $this->editor_recommendation_count_by_kind( $sections, 'image' ),
 			'internal_links' => $this->editor_recommendation_count_by_kind( $sections, 'internal_link' ),
+			'related_articles' => $this->editor_recommendation_count_by_kind( $sections, 'related_article' ),
 			'preflight'      => $this->editor_recommendation_count_by_kind( $sections, 'preflight' ),
 		);
 		$retrieval_sources   = $this->editor_recommendation_set_sources( $sections );
@@ -2745,10 +2747,13 @@ final class Rest_Controller {
 		return array(
 			'recommendation_set_id' => 'rec_' . substr( hash( 'sha256', $content_fingerprint . '|' . $intent . '|' . wp_json_encode( $artifact_counts ) ), 0, 20 ),
 			'contract_version'      => 'editor_recommendation_set.v1',
+			'canonical_contract'    => 'recommendation_set.v1',
+			'compatibility_contract' => 'editor_recommendation_set.v1',
 			'generated_at'          => gmdate( 'c' ),
 			'source_layer'          => $this->editor_recommendation_set_source_layer( $sections ),
 			'latency_profile'       => 'progressive_recommendations' === $intent ? 'local_300ms' : 'focused_intent',
 			'content_fingerprint'   => $content_fingerprint,
+			'content_context'       => $this->editor_content_context( $context ),
 			'intent'                => sanitize_key( $intent ),
 			'artifacts'             => $artifact_counts,
 			'artifact_counts'       => $artifact_counts,
@@ -2786,10 +2791,41 @@ final class Rest_Controller {
 		return 'sha256:' . hash( 'sha256', (string) wp_json_encode( $payload ) );
 	}
 
+	private function editor_content_context( array $context ): array {
+		$post_id = absint( $context['post_id'] ?? 0 );
+		return array(
+			'contract_version'    => 'content_context.v1',
+			'platform'            => 'wordpress',
+			'site_id'             => function_exists( 'get_current_blog_id' ) ? absint( get_current_blog_id() ) : 0,
+			'post_id'             => $post_id,
+			'post_type'           => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+			'post_status'         => sanitize_key( (string) ( $context['post_status'] ?? '' ) ),
+			'canonical_url'       => $post_id > 0 && function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post_id ) ) : '',
+			'language'            => function_exists( 'determine_locale' ) ? sanitize_text_field( determine_locale() ) : sanitize_text_field( (string) get_locale() ),
+			'context_scope'       => sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) ),
+			'title'               => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+			'excerpt'             => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
+			'content_text'        => sanitize_textarea_field( (string) ( $context['content_text'] ?? '' ) ),
+			'selected_text'       => sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ),
+			'selected_block_text' => sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ),
+			'category_ids'        => array_values( array_map( 'absint', is_array( $context['category_ids'] ?? null ) ? $context['category_ids'] : array() ) ),
+			'tag_ids'             => array_values( array_map( 'absint', is_array( $context['tag_ids'] ?? null ) ? $context['tag_ids'] : array() ) ),
+			'content_fingerprint' => $this->editor_content_fingerprint( $context ),
+			'write_owner'         => 'wordpress_local',
+			'direct_wordpress_write' => false,
+		);
+	}
+
 	private function editor_recommendation_count_by_kind( array $sections, string $kind ): int {
 		$count = 0;
 		foreach ( $sections as $section ) {
-			if ( ! is_array( $section ) || ! is_array( $section['recommendation_candidates'] ?? null ) ) {
+			if ( ! is_array( $section ) ) {
+				continue;
+			}
+			if ( 'related_article' === $kind && 'related_articles' === (string) ( $section['candidate_type'] ?? '' ) ) {
+				$count += count( is_array( $section['items'] ?? null ) ? $section['items'] : array() );
+			}
+			if ( ! is_array( $section['recommendation_candidates'] ?? null ) ) {
 				continue;
 			}
 			foreach ( $section['recommendation_candidates'] as $candidate ) {
@@ -2822,23 +2858,42 @@ final class Rest_Controller {
 	private function editor_recommendation_set_candidate_refs( array $sections ): array {
 		$refs = array();
 		foreach ( $sections as $section ) {
-			if ( ! is_array( $section ) || ! is_array( $section['recommendation_candidates'] ?? null ) ) {
+			if ( ! is_array( $section ) ) {
 				continue;
 			}
-			foreach ( $section['recommendation_candidates'] as $candidate ) {
-				if ( ! is_array( $candidate ) ) {
-					continue;
+			if ( is_array( $section['recommendation_candidates'] ?? null ) ) {
+				foreach ( $section['recommendation_candidates'] as $candidate ) {
+					if ( ! is_array( $candidate ) ) {
+						continue;
+					}
+					$id = sanitize_key( (string) ( $candidate['id'] ?? '' ) );
+					if ( '' === $id ) {
+						continue;
+					}
+					$refs[] = array(
+						'candidate_id'  => $id,
+						'kind'          => sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) ),
+						'target_field'  => sanitize_key( (string) ( $candidate['target_field'] ?? '' ) ),
+						'action_policy' => sanitize_key( (string) ( $candidate['action_policy'] ?? 'suggestion_only' ) ),
+					);
 				}
-				$id = sanitize_key( (string) ( $candidate['id'] ?? '' ) );
-				if ( '' === $id ) {
-					continue;
+			}
+			if ( 'related_articles' === (string) ( $section['candidate_type'] ?? '' ) && is_array( $section['items'] ?? null ) ) {
+				foreach ( array_slice( $section['items'], 0, 5 ) as $item ) {
+					if ( ! is_array( $item ) ) {
+						continue;
+					}
+					$id = sanitize_key( (string) ( $item['id'] ?? $item['post_id'] ?? '' ) );
+					if ( '' === $id ) {
+						continue;
+					}
+					$refs[] = array(
+						'candidate_id'  => $id,
+						'kind'          => 'related_article',
+						'target_field'  => 'article_reference',
+						'action_policy' => 'operator_review_only_no_write',
+					);
 				}
-				$refs[] = array(
-					'candidate_id'  => $id,
-					'kind'          => sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) ),
-					'target_field'  => sanitize_key( (string) ( $candidate['target_field'] ?? '' ) ),
-					'action_policy' => sanitize_key( (string) ( $candidate['action_policy'] ?? 'suggestion_only' ) ),
-				);
 			}
 		}
 		return $refs;
@@ -2884,7 +2939,7 @@ final class Rest_Controller {
 
 	private function editor_recommendation_set_source_layer( array $sections ): string {
 		foreach ( $sections as $section ) {
-			if ( is_array( $section ) && ! empty( $section['provider_execution'] ) ) {
+			if ( is_array( $section ) && ( ! empty( $section['provider_execution'] ) || 'cloud_vector' === (string) ( $section['candidate_source'] ?? '' ) ) ) {
 				return 'cloud';
 			}
 		}
@@ -2934,6 +2989,9 @@ final class Rest_Controller {
 			}
 			if ( ! empty( $section['provider_execution'] ) ) {
 				$sources[] = sanitize_key( (string) $section['provider_execution'] );
+			}
+			if ( ! empty( $section['candidate_source'] ) ) {
+				$sources[] = sanitize_key( (string) $section['candidate_source'] );
 			}
 			if ( ! empty( $section['ranking_context']['related_content_terms'] ) || ! empty( $section['related_context_summary'] ) ) {
 				$sources[] = 'site_knowledge';

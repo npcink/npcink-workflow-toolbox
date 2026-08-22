@@ -54,11 +54,19 @@ review queues, but the original candidate object remains the source of truth.
 
 ## Current Adoption
 
-- Editor Content Support returns an additive `editor_recommendation_set.v1`
-  wrapper on focused results and the local `progressive_recommendations` prefetch
-  result. It includes `recommendation_set_id`, `content_fingerprint`,
-  `generated_at`, `source_layer`, `latency_profile`, `artifact_counts`,
-  `retrieval_sources`, `proposal_targets`, `candidates`, and `no_write=true`.
+Focused editor responses also expose `content_context.v1` as the bounded
+WordPress article input projection. It includes `platform=wordpress`, article
+identity, language, context scope, sanitized title/excerpt/body excerpts,
+selected text, taxonomy ids, and the content fingerprint. It is input context,
+not site settings, approval truth, or a write authorization.
+
+- Editor Content Support returns an additive recommendation-set wrapper on
+  focused results and the local `progressive_recommendations` prefetch.
+  Its canonical contract name is `recommendation_set.v1`; the existing
+  `editor_recommendation_set.v1` field remains as a compatibility alias.
+  It includes `recommendation_set_id`, `content_fingerprint`, `generated_at`,
+  `source_layer`, `latency_profile`, `artifact_counts`, `retrieval_sources`,
+  `proposal_targets`, `candidates`, and `no_write=true`.
   The legacy `artifacts`, `governance`, and debug retrieval-source fields remain
   additive compatibility metadata. The wrapper is metadata around candidate
   sections, not the source of write, approval, audit, or learning truth.
