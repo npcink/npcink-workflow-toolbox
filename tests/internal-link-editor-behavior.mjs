@@ -38,10 +38,23 @@ function richTextValue(html) {
 
 const richText = {
 	create: ({ html }) => richTextValue(html),
-	applyFormat: (value, format, start, end) => ({ ...value, applied: { format, start, end } }),
+	applyFormat: (value, format, start, end) => {
+		const formats = value.formats.map((entries, index) => index >= start && index < end ? entries.concat([format]) : entries.slice());
+		return { ...value, formats };
+	},
 	toHTMLString: ({ value }) => {
-		const { start, end, format } = value.applied;
-		return value.text.slice(0, start) + '<a href="' + format.attributes.url + '">' + value.text.slice(start, end) + '</a>' + value.text.slice(end);
+		let output = '';
+		let activeUrl = '';
+		for (let index = 0; index < value.text.length; index += 1) {
+			const link = (value.formats[index] || []).find((format) => format && format.type === 'core/link');
+			const nextUrl = link ? link.attributes.url : '';
+			if (activeUrl && activeUrl !== nextUrl) output += '</a>';
+			if (nextUrl && activeUrl !== nextUrl) output += '<a href="' + nextUrl + '">';
+			output += value.text[index];
+			activeUrl = nextUrl;
+		}
+		if (activeUrl) output += '</a>';
+		return output;
 	},
 };
 
@@ -153,5 +166,73 @@ assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, ranges: [[0,
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, currentText: 'changed' }).reason_codes[0], 'stale_editor_block');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, anchorText: '文章', sourceMatch: { ...preflightBase.sourceMatch, matched_text: '文章' } }).reason_codes[0], 'generic_anchor');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, retrievalStatus: 'no_cloud_evidence', candidateSource: 'local_fallback' }).outcome, 'review_only');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, targetUrl: 'https://outside.test/target' }).reason_codes[0], 'invalid_internal_url');
 
-console.log('PASS: internal-link editor apply, batch preflight, duplicate protection, stale protection, and undo safety');
+function batchCandidate(id, anchorText, offset, targetPostId, targetUrl, expectedText = 'Alpha connects Beta clearly.') {
+	return {
+		id,
+		anchorText,
+		targetUrl,
+		targetPostId,
+		targetStatus: 'publish',
+		targetPostType: 'post',
+		candidateSource: 'cloud_vector',
+		retrievalStatus: 'cloud_vector_evidence',
+		canApplyToEditor: true,
+		sourceMatch: {
+			block_client_id: 'batch-block',
+			block_name: 'core/paragraph',
+			matched_text: anchorText,
+			text_offset: offset,
+			expected_text: expectedText,
+		},
+	};
+}
+
+const batchBlock = { clientId: 'batch-block', attributes: { content: 'Alpha connects Beta clearly.' }, innerBlocks: [] };
+const alphaCandidate = batchCandidate('alpha', 'Alpha', 0, 3001, 'https://example.test/alpha/');
+const betaCandidate = batchCandidate('beta', 'Beta', 15, 3002, 'https://example.test/beta/');
+const batchResult = helpers.prepareInternalLinkBatchApplication([alphaCandidate, betaCandidate], [batchBlock], richText);
+assert.equal(batchResult.schema, 'current_article_multi_link_result.v1');
+assert.equal(batchResult.write_posture, 'native_editor_commit');
+assert.equal(batchResult.direct_wordpress_write, false);
+assert.equal(batchResult.persisted, false);
+assert.equal(batchResult.applied_count, 2);
+assert.equal(batchResult.rejected_count, 0);
+assert.equal(batchResult.updates.length, 1);
+assert.equal(batchResult.updates[0].appliedContent, '<a href="https://example.test/alpha/">Alpha</a> connects <a href="https://example.test/beta/">Beta</a> clearly.');
+assert.equal(helpers.canUndoInternalLinkBatch([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent } }], batchResult.undo), true);
+assert.equal(helpers.canUndoInternalLinkBatch([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent + ' edited' } }], batchResult.undo), false);
+
+const partialResult = helpers.prepareInternalLinkBatchApplication([
+	alphaCandidate,
+	batchCandidate('stale-beta', 'Beta', 15, 3003, 'https://example.test/stale/', 'Alpha used to connect Beta.'),
+], [batchBlock], richText);
+assert.equal(partialResult.applied_count, 1);
+assert.equal(partialResult.rejected_count, 1);
+assert.equal(partialResult.items[1].reason_codes[0], 'stale_editor_block');
+
+const duplicateResult = helpers.prepareInternalLinkBatchApplication([
+	alphaCandidate,
+	batchCandidate('duplicate', 'Beta', 15, 3001, 'https://example.test/?p=3001'),
+], [batchBlock], richText);
+assert.equal(duplicateResult.applied_count, 0);
+assert.deepEqual(Array.from(duplicateResult.items, (item) => item.reason_codes[0]), ['duplicate_target', 'duplicate_target']);
+
+const overlappingResult = helpers.prepareInternalLinkBatchApplication([
+	batchCandidate('whole', 'Alpha connects Beta', 0, 3010, 'https://example.test/whole/'),
+	betaCandidate,
+], [batchBlock], richText);
+assert.equal(overlappingResult.applied_count, 0);
+assert.deepEqual(Array.from(overlappingResult.items, (item) => item.reason_codes[0]), ['overlap_conflict', 'overlap_conflict']);
+
+const overLimitResult = helpers.prepareInternalLinkBatchApplication(Array.from({ length: 9 }, (_, index) => ({ ...alphaCandidate, id: 'limit-' + index })), [batchBlock], richText);
+assert.equal(overLimitResult.applied_count, 0);
+assert.equal(overLimitResult.rejected_count, 9);
+assert.equal(overLimitResult.items[0].reason_codes[0], 'selection_limit_exceeded');
+
+const fallbackResult = helpers.prepareInternalLinkBatchApplication([{ ...alphaCandidate, candidateSource: 'local_fallback', retrievalStatus: 'no_cloud_evidence' }], [batchBlock], richText);
+assert.equal(fallbackResult.applied_count, 0);
+assert.equal(fallbackResult.items[0].reason_codes[0], 'fallback_must_not_be_labeled_vector');
+
+console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');

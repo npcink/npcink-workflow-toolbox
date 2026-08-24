@@ -17,8 +17,7 @@ function pass(message) {
 }
 
 function fail(message) {
-	console.error(`FAIL: ${message}`);
-	process.exit(1);
+	throw new Error(message);
 }
 
 function assert(condition, message) {
@@ -76,6 +75,30 @@ function wpCli(args, options = {}) {
 			...options,
 		}
 	).trim();
+}
+
+function wpPostContent(postId) {
+	const output = wpCli(['post', 'get', String(parseInt(postId, 10) || 0), '--fields=post_content', '--format=json']);
+	const parsed = JSON.parse(output || '{}');
+	return String(parsed.post_content || '');
+}
+
+function anchorEvidenceSummary(value, path = '', depth = 0, output = []) {
+	if (!value || typeof value !== 'object' || depth > 8 || output.length >= 24) return output;
+	Object.entries(value).forEach(([key, item]) => {
+		if (output.length >= 24) return;
+		const nextPath = path ? `${path}.${key}` : key;
+		if (['anchor_or_context', 'suggested_anchor_text', 'anchor_text'].includes(key) && typeof item === 'string') {
+			output.push({ path: nextPath, value: item.slice(0, 120) });
+			return;
+		}
+		if (key === 'source_match' && item && typeof item === 'object') {
+			output.push({ path: nextPath, matched_text: String(item.matched_text || '').slice(0, 120), has_block_client_id: Boolean(item.block_client_id) });
+			return;
+		}
+		anchorEvidenceSummary(item, nextPath, depth + 1, output);
+	});
+	return output;
 }
 
 function createLoginHelper(baseUrl, postId) {
@@ -197,6 +220,8 @@ async function dismissEditorOverlays(page) {
 const { chromium } = await loadPlaywright();
 const baseUrl = env('WP_BASE_URL', 'https://npcink.local').replace(/\/$/, '');
 const requestedPostId = process.env.POST_ID || '';
+const internalLinkBatchSmoke = process.env.NPCINK_INTERNAL_LINK_BATCH_SMOKE === '1';
+const requireInternalLinkApply = process.env.NPCINK_INTERNAL_LINK_REQUIRE_APPLY === '1';
 let activePostId = requestedPostId;
 const browserOptions = {
 	headless: process.env.HEADLESS !== '0',
@@ -214,9 +239,23 @@ const browser = await chromium.launch(browserOptions);
 let loginHelper = null;
 let page = null;
 try {
-	const context = await browser.newContext({ ignoreHTTPSErrors: true });
+	const viewport = {
+		width: parseInt(env('SMOKE_VIEWPORT_WIDTH', '1440'), 10) || 1440,
+		height: parseInt(env('SMOKE_VIEWPORT_HEIGHT', '1000'), 10) || 1000,
+	};
+	const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport });
+	await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseUrl }).catch(() => {});
 	page = await context.newPage();
 	const requests = [];
+	const consoleErrors = [];
+	const networkErrors = [];
+	page.on('console', (message) => {
+		if (message.type() === 'error') consoleErrors.push(message.text());
+	});
+	page.on('pageerror', (error) => consoleErrors.push(error.message || String(error)));
+	page.on('response', (response) => {
+		if (response.status() >= 400) networkErrors.push({ status: response.status(), url: response.url() });
+	});
 	page.on('request', (request) => {
 		const url = request.url();
 		if (!url.includes('/wp-json/')) {
@@ -258,10 +297,117 @@ try {
 		assert(defaultLocalSuggestionsButtonCount === 0, 'Successful local progressive recommendations do not add a default Local suggestions button.');
 
 		const firstRequest = progressiveRequests(requests)[0];
+		const firstPayload = JSON.parse(firstRequest.body || '{}');
 		assert(firstRequest.method === 'POST', 'Automatic prefetch uses POST /editor/content-support.');
-		assert(firstRequest.body.includes('progressive_recommendations'), 'Automatic prefetch sends the progressive_recommendations intent.');
-		assert(!/writing_support|proposal|adapterRestUrl/i.test(firstRequest.body), 'Automatic prefetch does not send writing support or proposal handoff data.');
+		assert(firstPayload.intent === 'progressive_recommendations', 'Automatic prefetch sends the progressive_recommendations intent.');
+		assert(!firstPayload.proposal_id && !firstPayload.adapter_rest_url && !firstPayload.write_confirmed, 'Automatic prefetch does not send proposal handoff controls.');
 		assert(forbiddenRequests(requests).length === 0, 'Automatic prefetch does not call Cloud, Adapter, or Core proposal routes.');
+
+		if (internalLinkBatchSmoke) {
+			assert(Boolean(activePostId), 'Internal-link browser smoke has a real post id.');
+			const databaseContentBefore = wpPostContent(activePostId);
+			const editorContentBefore = await page.evaluate(() => {
+				const selector = window.wp.data.select('core/editor');
+				return selector && typeof selector.getEditedPostContent === 'function' ? selector.getEditedPostContent() : '';
+			});
+			const responsePromise = page.waitForResponse((response) => {
+				const request = response.request();
+				return response.url().includes('/wp-json/npcink-toolbox/v1/editor/content-support')
+					&& String(request.postData() || '').includes('internal_links');
+			}, { timeout: 45000 });
+			await page.getByRole('button', { name: /Run Find internal links|运行 查找内链|Run 查找内链/i }).click({ timeout: 30000 });
+			const internalLinkResponse = await responsePromise;
+			const internalLinkPayload = await internalLinkResponse.json();
+			const internalLinkSection = internalLinkPayload && internalLinkPayload.sections ? internalLinkPayload.sections.internal_links || {} : {};
+			await page.waitForSelector('text=/Recommended internal links|推荐内链/', { timeout: 30000 });
+			assert(internalLinkResponse.status() >= 200 && internalLinkResponse.status() < 300, 'Internal-link editor request returns a successful HTTP status.');
+			assert(internalLinkSection.direct_wordpress_write === false, 'Internal-link browser response disables direct WordPress writes.');
+			assert(internalLinkSection.editor_transaction && internalLinkSection.editor_transaction.schema === 'current_article_multi_link_result.v1', 'Internal-link browser response exposes the current-article transaction contract.');
+
+			const candidateCount = Array.isArray(internalLinkSection.recommendation_candidates) ? internalLinkSection.recommendation_candidates.length : 0;
+			const candidateReview = (Array.isArray(internalLinkSection.recommendation_candidates) ? internalLinkSection.recommendation_candidates : []).map((candidate) => ({
+				id: candidate.id || '',
+				anchor_text: candidate.anchor_or_context || '',
+				anchor_quality_status: candidate.anchor_quality_status || '',
+				can_apply_to_editor: candidate.can_apply_to_editor === true,
+				has_source_match: Boolean(candidate.source_match && candidate.source_match.matched_text),
+				target_post_id: candidate.target_ref && candidate.target_ref.post_id || 0,
+				target_status: candidate.target_ref && candidate.target_ref.status || '',
+				target_post_type: candidate.target_ref && candidate.target_ref.post_type || '',
+				candidate_source: candidate.candidate_source || internalLinkSection.candidate_source || '',
+			}));
+			const cloudAnchorEvidence = anchorEvidenceSummary(internalLinkSection.source_knowledge || {});
+			console.log(`INFO: internal_link_candidate_review=${JSON.stringify(candidateReview)}`);
+			console.log(`INFO: internal_link_cloud_anchor_evidence=${JSON.stringify(cloudAnchorEvidence)}`);
+			const checkboxLocator = page.locator('.npcink-toolbox-editor-support__internal-link-card input[type="checkbox"]');
+			const applicableCount = await checkboxLocator.count();
+			const copyButton = page.locator('.npcink-toolbox-editor-support__internal-link-card button').filter({ hasText: /Copy link|复制链接/ }).first();
+			if (await copyButton.count()) {
+				await copyButton.click();
+				await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
+				pass('A reviewed internal-link URL can be copied manually.');
+			}
+
+			let appliedCount = 0;
+			let rejectedCount = 0;
+			if (applicableCount > 0) {
+				const selectionCount = Math.min(2, applicableCount);
+				for (let index = 0; index < selectionCount; index += 1) {
+					await checkboxLocator.nth(index).check();
+				}
+				const editorContentAfterSelection = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
+				assert(editorContentAfterSelection === editorContentBefore, 'Selecting internal-link suggestions does not mutate editor content.');
+				assert(wpPostContent(activePostId) === databaseContentBefore, 'Selecting internal-link suggestions does not persist WordPress content.');
+				const requestIndexBeforeApply = requests.length;
+				await page.getByRole('button', { name: /应用所选内链|Apply selected internal links/i }).click();
+				await page.waitForSelector('text=/已在当前编辑器应用/', { timeout: 10000 });
+				const resultText = await page.locator('.components-notice, .npcink-toolbox-editor-support__notice').filter({ hasText: /已在当前编辑器应用/ }).last().innerText();
+				const counts = resultText.match(/应用\s*(\d+)\s*条，拒绝\s*(\d+)\s*条/);
+				appliedCount = counts ? parseInt(counts[1], 10) : 0;
+				rejectedCount = counts ? parseInt(counts[2], 10) : 0;
+				const editorContentAfterApply = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
+				assert(appliedCount > 0 && editorContentAfterApply !== editorContentBefore, 'Explicit Apply changes only the visible Gutenberg editor state.');
+				assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Apply does not persist post_content before native Update or Publish.');
+				const applyRequests = requests.slice(requestIndexBeforeApply);
+				const directWriteRequests = applyRequests.filter((request) => /\/wp-json\/wp\/v2\/(posts|pages)\/\d+/i.test(request.url) && /POST|PUT|PATCH/i.test(request.method));
+				assert(directWriteRequests.length === 0, 'Toolbox Apply sends no direct WordPress post write request.');
+			} else {
+				if (requireInternalLinkApply) {
+					fail('The content-rich article did not return an exact source match required for Apply.');
+				}
+				pass('Review-only acceptance allows no Apply when the response has no exact source match.');
+				const emptyStateCount = await page.locator('text=/No internal link candidates returned|没有安全、具体且可匹配的锚文本|只能复制链接或打开文章检查|暂未找到/').count();
+				assert(emptyStateCount > 0 || candidateCount === 0, 'Weak or empty internal-link results show a bounded Chinese empty/review-only state.');
+				assert(await page.getByRole('button', { name: /应用所选内链|Apply selected internal links/i }).isDisabled().catch(() => true), 'Batch Apply stays unavailable without an exact source match.');
+			}
+
+			const artifactDir = env('SMOKE_ARTIFACT_DIR', 'tests/artifacts');
+			mkdirSync(artifactDir, { recursive: true });
+			const screenshotPath = `${artifactDir}/editor-internal-link-batch-${activePostId}.png`;
+			await page.screenshot({ path: screenshotPath, fullPage: true });
+			const toolboxNetworkErrors = networkErrors.filter((entry) => /npcink-toolbox|npcink-cloud-addon/i.test(entry.url));
+			assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
+			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
+				post_id: parseInt(activePostId, 10),
+				http_status: internalLinkResponse.status(),
+				retrieval_status: internalLinkSection.retrieval_status || '',
+				candidate_source: internalLinkSection.candidate_source || '',
+				candidate_count: candidateCount,
+				anchors: candidateReview.map((candidate) => ({ anchor_text: candidate.anchor_text, has_source_match: candidate.has_source_match })),
+				cloud_anchor_evidence: cloudAnchorEvidence,
+				applicable_count: applicableCount,
+				applied_count: appliedCount,
+				rejected_count: rejectedCount,
+				direct_wordpress_write: internalLinkSection.direct_wordpress_write,
+				wordpress_write: wpPostContent(activePostId) !== databaseContentBefore,
+				console_error_count: consoleErrors.length,
+				console_errors: consoleErrors.slice(0, 5),
+				network_error_count: networkErrors.length,
+				network_errors: networkErrors.slice(0, 5),
+				viewport,
+				screenshot: screenshotPath,
+			})}`);
+		}
 	} catch (error) {
 		await captureDiagnostics(page, requests, error);
 		throw error;

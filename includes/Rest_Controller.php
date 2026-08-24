@@ -4743,6 +4743,15 @@ final class Rest_Controller {
 		$artifact['owner_label'] = 'human_editor';
 		$artifact['next_safe_action'] = 'review_and_apply_to_visible_editor';
 		$artifact['action_policy'] = 'operator_confirmed_visible_editor_apply';
+		$artifact['editor_transaction'] = array(
+			'schema'                 => 'current_article_multi_link_result.v1',
+			'max_selected'           => 8,
+			'write_posture'          => 'native_editor_commit',
+			'direct_wordpress_write' => false,
+			'persisted'              => false,
+			'partial_results'        => true,
+			'undo_scope'             => 'request_scoped_editor_state',
+		);
 		$artifact['review_policy'] = array_merge(
 			is_array( $artifact['review_policy'] ?? null ) ? $artifact['review_policy'] : array(),
 			array(
@@ -5020,10 +5029,17 @@ final class Rest_Controller {
 			$anchor = sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) );
 			$url    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
 			$target_post_id = absint( $item['target_post_id'] ?? 0 );
+			$target_status  = $target_post_id > 0 ? sanitize_key( (string) get_post_status( $target_post_id ) ) : '';
+			$target_type    = $target_post_id > 0 ? sanitize_key( (string) get_post_type( $target_post_id ) ) : '';
+			$verified_url   = $target_post_id > 0 ? esc_url_raw( (string) get_permalink( $target_post_id ) ) : '';
+			$target_is_public_local = 'publish' === $target_status && in_array( $target_type, array( 'post', 'page' ), true ) && '' !== $verified_url;
+			if ( $target_is_public_local ) {
+				$url = $verified_url;
+			}
 			$reason       = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
 			$source_match = is_array( $item['source_match'] ?? null ) ? $item['source_match'] : array();
 			$matched_anchor = $this->editor_internal_link_safe_matched_anchor( $anchor, $source_match );
-			$can_apply_to_editor = '' !== $matched_anchor && '' !== $url;
+			$can_apply_to_editor = '' !== $matched_anchor && $target_is_public_local;
 			if ( '' === $title && '' === $anchor && '' === $url ) {
 				continue;
 			}
@@ -5046,6 +5062,10 @@ final class Rest_Controller {
 				$quality_score   = min( $quality_score, 55 );
 				$quality_issues[] = __( '没有安全、具体且可匹配的正文锚文本；只能复制链接或打开目标文章。', 'npcink-workflow-toolbox' );
 			}
+			if ( ! $target_is_public_local ) {
+				$quality_score   = min( $quality_score, 55 );
+				$quality_issues[] = __( '目标必须是本站已发布的文章或页面；当前候选只能复制或打开检查。', 'npcink-workflow-toolbox' );
+			}
 
 			$candidates[] = $this->editor_recommendation_candidate(
 				array(
@@ -5061,6 +5081,8 @@ final class Rest_Controller {
 						'post_id' => $target_post_id,
 						'title'   => $title,
 						'url'     => $url,
+						'status'  => $target_status,
+						'post_type' => $target_type,
 					),
 					'anchor_or_context'    => $matched_anchor,
 					'anchor_quality_status' => '' !== $matched_anchor ? 'safe_exact_source_match' : 'rejected_no_safe_exact_match',
@@ -6293,6 +6315,8 @@ final class Rest_Controller {
 				'post_id' => absint( $target_ref['post_id'] ?? 0 ),
 				'title'   => sanitize_text_field( (string) ( $target_ref['title'] ?? '' ) ),
 				'url'     => esc_url_raw( (string) ( $target_ref['url'] ?? '' ) ),
+				'status'  => sanitize_key( (string) ( $target_ref['status'] ?? '' ) ),
+				'post_type' => sanitize_key( (string) ( $target_ref['post_type'] ?? '' ) ),
 			);
 		}
 		if ( '' !== (string) ( $args['anchor_or_context'] ?? '' ) ) {
