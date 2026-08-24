@@ -4,16 +4,20 @@ Attachment-scoped recovery lookup uses `GET /wp-json/npcink-toolbox/v1/strong-lo
 
 ## Authoritative Write-Lane Split
 
-ADR-006 supersedes older editor handoff assumptions in this document. A value
-reviewed in the current article and placed into visible, editable editor state
-is persisted only by the author's native WordPress Publish or Update action.
-That `native_editor_commit` path does not create or execute a Core proposal and
-does not need a Core audit record. No editor proposal-intent seam or hidden
-post-save executor remains.
+ADR-006 supersedes older editor handoff assumptions in this document. ADR-014
+refines it for one bounded current-article multi-link editor transaction. A
+value reviewed in the current article and placed into visible, editable editor
+state is persisted only by the author's native WordPress Publish or Update
+action. That `native_editor_commit` path does not create or execute a Core
+proposal and does not need a Core audit record. No editor proposal-intent seam
+or hidden post-save executor remains.
 
-Plugin-admin batches, external clients, background work, media mutation, and
-cross-object or global writes continue through Core proposals. Toolbox stops
-after proposal creation and links to Core governance.
+Plugin-admin governed batches, external clients, background work, media
+mutation, backend content patches, and cross-object or global writes continue
+through Core proposals. Applying several explicitly reviewed links to the one
+current article's visible editor state is not a governed batch when every
+ADR-014 condition holds. Toolbox stops after proposal creation and links to
+Core governance for all governed paths.
 
 Reusable, versioned static workflow definitions are owned by
 `npcink-abilities-toolkit`. Toolbox is their fixed-button projection and
@@ -778,9 +782,12 @@ the editor code as compatible support paths, not as default buttons.
 The editor panel reads the current draft title, excerpt, content, terms, status,
 and featured image id. It never assigns terms, automatically inserts links,
 imports media, publishes content, or writes SEO fields. The internal-link panel
-may copy reviewed links or open target articles, but it does not format editor
-text selections or run backend post-content patches. Write-like follow-up must
-still go through Core proposals and reusable WordPress abilities.
+may copy reviewed links or open target articles. A future ADR-014 action may
+apply at most eight explicitly selected links to exact source phrases in the
+current visible Gutenberg state after an apply-time preflight, returning
+per-item outcomes and a request-scoped safe undo. It does not run backend
+post-content patches, save, or publish. Governed write follow-up must still go
+through Core proposals and reusable WordPress abilities.
 The editor content-support surface does not expose manual rating or
 issue-report controls. Successful operator actions can send silent
 metadata-only Agent feedback through the existing `/agent-feedback` route.

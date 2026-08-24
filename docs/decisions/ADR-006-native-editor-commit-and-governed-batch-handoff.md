@@ -44,7 +44,15 @@ path, only when all of these conditions hold:
   post-save executor to persist the value;
 - there is no delayed `save_post` or `transition_post_status` follow-up write;
 - it does not import or mutate media, write another object, change global
-  settings, create taxonomy, or execute a batch.
+  settings, create taxonomy, or execute a governed batch.
+
+ADR-014 refines the term `governed batch` for internal-link editing. One
+explicit action that applies at most eight individually reviewed links only to
+the current article's visible editor state may remain one
+`native_editor_commit`; it is not a governed batch solely because the action
+contains multiple selections. Cross-object, backend, hidden, external,
+background, directly persisted, durable, queued, or retry-based multi-write
+operations remain governed batches.
 
 WordPress revisions, author identity, modified time, and ordinary post history
 remain the record. Core proposal or audit records are not required. This is not
@@ -53,7 +61,7 @@ write path.
 
 An editor sidebar is not automatically exempt. If any condition above is
 missing, classify the operation normally. Cross-object, hidden, external,
-background, destructive, incomplete-preview, or batch writes remain
+background, destructive, incomplete-preview, or governed batch writes remain
 `core_proposal_required`.
 
 ### Governed batch handoff

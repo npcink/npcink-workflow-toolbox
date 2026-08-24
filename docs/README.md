@@ -137,7 +137,10 @@ Start from the active documents below before changing code.
 - [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
+- [ADR-011: Allow Single-Image Local Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
+- [ADR-012: Bound Media Backup Retention](decisions/ADR-012-media-backup-retention-setting.md)
 - [ADR-013: WordPress-First Content And Recommendation Contracts](decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
+- [ADR-014: Current-Article Multi-Link Editor Transaction](decisions/ADR-014-current-article-multi-link-editor-transaction.md)
 
 ## Archived Closeouts
 

@@ -123,9 +123,12 @@ ADR-006 distinguishes a non-Toolbox write path: an author-reviewed value may be
 placed into the current article's visible, editable editor state and persisted
 solely by native WordPress Publish or Update. That `native_editor_commit` path
 creates no Core record because Toolbox performs no backend write. Media,
-cross-object, global, external, background, hidden post-save, and batch actions
-remain governed. The removed proposal-intent bridge and current acceptance
-rules are recorded in the [Editor Native Commit Migration Specification](docs/editor-native-commit-migration-spec.md).
+cross-object, global, external, background, hidden post-save, and governed batch
+actions remain governed. ADR-014 defines a narrow current-article multi-link
+transaction that stays in visible editor state and does not become governed
+solely because several reviewed links are selected. The removed proposal-intent
+bridge and current acceptance rules are recorded in the
+[Editor Native Commit Migration Specification](docs/editor-native-commit-migration-spec.md).
 
 The default product posture is content support outside the article body:
 taxonomy/tag candidates, internal-link candidates, image candidates,
@@ -153,6 +156,8 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-010: Strong Local Confirmation For Single-Article Image Adoption](docs/decisions/ADR-010-single-article-strong-local-image-adoption.md)
 - [ADR-011: Single-Image Local Media Replacement](docs/decisions/ADR-011-single-image-local-media-replacement.md)
 - [ADR-012: Bounded Media Backup Retention Setting](docs/decisions/ADR-012-media-backup-retention-setting.md)
+- [ADR-013: WordPress-First Content And Recommendation Contracts](docs/decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
+- [ADR-014: Current-Article Multi-Link Editor Transaction](docs/decisions/ADR-014-current-article-multi-link-editor-transaction.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:

@@ -53,10 +53,15 @@ The product has two intentionally different commit paths:
   surface; approval and execution do not occur in Toolbox.
 
 The native-editor rule applies only to the current article and its normal save
-transaction. ADR-010 separately permits one immediate, reversible media import
+transaction. Under ADR-014, one explicit action may apply at most eight
+individually reviewed internal links to the current article's visible editor
+state without becoming a governed batch merely because it has multiple
+selections. ADR-010 separately permits one immediate, reversible media import
 for the same present editor after an exact preview and explicit confirmation.
 Hidden post-save execution, replacement, cross-object/global writes,
-external/background actions, and batches remain on the Core proposal path.
+external/background actions, and governed batches remain on the Core proposal
+path. Cross-post insertion and backend content patching are governed writes,
+not native editor commits.
 
 Toolbox must not fork the flow
 into a separate approval path, media registry, prompt/model control plane, or
