@@ -4676,6 +4676,16 @@ final class Rest_Controller {
 			$this->editor_internal_link_related_content_evidence( $source_knowledge ),
 			absint( $context['post_id'] ?? 0 )
 		);
+		$cloud_status     = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
+		$retrieval_status = 'cloud_vector_evidence';
+		$source_status    = 'cloud_vector';
+		if ( in_array( $cloud_status, array( 'error', 'failed' ), true ) ) {
+			$retrieval_status = 'cloud_unavailable';
+			$source_status    = 'cloud_unavailable';
+		} elseif ( empty( $related_content_evidence ) ) {
+			$retrieval_status = 'no_cloud_evidence';
+			$source_status    = 'local_fallback';
+		}
 		$input = array(
 			'current_post_id'          => absint( $context['post_id'] ?? 0 ),
 			'post_type'                => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
@@ -4689,7 +4699,7 @@ final class Rest_Controller {
 			'candidate_limit'          => 8,
 			'max_targets'              => 6,
 			'related_content_evidence' => $related_content_evidence,
-			'candidate_source'         => empty( $related_content_evidence ) ? 'local_fallback' : 'cloud_vector',
+			'candidate_source'         => $source_status,
 			'content_blocks'            => is_array( $context['content_blocks'] ?? null ) ? $context['content_blocks'] : array(),
 		);
 		if ( 0 >= (int) $input['current_post_id'] ) {
@@ -4721,6 +4731,11 @@ final class Rest_Controller {
 		$artifact['input_scope'] = $this->editor_input_scope( $context );
 		$artifact['source_ability_id'] = 'npcink-abilities-toolkit/resolve-internal-link-targets';
 		$artifact['source_knowledge'] = $source_knowledge;
+		$artifact['candidate_source'] = $source_status;
+		$artifact['source_status'] = $retrieval_status;
+		$artifact['retrieval_status'] = $retrieval_status;
+		$artifact['cloud_result_count'] = count( $related_content_evidence );
+		$artifact['fallback_used'] = 'local_fallback' === $source_status;
 		$artifact['toolkit_artifact'] = $data;
 		$artifact['recommendation_candidates'] = $this->editor_internal_link_recommendation_candidates( $items );
 		$artifact['final_write_path'] = 'native_editor_commit';
@@ -4955,6 +4970,9 @@ final class Rest_Controller {
 	}
 
 	private function empty_toolkit_internal_link_candidates( WP_Error $error, array $source_knowledge ): array {
+		$cloud_status     = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
+		$retrieval_status = in_array( $cloud_status, array( 'error', 'failed' ), true ) ? 'cloud_unavailable' : 'no_cloud_evidence';
+		$candidate_source = 'cloud_unavailable' === $retrieval_status ? 'cloud_unavailable' : 'local_fallback';
 		return array(
 			'artifact_type'          => 'internal_link_candidates.v1',
 			'candidate_type'         => 'internal_link_candidates',
@@ -4963,6 +4981,11 @@ final class Rest_Controller {
 			'final_write_path'       => 'native_editor_commit',
 			'direct_wordpress_write' => false,
 			'source_ability_id'      => 'npcink-abilities-toolkit/resolve-internal-link-targets',
+			'candidate_source'       => $candidate_source,
+			'source_status'          => $retrieval_status,
+			'retrieval_status'       => $retrieval_status,
+			'cloud_result_count'     => 0,
+			'fallback_used'          => 'local_fallback' === $candidate_source,
 			'toolkit_required'       => true,
 			'error_code'             => sanitize_key( $error->get_error_code() ),
 			'error_message'          => sanitize_text_field( $error->get_error_message() ),
@@ -4994,12 +5017,13 @@ final class Rest_Controller {
 		$candidates = array();
 		foreach ( array_slice( $items, 0, 8 ) as $index => $item ) {
 			$title  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
-			$anchor = sanitize_text_field( (string) ( $item['suggested_anchor_text'] ?? '' ) );
+			$anchor = sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) );
 			$url    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
 			$target_post_id = absint( $item['target_post_id'] ?? 0 );
-			$placement_hint = sanitize_text_field( (string) ( $item['placement_hint'] ?? '' ) );
 			$reason       = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
 			$source_match = is_array( $item['source_match'] ?? null ) ? $item['source_match'] : array();
+			$matched_anchor = $this->editor_internal_link_safe_matched_anchor( $anchor, $source_match );
+			$can_apply_to_editor = '' !== $matched_anchor && '' !== $url;
 			if ( '' === $title && '' === $anchor && '' === $url ) {
 				continue;
 			}
@@ -5018,31 +5042,37 @@ final class Rest_Controller {
 				$quality_score   = min( $quality_score, 55 );
 				$quality_issues[] = __( '缺少目标 URL，插入前需要人工补充或确认。', 'npcink-workflow-toolbox' );
 			}
+			if ( '' === $matched_anchor ) {
+				$quality_score   = min( $quality_score, 55 );
+				$quality_issues[] = __( '没有安全、具体且可匹配的正文锚文本；只能复制链接或打开目标文章。', 'npcink-workflow-toolbox' );
+			}
 
 			$candidates[] = $this->editor_recommendation_candidate(
 				array(
 					'id'                   => 'internal_link_' . ( $index + 1 ),
 					'kind'                 => 'internal_link',
 					'label'                => '' !== $title ? $title : __( 'Internal link candidate', 'npcink-workflow-toolbox' ),
-					'value'                => '' !== $anchor ? $anchor : $url,
+					'value'                => $matched_anchor,
 					'reason'               => $reason,
 					'confidence'           => $has_score && $score > 0 && $score <= 1 ? $score : null,
 					'target_field'         => 'post_content',
-					'action_policy'        => 'operator_confirmed_visible_editor_apply',
+					'action_policy'        => $can_apply_to_editor ? 'operator_confirmed_visible_editor_apply' : 'operator_review_copy_or_open_only',
 					'target_ref'           => array(
 						'post_id' => $target_post_id,
 						'title'   => $title,
 						'url'     => $url,
 					),
-					'anchor_or_context'    => '' !== $anchor ? $anchor : $placement_hint,
+					'anchor_or_context'    => $matched_anchor,
+					'anchor_quality_status' => '' !== $matched_anchor ? 'safe_exact_source_match' : 'rejected_no_safe_exact_match',
+					'can_apply_to_editor'  => $can_apply_to_editor,
 					'evidence_note'        => '' !== $reason ? $reason : __( 'Related content candidate for manual internal-link review.', 'npcink-workflow-toolbox' ),
 					'owner_label'          => 'human_editor',
-					'next_safe_action'     => 'review_and_apply_to_visible_editor',
-					'quality_status'       => $quality_score >= 60 && '' !== $url ? 'review' : 'weak',
+					'next_safe_action'     => $can_apply_to_editor ? 'review_and_apply_to_visible_editor' : 'copy_or_open_target_only',
+					'quality_status'       => $quality_score >= 60 && $can_apply_to_editor ? 'review' : 'weak',
 					'quality_score'        => $quality_score,
 					'quality_issues'       => $quality_issues,
 						'evidence_refs'        => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
-					'source_match'         => $source_match,
+					'source_match'         => $can_apply_to_editor ? $source_match : array(),
 					'candidate_source'     => sanitize_key( (string) ( $item['candidate_source'] ?? '' ) ),
 					'priority_reason'      => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
 						'link_graph_issues'    => is_array( $item['link_graph_issues'] ?? null ) ? $item['link_graph_issues'] : array(),
@@ -5054,6 +5084,36 @@ final class Rest_Controller {
 		}
 
 		return $candidates;
+	}
+
+	private function editor_internal_link_safe_matched_anchor( string $anchor, array $source_match ): string {
+		$matched_text  = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
+		$expected_text = sanitize_text_field( (string) ( $source_match['expected_text'] ?? '' ) );
+		$block_id      = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
+		$offset        = isset( $source_match['text_offset'] ) && is_numeric( $source_match['text_offset'] ) ? (int) $source_match['text_offset'] : -1;
+		if ( '' === $anchor || '' === $matched_text || '' === $expected_text || '' === $block_id || $offset < 0 ) {
+			return '';
+		}
+
+		$normalize = static function ( string $value ): string {
+			$value = trim( preg_replace( '/[\p{P}\p{Z}\s]+/u', '', $value ) ?? '' );
+			return function_exists( 'mb_strtolower' ) ? mb_strtolower( $value ) : strtolower( $value );
+		};
+		$normalized_anchor  = $normalize( $anchor );
+		$normalized_matched = $normalize( $matched_text );
+		$generic_anchors    = array( '主题', '文章', '内容', '这里', '本文', '本页', 'topic', 'article', 'content', 'here', 'this', 'post', 'page', 'link', 'readmore' );
+		$anchor_length      = function_exists( 'mb_strlen' ) ? mb_strlen( $normalized_matched ) : strlen( $normalized_matched );
+		if ( $normalized_anchor !== $normalized_matched || $anchor_length < 4 || in_array( $normalized_matched, $generic_anchors, true ) ) {
+			return '';
+		}
+
+		$matched_length = function_exists( 'mb_strlen' ) ? mb_strlen( $matched_text ) : strlen( $matched_text );
+		$expected_slice = function_exists( 'mb_substr' ) ? mb_substr( $expected_text, $offset, $matched_length ) : substr( $expected_text, $offset, $matched_length );
+		if ( $normalize( (string) $expected_slice ) !== $normalized_matched ) {
+			return '';
+		}
+
+		return $matched_text;
 	}
 
 	private function editor_ai_summary_suggestions( array $context, string $query ): array {
@@ -6237,6 +6297,12 @@ final class Rest_Controller {
 		}
 		if ( '' !== (string) ( $args['anchor_or_context'] ?? '' ) ) {
 			$candidate['anchor_or_context'] = sanitize_text_field( (string) $args['anchor_or_context'] );
+		}
+		if ( array_key_exists( 'can_apply_to_editor', $args ) ) {
+			$candidate['can_apply_to_editor'] = true === $args['can_apply_to_editor'];
+		}
+		if ( '' !== (string) ( $args['anchor_quality_status'] ?? '' ) ) {
+			$candidate['anchor_quality_status'] = sanitize_key( (string) $args['anchor_quality_status'] );
 		}
 		if ( '' !== (string) ( $args['evidence_note'] ?? '' ) ) {
 			$candidate['evidence_note'] = sanitize_text_field( (string) $args['evidence_note'] );
