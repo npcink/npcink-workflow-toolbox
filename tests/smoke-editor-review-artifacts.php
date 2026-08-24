@@ -261,28 +261,33 @@ $before       = toolbox_editor_review_smoke_post_snapshot( $sample_post_id );
 $post_count   = toolbox_editor_review_smoke_post_count();
 $category_ids = wp_get_post_categories( $sample_post_id );
 $tag_ids      = wp_get_post_tags( $sample_post_id, array( 'fields' => 'ids' ) );
+$internal_link_phrase                    = 'Internal link smoke anchor';
+$captured_internal_link_source_passages = array();
 
 add_filter(
 	'npcink_toolbox_site_knowledge_cloud_request',
-	static function ( $handled, array $runtime_payload ) use ( $target_post_id ) {
+	static function ( $handled, array $runtime_payload ) use ( $target_post_id, $internal_link_phrase, &$captured_internal_link_source_passages ) {
 		$intent = sanitize_key( (string) ( $runtime_payload['input']['intent'] ?? '' ) );
+		$item   = array(
+			'post_id'     => $target_post_id,
+			'source_type' => 'post',
+			'title'       => get_the_title( $target_post_id ),
+			'url'         => get_permalink( $target_post_id ),
+			'excerpt'     => 'Related public article returned by mocked Site Knowledge.',
+			'score'       => 0.91,
+			'reason'      => 'Mocked Site Knowledge related-content match for editor review smoke.',
+		);
+		if ( 'internal_links' === $intent ) {
+			$captured_internal_link_source_passages = is_array( $runtime_payload['input']['source_passages'] ?? null ) ? $runtime_payload['input']['source_passages'] : array();
+			$item['anchor_or_context'] = 0 < count( preg_grep( '/文章内容/u', $captured_internal_link_source_passages ) ) ? '文章内容' : $internal_link_phrase;
+		}
 		return array(
 			'status' => 'ready',
 			'data'   => array(
 				'result' => array(
 					'status'  => 'ready',
 					'intent'  => $intent,
-					'results' => array(
-						array(
-							'post_id'     => $target_post_id,
-							'source_type' => 'post',
-							'title'       => get_the_title( $target_post_id ),
-							'url'         => get_permalink( $target_post_id ),
-							'excerpt'     => 'Related public article returned by mocked Site Knowledge.',
-							'score'       => 0.91,
-							'reason'      => 'Mocked Site Knowledge related-content match for editor review smoke.',
-						),
-					),
+					'results' => array( $item ),
 					'coverage' => array(
 						'indexed_public_posts' => 1,
 					),
@@ -307,11 +312,9 @@ $base_params = array(
 	'context_scope'  => 'full_article',
 );
 
-$internal_link_phrase = 'Internal link smoke anchor';
 $internal_links_result = toolbox_editor_review_smoke_rest(
 	array(
 		'intent'         => 'internal_links',
-		'selected_text'  => $internal_link_phrase,
 		'content_blocks' => array(
 			array(
 				'client_id'  => 'editor-review-smoke-block',
@@ -325,6 +328,7 @@ $internal_links        = is_array( $internal_links_result['sections']['internal_
 $internal_items        = is_array( $internal_links['items'] ?? null ) ? $internal_links['items'] : array();
 $internal_projection   = is_array( $internal_links['recommendation_candidates'] ?? null ) ? $internal_links['recommendation_candidates'] : array();
 $internal_handoff      = is_array( $internal_links['handoff'] ?? null ) ? $internal_links['handoff'] : array();
+$internal_transaction  = is_array( $internal_links['editor_transaction'] ?? null ) ? $internal_links['editor_transaction'] : array();
 $target_projection     = array_values(
 	array_filter(
 		$internal_projection,
@@ -333,6 +337,7 @@ $target_projection     = array_values(
 );
 
 toolbox_editor_review_smoke_assert( 'editor_content_support_flow' === (string) ( $internal_links_result['artifact_type'] ?? '' ), 'Internal-links result declares editor_content_support_flow.' );
+toolbox_editor_review_smoke_assert( in_array( 'Prefix ' . $internal_link_phrase . ' suffix.', $captured_internal_link_source_passages, true ), 'Internal-links request sends bounded visible Gutenberg passage evidence to Cloud.' );
 toolbox_editor_review_smoke_assert( 'internal_links' === (string) ( $internal_links_result['intent'] ?? '' ), 'Internal-links result preserves the fixed intent.' );
 toolbox_editor_review_smoke_assert( false === (bool) ( $internal_links_result['direct_wordpress_write'] ?? true ), 'Internal-links flow disables direct WordPress writes.' );
 toolbox_editor_review_smoke_assert( 'internal_link_candidates.v1' === (string) ( $internal_links['artifact_type'] ?? '' ), 'Internal-links section returns the structured candidate artifact.' );
@@ -349,7 +354,10 @@ toolbox_editor_review_smoke_assert( 'internal_link' === (string) ( $internal_pro
 toolbox_editor_review_smoke_assert( 'operator_confirmed_visible_editor_apply' === (string) ( $internal_projection[0]['action_policy'] ?? '' ), 'Internal-link projection requires an operator-confirmed visible editor apply.' );
 toolbox_editor_review_smoke_assert( 'human_editor' === (string) ( $internal_links['owner_label'] ?? '' ), 'Internal-link section names the human editor as the placement owner.' );
 toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (string) ( $internal_links['next_safe_action'] ?? '' ), 'Internal-link section exposes the reviewed visible-editor action.' );
+toolbox_editor_review_smoke_assert( 'current_article_multi_link_result.v1' === (string) ( $internal_transaction['schema'] ?? '' ) && 8 === (int) ( $internal_transaction['max_selected'] ?? 0 ), 'Internal-link section exposes the bounded current-article transaction contract.' );
+toolbox_editor_review_smoke_assert( false === (bool) ( $internal_transaction['direct_wordpress_write'] ?? true ) && false === (bool) ( $internal_transaction['persisted'] ?? true ) && true === (bool) ( $internal_transaction['partial_results'] ?? false ), 'Internal-link editor transaction remains no-write and reports partial outcomes.' );
 toolbox_editor_review_smoke_assert( ! empty( $target_projection ) && is_array( $target_projection[0]['target_ref'] ?? null ), 'Internal-link projection exposes a bounded target_ref for the Cloud target.' );
+toolbox_editor_review_smoke_assert( 'publish' === (string) ( $target_projection[0]['target_ref']['status'] ?? '' ) && 'post' === (string) ( $target_projection[0]['target_ref']['post_type'] ?? '' ), 'Internal-link projection confirms a published local post target before editor Apply.' );
 toolbox_editor_review_smoke_assert( 'editor-review-smoke-block' === (string) ( $target_projection[0]['source_match']['block_client_id'] ?? '' ), 'Internal-link projection preserves the exact editor block match.' );
 toolbox_editor_review_smoke_assert( $internal_link_phrase === (string) ( $target_projection[0]['source_match']['matched_text'] ?? '' ), 'Internal-link projection preserves the exact reviewed anchor phrase.' );
 toolbox_editor_review_smoke_assert( 'Prefix ' . $internal_link_phrase . ' suffix.' === (string) ( $target_projection[0]['source_match']['expected_text'] ?? '' ), 'Internal-link projection preserves stale-block comparison text.' );
@@ -362,12 +370,11 @@ toolbox_editor_review_smoke_assert( in_array( 'no_backend_post_content_patch', (
 $generic_anchor_result = toolbox_editor_review_smoke_rest(
 	array(
 		'intent'         => 'internal_links',
-		'selected_text'  => '文章',
 		'content_blocks' => array(
 			array(
 				'client_id'  => 'editor-review-generic-anchor',
 				'block_name' => 'core/paragraph',
-				'text'       => '这篇文章介绍站点知识配置。',
+				'text'       => '这段文章内容介绍站点知识配置。',
 			),
 		),
 	) + $base_params

@@ -770,6 +770,11 @@
 	border-radius: 6px;
 }
 
+.npcink-toolbox-editor-support__internal-link-card.is-selected {
+	border-color: #3858e9;
+	box-shadow: inset 3px 0 0 #3858e9;
+}
+
 .npcink-toolbox-editor-support__internal-link-card strong {
 	color: #1d2327;
 	font-size: 13px;
@@ -807,6 +812,31 @@
 .npcink-toolbox-editor-support__internal-link-actions .components-button {
 	min-height: 30px;
 	font-size: 12px;
+}
+
+.npcink-toolbox-editor-support__internal-link-review {
+	display: grid;
+	gap: 8px;
+	padding-top: 10px;
+	border-top: 1px solid #dcdcde;
+}
+
+.npcink-toolbox-editor-support__internal-link-review > strong {
+	font-size: 13px;
+}
+
+.npcink-toolbox-editor-support__internal-link-review ul,
+.npcink-toolbox-editor-support__internal-link-results {
+	display: grid;
+	gap: 4px;
+	margin: 0;
+	padding-left: 18px;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.npcink-toolbox-editor-support__internal-link-results {
+	color: #8a2424;
 }
 
 .npcink-toolbox-editor-support__candidate-badge {

@@ -144,7 +144,9 @@ Start from the active documents below before changing code.
 
 ## Archived Closeouts
 
-Historical stage records live under [archive/2026-06](archive/2026-06/) and
-[archive/2026-07](archive/2026-07/).
+Historical stage records live under [archive/2026-06](archive/2026-06/),
+[archive/2026-07](archive/2026-07/), and [archive/2026-08](archive/2026-08/).
 They remain useful evidence, but they are not the first place to look for
 current product contracts.
+
+- [Cloud Vector Recommendation Funnel Closeout - 2026-08-24](archive/2026-08/cloud-vector-recommendation-funnel-closeout-2026-08-24.md) records local and M4 candidate evidence for exact anchors, reviewed batch Apply, native-save confirmation, metadata-only rollups, and the real-user observation stop point; it is not merge, production, or recommendation-quality authority.

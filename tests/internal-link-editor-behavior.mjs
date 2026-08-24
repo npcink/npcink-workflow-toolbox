@@ -12,6 +12,12 @@ vm.runInNewContext(source, { window: windowObject, URL, Object, Array, String, N
 
 const helpers = windowObject.NpcinkToolboxInternalLinkHelpers;
 assert.ok(helpers, 'internal-link helpers are available');
+assert.equal(helpers.internalLinkContractValue('cloud_vector'), 'cloud_vector');
+assert.equal(helpers.internalLinkContractValue(' cloud_vector_evidence '), 'cloud_vector_evidence');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 0), 'candidate_count_0');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 3), 'candidate_count_1_3');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 8), 'candidate_count_4_8');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 9), 'candidate_count_9_plus');
 
 function richTextValue(html) {
 	const formats = [];
@@ -38,10 +44,23 @@ function richTextValue(html) {
 
 const richText = {
 	create: ({ html }) => richTextValue(html),
-	applyFormat: (value, format, start, end) => ({ ...value, applied: { format, start, end } }),
+	applyFormat: (value, format, start, end) => {
+		const formats = value.formats.map((entries, index) => index >= start && index < end ? entries.concat([format]) : entries.slice());
+		return { ...value, formats };
+	},
 	toHTMLString: ({ value }) => {
-		const { start, end, format } = value.applied;
-		return value.text.slice(0, start) + '<a href="' + format.attributes.url + '">' + value.text.slice(start, end) + '</a>' + value.text.slice(end);
+		let output = '';
+		let activeUrl = '';
+		for (let index = 0; index < value.text.length; index += 1) {
+			const link = (value.formats[index] || []).find((format) => format && format.type === 'core/link');
+			const nextUrl = link ? link.attributes.url : '';
+			if (activeUrl && activeUrl !== nextUrl) output += '</a>';
+			if (nextUrl && activeUrl !== nextUrl) output += '<a href="' + nextUrl + '">';
+			output += value.text[index];
+			activeUrl = nextUrl;
+		}
+		if (activeUrl) output += '</a>';
+		return output;
 	},
 };
 
@@ -153,5 +172,123 @@ assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, ranges: [[0,
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, currentText: 'changed' }).reason_codes[0], 'stale_editor_block');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, anchorText: '文章', sourceMatch: { ...preflightBase.sourceMatch, matched_text: '文章' } }).reason_codes[0], 'generic_anchor');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, retrievalStatus: 'no_cloud_evidence', candidateSource: 'local_fallback' }).outcome, 'review_only');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, targetUrl: 'https://outside.test/target' }).reason_codes[0], 'invalid_internal_url');
 
-console.log('PASS: internal-link editor apply, batch preflight, duplicate protection, stale protection, and undo safety');
+function batchCandidate(id, anchorText, offset, targetPostId, targetUrl, expectedText = 'Alpha connects Beta clearly.') {
+	return {
+		id,
+		anchorText,
+		targetUrl,
+		targetPostId,
+		targetStatus: 'publish',
+		targetPostType: 'post',
+		candidateSource: 'cloud_vector',
+		retrievalStatus: 'cloud_vector_evidence',
+		canApplyToEditor: true,
+		sourceMatch: {
+			block_client_id: 'batch-block',
+			block_name: 'core/paragraph',
+			matched_text: anchorText,
+			text_offset: offset,
+			expected_text: expectedText,
+		},
+	};
+}
+
+const batchBlock = { clientId: 'batch-block', attributes: { content: 'Alpha connects Beta clearly.' }, innerBlocks: [] };
+const alphaCandidate = batchCandidate('alpha', 'Alpha', 0, 3001, 'https://example.test/alpha/');
+const betaCandidate = batchCandidate('beta', 'Beta', 15, 3002, 'https://example.test/beta/');
+const batchResult = helpers.prepareInternalLinkBatchApplication([alphaCandidate, betaCandidate], [batchBlock], richText);
+assert.equal(batchResult.schema, 'current_article_multi_link_result.v1');
+assert.equal(batchResult.write_posture, 'native_editor_commit');
+assert.equal(batchResult.direct_wordpress_write, false);
+assert.equal(batchResult.persisted, false);
+assert.equal(batchResult.applied_count, 2);
+assert.equal(batchResult.rejected_count, 0);
+assert.equal(batchResult.updates.length, 1);
+assert.equal(batchResult.updates[0].appliedContent, '<a href="https://example.test/alpha/">Alpha</a> connects <a href="https://example.test/beta/">Beta</a> clearly.');
+assert.equal(helpers.canUndoInternalLinkBatch([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent } }], batchResult.undo), true);
+assert.equal(helpers.canUndoInternalLinkBatch([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent + ' edited' } }], batchResult.undo), false);
+const telemetrySnapshots = helpers.internalLinkTelemetrySnapshots(batchResult.updates);
+assert.equal(telemetrySnapshots.length, 1);
+assert.equal(Object.prototype.hasOwnProperty.call(telemetrySnapshots[0], 'appliedContent'), false);
+assert.match(telemetrySnapshots[0].appliedFingerprint, /^[a-z0-9]+_[a-z0-9]+$/);
+assert.equal(helpers.internalLinkSavedStateChanged([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent } }], telemetrySnapshots), false);
+assert.equal(helpers.internalLinkSavedStateChanged([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent + ' edited' } }], telemetrySnapshots), true);
+assert.equal(helpers.internalLinkSavedStateChanged([], telemetrySnapshots), true);
+const applyFeedbackSeed = helpers.internalLinkApplyFeedbackSeed({}, 'internal_link_results_session', 2);
+assert.equal(applyFeedbackSeed.source_object_type, 'recommendation_session');
+assert.equal(applyFeedbackSeed.source_object_id, 'internal_link_results_session');
+assert.deepEqual(Array.from(applyFeedbackSeed.source_reason_codes), ['applied_count_1_3']);
+const savedUnchangedFeedback = helpers.internalLinkSavedFollowupPayload(applyFeedbackSeed, false);
+assert.equal(savedUnchangedFeedback.source_action_id, 'internal_link_saved_unchanged');
+assert.equal(savedUnchangedFeedback.local_outcome, 'accepted');
+assert.equal(savedUnchangedFeedback.source_object_type, 'recommendation_session');
+assert.equal(savedUnchangedFeedback.source_object_id, 'internal_link_results_session');
+assert.deepEqual(Array.from(savedUnchangedFeedback.source_reason_codes), ['applied_count_1_3', 'saved_without_editor_changes']);
+const savedEditedFeedback = helpers.internalLinkSavedFollowupPayload(savedUnchangedFeedback, true);
+assert.equal(savedEditedFeedback.source_action_id, 'internal_link_saved_edited');
+assert.equal(savedEditedFeedback.local_outcome, 'edited_before_accept');
+assert.deepEqual(Array.from(savedEditedFeedback.feedback_labels), ['good_but_needs_human_draft']);
+
+const feedbackContext = helpers.recommendationFeedbackContext({
+	sections: {
+		internal_links: {
+			retrieval_status: 'cloud_vector_evidence',
+			candidate_source: 'cloud_vector',
+			fallback_used: false,
+			recommendation_candidates: [
+				{
+					id: 'feedback-alpha',
+					anchor_or_context: '内容工作流',
+					can_apply_to_editor: true,
+					candidate_source: 'cloud_vector',
+					target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: 'https://example.test/alpha/' },
+					source_match: { block_client_id: 'batch-block', matched_text: '内容工作流' },
+				},
+			],
+		},
+	},
+}, 'internal_links');
+assert.equal(feedbackContext.candidateCount, 1);
+assert.equal(feedbackContext.applicableCount, 1);
+assert.deepEqual(Array.from(feedbackContext.reasonCodes), [
+	'candidate_count_1_3',
+	'applicable_count_1_3',
+	'retrieval_cloud_vector_evidence',
+	'source_cloud_vector',
+	'fallback_not_used',
+]);
+
+const partialResult = helpers.prepareInternalLinkBatchApplication([
+	alphaCandidate,
+	batchCandidate('stale-beta', 'Beta', 15, 3003, 'https://example.test/stale/', 'Alpha used to connect Beta.'),
+], [batchBlock], richText);
+assert.equal(partialResult.applied_count, 1);
+assert.equal(partialResult.rejected_count, 1);
+assert.equal(partialResult.items[1].reason_codes[0], 'stale_editor_block');
+
+const duplicateResult = helpers.prepareInternalLinkBatchApplication([
+	alphaCandidate,
+	batchCandidate('duplicate', 'Beta', 15, 3001, 'https://example.test/?p=3001'),
+], [batchBlock], richText);
+assert.equal(duplicateResult.applied_count, 0);
+assert.deepEqual(Array.from(duplicateResult.items, (item) => item.reason_codes[0]), ['duplicate_target', 'duplicate_target']);
+
+const overlappingResult = helpers.prepareInternalLinkBatchApplication([
+	batchCandidate('whole', 'Alpha connects Beta', 0, 3010, 'https://example.test/whole/'),
+	betaCandidate,
+], [batchBlock], richText);
+assert.equal(overlappingResult.applied_count, 0);
+assert.deepEqual(Array.from(overlappingResult.items, (item) => item.reason_codes[0]), ['overlap_conflict', 'overlap_conflict']);
+
+const overLimitResult = helpers.prepareInternalLinkBatchApplication(Array.from({ length: 9 }, (_, index) => ({ ...alphaCandidate, id: 'limit-' + index })), [batchBlock], richText);
+assert.equal(overLimitResult.applied_count, 0);
+assert.equal(overLimitResult.rejected_count, 9);
+assert.equal(overLimitResult.items[0].reason_codes[0], 'selection_limit_exceeded');
+
+const fallbackResult = helpers.prepareInternalLinkBatchApplication([{ ...alphaCandidate, candidateSource: 'local_fallback', retrievalStatus: 'no_cloud_evidence' }], [batchBlock], richText);
+assert.equal(fallbackResult.applied_count, 0);
+assert.equal(fallbackResult.items[0].reason_codes[0], 'fallback_must_not_be_labeled_vector');
+
+console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');

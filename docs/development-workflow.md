@@ -413,6 +413,42 @@ Adapter, or Core proposal route is called. It is intentionally outside
 `composer test:all` because it depends on a running local WordPress site,
 WP-CLI login-cookie generation, Playwright, and a local browser.
 
+The same browser harness covers the bounded current-article internal-link
+transaction without introducing a second framework:
+
+```bash
+POST_ID=<real-post-id> \
+NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" \
+composer smoke:editor-internal-link-batch-browser
+```
+
+Set `NPCINK_INTERNAL_LINK_REQUIRE_APPLY=1` for a content-rich article that must
+produce at least one exact eligible source match. The smoke records HTTP status,
+retrieval status, candidate source/count, applicable/applied/rejected counts,
+viewport, console/network errors, and a final screenshot. It copies one link
+when available, proves selection does not mutate content, performs Apply only
+when an exact match exists, verifies Apply changes visible Gutenberg state, and
+then reads WordPress again through WP-CLI to prove `post_content` was not
+persisted. Short or weak-candidate articles may finish in the Chinese
+review-only/empty state, but must never enable Apply without an exact match.
+
+To prove the final native-save boundary without modifying a published article,
+reuse the same harness with a disposable draft copied from a known content-rich
+source post:
+
+```bash
+NPCINK_INTERNAL_LINK_NATIVE_SAVE_SMOKE=1 \
+NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID=<source-post-id> \
+NPCINK_INTERNAL_LINK_REQUIRE_APPLY=1 \
+NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" \
+composer smoke:editor-internal-link-batch-browser
+```
+
+Omit `POST_ID` in this mode. The smoke creates and deletes a temporary draft,
+proves Apply leaves database `post_content` unchanged, explicitly invokes the
+WordPress native save, then verifies the database change and the correlated
+metadata-only `internal_link_saved_unchanged` receipt.
+
 For the per-occurrence article image ALT prototype, run:
 
 ```bash
