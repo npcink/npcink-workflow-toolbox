@@ -89,6 +89,48 @@
 		}
 	}
 
+	function internalLinkUrlIsSafe(value) {
+		return Boolean(canonicalInternalLinkUrl(value));
+	}
+
+	function internalLinkAnchorIsSpecific(value) {
+		const normalized = String(value || '').trim().replace(/[\p{P}\p{Z}\s]+/gu, '').toLocaleLowerCase();
+		const genericAnchors = ['主题', '文章', '内容', '这里', '本文', '本页', 'topic', 'article', 'content', 'here', 'this', 'post', 'page', 'link', 'readmore'];
+		return Array.from(normalized).length >= 4 && !genericAnchors.includes(normalized);
+	}
+
+	function internalLinkRangesOverlap(ranges) {
+		const normalized = (Array.isArray(ranges) ? ranges : [])
+			.filter((range) => Array.isArray(range) && range.length === 2 && Number.isInteger(Number(range[0])) && Number.isInteger(Number(range[1])))
+			.map((range) => [Number(range[0]), Number(range[1])])
+			.filter((range) => range[0] >= 0 && range[1] > range[0])
+			.sort((left, right) => left[0] - right[0]);
+		return normalized.some((range, index) => index > 0 && range[0] < normalized[index - 1][1]);
+	}
+
+	function internalLinkBatchPreflight(input) {
+		const candidate = input && typeof input === 'object' ? input : {};
+		const reject = (reason) => ({ outcome: 'rejected', reason_codes: [reason] });
+		if (!internalLinkUrlIsSafe(candidate.targetUrl)) return reject('invalid_internal_url');
+		if (candidate.targetStatus !== 'publish') return reject('target_not_public');
+		if (candidate.targetAlreadyLinked === true) return reject('target_already_linked');
+		const rawTargetPostIds = Array.isArray(candidate.targetPostIds) ? candidate.targetPostIds : [];
+		const targetPostIds = rawTargetPostIds.map(Number).filter((id) => Number.isInteger(id) && id > 0);
+		if (!targetPostIds.length || targetPostIds.length !== rawTargetPostIds.length) return reject('target_not_public');
+		if (new Set(targetPostIds).size !== targetPostIds.length) return reject('duplicate_target');
+		if (internalLinkRangesOverlap(candidate.ranges)) return reject('overlapping_source_ranges');
+		if (candidate.retrievalStatus !== 'cloud_vector_evidence' || candidate.candidateSource !== 'cloud_vector') {
+			return { outcome: 'review_only', reason_codes: ['fallback_must_not_be_labeled_vector'] };
+		}
+		const match = candidate.sourceMatch && typeof candidate.sourceMatch === 'object' ? candidate.sourceMatch : null;
+		if (!match || !match.matched_text || !match.expected_text || !match.block_client_id || match.text_offset === '' || match.text_offset === null || match.text_offset === undefined || !Number.isInteger(Number(match.text_offset))) return reject('missing_exact_source_match');
+		if (match.block_name === 'core/heading') return reject('heading_match_not_eligible');
+		if (!internalLinkAnchorIsSpecific(candidate.anchorText)) return reject('generic_anchor');
+		if (String(candidate.anchorText) !== String(match.matched_text)) return reject('missing_exact_source_match');
+		if (String(match.expected_text || '') !== String(candidate.currentText || '')) return reject('stale_editor_block');
+		return { outcome: 'eligible', reason_codes: [] };
+	}
+
 	function internalLinkMatchRange(text, phrase, textOffset) {
 		const source = String(text || '');
 		const needle = String(phrase || '');
@@ -227,6 +269,10 @@
 	if (typeof window !== 'undefined') {
 		window.NpcinkToolboxInternalLinkHelpers = Object.freeze({
 			canonicalInternalLinkUrl,
+			internalLinkUrlIsSafe,
+			internalLinkAnchorIsSpecific,
+			internalLinkRangesOverlap,
+			internalLinkBatchPreflight,
 			internalLinkMatchRange,
 			internalLinkRangeHasLink,
 			internalLinkBlocksContainUrl,

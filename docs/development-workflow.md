@@ -578,6 +578,20 @@ report is local development evidence under eval-lab `project-review/generated/`;
 it is not a Core audit record, approval decision, CI-required gate, or product
 runtime.
 
+For the Internal Links batch preflight adversarial contract, run:
+
+```bash
+composer eval:internal-link-batch:verify
+```
+
+This loads the tracked `link_batch_adversarial_fixture.v1` from the sibling
+development-only eval-lab checkout, executes Toolbox's product-owned pure JS
+preflight, writes an ignored `link_batch_adversarial_results.v1` artifact under
+`build/eval/`, and asks eval-lab to compare the observed outcomes. It makes no
+Provider or Cloud request and performs no WordPress write. Passing this gate
+does not expose, authorize, or execute batch Apply in the editor; it proves only
+that the current fail-closed preflight contract handles the tracked risks.
+
 For boundary-sensitive work, use
 [Adversarial Boundary Review](adversarial-boundary-review.md) as the triage
 ledger after model-backed review. Every finding must be classified as
