@@ -5,8 +5,9 @@ The read-only `/strong-local-confirmation/media-derivative-backups/{attachment_i
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 
 ADR-006 is the active authority for choosing between native editor commit and
-Core-governed handoff. The former proposal-intent and post-save execution
-routes have been removed.
+Core-governed handoff. ADR-014 refines that authority for one bounded
+current-article multi-link editor transaction. The former proposal-intent and
+post-save execution routes have been removed.
 
 Owned here:
 
@@ -78,10 +79,15 @@ author's normal WordPress Publish or Update transaction, the operation is a
 trace.
 
 This is not a direct-write exception and not a fifth Core classification.
-Toolbox itself does not commit backend state. The rule is invalid if the action
-uses a hidden post-save executor, a direct write route, another object, media
-import or mutation, global settings, taxonomy creation, external/background
-execution, or a batch. Those operations remain `core_proposal_required`.
+Toolbox itself does not commit backend state. ADR-014 permits one explicit
+action to apply at most eight individually reviewed links to the current
+article's visible editor state, with apply-time preflight and per-item results;
+that interaction is not a governed batch solely because it has multiple
+selections. The rule is invalid if the action uses a hidden post-save executor,
+a direct write route, another object, media import or mutation, global settings,
+taxonomy creation, external/background execution, cross-post insertion,
+backend content patching, or another governed batch. Those operations remain
+`core_proposal_required`.
 
 ## Plugin-Admin Batch Boundary
 
@@ -374,10 +380,13 @@ Internal-link support returns `internal_link_candidates.v1` with reviewable
 targets, anchor suggestions, and placement hints from
 `npcink-abilities-toolkit/resolve-internal-link-targets`. Toolbox supplies
 editor context and optional Cloud Site Knowledge related-content evidence, but
-it does not own candidate assembly, link insertion, post-content patching, or a
-link graph control plane. The editor sidebar may offer explicit copy-link and
-open-target actions only; the human editor still owns where any reviewed link is
-placed in the draft.
+it does not own candidate assembly, backend post-content patching, or a link
+graph control plane. The editor sidebar may offer explicit copy-link and
+open-target actions. Under ADR-014, a future editor action may also apply at
+most eight individually reviewed links to exact, unchanged phrases in the one
+current article's visible Gutenberg state after rerunning fail-closed preflight.
+It must not save, publish, patch another post, or continue in the background;
+the human editor still owns the draft and its native WordPress save.
 Publish preflight may aggregate summary, taxonomy, image, internal-link,
 duplicate-risk, and SEO readiness into `pre_publish_review.v1`, but that
 artifact remains advisory. SEO metadata support is limited to a single current

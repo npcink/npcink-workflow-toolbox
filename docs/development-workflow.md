@@ -592,6 +592,25 @@ Provider or Cloud request and performs no WordPress write. Passing this gate
 does not expose, authorize, or execute batch Apply in the editor; it proves only
 that the current fail-closed preflight contract handles the tracked risks.
 
+Before implementing the ADR-014 current-article multi-link editor transaction,
+keep the runtime contract inside these limits:
+
+- one currently open article and at most eight explicitly selected suggestions;
+- a final review of anchor, target, URL, and exact source phrase before Apply;
+- an apply-time rerun of the fail-closed preflight against current editor state;
+- accepted ranges applied from the highest offset to the lowest within a block;
+- partial results with a per-item outcome and reason code;
+- one request-scoped undo snapshot that fails closed after subsequent edits;
+- `direct_wordpress_write=false` and `persisted=false` for the Apply result; and
+- no REST write, backend content patch, automatic save, publish, queue, or retry.
+
+Browser acceptance must prove that selection and review do not mutate editor
+content, only an explicit Apply changes visible Gutenberg state, rejected items
+remain unchanged, and no durable WordPress mutation occurs before the editor's
+native Update or Publish. The browser test should reuse the existing Toolbox
+Playwright smoke infrastructure and record console/network errors plus the
+final editor state.
+
 For boundary-sensitive work, use
 [Adversarial Boundary Review](adversarial-boundary-review.md) as the triage
 ledger after model-backed review. Every finding must be classified as
