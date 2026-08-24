@@ -47,6 +47,7 @@ const richText = {
 
 const candidate = {
 	targetUrl: 'https://example.test/related/',
+	canApplyToEditor: true,
 	sourceMatch: {
 		block_client_id: 'block-1',
 		matched_text: 'Workflow',
@@ -67,6 +68,21 @@ const prepared = helpers.prepareInternalLinkApplication(candidate, block, [block
 assert.equal(prepared.error, undefined);
 assert.equal(prepared.appliedContent, 'Intro <a href="https://example.test/related/">Workflow</a> guidance.');
 assert.equal(prepared.matchedText, 'Workflow');
+
+const genericAnchor = {
+	...candidate,
+	canApplyToEditor: false,
+	sourceMatch: { ...candidate.sourceMatch, matched_text: '文章', expected_text: 'Intro 文章 guidance.' },
+};
+assert.equal(helpers.prepareInternalLinkApplication(genericAnchor, block, [block], richText).error, 'missing_exact_match');
+
+const selectedTextSelector = {
+	getSelectionStart: () => ({ clientId: 'block-1', attributeKey: 'content', offset: 6 }),
+	getSelectionEnd: () => ({ clientId: 'block-1', attributeKey: 'content', offset: 14 }),
+	getBlock: () => block,
+};
+assert.equal(helpers.internalLinkSelectedText(selectedTextSelector), 'Workflow');
+assert.equal(helpers.internalLinkSelectedText({ ...selectedTextSelector, getSelectionEnd: () => ({ clientId: 'block-2', attributeKey: 'content', offset: 14 }) }), '');
 
 const richTextDataBlock = { ...block, attributes: { content: richTextData('Intro Workflow guidance.') } };
 const preparedRichTextData = helpers.prepareInternalLinkApplication(candidate, richTextDataBlock, [richTextDataBlock], richText);

@@ -338,6 +338,7 @@ toolbox_editor_review_smoke_assert( false === (bool) ( $internal_links_result['d
 toolbox_editor_review_smoke_assert( 'internal_link_candidates.v1' === (string) ( $internal_links['artifact_type'] ?? '' ), 'Internal-links section returns the structured candidate artifact.' );
 toolbox_editor_review_smoke_assert( 'native_editor_commit' === (string) ( $internal_links['final_write_path'] ?? '' ), 'Internal-link candidates permit only visible editor-state adoption.' );
 toolbox_editor_review_smoke_assert( false === (bool) ( $internal_links['direct_wordpress_write'] ?? true ), 'Internal-link section disables direct WordPress writes.' );
+toolbox_editor_review_smoke_assert( 'cloud_vector' === (string) ( $internal_links['candidate_source'] ?? '' ) && 'cloud_vector_evidence' === (string) ( $internal_links['retrieval_status'] ?? '' ), 'Internal-link candidates expose the mocked Cloud vector evidence source explicitly.' );
 toolbox_editor_review_smoke_assert( ! empty( $internal_items ), 'Internal-link section returns at least one candidate from mocked Site Knowledge.' );
 toolbox_editor_review_smoke_assert( in_array( $target_post_id, array_map( 'absint', array_column( $internal_items, 'target_post_id' ) ), true ), 'Internal-link candidates include the public target post.' );
 toolbox_editor_review_smoke_assert( 'review_only_candidate' === (string) ( $internal_items[0]['status'] ?? '' ), 'Internal-link candidate is review-only.' );
@@ -352,11 +353,31 @@ toolbox_editor_review_smoke_assert( ! empty( $target_projection ) && is_array( $
 toolbox_editor_review_smoke_assert( 'editor-review-smoke-block' === (string) ( $target_projection[0]['source_match']['block_client_id'] ?? '' ), 'Internal-link projection preserves the exact editor block match.' );
 toolbox_editor_review_smoke_assert( $internal_link_phrase === (string) ( $target_projection[0]['source_match']['matched_text'] ?? '' ), 'Internal-link projection preserves the exact reviewed anchor phrase.' );
 toolbox_editor_review_smoke_assert( 'Prefix ' . $internal_link_phrase . ' suffix.' === (string) ( $target_projection[0]['source_match']['expected_text'] ?? '' ), 'Internal-link projection preserves stale-block comparison text.' );
-toolbox_editor_review_smoke_assert( '' !== (string) ( $internal_projection[0]['anchor_or_context'] ?? '' ), 'Internal-link projection exposes the suggested anchor or review context.' );
+toolbox_editor_review_smoke_assert( $internal_link_phrase === (string) ( $target_projection[0]['anchor_or_context'] ?? '' ) && true === (bool) ( $target_projection[0]['can_apply_to_editor'] ?? false ), 'A natural exact source phrase remains available for explicit editor application.' );
 toolbox_editor_review_smoke_assert( '' !== (string) ( $internal_projection[0]['evidence_note'] ?? '' ), 'Internal-link projection exposes a review evidence note.' );
 toolbox_editor_review_smoke_assert( 'human_editor' === (string) ( $internal_projection[0]['owner_label'] ?? '' ), 'Internal-link projection keeps placement ownership with the human editor.' );
 toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (string) ( $internal_projection[0]['next_safe_action'] ?? '' ), 'Internal-link projection exposes reviewed visible-editor placement.' );
 toolbox_editor_review_smoke_assert( in_array( 'no_backend_post_content_patch', (array) ( $internal_handoff['blocked_actions'] ?? array() ), true ), 'Internal-link handoff blocks backend post-content patching.' );
+
+$generic_anchor_result = toolbox_editor_review_smoke_rest(
+	array(
+		'intent'         => 'internal_links',
+		'selected_text'  => '文章',
+		'content_blocks' => array(
+			array(
+				'client_id'  => 'editor-review-generic-anchor',
+				'block_name' => 'core/paragraph',
+				'text'       => '这篇文章介绍站点知识配置。',
+			),
+		),
+	) + $base_params
+);
+$generic_section    = is_array( $generic_anchor_result['sections']['internal_links'] ?? null ) ? $generic_anchor_result['sections']['internal_links'] : array();
+$generic_candidates = is_array( $generic_section['recommendation_candidates'] ?? null ) ? $generic_section['recommendation_candidates'] : array();
+$generic_candidate  = $generic_candidates[0] ?? array();
+toolbox_editor_review_smoke_assert( false === (bool) ( $generic_candidate['can_apply_to_editor'] ?? true ), 'A generic anchor is rejected for editor application.' );
+toolbox_editor_review_smoke_assert( '' === (string) ( $generic_candidate['anchor_or_context'] ?? '' ) && empty( $generic_candidate['source_match'] ?? array() ), 'A rejected generic anchor is not exposed as a final anchor or exact source match.' );
+toolbox_editor_review_smoke_assert( 'copy_or_open_target_only' === (string) ( $generic_candidate['next_safe_action'] ?? '' ), 'A candidate without a safe exact anchor remains copy/open only.' );
 
 $related_articles_result = toolbox_editor_review_smoke_rest( array( 'intent' => 'related_articles' ) + $base_params );
 $related_articles        = is_array( $related_articles_result['sections']['related_articles'] ?? null ) ? $related_articles_result['sections']['related_articles'] : array();

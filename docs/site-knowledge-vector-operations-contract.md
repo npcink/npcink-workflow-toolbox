@@ -62,6 +62,22 @@ Allowed from Toolbox:
   transport for Cloud vision, not a WordPress media import, local cache, second
   queue, or durable media store.
 
+### Editor retrieval evidence states
+
+The `internal_links` and `related_articles` editor artifacts must expose the
+retrieval state separately from the candidate list:
+
+| `retrieval_status` | `candidate_source` | Meaning |
+| --- | --- | --- |
+| `cloud_vector_evidence` | `cloud_vector` | Cloud returned usable Site Knowledge evidence; this is the only state that may be described as a vector recommendation. |
+| `no_cloud_evidence` | `local_fallback` | Cloud returned no usable evidence and a bounded local candidate path may be present; never present it as a Cloud vector result. |
+| `cloud_unavailable` | `cloud_unavailable` | Cloud transport or runtime failed; recommendation quality is not validated and the UI must expose the blocked state. |
+
+Both artifacts remain suggestion-only and must include
+`direct_wordpress_write=false`. Coverage comparison is a separate operation:
+an index coverage result does not prove that a recommendation request returned
+usable vector evidence.
+
 Allowed from Cloud Addon:
 
 - Listen for public `post` and `page` changes, and approved comment changes.

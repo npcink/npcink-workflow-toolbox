@@ -183,7 +183,7 @@
 	function prepareInternalLinkApplication(candidate, block, allBlocks, richTextApi) {
 		const match = candidate && candidate.sourceMatch;
 		const url = String(candidate && candidate.targetUrl || '').trim();
-		if (!match || !match.block_client_id || !match.matched_text || !canonicalInternalLinkUrl(url) || !richTextApi || !richTextApi.create || !richTextApi.applyFormat || !richTextApi.toHTMLString) {
+		if (!candidate || candidate.canApplyToEditor !== true || !match || !match.block_client_id || !match.matched_text || !canonicalInternalLinkUrl(url) || !richTextApi || !richTextApi.create || !richTextApi.applyFormat || !richTextApi.toHTMLString) {
 			return { error: 'missing_exact_match' };
 		}
 		const current = internalLinkBlockContent(block);
@@ -205,6 +205,21 @@
 		};
 	}
 
+	function internalLinkSelectedText(blockEditorSelector) {
+		if (!blockEditorSelector || typeof blockEditorSelector.getSelectionStart !== 'function' || typeof blockEditorSelector.getSelectionEnd !== 'function' || typeof blockEditorSelector.getBlock !== 'function') {
+			return '';
+		}
+		const start = blockEditorSelector.getSelectionStart() || {};
+		const end = blockEditorSelector.getSelectionEnd() || {};
+		if (!start.clientId || start.clientId !== end.clientId || !start.attributeKey || start.attributeKey !== end.attributeKey || !Number.isInteger(start.offset) || !Number.isInteger(end.offset) || end.offset <= start.offset) {
+			return '';
+		}
+		const block = blockEditorSelector.getBlock(start.clientId);
+		const attribute = block && block.attributes ? block.attributes[start.attributeKey] : '';
+		const text = attribute && typeof attribute.toString === 'function' ? attribute.toString() : String(attribute || '');
+		return truncateText(text.slice(start.offset, end.offset).replace(/\s+/g, ' ').trim(), 80);
+	}
+
 	function canUndoInternalLink(block, undoState) {
 		return Boolean(undoState && internalLinkBlockContent(block) === undoState.appliedContent);
 	}
@@ -219,6 +234,7 @@
 			internalLinkEditorPolicy,
 			dedupeInternalLinkCandidates,
 			prepareInternalLinkApplication,
+			internalLinkSelectedText,
 			canUndoInternalLink,
 		});
 	}
@@ -5654,11 +5670,13 @@
 				const targetRef = item && item.target_ref && typeof item.target_ref === 'object' ? item.target_ref : {};
 				const title = plainTextFromHtml(readableItemText(item.label || item.name || source.title || item.id, __('Internal link candidate', 'npcink-workflow-toolbox')));
 				const targetUrl = readableItemText(item.target_url || targetRef.url || item.source_candidate_ref || source.target_url || source.url, '');
-				const anchorText = readableItemText(item.anchor_or_context || item.value || source.suggested_anchor_text || title, '');
+				const anchorText = readableItemText(item.anchor_or_context || item.value || source.anchor_or_context || source.suggested_anchor_text, '');
 				return {
 					id: readableItemText(item.id || source.target_post_id || String(index + 1), String(index + 1)),
 					title,
 					anchorText,
+					canApplyToEditor: item.can_apply_to_editor === true,
+					anchorQualityStatus: readableItemText(item.anchor_quality_status, ''),
 					targetUrl,
 					reason: internalLinkReasonText(item.evidence_note || item.reason || item.detail || source.reason),
 					placementHint: readableItemText(source.placement_hint || item.placement_hint, ''),
@@ -5682,7 +5700,8 @@
 			return {
 				id: readableItemText(item.target_post_id || String(index + 1), String(index + 1)),
 				title,
-				anchorText: readableItemText(item.suggested_anchor_text || title, ''),
+				anchorText: readableItemText(item.anchor_or_context || item.suggested_anchor_text, ''),
+				canApplyToEditor: false,
 				targetUrl: readableItemText(item.target_url || item.url, ''),
 				reason: internalLinkReasonText(item.reason),
 				placementHint: readableItemText(item.placement_hint, ''),
@@ -6681,11 +6700,18 @@
 		const actionControls = controls && controls.internalLinks ? controls.internalLinks : {};
 		const ignored = actionControls.ignored || {};
 		const visibleCandidates = candidates.filter((item) => !ignored[String(item.id || '')]).slice(0, 3);
+		const retrievalStatus = String(section && (section.retrieval_status || section.source_status) || '');
+		const sourceNotice = retrievalStatus === 'cloud_unavailable'
+			? __('Cloud 内链检索暂不可用；以下结果不能视为云端向量推荐。', 'npcink-workflow-toolbox')
+			: retrievalStatus === 'no_cloud_evidence'
+				? __('未取得云端相关文章证据；以下结果可能来自本地 fallback，不能视为云端向量推荐。', 'npcink-workflow-toolbox')
+				: __('Cloud 向量证据用于候选发现，最终插入仍由编辑者确认。', 'npcink-workflow-toolbox');
 		return createElement(
 				'section',
 				{ className: 'npcink-toolbox-editor-support__metadata-compact-section npcink-toolbox-editor-support__internal-links' },
 				createElement('h4', null, __('Recommended internal links', 'npcink-workflow-toolbox')),
 				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Use this after the draft direction is clear. These are related existing posts to cite manually, not a duplicate-risk review.', 'npcink-workflow-toolbox')),
+				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, sourceNotice),
 				visibleCandidates.length
 				? createElement(
 					'ul',
@@ -6700,12 +6726,12 @@
 						createElement(
 							'div',
 							{ className: 'npcink-toolbox-editor-support__internal-link-meta' },
-							item.anchorText ? createElement('span', null, __('Anchor: ', 'npcink-workflow-toolbox') + truncateText(item.anchorText, 48)) : null,
+							item.anchorText && item.canApplyToEditor ? createElement('span', null, __('Anchor: ', 'npcink-workflow-toolbox') + truncateText(item.anchorText, 48)) : null,
 							item.score ? createElement('span', null, item.score) : null
 						),
 						item.reason ? createElement('p', null, truncateText(item.reason, 92)) : null,
 						item.priorityReason ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, truncateText(item.priorityReason, 92)) : null,
-						item.sourceMatch && item.sourceMatch.matched_text ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Found in draft: ', 'npcink-workflow-toolbox') + truncateText(item.sourceMatch.matched_text, 64)) : null,
+						item.sourceMatch && item.sourceMatch.matched_text && item.canApplyToEditor ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Found in draft: ', 'npcink-workflow-toolbox') + truncateText(item.sourceMatch.matched_text, 64)) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No safe exact anchor is available. You can still copy the link or open the article.', 'npcink-workflow-toolbox')),
 						createElement(
 							'div',
 							{ className: 'npcink-toolbox-editor-support__internal-link-actions' },
@@ -6720,7 +6746,7 @@
 								},
 								__('Copy link', 'npcink-workflow-toolbox')
 							),
-							item.sourceMatch && item.sourceMatch.block_client_id && item.sourceMatch.matched_text ? createElement(
+							item.canApplyToEditor && item.sourceMatch && item.sourceMatch.block_client_id && item.sourceMatch.matched_text ? createElement(
 								Button,
 								{
 									type: 'button',
@@ -7885,6 +7911,10 @@
 							fallbackContextOverride,
 							runOptions.contextOverride && typeof runOptions.contextOverride === 'object' ? runOptions.contextOverride : {}
 						);
+						if (intent === 'internal_links') {
+							const blockEditorSelector = data.select && data.select('core/block-editor');
+							runContext.selected_text = internalLinkSelectedText(blockEditorSelector) || String(runContext.selected_text || '').trim();
+						}
 						const paragraphIntegrityBefore = intent === 'polish_notes'
 							? currentEditorContentIntegritySnapshot(runContext.content, runContext.post_id)
 							: null;
