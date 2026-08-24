@@ -134,4 +134,24 @@ assert.equal(unicodeRange.start, 9);
 assert.equal(unicodeRange.end, 17);
 assert.equal(unicodeRange.text, 'WORKFLOW');
 
-console.log('PASS: internal-link editor apply, duplicate protection, stale protection, and undo safety');
+const preflightBase = {
+	anchorText: '内容工作流',
+	targetUrl: 'https://example.test/target',
+	targetStatus: 'publish',
+	targetPostIds: [2001],
+	ranges: [[0, 6]],
+	retrievalStatus: 'cloud_vector_evidence',
+	candidateSource: 'cloud_vector',
+	sourceMatch: { block_client_id: 'block-1', block_name: 'core/paragraph', matched_text: '内容工作流', expected_text: '内容工作流', text_offset: 0 },
+	currentText: '内容工作流',
+};
+const eligiblePreflight = helpers.internalLinkBatchPreflight(preflightBase);
+assert.equal(eligiblePreflight.outcome, 'eligible');
+assert.equal(eligiblePreflight.reason_codes.length, 0);
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, targetPostIds: [2001, 2001] }).reason_codes[0], 'duplicate_target');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, ranges: [[0, 6], [4, 8]] }).reason_codes[0], 'overlapping_source_ranges');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, currentText: 'changed' }).reason_codes[0], 'stale_editor_block');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, anchorText: '文章', sourceMatch: { ...preflightBase.sourceMatch, matched_text: '文章' } }).reason_codes[0], 'generic_anchor');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, retrievalStatus: 'no_cloud_evidence', candidateSource: 'local_fallback' }).outcome, 'review_only');
+
+console.log('PASS: internal-link editor apply, batch preflight, duplicate protection, stale protection, and undo safety');

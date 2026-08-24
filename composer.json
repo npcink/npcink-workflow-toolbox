@@ -17,6 +17,8 @@
     "test:performance-baseline": "php tests/performance-baseline-behavior.php",
     "test:editor-progressive-js": "php tests/smoke-editor-progressive-js-contract.php",
     "test:internal-link-editor-js": "node tests/internal-link-editor-behavior.mjs",
+    "eval:internal-link-batch:export": "node tests/export-internal-link-batch-adversarial.mjs",
+    "eval:internal-link-batch:verify": "composer eval:internal-link-batch:export && sh scripts/eval-lab.sh task=link_recommendation_adversarial \"observed=$PWD/build/eval/link-batch-adversarial-results.json\"",
     "test:article-draft-native-editor-js": "node tests/smoke-article-draft-native-editor-js.mjs",
     "test:cloud-gate-evidence": "php tests/cross-repo-cloud-gate-behavior.php",
     "test:quiet": "php tests/run.php --quiet",
