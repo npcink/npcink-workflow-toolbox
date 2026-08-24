@@ -2,6 +2,8 @@
 
 状态：Active
 
+最近更新：2026-08-24
+
 适用范围：WordPress 编辑器中的相关文章推荐、内链候选推荐，以及它们依赖的 Cloud Site Knowledge 向量检索。
 
 本文是历史讨论、实现调查和阶段决策的归纳。它记录产品边界、算法原则、用户体验和验证方法；具体接口字段仍以代码中的版本化契约为准。
@@ -257,6 +259,45 @@ gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共
 并省略 URL。标注集版本必须记录评测日期、Cloud/Toolbox revision、K 值和纳入
 规则，后续排序比较必须复用同一版本 gold set。
 
+### 9.4 独立开发者的真实用户积累方式
+
+30 篇是第一版人工质量集的目标规模，不是一次招募任务，也不要求
+`10 位用户 x 每人 3 篇`。独立开发阶段按下面的顺序积累：
+
+1. 先由开发者用 3 至 10 篇内部文章证明事件、分母、隐私和保存边界正确；
+2. 再让自愿参加内部测试的真实用户正常使用，不给每位用户分配固定篇数；
+3. 每周或每两周从真实 impression 中抽取少量有代表性的成功、忽略、空结果
+   和保存案例，由人工补充 gold 判断；
+4. 当累计达到 30 篇不同查询文章时冻结 `gold_set_v1`，再计算第一版
+   Precision@5、Recall@5 和多样性；
+5. 后续按自然新增案例扩充版本，不为凑数量制造 Provider 请求或冷请求。
+
+行为事件不能自动成为 gold set。`open`、`copy`、`apply` 和 `save` 只能说明
+用户采取了动作；它们可能受时间、UI 位置或运营习惯影响。只有人工确认目标、
+位置和锚文本后，该案例才能进入人工认可集合。
+
+### 9.5 推荐漏斗口径
+
+推荐结果集用随机、站点范围内的 `recommendation_session` 关联一组行为：
+
+```text
+impression -> open/copy/ignore -> apply -> native WordPress save
+                                      \-> undo
+```
+
+- `impression` 是候选结果集分母，不是接受或拒绝结论；
+- `engagement_rate`、`open_rate`、`copy_rate`、`apply_rate` 和
+  `saved_adoption_rate` 以有 impression 的 session 为分母；
+- `save_confirmation_rate` 以发生 Apply 的 session 为分母；
+- `saved_edit_rate` 以确认保存的 session 为分母；
+- `undo_rate` 以发生 Apply 的 session 为分母；
+- 候选数和可 Apply 数只记录有界 bucket，不记录候选正文；
+- 每项指标低于 20 个 impression session 时标记为样本不足。
+
+线上 `apply_rate` 用于描述完整产品漏斗；离线人工评测仍应另算
+`apply / apply_eligible_impression`，避免没有安全 `source_match` 的文章被误判
+为锚文本质量失败。两个指标用途不同，不应合并成一个分数。
+
 ## 10. 分阶段路线
 
 ### 阶段 1：稳定可用
@@ -302,6 +343,31 @@ gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共
 - 记录本次改动的风险等级、涉及边界、是否调用真实 Cloud、是否达到运行时验证状态。
 
 如果没有真实 WordPress/Cloud 环境，必须明确报告“未执行运行时 smoke”，不得把静态测试结果写成 Cloud 检索质量证明。
+
+### 11.1 锚文本与 Apply 验收
+
+- 锚文本优先使用 Cloud 的 `anchor_or_context` 或
+  `suggested_anchor_text`，并且必须与正文中的精确 `source_match` 对应；
+- “主题”“文章”“内容”“这里”等泛化词必须拒绝；
+- 没有安全锚文本时不得回退到文章标题作为最终 Apply 锚文本；
+- 没有 `source_match` 时不显示 Apply，只允许复制链接或打开目标文章；
+- Toolbox 只做安全校验和编辑器事务，不重新实现语义关键词推荐算法。
+
+### 11.2 原生保存验收
+
+至少保留一个可重复的临时草稿浏览器场景：
+
+1. 使用已知内容丰富文章的正文创建一次性草稿，不修改原发布文章；
+2. 获取 Cloud vector 候选并选择具有精确 `source_match` 的建议；
+3. Apply 后读取数据库，证明 `post_content` 尚未变化；
+4. 由浏览器显式触发 WordPress 原生保存；
+5. 保存成功后再次读取数据库，证明正文此时才变化；
+6. 记录 `internal_link_saved_unchanged` 或
+   `internal_link_saved_edited`，并验证它与原 impression 使用同一个
+   `recommendation_session`；
+7. 删除临时草稿和登录 helper，不保留正文快照。
+
+Autosave、Toolbox REST 请求和 Apply 本身都不能被计为保存确认。
 
 ## 12. 快速排障清单
 
@@ -356,6 +422,28 @@ Precision@5、Recall@K、多样性、忽略率和采纳率。没有标注集时�
 打开、复制、忽略和人工插入属于编辑动作；自动插入锚文本、自动保存、
 自动发布和自动生成前台相关文章区块继续禁止。任何后续内链应用功能都
 必须保留可见编辑器、撤销和 WordPress 原生保存边界。
+
+### 13.7 分母必须先于优化
+
+只有点击事件没有 impression，就无法区分“用户没看到”与“用户看到了但没采用”。
+先建立 session 级分母和保存确认，再讨论模型、排序或 UI 优化。
+
+### 13.8 Apply 不等于采纳
+
+Apply 只改变当前 Gutenberg 可见状态。用户可能撤销、继续编辑或关闭页面。
+真正的编辑采纳必须等待一次成功、非 autosave 的 WordPress 原生保存；Cloud
+只接收结果元数据，不接收保存后的正文。
+
+### 13.9 浏览器测试应验证数据库边界
+
+只断言编辑器 DOM 或 Block API 变化不够。浏览器验收应在 Apply 前后和原生
+保存后读取真实 `post_content`，这样才能发现隐藏 REST 写入或错误的保存归因。
+
+### 13.10 运行时证据与质量结论分层
+
+`retrieval_status=cloud_vector_evidence`、`candidate_source=cloud_vector` 和
+`fallback_used=false` 证明候选来源；它们不证明推荐自然、有用或能提升 SEO。
+运行链路、人工质量、合并状态和生产状态必须分别报告。
 
 ## 14. 文档维护规则
 
