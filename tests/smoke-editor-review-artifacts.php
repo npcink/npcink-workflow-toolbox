@@ -261,28 +261,33 @@ $before       = toolbox_editor_review_smoke_post_snapshot( $sample_post_id );
 $post_count   = toolbox_editor_review_smoke_post_count();
 $category_ids = wp_get_post_categories( $sample_post_id );
 $tag_ids      = wp_get_post_tags( $sample_post_id, array( 'fields' => 'ids' ) );
+$internal_link_phrase                    = 'Internal link smoke anchor';
+$captured_internal_link_source_passages = array();
 
 add_filter(
 	'npcink_toolbox_site_knowledge_cloud_request',
-	static function ( $handled, array $runtime_payload ) use ( $target_post_id ) {
+	static function ( $handled, array $runtime_payload ) use ( $target_post_id, $internal_link_phrase, &$captured_internal_link_source_passages ) {
 		$intent = sanitize_key( (string) ( $runtime_payload['input']['intent'] ?? '' ) );
+		$item   = array(
+			'post_id'     => $target_post_id,
+			'source_type' => 'post',
+			'title'       => get_the_title( $target_post_id ),
+			'url'         => get_permalink( $target_post_id ),
+			'excerpt'     => 'Related public article returned by mocked Site Knowledge.',
+			'score'       => 0.91,
+			'reason'      => 'Mocked Site Knowledge related-content match for editor review smoke.',
+		);
+		if ( 'internal_links' === $intent ) {
+			$captured_internal_link_source_passages = is_array( $runtime_payload['input']['source_passages'] ?? null ) ? $runtime_payload['input']['source_passages'] : array();
+			$item['anchor_or_context'] = 0 < count( preg_grep( '/文章内容/u', $captured_internal_link_source_passages ) ) ? '文章内容' : $internal_link_phrase;
+		}
 		return array(
 			'status' => 'ready',
 			'data'   => array(
 				'result' => array(
 					'status'  => 'ready',
 					'intent'  => $intent,
-					'results' => array(
-						array(
-							'post_id'     => $target_post_id,
-							'source_type' => 'post',
-							'title'       => get_the_title( $target_post_id ),
-							'url'         => get_permalink( $target_post_id ),
-							'excerpt'     => 'Related public article returned by mocked Site Knowledge.',
-							'score'       => 0.91,
-							'reason'      => 'Mocked Site Knowledge related-content match for editor review smoke.',
-						),
-					),
+					'results' => array( $item ),
 					'coverage' => array(
 						'indexed_public_posts' => 1,
 					),
@@ -307,11 +312,9 @@ $base_params = array(
 	'context_scope'  => 'full_article',
 );
 
-$internal_link_phrase = 'Internal link smoke anchor';
 $internal_links_result = toolbox_editor_review_smoke_rest(
 	array(
 		'intent'         => 'internal_links',
-		'selected_text'  => $internal_link_phrase,
 		'content_blocks' => array(
 			array(
 				'client_id'  => 'editor-review-smoke-block',
@@ -334,6 +337,7 @@ $target_projection     = array_values(
 );
 
 toolbox_editor_review_smoke_assert( 'editor_content_support_flow' === (string) ( $internal_links_result['artifact_type'] ?? '' ), 'Internal-links result declares editor_content_support_flow.' );
+toolbox_editor_review_smoke_assert( in_array( 'Prefix ' . $internal_link_phrase . ' suffix.', $captured_internal_link_source_passages, true ), 'Internal-links request sends bounded visible Gutenberg passage evidence to Cloud.' );
 toolbox_editor_review_smoke_assert( 'internal_links' === (string) ( $internal_links_result['intent'] ?? '' ), 'Internal-links result preserves the fixed intent.' );
 toolbox_editor_review_smoke_assert( false === (bool) ( $internal_links_result['direct_wordpress_write'] ?? true ), 'Internal-links flow disables direct WordPress writes.' );
 toolbox_editor_review_smoke_assert( 'internal_link_candidates.v1' === (string) ( $internal_links['artifact_type'] ?? '' ), 'Internal-links section returns the structured candidate artifact.' );
@@ -366,12 +370,11 @@ toolbox_editor_review_smoke_assert( in_array( 'no_backend_post_content_patch', (
 $generic_anchor_result = toolbox_editor_review_smoke_rest(
 	array(
 		'intent'         => 'internal_links',
-		'selected_text'  => '文章',
 		'content_blocks' => array(
 			array(
 				'client_id'  => 'editor-review-generic-anchor',
 				'block_name' => 'core/paragraph',
-				'text'       => '这篇文章介绍站点知识配置。',
+				'text'       => '这段文章内容介绍站点知识配置。',
 			),
 		),
 	) + $base_params

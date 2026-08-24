@@ -4662,6 +4662,7 @@ final class Rest_Controller {
 	}
 
 	private function editor_internal_link_candidates( array $context, string $query ): array {
+		$source_passages = $this->editor_internal_link_source_passages( $context );
 		$source_knowledge = $this->editor_support_section(
 			$this->editor_cached_site_knowledge(
 				array(
@@ -4669,6 +4670,7 @@ final class Rest_Controller {
 					'intent'          => 'internal_links',
 					'current_post_id' => absint( $context['post_id'] ?? 0 ),
 					'max_results'     => 8,
+					'source_passages' => $source_passages,
 				)
 			)
 		);
@@ -4868,12 +4870,13 @@ final class Rest_Controller {
 		foreach ( array_slice( $this->editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
 			$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
 			$evidence[] = array(
-				'post_id'      => $post_id,
-				'title'        => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
-				'url'          => esc_url_raw( (string) ( $item['url'] ?? ( $item['permalink'] ?? ( $item['link'] ?? ( $item['source_url'] ?? '' ) ) ) ) ),
-				'excerpt'      => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
-				'score'        => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
-				'evidence_ref' => 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: $index ) ),
+				'post_id'           => $post_id,
+				'title'             => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
+				'url'               => esc_url_raw( (string) ( $item['url'] ?? ( $item['permalink'] ?? ( $item['link'] ?? ( $item['source_url'] ?? '' ) ) ) ) ),
+				'anchor_or_context' => sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) ),
+				'excerpt'           => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
+				'score'             => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
+				'evidence_ref'      => 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: $index ) ),
 			);
 		}
 
@@ -4883,6 +4886,29 @@ final class Rest_Controller {
 				static fn( array $item ): bool => '' !== (string) ( $item['title'] ?? '' ) || '' !== (string) ( $item['url'] ?? '' ) || 0 < absint( $item['post_id'] ?? 0 )
 			)
 		);
+	}
+
+	private function editor_internal_link_source_passages( array $context ): array {
+		$passages    = array();
+		$total_chars = 0;
+		$blocks      = is_array( $context['content_blocks'] ?? null ) ? $context['content_blocks'] : array();
+		foreach ( array_slice( $blocks, 0, 24 ) as $block ) {
+			if ( ! is_array( $block ) ) {
+				continue;
+			}
+			$text = trim( sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1200 ) ) );
+			if ( '' === $text ) {
+				continue;
+			}
+			$text_length = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
+			if ( $total_chars + $text_length > 12000 ) {
+				break;
+			}
+			$passages[] = $text;
+			$total_chars += $text_length;
+		}
+
+		return $passages;
 	}
 
 	private function editor_internal_link_graph_evidence( array $evidence, int $current_post_id ): array {

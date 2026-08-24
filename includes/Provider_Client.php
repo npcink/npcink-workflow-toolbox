@@ -2451,6 +2451,12 @@ final class Provider_Client {
 		if ( in_array( $result_granularity, array( 'chunk', 'document' ), true ) ) {
 			$payload['result_granularity'] = $result_granularity;
 		}
+		if ( 'internal_links' === $intent ) {
+			$source_passages = $this->site_knowledge_source_passages( $input['source_passages'] ?? array() );
+			if ( array() !== $source_passages ) {
+				$payload['source_passages'] = $source_passages;
+			}
+		}
 
 		return $this->execute_site_knowledge_cloud_request(
 			'npcink-cloud/site-knowledge-search',
@@ -9565,6 +9571,25 @@ final class Provider_Client {
 				static fn( string $item ): bool => '' !== $item
 			)
 		);
+	}
+
+	private function site_knowledge_source_passages( $value ): array {
+		$passages    = array();
+		$total_chars = 0;
+		foreach ( array_slice( is_array( $value ) ? $value : array(), 0, 24 ) as $item ) {
+			$text = trim( $this->bounded_text( (string) $item, 1200 ) );
+			if ( '' === $text ) {
+				continue;
+			}
+			$text_length = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
+			if ( $total_chars + $text_length > 12000 ) {
+				break;
+			}
+			$passages[] = $text;
+			$total_chars += $text_length;
+		}
+
+		return $passages;
 	}
 
 	private function bounded_text( string $value, int $max_chars ): string {

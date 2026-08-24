@@ -101,11 +101,12 @@ function anchorEvidenceSummary(value, path = '', depth = 0, output = []) {
 	return output;
 }
 
-function createLoginHelper(baseUrl, postId) {
+function createLoginHelper(baseUrl, postId, fixtureSourcePostId = 0) {
 	const token = randomBytes(24).toString('hex');
 	const fileName = `npcink-toolbox-browser-smoke-login-${randomBytes(8).toString('hex')}.php`;
 	const filePath = `${wpPath().replace(/\/$/, '')}/${fileName}`;
 	const requestedPostId = parseInt(postId, 10) || 0;
+	const sourcePostId = parseInt(fixtureSourcePostId, 10) || 0;
 	writeFileSync(filePath, `<?php
 declare(strict_types=1);
 $expected = '${token}';
@@ -133,12 +134,17 @@ wp_set_current_user($user->ID);
 wp_set_auth_cookie($user->ID, false, is_ssl());
 $post_id = ${requestedPostId};
 if ($post_id <= 0) {
+	$fixture_content = 'This temporary draft exists only for the editor progressive browser smoke. It should be deleted by the smoke cleanup.';
+	$fixture_source = get_post(${sourcePostId});
+	if ($fixture_source instanceof WP_Post) {
+		$fixture_content = (string) $fixture_source->post_content;
+	}
 	$post_id = wp_insert_post(array(
 		'post_type'    => 'post',
 		'post_status'  => 'draft',
 		'post_author'  => $user->ID,
 		'post_title'   => 'Npcink browser smoke fixture ' . wp_generate_uuid4(),
-		'post_content' => 'This temporary draft exists only for the editor progressive browser smoke. It should be deleted by the smoke cleanup.',
+		'post_content' => $fixture_content,
 	), true);
 	if (is_wp_error($post_id)) {
 		http_response_code(500);
@@ -163,6 +169,35 @@ exit;
 
 function progressiveRequests(requests) {
 	return requests.filter((request) => request.url.includes('/wp-json/npcink-toolbox/v1/editor/content-support'));
+}
+
+function agentFeedbackRequests(requests) {
+	return requests.filter((request) => request.url.includes('/wp-json/npcink-toolbox/v1/agent-feedback'));
+}
+
+function feedbackPayloadForAction(requests, action) {
+	for (const request of agentFeedbackRequests(requests)) {
+		const payload = JSON.parse(request.body || '{}');
+		if (payload.source_action_id === action) return payload;
+	}
+	return null;
+}
+
+async function waitForFeedbackAction(requests, action, timeoutMs = 10000) {
+	const start = Date.now();
+	while (Date.now() - start < timeoutMs) {
+		const payload = feedbackPayloadForAction(requests, action);
+		if (payload) return payload;
+		await new Promise((resolve) => setTimeout(resolve, 100));
+	}
+	fail(`Timed out waiting for Agent feedback action ${action}.`);
+}
+
+function assertMetadataOnlyFeedback(payload, label) {
+	const serialized = JSON.stringify(payload || {});
+	assert(payload && payload.redaction_status === 'metadata_only', `${label} declares metadata-only redaction.`);
+	assert(Array.isArray(payload.evidence_ref_ids) && payload.evidence_ref_ids.length === 0, `${label} omits content and candidate evidence references.`);
+	assert(!/"(?:content|post_content|anchor|anchor_text|source_match|provider_output)"\s*:/i.test(serialized) && String(payload.operator_note || '') === '', `${label} carries no raw content, anchor, source-match, note, or Provider fields.`);
 }
 
 function forbiddenRequests(requests) {
@@ -222,7 +257,15 @@ const baseUrl = env('WP_BASE_URL', 'https://npcink.local').replace(/\/$/, '');
 const requestedPostId = process.env.POST_ID || '';
 const internalLinkBatchSmoke = process.env.NPCINK_INTERNAL_LINK_BATCH_SMOKE === '1';
 const requireInternalLinkApply = process.env.NPCINK_INTERNAL_LINK_REQUIRE_APPLY === '1';
+const nativeSaveSmoke = process.env.NPCINK_INTERNAL_LINK_NATIVE_SAVE_SMOKE === '1';
+const fixtureSourcePostId = parseInt(env('NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID', '0'), 10) || 0;
 let activePostId = requestedPostId;
+if (nativeSaveSmoke && requestedPostId) {
+	fail('Native-save acceptance must use a disposable draft; omit POST_ID.');
+}
+if (nativeSaveSmoke && !fixtureSourcePostId) {
+	fail('Native-save acceptance requires NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID.');
+}
 const browserOptions = {
 	headless: process.env.HEADLESS !== '0',
 };
@@ -269,7 +312,7 @@ try {
 	});
 
 	try {
-		loginHelper = createLoginHelper(baseUrl, requestedPostId);
+		loginHelper = createLoginHelper(baseUrl, requestedPostId, fixtureSourcePostId);
 		await page.goto(loginHelper.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
 		activePostId = new URL(page.url()).searchParams.get('post') || activePostId;
 		await page.waitForFunction(() => window.wp && window.wp.data && window.wp.data.dispatch, null, { timeout: 30000 });
@@ -310,6 +353,43 @@ try {
 				const selector = window.wp.data.select('core/editor');
 				return selector && typeof selector.getEditedPostContent === 'function' ? selector.getEditedPostContent() : '';
 			});
+			const relatedResponsePromise = page.waitForResponse((response) => {
+				const request = response.request();
+				return response.url().includes('/wp-json/npcink-toolbox/v1/editor/content-support')
+					&& String(request.postData() || '').includes('related_articles');
+			}, { timeout: 45000 });
+			await page.getByRole('button', { name: /Run Find related articles|运行 查找相关文章|Run 查找相关文章/i }).click({ timeout: 30000 });
+			const relatedResponse = await relatedResponsePromise;
+			const relatedPayload = await relatedResponse.json();
+			const relatedSection = relatedPayload && relatedPayload.sections ? relatedPayload.sections.related_articles || {} : {};
+			const relatedCandidates = Array.isArray(relatedSection.recommendation_candidates) && relatedSection.recommendation_candidates.length
+				? relatedSection.recommendation_candidates
+				: (Array.isArray(relatedSection.items) ? relatedSection.items : []);
+				await page.waitForSelector('text=/Recommended related articles|推荐相关文章/', { timeout: 30000 });
+				const relatedImpression = await waitForFeedbackAction(requests, 'related_article_impression');
+				assertMetadataOnlyFeedback(relatedImpression, 'Related-article impression');
+				assert((relatedImpression.source_reason_codes || []).some((code) => /^candidate_count_/.test(code)), 'Related-article impression records a bounded candidate-count denominator.');
+			assert(relatedResponse.status() >= 200 && relatedResponse.status() < 300, 'Related-articles editor request returns a successful HTTP status.');
+			assert(relatedSection.direct_wordpress_write === false, 'Related-articles browser response disables direct WordPress writes.');
+			assert(['cloud_vector_evidence', 'no_cloud_evidence', 'only_current_post', 'cloud_unavailable'].includes(String(relatedSection.retrieval_status || '')), 'Related-articles response labels its retrieval status explicitly.');
+			assert(['cloud_vector', 'none', 'local_fallback'].includes(String(relatedSection.candidate_source || '')), 'Related-articles response labels its candidate source explicitly.');
+			const relatedCopyButton = page.locator('.npcink-toolbox-editor-support__related-articles button').filter({ hasText: /Copy link|复制链接/ }).first();
+			let relatedLinkCopied = false;
+				if (await relatedCopyButton.count()) {
+					await relatedCopyButton.click();
+					await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
+					const relatedCopyFeedback = await waitForFeedbackAction(requests, 'related_article_copy');
+					assertMetadataOnlyFeedback(relatedCopyFeedback, 'Related-article copy');
+					assert(relatedCopyFeedback.source_object_id === relatedImpression.source_object_id, 'Related-article copy correlates to its recommendation impression session.');
+					relatedLinkCopied = true;
+				pass('A reviewed related-article URL can be copied manually.');
+			} else {
+				const relatedEmptyStateCount = await page.locator('text=/Cloud 相关文章检索暂不可用|暂未找到相关已发布文章|Cloud 只命中了当前文章/').count();
+				assert(relatedEmptyStateCount > 0 || relatedCandidates.length === 0, 'Related-articles empty results show a bounded Chinese state.');
+			}
+			assert(wpPostContent(activePostId) === databaseContentBefore, 'Related-article review and copy do not persist WordPress content.');
+			await page.getByText(/工具列表|Tool list/i, { exact: true }).click({ timeout: 10000 });
+			await page.waitForSelector('text=/Run fixed support flows|围绕当前草稿运行固定支持流程/', { timeout: 10000 });
 			const responsePromise = page.waitForResponse((response) => {
 				const request = response.request();
 				return response.url().includes('/wp-json/npcink-toolbox/v1/editor/content-support')
@@ -319,7 +399,10 @@ try {
 			const internalLinkResponse = await responsePromise;
 			const internalLinkPayload = await internalLinkResponse.json();
 			const internalLinkSection = internalLinkPayload && internalLinkPayload.sections ? internalLinkPayload.sections.internal_links || {} : {};
-			await page.waitForSelector('text=/Recommended internal links|推荐内链/', { timeout: 30000 });
+				await page.waitForSelector('text=/Recommended internal links|推荐内链/', { timeout: 30000 });
+				const internalLinkImpression = await waitForFeedbackAction(requests, 'internal_link_impression');
+				assertMetadataOnlyFeedback(internalLinkImpression, 'Internal-link impression');
+				assert((internalLinkImpression.source_reason_codes || []).some((code) => /^applicable_count_/.test(code)), 'Internal-link impression records a bounded applicable-count denominator.');
 			assert(internalLinkResponse.status() >= 200 && internalLinkResponse.status() < 300, 'Internal-link editor request returns a successful HTTP status.');
 			assert(internalLinkSection.direct_wordpress_write === false, 'Internal-link browser response disables direct WordPress writes.');
 			assert(internalLinkSection.editor_transaction && internalLinkSection.editor_transaction.schema === 'current_article_multi_link_result.v1', 'Internal-link browser response exposes the current-article transaction contract.');
@@ -342,14 +425,20 @@ try {
 			const checkboxLocator = page.locator('.npcink-toolbox-editor-support__internal-link-card input[type="checkbox"]');
 			const applicableCount = await checkboxLocator.count();
 			const copyButton = page.locator('.npcink-toolbox-editor-support__internal-link-card button').filter({ hasText: /Copy link|复制链接/ }).first();
-			if (await copyButton.count()) {
-				await copyButton.click();
-				await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
-				pass('A reviewed internal-link URL can be copied manually.');
+				if (await copyButton.count()) {
+					await copyButton.click();
+					await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
+					const internalLinkCopyFeedback = await waitForFeedbackAction(requests, 'internal_link_copy');
+					assertMetadataOnlyFeedback(internalLinkCopyFeedback, 'Internal-link copy');
+					assert(internalLinkCopyFeedback.source_object_id === internalLinkImpression.source_object_id, 'Internal-link copy correlates to its recommendation impression session.');
+					pass('A reviewed internal-link URL can be copied manually.');
 			}
 
 			let appliedCount = 0;
 			let rejectedCount = 0;
+			let undoPerformed = false;
+			let nativeSavePerformed = false;
+			let nativeSaveFeedback = null;
 			if (applicableCount > 0) {
 				const selectionCount = Math.min(2, applicableCount);
 				for (let index = 0; index < selectionCount; index += 1) {
@@ -366,11 +455,36 @@ try {
 				appliedCount = counts ? parseInt(counts[1], 10) : 0;
 				rejectedCount = counts ? parseInt(counts[2], 10) : 0;
 				const editorContentAfterApply = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
-				assert(appliedCount > 0 && editorContentAfterApply !== editorContentBefore, 'Explicit Apply changes only the visible Gutenberg editor state.');
-				assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Apply does not persist post_content before native Update or Publish.');
+					assert(appliedCount > 0 && editorContentAfterApply !== editorContentBefore, 'Explicit Apply changes only the visible Gutenberg editor state.');
+					const internalLinkApplyFeedback = await waitForFeedbackAction(requests, 'internal_link_applied_to_editor');
+					assert(internalLinkApplyFeedback.source_object_id === internalLinkImpression.source_object_id, 'Internal-link Apply correlates to its recommendation impression session.');
+					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Apply does not persist post_content before native Update or Publish.');
 				const applyRequests = requests.slice(requestIndexBeforeApply);
 				const directWriteRequests = applyRequests.filter((request) => /\/wp-json\/wp\/v2\/(posts|pages)\/\d+/i.test(request.url) && /POST|PUT|PATCH/i.test(request.method));
 				assert(directWriteRequests.length === 0, 'Toolbox Apply sends no direct WordPress post write request.');
+				if (nativeSaveSmoke) {
+					await page.evaluate(async () => {
+						const dispatch = window.wp.data.dispatch('core/editor');
+						if (!dispatch || typeof dispatch.savePost !== 'function') {
+							throw new Error('WordPress core/editor savePost is unavailable.');
+						}
+						await dispatch.savePost();
+					});
+					nativeSaveFeedback = await waitForFeedbackAction(requests, 'internal_link_saved_unchanged', 20000);
+					assertMetadataOnlyFeedback(nativeSaveFeedback, 'Internal-link native-save confirmation');
+					assert(nativeSaveFeedback.source_object_type === 'recommendation_session', 'Native-save confirmation keeps recommendation-session identity.');
+					assert(nativeSaveFeedback.source_object_id === internalLinkImpression.source_object_id, 'Native-save confirmation correlates to the original recommendation impression session.');
+					const databaseContentAfterSave = wpPostContent(activePostId);
+					assert(databaseContentAfterSave !== databaseContentBefore && /<a\s/i.test(databaseContentAfterSave), 'WordPress post_content changes only after the explicit native save.');
+					nativeSavePerformed = true;
+				} else {
+					await page.getByRole('button', { name: /撤销本次内链应用|Undo current internal-link application/i }).click();
+					await page.waitForSelector('text=/本次应用的内链已从当前编辑器撤销/', { timeout: 10000 });
+					const editorContentAfterUndo = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
+					assert(editorContentAfterUndo === editorContentBefore, 'Explicit Undo restores the visible Gutenberg editor state.');
+					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Undo does not persist post_content.');
+					undoPerformed = true;
+				}
 			} else {
 				if (requireInternalLinkApply) {
 					fail('The content-rich article did not return an exact source match required for Apply.');
@@ -389,6 +503,14 @@ try {
 			assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
 			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
 				post_id: parseInt(activePostId, 10),
+				related_articles: {
+					http_status: relatedResponse.status(),
+					retrieval_status: relatedSection.retrieval_status || '',
+					candidate_source: relatedSection.candidate_source || '',
+					candidate_count: relatedCandidates.length,
+					link_copied: relatedLinkCopied,
+					direct_wordpress_write: relatedSection.direct_wordpress_write,
+				},
 				http_status: internalLinkResponse.status(),
 				retrieval_status: internalLinkSection.retrieval_status || '',
 				candidate_source: internalLinkSection.candidate_source || '',
@@ -398,6 +520,9 @@ try {
 				applicable_count: applicableCount,
 				applied_count: appliedCount,
 				rejected_count: rejectedCount,
+				undo_performed: undoPerformed,
+				native_save_performed: nativeSavePerformed,
+				native_save_feedback: nativeSaveFeedback ? nativeSaveFeedback.source_action_id : '',
 				direct_wordpress_write: internalLinkSection.direct_wordpress_write,
 				wordpress_write: wpPostContent(activePostId) !== databaseContentBefore,
 				console_error_count: consoleErrors.length,

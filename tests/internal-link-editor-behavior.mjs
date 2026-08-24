@@ -12,6 +12,12 @@ vm.runInNewContext(source, { window: windowObject, URL, Object, Array, String, N
 
 const helpers = windowObject.NpcinkToolboxInternalLinkHelpers;
 assert.ok(helpers, 'internal-link helpers are available');
+assert.equal(helpers.internalLinkContractValue('cloud_vector'), 'cloud_vector');
+assert.equal(helpers.internalLinkContractValue(' cloud_vector_evidence '), 'cloud_vector_evidence');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 0), 'candidate_count_0');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 3), 'candidate_count_1_3');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 8), 'candidate_count_4_8');
+assert.equal(helpers.recommendationCountBucket('candidate_count', 9), 'candidate_count_9_plus');
 
 function richTextValue(html) {
 	const formats = [];
@@ -203,6 +209,56 @@ assert.equal(batchResult.updates.length, 1);
 assert.equal(batchResult.updates[0].appliedContent, '<a href="https://example.test/alpha/">Alpha</a> connects <a href="https://example.test/beta/">Beta</a> clearly.');
 assert.equal(helpers.canUndoInternalLinkBatch([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent } }], batchResult.undo), true);
 assert.equal(helpers.canUndoInternalLinkBatch([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent + ' edited' } }], batchResult.undo), false);
+const telemetrySnapshots = helpers.internalLinkTelemetrySnapshots(batchResult.updates);
+assert.equal(telemetrySnapshots.length, 1);
+assert.equal(Object.prototype.hasOwnProperty.call(telemetrySnapshots[0], 'appliedContent'), false);
+assert.match(telemetrySnapshots[0].appliedFingerprint, /^[a-z0-9]+_[a-z0-9]+$/);
+assert.equal(helpers.internalLinkSavedStateChanged([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent } }], telemetrySnapshots), false);
+assert.equal(helpers.internalLinkSavedStateChanged([{ ...batchBlock, attributes: { content: batchResult.updates[0].appliedContent + ' edited' } }], telemetrySnapshots), true);
+assert.equal(helpers.internalLinkSavedStateChanged([], telemetrySnapshots), true);
+const applyFeedbackSeed = helpers.internalLinkApplyFeedbackSeed({}, 'internal_link_results_session', 2);
+assert.equal(applyFeedbackSeed.source_object_type, 'recommendation_session');
+assert.equal(applyFeedbackSeed.source_object_id, 'internal_link_results_session');
+assert.deepEqual(Array.from(applyFeedbackSeed.source_reason_codes), ['applied_count_1_3']);
+const savedUnchangedFeedback = helpers.internalLinkSavedFollowupPayload(applyFeedbackSeed, false);
+assert.equal(savedUnchangedFeedback.source_action_id, 'internal_link_saved_unchanged');
+assert.equal(savedUnchangedFeedback.local_outcome, 'accepted');
+assert.equal(savedUnchangedFeedback.source_object_type, 'recommendation_session');
+assert.equal(savedUnchangedFeedback.source_object_id, 'internal_link_results_session');
+assert.deepEqual(Array.from(savedUnchangedFeedback.source_reason_codes), ['applied_count_1_3', 'saved_without_editor_changes']);
+const savedEditedFeedback = helpers.internalLinkSavedFollowupPayload(savedUnchangedFeedback, true);
+assert.equal(savedEditedFeedback.source_action_id, 'internal_link_saved_edited');
+assert.equal(savedEditedFeedback.local_outcome, 'edited_before_accept');
+assert.deepEqual(Array.from(savedEditedFeedback.feedback_labels), ['good_but_needs_human_draft']);
+
+const feedbackContext = helpers.recommendationFeedbackContext({
+	sections: {
+		internal_links: {
+			retrieval_status: 'cloud_vector_evidence',
+			candidate_source: 'cloud_vector',
+			fallback_used: false,
+			recommendation_candidates: [
+				{
+					id: 'feedback-alpha',
+					anchor_or_context: '内容工作流',
+					can_apply_to_editor: true,
+					candidate_source: 'cloud_vector',
+					target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: 'https://example.test/alpha/' },
+					source_match: { block_client_id: 'batch-block', matched_text: '内容工作流' },
+				},
+			],
+		},
+	},
+}, 'internal_links');
+assert.equal(feedbackContext.candidateCount, 1);
+assert.equal(feedbackContext.applicableCount, 1);
+assert.deepEqual(Array.from(feedbackContext.reasonCodes), [
+	'candidate_count_1_3',
+	'applicable_count_1_3',
+	'retrieval_cloud_vector_evidence',
+	'source_cloud_vector',
+	'fallback_not_used',
+]);
 
 const partialResult = helpers.prepareInternalLinkBatchApplication([
 	alphaCandidate,
