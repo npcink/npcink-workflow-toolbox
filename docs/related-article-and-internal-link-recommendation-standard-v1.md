@@ -180,6 +180,83 @@
 
 没有真实评测数据时，只能说“架构合理”或“候选可用”，不能说“算法优秀”或“能够提升 SEO”。
 
+### 9.1 第一版 30 篇人工标注集
+
+第一版只验证标注流程和指标口径，不直接扩大采集。选择 30 篇公开文章，
+建议按内容丰富、标题或正文较短、候选较弱或可能为空各 10 篇分层。总体指标
+同时报告各层结果和 30 篇 macro average，避免某一类文章掩盖另一类问题。
+
+每篇文章保存一个最小记录；`related_gold` 与 `internal_link_gold` 必须由人工
+独立建立，不能把 Cloud 返回候选直接复制成 gold set：
+
+```json
+{
+  "post_id": 123,
+  "title": "文章标题",
+  "public_url": "https://example.test/post",
+  "content_summary": "不超过 300 字的人工摘要",
+  "topics": ["主题或分类"],
+  "sample_bucket": "rich|short|weak_or_empty",
+  "related_gold": [
+    {
+      "target_post_id": 456,
+      "relevance": "strong|supplemental",
+      "annotator_note": "为什么适合读者继续阅读"
+    }
+  ],
+  "internal_link_gold": [
+    {
+      "target_post_id": 789,
+      "source_excerpt": "适用句子或段落的最小必要摘录",
+      "suggested_anchor_text": "自然锚文本",
+      "anchor_natural": true,
+      "annotator_note": "为什么该位置和目标匹配"
+    }
+  ],
+  "annotator": "pseudonymous-id",
+  "annotation_notes": "歧义、空集原因或需要复核的事实"
+}
+```
+
+标注顺序：先阅读查询文章和站内可选文章，形成初始人工认可集合；再盲审系统
+Top 5，把候选标为 `strong`、`supplemental`、`theme_only` 或 `irrelevant`。
+系统候选可以提醒标注者复查遗漏，但只有经过独立判断和记录理由后才能加入
+gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共同裁决解决，再
+继续剩余 24 篇。
+
+内链 gold item 必须同时认可目标文章、正文位置和锚文本。找不到安全、具体、
+可匹配的正文短语时，保留目标为“可复制/打开”候选，但不得把它计为可 Apply
+的正确内链。`source_excerpt` 只保存判断所需的句子或短段落，不保存全文。
+
+### 9.2 指标口径
+
+相关文章和内链分别计算，不合并成一个质量分数：
+
+- `Precision@5 = Top 5 中命中人工认可集合的数量 / 5`；少于 5 个候选仍以 5
+  为分母，并另报 `candidate_count`，让覆盖不足显式影响结果。
+- `Recall@5 = Top 5 中命中人工认可集合的数量 / 人工认可集合大小`。人工认可
+  集合为空时不计算 Recall，单独报告为 `no_gold_target`，不得用 0 或 1 代替。
+- Related Articles 将 `strong` 和 `supplemental` 计为相关，同时分别报告强相关
+  命中率，避免宽松标签抬高结果。
+- Internal Links 只有目标、适用位置和自然锚文本均通过时才算命中；仅目标相关
+  但无安全 `source_match` 的候选不计入 Apply Precision。
+- 多样性按 Top 5 中不重复目标、主题/分类和内容类型的覆盖率报告，并同时记录
+  同一目标重复率；第一版不为计算多样性额外调用 Provider。
+- 交互采纳率分别计算 `open / impression`、`copy / impression`、
+  `apply / apply_eligible_impression`、`ignore / impression`。一次候选曝光为一个
+  impression；Apply 分母只包含有安全精确 `source_match` 的候选。
+
+技术失败、Cloud 不可用和正常空结果分开统计。`601/601` 只记录为知识库覆盖
+证据，不进入 Precision、Recall 或锚文本自然度结论。
+
+### 9.3 数据最小化与产物
+
+第一版产物只需要版本化的 schema、标注说明和 30 条脱敏记录。不要保存不必要
+的文章全文、Provider 原始输出、prompt、凭证、请求日志或敏感草稿。公开 URL、
+短摘要和最小适用摘录足以支持复核；如文章包含敏感信息，使用不可逆样本 ID
+并省略 URL。标注集版本必须记录评测日期、Cloud/Toolbox revision、K 值和纳入
+规则，后续排序比较必须复用同一版本 gold set。
+
 ## 10. 分阶段路线
 
 ### 阶段 1：稳定可用
