@@ -7909,7 +7909,7 @@
 							{},
 							postContext,
 							fallbackContextOverride,
-							 runOptions.contextOverride && typeof runOptions.contextOverride === 'object' ? runOptions.contextOverride : {}
+							runOptions.contextOverride && typeof runOptions.contextOverride === 'object' ? runOptions.contextOverride : {}
 						);
 						if (intent === 'internal_links') {
 							const blockEditorSelector = data.select && data.select('core/block-editor');
