@@ -28,6 +28,7 @@ require_once dirname( __DIR__ ) . '/includes/Single_Article_Image_Adoption.php';
 
 $service = new Npcink_Toolbox\Single_Article_Image_Adoption();
 $method  = new ReflectionMethod( $service, 'create_temporary_file' );
+$method->setAccessible( true );
 $result  = $method->invoke( $service, 'image.png' );
 
 toolbox_image_adoption_rest_assert( is_string( $result ) && '' !== $result, 'Image adoption creates a temporary file without the WP-CLI-preloaded helper.' );
