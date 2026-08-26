@@ -68,6 +68,7 @@ Start from the active documents below before changing code.
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
 - [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)
+- [编辑器推荐、图片与运行环境验证规范 v1](editor-recommendation-image-and-runtime-validation-standard-v1.md)
 - [Editor Summary Generation Performance](editor-summary-generation-performance.md)
 
 ## Ability And Workflow Contracts

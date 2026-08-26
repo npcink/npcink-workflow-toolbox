@@ -79,8 +79,8 @@ $image_bytes = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
 $artifact_id = 'art_' . str_repeat( 'a', 32 );
 $delivery_id = 'mdl_' . str_repeat( 'b', 32 );
 $checksum = is_string( $image_bytes ) ? 'sha256:' . hash( 'sha256', $image_bytes ) : '';
-$expires_at = gmdate( 'Y-m-d\TH:i:s\Z', time() + 1800 );
-$ack_deadline = gmdate( 'Y-m-d\TH:i:s\Z', time() + 600 );
+$expires_at = gmdate( 'Y-m-d\TH:i:s', time() + 1800 ) . '+00:00';
+$ack_deadline = gmdate( 'Y-m-d\TH:i:s', time() + 600 ) . '+00:00';
 $pull_url = 'http://127.0.0.1:8010/v1/runtime/media/artifacts/' . $artifact_id . '/download';
 $ack_url = 'http://127.0.0.1:8010/v1/runtime/media/artifacts/' . $artifact_id . '/delivery-ack';
 $http_filter = null;
@@ -165,7 +165,7 @@ try {
 							'received_checksum'    => $checksum,
 							'byte_size_verified'   => true,
 							'checksum_verified'    => true,
-							'acknowledged_at'      => gmdate( 'Y-m-d\TH:i:s\Z' ),
+							'acknowledged_at'      => gmdate( 'Y-m-d\TH:i:s' ) . '+00:00',
 							'artifact_expires_at'  => $expires_at,
 							'idempotent_replay'    => false,
 							'acknowledgement_scope' => 'verified_transfer_only',
@@ -194,7 +194,7 @@ try {
 							'suggestion_only'       => true,
 							'requires_local_review' => true,
 							'model_id'              => 'Tongyi-MAI/Z-Image-Turbo',
-							'profile_id'            => 'grok-imagine-image-quality',
+							'profile_id'            => 'wp-ai.image-generation',
 							'artifacts'             => array(
 								array(
 									'artifact_id'        => $artifact_id,
@@ -284,6 +284,7 @@ try {
 	toolbox_ai_image_cloud_addon_smoke_assert( $expected_url === $captured_url, 'Cloud Addon runtime execute request targets the exact local smoke endpoint.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'toolbox_image_generation' === (string) ( $captured_payload['channel'] ?? '' ), 'Cloud runtime payload uses the Toolbox image generation channel.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'npcink-cloud/generate-image' === (string) ( $captured_payload['ability_name'] ?? '' ), 'Cloud runtime payload uses the Cloud image generation ability.' );
+	toolbox_ai_image_cloud_addon_smoke_assert( 'wp-ai.image-generation' === (string) ( $captured_payload['profile_id'] ?? '' ), 'Cloud runtime payload delegates Provider and model selection to the managed image profile.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'toolbox_featured_image' === (string) ( $captured_payload['input']['source_surface'] ?? '' ), 'Cloud runtime payload marks the Toolbox featured-image source surface.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'result_only' === (string) ( $captured_payload['storage_mode'] ?? '' ), 'Cloud runtime payload stays result-only.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( false === (bool) ( $captured_payload['policy']['allow_fallback'] ?? true ), 'Cloud runtime payload does not allow provider fallback from Toolbox policy.' );
@@ -293,7 +294,7 @@ try {
 	$image = $data['images'][0] ?? array();
 	toolbox_ai_image_cloud_addon_smoke_assert( is_array( $image ) && 'ai_generated' === (string) ( $image['source_type'] ?? '' ), 'Toolbox returns an AI-generated image candidate.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'cloud' === (string) ( $image['provider_origin'] ?? '' ), 'Toolbox candidate records Cloud as the provider origin.' );
-	toolbox_ai_image_cloud_addon_smoke_assert( 'grok-imagine-image-quality' === (string) ( $image['hosted_profile'] ?? '' ), 'Toolbox candidate preserves the hosted profile.' );
+	toolbox_ai_image_cloud_addon_smoke_assert( 'wp-ai.image-generation' === (string) ( $image['hosted_profile'] ?? '' ), 'Toolbox candidate preserves the hosted profile.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( 'Tongyi-MAI/Z-Image-Turbo' === (string) ( $image['generation_model'] ?? '' ), 'Toolbox candidate preserves the generation model.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( $artifact_id === (string) ( $image['cloud_artifact']['artifact_id'] ?? '' ), 'Toolbox candidate preserves the Cloud artifact reference.' );
 	toolbox_ai_image_cloud_addon_smoke_assert( str_starts_with( (string) ( $image['preview_url'] ?? '' ), 'data:image/png;base64,' ), 'Toolbox candidate contains verified request-scoped preview bytes.' );

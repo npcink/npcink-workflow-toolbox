@@ -261,7 +261,7 @@ $before       = toolbox_editor_review_smoke_post_snapshot( $sample_post_id );
 $post_count   = toolbox_editor_review_smoke_post_count();
 $category_ids = wp_get_post_categories( $sample_post_id );
 $tag_ids      = wp_get_post_tags( $sample_post_id, array( 'fields' => 'ids' ) );
-$internal_link_phrase                    = 'Internal link smoke anchor';
+$internal_link_phrase                    = 'Internal link smoke anchor ' . wp_generate_uuid4();
 $captured_internal_link_source_passages = array();
 
 add_filter(
@@ -357,7 +357,7 @@ toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (st
 toolbox_editor_review_smoke_assert( 'current_article_multi_link_result.v1' === (string) ( $internal_transaction['schema'] ?? '' ) && 8 === (int) ( $internal_transaction['max_selected'] ?? 0 ), 'Internal-link section exposes the bounded current-article transaction contract.' );
 toolbox_editor_review_smoke_assert( false === (bool) ( $internal_transaction['direct_wordpress_write'] ?? true ) && false === (bool) ( $internal_transaction['persisted'] ?? true ) && true === (bool) ( $internal_transaction['partial_results'] ?? false ), 'Internal-link editor transaction remains no-write and reports partial outcomes.' );
 toolbox_editor_review_smoke_assert( ! empty( $target_projection ) && is_array( $target_projection[0]['target_ref'] ?? null ), 'Internal-link projection exposes a bounded target_ref for the Cloud target.' );
-toolbox_editor_review_smoke_assert( 'publish' === (string) ( $target_projection[0]['target_ref']['status'] ?? '' ) && 'post' === (string) ( $target_projection[0]['target_ref']['post_type'] ?? '' ), 'Internal-link projection confirms a published local post target before editor Apply.' );
+toolbox_editor_review_smoke_assert( 'publish' === (string) ( $target_projection[0]['target_ref']['status'] ?? '' ) && in_array( (string) ( $target_projection[0]['target_ref']['post_type'] ?? '' ), array( 'post', 'page' ), true ), 'Internal-link projection confirms a published local post or page target before editor Apply.' );
 toolbox_editor_review_smoke_assert( 'editor-review-smoke-block' === (string) ( $target_projection[0]['source_match']['block_client_id'] ?? '' ), 'Internal-link projection preserves the exact editor block match.' );
 toolbox_editor_review_smoke_assert( $internal_link_phrase === (string) ( $target_projection[0]['source_match']['matched_text'] ?? '' ), 'Internal-link projection preserves the exact reviewed anchor phrase.' );
 toolbox_editor_review_smoke_assert( 'Prefix ' . $internal_link_phrase . ' suffix.' === (string) ( $target_projection[0]['source_match']['expected_text'] ?? '' ), 'Internal-link projection preserves stale-block comparison text.' );
@@ -386,15 +386,23 @@ toolbox_editor_review_smoke_assert( false === (bool) ( $generic_candidate['can_a
 toolbox_editor_review_smoke_assert( '' === (string) ( $generic_candidate['anchor_or_context'] ?? '' ) && empty( $generic_candidate['source_match'] ?? array() ), 'A rejected generic anchor is not exposed as a final anchor or exact source match.' );
 toolbox_editor_review_smoke_assert( 'copy_or_open_target_only' === (string) ( $generic_candidate['next_safe_action'] ?? '' ), 'A candidate without a safe exact anchor remains copy/open only.' );
 
-$related_articles_result = toolbox_editor_review_smoke_rest( array( 'intent' => 'related_articles' ) + $base_params );
-$related_articles        = is_array( $related_articles_result['sections']['related_articles'] ?? null ) ? $related_articles_result['sections']['related_articles'] : array();
-$related_set             = is_array( $related_articles_result['recommendation_set'] ?? null ) ? $related_articles_result['recommendation_set'] : array();
-toolbox_editor_review_smoke_assert( 'related_article_candidates.v1' === (string) ( $related_articles['artifact_type'] ?? '' ), 'Related-article section returns the dedicated candidate artifact.' );
-toolbox_editor_review_smoke_assert( 'document' === (string) ( $related_articles['result_granularity'] ?? '' ), 'Related-article candidates are returned at document granularity.' );
-toolbox_editor_review_smoke_assert( false === (bool) ( $related_articles['direct_wordpress_write'] ?? true ), 'Related-article candidates disable direct WordPress writes.' );
-toolbox_editor_review_smoke_assert( 'content_context.v1' === (string) ( $related_articles_result['content_context']['contract_version'] ?? '' ) && 'wordpress' === (string) ( $related_articles_result['content_context']['platform'] ?? '' ), 'Editor response exposes the canonical WordPress content context.' );
-toolbox_editor_review_smoke_assert( 'recommendation_set.v1' === (string) ( $related_set['canonical_contract'] ?? '' ) && 'editor_recommendation_set.v1' === (string) ( $related_set['compatibility_contract'] ?? '' ), 'Recommendation set exposes canonical and compatibility contract names.' );
-toolbox_editor_review_smoke_assert( isset( $related_set['artifact_counts']['related_articles'] ), 'Recommendation set counts related-article candidates.' );
+$code_block_result = toolbox_editor_review_smoke_rest(
+	array(
+		'intent'         => 'internal_links',
+		'content_blocks' => array(
+			array(
+				'client_id'  => 'editor-review-code-block',
+				'block_name' => 'core/code',
+				'text'       => $internal_link_phrase,
+			),
+		),
+	) + $base_params
+);
+$code_block_section    = is_array( $code_block_result['sections']['internal_links'] ?? null ) ? $code_block_result['sections']['internal_links'] : array();
+$code_block_candidates = is_array( $code_block_section['recommendation_candidates'] ?? null ) ? $code_block_section['recommendation_candidates'] : array();
+$code_block_candidate  = $code_block_candidates[0] ?? array();
+toolbox_editor_review_smoke_assert( false === (bool) ( $code_block_candidate['can_apply_to_editor'] ?? true ), 'A code-block match remains reference-only so executable code is not reformatted as a link.' );
+toolbox_editor_review_smoke_assert( empty( $code_block_candidate['source_match'] ?? array() ) && 'copy_or_open_target_only' === (string) ( $code_block_candidate['next_safe_action'] ?? '' ), 'A code-block citation can be copied or opened but not inserted into the code block.' );
 
 $publish_result  = toolbox_editor_review_smoke_rest( array( 'intent' => 'publish_preflight' ) + $base_params );
 $review          = is_array( $publish_result['sections']['pre_publish_review'] ?? null ) ? $publish_result['sections']['pre_publish_review'] : array();

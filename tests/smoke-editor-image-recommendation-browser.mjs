@@ -170,6 +170,22 @@ function siteMediaPayload() {
 	};
 }
 
+function mediaBriefPayload() {
+	return {
+		artifact_type: 'image_visual_brief',
+		status: 'ready',
+		prompt_candidates: [
+			{
+				id: 'editorial_workspace',
+				label: 'Editorial workspace',
+				localized_label: '真实工作场景',
+				localized_prompt: '自然窗光下的家庭工作空间，木质书桌上有笔记本电脑、研究笔记、绿植和咖啡，不出现文字或 Logo。',
+				prompt: 'A home workspace in natural window light with a wooden desk, laptop, research notes, plant and coffee, without visible text or logos.',
+			},
+		],
+	};
+}
+
 function generationPayload(requestBody, generationIndex) {
 	const count = Math.max(1, Math.min(4, parseInt(requestBody.n || '2', 10) || 2));
 	const prefix = generationIndex === 1 ? 'Generated candidate' : 'Revised candidate';
@@ -276,7 +292,13 @@ try {
 		generationIndex += 1;
 		generationRequests.push(body);
 		requests.push({ method: request.method(), url: request.url(), body: request.postData() || '' });
+		await new Promise((resolve) => setTimeout(resolve, 250));
 		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(generationPayload(body, generationIndex)) });
+	});
+	await context.route('**/wp-json/npcink-toolbox/v1/flows/media-brief', async (route) => {
+		const request = route.request();
+		requests.push({ method: request.method(), url: request.url(), body: request.postData() || '' });
+		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mediaBriefPayload()) });
 	});
 	await context.route('**/wp-json/npcink-toolbox/v1/agent-feedback', async (route) => {
 		const request = route.request();
@@ -320,17 +342,18 @@ try {
 	await imageFlow.locator('button').click();
 
 	await page.waitForSelector('.npcink-toolbox-editor-support__image-modal', { timeout: 30000 });
-	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 9, null, { timeout: 10000 });
+	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length > 0, null, { timeout: 10000 });
 	assert(await page.locator('.npcink-toolbox-editor-support__image-results').count() === 1, 'The modal renders the image grid in the left results pane.');
 	assert(await page.locator('.npcink-toolbox-editor-support__image-inspector').count() === 1, 'The modal renders mode and review controls in the right inspector.');
-	assert(await page.getByRole('button', { name: /Hosted image|托管图片/ }).count() === 1, 'Featured-image mode exposes the hosted-image option.');
+	assert(await page.getByRole('button', { name: /AI generation|AI 生成/ }).count() === 1, 'Featured-image mode exposes the AI-generation option.');
 
 	await page.getByRole('button', { name: /Site media library|站内媒体库/ }).click();
 	const libraryQuery = '自然光下的木质书桌和笔记本电脑';
 	await page.locator('.npcink-toolbox-editor-support__image-inspector input[type="search"]').fill(libraryQuery);
 	await page.getByRole('button', { name: /Search site media|搜索站内媒体/ }).click();
 	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 1, null, { timeout: 10000 });
-	assert(libraryRequests.length === 1 && libraryRequests[0].provider === 'site_media', 'Site-media mode sends one natural-language local-library search request.');
+	const manualLibraryRequest = libraryRequests[libraryRequests.length - 1] || {};
+	assert(manualLibraryRequest.provider === 'site_media' && manualLibraryRequest.query === libraryQuery, 'Site-media mode sends the reviewed natural-language local-library search request.');
 	assert(await page.getByText(/Why this image matches|为什么匹配这张图片/).count() === 1, 'The selected site-media candidate shows its semantic match reason.');
 		assert(await page.getByText(/Suggested ALT text|建议的 ALT 文本/).count() === 1, 'The selected site-media candidate shows the reused ALT suggestion.');
 		assert(await page.locator('.npcink-toolbox-editor-support__image-evidence-item p').filter({ hasText: '自然光下摆放笔记本电脑和绿植的木质书桌' }).count() === 1, 'The visible ALT suggestion comes from the candidate evidence.');
@@ -355,22 +378,60 @@ try {
 		await page.screenshot({ path: libraryScreenshotPath, fullPage: true });
 	pass(`Site-media evidence browser smoke screenshot: ${libraryScreenshotPath}`);
 
-	await page.getByRole('button', { name: /Hosted image|托管图片/ }).click();
-	const prompt = 'Editorial home office with natural window light, wooden desk, laptop, plant and coffee, no text or logos.';
+	await page.getByRole('button', { name: /AI generation|AI 生成/ }).click();
 	const promptInput = page.locator('#npcink-toolbox-editor-support-image-prompt');
+	await promptInput.fill('');
+	assert(await page.locator('.npcink-toolbox-editor-support__image-options').count() === 0, 'Generation options stay hidden until a visual description exists.');
+	await page.getByRole('button', { name: /Generate visual description|生成画面描述/ }).click();
+	await page.waitForFunction(() => document.querySelector('#npcink-toolbox-editor-support-image-prompt')?.value.includes('自然窗光'), null, { timeout: 10000 });
+	assert(await page.locator('.npcink-toolbox-editor-support__image-options').count() === 1, 'Generation options appear after a visual description is ready.');
+	const promptLabel = page.locator('label[for="npcink-toolbox-editor-support-image-prompt"]');
+	assert(/Visual description|画面描述/.test(await promptLabel.innerText()), 'The primary editable field is labeled as the visual description.');
+	const advancedPromptDetails = page.locator('details.npcink-toolbox-editor-support__cloud-details').filter({ hasText: /Advanced information|高级信息/ });
+	assert(await advancedPromptDetails.count() === 1, 'A paired English provider prompt is available only as advanced information.');
+	assert(await advancedPromptDetails.evaluate((element) => !element.open), 'The English provider prompt is collapsed by default.');
+	assert((await promptInput.inputValue()).includes('自然窗光'), 'The paired Chinese visual description remains the single primary review value.');
+	const directionButton = page.locator('[data-toolbox-ai-prompt-direction="true"]').first();
+	await directionButton.click();
+	assert((await promptInput.inputValue()).includes('自然窗光'), 'Selecting a generation direction keeps the Chinese visual description in the primary field.');
+	assert(!(await promptInput.inputValue()).includes('A home workspace'), 'Selecting a generation direction never falls back to the English model prompt in the primary field.');
+	const prompt = '自然窗光下的家庭工作空间，木质书桌、笔记本电脑、绿植和咖啡，不要文字或 Logo。';
 	await promptInput.fill(prompt);
+	await page.waitForFunction(() => !Array.from(document.querySelectorAll('details')).some((element) => /Advanced information|高级信息/.test(element.textContent || '')), null, { timeout: 10000 });
+	assert(await page.getByText(/converted to English|转换为英文/).count() === 0, 'Request-time translation stays out of the primary editing interface.');
 	await page.getByRole('button', { name: /Request hosted image|请求托管图片/ }).click();
+	assert(await directionButton.isDisabled(), 'Generation direction controls are disabled while a hosted image request is running.');
+	assert(await page.getByRole('button', { name: /Site media library|站内媒体库/ }).isDisabled(), 'Image mode controls are disabled while a hosted image request is running.');
+	assert(await page.locator('.npcink-toolbox-editor-support__image-card').count() === 0, 'AI generation does not show stale source candidates while the hosted request is running.');
+	assert(await page.getByText(/No image-source candidates found|未找到图片来源候选/).count() === 0, 'AI generation never renders the image-source empty state.');
 	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 2, null, { timeout: 10000 });
 
 	assert(generationRequests.length === 1, 'One reviewed hosted-image request is made.');
 	assert(generationRequests[0].prompt === prompt, 'The request contains the reviewed prompt.');
 	assert(generationRequests[0].n === 2, 'The default candidate count remains two.');
 	assert(generationRequests[0].prompt_reviewed_by_operator === true, 'The request records operator prompt review.');
+	assert(generationRequests[0].prompt_source_locale === 'zh_CN', 'The request records the reviewed source prompt locale.');
+	assert(generationRequests[0].prompt_translation_mode === 'required', 'A manually reviewed Chinese description requests one Cloud translation before image generation.');
+	assert(generationRequests[0].provider_prompt_reviewed_by_operator === false, 'The request does not claim that the operator reviewed the request-time English translation.');
 	assert(generationRequests[0].aspect_ratio === '16:9' && generationRequests[0].resolution === 'high', 'The default aspect ratio and quality are sent explicitly.');
+	const generationFeedback = requests
+		.filter((item) => item.url.includes('/npcink-toolbox/v1/agent-feedback'))
+		.map((item) => {
+			try {
+				return JSON.parse(item.body || '{}');
+			} catch (error) {
+				return {};
+			}
+		})
+		.find((item) => item.source_action_id === 'ai_image_generation_requested');
+	assert(generationFeedback && generationFeedback.source_reason_codes.includes('prompt_locale_zh_cn'), 'AI image generation feedback records only the prompt locale classification.');
+	assert(generationFeedback.source_reason_codes.includes('prompt_translation_required'), 'AI image generation feedback records only the translation mode classification.');
+	assert(!JSON.stringify(generationFeedback).includes(prompt), 'AI image generation feedback does not include the reviewed prompt body.');
 
 	const firstCard = page.locator('.npcink-toolbox-editor-support__image-card').first();
 	await firstCard.click();
 	assert(await firstCard.getAttribute('aria-pressed') === 'true', 'The first generated candidate becomes the reviewed selection.');
+	assert(await page.getByText('browser-smoke-profile / browser-smoke-model / browser-smoke-provider').count() === 1, 'Selected generated image details show the resolved hosted profile and model.');
 	assert(await page.locator('[data-toolbox-editor-ai-image-regenerate="true"]').count() === 1, 'Generated selections expose semantic regeneration controls.');
 
 	await firstCard.getByRole('button', { name: /Preview image larger|放大预览图片/ }).click();
@@ -383,6 +444,10 @@ try {
 	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 4, null, { timeout: 10000 });
 	assert(generationRequests.length === 2, 'One explicit semantic regeneration request is made.');
 	assert(generationRequests[1].regeneration_mode === 'more_specific', 'The regeneration mode is sent to the existing image runtime.');
+	assert(generationRequests[1].prompt_translation_mode === 'preplanned_pair', 'The English regeneration prompt is treated as an already paired provider prompt.');
+	assert(generationRequests[1].provider_prompt_reviewed_by_operator === false, 'A generated English regeneration prompt is not falsely marked as operator-reviewed.');
+	assert(await promptInput.inputValue() === prompt, 'Semantic regeneration preserves the reviewed Chinese visual description.');
+	assert(!(await promptInput.inputValue()).includes('Regenerate this host-generated image'), 'The English regeneration prompt stays out of the primary visual-description field.');
 	assert(await page.locator('.npcink-toolbox-editor-support__image-card').count() === 4, 'Regeneration preserves the two existing candidates and adds two revised candidates.');
 
 	await page.screenshot({ path: screenshotPath, fullPage: true });

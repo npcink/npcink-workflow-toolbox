@@ -93,8 +93,8 @@ Article-specific jobs use the editor Content Support sidebar:
 publish preflight, internal links, and image candidates. Article narration and
 article audio summary remain callable but are temporarily hidden from the
 default menu. Summary, category, tag, outline, discoverability,
-article-checkup, current-article ALT, and related existing-post helpers remain
-compatible route or rendering paths, so `writing_support` remains
+article-checkup, and current-article ALT remain compatible route or rendering
+paths, so `writing_support` remains
 route-compatible but is not a default editor button.
 Site Check is temporarily hidden from the default operator UI while its
 problem statement, action model, and acceptance loop are reassessed. The stable `operations-insights` deep link remains capability-gated for compatibility and still opens the same panel. It

@@ -64,8 +64,8 @@ Allowed from Toolbox:
 
 ### Editor retrieval evidence states
 
-The `internal_links` and `related_articles` editor artifacts must expose the
-retrieval state separately from the candidate list:
+The `internal_links` editor artifact must expose retrieval state separately
+from its applicable and reference-only candidate list:
 
 | `retrieval_status` | `candidate_source` | Meaning |
 | --- | --- | --- |
@@ -73,8 +73,8 @@ retrieval state separately from the candidate list:
 | `no_cloud_evidence` | `local_fallback` | Cloud returned no usable evidence and a bounded local candidate path may be present; never present it as a Cloud vector result. |
 | `cloud_unavailable` | `cloud_unavailable` | Cloud transport or runtime failed; recommendation quality is not validated and the UI must expose the blocked state. |
 
-Both artifacts remain suggestion-only and must include
-`direct_wordpress_write=false`. Coverage comparison is a separate operation:
+The artifact must include `direct_wordpress_write=false`. Coverage comparison
+is a separate operation:
 an index coverage result does not prove that a recommendation request returned
 usable vector evidence.
 

@@ -467,6 +467,19 @@ For the editor image recommendation modal, run:
 NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-image-recommendation-browser
 ```
 
+After changing the single-image adoption route, its REST dependencies, or the
+editor adoption error surface, run the real HTTP browser smoke as well:
+
+```bash
+NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-image-adoption-browser
+```
+
+This smoke uses a disposable article, a deterministic local PNG response, and
+the real authenticated WordPress REST route. It makes no Provider or Cloud
+call, proves the browser PHP process does not rely on WP-CLI-preloaded helpers,
+and removes the imported attachment, article, login helper, and temporary MU
+filter during cleanup.
+
 This opens the real Gutenberg sidebar on a disposable local draft and
 intercepts only image candidate reads with deterministic suggestion-only
 fixtures. It verifies source and hosted-image modes, reviewed generation

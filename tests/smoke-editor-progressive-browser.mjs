@@ -353,53 +353,18 @@ try {
 				const selector = window.wp.data.select('core/editor');
 				return selector && typeof selector.getEditedPostContent === 'function' ? selector.getEditedPostContent() : '';
 			});
-			const relatedResponsePromise = page.waitForResponse((response) => {
-				const request = response.request();
-				return response.url().includes('/wp-json/npcink-toolbox/v1/editor/content-support')
-					&& String(request.postData() || '').includes('related_articles');
-			}, { timeout: 45000 });
-			await page.getByRole('button', { name: /Run Find related articles|运行 查找相关文章|Run 查找相关文章/i }).click({ timeout: 30000 });
-			const relatedResponse = await relatedResponsePromise;
-			const relatedPayload = await relatedResponse.json();
-			const relatedSection = relatedPayload && relatedPayload.sections ? relatedPayload.sections.related_articles || {} : {};
-			const relatedCandidates = Array.isArray(relatedSection.recommendation_candidates) && relatedSection.recommendation_candidates.length
-				? relatedSection.recommendation_candidates
-				: (Array.isArray(relatedSection.items) ? relatedSection.items : []);
-				await page.waitForSelector('text=/Recommended related articles|推荐相关文章/', { timeout: 30000 });
-				const relatedImpression = await waitForFeedbackAction(requests, 'related_article_impression');
-				assertMetadataOnlyFeedback(relatedImpression, 'Related-article impression');
-				assert((relatedImpression.source_reason_codes || []).some((code) => /^candidate_count_/.test(code)), 'Related-article impression records a bounded candidate-count denominator.');
-			assert(relatedResponse.status() >= 200 && relatedResponse.status() < 300, 'Related-articles editor request returns a successful HTTP status.');
-			assert(relatedSection.direct_wordpress_write === false, 'Related-articles browser response disables direct WordPress writes.');
-			assert(['cloud_vector_evidence', 'no_cloud_evidence', 'only_current_post', 'cloud_unavailable'].includes(String(relatedSection.retrieval_status || '')), 'Related-articles response labels its retrieval status explicitly.');
-			assert(['cloud_vector', 'none', 'local_fallback'].includes(String(relatedSection.candidate_source || '')), 'Related-articles response labels its candidate source explicitly.');
-			const relatedCopyButton = page.locator('.npcink-toolbox-editor-support__related-articles button').filter({ hasText: /Copy link|复制链接/ }).first();
-			let relatedLinkCopied = false;
-				if (await relatedCopyButton.count()) {
-					await relatedCopyButton.click();
-					await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
-					const relatedCopyFeedback = await waitForFeedbackAction(requests, 'related_article_copy');
-					assertMetadataOnlyFeedback(relatedCopyFeedback, 'Related-article copy');
-					assert(relatedCopyFeedback.source_object_id === relatedImpression.source_object_id, 'Related-article copy correlates to its recommendation impression session.');
-					relatedLinkCopied = true;
-				pass('A reviewed related-article URL can be copied manually.');
-			} else {
-				const relatedEmptyStateCount = await page.locator('text=/Cloud 相关文章检索暂不可用|暂未找到相关已发布文章|Cloud 只命中了当前文章/').count();
-				assert(relatedEmptyStateCount > 0 || relatedCandidates.length === 0, 'Related-articles empty results show a bounded Chinese state.');
-			}
-			assert(wpPostContent(activePostId) === databaseContentBefore, 'Related-article review and copy do not persist WordPress content.');
-			await page.getByText(/工具列表|Tool list/i, { exact: true }).click({ timeout: 10000 });
-			await page.waitForSelector('text=/Run fixed support flows|围绕当前草稿运行固定支持流程/', { timeout: 10000 });
-			const responsePromise = page.waitForResponse((response) => {
+				const responsePromise = page.waitForResponse((response) => {
 				const request = response.request();
 				return response.url().includes('/wp-json/npcink-toolbox/v1/editor/content-support')
 					&& String(request.postData() || '').includes('internal_links');
 			}, { timeout: 45000 });
-			await page.getByRole('button', { name: /Run Find internal links|运行 查找内链|Run 查找内链/i }).click({ timeout: 30000 });
+				await page.getByRole('button', { name: /Run Site citation suggestions|运行 站内引用建议/i }).click({ timeout: 30000 });
 			const internalLinkResponse = await responsePromise;
 			const internalLinkPayload = await internalLinkResponse.json();
 			const internalLinkSection = internalLinkPayload && internalLinkPayload.sections ? internalLinkPayload.sections.internal_links || {} : {};
-				await page.waitForSelector('text=/Recommended internal links|推荐内链/', { timeout: 30000 });
+					await page.waitForSelector('text=/Site citation suggestions|站内引用建议/', { timeout: 30000 });
+					const adjustmentDisclosure = page.locator('.npcink-toolbox-editor-support__citation-adjustments');
+					assert(await adjustmentDisclosure.count() === 1, 'Recommendation preferences are available in one low-frequency disclosure.');
 				const internalLinkImpression = await waitForFeedbackAction(requests, 'internal_link_impression');
 				assertMetadataOnlyFeedback(internalLinkImpression, 'Internal-link impression');
 				assert((internalLinkImpression.source_reason_codes || []).some((code) => /^applicable_count_/.test(code)), 'Internal-link impression records a bounded applicable-count denominator.');
@@ -422,9 +387,9 @@ try {
 			const cloudAnchorEvidence = anchorEvidenceSummary(internalLinkSection.source_knowledge || {});
 			console.log(`INFO: internal_link_candidate_review=${JSON.stringify(candidateReview)}`);
 			console.log(`INFO: internal_link_cloud_anchor_evidence=${JSON.stringify(cloudAnchorEvidence)}`);
-			const checkboxLocator = page.locator('.npcink-toolbox-editor-support__internal-link-card input[type="checkbox"]');
-			const applicableCount = await checkboxLocator.count();
-			const copyButton = page.locator('.npcink-toolbox-editor-support__internal-link-card button').filter({ hasText: /Copy link|复制链接/ }).first();
+			const applicableRows = page.locator('.npcink-toolbox-editor-support__internal-link-item.is-applicable');
+			const applicableCount = await applicableRows.count();
+			const copyButton = page.locator('.npcink-toolbox-editor-support__internal-link-item button').filter({ hasText: /Copy link|复制链接/ }).first();
 				if (await copyButton.count()) {
 					await copyButton.click();
 					await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
@@ -440,6 +405,10 @@ try {
 			let nativeSavePerformed = false;
 			let nativeSaveFeedback = null;
 			if (applicableCount > 0) {
+				assert(await applicableRows.first().getByRole('button', { name: /Add citation|添加引用/i }).count() === 1, 'Applicable rows expose one direct Add citation action below the candidate content.');
+				await page.getByRole('button', { name: /Batch select|批量选择/i }).click();
+				const checkboxLocator = page.locator('.npcink-toolbox-editor-support__internal-link-item.is-applicable input[type="checkbox"]');
+				assert(await checkboxLocator.count() === applicableCount, 'Checkboxes appear only after entering explicit batch-selection mode.');
 				const selectionCount = Math.min(2, applicableCount);
 				for (let index = 0; index < selectionCount; index += 1) {
 					await checkboxLocator.nth(index).check();
@@ -448,7 +417,7 @@ try {
 				assert(editorContentAfterSelection === editorContentBefore, 'Selecting internal-link suggestions does not mutate editor content.');
 				assert(wpPostContent(activePostId) === databaseContentBefore, 'Selecting internal-link suggestions does not persist WordPress content.');
 				const requestIndexBeforeApply = requests.length;
-				await page.getByRole('button', { name: /应用所选内链|Apply selected internal links/i }).click();
+				await page.getByRole('button', { name: /应用 \d+ 条内链|Apply \d+ links/i }).click();
 				await page.waitForSelector('text=/已在当前编辑器应用/', { timeout: 10000 });
 				const resultText = await page.locator('.components-notice, .npcink-toolbox-editor-support__notice').filter({ hasText: /已在当前编辑器应用/ }).last().innerText();
 				const counts = resultText.match(/应用\s*(\d+)\s*条，拒绝\s*(\d+)\s*条/);
@@ -503,14 +472,6 @@ try {
 			assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
 			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
 				post_id: parseInt(activePostId, 10),
-				related_articles: {
-					http_status: relatedResponse.status(),
-					retrieval_status: relatedSection.retrieval_status || '',
-					candidate_source: relatedSection.candidate_source || '',
-					candidate_count: relatedCandidates.length,
-					link_copied: relatedLinkCopied,
-					direct_wordpress_write: relatedSection.direct_wordpress_write,
-				},
 				http_status: internalLinkResponse.status(),
 				retrieval_status: internalLinkSection.retrieval_status || '',
 				candidate_source: internalLinkSection.candidate_source || '',

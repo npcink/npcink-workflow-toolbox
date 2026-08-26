@@ -30,10 +30,11 @@ additive contracts:
   recommendation wrapper. `editor_recommendation_set.v1` remains as a
   compatibility field for current consumers.
 
-Domain artifacts remain authoritative. For example, internal links continue
-to use `internal_link_candidates.v1`, and related articles use
-`related_article_candidates.v1`. The recommendation set only references these
-artifacts and exposes bounded candidate metadata for common consumers.
+Domain artifacts remain authoritative. Site citation suggestions use
+`internal_link_candidates.v1`; candidates with a safe exact match may be
+applied to visible editor state, while other related articles remain
+reference-only items in the same artifact. The recommendation set only
+references these bounded candidate records for common consumers.
 
 Cloud remains the semantic retrieval/runtime owner. WordPress remains the
 editor, confirmation, save, and final-write owner. Every Toolbox projection
@@ -66,4 +67,3 @@ content-management control plane.
   implementation today.
 - Legacy fields remain during migration, so consumers must prefer the
   canonical aliases when available.
-

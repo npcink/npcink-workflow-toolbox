@@ -207,8 +207,10 @@ final class Cloud_Image_Artifact_Transport {
 	private function strict_timestamp( string $value ) {
 		$utc     = new \DateTimeZone( 'UTC' );
 		$formats = array(
-			'!Y-m-d\TH:i:s\Z'   => 'Y-m-d\TH:i:s\Z',
-			'!Y-m-d\TH:i:s.u\Z' => 'Y-m-d\TH:i:s.u\Z',
+			'!Y-m-d\TH:i:s\Z'        => 'Y-m-d\TH:i:s\Z',
+			'!Y-m-d\TH:i:s.u\Z'      => 'Y-m-d\TH:i:s.u\Z',
+			'!Y-m-d\TH:i:s\+00:00'   => 'Y-m-d\TH:i:s\+00:00',
+			'!Y-m-d\TH:i:s.u\+00:00' => 'Y-m-d\TH:i:s.u\+00:00',
 		);
 		foreach ( $formats as $parse_format => $roundtrip_format ) {
 			$timestamp = \DateTimeImmutable::createFromFormat( $parse_format, $value, $utc );

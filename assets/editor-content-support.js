@@ -128,6 +128,7 @@
 		const match = candidate.sourceMatch && typeof candidate.sourceMatch === 'object' ? candidate.sourceMatch : null;
 		if (!match || !match.matched_text || !match.expected_text || !match.block_client_id || match.text_offset === '' || match.text_offset === null || match.text_offset === undefined || !Number.isInteger(Number(match.text_offset))) return reject('missing_exact_source_match');
 		if (match.block_name === 'core/heading') return reject('heading_match_not_eligible');
+		if (['core/code', 'core-code'].indexOf(match.block_name) >= 0) return reject('code_block_match_not_eligible');
 		if (!internalLinkAnchorIsSpecific(candidate.anchorText)) return reject('generic_anchor');
 		if (String(candidate.anchorText) !== String(match.matched_text)) return reject('missing_exact_source_match');
 		if (String(match.expected_text || '') !== String(candidate.currentText || '')) return reject('stale_editor_block');
@@ -578,12 +579,12 @@
 			libraryModeLabel: __('Site media library', 'npcink-workflow-toolbox'),
 			generateModeLabel: __('AI generation', 'npcink-workflow-toolbox'),
 			searchPlaceholder: __('Enter a scene, or leave blank to use article context', 'npcink-workflow-toolbox'),
-			generatePlaceholder: __('Review or enter a featured image prompt', 'npcink-workflow-toolbox'),
+			generatePlaceholder: __('Describe the scene you want to generate', 'npcink-workflow-toolbox'),
 			searchButtonLabel: __('Refresh recommendations', 'npcink-workflow-toolbox'),
 			searchBusyLabel: __('Recommending', 'npcink-workflow-toolbox'),
 			autoButtonLabel: __('Use article context', 'npcink-workflow-toolbox'),
 			generateButtonLabel: __('Request hosted image', 'npcink-workflow-toolbox'),
-			briefButtonLabel: __('Generate prompt', 'npcink-workflow-toolbox'),
+			briefButtonLabel: __('Generate visual description', 'npcink-workflow-toolbox'),
 		},
 		paragraph: {
 			mode: 'paragraph',
@@ -635,7 +636,7 @@
 	function normalizeImageBriefButtonLabel(label) {
 		const value = String(label || '').trim();
 		if (!value || value === 'Generate prompt plan' || value === 'Generate image plan' || value === 'Generate featured image plan' || value === '生成提示词计划' || value === '生成图片计划' || value === '生成特色图计划') {
-			return __('Generate prompt', 'npcink-workflow-toolbox');
+			return __('Generate visual description', 'npcink-workflow-toolbox');
 		}
 		return value;
 	}
@@ -695,8 +696,8 @@
 		},
 		{
 			intent: 'internal_links',
-			label: __('Find internal links', 'npcink-workflow-toolbox'),
-			description: __('Review exact anchor matches, then apply selected links to the current editor.', 'npcink-workflow-toolbox'),
+			label: __('Site citation suggestions', 'npcink-workflow-toolbox'),
+			description: __('Find related published articles, then separate safe internal links from reference-only suggestions.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft plus related Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Existing-post refs, anchor hints, relevance notes', 'npcink-workflow-toolbox'),
@@ -705,19 +706,6 @@
 			runtimeLabel: __('Toolkit review artifact; optional Cloud Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			writePostureLabel: __('Explicit editor Apply only; no automatic save or publish', 'npcink-workflow-toolbox'),
 			blockedLabel: __('Blocked when the draft has too little context or related content evidence is unavailable.', 'npcink-workflow-toolbox'),
-		},
-		{
-			intent: 'related_articles',
-			label: __('Find related articles', 'npcink-workflow-toolbox'),
-			description: __('Recommend published articles that are semantically related to this draft for review, reading, or manual citation.', 'npcink-workflow-toolbox'),
-			group: 'review_handoff',
-			sourceLabel: __('Current draft plus Cloud Site Knowledge vector evidence', 'npcink-workflow-toolbox'),
-			evidenceLabel: __('Article title, excerpt, relevance reason, score, and evidence refs', 'npcink-workflow-toolbox'),
-			actionLabel: __('Open / copy / ignore manually', 'npcink-workflow-toolbox'),
-			ownerLabel: __('Toolbox UI; Cloud Site Knowledge for semantic retrieval', 'npcink-workflow-toolbox'),
-			runtimeLabel: __('Cloud Site Knowledge related-content vector runtime', 'npcink-workflow-toolbox'),
-			writePostureLabel: __('Suggestion only; no body insertion or frontend related-articles block', 'npcink-workflow-toolbox'),
-			blockedLabel: __('Blocked when Cloud related-content evidence is unavailable or the draft has too little context.', 'npcink-workflow-toolbox'),
 		},
 		{
 			intent: 'image_alt_suggestions',
@@ -2060,6 +2048,27 @@
 		return eventPayload;
 	}
 
+	function editorAiImageGenerationFeedbackPayload(sessionId, picker, action, outcome, labels, reasonCodes, payload) {
+		const eventPayload = editorImageAgentFeedbackPayload(
+			Object.assign({
+				provider_mode: 'ai_generated',
+				_media_quality_session_id: String(sessionId || '').slice(0, 191),
+			}, payload && typeof payload === 'object' ? payload : {}),
+			null,
+			picker,
+			outcome,
+			labels,
+			{
+				action,
+				handoffType: 'editor_ai_image_generation_' + sanitizeFeedbackAction(action),
+				localSurface: mediaQualitySurface(picker, 'generation'),
+				reasonCodes,
+			}
+		);
+		eventPayload.evidence_ref_ids = [];
+		return eventPayload;
+	}
+
 	function contentSupportFeedbackEvidenceRefIds(payload) {
 		const ids = [];
 		const sections = payload && payload.sections && typeof payload.sections === 'object' ? payload.sections : {};
@@ -2216,10 +2225,8 @@
 	function recommendationFeedbackContext(payload, intent) {
 		const sections = payload && payload.sections && typeof payload.sections === 'object' ? payload.sections : {};
 		const section = sections[intent] && typeof sections[intent] === 'object' ? sections[intent] : {};
-		const candidates = intent === 'internal_links' ? internalLinkCandidateItems(section) : relatedArticleCandidateItems(section);
-		const applicableCount = intent === 'internal_links'
-			? candidates.filter((candidate) => candidate && candidate.canApplyToEditor && candidate.sourceMatch).length
-			: 0;
+		const candidates = internalLinkCandidateItems(section);
+		const applicableCount = candidates.filter((candidate) => candidate && candidate.canApplyToEditor && candidate.sourceMatch).length;
 		const retrievalStatus = sanitizeFeedbackAction(section.retrieval_status || section.source_status || 'unknown');
 		const candidateSource = sanitizeFeedbackAction(section.candidate_source || 'unknown');
 		const reasonCodes = [
@@ -2228,9 +2235,7 @@
 			'source_' + candidateSource,
 			section.fallback_used === true ? 'fallback_used' : 'fallback_not_used',
 		];
-		if (intent === 'internal_links') {
-			reasonCodes.splice(1, 0, recommendationCountBucket('applicable_count', applicableCount));
-		}
+		reasonCodes.splice(1, 0, recommendationCountBucket('applicable_count', applicableCount));
 		return {
 			candidateCount: candidates.length,
 			applicableCount,
@@ -2239,9 +2244,10 @@
 	}
 
 	function recommendationImpressionFeedbackPayload(payload, intent, sessionId) {
-		const action = intent === 'internal_links' ? 'internal_link_impression' : 'related_article_impression';
-		const context = recommendationFeedbackContext(payload, intent);
-		const eventPayload = editorContentImplicitFeedbackPayload(payload || {}, intent, action, 'ignored', [], '', {
+		const normalizedIntent = String(intent || '').trim() === 'related_content' ? 'related_content' : 'internal_links';
+		const action = normalizedIntent === 'related_content' ? 'related_content_impression' : 'internal_link_impression';
+		const context = recommendationFeedbackContext(payload, normalizedIntent);
+		const eventPayload = editorContentImplicitFeedbackPayload(payload || {}, normalizedIntent, action, 'ignored', [], '', {
 			sourceObjectType: 'recommendation_session',
 			sourceObjectId: sessionId,
 			reasonCodes: ['impression_only'].concat(context.reasonCodes),
@@ -2447,7 +2453,7 @@
 			libraryModeLabel: source.library_mode_label || source.libraryModeLabel || preset.libraryModeLabel || __('Site media library', 'npcink-workflow-toolbox'),
 			generateModeLabel: source.generate_mode_label || source.generateModeLabel || preset.generateModeLabel || __('AI generation', 'npcink-workflow-toolbox'),
 			searchPlaceholder: source.search_placeholder || source.searchPlaceholder || preset.searchPlaceholder || __('Search or describe image needs', 'npcink-workflow-toolbox'),
-			generatePlaceholder: source.generate_placeholder || source.generatePlaceholder || preset.generatePlaceholder || __('Review or enter a hosted image prompt', 'npcink-workflow-toolbox'),
+			generatePlaceholder: source.generate_placeholder || source.generatePlaceholder || preset.generatePlaceholder || __('Describe the scene you want to generate', 'npcink-workflow-toolbox'),
 			searchButtonLabel: source.search_button_label || source.searchButtonLabel || preset.searchButtonLabel || __('Recommend images', 'npcink-workflow-toolbox'),
 			searchBusyLabel: source.search_busy_label || source.searchBusyLabel || preset.searchBusyLabel || __('Recommending', 'npcink-workflow-toolbox'),
 			autoButtonLabel: source.auto_button_label || source.autoButtonLabel || preset.autoButtonLabel || __('Search from article', 'npcink-workflow-toolbox'),
@@ -2731,10 +2737,7 @@
 			return __('Tag suggestions', 'npcink-workflow-toolbox');
 		}
 		if (value === 'internal_links') {
-			return __('Internal link candidates', 'npcink-workflow-toolbox');
-		}
-		if (value === 'related_articles') {
-			return __('Related articles', 'npcink-workflow-toolbox');
+			return __('Site citation suggestions', 'npcink-workflow-toolbox');
 		}
 		return formatMetaLabel(value);
 	}
@@ -2746,8 +2749,8 @@
 		if (value === 'writing_support') {
 			return __('Finds similar published content first, then helps you decide how this draft should differ.', 'npcink-workflow-toolbox');
 		}
-		if (value === 'related_articles') {
-			return __('Finds semantically related published articles for reading or manual citation. It does not insert content into the draft.', 'npcink-workflow-toolbox');
+		if (value === 'internal_links') {
+			return __('Finds related published articles and identifies which ones have a safe exact placement in the current draft.', 'npcink-workflow-toolbox');
 		}
 		if (value === 'zhihu_research') {
 			return __('解决写作前“不知道用户真正关心什么、反对什么、该从哪个角度切入”的问题。它只返回知乎来源候选，供你人工判断、改写和引用。', 'npcink-workflow-toolbox');
@@ -2797,6 +2800,30 @@
 	function formatImageErrorMessage(error, fallback) {
 		const code = error && error.code ? String(error.code) : '';
 		const message = error && error.message ? String(error.message) : '';
+		if (/<(?:!doctype|html|body|p|a)\b/i.test(message) || /wordpress\.org\/documentation\/article\/faq-troubleshooting/i.test(message)) {
+			return __('WordPress could not complete the image action. Check the site error log, then try again.', 'npcink-workflow-toolbox');
+		}
+		const cloudCode = String(error && error.data && error.data.cloud_error_code ? error.data.cloud_error_code : '');
+		const normalizedCode = cloudCode || code
+			.replace(/^cloud_/, '')
+			.replace(/^provider_/, 'provider.')
+			.replace(/^image_generation_/, 'image_generation.');
+		const providerMessages = {
+			'provider.invalid_request': __('The image service rejected the current settings. Try one candidate at medium quality, or revise the visual description.', 'npcink-workflow-toolbox'),
+			'provider.rate_limited': __('The image service is receiving too many requests. Wait a moment, then try again.', 'npcink-workflow-toolbox'),
+			'provider.auth_invalid': __('The image Provider credentials are invalid. Check the Cloud Provider configuration.', 'npcink-workflow-toolbox'),
+			'provider.access_denied': __('The hosted image service denied access to the selected image model. Check the Cloud image Provider permissions or routing configuration.', 'npcink-workflow-toolbox'),
+			'provider.endpoint_not_found': __('The hosted image model endpoint is not available. Check the Cloud image Provider and routing configuration.', 'npcink-workflow-toolbox'),
+			'provider.timeout': __('Image generation timed out. Try one candidate or a lower quality setting.', 'npcink-workflow-toolbox'),
+			'provider.network_error': __('The image service is temporarily unreachable. Try again later.', 'npcink-workflow-toolbox'),
+			'provider.upstream_error': __('The image service is temporarily unavailable. Try again later.', 'npcink-workflow-toolbox'),
+			'image_generation.prompt_translation_unavailable': __('Chinese prompt conversion is not available. No image request was sent. Try again or enter an English description.', 'npcink-workflow-toolbox'),
+			'image_generation.prompt_translation_failed': __('Chinese prompt conversion failed. No image request was sent. Try again or enter an English description.', 'npcink-workflow-toolbox'),
+			'image_generation.prompt_translation_invalid': __('Chinese prompt conversion returned an invalid result. No image request was sent. Try again or enter an English description.', 'npcink-workflow-toolbox'),
+		};
+		if (providerMessages[normalizedCode]) {
+			return providerMessages[normalizedCode];
+		}
 		if (message.toLowerCase().indexOf('runtime quota') >= 0 && message.toLowerCase().indexOf('exhausted') >= 0) {
 			return __('Cloud runtime quota is exhausted for this request. Check Cloud quota or billing limits, then retry.', 'npcink-workflow-toolbox');
 		}
@@ -2810,6 +2837,30 @@
 			return __('Npcink Cloud Addon is not connected or not configured for managed image-source search.', 'npcink-workflow-toolbox');
 		}
 		return message || fallback;
+	}
+
+	function imageGenerationErrorReasonCode(error) {
+		const code = String(
+			error && error.data && error.data.cloud_error_code
+				? error.data.cloud_error_code
+				: (error && error.code ? error.code : '')
+		).toLowerCase();
+		if (code.indexOf('translation') >= 0) {
+			return 'prompt_translation_error';
+		}
+		if (code.indexOf('rate') >= 0) {
+			return 'provider_rate_limited';
+		}
+		if (code.indexOf('auth') >= 0) {
+			return 'provider_auth_error';
+		}
+		if (code.indexOf('timeout') >= 0) {
+			return 'provider_timeout';
+		}
+		if (code.indexOf('invalid') >= 0) {
+			return 'provider_invalid_request';
+		}
+		return 'provider_runtime_error';
 	}
 
 	function aiImagePromptSubject(postContext, picker, manualPrompt) {
@@ -3060,6 +3111,14 @@
 		);
 	}
 
+	function imagePromptCandidatePair(candidate) {
+		const normalized = typeof candidate === 'string' ? { prompt: candidate } : (candidate || {});
+		const providerPrompt = String(normalized.prompt || '').trim();
+		const localizedPrompt = String(normalized.localized_prompt || normalized.display_prompt || '').trim();
+		const displayPrompt = localizedPrompt || (hasCjkText(providerPrompt) ? providerPrompt : '');
+		return { displayPrompt, providerPrompt };
+	}
+
 	function firstImagePromptCandidate(payload) {
 		const source = imageResultSource(payload || {});
 		const handoff = source.ai_generation_handoff && typeof source.ai_generation_handoff === 'object' ? source.ai_generation_handoff : {};
@@ -3068,15 +3127,12 @@
 			.concat(Array.isArray(handoff.prompt_candidates) ? handoff.prompt_candidates : []);
 		for (let index = 0; index < candidates.length; index += 1) {
 			const candidate = candidates[index];
-			const prompt = typeof candidate === 'string'
-				? candidate
-				: (candidate && typeof candidate === 'object' ? candidate.prompt : '');
-			const value = String(prompt || '').trim();
-			if (value) {
-				return value;
+			const pair = imagePromptCandidatePair(candidate);
+			if (pair.displayPrompt) {
+				return pair;
 			}
 		}
-		return '';
+		return { displayPrompt: '', providerPrompt: '' };
 	}
 
 	function renderImageCandidateCards(images, payload, selectedImage, onSelectImage, onPreviewImage, onUseSuggestion, picker) {
@@ -3480,7 +3536,7 @@
 		);
 	}
 
-	function renderSelectedImagePanel(selectedImage, seoFields, adoptionRunning, adoptionAction, adoptionResult, adoptionError, picker, onSeoFieldChange, onAdoptFeatured, onImportOnly, onSelectOnly, regenerationRunning, onRegenerate) {
+	function renderSelectedImagePanel(selectedImage, seoFields, adoptionRunning, adoptionAction, adoptionResult, adoptionError, picker, onSeoFieldChange, onAdoptFeatured, onImportOnly, onSelectOnly, regenerationRunning, onRegenerate, resultPayload) {
 		const activePicker = normalizeImagePickerOptions(picker || {});
 		const paragraphMode = activePicker.mode === 'paragraph';
 		const selectOnlyMode = activePicker.adoptionMode === 'select_only';
@@ -3494,6 +3550,7 @@
 		const attributionLabel = imageAttributionLabel(selectedImage);
 		const sourceDetailRows = [
 			renderInfoRow(__('Source', 'npcink-workflow-toolbox'), imageCandidateSourceLabel(selectedImage), 'source'),
+			renderInfoRow(__('Model', 'npcink-workflow-toolbox'), imageCandidateProviderDetails(selectedImage, resultPayload).join(' / '), 'model'),
 			renderInfoRow(__('Review', 'npcink-workflow-toolbox'), selectedImage.license_review_status ? formatMetaLabel(selectedImage.license_review_status) : '', 'review'),
 		].filter(Boolean);
 		return createElement(
@@ -3747,6 +3804,7 @@
 			headingAction: null,
 			hideContext: false,
 			compactSelector: false,
+			disabled: false,
 			maxDirections: IMAGE_DIRECTION_TARGET_COUNT,
 		}, options || {});
 
@@ -3795,7 +3853,6 @@
 				'div',
 				{ className: 'npcink-toolbox-editor-support__prompt-candidates' },
 				promptCandidates.map((candidate, index) => {
-					const prompt = String(candidate.prompt || '');
 					const usePrompt = (event) => {
 						if (event && event.preventDefault) {
 							event.preventDefault();
@@ -3804,7 +3861,7 @@
 							event.stopPropagation();
 						}
 						if (onUsePrompt) {
-							onUsePrompt(prompt);
+							onUsePrompt(candidate);
 						}
 					};
 					const display = localizedPromptCandidateDisplay(candidate, index);
@@ -3815,6 +3872,7 @@
 							className: 'npcink-toolbox-editor-support__prompt-card',
 							type: 'button',
 							'data-toolbox-ai-prompt-direction': 'true',
+							disabled: Boolean(settings.disabled),
 							onClick: usePrompt,
 						},
 						createElement('strong', null, truncateText(settings.compactSelector ? compactPromptDirectionLabel(display.label) : display.label, 72)),
@@ -4951,9 +5009,9 @@
 						createElement(
 							'div',
 							{ className: 'npcink-toolbox-editor-support__outline-section-head' },
-							createElement('span', null, String(index + 1)),
-							createElement('strong', null, item.heading)
-						),
+								createElement('span', null, String(index + 1)),
+								createElement('strong', null, item.heading)
+							),
 						item.points.length ? createElement(
 							'ul',
 							null,
@@ -5499,7 +5557,6 @@
 			'tag_suggestions',
 			'category_suggestions',
 			'internal_links',
-			'related_articles',
 				'writing_support',
 				'zhihu_research',
 				'zhihu_hot_topics',
@@ -5532,9 +5589,6 @@
 		}
 		if (intent === 'internal_links') {
 			return __('Example: prefer tutorials over announcement posts.', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'related_articles') {
-			return __('Example: prefer practical tutorials and recently updated articles.', 'npcink-workflow-toolbox');
 		}
 		if (intent === 'article_checkup') {
 			return __('Example: focus on structure and factual claims, not style preference.', 'npcink-workflow-toolbox');
@@ -5981,9 +6035,18 @@
 		return text;
 	}
 
-	function internalLinkScoreText(score) {
-		const value = parseInt(score || '0', 10);
-		return value > 0 ? __('Score ', 'npcink-workflow-toolbox') + String(value) : '';
+	function internalLinkEvidenceLabel(candidateSource, retrievalStatus) {
+		return candidateSource === 'cloud_vector' && retrievalStatus === 'cloud_vector_evidence'
+			? __('Semantic candidate', 'npcink-workflow-toolbox')
+			: '';
+	}
+
+	function internalLinkPriorityReasonText(reason) {
+		const text = readableItemText(reason, '');
+		if (text.toLowerCase().indexOf('no detected incoming internal links') >= 0) {
+			return __('This article has no detected incoming internal links, so it is prioritized for review.', 'npcink-workflow-toolbox');
+		}
+		return text;
 	}
 
 	function internalLinkContractValue(value) {
@@ -6016,11 +6079,14 @@
 					sourceMatch: item.source_match && typeof item.source_match === 'object'
 						? item.source_match
 						: (source.source_match && typeof source.source_match === 'object' ? source.source_match : null),
-					score: internalLinkScoreText(item.quality_score),
+					evidenceLabel: internalLinkEvidenceLabel(
+						internalLinkContractValue(item.candidate_source || source.candidate_source || section.candidate_source),
+						internalLinkContractValue(section.retrieval_status || section.source_status)
+					),
 					quality_status: item.quality_status,
 					quality_score: item.quality_score,
 					quality_issues: item.quality_issues,
-					priorityReason: readableItemText(item.priority_reason, ''),
+					priorityReason: internalLinkPriorityReasonText(item.priority_reason),
 					linkGraphIssues: Array.isArray(item.link_graph_issues) ? item.link_graph_issues : [],
 					sharedTerms: Array.isArray(item.shared_terms) ? item.shared_terms : [],
 					action_policy: item.action_policy,
@@ -6044,28 +6110,17 @@
 				reason: internalLinkReasonText(item.reason),
 				placementHint: readableItemText(item.placement_hint, ''),
 				sourceMatch: item.source_match && typeof item.source_match === 'object' ? item.source_match : null,
-				score: item.score ? internalLinkScoreText(Math.round(Number(item.score) * 100)) : '',
+				evidenceLabel: internalLinkEvidenceLabel(
+					internalLinkContractValue(item.candidate_source || section.candidate_source),
+					internalLinkContractValue(section.retrieval_status || section.source_status)
+				),
 				quality_status: item.status,
-				priorityReason: readableItemText(item.priority_reason, ''),
+				priorityReason: internalLinkPriorityReasonText(item.priority_reason),
 				linkGraphIssues: Array.isArray(item.link_graph_issues) ? item.link_graph_issues : [],
 				sharedTerms: Array.isArray(item.shared_terms) ? item.shared_terms : [],
 				action_policy: 'operator_review_only_no_insert',
 				target_field: 'post_content',
 			};
-		}));
-	}
-
-	function relatedArticleCandidateItems(section) {
-		const items = section && Array.isArray(section.items) ? section.items : [];
-		return items.map((item, index) => ({
-			id: readableItemText(item && (item.id || item.post_id), String(index + 1)),
-			title: readableItemText(item && item.title, __('Related article', 'npcink-workflow-toolbox')),
-			targetUrl: readableItemText(item && (item.url || item.target_url || item.permalink), ''),
-			excerpt: readableItemText(item && item.excerpt, ''),
-			reason: readableItemText(item && item.reason, __('Semantically related by Cloud Site Knowledge.', 'npcink-workflow-toolbox')),
-			score: item && item.score,
-			candidateSource: readableItemText(item && item.candidate_source, ''),
-			evidenceRefs: Array.isArray(item && item.evidence_refs) ? item.evidence_refs : [],
 		}));
 	}
 
@@ -7044,6 +7099,7 @@
 			missing_exact_source_match: __('找不到精确正文短语', 'npcink-workflow-toolbox'),
 			stale_editor_block: __('正文在获取建议后已变化', 'npcink-workflow-toolbox'),
 			generic_anchor: __('锚文本过于泛化', 'npcink-workflow-toolbox'),
+			code_block_match_not_eligible: __('Code blocks stay unchanged; cite the article from nearby explanatory text.', 'npcink-workflow-toolbox'),
 			range_already_linked: __('该短语已经包含链接', 'npcink-workflow-toolbox'),
 			target_already_linked: __('当前文章已经链接到该目标', 'npcink-workflow-toolbox'),
 			article_link_density_reached: __('当前文章已达到内链密度上限', 'npcink-workflow-toolbox'),
@@ -7052,96 +7108,128 @@
 		return labels[reason] || __('未通过安全校验', 'npcink-workflow-toolbox');
 	}
 
+	function internalLinkCandidateReason(item) {
+		const reason = readableItemText(item && item.reason, '');
+		const normalized = reason.toLowerCase();
+		if (!reason || normalized.indexOf('related by site knowledge') >= 0 || reason.indexOf('提供的相关内容证据可作为') >= 0) {
+			return '';
+		}
+		return truncateText(reason, 72);
+	}
+
 	function renderInternalLinkCandidateSection(section, controls) {
 		const candidates = internalLinkCandidateItems(section);
 		const actionControls = controls && controls.internalLinks ? controls.internalLinks : {};
-		const ignored = actionControls.ignored || {};
 		const selected = actionControls.selected || {};
-		const visibleCandidates = candidates.filter((item) => !ignored[String(item.id || '')]).slice(0, 8);
+		const visibleCandidates = candidates.slice(0, 8);
+		const canApplyCandidate = (item) => Boolean(item.canApplyToEditor && item.sourceMatch && item.sourceMatch.block_client_id && item.sourceMatch.matched_text && item.targetStatus === 'publish' && ['post', 'page'].indexOf(item.targetPostType) >= 0);
+		const applicableCandidates = visibleCandidates.filter(canApplyCandidate);
+		const referenceCandidates = visibleCandidates.filter((item) => !canApplyCandidate(item));
 		const selectedCandidates = visibleCandidates.filter((item) => selected[String(item.id || '')]);
 		const selectionFull = selectedCandidates.length >= 8;
+		const batchMode = Boolean(actionControls.batchMode);
 		const batchResult = actionControls.result && typeof actionControls.result === 'object' ? actionControls.result : null;
 		const retrievalStatus = String(section && (section.retrieval_status || section.source_status) || '');
 		const sourceNotice = retrievalStatus === 'cloud_unavailable'
-			? __('Cloud 内链检索暂不可用；以下结果不能视为云端向量推荐。', 'npcink-workflow-toolbox')
+			? __('Site Knowledge is temporarily unavailable, so these results may be incomplete.', 'npcink-workflow-toolbox')
 			: retrievalStatus === 'no_cloud_evidence'
-				? __('未取得云端相关文章证据；以下结果可能来自本地 fallback，不能视为云端向量推荐。', 'npcink-workflow-toolbox')
-				: __('Cloud 向量证据用于候选发现，最终插入仍由编辑者确认。', 'npcink-workflow-toolbox');
+				? __('Site Knowledge returned no matches. Any suggestions below use available local evidence.', 'npcink-workflow-toolbox')
+				: '';
+		const summaryText = applicableCandidates.length
+			? sprintf(__('%1$d ready to apply, %2$d for reference.', 'npcink-workflow-toolbox'), applicableCandidates.length, referenceCandidates.length)
+			: sprintf(__('Found %d related articles. None can be applied directly.', 'npcink-workflow-toolbox'), referenceCandidates.length);
+		const renderCandidate = (item, index) => {
+			const title = readableItemText(item && item.title, __('Internal link candidate', 'npcink-workflow-toolbox'));
+			const key = String(index) + '-' + title;
+			const hasUrl = Boolean(item && item.targetUrl);
+			const itemId = String(item && item.id || '');
+			const canSelect = canApplyCandidate(item);
+			const reason = internalLinkCandidateReason(item);
+			return createElement(
+				'li',
+				{ key, className: 'npcink-toolbox-editor-support__internal-link-item' + (selected[itemId] ? ' is-selected' : '') + (canSelect ? ' is-applicable' : ' is-reference-only') },
+				createElement(
+					'div',
+					{ className: 'npcink-toolbox-editor-support__internal-link-main' },
+					createElement(
+						'div',
+						{ className: 'npcink-toolbox-editor-support__internal-link-title' },
+						canSelect && batchMode ? createElement(CheckboxControl, {
+							label: __('Select', 'npcink-workflow-toolbox'),
+							checked: Boolean(selected[itemId]),
+							disabled: Boolean(actionControls.running) || (selectionFull && !selected[itemId]),
+							__nextHasNoMarginBottom: true,
+							onChange: (checked) => actionControls.toggle && actionControls.toggle(item, checked),
+						}) : null,
+						createElement('strong', null, title)
+					),
+					createElement(
+						'div',
+						{ className: 'npcink-toolbox-editor-support__internal-link-meta' },
+						item.evidenceLabel ? createElement('span', null, item.evidenceLabel) : null,
+						canSelect && item.sourceMatch ? createElement('span', null, sprintf(__('Draft text: %s', 'npcink-workflow-toolbox'), truncateText(item.sourceMatch.matched_text, 48))) : null
+					),
+					reason ? createElement('p', null, reason) : null
+				),
+				createElement(
+					'div',
+					{ className: 'npcink-toolbox-editor-support__internal-link-actions' },
+					!batchMode && canSelect ? createElement(Button, {
+						type: 'button',
+						size: 'compact',
+						variant: 'primary',
+						disabled: Boolean(actionControls.running),
+						accessibleWhenDisabled: true,
+						onClick: () => actionControls.applyBatch && actionControls.applyBatch([item]),
+					}, __('Add citation', 'npcink-workflow-toolbox')) : null,
+					createElement(Button, {
+						type: 'button',
+						size: 'compact',
+						variant: 'secondary',
+						disabled: !hasUrl,
+						accessibleWhenDisabled: true,
+						onClick: () => actionControls.open && actionControls.open(item),
+					}, __('Open article', 'npcink-workflow-toolbox')),
+					hasUrl ? createElement(Button, {
+						type: 'button',
+						size: 'compact',
+						variant: 'secondary',
+						disabled: Boolean(actionControls.running),
+						accessibleWhenDisabled: true,
+						onClick: () => actionControls.copy && actionControls.copy(item, key),
+					}, __('Copy link', 'npcink-workflow-toolbox')) : null
+				)
+			);
+		};
+		const renderCandidateGroup = (key, title, items, allowBatch) => items.length ? createElement(
+			'div',
+			{ key, className: 'npcink-toolbox-editor-support__candidate-group' },
+			createElement('div', { className: 'npcink-toolbox-editor-support__candidate-group-heading' },
+				createElement('h4', null, title + ' (' + String(items.length) + ')'),
+				allowBatch ? createElement(Button, {
+					type: 'button',
+					size: 'compact',
+					variant: 'tertiary',
+					isPressed: batchMode,
+					disabled: Boolean(actionControls.running),
+					accessibleWhenDisabled: true,
+					onClick: actionControls.toggleBatchMode,
+				}, batchMode ? __('Done', 'npcink-workflow-toolbox') : __('Batch select', 'npcink-workflow-toolbox')) : null
+			),
+			createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, items.map(renderCandidate))
+		) : null;
+		const referencePreview = referenceCandidates.slice(0, 5);
+		const referenceRemainder = referenceCandidates.slice(5);
 		return createElement(
 				'section',
 				{ className: 'npcink-toolbox-editor-support__metadata-compact-section npcink-toolbox-editor-support__internal-links' },
-				createElement('h4', null, __('Recommended internal links', 'npcink-workflow-toolbox')),
-				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Use this after the draft direction is clear. These are related existing posts to cite manually, not a duplicate-risk review.', 'npcink-workflow-toolbox')),
-				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, sourceNotice),
-				visibleCandidates.length
-				? createElement(
-					'ul',
-					{ className: 'npcink-toolbox-editor-support__internal-link-list' },
-					visibleCandidates.map((item, index) => {
-						const key = String(index) + '-' + readableItemText(item && item.title, __('Internal link candidate', 'npcink-workflow-toolbox'));
-						const hasUrl = Boolean(item && item.targetUrl);
-						const itemId = String(item && item.id || '');
-						const canSelect = Boolean(item.canApplyToEditor && item.sourceMatch && item.sourceMatch.block_client_id && item.sourceMatch.matched_text && item.targetStatus === 'publish' && ['post', 'page'].indexOf(item.targetPostType) >= 0);
-						return createElement(
-						'li',
-						{ key, className: 'npcink-toolbox-editor-support__internal-link-card' + (selected[itemId] ? ' is-selected' : '') },
-						canSelect ? createElement(CheckboxControl, {
-							label: __('选择此条建议', 'npcink-workflow-toolbox'),
-							checked: Boolean(selected[itemId]),
-							disabled: Boolean(actionControls.running) || (selectionFull && !selected[itemId]),
-							onChange: (checked) => actionControls.toggle && actionControls.toggle(item, checked),
-						}) : null,
-						createElement('strong', null, readableItemText(item && item.title, __('Internal link candidate', 'npcink-workflow-toolbox'))),
-						createElement(
-							'div',
-							{ className: 'npcink-toolbox-editor-support__internal-link-meta' },
-							item.anchorText && item.canApplyToEditor ? createElement('span', null, __('Anchor: ', 'npcink-workflow-toolbox') + truncateText(item.anchorText, 48)) : null,
-							item.score ? createElement('span', null, item.score) : null
-						),
-						item.reason ? createElement('p', null, truncateText(item.reason, 92)) : null,
-						item.priorityReason ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, truncateText(item.priorityReason, 92)) : null,
-						canSelect ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('正文匹配：', 'npcink-workflow-toolbox') + truncateText(item.sourceMatch.matched_text, 64)) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('没有安全、具体且可匹配的锚文本，或目标文章不是本站已发布内容。只能复制链接或打开文章检查。', 'npcink-workflow-toolbox')),
-						createElement(
-							'div',
-							{ className: 'npcink-toolbox-editor-support__internal-link-actions' },
-							createElement(
-								Button,
-								{
-									type: 'button',
-									variant: 'primary',
-									disabled: !hasUrl || Boolean(actionControls.running),
-									isBusy: actionControls.running === key + ':copy',
-									onClick: () => actionControls.copy && actionControls.copy(item, key),
-								},
-								__('Copy link', 'npcink-workflow-toolbox')
-							),
-							createElement(Button, { type: 'button', variant: 'tertiary', onClick: () => actionControls.ignore && actionControls.ignore(item) }, __('Ignore', 'npcink-workflow-toolbox')),
-							createElement(
-								Button,
-								{
-									type: 'button',
-									variant: 'tertiary',
-									disabled: !hasUrl,
-									onClick: () => actionControls.open && actionControls.open(item),
-								},
-								__('Open article', 'npcink-workflow-toolbox')
-							)
-						)
-					);
-					})
-					)
-						: createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, candidates.length ? __('All internal link candidates have been ignored.', 'npcink-workflow-toolbox') : __('No internal link candidates returned.', 'npcink-workflow-toolbox'))
-				,
-				visibleCandidates.length && candidates.length > visibleCandidates.length ? createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, sprintf(__('Showing top %1$d of %2$d candidates.', 'npcink-workflow-toolbox'), visibleCandidates.length, candidates.length)) : null,
-				visibleCandidates.length ? createElement(
+				visibleCandidates.length ? createElement('p', { className: 'npcink-toolbox-editor-support__citation-summary' }, summaryText) : null,
+				sourceNotice ? createElement('p', { className: 'npcink-toolbox-editor-support__citation-notice' }, sourceNotice) : null,
+				visibleCandidates.length ? renderCandidateGroup('applicable', __('Ready to apply', 'npcink-workflow-toolbox'), applicableCandidates, true) : null,
+				applicableCandidates.length && batchMode ? createElement(
 					'div',
 					{ className: 'npcink-toolbox-editor-support__internal-link-review' },
-					createElement('strong', null, sprintf(__('已选择 %d / 8 条', 'npcink-workflow-toolbox'), selectedCandidates.length)),
-					selectedCandidates.length ? createElement(
-						'ul',
-						null,
-						selectedCandidates.map((item) => createElement('li', { key: String(item.id || '') }, truncateText(item.anchorText, 48) + ' → ' + truncateText(item.title, 48)))
-					) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('勾选有精确正文匹配的建议，在应用前统一核对锚文本和目标文章。', 'npcink-workflow-toolbox')),
+					createElement('strong', null, sprintf(__('%d selected', 'npcink-workflow-toolbox'), selectedCandidates.length)),
 					createElement(
 						Button,
 						{
@@ -7151,10 +7239,19 @@
 							isBusy: actionControls.running === 'batch:apply',
 							onClick: () => actionControls.applyBatch && actionControls.applyBatch(selectedCandidates),
 						},
-						__('应用所选内链', 'npcink-workflow-toolbox')
+						sprintf(__('Apply %d links', 'npcink-workflow-toolbox'), selectedCandidates.length)
 					),
-					createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, __('只修改当前可见编辑器内容；不会自动保存或发布。', 'npcink-workflow-toolbox'))
+					createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, __('Changes stay in the visible editor until you save or publish.', 'npcink-workflow-toolbox'))
 				) : null,
+				visibleCandidates.length ? renderCandidateGroup('reference', __('Reference only', 'npcink-workflow-toolbox'), referencePreview, false) : null,
+				referenceRemainder.length ? createElement(
+					'details',
+					{ className: 'npcink-toolbox-editor-support__citation-more' },
+					createElement('summary', null, sprintf(__('Show %d more', 'npcink-workflow-toolbox'), referenceRemainder.length)),
+					createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, referenceRemainder.map((item, index) => renderCandidate(item, index + referencePreview.length)))
+				) : null,
+				!visibleCandidates.length ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No site citation suggestions found.', 'npcink-workflow-toolbox')) : null,
+				visibleCandidates.length && candidates.length > visibleCandidates.length ? createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, sprintf(__('Showing top %1$d of %2$d candidates.', 'npcink-workflow-toolbox'), visibleCandidates.length, candidates.length)) : null,
 				actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message) : null,
 				batchResult && Array.isArray(batchResult.items) && batchResult.items.some((item) => item.outcome === 'rejected') ? createElement(
 					'ul',
@@ -7163,48 +7260,6 @@
 				) : null,
 				actionControls.undo ? createElement(Button, { type: 'button', variant: 'secondary', onClick: actionControls.undo }, __('撤销本次内链应用', 'npcink-workflow-toolbox')) : null
 			);
-	}
-
-	function renderRelatedArticleCandidateSection(section, controls) {
-		const candidates = relatedArticleCandidateItems(section);
-		const actionControls = controls && controls.relatedArticles ? controls.relatedArticles : {};
-		const ignored = actionControls.ignored || {};
-		const visibleCandidates = candidates.filter((item) => !ignored[String(item.id || '')]).slice(0, 5);
-		const retrievalStatus = String(section && (section.retrieval_status || section.source_status) || '');
-		const emptyMessage = retrievalStatus === 'cloud_unavailable'
-			? __('Cloud 相关文章检索暂不可用，请检查站点知识库连接后重试。', 'npcink-workflow-toolbox')
-			: retrievalStatus === 'only_current_post'
-				? __('Cloud 只命中了当前文章；请确认其他已发布文章已完成站点知识库索引。', 'npcink-workflow-toolbox')
-			: retrievalStatus === 'no_cloud_evidence'
-				? __('暂未找到相关已发布文章，请确认其他文章已发布且站点知识库已完成索引。', 'npcink-workflow-toolbox')
-				: __('暂未找到相关已发布文章。', 'npcink-workflow-toolbox');
-		return createElement(
-			'section',
-			{ className: 'npcink-toolbox-editor-support__metadata-compact-section npcink-toolbox-editor-support__related-articles' },
-			createElement('h4', null, __('Recommended related articles', 'npcink-workflow-toolbox')),
-			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Cloud 向量推荐，仅供阅读或手动引用。', 'npcink-workflow-toolbox')),
-			visibleCandidates.length
-				? createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, visibleCandidates.map((item, index) => {
-					const key = String(index) + '-' + item.title;
-					const hasUrl = Boolean(item.targetUrl);
-					return createElement('li', { key, className: 'npcink-toolbox-editor-support__internal-link-card' },
-						createElement('strong', null, item.title),
-						item.excerpt ? createElement('p', null, truncateText(item.excerpt, 140)) : null,
-						createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Related because: ', 'npcink-workflow-toolbox') + truncateText(item.reason, 140)),
-						createElement('div', { className: 'npcink-toolbox-editor-support__internal-link-meta' },
-							item.score ? createElement('span', null, __('Score ', 'npcink-workflow-toolbox') + item.score) : null,
-							section.candidate_source ? createElement('span', null, formatMetaLabel(section.candidate_source)) : null
-						),
-						createElement('div', { className: 'npcink-toolbox-editor-support__internal-link-actions' },
-							createElement(Button, { type: 'button', variant: 'primary', disabled: !hasUrl || Boolean(actionControls.running), isBusy: actionControls.running === key + ':copy', onClick: () => actionControls.copy && actionControls.copy(item, key) }, __('Copy link', 'npcink-workflow-toolbox')),
-							createElement(Button, { type: 'button', variant: 'tertiary', onClick: () => actionControls.ignore && actionControls.ignore(item) }, __('Ignore', 'npcink-workflow-toolbox')),
-							createElement(Button, { type: 'button', variant: 'tertiary', disabled: !hasUrl, onClick: () => actionControls.open && actionControls.open(item) }, __('Open article', 'npcink-workflow-toolbox'))
-						)
-					);
-				}))
-				: createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, candidates.length ? __('相关文章候选已全部忽略。', 'npcink-workflow-toolbox') : emptyMessage),
-			actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message) : null,
-		);
 	}
 
 	function renderEvidenceDetails(blocks, controls) {
@@ -7779,10 +7834,6 @@
 			blocks.push(renderInternalLinkCandidateSection(sections.internal_links, metadataHandoffControls));
 		}
 
-		if (sections.related_articles) {
-			blocks.push(renderRelatedArticleCandidateSection(sections.related_articles, metadataHandoffControls));
-		}
-
 		if (sections.site_knowledge && !sections.internal_links) {
 			blocks.push(createElement('h4', { key: 'links-title' }, __('Site Knowledge', 'npcink-workflow-toolbox')));
 			blocks.push(renderItems(extractKnowledgeItems(sections.site_knowledge), __('No related content returned.', 'npcink-workflow-toolbox')));
@@ -7922,6 +7973,8 @@
 			const [imageError, setImageError] = useState('');
 		const [imageGuidance, setImageGuidance] = useState('');
 			const [imageQuery, setImageQuery] = useState('');
+			const [aiImageProviderPrompt, setAiImageProviderPrompt] = useState('');
+			const [aiImageDisplayPromptBaseline, setAiImageDisplayPromptBaseline] = useState('');
 			const [imageSearchMode, setImageSearchMode] = useState('source');
 			const imageSearchModeRef = useRef('source');
 			const imageSourceRequestSeqRef = useRef(0);
@@ -7954,12 +8007,9 @@
 			const [internalLinkRunning, setInternalLinkRunning] = useState('');
 			const [internalLinkStatus, setInternalLinkStatus] = useState(null);
 			const [internalLinkUndo, setInternalLinkUndo] = useState(null);
-			const [internalLinkIgnored, setInternalLinkIgnored] = useState({});
 			const [internalLinkSelection, setInternalLinkSelection] = useState({});
+			const [internalLinkBatchMode, setInternalLinkBatchMode] = useState(false);
 			const [internalLinkBatchResult, setInternalLinkBatchResult] = useState(null);
-			const [relatedArticleRunning, setRelatedArticleRunning] = useState('');
-			const [relatedArticleStatus, setRelatedArticleStatus] = useState(null);
-			const [relatedArticleIgnored, setRelatedArticleIgnored] = useState({});
 			const [contextualAltApplyRunning, setContextualAltApplyRunning] = useState(false);
 			const [contextualAltApplyStatus, setContextualAltApplyStatus] = useState(null);
 			const [flowInstructions, setFlowInstructions] = useState({});
@@ -8008,19 +8058,23 @@
 
 			useEffect(() => {
 				const intent = String(activeFlowIntent || (result && result.intent) || '');
-				if (supportView !== 'result' || !result || ['internal_links', 'related_articles'].indexOf(intent) < 0) {
+				const sections = result && result.sections && typeof result.sections === 'object' ? result.sections : {};
+				const recommendationIntent = intent === 'internal_links'
+					? 'internal_links'
+					: (sections.related_content ? 'related_content' : '');
+				if (supportView !== 'result' || !result || !recommendationIntent) {
 					return;
 				}
 				const previous = recommendationImpressionRef.current;
-				if (previous.result === result && previous.intent === intent) {
+				if (previous.result === result && previous.intent === recommendationIntent) {
 					return;
 				}
-				const sessionId = mediaQualitySessionId(intent === 'internal_links' ? 'internal_link_results' : 'related_article_results');
-				recommendationImpressionRef.current = { result, intent };
-				recommendationSessionRef.current[intent] = sessionId;
+				const sessionId = mediaQualitySessionId(recommendationIntent === 'related_content' ? 'related_content_results' : 'internal_link_results');
+				recommendationImpressionRef.current = { result, intent: recommendationIntent };
+				recommendationSessionRef.current[recommendationIntent] = sessionId;
 				submitImplicitAgentFeedback(recommendationImpressionFeedbackPayload(
 					result,
-					intent,
+					recommendationIntent,
 					sessionId
 				));
 			}, [result, activeFlowIntent, supportView]);
@@ -8314,6 +8368,7 @@
 					setInternalLinkStatus(null);
 					if (intent === 'internal_links') {
 						setInternalLinkSelection({});
+						setInternalLinkBatchMode(false);
 						setInternalLinkBatchResult(null);
 						setInternalLinkUndo(null);
 					}
@@ -8853,40 +8908,6 @@
 			}
 		}
 
-		async function copyRelatedArticleCandidate(candidate, key) {
-			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
-			if (!url) {
-				setRelatedArticleStatus({ status: 'error', message: __('This related article has no URL to copy.', 'npcink-workflow-toolbox') });
-				return;
-			}
-			setRelatedArticleRunning(String(key || 'article') + ':copy');
-			try {
-				await copyTextToClipboard(url);
-				submitContentImplicitFeedback('related_article_copy', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('related_articles', candidate && candidate.id));
-				setRelatedArticleStatus({ status: 'success', message: __('Article link copied.', 'npcink-workflow-toolbox') });
-			} catch (copyError) {
-				setRelatedArticleStatus({ status: 'error', message: __('Could not copy the article link. Open it and copy manually.', 'npcink-workflow-toolbox') });
-			} finally {
-				setRelatedArticleRunning('');
-			}
-		}
-
-		function ignoreRelatedArticleCandidate(candidate) {
-			setRelatedArticleIgnored((current) => Object.assign({}, current || {}, { [String(candidate && candidate.id || '')]: true }));
-			submitContentImplicitFeedback('related_article_ignored', 'rejected', ['candidate_not_adopted'], recommendationActionFeedbackOptions('related_articles', candidate && candidate.id));
-			setRelatedArticleStatus({ status: 'info', message: __('Related article suggestion ignored.', 'npcink-workflow-toolbox') });
-		}
-
-		function openRelatedArticleCandidate(candidate) {
-			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
-			if (!url) {
-				setRelatedArticleStatus({ status: 'error', message: __('This related article has no URL to open.', 'npcink-workflow-toolbox') });
-				return;
-			}
-			submitContentImplicitFeedback('related_article_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('related_articles', candidate && candidate.id));
-			window.open(url, '_blank', 'noopener,noreferrer');
-		}
-
 		function toggleInternalLinkCandidate(candidate, checked) {
 			const candidateId = String(candidate && candidate.id || '');
 			if (!candidateId) return;
@@ -8929,6 +8950,7 @@
 			};
 			setInternalLinkUndo(batchResult.undo);
 			setInternalLinkSelection({});
+			setInternalLinkBatchMode(false);
 			setInternalLinkRunning('');
 			setInternalLinkStatus({
 				status: batchResult.rejected_count ? 'warning' : 'success',
@@ -8941,6 +8963,13 @@
 					submitContentImplicitFeedback('internal_link_rejected', 'rejected', ['candidate_not_adopted'].concat(item.reason_codes || []), recommendationActionFeedbackOptions('internal_links', item.id));
 				}
 			});
+		}
+
+		function toggleInternalLinkBatchMode() {
+			setInternalLinkSelection({});
+			setInternalLinkBatchResult(null);
+			setInternalLinkBatchMode((current) => !current);
+			setInternalLinkStatus(null);
 		}
 
 			function undoInternalLinkCandidate() {
@@ -8960,17 +8989,6 @@
 			setInternalLinkBatchResult(null);
 			setInternalLinkStatus({ status: 'info', message: __('本次应用的内链已从当前编辑器撤销，尚未保存到 WordPress。', 'npcink-workflow-toolbox') });
 				submitContentImplicitFeedback('internal_link_undone', 'rejected', ['operator_reversed', 'candidate_not_adopted'], recommendationActionFeedbackOptions('internal_links', ''));
-		}
-
-		function ignoreInternalLinkCandidate(candidate) {
-			setInternalLinkIgnored((current) => Object.assign({}, current || {}, { [String(candidate && candidate.id || '')]: true }));
-			setInternalLinkSelection((current) => {
-				const next = Object.assign({}, current || {});
-				delete next[String(candidate && candidate.id || '')];
-				return next;
-			});
-				submitContentImplicitFeedback('internal_link_ignored', 'rejected', ['candidate_not_adopted'], recommendationActionFeedbackOptions('internal_links', candidate && candidate.id));
-			setInternalLinkStatus({ status: 'info', message: __('Suggestion ignored.', 'npcink-workflow-toolbox') });
 		}
 
 		function openInternalLinkCandidate(candidate) {
@@ -9310,13 +9328,16 @@
 						refresh_variant: refreshVariant,
 					});
 					if (targetSearchMode === 'generate') {
-						const prompt = firstImagePromptCandidate(result) || (result && result.query ? String(result.query) : '');
+						const pair = firstImagePromptCandidate(result);
+						const prompt = pair.displayPrompt || (result && result.query ? String(result.query) : '');
 						imageSearchModeRef.current = 'generate';
 						setImageDirectionResult(result);
 						setImageSearchMode('generate');
 						setImageResult(imageGenerationResult || null);
 						setImageQuery(prompt);
-						setImageGuidance(prompt ? __('Generated a prompt from the article context. Review it before requesting a host-generated image candidate.', 'npcink-workflow-toolbox') : __('Generated prompt directions from the article context. Choose one direction before requesting a host-generated image candidate.', 'npcink-workflow-toolbox'));
+						setAiImageProviderPrompt(pair.providerPrompt);
+						setAiImageDisplayPromptBaseline(prompt);
+						setImageGuidance(prompt ? __('Prepared a visual description from the article context. Review it before generating an image.', 'npcink-workflow-toolbox') : __('Prepared visual directions from the article context. Choose one direction before generating an image.', 'npcink-workflow-toolbox'));
 					} else {
 						setImageResultForSearchMode('source', result);
 						setImageSearchMode('source');
@@ -9343,11 +9364,25 @@
 			const context = imagePickerRequestContext(postContext || {}, activePicker);
 			const override = promptOverride && typeof promptOverride === 'object' ? promptOverride : {};
 			const preserveExistingCandidates = Boolean(override.preserveExistingCandidates);
-			const prompt = String(override.prompt || imageQuery || '').trim();
-			if (!prompt) {
-				setImageError(__('Enter a hosted image prompt, or generate one from the article first.', 'npcink-workflow-toolbox'));
+			const sourcePrompt = String(override.prompt || imageQuery || '').trim();
+			const providerPrompt = String(override.providerPrompt || aiImageProviderPrompt || '').trim();
+			const displayBaseline = String(override.displayPromptBaseline || aiImageDisplayPromptBaseline || '').trim();
+			const hasReviewedPair = Boolean(providerPrompt && sourcePrompt === displayBaseline);
+			const translationRequired = !hasReviewedPair && hasCjkText(sourcePrompt);
+			const prompt = hasReviewedPair ? providerPrompt : sourcePrompt;
+			if (!sourcePrompt) {
+				setImageError(__('Enter a visual description, or prepare one from the article first.', 'npcink-workflow-toolbox'));
 				return;
 			}
+			const candidateCount = Math.max(1, Math.min(4, parseInt(aiImageCandidateCount || '2', 10) || 2));
+			const qualitySessionId = mediaQualitySessionId('ai_image_generation');
+			const promptReasonCodes = [
+				hasCjkText(sourcePrompt) ? 'prompt_locale_zh_cn' : 'prompt_locale_en',
+				hasReviewedPair ? 'prompt_translation_preplanned' : (translationRequired ? 'prompt_translation_required' : 'prompt_translation_none'),
+				displayBaseline && sourcePrompt !== displayBaseline ? 'prompt_operator_edited' : 'prompt_operator_unchanged',
+				'candidate_count_' + candidateCount,
+				'resolution_' + aiImageResolution,
+			];
 			setImageRunning('generate');
 			setImageError('');
 			setImageGuidance(override.guidance || '');
@@ -9359,10 +9394,15 @@
 				setImageAdoptionResult(null);
 				setImageAdoptionError('');
 			}
+			submitImplicitAgentFeedback(
+				editorAiImageGenerationFeedbackPayload(qualitySessionId, activePicker, 'ai_image_generation_requested', 'ignored', [], promptReasonCodes)
+			);
 			try {
-				const candidateCount = Math.max(1, Math.min(4, parseInt(aiImageCandidateCount || '2', 10) || 2));
 				const result = await postJson('ai/image-generation', {
 					prompt,
+					prompt_source_locale: hasCjkText(sourcePrompt) ? 'zh_CN' : 'en',
+					prompt_translation_mode: hasReviewedPair ? 'preplanned_pair' : (translationRequired ? 'required' : 'none'),
+					provider_prompt_reviewed_by_operator: !hasReviewedPair && !translationRequired,
 					aspect_ratio: aiImageAspectRatio,
 					resolution: aiImageResolution,
 					response_format: 'url',
@@ -9402,8 +9442,14 @@
 					? mergeImageCandidateResults(imageGenerationResult || imageResultForSearchMode('generate'), result)
 					: result;
 				setImageResultForSearchMode('generate', nextResult);
+				submitImplicitAgentFeedback(
+					editorAiImageGenerationFeedbackPayload(qualitySessionId, activePicker, 'ai_image_generation_completed', 'accepted', ['media_search_has_results'], promptReasonCodes.concat(['result_count_' + extractImageCandidates(result).length]), result)
+				);
 				setImageGuidance(__('Showing verified host-generated image candidates. Review one image before importing it or setting featured media.', 'npcink-workflow-toolbox'));
 			} catch (requestError) {
+				submitImplicitAgentFeedback(
+					editorAiImageGenerationFeedbackPayload(qualitySessionId, activePicker, 'ai_image_generation_runtime_error', 'ignored', ['media_search_runtime_error'], promptReasonCodes.concat([imageGenerationErrorReasonCode(requestError)]))
+				);
 				setImageError(formatImageErrorMessage(requestError, __('Hosted image candidate request failed.', 'npcink-workflow-toolbox')));
 			} finally {
 				setImageRunning('');
@@ -9424,13 +9470,18 @@
 				setImageError(__('No hosted image prompt is available to request a revision.', 'npcink-workflow-toolbox'));
 				return;
 			}
+			const displayPrompt = String(imageQuery || aiImageDisplayPromptBaseline || '').trim();
+			const requestSourcePrompt = displayPrompt || prompt;
 			setImageSearchMode('generate');
-			setImageQuery(prompt);
+			setAiImageProviderPrompt(prompt);
+			setAiImageDisplayPromptBaseline(displayPrompt);
 			setImageRegenerationRunning(revisionMode);
 			setImageGuidance(__('Requesting a revised host-generated image candidate while preserving the selected paragraph meaning.', 'npcink-workflow-toolbox'));
 			try {
 				await runAiImageGeneration(null, {
-					prompt,
+					prompt: requestSourcePrompt,
+					providerPrompt: prompt,
+					displayPromptBaseline: requestSourcePrompt,
 					regenerationMode: revisionMode,
 					preserveExistingCandidates: true,
 					guidance: __('Requesting a revised host-generated image candidate while preserving the selected paragraph meaning.', 'npcink-workflow-toolbox'),
@@ -9447,13 +9498,17 @@
 			runImageSearch(null, query, true);
 		}
 
-		function useAiPromptCandidate(prompt) {
-			const reviewedPrompt = String(prompt || '').trim();
+		function useAiPromptCandidate(candidate) {
+			const pair = imagePromptCandidatePair(candidate);
+			const reviewedPrompt = pair.displayPrompt;
 			if (!reviewedPrompt) {
+				setImageError(__('This direction does not include a Chinese visual description. Generate a new visual description before requesting an image.', 'npcink-workflow-toolbox'));
 				return;
 			}
 			setImageSearchMode('generate');
 			setImageQuery(reviewedPrompt);
+			setAiImageProviderPrompt(pair.providerPrompt);
+			setAiImageDisplayPromptBaseline(reviewedPrompt);
 			setSelectedImage(null);
 			setSelectedImageSeo(null);
 			setImagePreviewLightbox(null);
@@ -9511,6 +9566,8 @@
 				setImageSearchMode(initialSearchMode);
 				setImageModalOpen(true);
 					setImageQuery(activePicker.initialQuery || '');
+					setAiImageProviderPrompt('');
+					setAiImageDisplayPromptBaseline('');
 					setImageGuidance('');
 					setImageCompletionRunning(false);
 					setImageSourceResult(null);
@@ -10191,7 +10248,7 @@
 					editorImageImplicitFeedbackPayload(imageResult || {}, selectedImage, activePicker, setFeaturedImage ? 'featured_image_adopt' : 'media_import', 'accepted', ['evidence_useful', 'operator_confidence_high', 'media_candidate_adopted'])
 				);
 			} catch (requestError) {
-				setImageAdoptionError(requestError && requestError.message ? requestError.message : __('Could not adopt the selected image.', 'npcink-workflow-toolbox'));
+				setImageAdoptionError(formatImageErrorMessage(requestError, __('Could not adopt the selected image.', 'npcink-workflow-toolbox')));
 			} finally {
 				setImageAdoptionRunning(false);
 				setImageAdoptionAction('');
@@ -10206,9 +10263,12 @@
 				return renderImagePreviewModal(imagePreviewLightbox, () => setImagePreviewLightbox(null));
 			}
 
-			const images = extractImageCandidates(imageResult);
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
 			const activeSearchMode = imageSearchMode === 'generate' && !activePicker.allowGeneration ? 'source' : imageSearchMode;
+			const visibleImageResult = activeSearchMode === 'generate'
+				? imageGenerationResult
+				: (activeSearchMode === 'library' ? imageLibraryResult : imageSourceResult);
+			const images = extractImageCandidates(visibleImageResult);
 			const imageQueryText = String(imageQuery || '').trim();
 			const sourceSubmitLabel = imageRunning === 'search' || imageRunning === 'auto'
 				? activePicker.searchBusyLabel
@@ -10238,6 +10298,7 @@
 						type: 'button',
 						className: imageSearchMode === 'library' ? 'is-active' : '',
 						'aria-pressed': imageSearchMode === 'library' ? 'true' : 'false',
+						disabled: Boolean(imageRunning),
 						onClick: () => switchImageSearchMode('library'),
 					},
 					activePicker.libraryModeLabel
@@ -10248,6 +10309,7 @@
 						type: 'button',
 						className: imageSearchMode === 'source' ? 'is-active' : '',
 						'aria-pressed': imageSearchMode === 'source' ? 'true' : 'false',
+						disabled: Boolean(imageRunning),
 						onClick: () => switchImageSearchMode('source'),
 					},
 					activePicker.sourceModeLabel
@@ -10258,6 +10320,7 @@
 						type: 'button',
 						className: imageSearchMode === 'generate' ? 'is-active' : '',
 						'aria-pressed': imageSearchMode === 'generate' ? 'true' : 'false',
+						disabled: Boolean(imageRunning),
 						onClick: () => switchImageSearchMode('generate'),
 					},
 					activePicker.generateModeLabel
@@ -10309,6 +10372,7 @@
 						heading: __('Generation direction reference', 'npcink-workflow-toolbox'),
 						hideContext: true,
 						compactSelector: true,
+						disabled: Boolean(imageRunning),
 					})
 				: null;
 			const aiGenerationPanel = activeSearchMode === 'generate' ? createElement(
@@ -10323,7 +10387,7 @@
 								className: 'npcink-toolbox-editor-support__image-prompt-label',
 								htmlFor: imagePromptId,
 							},
-							__('Hosted image prompt', 'npcink-workflow-toolbox')
+							__('Visual description', 'npcink-workflow-toolbox')
 					),
 					createElement('textarea', {
 						id: imagePromptId,
@@ -10332,7 +10396,13 @@
 						placeholder: activePicker.generatePlaceholder,
 						rows: 4,
 						disabled: Boolean(imageRunning),
-						onChange: (event) => setImageQuery(event.target.value),
+						onChange: (event) => {
+							const value = event.target.value;
+							setImageQuery(value);
+							if (value !== aiImageDisplayPromptBaseline) {
+								setAiImageProviderPrompt('');
+							}
+						},
 					}),
 					generationDirectionsPanel,
 					createElement(
@@ -10348,7 +10418,7 @@
 								disabled: Boolean(imageRunning),
 								onClick: runMediaBrief,
 							},
-							imageRunning === 'brief' ? __('Planning', 'npcink-workflow-toolbox') : __('Generate prompt', 'npcink-workflow-toolbox')
+							imageRunning === 'brief' ? __('Planning', 'npcink-workflow-toolbox') : __('Generate visual description', 'npcink-workflow-toolbox')
 						) : null,
 						createElement(
 							Button,
@@ -10361,10 +10431,10 @@
 							imageRunning === 'generate' ? __('Requesting', 'npcink-workflow-toolbox') : (activePicker.generateButtonLabel || __('Request hosted image', 'npcink-workflow-toolbox'))
 						)
 					),
-					!imageQueryText ? createElement('p', { className: 'npcink-toolbox-editor-support__image-prompt-required' }, __('Enter a prompt, or generate one from the article first.', 'npcink-workflow-toolbox')) : null,
-					createElement(
-						'div',
-						{ className: 'npcink-toolbox-editor-support__image-options' },
+					!imageQueryText ? createElement('p', { className: 'npcink-toolbox-editor-support__image-prompt-required' }, __('Enter a visual description, or prepare one from the article first.', 'npcink-workflow-toolbox')) : null,
+						imageQueryText ? createElement(
+							'div',
+							{ className: 'npcink-toolbox-editor-support__image-options' },
 						renderAiImageOption(__('Aspect ratio', 'npcink-workflow-toolbox'), aiImageAspectRatio, setAiImageAspectRatio, [
 							{ value: '16:9', label: '16:9' },
 							{ value: '1:1', label: '1:1' },
@@ -10381,9 +10451,20 @@
 							{ value: '1', label: '1' },
 							{ value: '2', label: '2' },
 							{ value: '3', label: '3' },
-							{ value: '4', label: '4' },
-						])
-					)
+								{ value: '4', label: '4' },
+							])
+						) : null,
+					aiImageProviderPrompt && imageQueryText === aiImageDisplayPromptBaseline ? createElement(
+							'details',
+							{ className: 'npcink-toolbox-editor-support__cloud-details' },
+							createElement('summary', null, __('Advanced information', 'npcink-workflow-toolbox')),
+							createElement(
+								'div',
+								{ className: 'npcink-toolbox-editor-support__image-cloud-context' },
+								createElement('strong', null, __('English model prompt', 'npcink-workflow-toolbox')),
+								createElement('p', null, aiImageProviderPrompt)
+							)
+						) : null
 				)
 			) : null;
 			return createElement(
@@ -10399,7 +10480,6 @@
 					createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__image-modal-body' },
-						imageGuidance ? createElement(Notice, { status: 'info', isDismissible: false }, imageGuidance) : null,
 						imageError ? createElement(Notice, { status: 'error', isDismissible: false }, imageError) : null,
 					createElement(
 						'div',
@@ -10407,8 +10487,9 @@
 						createElement(
 							'section',
 								{ className: 'npcink-toolbox-editor-support__image-results' },
+								imageGuidance ? createElement(Notice, { status: 'info', isDismissible: false }, imageGuidance) : null,
 								imageRunning ? createElement('div', { className: 'npcink-toolbox-editor-support__running' }, createElement(Spinner, null), createElement('span', null, imageRunningLabel)) : null,
-								imageResult && !imageRunning ? renderImageCandidateCards(images, imageResult, selectedImage, selectImageCandidate, setImagePreviewLightbox, useSuggestedImageQuery, activePicker) : null,
+								visibleImageResult && !imageRunning ? renderImageCandidateCards(images, visibleImageResult, selectedImage, selectImageCandidate, setImagePreviewLightbox, useSuggestedImageQuery, activePicker) : null,
 								!imageRunning ? imageCompletionNotice : null
 							),
 						createElement(
@@ -10430,10 +10511,11 @@
 								() => adoptSelectedImage(false),
 								dispatchSelectedImageToCaller,
 								imageRegenerationRunning || (imageRunning === 'generate' ? 'generate' : ''),
-								regenerateSelectedImage
+								regenerateSelectedImage,
+								visibleImageResult
 							),
 							activeSearchMode === 'source' ? renderImageCloudDetails(
-								imageResult,
+							visibleImageResult,
 								useSuggestedImageQuery,
 								{
 									mode: activeSearchMode,
@@ -10491,21 +10573,13 @@
 					status: internalLinkStatus,
 					copy: copyInternalLinkCandidate,
 					applyBatch: applyInternalLinkBatch,
+					toggleBatchMode: toggleInternalLinkBatchMode,
+					batchMode: internalLinkBatchMode,
 					toggle: toggleInternalLinkCandidate,
 					selected: internalLinkSelection,
 					result: internalLinkBatchResult,
-					ignore: ignoreInternalLinkCandidate,
-					ignored: internalLinkIgnored,
 					undo: internalLinkUndo ? undoInternalLinkCandidate : null,
 					open: openInternalLinkCandidate,
-				},
-				relatedArticles: {
-					running: relatedArticleRunning,
-					status: relatedArticleStatus,
-					copy: copyRelatedArticleCandidate,
-					ignore: ignoreRelatedArticleCandidate,
-					ignored: relatedArticleIgnored,
-					open: openRelatedArticleCandidate,
 				},
 				contextualAltApply: {
 					apply: applyContextualAltToDraft,
@@ -10549,9 +10623,10 @@
 				},
 		};
 			const showResultView = supportView === 'result';
-			const rerunInstruction = rerunIntent ? String(flowInstructions[rerunIntent] || '') : '';
-			const canAdvancedSummaryRerun = rerunIntent === 'summary_suggestions';
-			const isAudioRerun = isAudioIntent(rerunIntent);
+				const rerunInstruction = rerunIntent ? String(flowInstructions[rerunIntent] || '') : '';
+				const canAdvancedSummaryRerun = rerunIntent === 'summary_suggestions';
+				const isAudioRerun = isAudioIntent(rerunIntent);
+				const isCitationRerun = rerunIntent === 'internal_links';
 
 		return createElement(
 			Fragment,
@@ -10587,17 +10662,44 @@
 									},
 								},
 								createElement('span', { className: 'dashicons dashicons-arrow-left-alt2', 'aria-hidden': 'true' }),
-								createElement('span', null, __('Tool list', 'npcink-workflow-toolbox'))
-							)
-						),
+									createElement('span', null, __('Tool list', 'npcink-workflow-toolbox'))
+								)
+							),
 						createElement(
 							'div',
 							{ className: 'npcink-toolbox-editor-support__view-title' },
 							createElement('strong', null, resultTitle),
 							createElement('span', null, running ? __('Running content support flow...', 'npcink-workflow-toolbox') : resultScopeLabel(rerunIntent))
 						),
-						rerunIntent && flowAcceptsUserInstruction(rerunIntent) ? createElement(
-							'div',
+							rerunIntent && flowAcceptsUserInstruction(rerunIntent) ? (isCitationRerun ? createElement(
+								'details',
+								{ className: 'npcink-toolbox-editor-support__citation-adjustments' },
+								createElement('summary', null, __('Adjust recommendation preferences', 'npcink-workflow-toolbox')),
+								createElement(
+									'div',
+									{ className: 'npcink-toolbox-editor-support__flow-instruction' },
+									createElement(TextareaControl, {
+										label: __('Recommendation preferences (optional)', 'npcink-workflow-toolbox'),
+										value: rerunInstruction,
+										placeholder: flowInstructionPlaceholder(rerunIntent),
+										disabled: Boolean(running),
+										rows: 2,
+										onChange: (value) => updateFlowInstruction(rerunIntent, value),
+									}),
+									createElement(Button, {
+										type: 'button',
+										variant: 'secondary',
+										isBusy: Boolean(running),
+										disabled: Boolean(running),
+										accessibleWhenDisabled: true,
+										onClick: () => {
+											submitContentImplicitFeedback('run_again', 'edited_before_accept', ['good_but_needs_human_draft']);
+											runFlow(rerunIntent);
+										},
+									}, running ? __('Running', 'npcink-workflow-toolbox') : __('Update suggestions', 'npcink-workflow-toolbox'))
+								)
+							) : createElement(
+								'div',
 							{ className: 'npcink-toolbox-editor-support__flow-instruction' },
 							isAudioRerun ? renderAudioPreferenceControls(audioPreferences, updateAudioPreference, Boolean(running)) : null,
 							createElement(TextareaControl, {
@@ -10607,9 +10709,9 @@
 								disabled: Boolean(running),
 								rows: isAudioRerun ? 2 : 3,
 								onChange: (value) => updateFlowInstruction(rerunIntent, value),
-							})
-						) : null,
-						rerunIntent && rerunIntent !== 'publish_preflight' && rerunIntent !== 'source_adaptation_review' ? createElement(
+								})
+							)) : null,
+							rerunIntent && !isCitationRerun && rerunIntent !== 'publish_preflight' && rerunIntent !== 'source_adaptation_review' ? createElement(
 							'div',
 							{ className: 'npcink-toolbox-editor-support__view-actions' },
 								createElement(

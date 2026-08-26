@@ -424,6 +424,11 @@ final class Provider_Client {
 		$media_context = $this->ai_image_media_context_from_input( $input, $prompt );
 		$review_input = is_array( $input['review'] ?? null ) ? $input['review'] : array();
 		$prompt_reviewed_by_operator = ! empty( $input['prompt_reviewed_by_operator'] ) || ! empty( $review_input['prompt_reviewed_by_operator'] );
+		$source_prompt_locale = sanitize_key( (string) ( $input['prompt_source_locale'] ?? $review_input['source_prompt_locale'] ?? '' ) );
+		$prompt_translation_mode = sanitize_key( (string) ( $input['prompt_translation_mode'] ?? $review_input['prompt_translation_mode'] ?? 'none' ) );
+		if ( ! in_array( $prompt_translation_mode, array( 'none', 'preplanned_pair', 'required' ), true ) ) {
+			$prompt_translation_mode = 'none';
+		}
 
 		$handoff = is_array( $input['handoff'] ?? null ) ? $input['handoff'] : array();
 		$template = is_array( $handoff['runtime_request_template'] ?? null ) ? $handoff['runtime_request_template'] : array();
@@ -437,7 +442,7 @@ final class Provider_Client {
 			'contract_version'    => 'image_generation_request.v1',
 			'execution_pattern'   => 'inline',
 			'execution_kind'      => 'image_generation',
-			'profile_id'          => sanitize_text_field( (string) ( $template['profile_id'] ?? 'grok-imagine-image-quality' ) ),
+			'profile_id'          => sanitize_text_field( (string) ( $template['profile_id'] ?? 'wp-ai.image-generation' ) ),
 			'input'               => array(
 				'prompt'          => $prompt,
 				'aspect_ratio'    => $aspect_ratio,
@@ -447,7 +452,11 @@ final class Provider_Client {
 				'purpose'         => sanitize_key( (string) ( $input['purpose'] ?? 'image_source_candidate_generation' ) ),
 				'media_context'   => $media_context,
 				'review'          => array(
-					'prompt_reviewed_by_operator' => $prompt_reviewed_by_operator,
+					'prompt_reviewed_by_operator'        => $prompt_reviewed_by_operator,
+					'source_prompt_reviewed_by_operator' => $prompt_reviewed_by_operator,
+					'source_prompt_locale'               => $source_prompt_locale,
+					'prompt_translation_mode'            => $prompt_translation_mode,
+					'provider_prompt_reviewed_by_operator' => ! empty( $input['provider_prompt_reviewed_by_operator'] ),
 					'write_posture'               => 'candidate_only',
 					'direct_wordpress_write'      => false,
 				),
@@ -524,6 +533,7 @@ final class Provider_Client {
 			'source_surface'   => 'toolbox_featured_image',
 			'timeout_seconds'  => absint( $runtime_payload['timeout_seconds'] ?? 60 ),
 			'retention_ttl'    => absint( $runtime_payload['retention_ttl'] ?? 3600 ),
+			'review'           => is_array( $input['review'] ?? null ) ? $input['review'] : array(),
 		);
 	}
 
@@ -6182,10 +6192,10 @@ final class Provider_Client {
 		$input  = is_array( $runtime_payload['input'] ?? null ) ? $runtime_payload['input'] : array();
 		$prompt = trim( sanitize_textarea_field( (string) ( $input['prompt'] ?? '' ) ) );
 		$model = sanitize_text_field(
-			(string) ( $result['model_id'] ?? $response['model_id'] ?? $response['data']['model_id'] ?? $result['model'] ?? 'grok-imagine-image-quality' )
+			(string) ( $result['model_id'] ?? $response['model_id'] ?? $response['data']['model_id'] ?? $result['model'] ?? 'managed-image' )
 		);
 		$hosted_profile = sanitize_text_field(
-			(string) ( $result['profile_id'] ?? $response['profile_id'] ?? $response['data']['profile_id'] ?? $runtime_payload['profile_id'] ?? 'grok-imagine-image-quality' )
+			(string) ( $result['profile_id'] ?? $response['profile_id'] ?? $response['data']['profile_id'] ?? $runtime_payload['profile_id'] ?? 'wp-ai.image-generation' )
 		);
 		$media_context = is_array( $input['media_context'] ?? null ) ? $this->sanitize_payload( $input['media_context'] ) : array();
 		$review = is_array( $input['review'] ?? null ) ? $this->sanitize_payload( $input['review'] ) : array();
