@@ -190,13 +190,13 @@ Toolbox-owned panel, not only on the standalone Toolbox admin page. The editor
 panel defaults to fixed flows for publish preflight, internal-link candidates,
 current-article contextual ALT review, and image candidates. Article narration
 and article audio summary remain callable compatibility flows but are
-temporarily hidden from the default menu. Summary, category, tag, outline, discoverability,
-article-checkup, and related existing-post helpers remain supported route or rendering paths, not
-default visible buttons. They must keep the same suggestion-only and
+temporarily hidden from the default menu. Summary, category, tag, outline,
+discoverability, and article-checkup remain supported route or rendering paths,
+not default visible buttons. They must keep the same suggestion-only and
 Core-governed write posture as the admin surface. Related existing-post review
-belongs inside publish preflight duplicate-risk checks and internal-link
-candidates rather than a separate writing-preparation button. Internal-link
-candidates are manual review aids, publish preflight is a unified advisory
+belongs inside publish preflight duplicate-risk checks and the unified site
+citation flow rather than a separate editor intent. Site citation candidates
+are manual review aids, publish preflight is a unified advisory
 review panel, SEO metadata is only a single-post Core handoff preview, and new
 vocabulary remains Core policy-gated strong review.
 

@@ -171,6 +171,8 @@ assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, targetPostId
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, ranges: [[0, 6], [4, 8]] }).reason_codes[0], 'overlapping_source_ranges');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, currentText: 'changed' }).reason_codes[0], 'stale_editor_block');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, anchorText: '文章', sourceMatch: { ...preflightBase.sourceMatch, matched_text: '文章' } }).reason_codes[0], 'generic_anchor');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, sourceMatch: { ...preflightBase.sourceMatch, block_name: 'core/code' } }).reason_codes[0], 'code_block_match_not_eligible');
+assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, sourceMatch: { ...preflightBase.sourceMatch, block_name: 'core-code' } }).reason_codes[0], 'code_block_match_not_eligible');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, retrievalStatus: 'no_cloud_evidence', candidateSource: 'local_fallback' }).outcome, 'review_only');
 assert.equal(helpers.internalLinkBatchPreflight({ ...preflightBase, targetUrl: 'https://outside.test/target' }).reason_codes[0], 'invalid_internal_url');
 

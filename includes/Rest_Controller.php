@@ -255,7 +255,7 @@ final class Rest_Controller {
 					'route'          => '/editor/content-support',
 					'artifact_type'  => 'editor_content_support_flow',
 					'source_layers'  => array( 'local_editor_context', 'cloud_site_knowledge', 'cloud_web_search', 'hosted_ai' ),
-					'intents'        => array( 'progressive_recommendations', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'related_articles', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ),
+					'intents'        => array( 'progressive_recommendations', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ),
 					'feedback_scope' => 'editor_content_support',
 				),
 				'nightly_inspection'     => array(
@@ -947,7 +947,7 @@ final class Rest_Controller {
 
 	public function editor_content_support( WP_REST_Request $request ) {
 		$intent = sanitize_key( (string) ( $request->get_param( 'intent' ) ?: '' ) );
-		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'related_articles', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ), true ) ) {
+		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_editor_support_intent',
 				__( 'A supported editor content-support intent is required.', 'npcink-workflow-toolbox' ),
@@ -1264,10 +1264,6 @@ final class Rest_Controller {
 
 		if ( 'internal_links' === $intent ) {
 			$result['sections']['internal_links'] = $this->editor_internal_link_candidates( $context, $query );
-		}
-
-		if ( 'related_articles' === $intent ) {
-			$result['sections']['related_articles'] = $this->editor_related_article_candidates( $context, $query );
 		}
 
 		if ( 'image_candidates' === $intent ) {
@@ -2800,7 +2796,6 @@ final class Rest_Controller {
 			'tags'           => $this->editor_recommendation_count_by_kind( $sections, 'tag' ),
 			'featured_image' => $this->editor_recommendation_count_by_kind( $sections, 'image' ),
 			'internal_links' => $this->editor_recommendation_count_by_kind( $sections, 'internal_link' ),
-			'related_articles' => $this->editor_recommendation_count_by_kind( $sections, 'related_article' ),
 			'preflight'      => $this->editor_recommendation_count_by_kind( $sections, 'preflight' ),
 		);
 		$retrieval_sources   = $this->editor_recommendation_set_sources( $sections );
@@ -2884,9 +2879,6 @@ final class Rest_Controller {
 			if ( ! is_array( $section ) ) {
 				continue;
 			}
-			if ( 'related_article' === $kind && 'related_articles' === (string) ( $section['candidate_type'] ?? '' ) ) {
-				$count += count( is_array( $section['items'] ?? null ) ? $section['items'] : array() );
-			}
 			if ( ! is_array( $section['recommendation_candidates'] ?? null ) ) {
 				continue;
 			}
@@ -2937,23 +2929,6 @@ final class Rest_Controller {
 						'kind'          => sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) ),
 						'target_field'  => sanitize_key( (string) ( $candidate['target_field'] ?? '' ) ),
 						'action_policy' => sanitize_key( (string) ( $candidate['action_policy'] ?? 'suggestion_only' ) ),
-					);
-				}
-			}
-			if ( 'related_articles' === (string) ( $section['candidate_type'] ?? '' ) && is_array( $section['items'] ?? null ) ) {
-				foreach ( array_slice( $section['items'], 0, 5 ) as $item ) {
-					if ( ! is_array( $item ) ) {
-						continue;
-					}
-					$id = sanitize_key( (string) ( $item['id'] ?? $item['post_id'] ?? '' ) );
-					if ( '' === $id ) {
-						continue;
-					}
-					$refs[] = array(
-						'candidate_id'  => $id,
-						'kind'          => 'related_article',
-						'target_field'  => 'article_reference',
-						'action_policy' => 'operator_review_only_no_write',
 					);
 				}
 			}
@@ -4784,87 +4759,6 @@ final class Rest_Controller {
 		return $artifact;
 	}
 
-	private function editor_related_article_candidates( array $context, string $query ): array {
-		$source_knowledge = $this->editor_support_section(
-			$this->editor_cached_site_knowledge(
-				array(
-					'query'              => $query,
-					'intent'             => 'related_content',
-					'current_post_id'    => absint( $context['post_id'] ?? 0 ),
-					'max_results'        => 8,
-					'result_granularity' => 'document',
-				)
-			)
-		);
-		$current_post_id = absint( $context['post_id'] ?? 0 );
-		$source_items     = $this->editor_related_content_items( $source_knowledge );
-		$cloud_status     = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
-		$source_status    = 'cloud_vector';
-		$retrieval_status = 'cloud_vector_evidence';
-		if ( 'error' === $cloud_status || 'failed' === $cloud_status ) {
-			$source_status    = 'cloud_unavailable';
-			$retrieval_status = 'cloud_unavailable';
-		} elseif ( empty( $source_items ) ) {
-			$source_status    = 'no_cloud_evidence';
-			$retrieval_status = 'no_cloud_evidence';
-		}
-		$excluded_current_post_count = 0;
-		$invalid_candidate_count     = 0;
-		$items = array();
-		foreach ( $source_items as $index => $item ) {
-			$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
-			if ( $current_post_id > 0 && $post_id === $current_post_id ) {
-				$excluded_current_post_count++;
-				continue;
-			}
-			$title = sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) );
-			$url   = esc_url_raw( (string) ( $item['url'] ?? $item['permalink'] ?? $item['link'] ?? $item['source_url'] ?? '' ) );
-			if ( '' === $title || '' === $url ) {
-				$invalid_candidate_count++;
-				continue;
-			}
-			$items[] = array(
-				'id'               => (string) ( $post_id ?: ( $item['id'] ?? $index + 1 ) ),
-				'post_id'          => $post_id,
-				'title'            => $title,
-				'url'              => $url,
-				'excerpt'          => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 45, '' ) ),
-				'reason'           => __( 'Semantically related by Cloud Site Knowledge.', 'npcink-workflow-toolbox' ),
-				'score'            => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
-				'evidence_refs'    => array( 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: ( $item['id'] ?? $index + 1 ) ) ) ),
-				'candidate_source' => 'cloud_vector',
-			);
-			if ( count( $items ) >= 5 ) {
-				break;
-			}
-		}
-		if ( empty( $items ) && 0 < $excluded_current_post_count && 'cloud_vector_evidence' === $retrieval_status ) {
-			$source_status    = 'only_current_post';
-			$retrieval_status = 'only_current_post';
-		}
-
-		return array(
-			'artifact_type'          => 'related_article_candidates.v1',
-			'candidate_type'         => 'related_articles',
-			'candidate_contract'     => 'recommendation_candidate.v1',
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
-			'result_granularity'     => 'document',
-			'candidate_source'        => $source_status,
-			'source_status'           => $retrieval_status,
-			'retrieval_status'        => $retrieval_status,
-			'cloud_result_count'       => count( $source_items ),
-			'excluded_current_post_count' => $excluded_current_post_count,
-			'invalid_candidate_count'  => $invalid_candidate_count,
-			'candidate_count'          => count( $items ),
-			'current_post_excluded'   => true,
-			'items'                   => $items,
-			'source_knowledge'        => $source_knowledge,
-			'action_policy'           => 'operator_review_only_no_write',
-			'next_safe_action'        => 'review_open_or_copy',
-		);
-	}
-
 	private function editor_internal_link_related_content_evidence( array $source_knowledge ): array {
 		$evidence = array();
 		foreach ( array_slice( $this->editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
@@ -5138,8 +5032,9 @@ final class Rest_Controller {
 		$matched_text  = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
 		$expected_text = sanitize_text_field( (string) ( $source_match['expected_text'] ?? '' ) );
 		$block_id      = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
+		$block_name    = sanitize_text_field( (string) ( $source_match['block_name'] ?? '' ) );
 		$offset        = isset( $source_match['text_offset'] ) && is_numeric( $source_match['text_offset'] ) ? (int) $source_match['text_offset'] : -1;
-		if ( '' === $anchor || '' === $matched_text || '' === $expected_text || '' === $block_id || $offset < 0 ) {
+		if ( '' === $anchor || '' === $matched_text || '' === $expected_text || '' === $block_id || in_array( $block_name, array( 'core/code', 'core-code' ), true ) || $offset < 0 ) {
 			return '';
 		}
 

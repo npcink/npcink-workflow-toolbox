@@ -25,7 +25,7 @@ npcink_fixed_button_check( 'npcink-governance-core' === (string) ( $decoded['gov
 npcink_fixed_button_check( 'npcink-ai-client-adapter' === (string) ( $decoded['external_client_owner'] ?? '' ), 'Adapter remains the external-client owner' );
 
 $buttons      = is_array( $decoded['buttons'] ?? null ) ? $decoded['buttons'] : array();
-$expected_ids = array( 'site_check', 'source_adaptation_review', 'publish_preflight', 'category_suggestions', 'tag_suggestions', 'internal_link_candidates', 'related_article_candidates', 'article_image_alt', 'image_candidates', 'article_narration', 'article_audio_summary', 'batch_image_optimization', 'batch_alt_review' );
+$expected_ids = array( 'site_check', 'source_adaptation_review', 'publish_preflight', 'category_suggestions', 'tag_suggestions', 'internal_link_candidates', 'article_image_alt', 'image_candidates', 'article_narration', 'article_audio_summary', 'batch_image_optimization', 'batch_alt_review' );
 $actual_ids   = array();
 $allowed_lanes = array( 'review_only', 'native_editor_commit', 'core_proposal_required', 'mixed_review_and_core_handoff' );
 $allowed_parity = array( 'workflow_projection_proven', 'ability_parity_ready', 'ability_parity_ready_editor_commit_excluded', 'partial_contract_reuse' );
@@ -49,7 +49,7 @@ foreach ( $buttons as $button ) {
 
 sort( $actual_ids );
 sort( $expected_ids );
-npcink_fixed_button_check( $expected_ids === $actual_ids, 'The table covers exactly the thirteen committed fixed-button contracts' );
+npcink_fixed_button_check( $expected_ids === $actual_ids, 'The table covers exactly the twelve committed fixed-button contracts' );
 npcink_fixed_button_check(
 	2 === count( array_filter( $buttons, static fn( array $button ): bool => false === ( $button['default_visible'] ?? true ) ) ),
 	'Exactly the two audio compatibility flows are hidden from the default menu'

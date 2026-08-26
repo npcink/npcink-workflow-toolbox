@@ -220,12 +220,31 @@ final class Single_Article_Image_Adoption {
 	}
 
 	/**
+	 * Creates a temporary file in both REST and WP-CLI execution contexts.
+	 *
+	 * WP-CLI preloads wp_tempnam(), while ordinary REST requests do not. The
+	 * native fallback avoids adding a runtime dependency on wp-admin files.
+	 *
+	 * @return string|false
+	 */
+	private function create_temporary_file( string $filename ) {
+		if ( function_exists( 'wp_tempnam' ) ) {
+			return wp_tempnam( $filename );
+		}
+
+		$prefix = (string) preg_replace( '/[^A-Za-z0-9_-]/', '-', pathinfo( $filename, PATHINFO_FILENAME ) );
+		$prefix = '' !== $prefix ? substr( $prefix, 0, 20 ) : 'npcink-image';
+
+		return tempnam( get_temp_dir(), $prefix );
+	}
+
+	/**
 	 * @param array<string,mixed> $candidate Candidate.
 	 * @return int|WP_Error
 	 */
 	private function import_candidate( array $candidate, int $post_id ) {
 		$filename = $this->candidate_filename( $candidate );
-		$tmp_file = wp_tempnam( $filename );
+		$tmp_file = $this->create_temporary_file( $filename );
 		if ( ! is_string( $tmp_file ) || '' === $tmp_file ) {
 			return new WP_Error( 'npcink_toolbox_image_adoption_tempfile_failed', __( 'WordPress could not prepare a temporary image file.', 'npcink-workflow-toolbox' ), array( 'status' => 500 ) );
 		}

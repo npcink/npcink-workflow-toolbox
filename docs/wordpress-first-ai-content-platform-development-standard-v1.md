@@ -77,7 +77,7 @@ generic list:
 | Capability | Authoritative artifact | Allowed first-version action |
 | --- | --- | --- |
 | Internal links | `internal_link_candidates.v1` | copy/open, or human-confirmed visible-editor placement |
-| Related articles | `related_article_candidates.v1` | open/copy/ignore only |
+| Site citation suggestions | `internal_link_candidates.v1` | explicit editor apply for exact matches; open/copy/ignore for reference-only candidates |
 | Title/summary/taxonomy | existing domain artifacts plus `recommendation_candidate.v1` | review and explicit local/Core path |
 | Image candidates | `image_candidate.v1` | review and the existing governed adoption path |
 
@@ -208,4 +208,3 @@ editorial evidence, or claiming runtime evidence from static tests alone.
 - [Editor Content Support Recommendation Review](editor-content-support-recommendation-review.md)
 - [Cross-Repo Boundary Matrix](cross-repo-boundary-matrix.md)
 - [ADR-013: WordPress-First Content And Recommendation Contracts](decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
-
