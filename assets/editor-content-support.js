@@ -9268,36 +9268,6 @@
 				}
 			}
 
-		async function refreshSiteMediaIndex() {
-			setImageRunning('index');
-			setImageError('');
-			setImageGuidance(__('Scanning local images, adding visual evidence, and refreshing the rebuildable search projection...', 'npcink-workflow-toolbox'));
-			try {
-				let page = 1;
-				let indexedItems = 0;
-				let visualEvidenceItems = 0;
-				let hasMore = true;
-				while (hasMore && page <= 20) {
-					const batch = await postJson('site-media/index-batch', { page, per_page: 10 });
-					indexedItems += parseInt(batch && batch.indexed_items ? batch.indexed_items : '0', 10) || 0;
-					visualEvidenceItems += parseInt(batch && batch.visual_evidence_items ? batch.visual_evidence_items : '0', 10) || 0;
-					hasMore = Boolean(batch && batch.has_more);
-					page += 1;
-				}
-				setImageGuidance(
-					sprintf(
-						__('Media search index refreshed: %1$d images, %2$d with visual evidence. Enter a description to search.', 'npcink-workflow-toolbox'),
-						indexedItems,
-						visualEvidenceItems
-					)
-				);
-			} catch (requestError) {
-				setImageError(formatImageErrorMessage(requestError, __('Could not refresh the site media search index.', 'npcink-workflow-toolbox')));
-			} finally {
-				setImageRunning('');
-			}
-		}
-
 		async function runMediaBrief() {
 			const postId = parseInt(postContext.post_id || '0', 10) || 0;
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
@@ -10352,15 +10322,9 @@
 						sourceSubmitLabel
 					),
 					activeSearchMode === 'library' ? createElement(
-						Button,
-						{
-							type: 'button',
-							variant: 'tertiary',
-							isBusy: imageRunning === 'index',
-							disabled: Boolean(imageRunning),
-							onClick: refreshSiteMediaIndex,
-						},
-						imageRunning === 'index' ? __('Refreshing media index', 'npcink-workflow-toolbox') : __('Refresh media index', 'npcink-workflow-toolbox')
+						'a',
+						{ className: 'button-link', href: (window.NpcinkToolboxEditorSupport && window.NpcinkToolboxEditorSupport.cloudAddonSiteKnowledgeUrl) || 'admin.php?page=npcink-cloud-addon&tab=site_knowledge', target: '_blank', rel: 'noopener noreferrer' },
+						__('Manage media index in Cloud Addon', 'npcink-workflow-toolbox')
 					) : null
 				)
 			) : null;
