@@ -57,6 +57,7 @@ final class Editor_Content_Support {
 				'adapterRestUrl' => esc_url_raw( rest_url( 'npcink-openclaw-adapter/v1' ) ),
 				'nonce'          => wp_create_nonce( 'wp_rest' ),
 				'adminUrl'       => esc_url_raw( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=tools' ) ),
+				'cloudAddonSiteKnowledgeUrl' => esc_url_raw( admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
 				'coreAdminUrl'   => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
 				'showRuntimeDiagnostics' => $this->show_runtime_diagnostics(),
 			)

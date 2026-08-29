@@ -75,6 +75,22 @@ final class Plugin {
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_native_category' ) );
 		add_action( 'wp_abilities_api_init', array( $this->abilities, 'register_native_abilities' ) );
 		add_filter( 'npcink_abilities_toolkit_media_backup_retention_days', array( $this, 'media_backup_retention_days' ) );
+		add_filter( 'npcink_toolbox_refresh_site_media_index_batch', array( $this, 'refresh_site_media_index_batch' ), 10, 2 );
+	}
+
+	/**
+	 * Provides the existing bounded media-index operation to local admin bridges.
+	 *
+	 * @param mixed $value Default filter value.
+	 * @param mixed $input Batch arguments.
+	 * @return mixed
+	 */
+	public function refresh_site_media_index_batch( $value, $input = array() ) {
+		if ( ! is_array( $input ) ) {
+			$input = array();
+		}
+
+		return $this->client->refresh_site_media_index_batch( $input );
 	}
 
 	/**

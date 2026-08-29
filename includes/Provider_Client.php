@@ -39,9 +39,9 @@ final class Provider_Client {
 	 * client or adding another Toolbox route.
 	 *
 	 * @param array<string,mixed> $request Image context evidence request.
-	 * @return array<string,mixed>
+	 * @return array<string,mixed>|\WP_Error
 	 */
-	public function request_image_context_evidence( array $request ): array {
+	public function request_image_context_evidence( array $request ) {
 		$items = is_array( $request['items'] ?? null ) ? $request['items'] : array();
 		if (
 			empty( $items )
@@ -78,9 +78,13 @@ final class Provider_Client {
 			$this->trace_id( 'image_context_evidence' ),
 			$idempotency_key
 		);
+		if ( is_wp_error( $result ) ) {
+			return 'background_completion' === (string) ( $request['dispatch_mode'] ?? '' )
+				? $result
+				: array();
+		}
 		if (
-			is_wp_error( $result )
-			|| ! is_array( $result )
+			! is_array( $result )
 			|| 'image_context_evidence.v1' !== (string) ( $result['contract_version'] ?? '' )
 			|| 'suggestion_only' !== (string) ( $result['write_posture'] ?? '' )
 			|| false !== (bool) ( $result['direct_wordpress_write'] ?? true )
@@ -95,9 +99,9 @@ final class Provider_Client {
 	 * Reuses current Site Knowledge visual evidence and recognizes only misses.
 	 *
 	 * @param array<string,mixed> $request Image context evidence request.
-	 * @return array<string,mixed>
+	 * @return array<string,mixed>|\WP_Error
 	 */
-	private function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false ): array {
+	private function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false ) {
 		$requested_items = is_array( $request['items'] ?? null ) ? $request['items'] : array();
 		$prepared_items  = array();
 		$fingerprints    = array();
@@ -180,12 +184,19 @@ final class Provider_Client {
 		}
 
 		$fresh_by_id = array();
+		$fresh_run_id = '';
+		$fresh_status = '';
 		if ( ! empty( $miss_items ) ) {
 			$miss_request                    = $request;
 			$miss_request['items']           = $miss_items;
 			$miss_request['requested_count'] = count( $miss_items );
 			$miss_request['idempotency_scope'] = 'site_media_semantic_index';
 			$fresh                           = $this->request_image_context_evidence( $miss_request );
+			if ( is_wp_error( $fresh ) ) {
+				return $fresh;
+			}
+			$fresh_run_id                    = sanitize_text_field( (string) ( $fresh['run_id'] ?? '' ) );
+			$fresh_status                    = sanitize_key( (string) ( $fresh['status'] ?? '' ) );
 			foreach ( (array) ( $fresh['items'] ?? array() ) as $fresh_item ) {
 				if ( ! is_array( $fresh_item ) ) {
 					continue;
@@ -214,16 +225,23 @@ final class Provider_Client {
 			}
 		}
 
-		return array(
+		$result = array(
 			'contract_version'       => 'image_context_evidence.v1',
 			'items'                  => $this->sanitize_payload( $resolved_items ),
 			'requested_count'        => count( $prepared_items ),
+			'submitted_count'        => count( $miss_items ),
 			'reused_count'           => count( $cached_by_id ),
 			'recognized_count'       => count( $fresh_by_id ),
 			'projection_queued'      => $projection_queued,
 			'write_posture'          => 'suggestion_only',
 			'direct_wordpress_write' => false,
 		);
+		if ( '' !== $fresh_run_id ) {
+			$result['run_id'] = $fresh_run_id;
+			$result['status'] = '' !== $fresh_status ? $fresh_status : 'processing';
+		}
+
+		return $result;
 	}
 
 	/**
@@ -258,10 +276,16 @@ final class Provider_Client {
 		if ( ! is_string( $fingerprint ) || '' === $fingerprint ) {
 			return array();
 		}
+		$extension = array(
+			'image/avif' => 'avif',
+			'image/jpeg' => 'jpg',
+			'image/png'  => 'png',
+			'image/webp' => 'webp',
+		)[ $mime_type ];
 
 		return array(
 			'path'              => $real_path,
-			'filename'          => sanitize_file_name( basename( $real_path ) ),
+			'filename'          => 'site-media-' . $attachment_id . '.' . $extension,
 			'mime_type'         => $mime_type,
 			'media_fingerprint' => 'sha256:' . implode( ':', str_split( $fingerprint, 8 ) ),
 		);
@@ -2583,25 +2607,54 @@ final class Provider_Client {
 			if ( ! is_array( $item ) || empty( $item['attachment_id'] ) || empty( $item['url'] ) ) {
 				continue;
 			}
+			$mime_type = sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) );
+			if ( ! in_array( $mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+				continue;
+			}
 			$evidence_request['items'][] = array(
 				'attachment_id'   => (string) absint( $item['attachment_id'] ),
 				'title'           => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
 				'filename'        => sanitize_file_name( wp_basename( (string) $item['url'] ) ),
-				'mime_type'       => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'mime_type'       => $mime_type,
 				'url'             => $this->runtime_safe_media_url( (string) $item['url'] ),
+				'attachment_url'  => $this->runtime_safe_media_url( (string) $item['url'] ),
 				'media_fingerprint' => (string) ( $item['media_fingerprint'] ?? '' ),
 				'candidate_quality_flags' => array( 'semantic_index_refresh' ),
 			);
 		}
 		$evidence_request['requested_count'] = count( $evidence_request['items'] );
 		$evidence_request['max_items']       = $per_page;
+		$evidence_request['dispatch_mode']  = 'background_completion';
 		$evidence_requested = ! empty( $evidence_request['items'] );
 		$evidence = $evidence_requested
 			? $this->resolve_media_image_context_evidence( $evidence_request )
 			: array();
-		$evidence_error = is_wp_error( $evidence ) ? $evidence : null;
-		if ( $evidence_error ) {
-			$evidence = array();
+		if ( is_wp_error( $evidence ) ) {
+			return $evidence;
+		}
+		$evidence_run_id = is_array( $evidence ) ? sanitize_text_field( (string) ( $evidence['run_id'] ?? '' ) ) : '';
+		if ( '' !== $evidence_run_id ) {
+			$total = absint( $inventory['total'] ?? count( $items ) );
+			return array(
+				'artifact_type'                    => 'site_media_index_batch.v1',
+				'contract_version'                 => 'site_media_index_batch.v1',
+				'status'                           => 'processing',
+				'page'                             => $page,
+				'per_page'                         => $per_page,
+				'total'                            => $total,
+				'indexed_items'                    => count( $items ),
+				'visual_evidence_items'            => 0,
+				'visual_evidence_reused_items'     => absint( $evidence['reused_count'] ?? 0 ),
+				'visual_evidence_submitted_items'  => absint( $evidence['submitted_count'] ?? 0 ),
+				'screened_items'                   => max( 0, count( $items ) - count( $evidence_request['items'] ) ),
+				'visual_evidence_recognized_items' => 0,
+				'visual_evidence_status'           => 'processing',
+				'visual_evidence_error_code'       => '',
+				'visual_evidence_run_id'           => $evidence_run_id,
+				'has_more'                         => $page * $per_page < $total,
+				'write_posture'                    => 'suggestion_only',
+				'direct_wordpress_write'           => false,
+			);
 		}
 		$evidence_by_id = array();
 		foreach ( (array) ( $evidence['items'] ?? array() ) as $evidence_item ) {
@@ -2674,6 +2727,7 @@ final class Provider_Client {
 		$sync['visual_evidence_items'] = count( $evidence_by_id );
 		$sync['visual_evidence_reused_items'] = absint( $evidence['reused_count'] ?? 0 );
 		$sync['visual_evidence_recognized_items'] = absint( $evidence['recognized_count'] ?? 0 );
+		$sync['screened_items']        = max( 0, count( $items ) - count( $evidence_request['items'] ) );
 		$sync['visual_evidence_status'] = ! $evidence_requested
 			? 'not_requested'
 			: (
@@ -2681,14 +2735,11 @@ final class Provider_Client {
 					? 'metadata_only_fallback'
 					: ( count( $evidence_by_id ) < count( $media_items ) ? 'partial' : 'ready' )
 			);
-		$sync['visual_evidence_error_code'] = $evidence_error
-			? sanitize_key( (string) $evidence_error->get_error_code() )
-			: (
-				$evidence_requested && empty( $evidence_by_id )
-					? 'visual_evidence_unavailable'
-					: ( count( $evidence_by_id ) < count( $media_items ) ? 'visual_evidence_partial' : '' )
-			);
+		$sync['visual_evidence_error_code'] = $evidence_requested && empty( $evidence_by_id )
+			? 'visual_evidence_unavailable'
+			: ( count( $evidence_by_id ) < count( $media_items ) ? 'visual_evidence_partial' : '' );
 		$sync['has_more']              = $page * $per_page < $sync['total'];
+		$sync['visual_evidence_run_id'] = '';
 		return $sync;
 	}
 
