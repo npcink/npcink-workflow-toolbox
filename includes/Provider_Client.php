@@ -2567,6 +2567,7 @@ final class Provider_Client {
 				'mime_type' => 'image',
 				'page'      => $page,
 				'per_page'  => $per_page,
+				'stable_order' => 'id_asc',
 			)
 		);
 		if ( is_wp_error( $inventory ) ) {
