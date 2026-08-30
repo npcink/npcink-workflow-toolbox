@@ -27,6 +27,7 @@ final class Provider_Client {
 	private const DEBUG_PAYLOAD_MAX_ITEMS = 40;
 	private const DEBUG_PAYLOAD_MAX_STRING_CHARS = 2000;
 	private const HTTP_CONNECT_TIMEOUT = 5;
+	private const SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES = 262144;
 
 	private Settings $settings;
 
@@ -101,7 +102,7 @@ final class Provider_Client {
 	 * @param array<string,mixed> $request Image context evidence request.
 	 * @return array<string,mixed>|\WP_Error
 	 */
-	private function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false ) {
+	private function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false, string $upload_scope = '' ) {
 		$requested_items = is_array( $request['items'] ?? null ) ? $request['items'] : array();
 		$prepared_items  = array();
 		$fingerprints    = array();
@@ -121,6 +122,10 @@ final class Provider_Client {
 				$item['mime_type']         = $source['mime_type'];
 				$item['media_fingerprint'] = $source['media_fingerprint'];
 			} else {
+				$local_path = function_exists( 'get_attached_file' ) ? get_attached_file( $attachment_id ) : '';
+				if ( is_string( $local_path ) && is_file( $local_path ) && is_readable( $local_path ) ) {
+					$local_sources[ $attachment_id ] = array( 'uploadable' => false );
+				}
 				$item['media_fingerprint'] = $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) );
 			}
 			$prepared_items[ $attachment_id ] = $item;
@@ -172,7 +177,8 @@ final class Provider_Client {
 			$artifact = $this->upload_local_media_visual_artifact(
 				$attachment_id,
 				$fingerprints[ $attachment_id ] ?? '',
-				$local_sources[ $attachment_id ] ?? array()
+				$local_sources[ $attachment_id ] ?? array(),
+				$upload_scope
 			);
 			if ( is_array( $artifact ) && ! empty( $artifact['artifact_id'] ) ) {
 				$item['source_artifact_id'] = sanitize_text_field( (string) $artifact['artifact_id'] );
@@ -268,12 +274,57 @@ final class Provider_Client {
 		if ( false === $file_size || 0 >= $file_size || 8 * MB_IN_BYTES < $file_size ) {
 			return array();
 		}
-		$mime_type = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $real_path ) : '';
-		if ( ! is_string( $mime_type ) || ! in_array( $mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+		$original_mime_type = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $real_path ) : '';
+		if ( ! is_string( $original_mime_type ) || ! in_array( $original_mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
 			return array();
 		}
 		$fingerprint = hash_file( 'sha256', $real_path );
 		if ( ! is_string( $fingerprint ) || '' === $fingerprint ) {
+			return array();
+		}
+		$source_path = $real_path;
+		if ( $file_size > self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES && function_exists( 'wp_get_attachment_metadata' ) ) {
+			$metadata = wp_get_attachment_metadata( $attachment_id );
+			$sizes    = is_array( $metadata ) && is_array( $metadata['sizes'] ?? null ) ? $metadata['sizes'] : array();
+			$candidates = array();
+			foreach ( $sizes as $size ) {
+				if ( ! is_array( $size ) || empty( $size['file'] ) ) {
+					continue;
+				}
+				$candidate_path = realpath( dirname( $real_path ) . DIRECTORY_SEPARATOR . basename( (string) $size['file'] ) );
+				if (
+					false === $candidate_path
+					|| ! is_file( $candidate_path )
+					|| ! is_readable( $candidate_path )
+					|| 0 !== strpos( $candidate_path, trailingslashit( $upload_root ) )
+				) {
+					continue;
+				}
+				$candidate_size = filesize( $candidate_path );
+				if ( false === $candidate_size || 0 >= $candidate_size || self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES < $candidate_size ) {
+					continue;
+				}
+				$candidates[] = array(
+					'path' => $candidate_path,
+					'area' => absint( $size['width'] ?? 0 ) * absint( $size['height'] ?? 0 ),
+				);
+			}
+			usort(
+				$candidates,
+				static function ( array $left, array $right ): int {
+					return (int) $right['area'] <=> (int) $left['area'];
+				}
+			);
+			if ( ! empty( $candidates ) ) {
+				$source_path = (string) $candidates[0]['path'];
+			}
+		}
+		$source_size = filesize( $source_path );
+		if ( false === $source_size || 0 >= $source_size || self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES < $source_size ) {
+			return array();
+		}
+		$mime_type = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $source_path ) : $original_mime_type;
+		if ( ! is_string( $mime_type ) || ! in_array( $mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
 			return array();
 		}
 		$extension = array(
@@ -284,7 +335,7 @@ final class Provider_Client {
 		)[ $mime_type ];
 
 		return array(
-			'path'              => $real_path,
+			'path'              => $source_path,
 			'filename'          => 'site-media-' . $attachment_id . '.' . $extension,
 			'mime_type'         => $mime_type,
 			'media_fingerprint' => 'sha256:' . implode( ':', str_split( $fingerprint, 8 ) ),
@@ -294,7 +345,7 @@ final class Provider_Client {
 	/**
 	 * @return array<string,mixed>
 	 */
-	private function upload_local_media_visual_artifact( int $attachment_id, string $media_fingerprint, array $source = array() ): array {
+	private function upload_local_media_visual_artifact( int $attachment_id, string $media_fingerprint, array $source = array(), string $upload_scope = '' ): array {
 		if ( empty( $source ) ) {
 			$source = $this->local_media_visual_source( $attachment_id );
 		}
@@ -305,25 +356,21 @@ final class Provider_Client {
 		if ( ! is_string( $contents ) || '' === $contents ) {
 			return array();
 		}
-		$result = array();
-		for ( $attempt = 0; $attempt < 2; ++$attempt ) {
-			$result = npcink_cloud_addon_upload_toolbox_site_media_visual_source(
-				array(
-					'contents'  => $contents,
-					'filename'  => $source['filename'],
-					'mime_type' => $source['mime_type'],
-				),
-				$this->trace_id( 'site_media_visual_upload' ),
-				'site_media_visual_upload_v1_' . substr(
-					hash( 'sha256', $attachment_id . '|' . $media_fingerprint . '|' . wp_generate_uuid4() ),
-					0,
-					32
-				)
-			);
-			if ( ! is_wp_error( $result ) ) {
-				break;
-			}
-		}
+		$upload_revision = hash( 'sha256', $contents );
+		$upload_nonce = '' !== $upload_scope ? $upload_scope : wp_generate_uuid4();
+		$result = npcink_cloud_addon_upload_toolbox_site_media_visual_source(
+			array(
+				'contents'  => $contents,
+				'filename'  => $source['filename'],
+				'mime_type' => $source['mime_type'],
+			),
+			$this->trace_id( 'site_media_visual_upload' ),
+			'site_media_visual_upload_v2_' . substr(
+				hash( 'sha256', $upload_nonce . '|' . $attachment_id . '|' . $media_fingerprint . '|' . $upload_revision ),
+				0,
+				32
+			)
+		);
 		unset( $contents );
 
 		return is_wp_error( $result ) || ! is_array( $result ) ? array() : $this->sanitize_payload( $result );
@@ -2562,6 +2609,8 @@ final class Provider_Client {
 	public function refresh_site_media_index_batch( array $input ) {
 		$page = max( 1, absint( $input['page'] ?? 1 ) );
 		$per_page = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );
+		$upload_scope = preg_replace( '/[^A-Za-z0-9._:-]/', '', (string) ( $input['upload_scope'] ?? '' ) );
+		$upload_scope = is_string( $upload_scope ) ? substr( $upload_scope, 0, 96 ) : '';
 		$inventory = $this->toolkit_media_inventory(
 			array(
 				'mime_type' => 'image',
@@ -2628,7 +2677,7 @@ final class Provider_Client {
 		$evidence_request['dispatch_mode']  = 'background_completion';
 		$evidence_requested = ! empty( $evidence_request['items'] );
 		$evidence = $evidence_requested
-			? $this->resolve_media_image_context_evidence( $evidence_request )
+			? $this->resolve_media_image_context_evidence( $evidence_request, false, $upload_scope )
 			: array();
 		if ( is_wp_error( $evidence ) ) {
 			return $evidence;
