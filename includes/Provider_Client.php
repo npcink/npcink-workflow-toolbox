@@ -349,7 +349,19 @@ final class Provider_Client {
 		if ( empty( $source ) ) {
 			$source = $this->local_media_visual_source( $attachment_id );
 		}
-		if ( empty( $source ) || ! function_exists( 'npcink_cloud_addon_upload_toolbox_site_media_visual_source' ) ) {
+		if (
+			empty( $source )
+			|| false === (bool) ( $source['uploadable'] ?? true )
+			|| ! is_string( $source['path'] ?? null )
+			|| '' === $source['path']
+			|| ! is_file( $source['path'] )
+			|| ! is_readable( $source['path'] )
+			|| ! is_string( $source['filename'] ?? null )
+			|| '' === $source['filename']
+			|| ! is_string( $source['mime_type'] ?? null )
+			|| '' === $source['mime_type']
+			|| ! function_exists( 'npcink_cloud_addon_upload_toolbox_site_media_visual_source' )
+		) {
 			return array();
 		}
 		$contents = file_get_contents( $source['path'] );
