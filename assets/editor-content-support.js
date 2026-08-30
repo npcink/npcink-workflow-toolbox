@@ -6338,6 +6338,19 @@
 		});
 	}
 
+	function relatedContentCandidateItems(section) {
+		return extractKnowledgeItems(section).map((item, index) => {
+			const sourceId = item && (item.post_id || item.id || item.source_id) ? String(item.post_id || item.id || item.source_id) : '';
+			const title = readableItemText(item && (item.title || item.name || item.source_title), __('Related article', 'npcink-workflow-toolbox') + ' ' + String(index + 1));
+			return {
+				id: sourceId || String(index + 1),
+				title,
+				targetUrl: readableItemText(item && (item.target_url || item.url || item.permalink || item.link || item.source_url), ''),
+				detail: readableItemText(item && (item.reason || item.excerpt || item.snippet || item.content_excerpt), ''),
+			};
+		});
+	}
+
 	function preflightActionIntent(action) {
 		const key = String(action || '').trim();
 		const mapping = {
@@ -7262,6 +7275,56 @@
 			);
 	}
 
+	function renderRelatedContentCandidateSection(section, controls) {
+		const candidates = relatedContentCandidateItems(section).slice(0, 8);
+		const actionControls = controls && controls.relatedContent ? controls.relatedContent : {};
+		return createElement(
+			'section',
+			{ className: 'npcink-toolbox-editor-support__candidate-group' },
+			createElement('h4', null, __('Related articles', 'npcink-workflow-toolbox')),
+			candidates.length ? createElement(
+				'ul',
+				{ className: 'npcink-toolbox-editor-support__internal-link-list' },
+				candidates.map((item, index) => {
+					const key = String(index) + '-' + item.title;
+					const hasUrl = Boolean(item.targetUrl);
+					return createElement(
+						'li',
+						{ key, className: 'npcink-toolbox-editor-support__internal-link-item is-reference-only' },
+						createElement(
+							'div',
+							{ className: 'npcink-toolbox-editor-support__internal-link-main' },
+							createElement('strong', null, item.title),
+							item.detail ? createElement('p', null, truncateText(item.detail, 120)) : null
+						),
+						createElement(
+							'div',
+							{ className: 'npcink-toolbox-editor-support__internal-link-actions' },
+							createElement(Button, {
+								type: 'button',
+								size: 'compact',
+								variant: 'secondary',
+								disabled: !hasUrl,
+								accessibleWhenDisabled: true,
+								onClick: () => actionControls.open && actionControls.open(item),
+							}, __('Open article', 'npcink-workflow-toolbox')),
+							hasUrl ? createElement(Button, {
+								type: 'button',
+								size: 'compact',
+								variant: 'secondary',
+								disabled: Boolean(actionControls.running),
+								isBusy: actionControls.running === key + ':copy',
+								accessibleWhenDisabled: true,
+								onClick: () => actionControls.copy && actionControls.copy(item, key),
+							}, __('Copy link', 'npcink-workflow-toolbox')) : null
+						)
+					);
+				})
+			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No related content returned.', 'npcink-workflow-toolbox')),
+			actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message || '') : null
+		);
+	}
+
 	function renderEvidenceDetails(blocks, controls) {
 		if (!Array.isArray(blocks) || !blocks.length) {
 			return null;
@@ -7834,9 +7897,17 @@
 			blocks.push(renderInternalLinkCandidateSection(sections.internal_links, metadataHandoffControls));
 		}
 
-		if (sections.site_knowledge && !sections.internal_links) {
-			blocks.push(createElement('h4', { key: 'links-title' }, __('Site Knowledge', 'npcink-workflow-toolbox')));
-			blocks.push(renderItems(extractKnowledgeItems(sections.site_knowledge), __('No related content returned.', 'npcink-workflow-toolbox')));
+		if (sections.related_content) {
+			blocks.push(renderRelatedContentCandidateSection(sections.related_content, metadataHandoffControls));
+		}
+
+		if (sections.site_knowledge && !sections.internal_links && !sections.related_content) {
+			if (metadataHandoffControls && metadataHandoffControls.intent === 'related_content') {
+				blocks.push(renderRelatedContentCandidateSection(sections.site_knowledge, metadataHandoffControls));
+			} else {
+				blocks.push(createElement('h4', { key: 'links-title' }, __('Site Knowledge', 'npcink-workflow-toolbox')));
+				blocks.push(renderItems(extractKnowledgeItems(sections.site_knowledge), __('No related content returned.', 'npcink-workflow-toolbox')));
+			}
 		}
 
 				if (sections.duplicate_check && !hasPreflightReview) {
@@ -8006,6 +8077,8 @@
 		const [audioPreferences, setAudioPreferences] = useState(readAudioPreferences);
 			const [internalLinkRunning, setInternalLinkRunning] = useState('');
 			const [internalLinkStatus, setInternalLinkStatus] = useState(null);
+			const [relatedContentRunning, setRelatedContentRunning] = useState('');
+			const [relatedContentStatus, setRelatedContentStatus] = useState(null);
 			const [internalLinkUndo, setInternalLinkUndo] = useState(null);
 			const [internalLinkSelection, setInternalLinkSelection] = useState({});
 			const [internalLinkBatchMode, setInternalLinkBatchMode] = useState(false);
@@ -8061,7 +8134,7 @@
 				const sections = result && result.sections && typeof result.sections === 'object' ? result.sections : {};
 				const recommendationIntent = intent === 'internal_links'
 					? 'internal_links'
-					: (sections.related_content ? 'related_content' : '');
+					: (intent === 'related_content' || sections.related_content ? 'related_content' : '');
 				if (supportView !== 'result' || !result || !recommendationIntent) {
 					return;
 				}
@@ -8908,6 +8981,27 @@
 			}
 		}
 
+		async function copyRelatedContentCandidate(candidate, key) {
+			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
+			if (!url) {
+				setRelatedContentStatus({ status: 'error', message: __('This article has no URL to copy.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			setRelatedContentRunning(String(key || 'related') + ':copy');
+			try {
+				await copyTextToClipboard(url);
+				const feedbackOptions = recommendationActionFeedbackOptions('related_content', '');
+				if (feedbackOptions.sourceObjectType === 'recommendation_session') {
+					submitContentImplicitFeedback('related_content_copy', 'accepted', ['evidence_useful', 'operator_confidence_high'], feedbackOptions);
+				}
+				setRelatedContentStatus({ status: 'success', message: __('Article link copied.', 'npcink-workflow-toolbox') });
+			} catch (copyError) {
+				setRelatedContentStatus({ status: 'error', message: __('Could not copy the link. Open the article and copy it manually.', 'npcink-workflow-toolbox') });
+			} finally {
+				setRelatedContentRunning('');
+			}
+		}
+
 		function toggleInternalLinkCandidate(candidate, checked) {
 			const candidateId = String(candidate && candidate.id || '');
 			if (!candidateId) return;
@@ -8998,6 +9092,19 @@
 				return;
 			}
 				submitContentImplicitFeedback('internal_link_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('internal_links', candidate && candidate.id));
+			window.open(url, '_blank', 'noopener,noreferrer');
+		}
+
+		function openRelatedContentCandidate(candidate) {
+			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
+			if (!url) {
+				setRelatedContentStatus({ status: 'error', message: __('This article has no URL to open.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			const feedbackOptions = recommendationActionFeedbackOptions('related_content', '');
+			if (feedbackOptions.sourceObjectType === 'recommendation_session') {
+				submitContentImplicitFeedback('related_content_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], feedbackOptions);
+			}
 			window.open(url, '_blank', 'noopener,noreferrer');
 		}
 
@@ -10544,6 +10651,12 @@
 					result: internalLinkBatchResult,
 					undo: internalLinkUndo ? undoInternalLinkCandidate : null,
 					open: openInternalLinkCandidate,
+				},
+				relatedContent: {
+					running: relatedContentRunning,
+					status: relatedContentStatus,
+					copy: copyRelatedContentCandidate,
+					open: openRelatedContentCandidate,
 				},
 				contextualAltApply: {
 					apply: applyContextualAltToDraft,
