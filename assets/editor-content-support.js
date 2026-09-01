@@ -461,6 +461,7 @@
 			internalLinkTelemetrySnapshots,
 			internalLinkSavedStateChanged,
 			internalLinkSavedFollowupPayload,
+			internalLinkSourcePreview,
 		});
 	}
 	const PluginSidebarComponent = editor.PluginSidebar || editPost.PluginSidebar;
@@ -2226,7 +2227,7 @@
 		const sections = payload && payload.sections && typeof payload.sections === 'object' ? payload.sections : {};
 		const section = sections[intent] && typeof sections[intent] === 'object' ? sections[intent] : {};
 		const candidates = internalLinkCandidateItems(section);
-		const applicableCount = candidates.filter((candidate) => candidate && candidate.canApplyToEditor && candidate.sourceMatch).length;
+		const applicableCount = candidates.filter((candidate) => candidate && candidate.canApplyToEditor && candidate.candidateRelevance !== 'weak' && candidate.sourceMatch).length;
 		const retrievalStatus = sanitizeFeedbackAction(section.retrieval_status || section.source_status || 'unknown');
 		const candidateSource = sanitizeFeedbackAction(section.candidate_source || 'unknown');
 		const reasonCodes = [
@@ -6041,6 +6042,15 @@
 			: '';
 	}
 
+	function recommendationRelevanceLabel(value) {
+		const labels = {
+			strong: __('Strong relevance', 'npcink-workflow-toolbox'),
+			review: __('Review relevance', 'npcink-workflow-toolbox'),
+			weak: __('Weak relevance', 'npcink-workflow-toolbox'),
+		};
+		return labels[internalLinkContractValue(value)] || '';
+	}
+
 	function internalLinkPriorityReasonText(reason) {
 		const text = readableItemText(reason, '');
 		if (text.toLowerCase().indexOf('no detected incoming internal links') >= 0) {
@@ -6073,6 +6083,7 @@
 					targetStatus: readableItemText(targetRef.status || source.target_status, ''),
 					targetPostType: readableItemText(targetRef.post_type || source.target_post_type, ''),
 					candidateSource: internalLinkContractValue(item.candidate_source || source.candidate_source || section.candidate_source),
+					candidateRelevance: internalLinkContractValue(item.candidate_relevance || source.candidate_relevance),
 					retrievalStatus: internalLinkContractValue(section.retrieval_status || section.source_status),
 					reason: internalLinkReasonText(item.evidence_note || item.reason || item.detail || source.reason),
 					placementHint: readableItemText(source.placement_hint || item.placement_hint, ''),
@@ -6106,6 +6117,7 @@
 				targetStatus: readableItemText(item.target_status, ''),
 				targetPostType: readableItemText(item.target_post_type, ''),
 				candidateSource: internalLinkContractValue(item.candidate_source || section.candidate_source),
+				candidateRelevance: internalLinkContractValue(item.candidate_relevance),
 				retrievalStatus: internalLinkContractValue(section.retrieval_status || section.source_status),
 				reason: internalLinkReasonText(item.reason),
 				placementHint: readableItemText(item.placement_hint, ''),
@@ -6347,6 +6359,7 @@
 				title,
 				targetUrl: readableItemText(item && (item.target_url || item.url || item.permalink || item.link || item.source_url), ''),
 				detail: readableItemText(item && (item.reason || item.excerpt || item.snippet || item.content_excerpt), ''),
+				candidateRelevance: internalLinkContractValue(item && item.candidate_relevance),
 			};
 		});
 	}
@@ -7130,12 +7143,47 @@
 		return truncateText(reason, 72);
 	}
 
+	function internalLinkSourcePreview(sourceMatch, maxLength) {
+		const match = sourceMatch && typeof sourceMatch === 'object' ? sourceMatch : {};
+		const sourceText = String(match.expected_text || '').trim();
+		const matchedText = String(match.matched_text || '').trim();
+		const limit = Math.max(80, Number(maxLength || 180));
+		if (!sourceText || !matchedText) return null;
+
+		let offset = Number(match.text_offset);
+		if (!Number.isInteger(offset) || offset < 0 || sourceText.slice(offset, offset + matchedText.length).toLocaleLowerCase() !== matchedText.toLocaleLowerCase()) {
+			offset = sourceText.toLocaleLowerCase().indexOf(matchedText.toLocaleLowerCase());
+		}
+		if (offset < 0) return null;
+
+		const available = Math.max(0, limit - matchedText.length);
+		let start = sourceText.length <= limit ? 0 : Math.max(0, offset - Math.floor(available / 2));
+		const end = sourceText.length <= limit ? sourceText.length : Math.min(sourceText.length, start + limit);
+		start = Math.max(0, end - limit);
+		return {
+			before: sourceText.slice(start, offset),
+			match: sourceText.slice(offset, offset + matchedText.length),
+			after: sourceText.slice(offset + matchedText.length, end),
+			clippedBefore: start > 0,
+			clippedAfter: end < sourceText.length,
+		};
+	}
+
 	function renderInternalLinkCandidateSection(section, controls) {
 		const candidates = internalLinkCandidateItems(section);
 		const actionControls = controls && controls.internalLinks ? controls.internalLinks : {};
 		const selected = actionControls.selected || {};
-		const visibleCandidates = candidates.slice(0, 8);
-		const canApplyCandidate = (item) => Boolean(item.canApplyToEditor && item.sourceMatch && item.sourceMatch.block_client_id && item.sourceMatch.matched_text && item.targetStatus === 'publish' && ['post', 'page'].indexOf(item.targetPostType) >= 0);
+		const excludedCandidates = candidates.filter((item) => item.candidateRelevance === 'weak');
+		const visibleCandidates = candidates.filter((item) => excludedCandidates.indexOf(item) < 0).slice(0, 8);
+		const canApplyCandidate = (item) => Boolean(
+			item.canApplyToEditor
+			&& item.candidateRelevance !== 'weak'
+			&& item.sourceMatch
+			&& item.sourceMatch.block_client_id
+			&& item.sourceMatch.matched_text
+			&& item.targetStatus === 'publish'
+			&& ['post', 'page'].indexOf(item.targetPostType) >= 0
+		);
 		const applicableCandidates = visibleCandidates.filter(canApplyCandidate);
 		const referenceCandidates = visibleCandidates.filter((item) => !canApplyCandidate(item));
 		const selectedCandidates = visibleCandidates.filter((item) => selected[String(item.id || '')]);
@@ -7158,6 +7206,7 @@
 			const itemId = String(item && item.id || '');
 			const canSelect = canApplyCandidate(item);
 			const reason = internalLinkCandidateReason(item);
+			const sourcePreview = internalLinkSourcePreview(item && item.sourceMatch);
 			return createElement(
 				'li',
 				{ key, className: 'npcink-toolbox-editor-support__internal-link-item' + (selected[itemId] ? ' is-selected' : '') + (canSelect ? ' is-applicable' : ' is-reference-only') },
@@ -7180,8 +7229,18 @@
 						'div',
 						{ className: 'npcink-toolbox-editor-support__internal-link-meta' },
 						item.evidenceLabel ? createElement('span', null, item.evidenceLabel) : null,
+						item.candidateRelevance ? createElement('span', null, recommendationRelevanceLabel(item.candidateRelevance)) : null,
 						canSelect && item.sourceMatch ? createElement('span', null, sprintf(__('Draft text: %s', 'npcink-workflow-toolbox'), truncateText(item.sourceMatch.matched_text, 48))) : null
 					),
+					sourcePreview ? createElement(
+						'blockquote',
+						{ className: 'npcink-toolbox-editor-support__internal-link-source' },
+						sourcePreview.clippedBefore ? '...' : '',
+						sourcePreview.before,
+						createElement('mark', null, sourcePreview.match),
+						sourcePreview.after,
+						sourcePreview.clippedAfter ? '...' : ''
+					) : null,
 					reason ? createElement('p', null, reason) : null
 				),
 				createElement(
@@ -7263,6 +7322,12 @@
 					createElement('summary', null, sprintf(__('Show %d more', 'npcink-workflow-toolbox'), referenceRemainder.length)),
 					createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, referenceRemainder.map((item, index) => renderCandidate(item, index + referencePreview.length)))
 				) : null,
+				excludedCandidates.length ? createElement(
+					'details',
+					{ className: 'npcink-toolbox-editor-support__citation-more' },
+					createElement('summary', null, sprintf(__('Show %d weak relevance candidates', 'npcink-workflow-toolbox'), excludedCandidates.length)),
+					createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, excludedCandidates.slice(0, 8).map((item, index) => renderCandidate(item, index)))
+				) : null,
 				!visibleCandidates.length ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No site citation suggestions found.', 'npcink-workflow-toolbox')) : null,
 				visibleCandidates.length && candidates.length > visibleCandidates.length ? createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, sprintf(__('Showing top %1$d of %2$d candidates.', 'npcink-workflow-toolbox'), visibleCandidates.length, candidates.length)) : null,
 				actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message) : null,
@@ -7295,6 +7360,7 @@
 							'div',
 							{ className: 'npcink-toolbox-editor-support__internal-link-main' },
 							createElement('strong', null, item.title),
+							item.candidateRelevance ? createElement('div', { className: 'npcink-toolbox-editor-support__internal-link-meta' }, createElement('span', null, recommendationRelevanceLabel(item.candidateRelevance))) : null,
 							item.detail ? createElement('p', null, truncateText(item.detail, 120)) : null
 						),
 						createElement(

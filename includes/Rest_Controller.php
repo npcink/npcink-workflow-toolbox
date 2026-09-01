@@ -4705,6 +4705,7 @@ final class Rest_Controller {
 		}
 
 		$items = is_array( $artifact['items'] ?? null ) ? $artifact['items'] : array();
+		$items = $this->editor_internal_link_merge_cloud_relevance( $items, $related_content_evidence );
 		$artifact['input_scope'] = $this->editor_input_scope( $context );
 		$artifact['source_ability_id'] = 'npcink-abilities-toolkit/resolve-internal-link-targets';
 		$artifact['source_knowledge'] = $source_knowledge;
@@ -4759,10 +4760,46 @@ final class Rest_Controller {
 		return $artifact;
 	}
 
+	private function editor_internal_link_merge_cloud_relevance( array $items, array $evidence ): array {
+		$by_post_id = array();
+		$by_url     = array();
+		foreach ( $evidence as $evidence_item ) {
+			$post_id = absint( $evidence_item['post_id'] ?? 0 );
+			$url     = esc_url_raw( (string) ( $evidence_item['url'] ?? '' ) );
+			if ( $post_id > 0 ) {
+				$by_post_id[ $post_id ] = $evidence_item;
+			}
+			if ( '' !== $url ) {
+				$by_url[ $url ] = $evidence_item;
+			}
+		}
+
+		foreach ( $items as &$item ) {
+			$post_id = absint( $item['target_post_id'] ?? 0 );
+			$url     = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
+			$match   = $post_id > 0 && isset( $by_post_id[ $post_id ] )
+				? $by_post_id[ $post_id ]
+				: ( '' !== $url && isset( $by_url[ $url ] ) ? $by_url[ $url ] : array() );
+			if ( empty( $match ) ) {
+				continue;
+			}
+			if ( array_key_exists( 'candidate_relevance', $match ) ) {
+				$item['candidate_relevance'] = $match['candidate_relevance'];
+			}
+		}
+		unset( $item );
+
+		return $items;
+	}
+
 	private function editor_internal_link_related_content_evidence( array $source_knowledge ): array {
 		$evidence = array();
 		foreach ( array_slice( $this->editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
 			$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
+			$candidate_relevance = sanitize_key( (string) ( $item['candidate_relevance'] ?? '' ) );
+			if ( ! in_array( $candidate_relevance, array( 'strong', 'review', 'weak' ), true ) ) {
+				$candidate_relevance = '';
+			}
 			$evidence[] = array(
 				'post_id'           => $post_id,
 				'title'             => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
@@ -4771,6 +4808,7 @@ final class Rest_Controller {
 				'excerpt'           => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
 				'score'             => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
 				'evidence_ref'      => 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: $index ) ),
+				'candidate_relevance' => $candidate_relevance,
 			);
 		}
 
@@ -4959,6 +4997,10 @@ final class Rest_Controller {
 			$reason       = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
 			$source_match = is_array( $item['source_match'] ?? null ) ? $item['source_match'] : array();
 			$matched_anchor = $this->editor_internal_link_safe_matched_anchor( $anchor, $source_match );
+			$candidate_relevance = sanitize_key( (string) ( $item['candidate_relevance'] ?? '' ) );
+			if ( ! in_array( $candidate_relevance, array( 'strong', 'review', 'weak' ), true ) ) {
+				$candidate_relevance = '';
+			}
 			$can_apply_to_editor = '' !== $matched_anchor && $target_is_public_local;
 			if ( '' === $title && '' === $anchor && '' === $url ) {
 				continue;
@@ -5010,12 +5052,13 @@ final class Rest_Controller {
 					'evidence_note'        => '' !== $reason ? $reason : __( 'Related content candidate for manual internal-link review.', 'npcink-workflow-toolbox' ),
 					'owner_label'          => 'human_editor',
 					'next_safe_action'     => $can_apply_to_editor ? 'review_and_apply_to_visible_editor' : 'copy_or_open_target_only',
-					'quality_status'       => $quality_score >= 60 && $can_apply_to_editor ? 'review' : 'weak',
+					'quality_status'       => '' !== $candidate_relevance ? $candidate_relevance : ( $quality_score >= 60 && $can_apply_to_editor ? 'review' : 'weak' ),
 					'quality_score'        => $quality_score,
 					'quality_issues'       => $quality_issues,
 						'evidence_refs'        => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
 					'source_match'         => $can_apply_to_editor ? $source_match : array(),
 					'candidate_source'     => sanitize_key( (string) ( $item['candidate_source'] ?? '' ) ),
+					'candidate_relevance'  => $candidate_relevance,
 					'priority_reason'      => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
 						'link_graph_issues'    => is_array( $item['link_graph_issues'] ?? null ) ? $item['link_graph_issues'] : array(),
 						'shared_terms'         => is_array( $item['shared_terms'] ?? null ) ? $item['shared_terms'] : array(),
@@ -6229,6 +6272,9 @@ final class Rest_Controller {
 		}
 		if ( '' !== (string) ( $args['candidate_source'] ?? '' ) ) {
 			$candidate['candidate_source'] = sanitize_key( (string) $args['candidate_source'] );
+		}
+		if ( in_array( (string) ( $args['candidate_relevance'] ?? '' ), array( 'strong', 'review', 'weak' ), true ) ) {
+			$candidate['candidate_relevance'] = (string) $args['candidate_relevance'];
 		}
 		if ( is_array( $args['target_ref'] ?? null ) ) {
 			$target_ref = $args['target_ref'];
