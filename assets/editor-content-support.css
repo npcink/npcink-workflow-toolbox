@@ -892,6 +892,24 @@
 	color: #a7aaad;
 }
 
+.npcink-toolbox-editor-support__internal-link-source {
+	margin: 2px 0 0;
+	padding: 6px 8px;
+	border-left: 2px solid #8c8f94;
+	color: #3c434a;
+	background: #f6f7f7;
+	font-size: 12px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.npcink-toolbox-editor-support__internal-link-source mark {
+	padding: 0 2px;
+	color: #1d2327;
+	background: #fcf0c3;
+	font-weight: 600;
+}
+
 .npcink-toolbox-editor-support__internal-link-actions {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));

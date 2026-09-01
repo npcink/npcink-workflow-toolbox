@@ -19,6 +19,17 @@ assert.equal(helpers.recommendationCountBucket('candidate_count', 3), 'candidate
 assert.equal(helpers.recommendationCountBucket('candidate_count', 8), 'candidate_count_4_8');
 assert.equal(helpers.recommendationCountBucket('candidate_count', 9), 'candidate_count_9_plus');
 
+const sourcePreview = helpers.internalLinkSourcePreview({
+	expected_text: 'This paragraph introduces a safe internal link anchor in its original sentence.',
+	matched_text: 'internal link anchor',
+	text_offset: 39,
+}, 80);
+assert.equal(sourcePreview.match, 'internal link anchor');
+assert.equal(sourcePreview.before + sourcePreview.match + sourcePreview.after, 'This paragraph introduces a safe internal link anchor in its original sentence.');
+assert.equal(sourcePreview.clippedBefore, false);
+assert.equal(sourcePreview.clippedAfter, false);
+assert.equal(helpers.internalLinkSourcePreview({ expected_text: 'No matching phrase.', matched_text: 'missing' }), null);
+
 function richTextValue(html) {
 	const formats = [];
 	let text = '';
@@ -248,11 +259,20 @@ const feedbackContext = helpers.recommendationFeedbackContext({
 					target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: 'https://example.test/alpha/' },
 					source_match: { block_client_id: 'batch-block', matched_text: '内容工作流' },
 				},
+				{
+					id: 'feedback-weak',
+					anchor_or_context: '弱相关候选',
+					can_apply_to_editor: true,
+					candidate_relevance: 'weak',
+					candidate_source: 'cloud_vector',
+					target_ref: { post_id: 3002, status: 'publish', post_type: 'post', url: 'https://example.test/weak/' },
+					source_match: { block_client_id: 'batch-block', matched_text: '弱相关候选' },
+				},
 			],
 		},
 	},
 }, 'internal_links');
-assert.equal(feedbackContext.candidateCount, 1);
+assert.equal(feedbackContext.candidateCount, 2);
 assert.equal(feedbackContext.applicableCount, 1);
 assert.deepEqual(Array.from(feedbackContext.reasonCodes), [
 	'candidate_count_1_3',
