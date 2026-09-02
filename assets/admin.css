@@ -4224,3 +4224,28 @@ pre.npcink-toolbox__result {
 		justify-content: space-between;
 	}
 }
+.npcink-toolbox__media-canary-feedback {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid #dcdcde;
+}
+
+.npcink-toolbox__media-canary-feedback select {
+	max-width: 220px;
+}
+
+.npcink-toolbox__media-canary-feedback-status {
+	margin-right: auto;
+}
+
+.npcink-toolbox__media-canary-feedback-status.is-ok {
+	color: #008a20;
+}
+
+.npcink-toolbox__media-canary-feedback-status.is-warning {
+	color: #b32d2e;
+}

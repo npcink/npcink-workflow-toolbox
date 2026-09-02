@@ -4664,6 +4664,64 @@
 				}
 				row.appendChild(comparison);
 			}
+			const feedback = el('div', 'npcink-toolbox__media-canary-feedback');
+			feedback.setAttribute('data-toolbox-media-canary-feedback', '');
+			const feedbackStatus = el('span', 'npcink-toolbox__batch-status', 'Canary review pending');
+			feedbackStatus.setAttribute('data-toolbox-media-canary-feedback-status', '');
+			feedback.appendChild(feedbackStatus);
+			const acceptButton = el('button', 'button button-small', 'Accept canary');
+			acceptButton.type = 'button';
+			acceptButton.setAttribute('data-toolbox-media-canary-accept', '');
+			const rejectButton = el('button', 'button button-small', 'Reject canary');
+			rejectButton.type = 'button';
+			rejectButton.setAttribute('data-toolbox-media-canary-reject', '');
+			const reason = document.createElement('select');
+			reason.setAttribute('data-toolbox-media-canary-reason', '');
+			reason.innerHTML = '<option value="visual_quality_low">Visual quality is lower</option><option value="savings_too_low">Savings are too low</option><option value="original_clearer">Original is clearer</option><option value="unsafe_or_overreaching">Should not be processed</option><option value="other">Other</option>';
+			reason.hidden = true;
+			feedback.appendChild(acceptButton);
+			feedback.appendChild(rejectButton);
+			feedback.appendChild(reason);
+			const sendFeedback = async (outcome, labels) => {
+				acceptButton.disabled = true;
+				rejectButton.disabled = true;
+				reason.disabled = true;
+				feedbackStatus.textContent = 'Saving canary feedback...';
+				try {
+					const candidateId = mediaBatchAttachmentId(state);
+					await postJson(config.adapterRestUrl, 'agent-feedback', {
+						agent_id: 'media_governance_canary_reviewer',
+						source_runtime: 'media_governance',
+						local_surface: 'toolbox_media_governance_canary',
+						local_outcome: outcome,
+						feedback_labels: labels,
+						source_object_type: 'attachment',
+						source_object_id: String(candidateId),
+						source_action_id: 'media-canary-' + String(candidateId),
+						source_reason_codes: labels,
+						source_score: Math.round(Number(candidate.filesize_bytes || 0) > 0 && Number(derivative.filesize_bytes || 0) > 0 ? Math.max(0, Math.min(100, (1 - Number(derivative.filesize_bytes) / Number(candidate.filesize_bytes)) * 100)) : 0),
+						evidence_ref_ids: [String(derivative.artifact_id || derivative.id || 'attachment:' + String(candidateId))],
+					});
+					feedbackStatus.textContent = outcome === 'accepted' ? 'Accepted and recorded' : 'Rejected and recorded';
+					feedbackStatus.classList.add('is-ok');
+					feedback.classList.add('is-complete');
+				} catch (error) {
+					feedbackStatus.textContent = 'Could not save feedback. Try again.';
+					feedbackStatus.classList.add('is-warning');
+					acceptButton.disabled = false;
+					rejectButton.disabled = false;
+					reason.disabled = false;
+				}
+			};
+			acceptButton.addEventListener('click', () => sendFeedback('accepted', ['operator_confidence_high']));
+			rejectButton.addEventListener('click', () => {
+				if (reason.hidden) {
+					reason.hidden = false;
+					return;
+				}
+				sendFeedback('rejected', [reason.value]);
+			});
+			row.appendChild(feedback);
 			const proposalUrl = coreHandoffProposalUrl(proposalIdFromResponse(state.batchProposalResult));
 			if (proposalUrl) {
 				row.appendChild(createLink(proposalUrl, 'Open in Core review'));
