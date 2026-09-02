@@ -346,6 +346,24 @@ try {
 	assert(await page.locator('.npcink-toolbox-editor-support__image-results').count() === 1, 'The modal renders the image grid in the left results pane.');
 	assert(await page.locator('.npcink-toolbox-editor-support__image-inspector').count() === 1, 'The modal renders mode and review controls in the right inspector.');
 	assert(await page.getByRole('button', { name: /AI generation|AI 生成/ }).count() === 1, 'Featured-image mode exposes the AI-generation option.');
+	let externalSearchFeedback = null;
+	for (let index = 0; index < 20 && !externalSearchFeedback; index += 1) {
+		externalSearchFeedback = requests
+			.filter((item) => item.url.includes('/npcink-toolbox/v1/agent-feedback'))
+			.map((item) => {
+				try {
+					return JSON.parse(item.body || '{}');
+				} catch (error) {
+					return {};
+				}
+			})
+			.find((item) => item.source_runtime === 'image_candidates' && item.source_action_id === 'media_search_completed') || null;
+		if (!externalSearchFeedback) {
+			await page.waitForTimeout(100);
+		}
+	}
+	assert(externalSearchFeedback && externalSearchFeedback.source_object_type === 'media_search_session', 'External image-source search emits a correlated metadata-only completion event.');
+	assert(externalSearchFeedback.source_object_id && externalSearchFeedback.handoff_id.includes(externalSearchFeedback.source_object_id), 'External image-source search and later adoption share a random quality session identifier.');
 
 	await page.getByRole('button', { name: /Site media library|站内媒体库/ }).click();
 	const libraryQuery = '自然光下的木质书桌和笔记本电脑';

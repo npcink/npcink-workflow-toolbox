@@ -9286,6 +9286,7 @@
 			const activeImageMode = modeOverride || activePicker.mode;
 			const imageContext = imagePickerRequestContext(postContext, activePicker, contextOverride || activePicker.context);
 				const targetSearchMode = imageSearchModeRef.current === 'library' ? 'library' : 'source';
+				const qualitySessionId = mediaQualitySessionId('media_search');
 				const operatorInstruction = String(imageQuery || '').trim();
 				const cacheKey = imageSearchCacheKey(targetSearchMode === 'library' ? 'library_auto' : 'auto', activePicker, operatorInstruction, imageContext);
 				const cachedResult = forceRefresh ? null : readCachedImageResult(cacheKey);
@@ -9303,10 +9304,22 @@
 						setImageCompletionRunning(false);
 						setImageError('');
 						setImageGuidance('');
-						setImageResultForSearchMode(targetSearchMode, cachedResult, true);
-					setImagePreviewLightbox(null);
-					setImageAdoptionResult(null);
-					setImageAdoptionError('');
+						const displayedResult = withMediaQualitySession(cachedResult, qualitySessionId);
+						setImageResultForSearchMode(targetSearchMode, displayedResult, true);
+						setImagePreviewLightbox(null);
+						setImageAdoptionResult(null);
+						setImageAdoptionError('');
+						const resultCount = extractImageCandidates(displayedResult).length;
+						submitImplicitAgentFeedback(
+							editorMediaSearchFeedbackPayload(
+								displayedResult,
+								activePicker,
+								'media_search_completed',
+								resultCount > 0 ? 'accepted' : 'rejected',
+								[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
+								resultCount
+							)
+						);
 						return;
 					}
 					const requestSeq = imageSourceRequestSeqRef.current + 1;
@@ -9361,15 +9374,37 @@
 						if (imageSourceRequestSeqRef.current !== requestSeq) {
 							return;
 						}
-						setImageResultForSearchMode(targetSearchMode, result);
+						const displayedResult = withMediaQualitySession(result, qualitySessionId);
+						setImageResultForSearchMode(targetSearchMode, displayedResult);
 						if (targetSearchMode === 'source') {
-							completeImageSourceCandidates(requestPayload, cacheKey, result, requestSeq);
+							completeImageSourceCandidates(requestPayload, cacheKey, displayedResult, requestSeq);
 						} else {
-							writeCachedImageResult(cacheKey, result);
+							writeCachedImageResult(cacheKey, displayedResult);
 						}
+						const resultCount = extractImageCandidates(displayedResult).length;
+						submitImplicitAgentFeedback(
+							editorMediaSearchFeedbackPayload(
+								displayedResult,
+								activePicker,
+								'media_search_completed',
+								resultCount > 0 ? 'accepted' : 'rejected',
+								[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
+								resultCount
+							)
+						);
 					} catch (requestError) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageError(formatImageErrorMessage(requestError, __('Cloud image recommendation failed.', 'npcink-workflow-toolbox')));
+							submitImplicitAgentFeedback(
+								editorMediaSearchFeedbackPayload(
+									withMediaQualitySession({ provider_mode: targetSearchMode === 'library' ? 'site_media' : 'auto' }, qualitySessionId),
+									activePicker,
+									'media_search_runtime_error',
+									'ignored',
+									['media_search_runtime_error'],
+									0
+								)
+							);
 						}
 					} finally {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
@@ -9393,15 +9428,13 @@
 				return;
 			}
 			const targetSearchMode = imageSearchModeRef.current === 'library' ? 'library' : 'source';
-			const qualitySessionId = targetSearchMode === 'library' ? mediaQualitySessionId('media_search') : '';
+			const qualitySessionId = mediaQualitySessionId('media_search');
 			const imageContext = imagePickerRequestContext(postContext, activePicker);
 			const cacheKey = imageSearchCacheKey(targetSearchMode === 'library' ? 'library' : 'manual', activePicker, query, imageContext);
 			const cachedResult = forceRefresh ? null : readCachedImageResult(cacheKey);
 			setImageQuery(query);
 					if (cachedResult) {
-						const displayedResult = targetSearchMode === 'library'
-							? withMediaQualitySession(cachedResult, qualitySessionId)
-							: cachedResult;
+						const displayedResult = withMediaQualitySession(cachedResult, qualitySessionId);
 						setImageRunning('');
 						setImageCompletionRunning(false);
 						setImageError('');
@@ -9410,19 +9443,17 @@
 					setImagePreviewLightbox(null);
 					setImageAdoptionResult(null);
 				setImageAdoptionError('');
-						if (targetSearchMode === 'library') {
-							const resultCount = extractImageCandidates(displayedResult).length;
-							submitImplicitAgentFeedback(
-								editorMediaSearchFeedbackPayload(
-									displayedResult,
-									activePicker,
-									'media_search_completed',
-									resultCount > 0 ? 'accepted' : 'rejected',
-									[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
-									resultCount
-								)
-							);
-						}
+						const resultCount = extractImageCandidates(displayedResult).length;
+						submitImplicitAgentFeedback(
+							editorMediaSearchFeedbackPayload(
+								displayedResult,
+								activePicker,
+								'media_search_completed',
+								resultCount > 0 ? 'accepted' : 'rejected',
+								[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
+								resultCount
+							)
+						);
 						return;
 					}
 					const requestSeq = imageSourceRequestSeqRef.current + 1;
@@ -9450,33 +9481,34 @@
 					if (imageSourceRequestSeqRef.current !== requestSeq) {
 						return;
 					}
-					const displayedResult = targetSearchMode === 'library'
-						? withMediaQualitySession(result, qualitySessionId)
-						: result;
+					const displayedResult = withMediaQualitySession(result, qualitySessionId);
 					setImageResultForSearchMode(targetSearchMode, displayedResult);
 					if (targetSearchMode === 'source') {
-						completeImageSourceCandidates(requestPayload, cacheKey, result, requestSeq);
+						completeImageSourceCandidates(requestPayload, cacheKey, displayedResult, requestSeq);
 					} else {
-						writeCachedImageResult(cacheKey, result);
-						const resultCount = extractImageCandidates(displayedResult).length;
-						submitImplicitAgentFeedback(
-							editorMediaSearchFeedbackPayload(
-								displayedResult,
-								activePicker,
-								'media_search_completed',
-								resultCount > 0 ? 'accepted' : 'rejected',
-								[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
-								resultCount
-							)
-						);
+						writeCachedImageResult(cacheKey, displayedResult);
 					}
+					const resultCount = extractImageCandidates(displayedResult).length;
+					submitImplicitAgentFeedback(
+						editorMediaSearchFeedbackPayload(
+							displayedResult,
+							activePicker,
+							'media_search_completed',
+							resultCount > 0 ? 'accepted' : 'rejected',
+							[resultCount > 0 ? 'media_search_has_results' : 'media_search_no_results'],
+							resultCount
+						)
+					);
 					} catch (requestError) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageError(formatImageErrorMessage(requestError, __('Cloud image search failed.', 'npcink-workflow-toolbox')));
-							if (targetSearchMode === 'library') {
+							if (targetSearchMode === 'source' || targetSearchMode === 'library') {
 								submitImplicitAgentFeedback(
 									editorMediaSearchFeedbackPayload(
-										withMediaQualitySession({ provider_mode: 'site_media' }, qualitySessionId),
+										withMediaQualitySession(
+											{ provider_mode: targetSearchMode === 'library' ? 'site_media' : 'auto' },
+											qualitySessionId
+										),
 										activePicker,
 										'media_search_runtime_error',
 										'ignored',
