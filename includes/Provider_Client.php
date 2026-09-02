@@ -5864,7 +5864,7 @@ final class Provider_Client {
 	}
 
 	private function execute_image_source_cloud_request( string $query, array $options, string $provider ) {
-		$per_page     = max( 1, min( 30, (int) ( $options['per_page'] ?? 8 ) ) );
+		$per_page     = max( 1, min( 30, (int) ( $options['per_page'] ?? 9 ) ) );
 		$latency_mode = $this->image_source_latency_mode( $options );
 		$fast_first   = 'fast_first' === $latency_mode;
 		$input        = array(
@@ -5996,6 +5996,7 @@ final class Provider_Client {
 
 		$visual_context = array(
 			'contract_version'       => 'image_visual_brief_request.v1',
+			'locale'                 => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
 			'image_use'              => $mode,
 			'latency_mode'           => $latency_mode,
 			'latency_budget_seconds' => $fast_first ? 5 : 60,
@@ -6288,8 +6289,7 @@ final class Provider_Client {
 			'status'                => sanitize_key( (string) ( $result['visual_brief_status'] ?? $result['brief_status'] ?? ( array() !== $brief ? 'ready' : 'fallback' ) ) ),
 			'primary_query'         => $primary_query,
 			'visual_intent'         => $visual_intent,
-			'alternate_queries'     => array_slice( $this->sanitize_string_list( $brief['alternate_queries'] ?? $result['alternate_queries'] ?? array() ), 0, 5 ),
-			'query_suggestions'     => array_slice( $this->sanitize_string_list( $brief['query_suggestions'] ?? $result['query_suggestions'] ?? $result['empty_query_suggestions'] ?? array() ), 0, 5 ),
+			'query_suggestions'     => $this->sanitize_image_query_suggestions( $brief['query_suggestions'] ?? $result['query_suggestions'] ?? $result['empty_query_suggestions'] ?? array() ),
 			'negative_terms'        => array_slice( $this->sanitize_string_list( $brief['negative_terms'] ?? $result['negative_terms'] ?? array() ), 0, 8 ),
 			'preferred_orientation' => $orientation,
 			'style'                 => $style,
@@ -6298,6 +6298,34 @@ final class Provider_Client {
 			'rerank_status'         => sanitize_key( (string) ( $result['rerank_status'] ?? $result['candidate_rerank_status'] ?? '' ) ),
 			'cloud_ai_steps'        => $this->sanitize_string_list( $input['visual_context']['cloud_ai_steps'] ?? array() ),
 		);
+	}
+
+	private function sanitize_image_query_suggestions( $value ): array {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		$suggestions = array();
+		foreach ( array_slice( $value, 0, 5 ) as $item ) {
+			if ( is_array( $item ) ) {
+				$label = sanitize_text_field( html_entity_decode( (string) ( $item['display_label'] ?? $item['label'] ?? $item['query'] ?? '' ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				$query = sanitize_text_field( html_entity_decode( (string) ( $item['search_query'] ?? $item['query'] ?? $item['display_label'] ?? '' ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				if ( '' !== $label && '' !== $query ) {
+					$suggestions[] = array(
+						'display_label' => $label,
+						'search_query'  => $query,
+					);
+				}
+				continue;
+			}
+			$query = sanitize_text_field( html_entity_decode( (string) $item, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+			if ( '' !== $query ) {
+				$suggestions[] = array(
+					'display_label' => $query,
+					'search_query'  => $query,
+				);
+			}
+		}
+		return $suggestions;
 	}
 
 	private function normalize_ai_image_generation_response( array $response, array $runtime_payload ) {
@@ -6543,7 +6571,6 @@ final class Provider_Client {
 					'visual_brief'               => $visual_brief,
 					'prompt_candidates'          => $prompt_candidates,
 					'optimized_query'            => sanitize_text_field( (string) ( $result['optimized_query'] ?? $visual_brief['primary_query'] ?? $query ) ),
-					'alternate_queries'          => $visual_brief['alternate_queries'],
 					'query_suggestions'          => $visual_brief['query_suggestions'],
 					'rerank_status'              => $visual_brief['rerank_status'],
 					'site_context_status'        => $visual_brief['site_context_status'],

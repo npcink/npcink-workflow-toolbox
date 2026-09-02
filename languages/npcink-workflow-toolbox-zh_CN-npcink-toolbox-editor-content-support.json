@@ -1180,7 +1180,20 @@
       "未取得云端相关文章证据；以下结果可能来自本地 fallback，不能视为云端向量推荐。": ["未取得云端相关文章证据；以下结果可能来自本地 fallback，不能视为云端向量推荐。"],
       "Cloud 向量证据用于候选发现，最终插入仍由编辑者确认。": ["Cloud 向量证据用于候选发现，最终插入仍由编辑者确认。"],
       "No safe exact anchor is available. You can still copy the link or open the article.": ["没有安全且精确匹配的锚文本；仍可复制链接或打开目标文章。"],
-      "This direction does not include a Chinese visual description. Generate a new visual description before requesting an image.": ["这个方向没有中文画面描述。请先重新生成画面描述，再请求图片。"]
+      "This direction does not include a Chinese visual description. Generate a new visual description before requesting an image.": ["这个方向没有中文画面描述。请先重新生成画面描述，再请求图片。"],
+      "Generate search keywords from article": ["根据文章生成搜索关键词"],
+      "Generating keywords": ["正在生成关键词"],
+      "Recommended searches": ["推荐搜索"],
+      "Generating image search keywords...": ["正在生成图片搜索关键词..."],
+      "No additional search keywords were generated. Enter a concrete scene and search directly.": ["没有生成更多搜索关键词，请输入具体场景后直接搜索。"],
+      "Save the draft before generating image search keywords.": ["生成图片搜索关键词前请先保存草稿。"],
+      "Image search keyword generation failed.": ["图片搜索关键词生成失败。"],
+      "Change keyword set": ["换一组关键词"],
+      "Search image sources": ["搜索图片来源"],
+      "Retry image search": ["重新搜索"],
+      "No new search keywords were generated. Edit the search description and try again.": ["暂无新的搜索关键词，请修改搜索描述后重试。"],
+      "Loading image candidates": ["正在加载图片候选"],
+      "AI quota is exhausted. Use the current search query or enter one manually.": ["AI 配额已用完，请使用当前搜索词或手动输入。"]
     }
   }
 }
