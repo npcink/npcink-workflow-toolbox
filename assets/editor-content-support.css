@@ -1617,8 +1617,9 @@
 
 .npcink-toolbox-editor-support__image-modal .components-modal__content {
 	width: min(1240px, calc(100vw - 32px));
-	min-width: min(860px, calc(100vw - 32px));
+	min-width: 0;
 	max-height: calc(100vh - 72px);
+	overflow-x: hidden;
 }
 
 .npcink-toolbox-editor-support__preflight-modal .components-modal__content {
@@ -2085,6 +2086,22 @@
 	width: 100%;
 }
 
+.npcink-toolbox-editor-support__image-keyword-tools {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.npcink-toolbox-editor-support__image-keyword-suggestions {
+	display: grid;
+	gap: 6px;
+	width: 100%;
+	order: 2;
+}
+
 .npcink-toolbox-editor-support__image-prompt-panel {
 	display: grid;
 	gap: 8px;
@@ -2503,6 +2520,17 @@
 	place-items: center;
 	color: #646970;
 	font-size: 12px;
+}
+
+.npcink-toolbox-editor-support__image-card.is-loading {
+	border-color: #e2e4e7;
+	background: linear-gradient(110deg, #f6f7f7 30%, #fff 45%, #f6f7f7 60%);
+	background-size: 200% 100%;
+	animation: npcink-image-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes npcink-image-skeleton {
+	to { background-position: -200% 0; }
 }
 
 .npcink-toolbox-editor-support__image-zoom {
