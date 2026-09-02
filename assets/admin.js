@@ -4467,9 +4467,11 @@
 		}
 		if (previewButton instanceof HTMLButtonElement) {
 			previewButton.disabled = selectedCount < 1;
+			previewButton.hidden = !form.__npcinkMediaDerivativeBatchPlan || selectedCount < 1;
 		}
 		if (submitButton instanceof HTMLButtonElement) {
 			submitButton.disabled = selectedCount < 1 || previewReadyCount !== selectedCount || pendingProposalCount < 1;
+			submitButton.hidden = previewReadyCount < 1;
 		}
 	}
 
@@ -5461,9 +5463,11 @@
 		const submitButton = form.querySelector('[data-toolbox-submit-media-batch-proposals]');
 		if (runButton instanceof HTMLButtonElement) {
 			runButton.disabled = !(asArray(plan.candidates).length > 0);
+			runButton.hidden = !(asArray(plan.candidates).length > 0);
 		}
 		if (submitButton instanceof HTMLButtonElement) {
 			submitButton.disabled = true;
+			submitButton.hidden = true;
 		}
 	}
 
