@@ -3200,10 +3200,11 @@
 
 		const resultMode = String((imageResultSource(payload || {}).provider_mode || imageResultSource(payload || {}).resolved_provider || '')).toLowerCase();
 		const fixedSourceSlots = resultMode !== 'site_media' && resultMode !== 'ai_generated';
+		const visibleImages = fixedSourceSlots ? images.slice(0, 9) : images;
 		return createElement(
 			'div',
 			{ className: 'npcink-toolbox-editor-support__image-grid' },
-				Array.from({ length: fixedSourceSlots ? 9 : images.length }, (_, index) => images[index] || null).map((image, index) => {
+				Array.from({ length: fixedSourceSlots ? 9 : visibleImages.length }, (_, index) => visibleImages[index] || null).map((image, index) => {
 					if (!image) {
 						return createElement('div', {
 							className: 'npcink-toolbox-editor-support__image-card is-loading',
