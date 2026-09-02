@@ -2961,6 +2961,51 @@ msgstr "图片计划生成失败。"
 msgid "Generating image plan..."
 msgstr "正在生成图片计划..."
 
+msgid "Generate search keywords from article"
+msgstr "根据文章生成搜索关键词"
+
+msgid "Generating keywords"
+msgstr "正在生成关键词"
+
+msgid "Recommended searches"
+msgstr "推荐搜索"
+
+msgid "Generating image search keywords..."
+msgstr "正在生成图片搜索关键词..."
+
+msgid "No additional search keywords were generated. Enter a concrete scene and search directly."
+msgstr "没有生成更多搜索关键词，请输入具体场景后直接搜索。"
+
+msgid "Save the draft before generating image search keywords."
+msgstr "生成图片搜索关键词前请先保存草稿。"
+
+msgid "Image search keyword generation failed."
+msgstr "图片搜索关键词生成失败。"
+
+#: assets/editor-content-support.js
+msgid "Change keyword set"
+msgstr "换一组关键词"
+
+#: assets/editor-content-support.js
+msgid "Search image sources"
+msgstr "搜索图片来源"
+
+#: assets/editor-content-support.js
+msgid "Retry image search"
+msgstr "重新搜索"
+
+#: assets/editor-content-support.js
+msgid "No new search keywords were generated. Edit the search description and try again."
+msgstr "暂无新的搜索关键词，请修改搜索描述后重试。"
+
+#: assets/editor-content-support.js
+msgid "Loading image candidates"
+msgstr "正在加载图片候选"
+
+#: assets/editor-content-support.js
+msgid "AI quota is exhausted. Use the current search query or enter one manually."
+msgstr "AI 配额已用完，请使用当前搜索词或手动输入。"
+
 msgid "Requesting hosted image candidate..."
 msgstr "正在请求托管图片候选..."
 
@@ -6800,15 +6845,6 @@ msgstr "查找待优化图片"
 
 msgid "Build a small review list from existing media-library images. Nothing replaces the original files from this page."
 msgstr "从现有媒体库图片构建一个小型审阅列表。此页面不会替换原始文件。"
-
-msgid "Start with a small sample. We will show the original and optimized image before anything is submitted for review."
-msgstr "先从小范围样本开始。提交审核前，我们会先展示原图和优化后的图片。"
-
-msgid "Nothing replaces the original image from this page."
-msgstr "此页面不会替换原图。"
-
-msgid "Most users can keep the defaults. Open this only when you need to choose a specific source, format, size, crop, or watermark."
-msgstr "大多数用户保持默认设置即可。只有需要指定来源、格式、尺寸、裁剪或水印时，才打开这里。"
 
 msgid "No original image is replaced here. Review previews first, then submit selected rows for the governed optimization path."
 msgstr "这里不会替换原始图片。请先审阅预览，再将选中的行提交到受治理的优化路径。"

@@ -60,6 +60,7 @@ final class Editor_Content_Support {
 				'cloudAddonSiteKnowledgeUrl' => esc_url_raw( admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
 				'coreAdminUrl'   => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
 				'showRuntimeDiagnostics' => $this->show_runtime_diagnostics(),
+				'locale'              => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
 			)
 		);
 	}
