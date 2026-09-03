@@ -3994,6 +3994,7 @@ final class Admin_Page {
 					</select>
 				</label>
 			</div>
+			<input type="hidden" name="attachment_ids" data-toolbox-selected-attachment-ids value="" />
 			<div class="npcink-toolbox__split">
 				<label>
 					<span><?php esc_html_e( 'Text', 'npcink-workflow-toolbox' ); ?></span>
@@ -4377,79 +4378,47 @@ final class Admin_Page {
 	private function render_media_derivative_batch_controls( array $toolbox_policy ): void {
 		?>
 		<div class="npcink-toolbox__batch-panel">
-			<h3><?php esc_html_e( 'Find images to optimize', 'npcink-workflow-toolbox' ); ?></h3>
-			<p><?php esc_html_e( 'Start with a small sample. We will show the original and optimized image before anything is submitted for review.', 'npcink-workflow-toolbox' ); ?></p>
-			<p class="description" data-toolbox-selected-attachment-summary><?php esc_html_e( 'Nothing replaces the original image from this page.', 'npcink-workflow-toolbox' ); ?></p>
-			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'No original image is replaced here. Review previews first, then submit selected rows for the governed optimization path.', 'npcink-workflow-toolbox' ); ?></div>
-			<details class="npcink-toolbox__result-details npcink-toolbox__advanced-filters">
-				<summary><?php esc_html_e( 'Optional filters and processing options', 'npcink-workflow-toolbox' ); ?></summary>
-				<p class="description"><?php esc_html_e( 'Most users can keep the defaults. Open this only when you need to choose a specific source, format, size, crop, or watermark.', 'npcink-workflow-toolbox' ); ?></p>
-				<div class="npcink-toolbox__split">
-					<label>
-						<span><?php esc_html_e( 'Image source', 'npcink-workflow-toolbox' ); ?></span>
-						<select name="batch_scope_preset">
-							<option value="current_month"><?php esc_html_e( 'This month\'s images', 'npcink-workflow-toolbox' ); ?></option>
-							<option value="previous_month"><?php esc_html_e( 'Previous month\'s images', 'npcink-workflow-toolbox' ); ?></option>
-							<option value="custom"><?php esc_html_e( 'Custom date range', 'npcink-workflow-toolbox' ); ?></option>
-							<option value="all"><?php esc_html_e( 'Small eligible sample', 'npcink-workflow-toolbox' ); ?></option>
-						</select>
-					</label>
-					<label>
-						<span><?php esc_html_e( 'Optimization goal', 'npcink-workflow-toolbox' ); ?></span>
-						<select name="batch_recipe">
-							<option value="smart_optimize"><?php esc_html_e( 'Recommended optimization', 'npcink-workflow-toolbox' ); ?></option>
-							<option value="convert_format"><?php esc_html_e( 'Change file format', 'npcink-workflow-toolbox' ); ?></option>
-							<option value="resize_only"><?php esc_html_e( 'Resize large images', 'npcink-workflow-toolbox' ); ?></option>
-							<option value="watermark"><?php esc_html_e( 'Add watermark', 'npcink-workflow-toolbox' ); ?></option>
-						</select>
-					</label>
-				</div>
+			<h3><?php esc_html_e( 'Optimize Media Library images', 'npcink-workflow-toolbox' ); ?></h3>
+			<div class="npcink-toolbox__split">
 				<label>
-					<span><?php esc_html_e( 'Images to review', 'npcink-workflow-toolbox' ); ?></span>
-					<input type="number" min="1" max="10" step="1" name="batch_max_items" value="5" />
-				</label>
-				<label>
-					<span><?php esc_html_e( 'Selected image IDs', 'npcink-workflow-toolbox' ); ?></span>
-					<input type="text" name="attachment_ids" data-toolbox-selected-attachment-ids placeholder="<?php esc_attr_e( 'Optional: 12, 34, 56', 'npcink-workflow-toolbox' ); ?>" />
-				</label>
-				<div class="npcink-toolbox__split">
-					<label>
-						<span><?php esc_html_e( 'Date from', 'npcink-workflow-toolbox' ); ?></span>
-						<input type="date" name="batch_date_from" />
-					</label>
-					<label>
-						<span><?php esc_html_e( 'Date to', 'npcink-workflow-toolbox' ); ?></span>
-						<input type="date" name="batch_date_to" />
-					</label>
-				</div>
-				<div class="npcink-toolbox__split">
-					<label>
-						<span><?php esc_html_e( 'Exclude formats', 'npcink-workflow-toolbox' ); ?></span>
-						<input type="text" name="batch_exclude_formats" value="webp,gif,svg" />
-					</label>
-					<label>
-						<span><?php esc_html_e( 'Min dimensions', 'npcink-workflow-toolbox' ); ?></span>
-						<input type="text" name="batch_min_dimensions" value="800x800" />
-					</label>
-				</div>
-				<label>
-					<span><?php esc_html_e( 'Output format', 'npcink-workflow-toolbox' ); ?></span>
-					<select name="batch_target_format">
-						<?php foreach ( array( 'webp', 'avif', 'jpeg', 'png', 'original' ) as $format ) : ?>
-							<option value="<?php echo esc_attr( $format ); ?>" <?php selected( 'webp', $format ); ?>><?php echo esc_html( strtoupper( $format ) ); ?></option>
-						<?php endforeach; ?>
+					<span><?php esc_html_e( 'Time range', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="batch_scope_preset">
+						<option value="one_month"><?php esc_html_e( 'Last month', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="three_months"><?php esc_html_e( 'Last three months', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="this_year"><?php esc_html_e( 'This year', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="all"><?php esc_html_e( 'All images', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="custom"><?php esc_html_e( 'Custom range', 'npcink-workflow-toolbox' ); ?></option>
 					</select>
 				</label>
-				<?php $this->render_media_derivative_format_controls( $toolbox_policy ); ?>
-				<?php $this->render_media_derivative_crop_controls(); ?>
-				<?php $this->render_media_derivative_watermark_controls( $toolbox_policy ); ?>
-			</details>
+				<label>
+					<span><?php esc_html_e( 'Image type', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="batch_image_type">
+						<option value="recommended"><?php esc_html_e( 'Recommended images', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="jpeg">JPEG</option>
+						<option value="png">PNG</option>
+						<option value="webp">WebP</option>
+					</select>
+				</label>
+			</div>
+			<div class="npcink-toolbox__split" data-toolbox-custom-media-dates hidden>
+				<label><span><?php esc_html_e( 'From', 'npcink-workflow-toolbox' ); ?></span><input type="date" name="batch_date_from" /></label>
+				<label><span><?php esc_html_e( 'To', 'npcink-workflow-toolbox' ); ?></span><input type="date" name="batch_date_to" /></label>
+			</div>
 			<div class="npcink-toolbox__inline-actions">
-				<button type="button" class="button button-primary" data-toolbox-build-media-batch-plan><?php esc_html_e( 'Build review list', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="button" data-toolbox-run-media-batch-previews disabled hidden><?php esc_html_e( 'Generate selected previews', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="button" data-toolbox-submit-media-batch-proposals disabled hidden><?php esc_html_e( 'Submit selected to Core review', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button button-primary" data-toolbox-build-media-batch-plan><?php esc_html_e( 'Check optimizable images', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button button-primary" data-toolbox-submit-media-batch-proposals disabled hidden><?php esc_html_e( 'Start optimization', 'npcink-workflow-toolbox' ); ?></button>
+			</div>
+			<div data-toolbox-media-resize-choice hidden>
+				<strong><?php esc_html_e( 'Large images found', 'npcink-workflow-toolbox' ); ?></strong>
+				<label><input type="radio" name="batch_resize_mode" value="preserve" checked /> <?php esc_html_e( 'Keep original dimensions', 'npcink-workflow-toolbox' ); ?></label>
+				<label><input type="radio" name="batch_resize_mode" value="fit" /> <?php esc_html_e( 'Limit longest side to 1920px', 'npcink-workflow-toolbox' ); ?></label>
 			</div>
 			<div class="npcink-toolbox__batch-plan" data-toolbox-media-batch-plan hidden></div>
+			<div class="npcink-toolbox__batch-progress" data-toolbox-media-batch-progress hidden aria-live="polite"></div>
+			<section class="npcink-toolbox__media-batch-history" data-toolbox-media-batch-history>
+				<h3><?php esc_html_e( 'History and restore', 'npcink-workflow-toolbox' ); ?></h3>
+				<p class="description"><?php esc_html_e( 'Completed batches remain recoverable for 30 days. Backups are not deleted automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			</section>
 		</div>
 		<?php
 	}
@@ -4462,11 +4431,6 @@ final class Admin_Page {
 			<?php if ( $single_attachment_id <= 0 ) : ?>
 				<h2><?php echo esc_html( $title ); ?></h2>
 				<p><?php echo esc_html( $description ); ?></p>
-				<div class="npcink-toolbox__example is-ai">
-					<strong><?php esc_html_e( 'Review before submitting', 'npcink-workflow-toolbox' ); ?></strong>
-					<span><?php esc_html_e( 'This page prepares previews and submits selected rows to Core review only. Approval and execution happen from the governed Core/Adapter review path.', 'npcink-workflow-toolbox' ); ?></span>
-				</div>
-				<?php $this->render_media_derivative_toolbox_defaults( $toolbox_policy ); ?>
 			<?php endif; ?>
 			<?php if ( $single_attachment_id > 0 ) : ?>
 				<?php $this->render_media_derivative_single_tool( $single_attachment_id, $toolbox_policy ); ?>

@@ -1,5 +1,7 @@
 # Product Positioning
 
+Media Library optimization uses a simple default flow: choose a time and image-type range, inspect representative Cloud-qualified samples, confirm once, then watch foreground progress and use batch history for restore. Encoding choices, quality thresholds, fingerprints, Providers, and Artifact details stay out of the default surface. Advanced one-image processing remains separate.
+
 Status: active for the first Toolbox build.
 
 Npcink Workflow Toolbox is the WordPress operator-facing AI workflow surface:

@@ -3063,6 +3063,7 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__stacked-toggle[hidden],
 .npcink-toolbox__result[hidden],
+.npcink-toolbox__batch-panel [hidden],
 .npcink-toolbox__result:empty {
 	display: none !important;
 }

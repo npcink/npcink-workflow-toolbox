@@ -925,7 +925,7 @@ NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/
 This creates one temporary attachment, submits the Toolbox-owned preview route
 from a real authenticated browser, polls Cloud Addon through Toolbox, proves the
 separate queryless local review endpoint rejects a POST body without a WordPress
-REST nonce, then loads verified WebP bytes with `X-WP-Nonce` and the exact local11
+REST nonce, then loads verified WebP bytes with `X-WP-Nonce` and the exact local12
 JSON body. It also checks no-store and nosniff response headers, rejects every
 query field and extra body shape, and rejects
 any request to the removed Adapter media derivative Cloud routes. It cleans up

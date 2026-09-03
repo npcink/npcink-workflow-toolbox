@@ -139,6 +139,10 @@ $base_artifact = array(
 		'final_sanitize_unique_required' => true,
 	),
 	'processing_warnings' => array(),
+	'transform_facts'     => array(
+		'optimization_profile' => 'auto_safe.v1',
+		'qualified'            => true,
+	),
 );
 
 $request_for = static function ( array $artifact, array $query = array(), ?string $path_artifact_id = null, ?array $json = null ) use ( $artifact_id ): WP_REST_Request {
@@ -160,8 +164,8 @@ $artifact_schema  = is_array( $route_args['artifact'] ?? null ) ? $route_args['a
 $artifact_properties = is_array( $artifact_schema['properties'] ?? null ) ? $artifact_schema['properties'] : array();
 npcink_toolbox_local_review_assert( true === ( $artifact_schema['required'] ?? null ), 'WordPress route marks the whole artifact argument required.' );
 npcink_toolbox_local_review_assert( 'rest_validate_request_arg' === ( $artifact_schema['validate_callback'] ?? null ), 'WordPress Core validates the registered artifact object schema before the callback.' );
-npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( $artifact_properties ), 'Route schema declares exactly the local11 artifact properties.' );
-npcink_toolbox_local_review_assert( array() === array_filter( $artifact_properties, static fn( array $property ): bool => true !== ( $property['required'] ?? null ) ), 'Schema v3 marks every local11 property required.' );
+npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( $artifact_properties ), 'Route schema declares exactly the local12 artifact properties.' );
+npcink_toolbox_local_review_assert( array() === array_filter( $artifact_properties, static fn( array $property ): bool => true !== ( $property['required'] ?? null ) ), 'Schema v3 marks every local12 property required.' );
 npcink_toolbox_local_review_assert(
 	array( 'owner', 'strategy', 'final_sanitize_unique_required' ) === ( $artifact_properties['filename_basis']['anyOf'][0]['required'] ?? null ),
 	'Nested filename_basis keeps its exact required-property list.'
@@ -208,13 +212,13 @@ $assert_descriptor_rejected( $base_artifact, 'Path and body artifact ids must ma
 $valid_result = $controller->serve_media_derivative_local_review( $request_for( $base_artifact ) );
 npcink_toolbox_local_review_assert( $valid_result instanceof WP_Error && 'behavior_receive_sentinel' === $valid_result->get_error_code(), 'Canonical Z UTC JSON artifact reaches the Addon receiver.' );
 npcink_toolbox_local_review_assert( 1 === $npcink_toolbox_local_review_receive_calls, 'Addon receiver is called exactly once for the canonical Z descriptor.' );
-npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( $npcink_toolbox_local_review_received_artifact ), 'Addon receiver receives the exact canonical local11 artifact contract.' );
+npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( $npcink_toolbox_local_review_received_artifact ), 'Addon receiver receives the exact canonical local12 artifact contract.' );
 npcink_toolbox_local_review_assert( $base_artifact['sha256'] === $npcink_toolbox_local_review_received_artifact['sha256'], 'Addon receiver gets the bare sha256 value.' );
 npcink_toolbox_local_review_assert( ! isset( $npcink_toolbox_local_review_received_artifact['checksum'], $npcink_toolbox_local_review_received_artifact['artifact_reference'] ), 'Addon receiver gets no Cloud-only checksum or artifact_reference fields.' );
 
 $reordered_artifact = array_reverse( $base_artifact, true );
 $reordered_artifact['filename_basis'] = array_reverse( $base_artifact['filename_basis'], true );
-$assert_descriptor_forwarded( $reordered_artifact, 'Reordered JSON object keys remain a valid exact local11 body.' );
+$assert_descriptor_forwarded( $reordered_artifact, 'Reordered JSON object keys remain a valid exact local12 body.' );
 $assert_descriptor_rejected( array_merge( $base_artifact, array( 'expires_at' => '2030-02-31T00:00:00Z' ) ), 'Impossible UTC calendar dates are rejected.' );
 $assert_descriptor_rejected( array_merge( $base_artifact, array( 'expires_at' => '2030-01-01T08:00:00+08:00' ) ), 'Non-UTC RFC3339 offsets are rejected.' );
 $assert_descriptor_forwarded( array_merge( $base_artifact, array( 'expires_at' => gmdate( 'Y-m-d\TH:i:s', time() + 900 ) . '+00:00' ) ), 'Canonical +00:00 UTC RFC3339 reaches Cloud Addon.' );
@@ -242,6 +246,10 @@ $cloud_artifact = array(
 	'filesize_bytes'      => $base_artifact['filesize_bytes'],
 	'checksum'            => 'sha256:' . $base_artifact['sha256'],
 	'processing_warnings' => $base_artifact['processing_warnings'],
+	'transform_facts'     => array(
+		'optimization_profile' => 'auto_safe.v1',
+		'qualified'            => true,
+	),
 );
 $projection_method = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'media_derivative_local_review_projection' );
 $projection_method->setAccessible( true );
@@ -249,7 +257,10 @@ $local_review = $projection_method->invoke( $controller, array( 'artifact' => ar
 npcink_toolbox_local_review_assert( array( 'endpoint', 'method', 'artifact' ) === array_keys( $local_review ), 'Projection emits only endpoint, method, and artifact.' );
 npcink_toolbox_local_review_assert( 'POST' === ( $local_review['method'] ?? null ), 'Projection requires POST.' );
 npcink_toolbox_local_review_assert( false === strpos( (string) ( $local_review['endpoint'] ?? '' ), '?' ), 'Projection endpoint is queryless.' );
-npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( (array) ( $local_review['artifact'] ?? array() ) ), 'Projection emits the exact canonical local11 JSON artifact.' );
+npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( (array) ( $local_review['artifact'] ?? array() ) ), 'Projection emits the exact canonical local12 JSON artifact.' );
 npcink_toolbox_local_review_assert( ! isset( $local_review['artifact']['checksum'], $local_review['artifact']['artifact_reference'] ), 'Projection strips Cloud-only checksum and artifact_reference fields.' );
+$invalid_cloud_artifact = $cloud_artifact;
+$invalid_cloud_artifact['transform_facts'] = array();
+npcink_toolbox_local_review_assert( array() === $projection_method->invoke( $controller, array( 'artifact' => $invalid_cloud_artifact ) ), 'Projection rejects a v3 artifact without structured transform facts.' );
 
 echo "Media derivative local review behavior checks passed.\n";

@@ -329,6 +329,68 @@
       "boundary_note": "Builds media derivative handoff only; no derivative execution or media replacement."
     },
     {
+      "route": "/media-optimization-manifest",
+      "documented_route": "/media-optimization-manifest",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "npcink_abilities_toolkit",
+      "write_posture": "read_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Invokes the existing Toolkit read-only planner for the present administrator; it creates no Core approval and performs no media write."
+    },
+    {
+      "route": "/media-optimization-batches",
+      "documented_route": "/media-optimization-batches",
+      "methods": ["GET", "POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "toolbox_exact_manifest_state",
+      "write_posture": "local_execution_record",
+      "direct_wordpress_write": false,
+      "boundary_note": "Creates or lists the bounded local exact-manifest execution record; it does not optimize or replace media by itself."
+    },
+    {
+      "route": "/media-optimization-batches/current",
+      "documented_route": "/media-optimization-batches/current",
+      "methods": ["GET"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "toolbox_exact_manifest_state",
+      "write_posture": "read_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Reads the latest local foreground batch so an administrator can explicitly resume it."
+    },
+    {
+      "route": "/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/confirm",
+      "documented_route": "/media-optimization-batches/{batch_id}/confirm",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "toolbox_exact_manifest_state",
+      "write_posture": "strong_local_confirmation_record",
+      "direct_wordpress_write": false,
+      "boundary_note": "Records one administrator confirmation for the exact manifest digest; it does not approve a Core proposal or modify media."
+    },
+    {
+      "route": "/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/complete",
+      "documented_route": "/media-optimization-batches/{batch_id}/items/{attachment_id}/complete",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "npcink_abilities_toolkit",
+      "write_posture": "strong_local_confirmation_exception",
+      "direct_wordpress_write": true,
+      "boundary_exception": "ADR-015",
+      "boundary_note": "After exact-manifest confirmation and a second source SHA-256 check, delegates one qualified replacement to the existing Toolkit write ability."
+    },
+    {
+      "route": "/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/restore",
+      "documented_route": "/media-optimization-batches/{batch_id}/items/{attachment_id}/restore",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "npcink_abilities_toolkit",
+      "write_posture": "strong_local_confirmation_exception",
+      "direct_wordpress_write": true,
+      "boundary_exception": "ADR-015",
+      "boundary_note": "Delegates one explicitly selected batch restore to the existing Toolkit restore ability and isolates item failure."
+    },
+    {
       "route": "/media-derivative-preview",
       "documented_route": "/media-derivative-preview",
       "methods": ["POST"],
@@ -376,7 +438,7 @@
       "owner": "toolbox_local_review_projection",
       "write_posture": "preview_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Queryless POST with cookie plus X-WP-Nonce and exact local11 JSON artifact body; bytes are received and verified through Cloud Addon with no self-signed query authorization, persistence, media registration, or write."
+      "boundary_note": "Queryless POST with cookie plus X-WP-Nonce and exact local12 JSON artifact body including v3 transform facts; bytes are received and verified through Cloud Addon with no self-signed query authorization, persistence, media registration, or write."
     },
     {
       "route": "/nightly-inspection/cloud-runtime-entitlement",

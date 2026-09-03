@@ -388,6 +388,12 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/flows/media-brief`
 - `POST /wp-json/npcink-toolbox/v1/editor/content-support`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-handoff`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-manifest`
+- `GET|POST /wp-json/npcink-toolbox/v1/media-optimization-batches`
+- `GET /wp-json/npcink-toolbox/v1/media-optimization-batches/current`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/confirm`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-preview`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}/result`
@@ -403,7 +409,7 @@ Current routes require `manage_options`:
 Media derivative result responses keep two independent projections. The
 `cloud_result.artifact` member is the exact artifact validated from
 `media_derivative_result.v1`; `local_review` contains one queryless same-origin
-`endpoint`, `method=POST`, and the exact local11 `artifact`. The route is
+`endpoint`, `method=POST`, and the exact local12 `artifact`. The route is
 administrator-only and cookie plus `X-WP-Nonce` gated. Toolbox rejects every
 query parameter and every extra body field before passing the exact artifact to
 Addon, which pulls, verifies, and ACKs the bytes. The browser renders those

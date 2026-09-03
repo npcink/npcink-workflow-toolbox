@@ -3108,9 +3108,6 @@ msgstr "使用文章上下文"
 msgid "Use selected paragraph"
 msgstr "使用选中段落"
 
-msgid "Search image sources"
-msgstr "搜索图片来源"
-
 msgid "Searching"
 msgstr "搜索中"
 
@@ -8526,3 +8523,73 @@ msgstr "此页面不会替换原图。"
 #: includes/Admin_Page.php
 msgid "Most users can keep the defaults. Open this only when you need to choose a specific source, format, size, crop, or watermark."
 msgstr "大多数情况下可以保留默认设置。只有需要指定来源、格式、尺寸、裁剪或水印时才打开这里。"
+
+#: includes/Admin_Page.php
+msgid "Optimize Media Library images"
+msgstr "优化媒体库图片"
+
+#: includes/Admin_Page.php
+msgid "Time range"
+msgstr "时间范围"
+
+#: includes/Admin_Page.php
+msgid "Last month"
+msgstr "最近一个月"
+
+#: includes/Admin_Page.php
+msgid "Last three months"
+msgstr "最近三个月"
+
+#: includes/Admin_Page.php
+msgid "This year"
+msgstr "今年"
+
+#: includes/Admin_Page.php
+msgid "All images"
+msgstr "全部图片"
+
+#: includes/Admin_Page.php
+msgid "Image type"
+msgstr "图片类型"
+
+#: includes/Admin_Page.php
+msgid "From"
+msgstr "开始日期"
+
+#: includes/Admin_Page.php
+msgid "To"
+msgstr "结束日期"
+
+#: includes/Admin_Page.php
+msgid "Check optimizable images"
+msgstr "检查可优化图片"
+
+msgid "Recommended images"
+msgstr "推荐图片"
+
+#: includes/Admin_Page.php
+msgid "Start optimization"
+msgstr "开始优化"
+
+msgid "Sample preview could not be verified. Check the images again before starting optimization."
+msgstr "样本预览未能验证。请重新检查图片后再开始优化。"
+
+#: includes/Admin_Page.php
+msgid "Large images found"
+msgstr "发现超大图片"
+
+#: includes/Admin_Page.php
+msgid "Keep original dimensions"
+msgstr "保持原尺寸"
+
+#: includes/Admin_Page.php
+msgid "Limit longest side to 1920px"
+msgstr "最长边缩至 1920px"
+
+#: includes/Admin_Page.php
+msgid "History and restore"
+msgstr "历史与恢复"
+
+#: includes/Admin_Page.php
+msgid "Completed batches remain recoverable for 30 days. Backups are not deleted automatically."
+msgstr "已完成批次默认可在 30 天内恢复。备份不会被自动删除。"
