@@ -148,11 +148,13 @@ final class Provider_Client {
 				}
 				$attachment_id = absint( $cached_item['attachment_id'] ?? 0 );
 				$visual        = is_array( $cached_item['visual_evidence'] ?? null ) ? $cached_item['visual_evidence'] : array();
+				$current_fingerprint = (string) ( $fingerprints[ $attachment_id ] ?? '' );
+				$evidence_fingerprint = sanitize_text_field( (string) ( $cached_item['media_fingerprint'] ?? '' ) );
+				$visual_reuse_policy = $this->media_visual_evidence_reuse_policy( $attachment_id, $current_fingerprint, $evidence_fingerprint, $visual );
 				if (
 					0 >= $attachment_id
 					|| 'ready' !== sanitize_key( (string) ( $visual['status'] ?? '' ) )
-					|| '' === (string) ( $fingerprints[ $attachment_id ] ?? '' )
-					|| (string) $fingerprints[ $attachment_id ] !== sanitize_text_field( (string) ( $cached_item['media_fingerprint'] ?? '' ) )
+					|| '' === $visual_reuse_policy
 				) {
 					continue;
 				}
@@ -162,6 +164,7 @@ final class Provider_Client {
 						'attachment_id'          => $attachment_id,
 						'media_fingerprint'       => $fingerprints[ $attachment_id ],
 						'evidence_reuse'          => 'site_knowledge_projection',
+						'visual_reuse_policy'     => $visual_reuse_policy,
 						'write_posture'           => 'suggestion_only',
 						'direct_wordpress_write'  => false,
 					)
@@ -338,7 +341,7 @@ final class Provider_Client {
 			'path'              => $source_path,
 			'filename'          => 'site-media-' . $attachment_id . '.' . $extension,
 			'mime_type'         => $mime_type,
-			'media_fingerprint' => 'sha256:' . implode( ':', str_split( $fingerprint, 8 ) ),
+			'media_fingerprint' => 'sha256:' . strtolower( $fingerprint ),
 		);
 	}
 
@@ -2810,8 +2813,45 @@ final class Provider_Client {
 		if ( '' === $fingerprint ) {
 			return '';
 		}
+		if ( 1 === preg_match( '/^sha256:[a-f0-9]{64}$/i', $fingerprint ) ) {
+			return strtolower( $fingerprint );
+		}
 
-		return 'sha256:' . implode( ':', str_split( hash( 'sha256', $fingerprint ), 8 ) );
+		if ( 1 === preg_match( '/^[a-f0-9]{64}$/i', $fingerprint ) ) {
+			return 'sha256:' . strtolower( $fingerprint );
+		}
+
+		return '';
+	}
+
+	private function media_visual_evidence_reuse_policy( int $attachment_id, string $current_fingerprint, string $evidence_fingerprint, array $visual ): string {
+		$current_fingerprint = $this->runtime_safe_media_fingerprint( $current_fingerprint );
+		$evidence_fingerprint = $this->runtime_safe_media_fingerprint( $evidence_fingerprint );
+		$evidence_policy = sanitize_key( (string) ( $visual['visual_reuse_policy'] ?? '' ) );
+		if ( '' === $current_fingerprint || '' === $evidence_fingerprint || 'requires_reidentification' === $evidence_policy ) {
+			return '';
+		}
+		if ( $current_fingerprint === $evidence_fingerprint ) {
+			return 'reuse_with_human_check' === $evidence_policy ? $evidence_policy : 'reuse';
+		}
+		if ( ! function_exists( 'get_post_meta' ) ) {
+			return '';
+		}
+		$history = get_post_meta( $attachment_id, '_npcink_ai_media_file_replacement_history', true );
+		if ( ! is_array( $history ) || empty( $history ) ) {
+			return '';
+		}
+		$latest = end( $history );
+		if (
+			! is_array( $latest )
+			|| $current_fingerprint !== $this->runtime_safe_media_fingerprint( (string) ( $latest['new_media_fingerprint'] ?? '' ) )
+			|| $evidence_fingerprint !== $this->runtime_safe_media_fingerprint( (string) ( $latest['derived_from_media_fingerprint'] ?? '' ) )
+		) {
+			return '';
+		}
+		$policy = sanitize_key( (string) ( $latest['visual_reuse_policy'] ?? '' ) );
+		$facts = is_array( $latest['transform_facts'] ?? null ) ? $latest['transform_facts'] : array();
+		return in_array( $policy, array( 'reuse', 'reuse_with_human_check' ), true ) && ! empty( $facts ) ? $policy : '';
 	}
 
 	private function runtime_safe_media_url( string $url ): string {
@@ -2908,6 +2948,7 @@ final class Provider_Client {
 					'alt_text_basis'    => sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) ),
 					'visual_summary'    => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
 					'evidence_reuse'    => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? 'site_knowledge_projection' ) ),
+					'visual_reuse_policy' => sanitize_key( (string) ( $visual_evidence['visual_reuse_policy'] ?? '' ) ),
 				);
 			}
 		}
@@ -2921,11 +2962,12 @@ final class Provider_Client {
 			$format            = is_array( $item['format_inspection'] ?? null ) ? $item['format_inspection'] : array();
 			$media_fingerprint = sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) );
 			$visual_evidence   = is_array( $evidence_by_attachment_id[ $attachment_id ] ?? null ) ? $evidence_by_attachment_id[ $attachment_id ] : array();
+			$visual_reuse_policy = $this->media_visual_evidence_reuse_policy( $attachment_id, $media_fingerprint, (string) ( $visual_evidence['media_fingerprint'] ?? '' ), $visual_evidence );
 			if (
-				'' === $media_fingerprint
-				|| $media_fingerprint !== (string) ( $visual_evidence['media_fingerprint'] ?? '' )
+				'' === $visual_reuse_policy
 			) {
 				$visual_evidence = array();
+				$visual_reuse_policy = '';
 			}
 			$suggested_alt = sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) );
 			$images[] = array(
@@ -2951,6 +2993,8 @@ final class Provider_Client {
 				'suggested_alt'      => $suggested_alt,
 				'visual_summary'     => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
 				'evidence_reuse'     => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? '' ) ),
+				'visual_reuse_policy' => $visual_reuse_policy,
+				'needs_human_visual_check' => 'reuse_with_human_check' === $visual_reuse_policy,
 				'seo_suggestions'    => '' !== $suggested_alt ? array( 'alt' => $suggested_alt ) : array(),
 				'requires_local_review' => true,
 				'direct_wordpress_write' => false,
