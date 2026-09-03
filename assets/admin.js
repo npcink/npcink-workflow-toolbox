@@ -5515,9 +5515,8 @@
 		if (!(submitButton instanceof HTMLButtonElement)) return;
 		const states = asArray(sampleStates);
 		const hasVerifiedPreview = states.some((state) => !state.skipped && state.localReviewStatus === 'verified');
-		const hasFailure = states.some((state) => state.batchPreviewError || state.localReviewStatus === 'failed');
 		const allSettled = states.length > 0 && states.every((state) => state.skipped || state.localReviewStatus === 'verified' || state.localReviewStatus === 'failed' || state.batchPreviewError);
-		const ready = asArray(plan.candidates).length > 0 && allSettled && hasVerifiedPreview && !hasFailure;
+		const ready = asArray(plan.candidates).length > 0 && allSettled && hasVerifiedPreview;
 		submitButton.disabled = !ready;
 		submitButton.hidden = !ready;
 	}
