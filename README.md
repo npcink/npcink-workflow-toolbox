@@ -1,5 +1,7 @@
 # Npcink Workflow Toolbox
 
+The default Media Library optimization flow is `choose range -> check samples -> confirm once and run -> history and restore`. It uses Cloud `auto_safe.v1` analysis while WordPress and Abilities Toolkit retain all file replacement, backup, and restore authority. See `docs/decisions/ADR-015-exact-manifest-local-media-optimization.md`.
+
 Single-image recovery remains attachment-scoped. Media Library attachment details and row actions can reopen the existing workbench, which reads available backups through `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` before the administrator explicitly confirms restoration. This lookup does not restore, delete, or modify media.
 
 Npcink Workflow Toolbox turns proven AI-assisted WordPress operations into
@@ -284,6 +286,12 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/flows/media-brief`
 - `POST /wp-json/npcink-toolbox/v1/editor/content-support`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-handoff`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-manifest`
+- `GET|POST /wp-json/npcink-toolbox/v1/media-optimization-batches`
+- `GET /wp-json/npcink-toolbox/v1/media-optimization-batches/current`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/confirm`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
+- `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-preview`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}/result`
@@ -739,7 +747,7 @@ the same preview/proposal flow. The single-image action surface dispatches the
 bounded media-derivative recipe through Cloud Addon, polls the short-lived Cloud
 artifact result, and renders a separate `local_review` POST transport. Its
 same-origin WordPress endpoint has no query string; the browser submits the
-exact local11 artifact as JSON with cookie authentication and `X-WP-Nonce`.
+exact local12 artifact as JSON with cookie authentication and `X-WP-Nonce`.
 Cloud Addon receives, verifies, and ACKs the bytes before Toolbox serves them
 with no-store and nosniff headers. The browser renders the response through a
 short-lived Blob object URL and revokes it on load, error, or re-render. The

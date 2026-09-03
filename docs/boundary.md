@@ -1,5 +1,7 @@
 # Npcink Toolbox Boundary
 
+ADR-015 permits one narrow present-admin write lane for `auto_safe.v1` Media Library optimization. Toolbox owns only the frozen local manifest, foreground progress, and confirmation receipt. Cloud owns derivative analysis and short-lived Artifacts; Toolkit owns every replacement, backup, verification, lineage record, and restore. This lane creates no Core proposal because the exact manifest is strongly confirmed once by the present administrator. It is unavailable to agents, background execution, Cron, or arbitrary media transforms, and does not change Core or Adapter contracts.
+
 The read-only `/strong-local-confirmation/media-derivative-backups/{attachment_id}` route lists Toolkit-owned backups for one editable attachment so the existing local restore workbench can be reopened. It does not restore, delete, or modify media.
 
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
@@ -229,6 +231,12 @@ human-readable allowlist and must stay aligned with that table and
 - `/flows/media-brief`
 - `/editor/content-support`
 - `/media-derivative-handoff`
+- `/media-optimization-manifest`
+- `/media-optimization-batches`
+- `/media-optimization-batches/current`
+- `/media-optimization-batches/{batch_id}/confirm`
+- `/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
+- `/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
 - `/media-derivative-preview`
 - `/media-derivative-preview/{run_id}`
 - `/media-derivative-preview/{run_id}/result`
@@ -581,7 +589,7 @@ Batch selection and every background, delegated, or external-client flow remain
 Core-governed. The preview surface
 may POST `/media-derivative-local-review/{artifact_id}` for operator review.
 That queryless route requires an authenticated administrator and `X-WP-Nonce`,
-accepts only `{artifact: exact local11}` JSON with a matching path artifact id,
+accepts only `{artifact: exact local12}` JSON with a matching path artifact id,
 passes it to Cloud Addon for verified receive and delivery ACK, and returns
 no-store/nosniff bytes. The browser uses and revokes a short-lived Blob object
 URL; it accepts no query parameter, self-signed authorization, remote URL,

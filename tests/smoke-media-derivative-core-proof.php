@@ -398,7 +398,7 @@ toolbox_media_derivative_smoke_assert( 'POST' === (string) ( $local_review['meth
 toolbox_media_derivative_smoke_assert( (string) $derivative['artifact_id'] === (string) ( $local_review_artifact['artifact_id'] ?? '' ), 'Toolbox local review binds to the exact Cloud artifact id.' );
 toolbox_media_derivative_smoke_assert( (string) $derivative['expires_at'] === (string) ( $local_review_artifact['expires_at'] ?? '' ), 'Toolbox local review preserves the Cloud artifact expiry.' );
 toolbox_media_derivative_smoke_assert( false !== strpos( (string) ( $local_review['endpoint'] ?? '' ), '/npcink-toolbox/v1/media-derivative-local-review/' ) && false === strpos( (string) ( $local_review['endpoint'] ?? '' ), '?' ), 'Toolbox returns a queryless capability-gated local review endpoint separately from the Cloud artifact.' );
-toolbox_media_derivative_smoke_assert( array( 'artifact_id', 'expires_at', 'mime_type', 'format', 'width', 'height', 'filesize_bytes', 'sha256', 'suggested_filename', 'filename_basis', 'processing_warnings' ) === array_keys( $local_review_artifact ), 'Toolbox local review carries exact local11 JSON artifact evidence.' );
+toolbox_media_derivative_smoke_assert( array( 'artifact_id', 'expires_at', 'mime_type', 'format', 'width', 'height', 'filesize_bytes', 'sha256', 'suggested_filename', 'filename_basis', 'processing_warnings', 'transform_facts' ) === array_keys( $local_review_artifact ), 'Toolbox local review carries exact local12 JSON artifact evidence.' );
 toolbox_media_derivative_smoke_assert( ! isset( $local_review_artifact['checksum'], $local_review_artifact['artifact_reference'] ), 'Toolbox local review omits Cloud-only checksum and artifact_reference fields.' );
 
 $direct_preflight = toolbox_media_derivative_smoke_rest_raw(

@@ -2833,7 +2833,7 @@
 		const artifact = localReview.artifact && typeof localReview.artifact === 'object' ? localReview.artifact : {};
 		const expectedArtifactKeys = [
 			'artifact_id', 'expires_at', 'mime_type', 'format', 'width', 'height',
-			'filesize_bytes', 'sha256', 'suggested_filename', 'filename_basis', 'processing_warnings'
+			'filesize_bytes', 'sha256', 'suggested_filename', 'filename_basis', 'processing_warnings', 'transform_facts'
 		];
 		if (localReview.method !== 'POST' || Object.keys(artifact).length !== expectedArtifactKeys.length || !expectedArtifactKeys.every((key) => Object.prototype.hasOwnProperty.call(artifact, key))) {
 			return null;
@@ -3455,47 +3455,36 @@
 	}
 
 	function mediaDerivativeBatchPlanInput(form) {
-		syncWatermarkTemplateSelection(form);
 		const raw = serialize(form);
-		const scope = resolveMediaBatchScopePreset(raw);
-		const recipe = resolveMediaBatchRecipeDefaults(raw);
+		const preset = String(raw.batch_scope_preset || 'one_month');
+		const now = new Date();
+		const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		if (preset === 'one_month') {
+			start.setMonth(start.getMonth() - 1);
+		} else if (preset === 'three_months') {
+			start.setMonth(start.getMonth() - 3);
+		} else if (preset === 'this_year') {
+			start.setMonth(0, 1);
+		}
+		const dateValue = (date) => date.toISOString().slice(0, 10);
+		const imageType = String(raw.batch_image_type || 'recommended');
+		const imageTypes = ['jpeg', 'png', 'webp'].includes(imageType) ? [imageType] : ['jpeg', 'png', 'webp'];
 		const attachmentIds = parseAttachmentIds(raw.attachment_ids || '');
-		const rawDimensions = String(raw.batch_min_dimensions || '').trim();
-		const dimensionsValue = rawDimensions && !(rawDimensions === '800x800' && recipe.recipe !== 'smart_optimize') ? rawDimensions : recipe.min_dimensions || '0x0';
-		const dimensions = dimensionsFromText(dimensionsValue, 0, 0);
-		const targetFormat = String(recipe.target_format || raw.batch_target_format || 'webp');
-		const rawExcludeFormats = String(raw.batch_exclude_formats || '').trim();
-		const excludeFormatsValue = rawExcludeFormats && !(rawExcludeFormats === 'webp,gif,svg' && recipe.recipe !== 'smart_optimize') ? rawExcludeFormats : recipe.exclude_formats || targetFormat;
 		const input = {
 			mime_type: 'image',
-			target_format: targetFormat,
-			exclude_formats: commaList(excludeFormatsValue),
-			min_width: dimensions.width,
-			min_height: dimensions.height,
-			max_items: parseInt(raw.batch_max_items || '5', 10) || 5,
+			optimization_mode: 'auto_safe',
+			optimization_profile: 'auto_safe.v1',
+			image_types: imageTypes,
+			resize_mode: String(raw.batch_resize_mode || 'preserve') === 'fit' ? 'fit' : 'preserve',
+			max_items: 1000,
 		};
-		if (scope.date_from) {
-			input.date_from = String(scope.date_from);
-		}
-		if (scope.date_to) {
-			input.date_to = String(scope.date_to) + ' 23:59:59';
-		}
-		if (attachmentIds.length) {
-			input.attachment_ids = attachmentIds.slice(0, 50);
-		}
-		if (raw.max_width) {
-			input.target_max_width = raw.max_width;
-		}
-		if (raw.quality) {
-			input.quality = raw.quality;
-		}
-		const cropInput = mediaDerivativeCropInput(raw);
-		if (cropInput.crop) {
-			input.crop = cropInput.crop;
-		}
-		const watermarkInput = mediaDerivativeWatermarkInput(raw);
-		if (watermarkInput.watermark) {
-			input.watermark = watermarkInput.watermark;
+		if (attachmentIds.length) input.attachment_ids = attachmentIds.slice(0, 1000);
+		if (preset === 'custom') {
+			if (raw.batch_date_from) input.date_from = String(raw.batch_date_from);
+			if (raw.batch_date_to) input.date_to = String(raw.batch_date_to) + ' 23:59:59';
+		} else if (preset !== 'all') {
+			input.date_from = dateValue(start);
+			input.date_to = dateValue(now) + ' 23:59:59';
 		}
 		return input;
 	}
@@ -5067,6 +5056,19 @@
 		}
 		const derivative = derivativeFromResult(resultPayload);
 		const localReview = localReviewFromResult(resultPayload);
+		const optimization = asObject(resultPayload && (resultPayload.optimization || (resultPayload.cloud_result && resultPayload.cloud_result.optimization)));
+		if (optimization.status === 'skipped') {
+			return {
+				abilityInput: input,
+				mediaDetailsInput: mediaDetails || {},
+				outputFilenameBase,
+				create: createPayload,
+				result: resultPayload,
+				runId,
+				skipped: true,
+				optimization,
+			};
+		}
 		if (!derivative || !derivative.artifact_id) {
 			throw { message: 'Cloud result did not include a derivative artifact id.' };
 		}
@@ -5422,124 +5424,200 @@
 	}
 
 	async function buildMediaDerivativeBatchPlan(form) {
-		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
+		if (!config.restUrl) {
+			throw { message: 'Npcink Toolbox REST URL is unavailable.' };
 		}
 
 		const input = mediaDerivativeBatchPlanInput(form);
 		renderTextResult(form, 'Building media derivative batch plan...', 'pending');
-		let planEnvelope;
-		try {
-			planEnvelope = await runMediaDerivativeBatchPlanRead(input);
-		} catch (error) {
-			if (!errorContainsCode(error, 'npcink_openclaw_adapter_core_read_authorization_required', new WeakSet())) {
-				throw error;
-			}
-			await requestMediaDerivativeBatchReadAuthorization(form, input);
-			return;
-		}
-		completeMediaDerivativeBatchPlan(form, planEnvelope);
+		const planEnvelope = await postJson(config.restUrl, 'media-optimization-manifest', input);
+		await completeMediaDerivativeBatchPlan(form, planEnvelope);
 	}
 
-	function runMediaDerivativeBatchPlanRead(input, readRequestId) {
-		const payload = {
-			ability_id: 'npcink-abilities-toolkit/build-media-derivative-batch-plan',
-			input,
+	function representativeMediaCandidates(candidates) {
+		const picked = [];
+		const add = (candidate) => {
+			if (candidate && !picked.some((item) => mediaBatchAttachmentId(item) === mediaBatchAttachmentId(candidate))) picked.push(candidate);
 		};
-		if (readRequestId) {
-			payload.read_request_id = readRequestId;
-		}
-		return postJson(config.adapterRestUrl, 'run-read-ability', payload);
+		const bySize = candidates.slice().sort((a, b) => Number(b.filesize_bytes || 0) - Number(a.filesize_bytes || 0));
+		add(bySize[0]);
+		add(candidates.find((item) => item.is_oversized));
+		['png', 'jpeg', 'webp'].forEach((format) => add(candidates.find((item) => String(item.source_format || '') === format)));
+		bySize.forEach((candidate) => { if (picked.length < 6) add(candidate); });
+		return picked.slice(0, 6);
 	}
 
-	function completeMediaDerivativeBatchPlan(form, planEnvelope) {
+	function estimatedMediaOptimizationSavings(plan, sampleStates) {
+		const qualified = asArray(sampleStates).filter((state) => !state.skipped && Number(asObject(state.derivative).filesize_bytes || 0) > 0);
+		const sampledSourceBytes = qualified.reduce((total, state) => total + Number(asObject(state.batchCandidate).filesize_bytes || 0), 0);
+		const sampledSavedBytes = qualified.reduce((total, state) => {
+			const before = Number(asObject(state.batchCandidate).filesize_bytes || 0);
+			const after = Number(asObject(state.derivative).filesize_bytes || 0);
+			return total + Math.max(0, before - after);
+		}, 0);
+		if (!sampledSourceBytes || !sampledSavedBytes) return 0;
+		const candidateBytes = asArray(plan.candidates).reduce((total, candidate) => total + Number(candidate.filesize_bytes || 0), 0);
+		return Math.round(candidateBytes * sampledSavedBytes / sampledSourceBytes);
+	}
+
+	function renderOneClickMediaBatch(form, batch, sampleStates, plan) {
+		const host = form.querySelector('[data-toolbox-media-batch-plan]');
+		if (!host) return;
+		host.hidden = false;
+		host.replaceChildren();
+		const summary = asObject(batch.summary);
+		const planSummary = asObject(asObject(plan).summary);
+		const meta = el('div', 'npcink-toolbox__result-meta');
+		appendMeta(meta, t('Images found'), Number(planSummary.candidate_count || summary.total || 0));
+		appendMeta(meta, t('Estimated saving'), mediaOptimizationBytes(estimatedMediaOptimizationSavings(plan, sampleStates)));
+		appendMeta(meta, t('Skipped during check'), Number(planSummary.skipped_count || 0));
+		appendMeta(meta, t('Maximum batch size'), 1000);
+		host.appendChild(meta);
+		if (Array.isArray(sampleStates) && sampleStates.length) {
+			const samples = el('div', 'npcink-toolbox__media-samples');
+			sampleStates.forEach((state) => {
+				const candidate = asObject(state.batchCandidate);
+				const row = el('article', 'npcink-toolbox__result-item');
+				row.appendChild(el('h4', '', String(candidate.title || ('Image #' + mediaBatchAttachmentId(candidate)))));
+				if (state.batchPreviewError) {
+					row.appendChild(el('p', 'npcink-toolbox__result-notice is-error', t('Sample preview could not be verified. Check the images again before starting optimization.')));
+				} else if (state.skipped) {
+					row.appendChild(el('p', 'npcink-toolbox__result-notice is-pending', t('Cloud checked this image and skipped it because the safe saving threshold was not met.')));
+				} else {
+					const comparison = el('div', 'npcink-toolbox__media-comparison');
+					const original = el('img'); original.src = String(candidate.url || ''); original.alt = '';
+					const before = el('figure'); before.append(original, el('figcaption', '', t('Original')));
+					comparison.appendChild(before);
+					const transport = mediaDerivativeLocalReviewTransport(state.localReview);
+					if (transport) {
+						const optimized = el('img'); optimized.alt = '';
+						const after = el('figure'); after.append(optimized, el('figcaption', '', t('Optimized preview')));
+						comparison.appendChild(after);
+						startMediaDerivativePreviewImage(optimized, state.localReview, () => {
+							state.localReviewStatus = 'verified';
+							syncOneClickMediaBatchStartState(form, plan, sampleStates);
+						}, () => {
+							state.localReviewStatus = 'failed';
+							syncOneClickMediaBatchStartState(form, plan, sampleStates);
+						});
+					}
+					row.appendChild(comparison);
+					row.appendChild(el('p', '', mediaBatchSavingsLabel(candidate.filesize_bytes, asObject(state.derivative).filesize_bytes)));
+				}
+				samples.appendChild(row);
+			});
+			host.appendChild(samples);
+		}
+	}
+
+	function syncOneClickMediaBatchStartState(form, plan, sampleStates) {
+		const submitButton = form.querySelector('[data-toolbox-submit-media-batch-proposals]');
+		if (!(submitButton instanceof HTMLButtonElement)) return;
+		const states = asArray(sampleStates);
+		const hasVerifiedPreview = states.some((state) => !state.skipped && state.localReviewStatus === 'verified');
+		const hasFailure = states.some((state) => state.batchPreviewError || state.localReviewStatus === 'failed');
+		const allSettled = states.length > 0 && states.every((state) => state.skipped || state.localReviewStatus === 'verified' || state.localReviewStatus === 'failed' || state.batchPreviewError);
+		const ready = asArray(plan.candidates).length > 0 && allSettled && hasVerifiedPreview && !hasFailure;
+		submitButton.disabled = !ready;
+		submitButton.hidden = !ready;
+	}
+
+	function mediaOptimizationBytes(bytes) {
+		bytes = Number(bytes || 0);
+		if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+		if (bytes >= 1024) return Math.round(bytes / 1024) + ' KB';
+		return Math.max(0, Math.round(bytes)) + ' B';
+	}
+
+	function renderMediaOptimizationHistory(form, batch) {
+		const host = form.querySelector('[data-toolbox-media-batch-history]');
+		if (!host || !batch || !batch.batch_id) return;
+		const previous = host.querySelector('[data-toolbox-media-history-summary]');
+		if (previous) previous.remove();
+		const summary = asObject(batch.summary);
+		const block = el('div', 'npcink-toolbox__media-history-summary');
+		block.setAttribute('data-toolbox-media-history-summary', '');
+		block.appendChild(el('strong', '', formatDateTime(batch.created_at_gmt) || t('Latest batch')));
+		block.appendChild(el('p', '', [
+			t('Optimized ') + String(summary.success || 0),
+			t('skipped ') + String(summary.skipped || 0),
+			t('failed ') + String(summary.failed || 0),
+			mediaOptimizationBytes(summary.bytes_saved || 0) + t(' saved'),
+		].join(' · ')));
+		block.appendChild(el('p', 'description', new Date(String(batch.recoverable_until_gmt || '')).getTime() < Date.now()
+			? t('Restore period has ended. Backups are still kept until you separately choose to clean them up.')
+			: t('Individual and whole-batch restore remain available until ') + formatDateTime(batch.recoverable_until_gmt) + '.'));
+		const restorable = asArray(batch.items).filter((item) => item.status === 'completed' && item.restore_status !== 'restored');
+		if (restorable.length) {
+			const actions = el('div', 'npcink-toolbox__inline-actions');
+			const select = document.createElement('select');
+			select.setAttribute('data-toolbox-media-restore-selection', '');
+			restorable.forEach((item) => {
+				const option = document.createElement('option');
+				option.value = String(item.attachment_id || '');
+				option.textContent = String(item.title || ('Image #' + item.attachment_id));
+				select.appendChild(option);
+			});
+			const one = el('button', 'button', t('Restore selected image'));
+			one.type = 'button'; one.setAttribute('data-toolbox-restore-media-batch-item', '');
+			const all = el('button', 'button', t('Restore whole batch'));
+			all.type = 'button'; all.setAttribute('data-toolbox-restore-media-batch-all', '');
+			actions.append(select, one, all);
+			block.appendChild(actions);
+		}
+		host.appendChild(block);
+	}
+
+	async function restoreMediaOptimizationItem(form, attachmentId) {
+		const batch = asObject(form.__npcinkMediaOptimizationBatch);
+		if (!batch.batch_id || !attachmentId) throw { message: 'Choose an optimized image to restore.' };
+		const updated = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(attachmentId)) + '/restore', {});
+		form.__npcinkMediaOptimizationBatch = updated;
+		renderMediaOptimizationHistory(form, updated);
+		return updated;
+	}
+
+	async function restoreWholeMediaOptimizationBatch(form) {
+		let batch = asObject(form.__npcinkMediaOptimizationBatch);
+		const items = asArray(batch.items).filter((item) => item.status === 'completed' && item.restore_status !== 'restored');
+		for (let index = 0; index < items.length; index += 1) {
+			renderTextResult(form, t('Restoring ') + String(index + 1) + t(' of ') + String(items.length) + '...', 'pending');
+			try {
+				batch = await restoreMediaOptimizationItem(form, items[index].attachment_id);
+			} catch (error) {
+				// A failed restore is isolated; continue with the next recorded image.
+			}
+		}
+		renderTextResult(form, t('Batch restore finished. Review any items that could not be restored.'), 'ok');
+	}
+
+	async function completeMediaDerivativeBatchPlan(form, planEnvelope) {
 		const plan = normalizeMediaDerivativeBatchPlan(planDataFromEnvelope(planEnvelope) || {});
 		form.__npcinkMediaDerivativeBatchReadAuthorization = null;
 		form.__npcinkMediaDerivativeBatchPlan = plan;
-		form.__npcinkMediaDerivativeBatchStates = [];
-		renderMediaDerivativeBatchPlan(form, planEnvelope, plan);
-		renderTextResult(form, plan.operator_next_action || 'Review list ready. Select images and generate previews.', 'ok');
-		const runButton = form.querySelector('[data-toolbox-run-media-batch-previews]');
-		const submitButton = form.querySelector('[data-toolbox-submit-media-batch-proposals]');
-		if (runButton instanceof HTMLButtonElement) {
-			runButton.disabled = !(asArray(plan.candidates).length > 0);
-			runButton.hidden = !(asArray(plan.candidates).length > 0);
+		const batch = await postJson(config.restUrl, 'media-optimization-batches', { plan });
+		form.__npcinkMediaOptimizationBatch = batch;
+		const resizeChoice = form.querySelector('[data-toolbox-media-resize-choice]');
+		if (resizeChoice) resizeChoice.hidden = !(Number(asObject(plan.summary).oversized_count || 0) > 0);
+		const samples = representativeMediaCandidates(asArray(plan.candidates));
+		const states = [];
+		for (let index = 0; index < samples.length; index += 1) {
+			const candidate = samples[index];
+			renderTextResult(form, t('Checking sample ') + String(index + 1) + t(' of ') + String(samples.length) + '...', 'pending');
+			try {
+				const state = await createMediaDerivativePreview(asObject(candidate.cloud_request_input), {}, true, null, '', true);
+				state.batchCandidate = candidate;
+				states.push(state);
+			} catch (error) {
+				states.push({ batchCandidate: candidate, batchPreviewError: error });
+			}
 		}
-		if (submitButton instanceof HTMLButtonElement) {
-			submitButton.disabled = true;
-			submitButton.hidden = true;
-		}
+		form.__npcinkMediaDerivativeBatchStates = states;
+		renderOneClickMediaBatch(form, batch, states, plan);
+		syncOneClickMediaBatchStartState(form, plan, states);
+		renderTextResult(form, t('Check complete. Review the samples, then start optimization once.'), 'ok');
 	}
 
-	async function requestMediaDerivativeBatchReadAuthorization(form, input) {
-		const request = await postJson(config.adapterRestUrl, 'read-requests', {
-			ability_id: 'npcink-abilities-toolkit/build-media-derivative-batch-plan',
-			input,
-			requested_input_summary: 'Build the bounded media derivative review list selected in Toolbox.',
-			data_classes: ['media', 'attachment_metadata'],
-			redaction_level: 'strict',
-			purpose: 'Let the current WordPress operator review local media candidates before any Cloud upload or Core proposal.',
-			caller: { external_thread_id: 'toolbox-media-derivative-batch-plan' },
-			bounds: { denied_fields: ['authorization', 'cookie', 'application_password'] },
-		});
-		const requestId = String(request && request.request_id || '').trim();
-		if (!requestId || String(request.status || '') !== 'pending') {
-			throw { message: 'Core did not return a pending bounded read authorization request.', response: request };
-		}
-
-		form.__npcinkMediaDerivativeBatchReadAuthorization = { requestId, input };
-		const result = renderShell(
-			form,
-			{ provider: 'core governance' },
-			t('Media read authorization required'),
-			t('Core will record a one-time read authorization. Confirm the scope to build the candidate list.')
-		);
-		if (!result) {
-			return;
-		}
-		result.classList.add('is-authorization');
-		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, t('Request ID'), requestId);
-		appendMeta(meta, t('Data scope'), t('Media and attachment metadata'));
-		appendMeta(meta, t('Privacy'), t('Strict redaction'));
-		appendMeta(meta, t('Writes'), t('None'));
-		result.appendChild(meta);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.')));
-		// Boundary contract: It does not authorize Cloud upload, a Core proposal, or a WordPress write.
-		const actions = el('div', 'npcink-toolbox__result-actions');
-		const approveButton = el('button', 'button button-primary', t('Authorize and build list'));
-		approveButton.type = 'button';
-		approveButton.setAttribute('data-toolbox-authorize-media-batch-read', '');
-		actions.appendChild(approveButton);
-		if (config.coreAdminUrl) {
-			actions.appendChild(createLink(config.coreAdminUrl, t('Open Core')));
-		}
-		result.appendChild(actions);
-		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('No image candidates have been read yet. Authorize the request to continue.')));
-	}
-
-	async function authorizeMediaDerivativeBatchRead(form, button) {
-		const state = form.__npcinkMediaDerivativeBatchReadAuthorization;
-		if (!state || !state.requestId || !state.input) {
-			throw { message: 'The bounded Core read request is missing. Build the review list again.' };
-		}
-		if (!config.coreRestUrl) {
-			throw { message: 'Npcink Core REST URL is unavailable.' };
-		}
-
-		if (button instanceof HTMLButtonElement) {
-			button.disabled = true;
-			button.textContent = t('Authorizing bounded read...');
-		}
-		renderTextResult(form, 'Core is recording the explicit one-time read authorization...', 'pending');
-		await postJson(config.coreRestUrl, 'read-requests/' + encodeURIComponent(state.requestId) + '/approve', {
-			note: 'WordPress operator explicitly authorized the bounded Toolbox media review-list read.',
-			redaction_level: 'strict',
-			denied_fields: ['authorization', 'cookie', 'application_password'],
-		});
-		const planEnvelope = await runMediaDerivativeBatchPlanRead(state.input, state.requestId);
-		completeMediaDerivativeBatchPlan(form, planEnvelope);
-	}
 
 	async function runMediaDerivativeBatchPreviews(form) {
 		if (!config.adapterRestUrl) {
@@ -5646,79 +5724,42 @@
 	}
 
 	async function submitMediaDerivativeBatchProposals(form) {
-		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
-		}
-
-		const selectedCandidates = selectedMediaBatchCandidates(form);
-		const states = selectedMediaBatchStates(form);
-		if (!states.length || states.some((state) => !mediaBatchArtifactReady(state))) {
-			throw { message: 'Generate selected previews before submitting items for review.' };
-		}
-		if (states.length !== selectedCandidates.length) {
-			throw { message: 'Every currently selected image needs a successful preview before Core submission.' };
-		}
-		if (states.some((state) => !mediaDerivativeLocalReviewVerified(state))) {
-			throw {
-				code: 'toolbox_media_derivative_local_review_unverified',
-				message: 'Every selected image must finish the same-origin verified preview read before Core submission.',
-			};
-		}
-		const statesToSubmit = states.filter((state) => !state.batchProposalResult);
-		if (!statesToSubmit.length) {
-			throw { message: 'All currently selected previews already have Core review proposals.' };
-		}
-
-		const proposals = [];
-		const failures = [];
-		for (let index = 0; index < statesToSubmit.length; index += 1) {
-			const state = statesToSubmit[index];
-			renderTextResult(form, t('Submitting to Core review ') + String(index + 1) + t(' of ') + String(statesToSubmit.length) + '...', 'pending');
+		let batch = asObject(form.__npcinkMediaOptimizationBatch);
+		if (!batch.batch_id) throw { message: 'Check optimizable images before starting.' };
+		batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/confirm', {
+			confirm: true,
+			manifest_digest: batch.manifest_digest,
+		});
+		form.__npcinkMediaOptimizationBatch = batch;
+		const progress = form.querySelector('[data-toolbox-media-batch-progress]');
+		if (progress) progress.hidden = false;
+		const pending = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')));
+		for (let index = 0; index < pending.length; index += 1) {
+			const item = pending[index];
+			if (progress) progress.textContent = t('Optimizing ') + String(index + 1) + t(' of ') + String(pending.length) + '...';
+			let completion;
 			try {
-				const proposal = await postJson(config.adapterRestUrl, 'proposals', {
-					ability_id: 'npcink-abilities-toolkit/adopt-cloud-media-derivative',
-					title: 'Replace media file with Cloud derivative',
-					summary: 'Review one short-lived Cloud derivative artifact before any governed local WordPress media replacement.',
-					input: proposalInputFromState(state),
-					preview: state.proposalPayload,
-				});
-				state.batchProposalResult = proposal;
-				delete state.batchProposalError;
-				state.batchStatus = 'submitted';
-				proposals.push(proposal);
+				const state = await createMediaDerivativePreview(asObject(item.cloud_request_input), {}, true, null, '', true);
+				const localReviewTransport = mediaDerivativeLocalReviewTransport(state.localReview);
+				completion = state.skipped
+					? { status: 'skipped', reason: asArray(state.optimization.decision_reasons)[0] || 'cloud_not_qualified' }
+					: { status: 'qualified', derivative_artifact: localReviewTransport ? localReviewTransport.artifact : null };
 			} catch (error) {
-				state.batchProposalError = error;
-				state.batchStatus = 'proposal_failed';
-				failures.push({ attachment_id: mediaBatchAttachmentId(state), error });
+				completion = { status: 'failed', reason: String(error && error.code || 'processing_failed') };
 			}
+			batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(item.attachment_id)) + '/complete', completion);
+			form.__npcinkMediaOptimizationBatch = batch;
+			const summary = asObject(batch.summary);
+			if (progress) progress.textContent = [
+				t('Completed: ') + String(summary.success || 0),
+				t('Skipped: ') + String(summary.skipped || 0),
+				t('Failed: ') + String(summary.failed || 0),
+				mediaOptimizationBytes(summary.bytes_saved || 0) + t(' saved'),
+			].join(' · ');
+			if (batch.status === 'paused') break;
 		}
-		const totalSubmittedCount = states.filter((state) => state.batchProposalResult).length;
-		renderMediaDerivativeBatchResults(
-			form,
-			states,
-			failures.length ? 'Batch submission partially finished' : 'Batch submission finished',
-			failures.length ? 'Some selected previews could not be submitted. Successful Core proposals were preserved; retry only unresolved items.' : 'Selected previews were submitted to Core review. No execution was requested from Toolbox.',
-			{
-				selected_count: states.length,
-				submitted_count: totalSubmittedCount,
-				failed_count: failures.length,
-				partial_success: totalSubmittedCount > 0 && failures.length > 0,
-				retryable: failures.length > 0,
-				operator_next_action: failures.length ? 'Resolve or retry only failed proposal submissions.' : 'Open Core review to approve or reject the submitted proposals.',
-				retry_guidance: failures.length ? 'Successful Core proposals remain available and will not be resubmitted.' : 'Execution stays outside this Toolbox workbench.',
-			}
-		);
-		updateMediaBatchSelectedCount(form);
-		const result = form.querySelector('.npcink-toolbox__result');
-		if (result) {
-			result.appendChild(createRawDetails({
-				proposals,
-				failures: failures.map((failure) => ({
-					attachment_id: failure.attachment_id,
-					error: formatErrorMessage(failure.error),
-				})),
-			}, 'Core review submission details'));
-		}
+		renderMediaOptimizationHistory(form, batch);
+		renderTextResult(form, batch.status === 'completed' ? t('Optimization complete. Originals remain available for restore.') : t('Optimization paused. Completed items were kept; continue when ready.'), batch.status === 'completed' ? 'ok' : 'warning');
 	}
 
 	async function submitMediaDerivativeProposal(form) {
@@ -8236,6 +8277,31 @@
 			prefillSelectedAttachmentIds(form);
 			prefillSingleMediaFromUrl(form);
 			syncMediaBatchFixedFlow(form);
+			const scopeField = form.querySelector('[name="batch_scope_preset"]');
+			const customDates = form.querySelector('[data-toolbox-custom-media-dates]');
+			const syncCustomDates = () => {
+				if (customDates) customDates.hidden = !(scopeField instanceof HTMLSelectElement && scopeField.value === 'custom');
+			};
+			syncCustomDates();
+			if (scopeField instanceof HTMLSelectElement) scopeField.addEventListener('change', syncCustomDates);
+			if (form.querySelector('[data-toolbox-media-batch-history]') && config.restUrl) {
+				getJson(config.restUrl, 'media-optimization-batches/current').then((batch) => {
+					form.__npcinkMediaOptimizationBatch = batch;
+					renderMediaOptimizationHistory(form, batch);
+					const start = form.querySelector('[data-toolbox-submit-media-batch-proposals]');
+					if (start instanceof HTMLButtonElement && ['running', 'paused'].includes(String(batch.status || ''))) {
+						start.hidden = false;
+						start.disabled = false;
+						start.textContent = t('Continue optimization');
+					}
+				}).catch(() => {});
+			}
+			form.querySelectorAll('[name="batch_resize_mode"]').forEach((field) => {
+				field.addEventListener('change', () => {
+					if (!form.__npcinkMediaOptimizationBatch) return;
+					buildMediaDerivativeBatchPlan(form).catch((error) => renderTextResult(form, formatErrorMessage(error), 'error'));
+				});
+			});
 			['batch_recipe', 'batch_scope_preset'].forEach((name) => {
 				const field = form.querySelector('[name="' + name + '"]');
 				if (field instanceof HTMLSelectElement) {
@@ -8372,23 +8438,29 @@
 					return;
 				}
 
-				const batchPlanButton = event.target.closest('[data-toolbox-build-media-batch-plan]');
+					const batchPlanButton = event.target.closest('[data-toolbox-build-media-batch-plan]');
 				if (batchPlanButton && form.contains(batchPlanButton)) {
 					event.preventDefault();
 					buildMediaDerivativeBatchPlan(form).catch((error) => {
 						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : 'Request failed.'), 'error');
 					});
 					return;
-				}
+					}
 
-				const batchReadAuthorizationButton = event.target.closest('[data-toolbox-authorize-media-batch-read]');
-				if (batchReadAuthorizationButton && form.contains(batchReadAuthorizationButton)) {
-					event.preventDefault();
-					authorizeMediaDerivativeBatchRead(form, batchReadAuthorizationButton).catch((error) => {
-						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : 'Request failed.'), 'error');
-					});
-					return;
-				}
+					const restoreBatchItemButton = event.target.closest('[data-toolbox-restore-media-batch-item]');
+					if (restoreBatchItemButton && form.contains(restoreBatchItemButton)) {
+						event.preventDefault();
+						const select = form.querySelector('[data-toolbox-media-restore-selection]');
+						restoreMediaOptimizationItem(form, parseInt(select && select.value || '0', 10)).catch((error) => renderTextResult(form, formatErrorMessage(error), 'error'));
+						return;
+					}
+
+					const restoreBatchAllButton = event.target.closest('[data-toolbox-restore-media-batch-all]');
+					if (restoreBatchAllButton && form.contains(restoreBatchAllButton)) {
+						event.preventDefault();
+						restoreWholeMediaOptimizationBatch(form).catch((error) => renderTextResult(form, formatErrorMessage(error), 'error'));
+						return;
+					}
 
 				const batchPreviewButton = event.target.closest('[data-toolbox-run-media-batch-previews]');
 				if (batchPreviewButton && form.contains(batchPreviewButton)) {

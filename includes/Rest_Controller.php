@@ -58,6 +58,13 @@ final class Rest_Controller {
 		$this->post( '/strong-local-confirmation/media-derivative', 'strong_local_confirmation_media_derivative' );
 		$this->post( '/strong-local-confirmation/media-derivative-restore', 'strong_local_confirmation_media_derivative_restore' );
 		$this->get( '/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)', 'strong_local_confirmation_media_derivative_backups' );
+		$this->post( '/media-optimization-manifest', 'media_optimization_manifest' );
+		$this->post( '/media-optimization-batches', 'media_optimization_batch_create' );
+		$this->get( '/media-optimization-batches', 'media_optimization_batches' );
+		$this->get( '/media-optimization-batches/current', 'media_optimization_batch_current' );
+		$this->post( '/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/confirm', 'media_optimization_batch_confirm' );
+		$this->post( '/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/complete', 'media_optimization_batch_complete_item' );
+		$this->post( '/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/restore', 'media_optimization_batch_restore_item' );
 		$this->post( '/flows/site-knowledge-review-plan', 'site_knowledge_review_plan' );
 		$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' );
 		$this->post( '/flows/content-metadata-apply-plan', 'content_metadata_apply_plan' );
@@ -139,6 +146,9 @@ final class Rest_Controller {
 		if ( preg_match( '#^/strong-local-confirmation/media-derivative-backups/[0-9]+$#', $route ) ) {
 			return 'cap.toolbox.image_adoption';
 		}
+		if ( preg_match( '#^/media-optimization-batches(?:/current|/media_opt_[A-Za-z0-9]+(?:/confirm|/items/[0-9]+/(?:complete|restore))?)?$#', $route ) ) {
+			return 'cap.toolbox.image_adoption';
+		}
 
 		$scopes = array(
 			'/status'                                      => 'cap.toolbox.status.read',
@@ -165,6 +175,7 @@ final class Rest_Controller {
 			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative-restore' => 'cap.toolbox.image_adoption',
+			'/media-optimization-manifest'                 => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -883,6 +894,51 @@ final class Rest_Controller {
 		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
+	public function media_optimization_batch_create( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$result = ( new Media_Optimization_Batches() )->create( is_array( $params ) ? $params : array() );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_optimization_manifest( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$result = ( new Media_Optimization_Batches() )->build_manifest( is_array( $params ) ? $params : array() );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_optimization_batches() {
+		return rest_ensure_response( ( new Media_Optimization_Batches() )->all() );
+	}
+
+	public function media_optimization_batch_current() {
+		$result = ( new Media_Optimization_Batches() )->current();
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_optimization_batch_confirm( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$result = ( new Media_Optimization_Batches() )->confirm( sanitize_text_field( (string) $request->get_param( 'batch_id' ) ), is_array( $params ) ? $params : array() );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_optimization_batch_complete_item( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$result = ( new Media_Optimization_Batches() )->complete_item(
+			sanitize_text_field( (string) $request->get_param( 'batch_id' ) ),
+			absint( $request->get_param( 'attachment_id' ) ),
+			is_array( $params ) ? $params : array()
+		);
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_optimization_batch_restore_item( WP_REST_Request $request ) {
+		$result = ( new Media_Optimization_Batches() )->restore_item(
+			sanitize_text_field( (string) $request->get_param( 'batch_id' ) ),
+			absint( $request->get_param( 'attachment_id' ) )
+		);
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
 	public function site_knowledge_review_plan( WP_REST_Request $request ) {
 		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
 		return rest_ensure_response( $this->client->build_site_knowledge_review_plan( is_array( $params ) ? $params : array() ) );
@@ -1446,6 +1502,18 @@ final class Rest_Controller {
 
 		$cloud_result = is_array( $result ) ? $result : array();
 		$local_review = $this->media_derivative_local_review_projection( $cloud_result );
+		$optimization = is_array( $cloud_result['optimization'] ?? null ) ? $cloud_result['optimization'] : array();
+		if ( 'skipped' === (string) ( $optimization['status'] ?? '' ) ) {
+			return rest_ensure_response(
+				array(
+					'contract_version' => 'toolbox_media_derivative_preview_result.v3',
+					'cloud_result' => $cloud_result,
+					'local_review' => array(),
+					'optimization' => $optimization,
+					'direct_wordpress_write' => false,
+				)
+			);
+		}
 		if ( empty( $local_review ) ) {
 			return new WP_Error(
 				'npcink_toolbox_media_derivative_local_review_unavailable',
@@ -1521,6 +1589,7 @@ final class Rest_Controller {
 			'suggested_filename',
 			'filename_basis',
 			'processing_warnings',
+			'transform_facts',
 		);
 		if ( $expected_local_artifact_keys !== array_keys( $artifact ) ) {
 			return new WP_Error(
@@ -7848,6 +7917,10 @@ final class Rest_Controller {
 
 		$allowed_fields = array(
 			'attachment_id',
+			'optimization_mode',
+			'optimization_profile',
+			'resize_mode',
+			'expected_source_media_fingerprint',
 			'target_max_width',
 			'large_file_threshold_bytes',
 			'preferred_format',
@@ -7923,6 +7996,14 @@ final class Rest_Controller {
 		}
 		if ( isset( $input['preferred_format'] ) ) {
 			$input['preferred_format'] = sanitize_key( (string) $input['preferred_format'] );
+		}
+		foreach ( array( 'optimization_mode', 'resize_mode' ) as $key_field ) {
+			if ( isset( $input[ $key_field ] ) ) {
+				$input[ $key_field ] = sanitize_key( (string) $input[ $key_field ] );
+			}
+		}
+		if ( isset( $input['optimization_profile'] ) ) {
+			$input['optimization_profile'] = sanitize_text_field( (string) $input['optimization_profile'] );
 		}
 		if ( isset( $input['quality'] ) ) {
 			$input['quality'] = max( 1, min( 100, absint( $input['quality'] ) ) );
@@ -8008,6 +8089,7 @@ final class Rest_Controller {
 			'filesize_bytes',
 			'checksum',
 			'processing_warnings',
+			'transform_facts',
 		);
 		if ( count( $artifact ) !== count( $expected_keys ) || array() !== array_diff( $expected_keys, array_keys( $artifact ) ) || array() !== array_diff( array_keys( $artifact ), $expected_keys ) ) {
 			return array();
@@ -8060,6 +8142,8 @@ final class Rest_Controller {
 			|| (int) $artifact['filesize_bytes'] > 26214400
 			|| 1 !== preg_match( '/^sha256:[0-9a-f]{64}$/', (string) $artifact['checksum'] )
 			|| ! is_array( $artifact['processing_warnings'] )
+			|| ! is_array( $artifact['transform_facts'] )
+			|| empty( $artifact['transform_facts'] )
 			|| ( ! empty( $artifact['processing_warnings'] ) && array_keys( $artifact['processing_warnings'] ) !== range( 0, count( $artifact['processing_warnings'] ) - 1 ) )
 			|| count( $artifact['processing_warnings'] ) > 20
 			|| '' === (string) $artifact['suggested_filename']
@@ -8086,6 +8170,7 @@ final class Rest_Controller {
 			'suggested_filename'  => (string) $artifact['suggested_filename'],
 			'filename_basis'      => $filename_basis,
 			'processing_warnings' => array_values( $artifact['processing_warnings'] ),
+			'transform_facts'     => $artifact['transform_facts'],
 		);
 
 		return array(
@@ -8126,7 +8211,7 @@ final class Rest_Controller {
 	}
 
 	/**
-	 * Builds the exact local11 artifact only after fail-closed cross-field validation.
+	 * Builds the exact local12 artifact only after fail-closed cross-field validation.
 	 *
 	 * WordPress REST args validate individual body fields, but cannot validate
 	 * MIME/format, width/height area, or the complete descriptor together.
@@ -8150,6 +8235,7 @@ final class Rest_Controller {
 			'suggested_filename',
 			'filename_basis',
 			'processing_warnings',
+			'transform_facts',
 		);
 		if (
 			count( $artifact ) !== count( $expected_keys )
@@ -8170,6 +8256,7 @@ final class Rest_Controller {
 		$suggested_filename = $artifact['suggested_filename'];
 		$filename_basis     = $artifact['filename_basis'];
 		$processing_warnings = $artifact['processing_warnings'];
+		$transform_facts     = $artifact['transform_facts'];
 		$expires_timestamp  = is_string( $expires_at ) ? self::media_derivative_strict_timestamp( $expires_at ) : false;
 		$mime_by_format     = array(
 			'avif' => 'image/avif',
@@ -8208,6 +8295,8 @@ final class Rest_Controller {
 			|| 'wordpress_write_ability_final' !== ( $filename_basis['owner'] ?? null )
 			|| 'format_checksum' !== ( $filename_basis['strategy'] ?? null )
 			|| true !== ( $filename_basis['final_sanitize_unique_required'] ?? null )
+			|| ! is_array( $transform_facts )
+			|| empty( $transform_facts )
 		) {
 			return $this->media_derivative_local_review_descriptor_invalid();
 		}
@@ -8241,6 +8330,7 @@ final class Rest_Controller {
 				'final_sanitize_unique_required' => true,
 			),
 			'processing_warnings' => $processing_warnings,
+			'transform_facts'     => $transform_facts,
 		);
 	}
 
@@ -8305,6 +8395,11 @@ final class Rest_Controller {
 						'type'     => 'array',
 						'maxItems' => 20,
 						'items'    => array( 'type' => 'string', 'maxLength' => 200 ),
+					),
+					'transform_facts' => array(
+						'required'             => true,
+						'type'                 => 'object',
+						'additionalProperties' => true,
 					),
 				),
 			),
