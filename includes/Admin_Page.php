@@ -3280,8 +3280,8 @@ final class Admin_Page {
 				'group_id'    => 'media',
 				'id'          => 'media-batch-optimize',
 				'endpoint'    => 'media-derivative-handoff',
-				'title'       => __( 'Batch Image Optimization Review', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Find images that may need optimization, generate previews, then submit only reviewed rows.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Media Library Optimization', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Choose a range, check the expected results, then confirm once to optimize. Backups remain available for restore.', 'npcink-workflow-toolbox' ),
 				'custom'      => 'media_derivative_batch',
 			),
 			array(

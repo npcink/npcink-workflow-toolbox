@@ -6411,8 +6411,8 @@ msgstr "Npcink：补全所选图片 ALT"
 msgid "Npcink: optimize selected images"
 msgstr "Npcink：优化所选图片"
 
-msgid "Batch Image Optimization Review"
-msgstr "批量图片优化审核"
+msgid "Media Library Optimization"
+msgstr "媒体库优化"
 
 msgid "Build a small review list, generate previews, then submit only approved rows. Original images are not replaced here."
 msgstr "先构建小范围审核列表，生成预览后，只提交已确认的行。这里不会替换原图。"
@@ -6828,8 +6828,8 @@ msgstr "除非支持人员或编辑政策需要更严格指引，否则保持默
 msgid "This profile guides suggestions only. WordPress changes still require review approval."
 msgstr "此画像仅用于指导建议。WordPress 更改仍需审核批准。"
 
-msgid "Find images that may need optimization, generate previews, then submit only reviewed rows."
-msgstr "找出可能需要优化的图片，生成预览，然后只提交已审阅的行。"
+msgid "Choose a range, check the expected results, then confirm once to optimize. Backups remain available for restore."
+msgstr "选择范围，检查预计效果，确认一次即可开始优化；备份会保留以便恢复。"
 
 msgid "Review image optimization and ALT suggestions. Full-site content opportunities start from Overview."
 msgstr "审阅图片优化和 ALT 建议。全站内容机会从概览开始。"

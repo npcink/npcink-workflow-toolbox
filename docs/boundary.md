@@ -547,19 +547,15 @@ not approve, preflight, execute, schedule, queue, or directly write WordPress
 content.
 
 `media_optimization_v1` is the fixed governed name for the image optimization
-workflow. Single-image ALT and optimization actions start from the media-library
-attachment details panel or image row actions, then pass that attachment into
-the selected-image review workbench. Deprecated `tool=optimize` and legacy
-`toolbox_tool=media-derivative` requests fall back to the batch optimization
-workbench instead of rendering a standalone one-image picker. Batch
-optimization starts from selected media-library attachments or the
-`tab=image&tool=batch-optimize` workbench. These surfaces may guide operator
-intent through media selection, Toolbox policy defaults, Toolbox/Cloud Addon
-derivative preview, reviewed metadata, selected Core proposal submission, and
-links to separate Core/Adapter execution. The fixed batch action stops after
-selected proposal submission. It must not add a generic workflow runner,
-persistent run table, Toolbox media registry, automatic approval, retry worker,
-queue, scheduler, or direct media write.
+workflow. Single-image ALT and advanced optimization actions start from the
+media-library attachment details panel or image row actions. The default Media
+Library Optimization workbench instead follows ADR-015: it freezes a bounded
+attachment-and-SHA-256 manifest, shows Cloud-qualified samples, and requires one
+present-administrator confirmation before Toolkit executes each replacement or
+restore. It creates no Core proposal and is not available to agents, Cron, or
+background execution. The workbench must not add a generic workflow runner,
+persistent run table, Toolbox media registry, retry worker, queue, scheduler,
+or second media write implementation.
 
 `/media-derivative-handoff` prepares one-run ability input for
 `npcink-abilities-toolkit/build-media-derivative-cloud-request` from Toolbox media policy defaults
@@ -600,22 +596,14 @@ store site media policy truth, own Cloud credentials, create an artifact
 registry, approve proposals, execute proposals, replace attachment files, or
 update attachment metadata.
 
-The dedicated batch admin surface may call
-`npcink-abilities-toolkit/build-media-derivative-batch-plan` through Adapter
-`run-read-ability` for selected attachment IDs or bounded bulk requests such as
-date-range format conversion. The batch surface may show candidates, skipped
-reasons, selected per-attachment previews, selected Core proposal submissions,
-and links to the governed execution surface; it must not request execution
-itself. It must still use the per-attachment Toolbox preview projection backed
-by Cloud Addon for Cloud artifacts and must not create a Toolbox-side media registry, approval queue,
-scheduler, or write executor.
-When selected batch items are later executed on the separate governed surface,
-it must be the
-Adapter/Core/Abilities approved execution path: Core approval and preflight
-first, Adapter allowlisted execution second, Abilities media replacement
-callback last. If Core policy blocks automatic execution, the proposal remains
-pending for Core review. Toolbox links to that evidence but does not mirror the
-execution state, update attachment files, or update URL references directly.
+The dedicated batch admin surface calls Toolkit's read-only media planning
+ability for the administrator-selected time and image-type range. Toolbox owns
+only the frozen local manifest, foreground progress, and confirmation receipt.
+It invokes Toolkit's existing adoption and restore abilities item by item;
+Toolkit remains the sole owner of attachment files, metadata, references,
+backups, final verification, and lineage history. The local batch record is a
+resumable foreground execution and history record, not an approval queue,
+scheduler, media registry, or independent write executor.
 
 After a local media replacement has been approved and executed, the admin
 surface may ask Adapter to run `npcink-abilities-toolkit/build-media-reference-repair-plan`

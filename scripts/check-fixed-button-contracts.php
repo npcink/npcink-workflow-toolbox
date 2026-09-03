@@ -27,7 +27,7 @@ npcink_fixed_button_check( 'npcink-ai-client-adapter' === (string) ( $decoded['e
 $buttons      = is_array( $decoded['buttons'] ?? null ) ? $decoded['buttons'] : array();
 $expected_ids = array( 'site_check', 'source_adaptation_review', 'publish_preflight', 'category_suggestions', 'tag_suggestions', 'internal_link_candidates', 'article_image_alt', 'image_candidates', 'article_narration', 'article_audio_summary', 'batch_image_optimization', 'batch_alt_review' );
 $actual_ids   = array();
-$allowed_lanes = array( 'review_only', 'native_editor_commit', 'core_proposal_required', 'mixed_review_and_core_handoff' );
+$allowed_lanes = array( 'review_only', 'native_editor_commit', 'core_proposal_required', 'mixed_review_and_core_handoff', 'strong_local_confirmation' );
 $allowed_parity = array( 'workflow_projection_proven', 'ability_parity_ready', 'ability_parity_ready_editor_commit_excluded', 'partial_contract_reuse' );
 
 foreach ( $buttons as $button ) {
@@ -40,7 +40,11 @@ foreach ( $buttons as $button ) {
 	npcink_fixed_button_check( in_array( (string) ( $button['write_lane'] ?? '' ), $allowed_lanes, true ), "{$button_id} uses an allowed write lane" );
 	npcink_fixed_button_check( '' !== (string) ( $button['handoff_owner'] ?? '' ), "{$button_id} declares a handoff owner" );
 	npcink_fixed_button_check( in_array( (string) ( $button['adapter_parity_status'] ?? '' ), $allowed_parity, true ), "{$button_id} reports an honest Adapter parity status" );
-	npcink_fixed_button_check( false === (bool) ( $button['direct_wordpress_write'] ?? true ), "{$button_id} exposes no direct Toolbox WordPress write" );
+	$direct_wordpress_write = (bool) ( $button['direct_wordpress_write'] ?? true );
+	$allowed_local_media_write = 'batch_image_optimization' === $button_id
+		&& 'strong_local_confirmation' === (string) ( $button['write_lane'] ?? '' )
+		&& 'npcink-abilities-toolkit_local_media_write' === (string) ( $button['handoff_owner'] ?? '' );
+	npcink_fixed_button_check( ! $direct_wordpress_write || $allowed_local_media_write, "{$button_id} exposes no unclassified direct Toolbox WordPress write" );
 
 	$source_file = $root . '/' . ltrim( (string) ( $button['source_file'] ?? '' ), '/' );
 	$source      = is_file( $source_file ) ? file_get_contents( $source_file ) : false;
@@ -55,6 +59,7 @@ npcink_fixed_button_check(
 	'Exactly the two audio compatibility flows are hidden from the default menu'
 );
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => 'workflow_projection_proven' === ( $button['adapter_parity_status'] ?? '' ) ) ), 'Only the currently proven media workflow claims full projection parity' );
+npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => true === ( $button['direct_wordpress_write'] ?? false ) ) ), 'Only Media Library Optimization declares the bounded direct-write exception' );
 
 $editor_source = file_get_contents( $root . '/assets/editor-content-support.js' );
 $editor_block  = false !== $editor_source && preg_match( '/const flows = \[(.*?)\n\t\];\n\n\tconst flowGroups/s', $editor_source, $editor_match ) ? $editor_match[1] : '';
