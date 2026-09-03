@@ -118,15 +118,12 @@ Target features:
 - taxonomy/tag proposal handoff;
 - internal-link candidate handoff for operator review;
 - image candidate adoption proposal handoff;
-- consolidate **Batch Optimize Images** and Media Library image actions as
-  `media_optimization_v1`, the fixed governed media optimization workflow over
-  the existing media derivative, reviewed metadata, Adapter recipe, and Core
-  proposal handoff surface
-  (validated and frozen for V1 after the 2026-06-18 real-attachment operator
-  trial);
-- batch review-set planning for media optimization, with explicit eligibility
-  summaries, blocked reasons, selected previews, and selected Core proposal
-  submissions;
+- maintain **Media Library Optimization** as the ADR-015 fixed workflow: freeze
+  a bounded attachment-and-SHA-256 manifest, inspect representative
+  Cloud-qualified results, confirm once, and delegate foreground replacement
+  and restore items to Toolkit without a Core proposal;
+- keep external Agent, OpenClaw, open-ended media batches, article/media
+  creation, and URL/settings repairs on their Core/Adapter paths;
 - selected media ALT/caption review-set planning for recent weak metadata
   images, with operator selection and a local handoff preview only; Toolbox does
   not create the proposal, approve, execute, or write media metadata;
@@ -247,8 +244,8 @@ Rule:
 Buttons may run bounded synchronous planning actions. Long-running orchestration,
 queues, retries, and scheduling require a separate runtime decision.
 `media_optimization_v1` should stay a fixed governed workflow over Media
-Library image actions and the Batch Optimize Images surface, not a generic
-workflow builder or persistent run store.
+Library image actions and the Media Library Optimization surface, not a generic
+workflow builder, persistent run store, queue, or scheduler.
 
 Batch and automation planning follows
 [Batch Automation Governance Plan](batch-automation-governance-plan.md):
@@ -256,10 +253,9 @@ Toolbox may adopt rule-first eligibility, blocked-item reporting, selected
 previews, and operator recovery guidance, but it must not import local queue
 runtime, unauthenticated triggers, administrator impersonation, automatic
 publishing, automatic term creation, or direct WordPress writes.
-For batch media replacement, the canonical order is OpenClaw first and Toolbox
-second: Adapter proves selected-batch execution with Core approval/preflight,
-execution profiles, per-action results, and Abilities callbacks; Toolbox then
-turns that accepted path into a fixed best-practice button.
+The default present-administrator batch is the bounded ADR-015 exception.
+OpenClaw, external Agent, and open-ended batch replacement remain separate
+Core/Adapter contracts and do not inherit the local exact-manifest exception.
 
 The first local automation runtime step is Phase 1 only: Toolbox may bundle
 `modules/local-automation-runtime/` for contract docs, deterministic scoring,

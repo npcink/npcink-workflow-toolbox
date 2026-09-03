@@ -122,16 +122,18 @@ the Scheduled Review sub tab. Scheduled Review uses the Nightly/Morning Brief
 preview and folded optional local fallback settings, but it is not presented as
 a second site-check product. Its Cloud run recovery action links to Cloud Addon
 Runtime Runs instead of rendering run recovery controls locally.
-The admin Image Handling tab defaults to Image Optimization, with
-Batch Optimize Images as the first visible workbench. Single-image actions
+The admin Image Handling tab defaults to Media Library Optimization. Single-image actions
 start from the WordPress media-library attachment details panel or image row
-actions, then carry that attachment into Batch Image ALT or Batch Optimize
+actions, then carry that attachment into Batch Image ALT or Media Library Optimization.
 Images. The old `tab=image&tool=optimize` and
 `toolbox_tab=tools&toolbox_tool=media-derivative` URLs are deprecated and fall
 back to `tab=image&tool=batch-optimize`; Toolbox no longer exposes a standalone
 one-image picker page. The media library bulk action can send selected
-attachment IDs into Batch Image ALT or Batch Optimize Images, while Toolbox
-owns the review, preview, and Core handoff workspace. It does not expose the former single-article Image Text Checks tool or the saved-post Media Brief tool.
+attachment IDs into Batch Image ALT or Media Library Optimization. Toolbox owns
+the exact-manifest check, one administrator confirmation, foreground progress,
+and history presentation; Toolkit owns each replacement and restore. The
+default batch creates no Core proposal. Toolbox does not expose the former
+single-article Image Text Checks tool or the saved-post Media Brief tool.
 Article-level featured-image recommendation and media brief planning belong in the editor sidebar. Batch
 Image ALT is a separate selected media-library review-set surface that can
 prepare a local handoff preview without scanning the whole library, creating
@@ -146,7 +148,7 @@ article-plan URLs remain compatibility paths that fall back to Site Check, not
 operator-facing admin tools. Batch media entry points use
 `tab=image&tool=bulk-alt` and `tab=image&tool=batch-optimize`;
 deprecated `tool=optimize` and legacy `toolbox_tool=media-derivative` URLs
-canonicalize to Batch Optimize Images. The
+canonicalize to Media Library Optimization. The
 lower-level `taxonomy_tags` intent remains available to the route but is not a
 separate default button in the editor UI.
 

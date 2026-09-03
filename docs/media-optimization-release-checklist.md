@@ -2,107 +2,79 @@
 
 Status: release gate for the fixed `media_optimization_v1` flow.
 
-Run this checklist before shipping media optimization changes that touch
-Toolbox, Adapter, Cloud Addon, Cloud runtime, Core proposal handoff, or the
-Abilities media write contracts.
+ADR-015 supersedes the former default per-image Core proposal checklist. Use
+this checklist for the administrator-present exact-manifest flow. Keep legacy
+Core smokes only for external Agent, OpenClaw, and other proposal-owned paths.
 
-## Required Smoke
-
-Run:
+## Source Gates
 
 ```bash
-composer smoke:media-derivative-core
-composer smoke:media-derivative-batch-execute
+composer test:single-image-media-optimization
+composer test:media-optimization-batches
+composer test:media-derivative-local-review
+composer test:all
 ```
 
-The single-image smoke must pass end to end on a local WordPress site with
-Core, Adapter, Cloud Addon, Cloud runtime, Toolbox, and Abilities active. It
-creates a temporary image attachment, generates a Cloud derivative, submits a
-governed Core proposal, executes it, verifies the result, restores the backup,
-and cleans test fixtures.
+For cross-repository closeout, provide an explicit clean Cloud worktree when
+the normal Cloud checkout contains unrelated work:
 
-The selected-batch execution smoke must also pass before the fixed batch
-replacement button is treated as release-ready. It creates two temporary JPEG
-attachments, builds a selected review plan, generates selected Cloud derivative
-artifacts, creates selected Core media optimization proposals, calls Adapter
-`approve-and-execute`, verifies execution evidence, and restores the attachments
-through governed rollback proposals.
+```bash
+NPCINK_REPO_FAMILY_ROOT=/Users/muze/gitee \
+composer quality:matrix:run -- \
+  --repo-path=npcink-ai-cloud:/absolute/clean/npcink-ai-cloud-worktree
+```
+
+The override is explicit and repository-identity checked. The matrix must not
+guess another worktree or treat dirty source as exact-SHA evidence.
 
 ## Pass Criteria
 
-The release is not ready unless all six checks pass:
-
-1. Preview: Toolbox can create a short-lived Cloud derivative preview artifact
-   for an existing media attachment.
-2. Preflight: the media adoption preflight summary is read-only, creates no
-   Core proposal, performs no WordPress write, and marks the reviewed artifact
-   Core-proposal ready.
-3. Proposal: Adapter/Core create one media optimization proposal from the
-   reviewed plan instead of splitting the same user intent into separate
-   metadata and derivative proposals.
-4. Execution: Adapter `approve-and-execute` applies the Core-approved proposal
-   through allowlisted WordPress abilities.
-5. Evidence: the executed proposal changes the attachment URL/file pointer,
-   changes the attachment MIME to the derivative MIME, applies reviewed ALT or
-   metadata, and records backup history.
-6. Rollback: a governed restore proposal can restore the original backup, and
-   the attachment file pointer and MIME return to their original values.
+1. Checking a range is read-only and freezes no more than 1000 attachment IDs
+   with their current SHA-256 values.
+2. Samples show qualified and skipped results without replacing media.
+3. The run action remains hidden until checking completes and oversized-image
+   resize choice appears only when applicable.
+4. One present-administrator confirmation binds the exact manifest digest and
+   `auto_safe.v1` policy; the default batch creates no Core proposal.
+5. Upload and final replacement both recheck source SHA-256. Drift skips only
+   the affected item.
+6. Cloud Addon validates downloaded MIME, dimensions and SHA-256; Toolkit owns
+   backup, replacement, reference repair, verification, lineage and restore.
+7. Partial failures preserve completed evidence and pause at the documented
+   three-consecutive or 30-percent block threshold.
+8. Refresh resumes the bounded foreground run without duplicate completion or
+   duplicate replacement.
+9. History reports original size, new size, savings and restore state.
+10. One-image and whole-batch restore work item by item; no backup is deleted
+    automatically.
 
 ## Manual UI Check
 
-After the smoke passes, open:
+At `https://magick-ai.local/`, open:
 
 ```text
-Npcink AI -> Toolbox -> Image Handling -> Batch Optimize Images
+Npcink AI -> Toolbox -> Image Handling -> Media Library Optimization
 ```
 
-Confirm the operator-facing path is still understandable:
+Confirm that the first view contains only time range, image type and **Check
+optimizable images**. After checking, verify representative samples, the
+conditional resize choice, one **Start optimization** action, foreground
+progress, and **History and restore**. The page must not expose provider,
+model, quality, Artifact, fingerprint, queue, or Core proposal terminology.
 
-- opening **Optimize this image** for exactly one Media Library attachment shows
-  the contextual single-image workbench rather than the batch candidate form;
-- watermark templates expand to the existing canonical watermark input and do
-  not add provider, workflow, or execution ownership;
-- an optional output basename is shown as reviewed confirmation evidence, uses the generated
-  MIME extension, and remains subject to final WordPress sanitize/unique rules;
-- the **Apply to Media Library** button remains disabled until the preview image verifies and the
-  operator confirms rollback-backed replacement semantics;
-- single-image flow says generate preview first, then locally apply only after
-  inspecting the exact derivative and confirming the backup statement;
-- replacement receipt exposes Toolkit-owned attachment adoption, known content
-  reference repair, backup, and verification evidence;
-- batch flow says bounded review set, selected previews, and selected Core
-  reviews, not one-click whole-site replacement;
-- batch flow defaults to a small review set and does not ask operators to run
-  unattended whole-library replacement;
-- the generated preview image loads through the administrator-only local review
-  route with a WordPress REST nonce, no-store, and nosniff headers;
-- no batch button or success state implies Toolbox or Cloud bypasses Core;
-- no single-image path authorizes a Toolkit write other than the exact
-  `adopt-cloud-media-derivative` request.
-- no control claims **Save as new media item** until a separate governed
-  create-attachment ability exists.
+This copy-only check must not click **Start optimization** unless the release
+task explicitly authorizes real media writes.
 
-Before expanding the media surface, complete the
-[Media Optimization Operator Trial](archive/2026-06/media-optimization-operator-trial.md) on a
-small set of real low-risk attachments. Keep selected batch trials at or below
-the visible UI cap of 10 candidates.
+## Separate Governed Paths
 
-## Failure Handling
-
-If either required smoke fails:
-
-- do not ship the media optimization change;
-- check whether Cloud run result polling is still pending before treating a
-  transient `409` as a hard failure;
-- inspect Adapter/Core response bodies for proposal, preflight, execution, or
-  restore errors;
-- for selected-batch partial failures, keep completed Adapter/Core execution
-  evidence, then create a revised proposal only for unresolved items;
-- keep temporary test attachments and Core proposal fixtures cleaned up before
-  rerunning the smoke.
+- Advanced single-image transforms remain under ADR-011 strong confirmation.
+- External Agent/OpenClaw and open-ended media batches remain Core/Adapter
+  governed.
+- Hard-coded URL and settings repairs remain Core proposals.
+- Article/media creation and attachment ALT writes are not authorized here.
 
 ## Non-Goals
 
-This checklist does not approve broader media features such as video
-transcoding, global search-replace, CDN cache invalidation, or arbitrary
-third-party option repair. Those need separate contracts and release gates.
+This checklist does not authorize production deployment, automatic backup
+deletion, animation support, CDN changes, a local queue/Cron runner, a Cloud
+control plane, or any new WordPress write path.

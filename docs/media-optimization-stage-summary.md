@@ -1,140 +1,67 @@
 # Media Optimization Stage Summary
 
-Status: V1 validated and frozen for follow-up planning.
+Status: V1 validated and frozen for defect fixes only.
 
-This summary records the accepted shape of the Cloud-backed media optimization
-work after the first closed-loop proof. It is meant for future maintainers and
-AI agents that need the current product boundary before adding more media
-features.
+ADR-015 supersedes the former default selected-review/Core-proposal batch. The
+current administrator flow is:
 
-## Stage Decision
-
-Freeze the first media optimization slice as a governed fixed flow. Real
-operator validation has passed for one single-image execution plus one selected
-batch review set on low-risk local attachments.
-
-The current slice is not a generic workflow runner, a whole-site replacement
-tool, a Cloud-controlled media registry, or a second WordPress control plane.
-It is a fixed Toolbox button flow over existing local WordPress abilities,
-Adapter/Core proposal governance, Cloud Addon transport, and Cloud runtime
-derivative processing.
-
-## Closed Loop
-
-The verified loop is:
-
-1. Select or resolve one existing WordPress media attachment.
-2. Generate a short-lived Cloud derivative preview.
-3. Inspect derivative evidence and read-only adoption preflight.
-4. Submit one Core media optimization review.
-5. Approve and execute through Adapter/Core.
-6. Verify attachment URL, file pointer, MIME type, reviewed ALT or metadata, and
-   backup history.
-7. Restore through a governed rollback proposal when needed.
-
-This is covered by `composer smoke:media-derivative-core` and by the release
-gate in [Media Optimization Release Checklist](media-optimization-release-checklist.md).
-The selected batch path is covered separately by
-`composer smoke:media-derivative-batch-execute`; it proves selected review-set
-execution only, not unattended whole-library automation.
-The first real-attachment validation is recorded in
-[Media Optimization Operator Trial Results - 2026-06-18](archive/2026-06/media-optimization-operator-trial-results-2026-06-18.md).
-
-## Ownership Boundary
-
-| Area | Owner |
-| --- | --- |
-| Fixed operator UX, media defaults, one-run overrides, preview display, reviewed metadata fields | Toolbox |
-| WordPress proposal truth, approval, preflight, and audit | Core |
-| Plan-to-proposal relay and approved execution orchestration | Adapter |
-| Local-to-Cloud signing, verified artifact receive/ACK transport | Cloud Addon |
-| Derivative processing runtime, short-lived artifacts, processing evidence | Cloud |
-| WordPress media read/write ability contracts and rollback primitives | Abilities Toolkit |
-
-Cloud returns derivative artifacts and processing evidence only. It does not
-own WordPress write decisions, canonical media truth, or approval truth.
-Toolbox does not approve, execute, or directly write media files.
-
-## User-Facing Flow
-
-The product should continue to present:
-
-- single image: enter from the Media Library, choose a bounded format/crop/
-  watermark template and optional output basename, generate a verified preview,
-  confirm rollback-backed replacement, then submit one Core derivative-adoption
-  review;
-- content URL repair: separate governed action for hard-coded post content
-  references;
-- settings URL repair: separate governed action for theme settings, plugin
-  options, and other settings values;
-- batch media optimization: bounded review set, selected previews, selected
-  Core reviews, then an explicit move to the governed Core/Adapter surface for
-  any approved replacement execution.
-
-Batch work must not be presented as one-click whole-site replacement. Broad
-scopes can find candidates, but visible language should keep the operator in a
-review-set workflow. The default review set should stay small, with an explicit
-upper bound, so the product feels like governed operator work instead of
-background automation.
-
-The single-image surface must not claim **Save as new media item**. The current
-write contract adopts the derivative as the selected attachment main file and
-records backup/rollback evidence. Creating a second attachment requires a
-future separate governed ability; Toolbox must not emulate that with a direct
-upload or filesystem copy. See
-[Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md).
-
-## Why Not One-Click Whole-Site Replacement
-
-WordPress image references are distributed across attachment metadata, post
-content, block attributes, theme options, plugin settings, page builders, CDN
-caches, and sometimes custom tables. The current system governs known write
-paths, not arbitrary site-wide storage.
-
-A one-click whole-site replacement label would imply more coverage and write
-authority than the current contracts provide. It would also make rollback,
-audit, and operator confidence worse. The safer product promise is controlled
-batch optimization: plan, preview, select, submit, approve, execute, audit, and
-roll back.
-
-## Release Gate
-
-Before shipping any media optimization change, run:
-
-```bash
-php tests/run.php
-composer smoke:media-derivative-core
-composer smoke:media-derivative-batch-execute
+```text
+choose range -> freeze exact SHA-256 manifest -> inspect representative results
+-> confirm once -> foreground Toolkit replacements -> history and restore
 ```
 
-The release checklist must pass the six closed-loop criteria: preview,
-preflight, proposal, execution, evidence, and rollback.
+The earlier single-image and selected-batch Core trials remain archived evidence
+of the implementation's evolution. They do not describe the current default
+Media Library Optimization surface.
 
-## Current Closeout
+## Current Closed Loop
 
-`media_optimization_v1` should now be treated as done for this stage. Do not add
-more replacement mechanics, background execution, or broader media mutation to
-this V1. Future work should maintain the existing contract and fix defects only.
+1. A present administrator selects time range and image type.
+2. Toolkit builds a bounded manifest of current attachment main-file SHA-256
+   values.
+3. Cloud Addon transports images to Cloud, where `auto_safe.v1` produces
+   qualified short-lived `media_derivative_result.v3` Artifacts.
+4. Toolbox shows totals and representative samples without replacing media.
+5. One strong confirmation binds the exact manifest and policy.
+6. The browser runs items in the foreground; Toolkit rechecks source bytes,
+   backs up, replaces, verifies, records lineage, and exposes restore history.
+7. Item failures are isolated and the run pauses at the documented stop limits.
+8. Individual and whole-batch restore remain item-by-item Toolkit operations.
+
+Cloud returns derivative Artifacts and processing evidence only. It never owns
+WordPress files, replacement decisions, or long-term media storage. Toolbox
+owns the bounded operator flow, not a general writer. Toolkit is the sole owner
+of attachment replacement, backup, verification, lineage, and restore.
+
+## Boundary
+
+- The default batch creates no Core proposal.
+- Advanced attachment-scoped format, quality, crop, and watermark transforms
+  remain under ADR-011 strong confirmation.
+- External Agent, OpenClaw, open-ended media batches, article/media creation,
+  and URL/settings repair remain Core/Adapter governed.
+- The local manifest is resumable browser-driven state, not a queue, scheduler,
+  approval registry, custom table, or second media truth.
+- Backups have an advisory 30-day restore window and are never deleted
+  automatically.
+- Animation, video, CDN rewrite, global search/replace, global ALT writes, and
+  unattended execution remain out of scope.
+
+## Verification
+
+```bash
+composer test:single-image-media-optimization
+composer test:media-optimization-batches
+composer test:media-derivative-local-review
+composer test:all
+```
+
+Use `https://magick-ai.local/` for the WordPress UI and restore acceptance.
+Cloud runtime tests, when required, run in M4 Docker. See
+[Media Optimization Release Checklist](media-optimization-release-checklist.md).
 
 ## Next Stage
 
-Do not add video transcoding, global search-replace, complex media registry
-features, unattended whole-library replacement, or more image operations by
-default. The
-[Media Optimization Operator Trial](archive/2026-06/media-optimization-operator-trial.md) has
-accepted the fixed flow for the current low-risk scope:
-
-- Do users know to generate preview before submitting Core review?
-- Do they understand attachment adoption versus content URL repair versus
-  settings URL repair?
-- Do they trust the rollback story?
-- Do batch controls feel like selected review sets rather than whole-site
-  replacement?
-
-The next batch capability is media ALT/caption review sets. Keep it as bounded
-suggestion/planning output or Core handoff evidence; it must not become a
-direct media metadata writer. Taxonomy/tag review sets remain second, and
-internal-link review sets remain third. Do not add old-article source coverage
-as a local Toolbox batch surface; site-wide or multi-article source coverage
-belongs in Nightly Inspection Cloud Batch result detail and reviewed Core
-handoff.
+Future media ALT/caption work remains a bounded review or Core handoff and must
+not inherit the ADR-015 attachment-replacement exception. Do not add another
+write-like batch surface without its own boundary decision and operator trial.

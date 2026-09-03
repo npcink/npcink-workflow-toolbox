@@ -14,7 +14,9 @@ or hidden post-save executor remains.
 
 Plugin-admin governed batches, external clients, background work, media
 mutation, backend content patches, and cross-object or global writes continue
-through Core proposals. Applying several explicitly reviewed links to the one
+through Core proposals unless an accepted ADR defines a narrower bounded lane.
+ADR-015 is the sole current plugin-admin batch exception and applies only to its
+present-administrator exact media manifest. Applying several explicitly reviewed links to the one
 current article's visible editor state is not a governed batch when every
 ADR-014 condition holds. Toolbox stops after proposal creation and links to
 Core governance for all governed paths.
@@ -728,10 +730,9 @@ delivery detail. Toolbox only consumes Site Knowledge results inside its other
 workflows.
 
 The admin **Image Handling** tab groups image-first buttons by operator job and
-defaults to **Image Optimization**, with **Batch Optimize Images** as the first
-visible workbench. Single-image actions start from the WordPress
+defaults to **Media Library Optimization**. Single-image actions start from the WordPress
 media-library attachment details panel or image row actions, then enter the same
-	selected Batch Image ALT Review or Batch Optimize Images workbenches used by bulk
+	selected Batch Image ALT Review or Media Library Optimization workbenches used by bulk
 selections.
 It no longer exposes a standalone one-image optimization picker or a
 single-article image text helper; article-specific image text needs current
@@ -748,7 +749,7 @@ draft-side backend tools.
 Batch entry points use `tab=image&tool=bulk-alt` and
 `tab=image&tool=batch-optimize`; deprecated `tool=optimize` and legacy
 `toolbox_tool=media-derivative` URLs remain accepted only as compatibility
-aliases that canonicalize to Batch Optimize Images.
+aliases that canonicalize to Media Library Optimization.
 The writing-pack entry, publish preflight, direct existing-category and
 existing-tag suggestions, internal-link candidates, current-article ALT review,
 and image candidates stay as default post editor buttons. Article narration and
@@ -865,21 +866,22 @@ surfaces without turning Toolbox into an image index, provider router, media
 registry, or write executor.
 
 `media_optimization_v1` is the architecture name for media-library single-image
-actions and the Toolbox Batch Optimize Images workbench. It is
-implemented with current admin state, Toolbox media derivative preview
-projections, Cloud Addon transport, Adapter proposal handoff, and Core/Abilities
-media contracts. The projections do not persist run state: create/status/result
-calls delegate directly to Cloud Addon, while governed proposal submission
-continues through Adapter. It
-does not introduce a Toolbox custom table, a /workflow-runs route, queue, scheduler,
-retry lease, artifact registry, or direct media writer.
-Batch media replacement follows the same dependency direction: OpenClaw/Adapter
-must prove selected-batch execution with Core approval, commit preflight,
-execution profile allowlist evidence, per-action results, and Abilities media
-replacement callbacks before Toolbox presents it as a fixed best-practice
-button. Toolbox may render review sets, selected previews, and Core proposal
-submission receipts. Approval and execution outcomes belong to the governed
-Core/Adapter execution surface; Toolbox must not own or trigger batch execution.
+actions and the default Media Library Optimization workbench. ADR-015 permits
+one bounded exception for the present administrator: Toolbox freezes an exact
+attachment-and-SHA-256 manifest, renders representative Cloud-qualified samples,
+records one confirmation, and runs a foreground loop that delegates every
+replacement or restore to Toolkit. Cloud Addon owns signed transport, Cloud owns
+`auto_safe.v1` analysis and short-lived Artifacts, and Toolkit remains the sole
+file, backup, verification, lineage, idempotency, and restore owner.
+
+The bounded batch manifest is stored in an existing WordPress option for resume
+and history. It is not a custom table, `/workflow-runs` route, queue, scheduler,
+retry lease, approval registry, artifact registry, or second media truth. The
+default flow creates no Core proposal and cannot be invoked by OpenClaw, an
+external Agent, Cron, or a background worker. Those callers, open-ended media
+batches, article/media creation, and URL/settings repair continue through the
+governed Core/Adapter path. Advanced attachment-scoped transforms continue under
+ADR-011 strong confirmation.
 
 Toolbox no longer renders a Cloud Checks or Troubleshooting Checks secondary
 panel. Cloud connection checks, hosted runtime health, provider/search/image

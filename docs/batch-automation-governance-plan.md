@@ -9,7 +9,11 @@ path.
 ## Decision
 
 Toolbox should productize batch work as governed review sets, not as an
-automation executor.
+automation executor. ADR-015 defines one narrow exception: the present-admin
+Media Library Optimization flow may strongly confirm a frozen SHA-256 manifest
+once and delegate foreground replacement and restore items to Toolkit. External
+agents, scheduled work, open-ended batches, and every other batch surface do not
+inherit that exception.
 
 The useful pattern is:
 
@@ -127,7 +131,7 @@ implementing it. Do not add it inside Toolbox or Adapter by default.
 
 | Repo | Near-term responsibility |
 | --- | --- |
-| `npcink-toolbox` | Batch review-set UI, eligibility summaries, blocked reasons, selected previews, and selected Core proposal submission. |
+| `npcink-toolbox` | Batch review-set UI and selected Core proposal submission by default; for ADR-015 only, exact-manifest confirmation, foreground progress, and history presentation. |
 | `npcink-abilities-toolkit` | Ability schemas, dry-run preview callbacks, read-only plan builders, workflow definition guidance, and host-approved final write callbacks. |
 | `npcink-governance-core` | Proposal intake, approval, preflight, audit, policy evaluation, and review status. |
 | `npcink-ai-client-adapter` | Authenticated channel, Core proposal relay, `write_actions[]` validation, output-reference validation, execution profile allowlist, and approved execution. |

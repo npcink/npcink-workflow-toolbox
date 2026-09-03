@@ -6421,10 +6421,13 @@ msgid "Start from selected media-library images, build a bounded review plan, pr
 msgstr "从已选媒体库图片开始，生成有限审阅计划，预览选中行，然后继续进入 Core 审核。"
 
 msgid "Image Optimization Review"
-msgstr "图片优化审核"
+msgstr "媒体库优化"
 
 msgid "Preview selected images before submitting an optimization request."
 msgstr "提交优化申请前，先预览所选图片。"
+
+msgid "Choose a range, check the expected results, then confirm once to optimize. Restore from history when needed."
+msgstr "选择范围并检查预计效果，确认一次即可开始优化；需要时可从历史记录恢复。"
 
 msgid "Batch work starts from selected media-library images or a bounded sample. Nothing is written automatically."
 msgstr "批量任务从所选媒体库图片或有限样本开始。不会自动写入任何内容。"
@@ -6939,8 +6942,8 @@ msgstr "通过允许的人工或审核路径处理所选对象后，重新扫描
 msgid "Rescan to verify"
 msgstr "重新扫描验证"
 
-msgid "Improve images and prepare safe AI suggestions without changing WordPress automatically."
-msgstr "优化图片并准备安全的 AI 建议，不会自动更改 WordPress。"
+msgid "Check and optimize Media Library images. Other AI suggestions still require human review."
+msgstr "检查并优化媒体库图片，其他 AI 建议仍需人工确认。"
 
 msgid "Use Site Profile and Image Handling for currently supported operator tasks."
 msgstr "请使用站点画像和图片处理完成当前支持的运营任务。"
