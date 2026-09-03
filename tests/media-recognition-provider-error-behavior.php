@@ -40,6 +40,13 @@ namespace {
 		return trim( (string) $value );
 	}
 
+	$GLOBALS['npcink_toolbox_media_test_meta'] = array();
+
+	function get_post_meta( int $post_id, string $key, bool $single = false ) {
+		unset( $single );
+		return $GLOBALS['npcink_toolbox_media_test_meta'][ $post_id ][ $key ] ?? array();
+	}
+
 	function npcink_cloud_addon_request_image_context_evidence( array $request, string $trace_id, string $idempotency_key ) {
 		return new WP_Error( 'cloud_media_recognition_temporarily_unavailable' );
 	}
@@ -89,5 +96,49 @@ namespace {
 	npcink_toolbox_media_recognition_error_assert(
 		array() === $interactive_result,
 		'Interactive image evidence keeps the existing non-blocking empty fallback.'
+	);
+
+	$reflection = new \ReflectionClass( $client );
+	$fingerprint_method = $reflection->getMethod( 'runtime_safe_media_fingerprint' );
+	$fingerprint_method->setAccessible( true );
+	npcink_toolbox_media_recognition_error_assert(
+		'sha256:' . str_repeat( 'a', 64 ) === $fingerprint_method->invoke( $client, str_repeat( 'A', 64 ) ),
+		'Current media fingerprints normalize a raw SHA-256 digest to the canonical lowercase format.'
+	);
+	npcink_toolbox_media_recognition_error_assert(
+		'' === $fingerprint_method->invoke( $client, 'attachment-42' ),
+		'Unknown media identity values fail closed instead of being hashed into a fake file fingerprint.'
+	);
+
+	$reuse_method = $reflection->getMethod( 'media_visual_evidence_reuse_policy' );
+	$reuse_method->setAccessible( true );
+	$current_fingerprint = 'sha256:' . str_repeat( 'b', 64 );
+	$evidence_fingerprint = 'sha256:' . str_repeat( 'a', 64 );
+	npcink_toolbox_media_recognition_error_assert(
+		'reuse' === $reuse_method->invoke( $client, 42, $current_fingerprint, $current_fingerprint, array() ),
+		'Visual evidence for the exact current file fingerprint is reused without replacement lineage.'
+	);
+	$GLOBALS['npcink_toolbox_media_test_meta'][42]['_npcink_ai_media_file_replacement_history'] = array(
+		array(
+			'new_media_fingerprint' => $current_fingerprint,
+			'derived_from_media_fingerprint' => 'sha256:' . str_repeat( 'c', 64 ),
+			'visual_reuse_policy'   => 'reuse',
+			'transform_facts'       => array( 'encoding_mode' => 'lossless' ),
+		),
+	);
+	npcink_toolbox_media_recognition_error_assert(
+		'' === $reuse_method->invoke( $client, 42, $current_fingerprint, $evidence_fingerprint, array() ),
+		'Visual evidence is rejected when replacement lineage does not derive from its fingerprint.'
+	);
+	$GLOBALS['npcink_toolbox_media_test_meta'][42]['_npcink_ai_media_file_replacement_history'][0]['derived_from_media_fingerprint'] = $evidence_fingerprint;
+	$GLOBALS['npcink_toolbox_media_test_meta'][42]['_npcink_ai_media_file_replacement_history'][0]['visual_reuse_policy'] = 'reuse_with_human_check';
+	npcink_toolbox_media_recognition_error_assert(
+		'reuse_with_human_check' === $reuse_method->invoke( $client, 42, $current_fingerprint, $evidence_fingerprint, array() ),
+		'Lineage-matched visual evidence remains available only with its human-check policy.'
+	);
+	$GLOBALS['npcink_toolbox_media_test_meta'][42]['_npcink_ai_media_file_replacement_history'][0]['visual_reuse_policy'] = 'requires_reidentification';
+	npcink_toolbox_media_recognition_error_assert(
+		'' === $reuse_method->invoke( $client, 42, $current_fingerprint, $evidence_fingerprint, array() ),
+		'Visual evidence requiring reidentification is never reused after a replacement.'
 	);
 }
