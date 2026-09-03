@@ -104,7 +104,7 @@ Every new AI feature should define these artifacts before implementation:
 | --- | --- | --- |
 | `suggestion_only` | Produces advice, candidates, summaries, scores, plans, or source evidence only | Toolbox/Cloud |
 | `local_admin_consent` | Narrow present-admin local write with explicit audit contract | Only allowed by prior ADR |
-| `strong_local_confirmation` | Narrow present-editor direct apply with exact preview, native capabilities, and compensation | Toolbox only when an accepted ADR defines the exact action; ADR-010 covers one image |
+| `strong_local_confirmation` | Narrow present-user direct apply with exact preview or manifest, native capabilities, and compensation | Toolbox only when an accepted ADR defines the exact action; ADR-010 covers one reviewed image adoption and ADR-015 covers one present-admin exact media manifest |
 | `core_proposal_required` | Batch, background, external, incomplete-preview, replacement, publishing, taxonomy, settings, or otherwise unbounded durable writes | Core + Abilities |
 
 Default to `suggestion_only`. A WordPress write escalates to

@@ -352,20 +352,17 @@ Knowledge, or hosted GPT actions can run without a connected Cloud Addon or
 host-provided runtime filter.
 
 Toolbox admin result panels can render governed `operator_feedback` payloads
-from Adapter/Core handoff failures. The feedback is for operator revision only;
-Toolbox may submit one Core media optimization proposal from the Adapter media
-derivative recipe after reviewed metadata and derivative artifact evidence are
-present, but it does not approve proposals, execute proposals, or perform
-WordPress writes.
-The fixed media optimization flow is: select or resolve an existing attachment,
-generate a short-lived Cloud preview, review the derivative and adoption
-preflight, then submit one Core optimization review. Attachment adoption,
-content URL repair, and settings URL repair remain separate governed actions so
-hard-coded post URLs and URLs stored in theme or plugin options are not silently
-rewritten by preview generation.
-Batch media optimization uses bounded review sets: build a review plan,
-generate previews for selected candidates, and submit only selected Core
-reviews. It is intentionally not presented as one-click whole-site replacement.
+from Adapter/Core handoff failures. The feedback is for operator revision only.
+The default Media Library optimization flow is the narrow ADR-015 exception:
+choose a time and image-type range, freeze the bounded attachment-and-SHA-256
+manifest, inspect representative Cloud-qualified results, confirm once, then
+let the foreground browser loop delegate each replacement to Toolkit. It creates
+no Core proposal. Toolkit owns every backup, replacement, verification, lineage
+record, and restore; Cloud never writes WordPress.
+Advanced single-image transforms remain attachment-scoped strong-confirmation
+transactions. Hard-coded content URL repair, settings URL repair, OpenClaw,
+external Agent, and open-ended media batches remain separate Core/Adapter
+governed actions.
 Toolbox also bundles `modules/local-automation-runtime/` as an isolated
 exception record for the future `npcink-local-automation-runtime` owner. That
 module supports Phase 1A Manual Read-Only Preview for Morning Brief evidence,
@@ -498,17 +495,15 @@ public Toolbox ability. Reviewed draft write-plan handoffs should use
 `npcink-toolbox/build-article-write-plan` through REST or Abilities; normal
 editorial work should stay in the editor content-support sidebar.
 
-Toolbox fixed buttons are the operator-click surface for repeatable OpenClaw
-flows. They should reuse the same ability ids, plan artifact shapes, Adapter
-recipe guidance, and Core proposal handoff as OpenClaw natural-language flows.
-Toolbox must not turn those buttons into a separate approval store, media
-registry, workflow runtime, prompt/model control plane, or WordPress write
-executor.
-Batch replacement must be developed and accepted first as an OpenClaw/Adapter
-contract with Core approval, commit preflight, execution profile evidence,
-per-action results, and Abilities media replacement callbacks. Toolbox then
-exposes that accepted path as the fixed `media_optimization_v1` best-practice
-button; it must not create a separate batch writer.
+Toolbox fixed buttons should reuse canonical Toolkit abilities and established
+Cloud Addon transport rather than creating parallel registries or runtimes.
+Most external or open-ended write flows keep their Adapter/Core handoff. The
+default `media_optimization_v1` button is the explicit ADR-015 exception: a
+present administrator strongly confirms one exact SHA-256 manifest, then
+Toolbox delegates bounded foreground replacement and restore items to Toolkit.
+That exception does not create a second approval store, media registry,
+workflow runtime, prompt/model control plane, or general WordPress writer, and
+it is not inherited by OpenClaw or another external Agent.
 
 The article plan flow and `npcink-toolbox/build-article-write-plan` ability
 assemble a Core-ready `article_write_plan` for a reviewed draft. They do not
@@ -727,48 +722,26 @@ remain secondary low-frequency checks, while content preparation and reviewed
 handoffs live in their own admin surface.
 
 `media_optimization_v1` names the fixed governed image optimization workflow,
-not a new workflow runtime or persistent run store. Toolbox stores media
-optimization defaults for the preview and handoff flow, accepts one-run
-operator overrides, lets an operator start one image from the media library, and
-lets selected media-library images enter a bounded batch workbench. The batch
-workbench may ask Adapter/Core to approve and execute selected proposals after
-previews exist; Core policy decides whether execution is allowed or the proposal
-remains pending for review. Operators can request a bounded one-run
-aspect-ratio crop before resize/watermark processing. Operators can keep the Toolbox default
-watermark, disable it for the run, use a text watermark, or use the configured
-Toolbox image/logo watermark source with one-run placement settings.
-Text watermark overrides pass text, font, color, background, margin, position,
-and opacity directly to the same Cloud request shape used by OpenClaw handoffs.
-If an operator starts from a hard-coded
-local uploads URL, the same surface can call the local read-only
-`npcink-abilities-toolkit/resolve-media-attachment-by-url` ability through Adapter
-`run-read-ability`, show bounded match evidence, and fill the attachment ID for
-the same preview/proposal flow. The single-image action surface dispatches the
-bounded media-derivative recipe through Cloud Addon, polls the short-lived Cloud
-artifact result, and renders a separate `local_review` POST transport. Its
-same-origin WordPress endpoint has no query string; the browser submits the
-exact local12 artifact as JSON with cookie authentication and `X-WP-Nonce`.
-Cloud Addon receives, verifies, and ACKs the bytes before Toolbox serves them
-with no-store and nosniff headers. The browser renders the response through a
-short-lived Blob object URL and revokes it on load, error, or re-render. The
-Cloud `artifact` projection never contains this local endpoint, a remote URL, a
-storage locator, or a self-signed credential. The surface can then submit
-a Core replacement proposal with the artifact evidence. The
-	Batch Optimize Images workbench can build a bounded batch conversion plan, show
-	candidates and skipped reasons, generate selected previews, and submit selected
-	items for review; final replacement execution stays in the governed
-	Adapter/Core path outside the default admin workbench. The admin batch surface is intentionally
-	a fixed operator flow: operators choose selected media or a media range and
-	processing goal first, while exact ID, date, exclusion, and dimension filters remain in an
-	advanced disclosure for exceptions. Toolbox
+not a new workflow runtime or persistent run store. The default Media Library
+Optimization surface follows ADR-015: Toolbox stores one bounded
+`toolbox_media_optimization_batch.v1` manifest, Cloud qualifies `auto_safe.v1`
+WebP results, the administrator confirms the exact manifest once, and the
+foreground browser loop delegates each qualified replacement or restore to
+Toolkit. The manifest is capped at 1000 items, binds each attachment to the
+current main-file SHA-256, and stops further writes when the browser closes.
+It is not a queue, Cron runner, approval registry, or media source of truth.
+
+Advanced single-image format, quality, crop, and watermark controls remain in
+the attachment-scoped ADR-011 path. The Cloud Addon transport continues to
+receive, validate, and acknowledge short-lived Artifact bytes; the Cloud result
+never becomes long-term media storage or a WordPress writer. Toolbox
 can also build a local media reference repair plan for exact hard-coded URL
 matches and submit that plan to Core from-plan intake as `patch-post-content`
 actions. For theme/plugin settings that store hard-coded media URLs, Toolbox can
 build a filtered settings reference repair plan with excluded formats and minimum
 image dimensions, then submit exact `patch-setting-value` actions to Core.
-Toolbox does not store the site media policy, own Cloud credentials, create an
-artifact registry, approve proposals, execute proposals, replace files, write
-attachment metadata, patch post content, or update options/theme mods directly.
+Toolbox does not own Cloud credentials, an artifact registry, general approval
+truth, arbitrary media writes, post-content patches, or settings writes.
 See [Media Optimization V1](docs/media-optimization-v1.md) for the fixed
 workflow contract and expansion rule, and
 [OpenClaw Batch Media Optimization Handoff](docs/openclaw-batch-media-optimization-handoff.md)
@@ -889,8 +862,8 @@ Standalone Cloud diagnostics are not exposed in Toolbox. Cloud Addon owns the
 WordPress-side Cloud connection, hosted runtime status, search/image-source
 diagnostics, entitlement, quota, billing, request logs, and service health
 detail. Toolbox keeps Cloud-backed calls inside explicit product workflows, and
-single-image Core proposal submission, URL repair handoffs, and batch proposal
-submission remain in **Image Handling**.
+advanced single-image work, URL repair handoffs, and media history remain in
+**Image Handling**. The default exact-manifest batch creates no Core proposal.
 
 When **Optimize this image** is opened for exactly one Media Library attachment,
 Toolbox shows a contextual single-image workbench inside the same fixed flow.

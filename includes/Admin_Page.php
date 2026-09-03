@@ -545,7 +545,7 @@ final class Admin_Page {
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
-			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Improve images and prepare safe AI suggestions without changing WordPress automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Check and optimize Media Library images. Other AI suggestions still require human review.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php
 			if ( ! $cloud_ready ) {
 				$this->render_cloud_runtime_notice();
@@ -3337,8 +3337,8 @@ final class Admin_Page {
 
 		$tool_groups = array(
 			'media'             => array(
-				'title'       => __( 'Image Optimization Review', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Preview selected images before submitting an optimization request.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Media Library Optimization', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Choose a range, check the expected results, then confirm once to optimize. Restore from history when needed.', 'npcink-workflow-toolbox' ),
 			),
 			'image-text-review' => array(
 				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),

@@ -171,6 +171,20 @@ This command does not require Docker on the MBA/M5. The five WordPress
 repositories run their configured local gates. Cloud source evidence comes from
 the required GitHub checks attached to the exact clean Cloud `HEAD`; dirty,
 unpushed, pending, or missing evidence is reported as `needs_validation`.
+When a normal sibling checkout contains unrelated work, select a known clean
+worktree explicitly instead of moving or guessing source:
+
+```bash
+NPCINK_REPO_FAMILY_ROOT=/Users/muze/gitee \
+composer quality:matrix:run -- \
+  --repo-path=npcink-ai-cloud:/absolute/clean/npcink-ai-cloud-worktree
+```
+
+`--repo-path=<repo>:<absolute-path>` may be repeated. Each override must be a
+Git worktree root whose `origin` matches `npcink/<repo>`; reports identify each
+path as `default` or `override`. Invalid, missing, relative, duplicate, or
+wrong-repository overrides fail as command-usage errors. The matrix never
+auto-selects another worktree.
 
 When the milestone also requires M4 runtime acceptance, run the explicit
 revision-bound gate:
@@ -874,115 +888,44 @@ entitlement is `near_limit`, quota is exhausted, or credits are insufficient,
 record an intentional provider-gate skip instead of treating quota exhaustion
 as a Toolbox code failure or adding local provider/quota ownership.
 
-For the fixed media optimization flow, run:
+For the fixed ADR-015 Media Library Optimization flow, run:
 
 ```bash
-composer smoke:media-derivative-core
+composer test:single-image-media-optimization
+composer test:media-optimization-batches
+composer test:media-derivative-local-review
 ```
 
-This starts at Toolbox `/media-derivative-handoff`, generates a Cloud derivative
-through Adapter, submits the returned optimization plan to Core, executes it
-through Adapter approve-and-execute, verifies the attachment file replacement,
-and restores the original backup.
-Before release, also follow
-[Media Optimization Release Checklist](media-optimization-release-checklist.md):
-preview, preflight, proposal creation, approve-and-execute, URL/MIME/ALT
-evidence, and rollback must all pass.
+These gates verify the read-only range check, exact attachment-and-SHA-256
+manifest, representative samples, one present-administrator confirmation,
+foreground item execution, source-drift rejection, failure isolation,
+idempotency, history, and item/batch restore. The default batch creates no Core
+proposal. Cloud Addon owns signed transport, Cloud owns `auto_safe.v1` analysis
+and short-lived Artifacts, and Toolkit owns every file replacement, backup,
+verification, lineage record, and restore.
 
-For the batch media optimization review-set plan, run:
+Before release, follow
+[Media Optimization Release Checklist](media-optimization-release-checklist.md)
+and inspect the first view at `https://magick-ai.local/`. A copy-only acceptance
+must not click **Start optimization**. Cloud execution, when needed for a media
+runtime test, belongs to M4 Docker.
 
-```bash
-composer smoke:media-derivative-batch-plan
-```
+The following older smokes remain useful only for their separate governed
+contracts; they do not describe the default Toolbox batch:
 
-This creates two temporary image attachments, calls
-`npcink-abilities-toolkit/build-media-derivative-batch-plan`, verifies
-`eligibility_summary`, `blocked_items`, `operator_next_action`, `retryable`,
-and `retry_guidance`, and proves planning does not change the fixture media
-files. It does not call Cloud, create Core proposals, approve, preflight, or
-execute WordPress writes.
+- `composer smoke:media-derivative-core` for the legacy Core projection proof;
+- `composer smoke:media-derivative-batch-core` and
+  `composer smoke:media-derivative-batch-execute` for external Agent/OpenClaw
+  selected-batch governance;
+- `composer smoke:generic-ai-client-contract` for non-OpenClaw Adapter contract
+  consumption;
+- `composer smoke:media-derivative-batch-plan` and the media conversion
+  review-set browser smoke for the historical read-only review-set contract.
 
-For the optional browser check of that review-set UI, run:
-
-```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:media-conversion-review-set-browser
-```
-
-This opens the Toolbox media derivative surface, builds the read-only batch
-plan, confirms the UI renders
-`npcink_local_automation_media_conversion_review_set.v1`,
-`npcink-local-automation-runtime`, and `governed_review_set`, and verifies the
-browser does not call preview, Core proposal, or execute routes. It is outside
-`composer test:all` because it needs a running local WordPress site, WP-CLI
-login-cookie generation, Playwright, and a local browser.
-
-For the production preview projection and same-origin image response, run:
-
-```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:media-derivative-preview-browser
-```
-
-This creates one temporary attachment, submits the Toolbox-owned preview route
-from a real authenticated browser, polls Cloud Addon through Toolbox, proves the
-separate queryless local review endpoint rejects a POST body without a WordPress
-REST nonce, then loads verified WebP bytes with `X-WP-Nonce` and the exact local12
-JSON body. It also checks no-store and nosniff response headers, rejects every
-query field and extra body shape, and rejects
-any request to the removed Adapter media derivative Cloud routes. It cleans up
-the attachment after the check.
-
-When Adapter, Toolkit, and Core are available, run the workflow-projection Core
-proposal smoke:
-
-```bash
-composer smoke:media-derivative-batch-core
-```
-
-This creates two temporary JPEG attachments, builds the batch plan through
-Adapter `run-read-ability`, supplies bounded non-production derivative evidence,
-resolves the canonical Toolkit `build-media-optimization-plan`, and creates two
-Core review proposals through Adapter `proposals/from-plan`. It does not call
-the removed Adapter Cloud routes, approve, preflight, execute, or replace media
-files. Cloud transport is tested separately by Cloud Addon.
-
-To verify that the Adapter contract can be consumed by a client that is not
-implemented as OpenClaw, run:
-
-```bash
-composer smoke:generic-ai-client-contract
-```
-
-This authenticated real-host probe identifies itself as a generic contract
-consumer, reads Adapter discovery and connection metadata, and resolves the
-canonical Toolkit media workflow through Adapter `run-read-ability`. It checks
-proposal-only writes and fail-closed workflow parity. It deliberately does not
-add a second `supported_channels` entry or claim production support for a new
-channel; OpenClaw remains the priority and currently supported implementation.
-
-For downstream selected-batch execution proof outside the Toolbox workbench,
-run:
-
-```bash
-composer smoke:media-derivative-batch-execute
-```
-
-This extends the single-image `composer smoke:media-derivative-core` proof:
-it creates two temporary JPEG attachments, builds the selected batch plan,
-generates selected Cloud derivative artifacts, creates selected Core media
-optimization proposals, calls Adapter `approve-and-execute` for each selected
-proposal, verifies file pointer/MIME/ALT/backup evidence, and restores each
-attachment through governed restore proposals. Keep it outside `composer
-test:all` because it performs real local media replacements and requires
-Adapter, Core, Abilities, Cloud Addon, and Cloud runtime availability.
-This smoke validates the separate governed Core/Adapter execution surface; the
-Toolbox batch button stops after selected Core review proposal submission.
-
-Before adding another media or batch surface, run the
-[Media Optimization Operator Trial](archive/2026-06/media-optimization-operator-trial.md). The
-trial records 5 to 10 low-risk real attachments, checks that selected batch
-work stays at or below the UI cap of 10 candidates, and verifies that operators
-understand preview, Core review, execution, partial failure recovery, and
-governed restore.
+Advanced attachment-scoped format, quality, crop, and watermark transforms
+remain under ADR-011 strong confirmation. URL/settings repair, open-ended media
+batches, and article/media creation remain Core/Adapter governed. Do not route
+those paths through the ADR-015 exact-manifest exception.
 
 For the media ALT/caption Toolkit extraction gate, run:
 
@@ -1198,11 +1141,12 @@ automatic editor-state action, and media metadata remains unchanged.
   media upload, metadata, and featured-image actions must stay in
   `core_proposal_required` and be verified with
   `composer smoke:article-media-batch-core`.
-- Treat media optimization as a governed fixed flow: Toolbox builds the
-  operator handoff, Cloud Addon/Cloud generates and receives the short-lived
-  local review bytes, Core owns
-  proposal approval, and release checks should run
-  `composer smoke:media-derivative-core`.
+- Treat default Media Library Optimization as the ADR-015 governed fixed flow:
+  Toolbox freezes the exact SHA-256 manifest and records one present-admin
+  confirmation, Cloud Addon/Cloud handles short-lived derivative transport and
+  analysis, and Toolkit owns replacement, backup, verification, lineage, and
+  restore. It creates no Core proposal. External Agent, OpenClaw, open-ended
+  batch, and URL/settings repair paths remain Core/Adapter governed.
 - Keep Cloud-managed web search output as source candidates, not verified truth.
   Toolbox does not own web search provider configuration, local key storage, or
   local search execution.

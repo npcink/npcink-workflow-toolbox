@@ -58,7 +58,10 @@ $options = array(
 	'fail_on_dirty' => false,
 	'output'        => '',
 	'repos'         => array(),
+	'repo_paths'    => array(),
 );
+
+$known_repo_names = array_fill_keys( array_column( $repos, 'name' ), true );
 
 foreach ( array_slice( $_SERVER['argv'] ?? array(), 1 ) as $arg ) {
 	if ( '--run-gates' === $arg ) {
@@ -91,8 +94,33 @@ foreach ( array_slice( $_SERVER['argv'] ?? array(), 1 ) as $arg ) {
 		continue;
 	}
 
+	if ( 0 === strpos( $arg, '--repo-path=' ) ) {
+		$spec      = substr( $arg, strlen( '--repo-path=' ) );
+		$separator = strpos( $spec, ':' );
+		if ( false === $separator ) {
+			fwrite( STDERR, "Invalid --repo-path. Expected REPO:/absolute/path.\n" );
+			exit( 2 );
+		}
+		$repo_name = substr( $spec, 0, $separator );
+		$repo_path = substr( $spec, $separator + 1 );
+		if ( ! isset( $known_repo_names[ $repo_name ] ) ) {
+			fwrite( STDERR, "Unknown repository in --repo-path: {$repo_name}\n" );
+			exit( 2 );
+		}
+		if ( isset( $options['repo_paths'][ $repo_name ] ) ) {
+			fwrite( STDERR, "Duplicate --repo-path for repository: {$repo_name}\n" );
+			exit( 2 );
+		}
+		if ( '' === $repo_path || DIRECTORY_SEPARATOR !== $repo_path[0] ) {
+			fwrite( STDERR, "Repository override must be an absolute path: {$repo_name}\n" );
+			exit( 2 );
+		}
+		$options['repo_paths'][ $repo_name ] = $repo_path;
+		continue;
+	}
+
 	fwrite( STDERR, "Unknown option: {$arg}\n" );
-	fwrite( STDERR, "Usage: php scripts/cross-repo-quality-matrix.php [--run-gates] [--cloud-m4] [--fail-on-dirty] [--json] [--output=PATH] [--repo=NAME]\n" );
+	fwrite( STDERR, "Usage: php scripts/cross-repo-quality-matrix.php [--run-gates] [--cloud-m4] [--fail-on-dirty] [--json] [--output=PATH] [--repo=NAME] [--repo-path=NAME:/absolute/path]\n" );
 	exit( 2 );
 }
 
@@ -212,6 +240,18 @@ function npcink_quality_matrix_resolve_path( string $family_root, array $paths )
 }
 
 /**
+ * Verify that an explicit worktree belongs to the expected repository.
+ *
+ * @param string $remote_url Origin URL.
+ * @param string $repo_name Repository name.
+ * @return bool
+ */
+function npcink_quality_matrix_remote_matches( string $remote_url, string $repo_name ): bool {
+	$pattern = '~(?:^|[:/])npcink/' . preg_quote( $repo_name, '~' ) . '(?:\.git)?/?$~i';
+	return 1 === preg_match( $pattern, trim( $remote_url ) );
+}
+
+/**
  * Parse git status first line for ahead/behind and branch detail.
  *
  * @param string $branch_line Status branch line.
@@ -241,10 +281,18 @@ $results  = array();
 $failures = 0;
 
 foreach ( $repos as $repo ) {
-	$path   = npcink_quality_matrix_resolve_path( $family_root, $repo['paths'] );
+	$path_source = isset( $options['repo_paths'][ $repo['name'] ] ) ? 'override' : 'default';
+	$path   = 'override' === $path_source
+		? $options['repo_paths'][ $repo['name'] ]
+		: npcink_quality_matrix_resolve_path( $family_root, $repo['paths'] );
+	if ( 'override' === $path_source && ! is_dir( $path ) ) {
+		fwrite( STDERR, "Repository override path is unavailable: {$repo['name']}={$path}\n" );
+		exit( 2 );
+	}
 	$result = array(
 		'name'          => $repo['name'],
 		'path'          => $path,
+		'path_source'   => $path_source,
 		'exists'        => is_dir( $path ),
 		'is_git'        => false,
 		'branch'        => 'missing',
@@ -277,10 +325,27 @@ foreach ( $repos as $repo ) {
 
 	$git_root = npcink_quality_matrix_run( 'git rev-parse --show-toplevel', $path );
 	if ( 0 !== $git_root['exit_code'] ) {
+		if ( 'override' === $path_source ) {
+			fwrite( STDERR, "Repository override is not a Git worktree: {$repo['name']}={$path}\n" );
+			exit( 2 );
+		}
 		++$failures;
 		$result['branch'] = 'not a git repository';
 		$results[]        = $result;
 		continue;
+	}
+	if ( 'override' === $path_source ) {
+		$resolved_path = realpath( $path );
+		$resolved_root = realpath( trim( $git_root['output'] ) );
+		if ( false === $resolved_path || false === $resolved_root || $resolved_path !== $resolved_root ) {
+			fwrite( STDERR, "Repository override must point to the worktree root: {$repo['name']}={$path}\n" );
+			exit( 2 );
+		}
+		$origin = npcink_quality_matrix_run( 'git remote get-url origin', $path );
+		if ( 0 !== $origin['exit_code'] || ! npcink_quality_matrix_remote_matches( $origin['output'], $repo['name'] ) ) {
+			fwrite( STDERR, "Repository override origin does not match npcink/{$repo['name']}: {$path}\n" );
+			exit( 2 );
+		}
 	}
 
 	$result['is_git'] = true;
@@ -376,13 +441,14 @@ if ( $options['json'] ) {
 	$lines[] = '- Gates: `' . ( $options['run_gates'] ? 'run' : 'not_run' ) . '`';
 	$lines[] = '- M4 runtime acceptance: `' . ( $options['cloud_m4'] ? 'requested' : 'not_requested' ) . '`';
 	$lines[] = '';
-	$lines[] = '| Repo | Branch | Dirty | Ahead | Behind | Gate | Result |';
-	$lines[] = '| --- | --- | ---: | ---: | ---: | --- | --- |';
+	$lines[] = '| Repo | Path source | Branch | Dirty | Ahead | Behind | Gate | Result |';
+	$lines[] = '| --- | --- | --- | ---: | ---: | ---: | --- | --- |';
 
 	foreach ( $results as $result ) {
 		$lines[] = sprintf(
-			'| `%s` | `%s` | %s | %s | %s | `%s` | `%s` |',
+			'| `%s` | `%s` | `%s` | %s | %s | %s | `%s` | `%s` |',
 			$result['name'],
+			$result['path_source'],
 			$result['branch'],
 			null === $result['dirty_count'] ? 'n/a' : (string) $result['dirty_count'],
 			null === $result['ahead'] ? 'n/a' : (string) $result['ahead'],
@@ -399,6 +465,7 @@ if ( $options['json'] ) {
 		$lines[] = '### ' . $result['name'];
 		$lines[] = '';
 		$lines[] = '- Path: `' . $result['path'] . '`';
+		$lines[] = '- Path source: `' . $result['path_source'] . '`';
 		$lines[] = '- Exists: `' . ( $result['exists'] ? 'yes' : 'no' ) . '`';
 		$lines[] = '- Git repo: `' . ( $result['is_git'] ? 'yes' : 'no' ) . '`';
 		$lines[] = '- Gate notes: ' . $result['gate_notes'];

@@ -51,8 +51,9 @@ The product has two intentionally different commit paths:
   `strong_local_confirmation` action may import one external or AI-generated
   image and optionally set it as featured under ADR-010.
 - In plugin-admin batch execution surfaces, selected writes become Core
-  proposals. Toolbox then stops and links or navigates to the governance
-  surface; approval and execution do not occur in Toolbox.
+  proposals unless an accepted ADR defines a narrower bounded lane. ADR-015 is
+  the sole current exception: one present administrator confirms an exact
+  media SHA-256 manifest and Toolkit owns every replacement and restore.
 
 The native-editor rule applies only to the current article and its normal save
 transaction. Under ADR-014, one explicit action may apply at most eight
