@@ -167,19 +167,17 @@ the editor may explicitly map reviewed sections into native blocks only when the
 current Gutenberg body is empty, with persistence left to normal WordPress save.
 Any later governed cross-object or automated write still belongs outside Toolbox.
 
-Media optimization is the first fixed governed media workflow. Toolbox may
-present `media_optimization_v1` through media-library single-image actions and
-a Toolbox Batch Optimize Images workbench, with visible steps from media
-selection through Cloud preview and selected Core proposal handoff. One exact,
-visually verified attachment may instead use ADR-011 strong local confirmation
-with Toolkit-owned backup and rollback. The fixed batch action stops after proposal submission; approval and execution continue
-on the separate governed Core/Adapter surface. Toolbox must not add a workflow
-runtime, persistent run store, media registry, approval path, provider routing
-UI, or a second media replacement implementation.
-Batch media conversion and direct replacement should reuse the same
-OpenClaw/Adapter/Core/Abilities replacement path once the OpenClaw batch
-contract is accepted; Toolbox should not duplicate attachment replacement or URL
-repair logic locally.
+Media optimization is the first fixed governed media workflow. The default
+Media Library Optimization surface follows ADR-015: Toolbox freezes an exact
+SHA-256 manifest, shows representative Cloud-qualified samples, and records one
+present-administrator confirmation before delegating each replacement or restore
+to Toolkit. Cloud owns derivative analysis and short-lived Artifacts; Toolkit
+owns file replacement, backup, verification, lineage, and restore. This narrow
+lane creates no Core proposal and cannot be used by agents, Cron, background
+execution, or arbitrary transforms. Toolbox must not add a workflow runtime,
+persistent run table, media registry, approval path, provider routing UI, or a
+second media replacement implementation. Advanced and external-client media
+flows retain their separately documented review and governance boundaries.
 
 Batch media ALT follows the same boundary with a narrower contract. Toolbox may
 submit one visually confirmed, missing-only `media_alt_apply_plan.v1` per image

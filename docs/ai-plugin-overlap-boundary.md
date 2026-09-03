@@ -93,14 +93,16 @@ Toolbox keeps the operator-facing Npcink workflow surface:
 - Internal Link Candidates;
 - Image Candidates and governed image adoption planning;
 - Article audio candidates and governed audio adoption planning;
-- Batch Image Optimization Review;
+- Media Library Optimization;
 - Batch ALT Review Handoff;
 - Core/Adapter handoff receipts and failure feedback.
 
 These surfaces are review-only unless a separate Core/Adapter/Abilities path
-performs the approved WordPress write. Toolbox does not own final writes,
-approval truth, audit truth, provider billing, request logs, connector approval,
-or workflow/runtime queues.
+performs the approved WordPress write. ADR-015 additionally permits Media
+Library Optimization to delegate only its exact-manifest, present-administrator
+confirmed replacement and restore items to Toolkit. Toolbox does not own
+general final writes, approval truth, audit truth, provider billing, request
+logs, connector approval, or workflow/runtime queues.
 
 ## Entry-Point Rule
 
