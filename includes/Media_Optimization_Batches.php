@@ -17,6 +17,7 @@ final class Media_Optimization_Batches {
 	private const MANIFEST_ABILITY_ID = 'npcink-abilities-toolkit/build-media-derivative-batch-plan';
 	private const ABILITY_ID = 'npcink-abilities-toolkit/adopt-cloud-media-derivative';
 	private const RESTORE_ABILITY_ID = 'npcink-abilities-toolkit/restore-media-backup';
+	private const CLEANUP_ABILITY_ID = 'npcink-abilities-toolkit/cleanup-media-backups';
 	private const MAX_BATCHES = 20;
 	private const MAX_ITEMS = 1000;
 	private const CHUNK_SIZE = 10;
@@ -76,6 +77,10 @@ final class Media_Optimization_Batches {
 			'items' => array_map( static fn( $item ) => array( $item['attachment_id'], $item['source_fingerprint'] ), array_values( $items ) ),
 		);
 		$digest = 'sha256:' . hash( 'sha256', (string) wp_json_encode( $manifest_seed ) );
+		$existing = $this->find_ready_batch_by_digest( $digest );
+		if ( null !== $existing ) {
+			return $existing;
+		}
 		$batch_id = 'media_opt_' . str_replace( '-', '', (string) wp_generate_uuid4() );
 		$now = gmdate( 'c' );
 		$batch = array(
@@ -175,7 +180,52 @@ final class Media_Optimization_Batches {
 	/** @return array<string,mixed>|WP_Error */
 	public function current() {
 		$batches = $this->all();
-		return empty( $batches ) ? $this->error( 'npcink_toolbox_media_batch_not_found', 'No media optimization history is available.', 404 ) : $this->with_summary( $batches[0] );
+		if ( empty( $batches ) ) {
+			return $this->error( 'npcink_toolbox_media_batch_not_found', 'No media optimization history is available.', 404 );
+		}
+		$batch = $this->with_summary( $batches[0] );
+		$cleanup = $this->run_registered_ability( 'npcink-abilities-toolkit/cleanup-media-backups', array( 'dry_run' => true, 'commit' => false ) );
+		if ( is_array( $cleanup ) ) {
+			$batch['backup_cleanup_preview'] = array(
+				'expired' => absint( $cleanup['expired'] ?? 0 ),
+				'retention_days' => absint( $cleanup['retention_days'] ?? 30 ),
+				'current_media_preserved' => true,
+			);
+		}
+		return $batch;
+	}
+
+	/** @return array<string,mixed>|WP_Error */
+	public function preview_backup_cleanup() {
+		return $this->run_registered_ability( self::CLEANUP_ABILITY_ID, array( 'dry_run' => true, 'commit' => false ) );
+	}
+
+	/** @return array<string,mixed>|WP_Error */
+	public function cleanup_backups( array $payload ) {
+		if ( true !== ( $payload['confirm'] ?? null ) || true !== ( $payload['preview_verified'] ?? null ) ) {
+			return $this->error( 'npcink_toolbox_media_backup_cleanup_unconfirmed', 'Review and confirm the expired backup cleanup before continuing.', 409 );
+		}
+		$preview = $this->preview_backup_cleanup();
+		if ( is_wp_error( $preview ) ) {
+			return $preview;
+		}
+		if ( absint( $payload['preview_expired'] ?? -1 ) !== absint( $preview['expired'] ?? 0 ) ) {
+			return $this->error( 'npcink_toolbox_media_backup_cleanup_stale', 'The expired backup preview changed. Refresh it before confirming cleanup.', 409 );
+		}
+		$authorize = static fn( bool $allowed, string $ability_id ): bool => self::CLEANUP_ABILITY_ID === $ability_id ? true : $allowed;
+		add_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10, 2 );
+		try {
+			return $this->run_registered_ability(
+				self::CLEANUP_ABILITY_ID,
+				array(
+					'dry_run' => false,
+					'commit' => true,
+					'idempotency_key' => 'toolbox-media-backup-cleanup-' . gmdate( 'Ymd' ),
+				)
+			);
+		} finally {
+			remove_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10 );
+		}
 	}
 
 	/** @return array<string,mixed>|WP_Error */
@@ -234,6 +284,24 @@ final class Media_Optimization_Batches {
 			}
 		}
 		return $this->error( 'npcink_toolbox_media_batch_not_found', 'The media optimization batch was not found.', 404 );
+	}
+
+	/**
+	 * Reuse an identical, unconfirmed manifest instead of creating duplicate
+	 * ready-for-review history entries when the check action is retried.
+	 *
+	 * @return array<string,mixed>|null
+	 */
+	private function find_ready_batch_by_digest( string $digest ): ?array {
+		foreach ( $this->all() as $batch ) {
+			if ( 'ready_for_review' !== (string) ( $batch['status'] ?? '' ) ) {
+				continue;
+			}
+			if ( hash_equals( $digest, (string) ( $batch['manifest_digest'] ?? '' ) ) ) {
+				return $this->with_summary( $batch );
+			}
+		}
+		return null;
 	}
 
 	private function adopt( array $batch, array $item, array $payload ) {

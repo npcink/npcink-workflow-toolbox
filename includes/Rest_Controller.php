@@ -63,6 +63,8 @@ final class Rest_Controller {
 		$this->post( '/media-optimization-batches', 'media_optimization_batch_create' );
 		$this->get( '/media-optimization-batches', 'media_optimization_batches' );
 		$this->get( '/media-optimization-batches/current', 'media_optimization_batch_current' );
+		$this->get( '/media-backup-cleanup/preview', 'media_backup_cleanup_preview' );
+		$this->post( '/media-backup-cleanup/confirm', 'media_backup_cleanup_confirm' );
 		$this->post( '/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/confirm', 'media_optimization_batch_confirm' );
 		$this->post( '/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/complete', 'media_optimization_batch_complete_item' );
 		$this->post( '/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/restore', 'media_optimization_batch_restore_item' );
@@ -148,6 +150,9 @@ final class Rest_Controller {
 			return 'cap.toolbox.image_adoption';
 		}
 		if ( preg_match( '#^/media-optimization-batches(?:/current|/media_opt_[A-Za-z0-9]+(?:/confirm|/items/[0-9]+/(?:complete|restore))?)?$#', $route ) ) {
+			return 'cap.toolbox.image_adoption';
+		}
+		if ( in_array( $route, array( '/media-backup-cleanup/preview', '/media-backup-cleanup/confirm' ), true ) ) {
 			return 'cap.toolbox.image_adoption';
 		}
 
@@ -973,6 +978,18 @@ final class Rest_Controller {
 			sanitize_text_field( (string) $request->get_param( 'batch_id' ) ),
 			absint( $request->get_param( 'attachment_id' ) )
 		);
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_backup_cleanup_preview() {
+		$result = ( new Media_Optimization_Batches() )->preview_backup_cleanup();
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	public function media_backup_cleanup_confirm( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$params = is_array( $params ) ? $params : array();
+		$result = ( new Media_Optimization_Batches() )->cleanup_backups( $params );
 		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 

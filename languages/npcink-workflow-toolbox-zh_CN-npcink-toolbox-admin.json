@@ -711,6 +711,7 @@
 	  ,"Estimated saving": ["预计节省"]
 	  ,"Skipped during check": ["检查时跳过"]
 	  ,"Maximum batch size": ["单批最多数量"]
+	  ,"Images to optimize": ["要优化的图片"]
 	  ,"Cloud checked this image and skipped it because the safe saving threshold was not met.": ["云端已检查此图片；由于未达到安全节省门槛，已跳过。"]
 	  ,"Original": ["原图"]
 	  ,"Latest batch": ["最近批次"]
@@ -748,6 +749,12 @@
       ,"Authorize and build list": ["授权并生成列表"]
       ,"Open Core": ["打开 Core"]
       ,"No image candidates have been read yet. Authorize the request to continue.": ["尚未读取图片候选。请先授权后继续。"]
+      ,"There are ": ["有 "]
+      ," expired backup(s) eligible for administrator cleanup. Current media files are never removed.": [" 个过期备份可由管理员清理。当前媒体文件永远不会被删除。"]
+      ,"Clean expired backups": ["清理过期备份"]
+      ,"No expired backups are available for cleanup.": ["没有可清理的过期备份。"]
+      ,"Clean the expired media backups now? Current media files will not be removed.": ["现在清理过期媒体备份吗？当前媒体文件不会被删除。"]
+      ,"Expired backup cleanup finished.": ["过期备份清理已完成。"]
     }
   }
 }

@@ -290,6 +290,8 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-manifest`
 - `GET|POST /wp-json/npcink-toolbox/v1/media-optimization-batches`
 - `GET /wp-json/npcink-toolbox/v1/media-optimization-batches/current`
+- `GET /wp-json/npcink-toolbox/v1/media-backup-cleanup/preview`
+- `POST /wp-json/npcink-toolbox/v1/media-backup-cleanup/confirm`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/confirm`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`

@@ -5490,6 +5490,29 @@
 		appendMeta(meta, t('Skipped during check'), Number(planSummary.skipped_count || 0));
 		appendMeta(meta, t('Maximum batch size'), 1000);
 		host.appendChild(meta);
+		const failedIds = new Set(asArray(sampleStates).filter((state) => state && (state.batchPreviewError || state.localReviewStatus === 'failed')).map((state) => mediaBatchAttachmentId(state)).filter(Boolean));
+		const selection = el('details', 'npcink-toolbox__result-details');
+		selection.open = true;
+		selection.appendChild(el('summary', '', t('Images to optimize')));
+		const selectionList = el('div', 'npcink-toolbox__batch-list');
+		asArray(plan.candidates).forEach((candidate) => {
+			const attachmentId = mediaBatchAttachmentId(candidate);
+			const row = el('label', 'npcink-toolbox__batch-row');
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.checked = !failedIds.has(attachmentId);
+			checkbox.setAttribute('data-toolbox-media-batch-candidate', String(attachmentId));
+			checkbox.addEventListener('change', function () { updateMediaBatchSelectedCount(form); });
+			row.appendChild(checkbox);
+			const body = el('span', 'npcink-toolbox__batch-row-body');
+			body.appendChild(el('strong', '', String(candidate.title || ('Image #' + attachmentId))));
+			body.appendChild(el('small', '', candidate.filesize_bytes ? mediaOptimizationBytes(candidate.filesize_bytes) : ''));
+			row.appendChild(body);
+			row.__npcinkMediaBatchCandidate = candidate;
+			selectionList.appendChild(row);
+		});
+		selection.appendChild(selectionList);
+		host.appendChild(selection);
 		if (Array.isArray(sampleStates) && sampleStates.length) {
 			const samples = el('div', 'npcink-toolbox__media-samples');
 			sampleStates.forEach((state) => {
@@ -5531,9 +5554,11 @@
 		const submitButton = form.querySelector('[data-toolbox-submit-media-batch-proposals]');
 		if (!(submitButton instanceof HTMLButtonElement)) return;
 		const states = asArray(sampleStates);
-		const hasVerifiedPreview = states.some((state) => !state.skipped && state.localReviewStatus === 'verified');
-		const allSettled = states.length > 0 && states.every((state) => state.skipped || state.localReviewStatus === 'verified' || state.localReviewStatus === 'failed' || state.batchPreviewError);
-		const ready = asArray(plan.candidates).length > 0 && allSettled && hasVerifiedPreview;
+		const selectedIds = new Set(selectedMediaBatchCandidates(form).map((candidate) => mediaBatchAttachmentId(candidate)).filter(Boolean));
+		const selectedStates = states.filter((state) => selectedIds.has(mediaBatchAttachmentId(state)));
+		const hasVerifiedPreview = selectedStates.some((state) => !state.skipped && state.localReviewStatus === 'verified');
+		const allSettled = selectedStates.length === 0 || selectedStates.every((state) => state.skipped || state.localReviewStatus === 'verified' || state.localReviewStatus === 'failed' || state.batchPreviewError);
+		const ready = selectedIds.size > 0 && allSettled && hasVerifiedPreview;
 		submitButton.disabled = !ready;
 		submitButton.hidden = !ready;
 	}
@@ -5563,6 +5588,16 @@
 		block.appendChild(el('p', 'description', new Date(String(batch.recoverable_until_gmt || '')).getTime() < Date.now()
 			? t('Restore period has ended. Backups are still kept until you separately choose to clean them up.')
 			: t('Individual and whole-batch restore remain available until ') + formatDateTime(batch.recoverable_until_gmt) + '.'));
+		const cleanup = asObject(batch.backup_cleanup_preview);
+		if (Number(cleanup.expired || 0) > 0) {
+			block.appendChild(el('p', 'description', t('There are ') + String(cleanup.expired) + t(' expired backup(s) eligible for administrator cleanup. Current media files are never removed.')));
+			const cleanupActions = el('div', 'npcink-toolbox__inline-actions');
+			const cleanupButton = el('button', 'button', t('Clean expired backups'));
+			cleanupButton.type = 'button';
+			cleanupButton.setAttribute('data-toolbox-cleanup-expired-backups', '');
+			cleanupActions.appendChild(cleanupButton);
+			block.appendChild(cleanupActions);
+		}
 		const restorable = asArray(batch.items).filter((item) => item.status === 'completed' && item.restore_status !== 'restored');
 		if (restorable.length) {
 			const actions = el('div', 'npcink-toolbox__inline-actions');
@@ -5605,6 +5640,19 @@
 			}
 		}
 		renderTextResult(form, t('Batch restore finished. Review any items that could not be restored.'), 'ok');
+	}
+
+	async function cleanupExpiredMediaBackups(form, button) {
+		const preview = asObject(asObject(form.__npcinkMediaOptimizationBatch).backup_cleanup_preview);
+		if (Number(preview.expired || 0) <= 0) throw { message: t('No expired backups are available for cleanup.') };
+		if (!window.confirm(t('Clean the expired media backups now? Current media files will not be removed.'))) return;
+		button.disabled = true;
+		const result = await postJson(config.restUrl, 'media-backup-cleanup/confirm', { confirm: true, preview_verified: true, preview_expired: Number(preview.expired || 0) });
+		const batch = await getJson(config.restUrl, 'media-optimization-batches/current');
+		form.__npcinkMediaOptimizationBatch = batch;
+		renderMediaOptimizationHistory(form, batch);
+		renderTextResult(form, t('Expired backup cleanup finished.'), 'ok');
+		return result;
 	}
 
 	async function completeMediaDerivativeBatchPlan(form, planEnvelope) {
@@ -5750,7 +5798,13 @@
 		form.__npcinkMediaOptimizationBatch = batch;
 		const progress = form.querySelector('[data-toolbox-media-batch-progress]');
 		if (progress) progress.hidden = false;
-		const pending = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')));
+		const selectedIds = new Set(selectedMediaBatchCandidates(form).map((candidate) => mediaBatchAttachmentId(candidate)).filter(Boolean));
+		const pending = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && selectedIds.has(mediaBatchAttachmentId(item)));
+		const deselected = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && !selectedIds.has(mediaBatchAttachmentId(item)));
+		for (let index = 0; index < deselected.length; index += 1) {
+			batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(deselected[index].attachment_id)) + '/complete', { status: 'skipped', reason: 'not_selected' });
+			form.__npcinkMediaOptimizationBatch = batch;
+		}
 		for (let index = 0; index < pending.length; index += 1) {
 			const item = pending[index];
 			if (progress) progress.textContent = t('Optimizing ') + String(index + 1) + t(' of ') + String(pending.length) + '...';
@@ -8476,6 +8530,16 @@
 					if (restoreBatchAllButton && form.contains(restoreBatchAllButton)) {
 						event.preventDefault();
 						restoreWholeMediaOptimizationBatch(form).catch((error) => renderTextResult(form, formatErrorMessage(error), 'error'));
+						return;
+					}
+
+					const cleanupBackupsButton = event.target.closest('[data-toolbox-cleanup-expired-backups]');
+					if (cleanupBackupsButton && form.contains(cleanupBackupsButton)) {
+						event.preventDefault();
+						cleanupExpiredMediaBackups(form, cleanupBackupsButton).catch((error) => {
+							cleanupBackupsButton.disabled = false;
+							renderTextResult(form, formatErrorMessage(error), 'error');
+						});
 						return;
 					}
 

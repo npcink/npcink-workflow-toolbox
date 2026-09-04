@@ -235,6 +235,8 @@ human-readable allowlist and must stay aligned with that table and
 - `/media-optimization-manifest`
 - `/media-optimization-batches`
 - `/media-optimization-batches/current`
+- `/media-backup-cleanup/preview`
+- `/media-backup-cleanup/confirm`
 - `/media-optimization-batches/{batch_id}/confirm`
 - `/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
 - `/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
