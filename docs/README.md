@@ -87,6 +87,7 @@ Start from the active documents below before changing code.
 
 ## Media And Site Operations
 
+- [媒体治理与单人 AI 开发规范 v1](media-governance-and-solo-ai-development-standard-v1.md)
 - [Media Optimization V1](media-optimization-v1.md)
 - [Media Optimization Stage Summary](media-optimization-stage-summary.md)
 - [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
