@@ -8594,5 +8594,5 @@ msgid "History and restore"
 msgstr "历史与恢复"
 
 #: includes/Admin_Page.php
-msgid "Completed batches remain recoverable for 30 days. Backups are not deleted automatically."
-msgstr "已完成批次默认可在 30 天内恢复。备份不会被自动删除。"
+msgid "Completed batches remain recoverable for 30 days. Single-image backup files expire through daily maintenance; batch backups stay until explicitly cleaned up. The current Media Library image is never removed."
+msgstr "已完成批次默认可在 30 天内恢复。单图备份文件由每日维护到期清理；批次备份会保留，直到明确执行清理。当前媒体库图片不会被删除。"
