@@ -33,6 +33,8 @@ function map_deep( $value, callable $callback ) {
 $GLOBALS['batch_filters'] = array();
 $GLOBALS['batch_ability_calls'] = array();
 $GLOBALS['batch_adopt_failure'] = false;
+$GLOBALS['batch_cleanup_expired'] = 2;
+$GLOBALS['batch_cleanup_commits'] = 0;
 function add_filter( string $hook, callable $callback ): void { $GLOBALS['batch_filters'][ $hook ] = $callback; }
 function remove_filter( string $hook, callable $callback ): void {
 	if ( ( $GLOBALS['batch_filters'][ $hook ] ?? null ) === $callback ) unset( $GLOBALS['batch_filters'][ $hook ] );
@@ -60,6 +62,18 @@ function npcink_abilities_toolkit_get_registered(): array {
 				$GLOBALS['batch_ability_calls'][] = array( 'restore', $input );
 				if ( 'backup-' . $input['attachment_id'] !== $input['backup_id'] ) return new WP_Error( 'test_restore_backup_id_mismatch' );
 				return array( 'restored' => true );
+			},
+		),
+		'npcink-abilities-toolkit/cleanup-media-backups' => array(
+			'execute_callback' => static function ( array $input ) {
+				$GLOBALS['batch_ability_calls'][] = array( 'cleanup', $input );
+				if ( ! empty( $input['dry_run'] ) ) {
+					return array( 'retention_days' => 30, 'expired' => (int) $GLOBALS['batch_cleanup_expired'], 'removed' => 0, 'dry_run' => true );
+				}
+				$filter = $GLOBALS['batch_filters']['npcink_abilities_toolkit_write_commit_allowed'] ?? null;
+				if ( ! is_callable( $filter ) || ! $filter( false, 'npcink-abilities-toolkit/cleanup-media-backups' ) ) return new WP_Error( 'test_cleanup_scope_failed' );
+				++$GLOBALS['batch_cleanup_commits'];
+				return array( 'retention_days' => 30, 'expired' => (int) $GLOBALS['batch_cleanup_expired'], 'removed' => (int) $GLOBALS['batch_cleanup_expired'], 'dry_run' => false );
 			},
 		),
 	);
@@ -151,5 +165,19 @@ batch_assert( 'backup-41' === (string) ( $GLOBALS['batch_ability_calls'][ count(
 $restored_again = $service->restore_item( $success_batch['batch_id'], 41 );
 batch_assert( is_array( $restored_again ) && 'restored' === $restored_again['items'][0]['restore_status'], 'Repeated restore is idempotent.' );
 batch_assert( empty( $GLOBALS['batch_filters'] ), 'Request-scoped Toolkit write authorization is always removed.' );
+
+$unconfirmed_cleanup = $service->cleanup_backups( array( 'confirm' => false, 'preview_verified' => false, 'preview_expired' => 2 ) );
+batch_assert( is_wp_error( $unconfirmed_cleanup ) && 'npcink_toolbox_media_backup_cleanup_unconfirmed' === $unconfirmed_cleanup->get_error_code(), 'Backup cleanup rejects requests without explicit confirmation.' );
+$GLOBALS['batch_cleanup_expired'] = 3;
+$stale_cleanup = $service->cleanup_backups( array( 'confirm' => true, 'preview_verified' => true, 'preview_expired' => 2 ) );
+batch_assert( is_wp_error( $stale_cleanup ) && 'npcink_toolbox_media_backup_cleanup_stale' === $stale_cleanup->get_error_code(), 'Backup cleanup rejects a stale preview count before execution.' );
+$GLOBALS['batch_cleanup_expired'] = 2;
+$cleanup = $service->cleanup_backups( array( 'confirm' => true, 'preview_verified' => true, 'preview_expired' => 2 ) );
+batch_assert( is_array( $cleanup ) && false === (bool) ( $cleanup['dry_run'] ?? true ) && 2 === (int) ( $cleanup['removed'] ?? 0 ), 'Confirmed backup cleanup delegates execution to Toolkit after a fresh preview.' );
+$cleanup_call = $GLOBALS['batch_ability_calls'][ count( $GLOBALS['batch_ability_calls'] ) - 1 ][1] ?? array();
+batch_assert( 'toolbox-media-backup-cleanup-' . gmdate( 'Ymd' ) === (string) ( $cleanup_call['idempotency_key'] ?? '' ), 'Backup cleanup uses a stable daily idempotency key.' );
+batch_assert( empty( $GLOBALS['batch_filters'] ), 'Backup cleanup removes its request-scoped Toolkit authorization filter.' );
+$cleanup_again = $service->cleanup_backups( array( 'confirm' => true, 'preview_verified' => true, 'preview_expired' => 2 ) );
+batch_assert( is_array( $cleanup_again ) && 2 === (int) ( $cleanup_again['removed'] ?? 0 ) && 2 === $GLOBALS['batch_cleanup_commits'], 'Repeated backup cleanup confirmation remains safe for the idempotent Toolkit ability.' );
 
 echo "OK: media optimization batch behavior\n";
