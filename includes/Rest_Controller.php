@@ -59,6 +59,7 @@ final class Rest_Controller {
 		$this->post( '/strong-local-confirmation/media-derivative-restore', 'strong_local_confirmation_media_derivative_restore' );
 		$this->get( '/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)', 'strong_local_confirmation_media_derivative_backups' );
 		$this->post( '/media-optimization-manifest', 'media_optimization_manifest' );
+		$this->get( '/media-optimization-health', 'media_optimization_health' );
 		$this->post( '/media-optimization-batches', 'media_optimization_batch_create' );
 		$this->get( '/media-optimization-batches', 'media_optimization_batches' );
 		$this->get( '/media-optimization-batches/current', 'media_optimization_batch_current' );
@@ -176,6 +177,7 @@ final class Rest_Controller {
 			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
 			'/strong-local-confirmation/media-derivative-restore' => 'cap.toolbox.image_adoption',
 			'/media-optimization-manifest'                 => 'cap.toolbox.image_adoption',
+			'/media-optimization-health'                   => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
 			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
@@ -246,6 +248,41 @@ final class Rest_Controller {
 					'retry_registered'       => true,
 				),
 				'boundary'                 => 'Toolbox returns Cloud-managed image-source and Cloud-managed site-knowledge suggestions only. Cloud owns web search execution and provider configuration. WordPress writes should be handed to Abilities/Core governance.',
+			)
+		);
+	}
+
+	/**
+	 * Performs a live, read-only Cloud readiness check before media processing.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function media_optimization_health(): WP_REST_Response {
+		if ( ! function_exists( 'npcink_cloud_addon_get_manual_readiness_result' ) ) {
+			return rest_ensure_response(
+				array(
+					'ready'             => false,
+					'status'            => 'unavailable',
+					'blocked_reason'    => 'cloud_addon_not_installed',
+					'next_action'       => 'check_cloud_connection',
+					'write_posture'     => 'read_only',
+					'contract_version'  => 'toolbox_media_optimization_health.v1',
+				)
+			);
+		}
+
+		$readiness = npcink_cloud_addon_get_manual_readiness_result();
+		$readiness = is_array( $readiness ) ? $readiness : array();
+		$status    = sanitize_key( (string) ( $readiness['status'] ?? 'unavailable' ) );
+
+		return rest_ensure_response(
+			array(
+				'ready'            => 'ready' === $status,
+				'status'           => '' !== $status ? $status : 'unavailable',
+				'blocked_reason'   => sanitize_text_field( (string) ( $readiness['blocked_reason'] ?? '' ) ),
+				'next_action'      => sanitize_key( (string) ( $readiness['next_safe_action'] ?? 'check_cloud_connection' ) ),
+				'write_posture'    => 'read_only',
+				'contract_version' => 'toolbox_media_optimization_health.v1',
 			)
 		);
 	}

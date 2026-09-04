@@ -339,6 +339,16 @@
       "boundary_note": "Invokes the existing Toolkit read-only planner for the present administrator; it creates no Core approval and performs no media write."
     },
     {
+      "route": "/media-optimization-health",
+      "documented_route": "/media-optimization-health",
+      "methods": ["GET"],
+      "scope": "cap.toolbox.image_adoption",
+      "owner": "cloud_addon",
+      "write_posture": "read_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Runs the Cloud Addon liveness and signed-read readiness probe before media optimization; it creates no media, approval, queue, or write state."
+    },
+    {
       "route": "/media-optimization-batches",
       "documented_route": "/media-optimization-batches",
       "methods": ["GET", "POST"],

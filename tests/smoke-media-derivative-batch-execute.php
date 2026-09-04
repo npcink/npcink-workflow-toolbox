@@ -282,6 +282,9 @@ toolbox_media_batch_execute_assert( class_exists( 'WP_REST_Request' ) && functio
 toolbox_media_batch_execute_assert( toolbox_media_batch_execute_admin_user_id() > 0, 'A local administrator is available.' );
 toolbox_media_batch_execute_assert( function_exists( 'npcink_abilities_toolkit_get_registered' ), 'Npcink Abilities Toolkit registry is available.' );
 
+$cloud_health = toolbox_media_batch_execute_rest_raw( 'GET', '/npcink-toolbox/v1/media-optimization-health' );
+toolbox_media_batch_execute_assert( 200 === (int) ( $cloud_health['status'] ?? 0 ) && true === (bool) ( $cloud_health['data']['ready'] ?? false ), 'Cloud readiness is verified before creating temporary media fixtures.' );
+
 $attachment_ids = array(
 	toolbox_media_batch_execute_create_attachment( 'A' ),
 	toolbox_media_batch_execute_create_attachment( 'B' ),

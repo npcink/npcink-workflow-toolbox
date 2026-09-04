@@ -390,6 +390,7 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/flows/media-brief`
 - `POST /wp-json/npcink-toolbox/v1/editor/content-support`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-handoff`
+- `GET /wp-json/npcink-toolbox/v1/media-optimization-health`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-manifest`
 - `GET|POST /wp-json/npcink-toolbox/v1/media-optimization-batches`
 - `GET /wp-json/npcink-toolbox/v1/media-optimization-batches/current`
