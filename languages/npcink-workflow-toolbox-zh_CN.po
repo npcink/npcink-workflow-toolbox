@@ -7956,17 +7956,23 @@ msgstr "所选备份已不可用于恢复。"
 msgid "Original image backup retention"
 msgstr "原图备份保留时间"
 
-msgid "Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed."
-msgstr "选择自动创建的单图备份可用于恢复的时长。过期文件会从隐藏备份目录中移除，但不会删除媒体库中的当前图片。"
+msgid "Backups are retained for 30 days. Choose whether cleanup requires your confirmation or runs automatically for backups created after this setting is enabled. The current Media Library image is never removed."
+msgstr "备份固定保留 30 天。请选择清理是否需要您的确认，或仅对启用此设置后新创建的备份自动执行。当前媒体库图片永远不会被删除。"
 
 msgid "Keep backups for"
 msgstr "备份保留时间"
 
-msgid "30 days (recommended)"
-msgstr "30 天（推荐）"
+msgid "30 days"
+msgstr "30 天"
 
-msgid "90 days"
-msgstr "90 天"
+msgid "Expired backup cleanup"
+msgstr "过期备份清理"
+
+msgid "Ask me before cleanup"
+msgstr "清理前询问我"
+
+msgid "Clean up automatically"
+msgstr "自动清理"
 
 msgid "Save backup retention"
 msgstr "保存备份保留设置"
