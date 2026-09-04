@@ -5490,7 +5490,7 @@
 		appendMeta(meta, t('Skipped during check'), Number(planSummary.skipped_count || 0));
 		appendMeta(meta, t('Maximum batch size'), 1000);
 		host.appendChild(meta);
-		const failedIds = new Set(asArray(sampleStates).filter((state) => state && state.batchPreviewError).map((state) => mediaBatchAttachmentId(state)).filter(Boolean));
+		const failedIds = new Set(asArray(sampleStates).filter((state) => state && (state.batchPreviewError || state.localReviewStatus === 'failed')).map((state) => mediaBatchAttachmentId(state)).filter(Boolean));
 		const selection = el('details', 'npcink-toolbox__result-details');
 		selection.open = true;
 		selection.appendChild(el('summary', '', t('Images to optimize')));
