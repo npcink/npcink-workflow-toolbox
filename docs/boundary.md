@@ -231,6 +231,7 @@ human-readable allowlist and must stay aligned with that table and
 - `/flows/media-brief`
 - `/editor/content-support`
 - `/media-derivative-handoff`
+- `/media-optimization-health`
 - `/media-optimization-manifest`
 - `/media-optimization-batches`
 - `/media-optimization-batches/current`

@@ -5428,10 +5428,27 @@
 			throw { message: 'Npcink Toolbox REST URL is unavailable.' };
 		}
 
+		await ensureMediaOptimizationCloudReady(form);
 		const input = mediaDerivativeBatchPlanInput(form);
 		renderTextResult(form, 'Building media derivative batch plan...', 'pending');
 		const planEnvelope = await postJson(config.restUrl, 'media-optimization-manifest', input);
 		await completeMediaDerivativeBatchPlan(form, planEnvelope);
+	}
+
+	async function ensureMediaOptimizationCloudReady(form) {
+		if (!config.restUrl) {
+			throw { message: 'Npcink Toolbox REST URL is unavailable.' };
+		}
+
+		try {
+			const health = await getJson(config.restUrl, 'media-optimization-health');
+			if (health && health.ready === true) return health;
+			const reason = health && health.blocked_reason ? String(health.blocked_reason) : 'Cloud service is unavailable.';
+			throw { code: 'toolbox_media_cloud_unavailable', message: reason + ' Connect the M4 Cloud service and try again.' };
+		} catch (error) {
+			if (error && error.code === 'toolbox_media_cloud_unavailable') throw error;
+			throw { code: 'toolbox_media_cloud_unavailable', message: 'Cloud service is unavailable. Connect the M4 Cloud service and try again.' };
+		}
 	}
 
 	function representativeMediaCandidates(candidates) {
@@ -5725,6 +5742,7 @@
 	async function submitMediaDerivativeBatchProposals(form) {
 		let batch = asObject(form.__npcinkMediaOptimizationBatch);
 		if (!batch.batch_id) throw { message: 'Check optimizable images before starting.' };
+		await ensureMediaOptimizationCloudReady(form);
 		batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/confirm', {
 			confirm: true,
 			manifest_digest: batch.manifest_digest,

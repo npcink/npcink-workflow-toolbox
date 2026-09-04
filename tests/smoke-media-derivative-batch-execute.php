@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $toolbox_media_batch_execute_attachment_ids = array();
 $toolbox_media_batch_execute_paths          = array();
 $toolbox_media_batch_execute_proposal_ids   = array();
+$toolbox_media_batch_execute_read_request_ids = array();
 
 function toolbox_media_batch_execute_pass( string $message ): void {
 	echo "PASS: {$message}\n";
@@ -83,6 +84,15 @@ function toolbox_media_batch_execute_track_proposals( $data ): void {
 	}
 }
 
+function toolbox_media_batch_execute_track_read_request( string $read_request_id ): void {
+	global $toolbox_media_batch_execute_read_request_ids;
+
+	$read_request_id = sanitize_text_field( $read_request_id );
+	if ( '' !== $read_request_id ) {
+		$toolbox_media_batch_execute_read_request_ids[ $read_request_id ] = true;
+	}
+}
+
 function toolbox_media_batch_execute_rest_raw( string $method, string $route, array $params = array() ): array {
 	wp_set_current_user( toolbox_media_batch_execute_admin_user_id() );
 
@@ -109,7 +119,7 @@ function toolbox_media_batch_execute_rest( string $method, string $route, array 
 
 	toolbox_media_batch_execute_assert(
 		$status >= 200 && $status < 300,
-		$method . ' ' . $route . ' returned HTTP ' . $status
+		$method . ' ' . $route . ' returned HTTP ' . $status . ( ! empty( $data ) ? ': ' . wp_json_encode( $data ) : '' )
 	);
 
 	return $data;
@@ -214,7 +224,7 @@ function toolbox_media_batch_execute_response_value( array $payload, string $key
 }
 
 function toolbox_media_batch_execute_cleanup(): void {
-	global $wpdb, $toolbox_media_batch_execute_attachment_ids, $toolbox_media_batch_execute_paths, $toolbox_media_batch_execute_proposal_ids;
+	global $wpdb, $toolbox_media_batch_execute_attachment_ids, $toolbox_media_batch_execute_paths, $toolbox_media_batch_execute_proposal_ids, $toolbox_media_batch_execute_read_request_ids;
 
 	foreach ( array_reverse( array_unique( array_filter( $toolbox_media_batch_execute_attachment_ids ) ) ) as $attachment_id ) {
 		wp_delete_attachment( absint( $attachment_id ), true );
@@ -242,6 +252,18 @@ function toolbox_media_batch_execute_cleanup(): void {
 	}
 
 	if ( toolbox_media_batch_execute_should_purge() ) {
+		$read_request_ids = array_keys( is_array( $toolbox_media_batch_execute_read_request_ids ) ? $toolbox_media_batch_execute_read_request_ids : array() );
+		if ( ! empty( $read_request_ids ) ) {
+			$audit_table        = $wpdb->prefix . 'npcink_governance_core_audit_log';
+			$read_request_table = $wpdb->prefix . 'npcink_governance_core_read_requests';
+			foreach ( $read_request_ids as $read_request_id ) {
+				$read_request_id = sanitize_text_field( $read_request_id );
+				$wpdb->delete( $audit_table, array( 'proposal_id' => $read_request_id ), array( '%s' ) );
+				$wpdb->delete( $read_request_table, array( 'request_id' => $read_request_id ), array( '%s' ) );
+			}
+			toolbox_media_batch_execute_info( 'Purged Core read authorization fixtures: ' . count( $read_request_ids ) );
+		}
+
 		$proposal_ids = array_keys( is_array( $toolbox_media_batch_execute_proposal_ids ) ? $toolbox_media_batch_execute_proposal_ids : array() );
 		if ( ! empty( $proposal_ids ) ) {
 			$audit_table    = $wpdb->prefix . 'npcink_governance_core_audit_log';
@@ -260,6 +282,9 @@ toolbox_media_batch_execute_assert( class_exists( 'WP_REST_Request' ) && functio
 toolbox_media_batch_execute_assert( toolbox_media_batch_execute_admin_user_id() > 0, 'A local administrator is available.' );
 toolbox_media_batch_execute_assert( function_exists( 'npcink_abilities_toolkit_get_registered' ), 'Npcink Abilities Toolkit registry is available.' );
 
+$cloud_health = toolbox_media_batch_execute_rest_raw( 'GET', '/npcink-toolbox/v1/media-optimization-health' );
+toolbox_media_batch_execute_assert( 200 === (int) ( $cloud_health['status'] ?? 0 ) && true === (bool) ( $cloud_health['data']['ready'] ?? false ), 'Cloud readiness is verified before creating temporary media fixtures.' );
+
 $attachment_ids = array(
 	toolbox_media_batch_execute_create_attachment( 'A' ),
 	toolbox_media_batch_execute_create_attachment( 'B' ),
@@ -272,18 +297,62 @@ foreach ( $attachment_ids as $attachment_id ) {
 	toolbox_media_batch_execute_assert( '' !== $before_files[ $attachment_id ] && '' !== $before_urls[ $attachment_id ], 'Attachment ' . (int) $attachment_id . ' has initial URL and file pointer.' );
 }
 
-$plan_envelope = toolbox_media_batch_execute_rest(
+$plan_input = array(
+	'attachment_ids'        => $attachment_ids,
+	'optimization_mode'     => 'auto_safe',
+	'optimization_profile'  => 'auto_safe.v1',
+	'image_types'           => array( 'jpeg', 'png', 'webp' ),
+	'resize_mode'           => 'preserve',
+	'max_items'             => 10,
+);
+$direct_plan = toolbox_media_batch_execute_rest_raw(
 	'POST',
 	'/npcink-openclaw-adapter/v1/run-read-ability',
 	array(
 		'ability_id' => 'npcink-abilities-toolkit/build-media-derivative-batch-plan',
-		'input'      => array(
-			'attachment_ids'    => $attachment_ids,
-			'target_format'     => 'webp',
-			'target_max_width'  => 320,
-			'quality'           => 82,
-			'max_items'         => 10,
-		),
+		'input'      => $plan_input,
+	)
+);
+$direct_plan_data = is_array( $direct_plan['data'] ?? null ) ? (array) $direct_plan['data'] : array();
+toolbox_media_batch_execute_assert( 403 === (int) ( $direct_plan['status'] ?? 0 ), 'Adapter fails closed before Core authorizes the media batch plan read.' );
+toolbox_media_batch_execute_assert( 'npcink_openclaw_adapter_core_read_authorization_required' === (string) ( $direct_plan_data['code'] ?? '' ), 'Adapter returns the stable Core read authorization requirement.' );
+
+$read_request = toolbox_media_batch_execute_rest(
+	'POST',
+	'/npcink-openclaw-adapter/v1/read-requests',
+	array(
+		'ability_id'              => 'npcink-abilities-toolkit/build-media-derivative-batch-plan',
+		'input'                   => $plan_input,
+		'requested_input_summary' => 'Toolbox media derivative batch execution smoke plan.',
+		'data_classes'            => array( 'media', 'attachment_metadata' ),
+		'redaction_level'         => 'strict',
+		'purpose'                 => 'Verify the bounded media batch plan before temporary smoke execution.',
+		'caller'                  => array( 'external_thread_id' => 'toolbox-media-derivative-batch-execute' ),
+		'bounds'                  => array( 'denied_fields' => array( 'authorization', 'cookie', 'application_password' ) ),
+	)
+);
+$read_request_id = sanitize_text_field( (string) ( $read_request['request_id'] ?? '' ) );
+toolbox_media_batch_execute_assert( '' !== $read_request_id && 'pending' === (string) ( $read_request['status'] ?? '' ), 'Adapter creates a pending Core-governed media batch read request.' );
+toolbox_media_batch_execute_track_read_request( $read_request_id );
+
+$approved_read_request = toolbox_media_batch_execute_rest(
+	'POST',
+	'/npcink-governance-core/v1/read-requests/' . rawurlencode( $read_request_id ) . '/approve',
+	array(
+		'note'            => 'Toolbox media derivative batch execution smoke approval.',
+		'redaction_level' => 'strict',
+		'denied_fields'   => array( 'authorization', 'cookie', 'application_password' ),
+	)
+);
+toolbox_media_batch_execute_assert( 'approved' === (string) ( $approved_read_request['status'] ?? '' ), 'Core approves the bounded media batch read request.' );
+
+$plan_envelope = toolbox_media_batch_execute_rest(
+	'POST',
+	'/npcink-openclaw-adapter/v1/run-read-ability',
+	array(
+		'ability_id'      => 'npcink-abilities-toolkit/build-media-derivative-batch-plan',
+		'input'           => $plan_input,
+		'read_request_id' => $read_request_id,
 	)
 );
 $plan          = is_array( $plan_envelope['result']['data'] ?? null ) ? (array) $plan_envelope['result']['data'] : ( is_array( $plan_envelope['data'] ?? null ) ? (array) $plan_envelope['data'] : array() );

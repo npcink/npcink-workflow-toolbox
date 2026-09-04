@@ -4417,7 +4417,7 @@ final class Admin_Page {
 			<div class="npcink-toolbox__batch-progress" data-toolbox-media-batch-progress hidden aria-live="polite"></div>
 			<section class="npcink-toolbox__media-batch-history" data-toolbox-media-batch-history>
 				<h3><?php esc_html_e( 'History and restore', 'npcink-workflow-toolbox' ); ?></h3>
-				<p class="description"><?php esc_html_e( 'Completed batches remain recoverable for 30 days. Backups are not deleted automatically.', 'npcink-workflow-toolbox' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Completed batches remain recoverable for 30 days. Single-image backup files expire through daily maintenance; batch backups stay until explicitly cleaned up. The current Media Library image is never removed.', 'npcink-workflow-toolbox' ); ?></p>
 			</section>
 		</div>
 		<?php
