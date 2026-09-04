@@ -30,6 +30,8 @@ final class Plugin {
 	private Article_Audio_Playback $article_audio_playback;
 	private Site_Knowledge_Auto_Sync $site_knowledge_auto_sync;
 	private Basic_WP_Cron_Dry_Run $nightly_inspection_cron;
+	private Media_Fingerprint_Scan $media_fingerprint_scan;
+	private Media_Recognition_Continuation $media_recognition_continuation;
 	private Abilities $abilities;
 
 	private function __construct() {
@@ -43,6 +45,8 @@ final class Plugin {
 		$this->article_audio_playback = new Article_Audio_Playback();
 		$this->site_knowledge_auto_sync = new Site_Knowledge_Auto_Sync( $this->client );
 		$this->nightly_inspection_cron = new Basic_WP_Cron_Dry_Run( $this->settings );
+		$this->media_fingerprint_scan = new Media_Fingerprint_Scan( $this->client );
+		$this->media_recognition_continuation = new Media_Recognition_Continuation( $this->client );
 		$this->abilities       = new Abilities( $this->settings, $this->client );
 	}
 
@@ -70,6 +74,9 @@ final class Plugin {
 		$this->dashboard_widget->register_hooks();
 		$this->site_knowledge_auto_sync->register_hooks();
 		$this->nightly_inspection_cron->register_hooks();
+		$this->media_fingerprint_scan->register_hooks();
+		$this->media_recognition_continuation->register_hooks();
+		add_action( 'admin_post_npcink_toolbox_resume_media_recognition', array( $this->admin_page, 'handle_resume_media_recognition' ) );
 		add_action( 'rest_api_init', array( $this->rest_controller, 'register_routes' ) );
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_with_npcink_abilities_toolkit' ), 1 );
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_native_category' ) );
@@ -77,6 +84,9 @@ final class Plugin {
 		add_filter( 'npcink_abilities_toolkit_media_backup_retention_days', array( $this, 'media_backup_retention_days' ) );
 		add_filter( 'npcink_abilities_toolkit_media_backup_cleanup_policy', array( $this, 'media_backup_cleanup_policy' ), 10, 2 );
 		add_filter( 'npcink_toolbox_refresh_site_media_index_batch', array( $this, 'refresh_site_media_index_batch' ), 10, 2 );
+		add_filter( 'npcink_toolbox_media_recognition_start', array( $this, 'start_media_recognition' ), 10, 2 );
+		add_filter( 'npcink_toolbox_media_recognition_status', array( $this, 'media_recognition_status' ) );
+		add_filter( 'npcink_toolbox_media_recognition_resume', array( $this, 'resume_media_recognition' ) );
 	}
 
 	/**
@@ -92,6 +102,21 @@ final class Plugin {
 		}
 
 		return $this->client->refresh_site_media_index_batch( $input );
+	}
+
+	/** Starts one bounded local continuation through the existing bridge. */
+	public function start_media_recognition( $value, $input = array() ): array {
+		return $this->media_recognition_continuation->start( is_array( $input ) ? $input : array() );
+	}
+
+	/** Returns the bounded local continuation projection. */
+	public function media_recognition_status( $value = array() ): array {
+		return $this->media_recognition_continuation->status();
+	}
+
+	/** Resumes only an already-paused continuation. */
+	public function resume_media_recognition( $value = array() ): array {
+		return $this->media_recognition_continuation->resume();
 	}
 
 	/**

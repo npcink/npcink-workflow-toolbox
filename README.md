@@ -1,5 +1,7 @@
 # Npcink Workflow Toolbox
 
+Media recognition continuation ownership and failure recovery are documented in [Media Recognition Continuation](docs/media-recognition-continuation.md).
+
 The default Media Library optimization flow is `choose range -> check samples -> confirm once and run -> history and restore`. It uses Cloud `auto_safe.v1` analysis while WordPress and Abilities Toolkit retain all file replacement, backup, and restore authority. See `docs/decisions/ADR-015-exact-manifest-local-media-optimization.md`.
 
 Single-image recovery remains attachment-scoped. Media Library attachment details and row actions can reopen the existing workbench, which reads available backups through `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` before the administrator explicitly confirms restoration. This lookup does not restore, delete, or modify media.
@@ -260,9 +262,10 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync` (refresh-only bounded
   Cloud request; no rebuild/delete, indexing lifecycle, local queue, or
   collection controls)
-- `POST /wp-json/npcink-toolbox/v1/site-media/index-batch` (explicit batches of
-  at most 10 Toolkit-enumerated images; Cloud owns visual recognition,
-  embedding, and the rebuildable media projection)
+- `POST /wp-json/npcink-toolbox/v1/site-media/index-batch` (starts or returns
+  the single Toolbox-owned continuation; each step contains at most 10
+  Toolkit-enumerated images, while Cloud owns visual recognition, embedding,
+  and the rebuildable media projection)
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback/summary`
 - `POST /wp-json/npcink-toolbox/v1/ai/content-support`
@@ -320,7 +323,9 @@ High-risk entries are intentionally constrained:
   stale-index policy, embedding configuration, vector database endpoints, or
   vector collection lifecycle ownership.
 - `/site-media/index-batch` is an explicit operator-triggered projection
-  refresh. Toolkit owns local attachment enumeration and revision evidence;
+  refresh. Toolbox owns only its bounded local `id_asc` continuation cursor,
+  retry pause, atomic lock, and single-event WP-Cron wakeup. Toolkit owns local
+  attachment enumeration and revision evidence;
   Cloud owns vision and vector execution. Toolbox first reuses a matching
   Cloud Site Knowledge visual-evidence projection; only misses use the existing
   short-lived Cloud Addon Artifact upload and visual-recognition contract.

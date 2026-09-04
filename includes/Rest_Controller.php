@@ -401,14 +401,16 @@ final class Rest_Controller {
 	}
 
 	public function site_media_index_batch( WP_REST_Request $request ) {
-		return rest_ensure_response(
-			$this->client->refresh_site_media_index_batch(
-				array(
-					'page'     => max( 1, (int) ( $request->get_param( 'page' ) ?: 1 ) ),
-					'per_page' => max( 1, min( 10, (int) ( $request->get_param( 'per_page' ) ?: 10 ) ) ),
-				)
-			)
+		$continuation = apply_filters(
+			'npcink_toolbox_media_recognition_start',
+			array(),
+			array( 'per_page' => max( 1, min( 10, (int) ( $request->get_param( 'per_page' ) ?: 10 ) ) ) )
 		);
+		if ( is_array( $continuation ) && '' !== (string) ( $continuation['plan_id'] ?? '' ) ) {
+			return rest_ensure_response( $continuation );
+		}
+
+		return new WP_Error( 'npcink_toolbox_media_recognition_unavailable', __( 'Media recognition continuation is unavailable.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );
 	}
 
 	public function knowledge_search( WP_REST_Request $request ) {
@@ -1899,6 +1901,8 @@ final class Rest_Controller {
 			'tag_ids'             => $this->csv_absint_list( (string) $request->get_param( 'tag_ids' ) ),
 			'featured_media'      => absint( $request->get_param( 'featured_media' ) ),
 			'media_items'         => $this->editor_media_items_from_request( $request ),
+			'page'                => max( 1, absint( $request->get_param( 'page' ) ?: 1 ) ),
+			'per_page'            => max( 1, min( 12, absint( $request->get_param( 'per_page' ) ?: 12 ) ) ),
 			'content_blocks'      => $this->editor_content_blocks_from_request( $request ),
 			'comment_id'          => absint( $request->get_param( 'comment_id' ) ),
 			'comment_author'      => sanitize_text_field( (string) $request->get_param( 'comment_author' ) ),
@@ -2013,9 +2017,6 @@ final class Rest_Controller {
 			}
 			$items[] = $media_item;
 			$seen[]  = $key;
-			if ( count( $items ) >= 12 ) {
-				break;
-			}
 		}
 
 		return $items;
@@ -2103,6 +2104,10 @@ final class Rest_Controller {
 				static fn( $item ): bool => is_array( $item ) && '' !== trim( (string) ( $item['occurrence_id'] ?? '' ) )
 			)
 		);
+		$page        = max( 1, absint( $context['page'] ?? 1 ) );
+		$per_page    = max( 1, min( 12, absint( $context['per_page'] ?? 12 ) ) );
+		$total_items = count( $items );
+		$items       = array_slice( $items, ( $page - 1 ) * $per_page, $per_page );
 		if ( empty( $items ) ) {
 			return array(
 				'artifact_type'          => 'current_article_image_alt_suggestions.v1',
@@ -2177,6 +2182,10 @@ final class Rest_Controller {
 			'visual_fallback_used_count' => $visual_fallback_used_count,
 			'visual_confirmation_policy' => 'no_extra_step_author_present_and_native_save',
 			'items'                 => $review_items,
+			'page'                  => $page,
+			'per_page'              => $per_page,
+			'total_occurrence_count' => $total_items,
+			'has_next_page'         => ( $page * $per_page ) < $total_items,
 			'write_posture'         => 'suggestion_only',
 			'editor_apply_path'      => 'local_admin_consent_audit_then_editor_state',
 			'final_write_path'      => 'wordpress_editor_save_after_confirmation',

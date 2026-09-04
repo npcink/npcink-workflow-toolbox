@@ -28,6 +28,7 @@ final class Provider_Client {
 	private const DEBUG_PAYLOAD_MAX_STRING_CHARS = 2000;
 	private const HTTP_CONNECT_TIMEOUT = 5;
 	private const SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES = 262144;
+	private const MEDIA_FINGERPRINT_SCAN_LOOKBACK_DAYS = 7;
 
 	private Settings $settings;
 
@@ -2624,21 +2625,29 @@ final class Provider_Client {
 	public function refresh_site_media_index_batch( array $input ) {
 		$page = max( 1, absint( $input['page'] ?? 1 ) );
 		$per_page = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );
+		$uses_stable_cursor = array_key_exists( 'after_id', $input );
+		$after_id = absint( $input['after_id'] ?? 0 );
 		$upload_scope = preg_replace( '/[^A-Za-z0-9._:-]/', '', (string) ( $input['upload_scope'] ?? '' ) );
 		$upload_scope = is_string( $upload_scope ) ? substr( $upload_scope, 0, 96 ) : '';
-		$inventory = $this->toolkit_media_inventory(
-			array(
-				'mime_type' => 'image',
-				'page'      => $page,
-				'per_page'  => $per_page,
-				'stable_order' => 'id_asc',
-			)
-		);
+		$inventory = $uses_stable_cursor
+			? $this->toolkit_media_inventory_after_id( $after_id, $per_page )
+			: $this->toolkit_media_inventory(
+				array(
+					'mime_type'   => 'image',
+					'page'        => $page,
+					'per_page'    => $per_page,
+					'stable_order' => 'id_asc',
+				)
+			);
 		if ( is_wp_error( $inventory ) ) {
 			return $inventory;
 		}
 
 		$items = is_array( $inventory['items'] ?? null ) ? $inventory['items'] : array();
+		$has_more = $uses_stable_cursor
+			? ! empty( $inventory['continuation_has_more'] )
+			: $page * $per_page < absint( $inventory['total'] ?? count( $items ) );
+		$next_after_id = $uses_stable_cursor ? absint( $inventory['continuation_after_id'] ?? $after_id ) : 0;
 		if ( empty( $items ) ) {
 			return array(
 				'artifact_type'          => 'site_media_index_batch.v1',
@@ -2648,6 +2657,8 @@ final class Provider_Client {
 				'per_page'               => $per_page,
 				'total'                  => absint( $inventory['total'] ?? 0 ),
 				'indexed_items'          => 0,
+				'has_more'               => $has_more,
+				'next_cursor'            => array( 'after_id' => $next_after_id ),
 				'direct_wordpress_write' => false,
 			);
 		}
@@ -2716,7 +2727,8 @@ final class Provider_Client {
 				'visual_evidence_status'           => 'processing',
 				'visual_evidence_error_code'       => '',
 				'visual_evidence_run_id'           => $evidence_run_id,
-				'has_more'                         => $page * $per_page < $total,
+				'has_more'                         => $has_more,
+				'next_cursor'                      => array( 'after_id' => $next_after_id ),
 				'write_posture'                    => 'suggestion_only',
 				'direct_wordpress_write'           => false,
 			);
@@ -2803,9 +2815,105 @@ final class Provider_Client {
 		$sync['visual_evidence_error_code'] = $evidence_requested && empty( $evidence_by_id )
 			? 'visual_evidence_unavailable'
 			: ( count( $evidence_by_id ) < count( $media_items ) ? 'visual_evidence_partial' : '' );
-		$sync['has_more']              = $page * $per_page < $sync['total'];
+		$sync['has_more']              = $has_more;
+		$sync['next_cursor']           = array( 'after_id' => $next_after_id );
 		$sync['visual_evidence_run_id'] = '';
 		return $sync;
+	}
+
+	/**
+	 * Compares a bounded recent media sample with the current Cloud projection.
+	 * The existing Toolkit media-version hook remains the only invalidation lane.
+	 *
+	 * @return array<int,array{attachment_id:int,media_fingerprint:string}>
+	 */
+	public function scan_media_fingerprint_changes( int $limit = 100 ): array {
+		$ids = $this->media_fingerprint_scan_candidate_ids( $limit );
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$status = $this->get_site_knowledge_status( array( 'media_attachment_ids' => $ids ) );
+		$known  = array();
+		foreach ( (array) ( is_array( $status ) ? ( $status['media_evidence_items'] ?? array() ) : array() ) as $item ) {
+			if ( is_array( $item ) && absint( $item['attachment_id'] ?? 0 ) > 0 ) {
+				$known[ absint( $item['attachment_id'] ) ] = $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) );
+			}
+		}
+
+		$changes = array();
+		foreach ( $ids as $attachment_id ) {
+			$source  = $this->local_media_visual_source( $attachment_id );
+			$current = $this->runtime_safe_media_fingerprint( (string) ( $source['media_fingerprint'] ?? '' ) );
+			if ( '' !== $current && isset( $known[ $attachment_id ] ) && $current !== $known[ $attachment_id ] ) {
+				$changes[] = array( 'attachment_id' => $attachment_id, 'media_fingerprint' => $current );
+			}
+		}
+		return $changes;
+	}
+
+	/** @return array<int,int> */
+	private function media_fingerprint_scan_candidate_ids( int $limit ): array {
+		$limit       = max( 1, min( 100, $limit ) );
+		$lookback_at = gmdate( 'Y-m-d H:i:s', time() - ( self::MEDIA_FINGERPRINT_SCAN_LOOKBACK_DAYS * DAY_IN_SECONDS ) );
+		$ids         = array();
+		$append_ids  = static function ( array &$target, $values ): void {
+			foreach ( (array) $values as $value ) {
+				$id = absint( $value );
+				if ( $id > 0 && ! in_array( $id, $target, true ) ) {
+					$target[] = $id;
+				}
+			}
+		};
+
+		$recent_attachments = get_posts(
+			array(
+				'post_type' => 'attachment', 'post_status' => 'inherit', 'post_mime_type' => 'image',
+				'posts_per_page' => $limit, 'fields' => 'ids', 'orderby' => 'post_modified_gmt', 'order' => 'DESC',
+				'date_query' => array( array( 'column' => 'post_modified_gmt', 'after' => $lookback_at ) ),
+			)
+		);
+		$append_ids( $ids, $recent_attachments );
+
+		$recent_posts = get_posts(
+			array(
+				'post_type' => array( 'post', 'page' ), 'post_status' => array( 'publish', 'private', 'draft', 'pending', 'future' ),
+				'posts_per_page' => min( 100, max( 20, $limit ) ), 'fields' => 'ids', 'orderby' => 'post_modified_gmt', 'order' => 'DESC',
+				'date_query' => array( array( 'column' => 'post_modified_gmt', 'after' => $lookback_at ) ),
+			)
+		);
+		foreach ( (array) $recent_posts as $post_id ) {
+			$content = function_exists( 'get_post_field' ) ? (string) get_post_field( 'post_content', absint( $post_id ) ) : '';
+			$blocks  = function_exists( 'parse_blocks' ) ? parse_blocks( $content ) : array();
+			$collect = function ( $nested ) use ( &$collect, &$ids, $append_ids ): void {
+				foreach ( (array) $nested as $block ) {
+					if ( ! is_array( $block ) ) {
+						continue;
+					}
+					$name  = (string) ( $block['blockName'] ?? '' );
+					$attrs = is_array( $block['attrs'] ?? null ) ? $block['attrs'] : array();
+					if ( in_array( $name, array( 'core/image', 'core/cover' ), true ) ) {
+						$append_ids( $ids, array( $attrs['id'] ?? 0, $attrs['mediaId'] ?? 0, $attrs['media_id'] ?? 0 ) );
+					}
+					if ( 'core/gallery' === $name ) {
+						foreach ( (array) ( $attrs['images'] ?? array() ) as $image ) {
+							$append_ids( $ids, array( is_array( $image ) ? ( $image['id'] ?? $image['mediaId'] ?? 0 ) : 0 ) );
+						}
+					}
+					$collect( $block['innerBlocks'] ?? array() );
+				}
+			};
+			$collect( $blocks );
+			if ( count( $ids ) >= $limit ) {
+				break;
+			}
+		}
+
+		$evidence_ids = apply_filters( 'npcink_toolbox_media_fingerprint_scan_evidence_attachment_ids', array(), $limit );
+		$prioritized  = array();
+		$append_ids( $prioritized, $evidence_ids );
+		$append_ids( $prioritized, $ids );
+		return array_slice( $prioritized, 0, $limit );
 	}
 
 	private function runtime_safe_media_fingerprint( string $fingerprint ): string {
@@ -3048,6 +3156,39 @@ final class Provider_Client {
 			);
 		}
 		return is_array( $result['data'] ?? null ) ? $result['data'] : array();
+	}
+
+	/** Reads one stable ID cursor, then delegates media row shaping to Toolkit. */
+	private function toolkit_media_inventory_after_id( int $after_id, int $per_page ) {
+		global $wpdb;
+		$limit = max( 1, min( 10, $per_page ) ) + 1;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- A bounded ID-only cursor cannot use WP_Query without page drift.
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE ID > %d AND post_type = %s AND post_status = %s AND post_mime_type LIKE %s ORDER BY ID ASC LIMIT %d",
+				$after_id,
+				'attachment',
+				'inherit',
+				'image/%',
+				$limit
+			)
+		);
+		$ids      = array_values( array_filter( array_map( 'absint', is_array( $ids ) ? $ids : array() ) ) );
+		$has_more = count( $ids ) > $per_page;
+		$ids      = array_slice( $ids, 0, $per_page );
+		if ( empty( $ids ) ) {
+			return array( 'items' => array(), 'total' => 0, 'continuation_has_more' => false, 'continuation_after_id' => $after_id );
+		}
+
+		$inventory = $this->toolkit_media_inventory(
+			array( 'mime_type' => 'image', 'attachment_ids' => $ids, 'page' => 1, 'per_page' => $per_page )
+		);
+		if ( is_wp_error( $inventory ) ) {
+			return $inventory;
+		}
+		$inventory['continuation_has_more'] = $has_more;
+		$inventory['continuation_after_id'] = (int) end( $ids );
+		return $inventory;
 	}
 
 	private function cloud_web_search_notice(): array {

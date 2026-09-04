@@ -411,9 +411,17 @@ Current routes require `manage_options`:
 - `GET|POST /wp-json/npcink-toolbox/v1/nightly-inspection/cloud-batch/{run_id}/result`
 - `POST /wp-json/npcink-toolbox/v1/nightly-inspection/cloud-batch/{run_id}/retry`
 
+`/site-media/index-batch` starts or returns one bounded Toolbox-owned media
+recognition continuation. Its non-autoloaded state contains a stable `id_asc`
+`after_id` cursor, pending cursor/counts, current Cloud `run_id`, bounded
+counters, retry eligibility, and pause reason. One self-healing atomic option
+lock and one single-event WP-Cron wakeup advance at most one batch. This narrow
+continuation does not become a generic workflow runtime or move Cloud execution,
+Toolkit inventory, Core review, Adapter execution, or WordPress write truth.
+
 Media derivative result responses keep two independent projections. The
 `cloud_result.artifact` member is the exact artifact validated from
-`media_derivative_result.v1`; `local_review` contains one queryless same-origin
+`media_derivative_result.v3`; `local_review` contains one queryless same-origin
 `endpoint`, `method=POST`, and the exact local12 `artifact`. The route is
 administrator-only and cookie plus `X-WP-Nonce` gated. Toolbox rejects every
 query parameter and every extra body field before passing the exact artifact to
