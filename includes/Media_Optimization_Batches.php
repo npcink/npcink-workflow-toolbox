@@ -77,6 +77,10 @@ final class Media_Optimization_Batches {
 			'items' => array_map( static fn( $item ) => array( $item['attachment_id'], $item['source_fingerprint'] ), array_values( $items ) ),
 		);
 		$digest = 'sha256:' . hash( 'sha256', (string) wp_json_encode( $manifest_seed ) );
+		$existing = $this->find_ready_batch_by_digest( $digest );
+		if ( null !== $existing ) {
+			return $existing;
+		}
 		$batch_id = 'media_opt_' . str_replace( '-', '', (string) wp_generate_uuid4() );
 		$now = gmdate( 'c' );
 		$batch = array(
@@ -280,6 +284,24 @@ final class Media_Optimization_Batches {
 			}
 		}
 		return $this->error( 'npcink_toolbox_media_batch_not_found', 'The media optimization batch was not found.', 404 );
+	}
+
+	/**
+	 * Reuse an identical, unconfirmed manifest instead of creating duplicate
+	 * ready-for-review history entries when the check action is retried.
+	 *
+	 * @return array<string,mixed>|null
+	 */
+	private function find_ready_batch_by_digest( string $digest ): ?array {
+		foreach ( $this->all() as $batch ) {
+			if ( 'ready_for_review' !== (string) ( $batch['status'] ?? '' ) ) {
+				continue;
+			}
+			if ( hash_equals( $digest, (string) ( $batch['manifest_digest'] ?? '' ) ) ) {
+				return $this->with_summary( $batch );
+			}
+		}
+		return null;
 	}
 
 	private function adopt( array $batch, array $item, array $payload ) {

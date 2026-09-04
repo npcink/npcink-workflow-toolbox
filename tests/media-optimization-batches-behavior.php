@@ -129,6 +129,9 @@ $batch = $service->create( array( 'plan' => $plan ) );
 batch_assert( is_array( $batch ) && 'ready_for_review' === $batch['status'] && 5 === $batch['summary']['pending'], 'Batch creation freezes all exact manifest items without processing them.' );
 batch_assert( 'auto_safe.v1' === $batch['optimization_profile'] && 10 === $batch['chunk_size'] && 'preserve' === $batch['resize_mode'], 'Batch pins the safe policy, foreground chunk size, and resize choice.' );
 batch_assert( 'auto_safe' === $batch['items'][0]['cloud_request_input']['optimization_mode'] && ! isset( $batch['items'][0]['cloud_request_input']['quality'] ), 'Batch Cloud input omits user quality controls.' );
+$duplicate = $service->create( array( 'plan' => $plan ) );
+batch_assert( is_array( $duplicate ) && $batch['batch_id'] === $duplicate['batch_id'], 'Retrying the same exact manifest reuses the existing ready-for-review batch.' );
+batch_assert( 1 === count( $service->all() ), 'Retrying an identical manifest does not add a duplicate batch history entry.' );
 
 $wrong_confirmation = $service->confirm( $batch['batch_id'], array( 'confirm' => true, 'manifest_digest' => 'sha256:' . str_repeat( 'b', 64 ) ) );
 batch_assert( is_wp_error( $wrong_confirmation ) && 'npcink_toolbox_media_batch_confirmation_invalid' === $wrong_confirmation->get_error_code(), 'Batch start requires confirmation of the exact manifest digest.' );
