@@ -5563,6 +5563,10 @@
 		block.appendChild(el('p', 'description', new Date(String(batch.recoverable_until_gmt || '')).getTime() < Date.now()
 			? t('Restore period has ended. Backups are still kept until you separately choose to clean them up.')
 			: t('Individual and whole-batch restore remain available until ') + formatDateTime(batch.recoverable_until_gmt) + '.'));
+		const cleanup = asObject(batch.backup_cleanup_preview);
+		if (Number(cleanup.expired || 0) > 0) {
+			block.appendChild(el('p', 'description', t('There are ') + String(cleanup.expired) + t(' expired backup(s) eligible for administrator cleanup. Current media files are never removed.')));
+		}
 		const restorable = asArray(batch.items).filter((item) => item.status === 'completed' && item.restore_status !== 'restored');
 		if (restorable.length) {
 			const actions = el('div', 'npcink-toolbox__inline-actions');

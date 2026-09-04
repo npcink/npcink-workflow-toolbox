@@ -175,7 +175,19 @@ final class Media_Optimization_Batches {
 	/** @return array<string,mixed>|WP_Error */
 	public function current() {
 		$batches = $this->all();
-		return empty( $batches ) ? $this->error( 'npcink_toolbox_media_batch_not_found', 'No media optimization history is available.', 404 ) : $this->with_summary( $batches[0] );
+		if ( empty( $batches ) ) {
+			return $this->error( 'npcink_toolbox_media_batch_not_found', 'No media optimization history is available.', 404 );
+		}
+		$batch = $this->with_summary( $batches[0] );
+		$cleanup = $this->run_registered_ability( 'npcink-abilities-toolkit/cleanup-media-backups', array( 'dry_run' => true, 'commit' => false ) );
+		if ( is_array( $cleanup ) ) {
+			$batch['backup_cleanup_preview'] = array(
+				'expired' => absint( $cleanup['expired'] ?? 0 ),
+				'retention_days' => absint( $cleanup['retention_days'] ?? 30 ),
+				'current_media_preserved' => true,
+			);
+		}
+		return $batch;
 	}
 
 	/** @return array<string,mixed>|WP_Error */
