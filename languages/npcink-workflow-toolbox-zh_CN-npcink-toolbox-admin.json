@@ -711,6 +711,7 @@
 	  ,"Estimated saving": ["预计节省"]
 	  ,"Skipped during check": ["检查时跳过"]
 	  ,"Maximum batch size": ["单批最多数量"]
+	  ,"Images to optimize": ["要优化的图片"]
 	  ,"Cloud checked this image and skipped it because the safe saving threshold was not met.": ["云端已检查此图片；由于未达到安全节省门槛，已跳过。"]
 	  ,"Original": ["原图"]
 	  ,"Latest batch": ["最近批次"]
