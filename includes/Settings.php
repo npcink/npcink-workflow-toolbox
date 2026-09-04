@@ -79,6 +79,7 @@ final class Settings {
 		return array(
 			'enabled'                  => false,
 			'backup_retention_days'    => 30,
+			'backup_cleanup_mode'      => 'manual',
 			'target_format'            => 'webp',
 			'max_width'                => 1600,
 			'quality'                  => 82,
@@ -585,8 +586,14 @@ final class Settings {
 		}
 		$text = function_exists( 'mb_substr' ) ? mb_substr( $text, 0, 64 ) : substr( $text, 0, 64 );
 
+		$cleanup_mode = sanitize_key( (string) ( $input['backup_cleanup_mode'] ?? 'manual' ) );
+		if ( ! in_array( $cleanup_mode, array( 'manual', 'automatic' ), true ) ) {
+			$cleanup_mode = 'manual';
+		}
+
 		return array(
-			'backup_retention_days'    => in_array( absint( $input['backup_retention_days'] ?? 30 ), array( 30, 90 ), true ) ? absint( $input['backup_retention_days'] ?? 30 ) : 30,
+			'backup_retention_days'    => 30,
+			'backup_cleanup_mode'      => $cleanup_mode,
 			'enabled'                  => ! empty( $input['enabled'] ),
 			'target_format'            => $format,
 			'max_width'                => max( 320, min( 7680, absint( $input['max_width'] ?? 1600 ) ) ),

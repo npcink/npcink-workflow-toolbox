@@ -75,6 +75,7 @@ final class Plugin {
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_native_category' ) );
 		add_action( 'wp_abilities_api_init', array( $this->abilities, 'register_native_abilities' ) );
 		add_filter( 'npcink_abilities_toolkit_media_backup_retention_days', array( $this, 'media_backup_retention_days' ) );
+		add_filter( 'npcink_abilities_toolkit_media_backup_cleanup_policy', array( $this, 'media_backup_cleanup_policy' ), 10, 2 );
 		add_filter( 'npcink_toolbox_refresh_site_media_index_batch', array( $this, 'refresh_site_media_index_batch' ), 10, 2 );
 	}
 
@@ -100,10 +101,22 @@ final class Plugin {
 	 * @return int
 	 */
 	public function media_backup_retention_days( $days ): int {
-		$settings = $this->settings->get_media_optimization_settings();
-		$value    = absint( $settings['backup_retention_days'] ?? 30 );
+		return 30;
+	}
 
-		return in_array( $value, array( 30, 90 ), true ) ? $value : absint( $days );
+	/**
+	 * Projects the administrator's cleanup mode into each newly-created Toolkit backup record.
+	 * Existing history remains frozen and is not rewritten.
+	 *
+	 * @param mixed $policy Toolkit default policy.
+	 * @param mixed $input Replacement input.
+	 * @return string
+	 */
+	public function media_backup_cleanup_policy( $policy, $input = array() ): string {
+		$settings = $this->settings->get_media_optimization_settings();
+		return 'automatic' === (string) ( $settings['backup_cleanup_mode'] ?? 'manual' )
+			? 'automatic_after_retention'
+			: 'manual_confirmation_required';
 	}
 
 	/**

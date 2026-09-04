@@ -3521,15 +3521,19 @@ final class Admin_Page {
 				<div class="npcink-toolbox__section-heading">
 					<div>
 						<h3><?php esc_html_e( 'Original image backup retention', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php esc_html_e( 'Choose how long automatically created single-image backups remain available for restore. Expired files are removed from the hidden backup directory; the current Media Library image is never removed.', 'npcink-workflow-toolbox' ); ?></p>
+						<p><?php esc_html_e( 'Backups are retained for 30 days. Choose whether cleanup requires your confirmation or runs automatically for backups created after this setting is enabled. The current Media Library image is never removed.', 'npcink-workflow-toolbox' ); ?></p>
 					</div>
 				</div>
 				<div class="npcink-toolbox__retention-control">
 				<label>
 					<span><?php esc_html_e( 'Keep backups for', 'npcink-workflow-toolbox' ); ?></span>
-					<select name="<?php echo esc_attr( Plugin::MEDIA_OPTION_NAME ); ?>[backup_retention_days]">
-						<option value="30" <?php selected( 30, (int) $settings['backup_retention_days'] ); ?>><?php esc_html_e( '30 days (recommended)', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="90" <?php selected( 90, (int) $settings['backup_retention_days'] ); ?>><?php esc_html_e( '90 days', 'npcink-workflow-toolbox' ); ?></option>
+					<span><?php esc_html_e( '30 days', 'npcink-workflow-toolbox' ); ?></span>
+				</label>
+				<label>
+					<span><?php esc_html_e( 'Expired backup cleanup', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="<?php echo esc_attr( Plugin::MEDIA_OPTION_NAME ); ?>[backup_cleanup_mode]">
+						<option value="manual" <?php selected( 'manual', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Ask me before cleanup', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="automatic" <?php selected( 'automatic', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Clean up automatically', 'npcink-workflow-toolbox' ); ?></option>
 					</select>
 				</label>
 				<div class="npcink-toolbox__retention-actions">
