@@ -201,14 +201,27 @@ final class Media_Optimization_Batches {
 		if ( true !== ( $payload['confirm'] ?? null ) || true !== ( $payload['preview_verified'] ?? null ) ) {
 			return $this->error( 'npcink_toolbox_media_backup_cleanup_unconfirmed', 'Review and confirm the expired backup cleanup before continuing.', 409 );
 		}
-		return $this->run_registered_ability(
-			self::CLEANUP_ABILITY_ID,
-			array(
-				'dry_run' => false,
-				'commit' => true,
-				'idempotency_key' => 'toolbox-media-backup-cleanup-' . gmdate( 'Ymd' ),
-			)
-		);
+		$preview = $this->preview_backup_cleanup();
+		if ( is_wp_error( $preview ) ) {
+			return $preview;
+		}
+		if ( absint( $payload['preview_expired'] ?? -1 ) !== absint( $preview['expired'] ?? 0 ) ) {
+			return $this->error( 'npcink_toolbox_media_backup_cleanup_stale', 'The expired backup preview changed. Refresh it before confirming cleanup.', 409 );
+		}
+		$authorize = static fn( bool $allowed, string $ability_id ): bool => self::CLEANUP_ABILITY_ID === $ability_id ? true : $allowed;
+		add_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10, 2 );
+		try {
+			return $this->run_registered_ability(
+				self::CLEANUP_ABILITY_ID,
+				array(
+					'dry_run' => false,
+					'commit' => true,
+					'idempotency_key' => 'toolbox-media-backup-cleanup-' . gmdate( 'Ymd' ),
+				)
+			);
+		} finally {
+			remove_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10 );
+		}
 	}
 
 	/** @return array<string,mixed>|WP_Error */

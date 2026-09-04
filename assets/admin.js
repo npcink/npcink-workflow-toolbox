@@ -5622,7 +5622,7 @@
 		if (Number(preview.expired || 0) <= 0) throw { message: t('No expired backups are available for cleanup.') };
 		if (!window.confirm(t('Clean the expired media backups now? Current media files will not be removed.'))) return;
 		button.disabled = true;
-		const result = await postJson(config.restUrl, 'media-backup-cleanup/confirm', { confirm: true, preview_verified: true });
+		const result = await postJson(config.restUrl, 'media-backup-cleanup/confirm', { confirm: true, preview_verified: true, preview_expired: Number(preview.expired || 0) });
 		const batch = await getJson(config.restUrl, 'media-optimization-batches/current');
 		form.__npcinkMediaOptimizationBatch = batch;
 		renderMediaOptimizationHistory(form, batch);
