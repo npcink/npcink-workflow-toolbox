@@ -1481,7 +1481,7 @@ foreach ( $route_boundary_rows as $route_boundary_row ) {
 	toolbox_assert( '' !== (string) ( $route_boundary_row['write_posture'] ?? '' ), 'Route boundary row records write posture: ' . $route );
 	toolbox_assert( '' !== (string) ( $route_boundary_row['boundary_note'] ?? '' ), 'Route boundary row records a boundary note: ' . $route );
 	if ( $direct_write ) {
-		$expected_direct_write_adr = '/local-admin-consent/featured-image' === $route ? 'ADR-003' : ( '/strong-local-confirmation/image-adoption' === $route ? 'ADR-010' : ( in_array( $route, array( '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore' ), true ) ? 'ADR-011' : ( str_starts_with( $route, '/media-optimization-batches/(?P<batch_id>' ) ? 'ADR-015' : '' ) ) );
+		$expected_direct_write_adr = '/local-admin-consent/featured-image' === $route ? 'ADR-003' : ( '/strong-local-confirmation/image-adoption' === $route ? 'ADR-010' : ( in_array( $route, array( '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore' ), true ) ? 'ADR-011' : ( str_starts_with( $route, '/media-optimization-batches/(?P<batch_id>' ) ? 'ADR-015' : ( '/media-backup-cleanup/confirm' === $route ? 'ADR-016' : '' ) ) ) );
 		toolbox_assert( '' !== $expected_direct_write_adr && $expected_direct_write_adr === (string) ( $route_boundary_row['boundary_exception'] ?? '' ), 'Direct-write route is limited to an accepted ADR: ' . $route );
 	} else {
 		toolbox_assert( 'local_admin_consent_exception' !== (string) ( $route_boundary_row['write_posture'] ?? '' ), 'Non-write routes do not claim local admin consent posture: ' . $route );

@@ -5566,6 +5566,12 @@
 		const cleanup = asObject(batch.backup_cleanup_preview);
 		if (Number(cleanup.expired || 0) > 0) {
 			block.appendChild(el('p', 'description', t('There are ') + String(cleanup.expired) + t(' expired backup(s) eligible for administrator cleanup. Current media files are never removed.')));
+			const cleanupActions = el('div', 'npcink-toolbox__inline-actions');
+			const cleanupButton = el('button', 'button', t('Clean expired backups'));
+			cleanupButton.type = 'button';
+			cleanupButton.setAttribute('data-toolbox-cleanup-expired-backups', '');
+			cleanupActions.appendChild(cleanupButton);
+			block.appendChild(cleanupActions);
 		}
 		const restorable = asArray(batch.items).filter((item) => item.status === 'completed' && item.restore_status !== 'restored');
 		if (restorable.length) {
@@ -5609,6 +5615,19 @@
 			}
 		}
 		renderTextResult(form, t('Batch restore finished. Review any items that could not be restored.'), 'ok');
+	}
+
+	async function cleanupExpiredMediaBackups(form, button) {
+		const preview = asObject(asObject(form.__npcinkMediaOptimizationBatch).backup_cleanup_preview);
+		if (Number(preview.expired || 0) <= 0) throw { message: t('No expired backups are available for cleanup.') };
+		if (!window.confirm(t('Clean the expired media backups now? Current media files will not be removed.'))) return;
+		button.disabled = true;
+		const result = await postJson(config.restUrl, 'media-backup-cleanup/confirm', { confirm: true, preview_verified: true });
+		const batch = await getJson(config.restUrl, 'media-optimization-batches/current');
+		form.__npcinkMediaOptimizationBatch = batch;
+		renderMediaOptimizationHistory(form, batch);
+		renderTextResult(form, t('Expired backup cleanup finished.'), 'ok');
+		return result;
 	}
 
 	async function completeMediaDerivativeBatchPlan(form, planEnvelope) {
@@ -8480,6 +8499,16 @@
 					if (restoreBatchAllButton && form.contains(restoreBatchAllButton)) {
 						event.preventDefault();
 						restoreWholeMediaOptimizationBatch(form).catch((error) => renderTextResult(form, formatErrorMessage(error), 'error'));
+						return;
+					}
+
+					const cleanupBackupsButton = event.target.closest('[data-toolbox-cleanup-expired-backups]');
+					if (cleanupBackupsButton && form.contains(cleanupBackupsButton)) {
+						event.preventDefault();
+						cleanupExpiredMediaBackups(form, cleanupBackupsButton).catch((error) => {
+							cleanupBackupsButton.disabled = false;
+							renderTextResult(form, formatErrorMessage(error), 'error');
+						});
 						return;
 					}
 

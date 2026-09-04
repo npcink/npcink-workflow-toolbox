@@ -17,6 +17,7 @@ final class Media_Optimization_Batches {
 	private const MANIFEST_ABILITY_ID = 'npcink-abilities-toolkit/build-media-derivative-batch-plan';
 	private const ABILITY_ID = 'npcink-abilities-toolkit/adopt-cloud-media-derivative';
 	private const RESTORE_ABILITY_ID = 'npcink-abilities-toolkit/restore-media-backup';
+	private const CLEANUP_ABILITY_ID = 'npcink-abilities-toolkit/cleanup-media-backups';
 	private const MAX_BATCHES = 20;
 	private const MAX_ITEMS = 1000;
 	private const CHUNK_SIZE = 10;
@@ -188,6 +189,26 @@ final class Media_Optimization_Batches {
 			);
 		}
 		return $batch;
+	}
+
+	/** @return array<string,mixed>|WP_Error */
+	public function preview_backup_cleanup() {
+		return $this->run_registered_ability( self::CLEANUP_ABILITY_ID, array( 'dry_run' => true, 'commit' => false ) );
+	}
+
+	/** @return array<string,mixed>|WP_Error */
+	public function cleanup_backups( array $payload ) {
+		if ( true !== ( $payload['confirm'] ?? null ) || true !== ( $payload['preview_verified'] ?? null ) ) {
+			return $this->error( 'npcink_toolbox_media_backup_cleanup_unconfirmed', 'Review and confirm the expired backup cleanup before continuing.', 409 );
+		}
+		return $this->run_registered_ability(
+			self::CLEANUP_ABILITY_ID,
+			array(
+				'dry_run' => false,
+				'commit' => true,
+				'idempotency_key' => 'toolbox-media-backup-cleanup-' . gmdate( 'Ymd' ),
+			)
+		);
 	}
 
 	/** @return array<string,mixed>|WP_Error */
