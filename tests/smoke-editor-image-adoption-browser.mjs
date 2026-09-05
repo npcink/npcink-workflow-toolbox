@@ -287,8 +287,11 @@ try {
 	assert(await imageFlow.count() === 1, 'The editor exposes the featured-image recommendation entry.');
 	await imageFlow.locator('button').click();
 	await page.waitForSelector('.npcink-toolbox-editor-support__image-modal', { timeout: 30000 });
-	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 1, null, { timeout: 10000 });
-	const candidate = page.locator('.npcink-toolbox-editor-support__image-card').first();
+	const externalLibraryButton = page.getByRole('button', { name: /^External image library$|^外部图库$/ });
+	await externalLibraryButton.click();
+	await page.getByRole('button', { name: /^Search image sources$|^搜索图片来源$/ }).click();
+	await page.waitForSelector('.npcink-toolbox-editor-support__image-card:not(.is-loading)', { timeout: 10000 });
+	const candidate = page.locator('.npcink-toolbox-editor-support__image-card:not(.is-loading)').first();
 	await candidate.click();
 	assert(await candidate.getAttribute('aria-pressed') === 'true', 'The deterministic image candidate is selected for review.');
 
