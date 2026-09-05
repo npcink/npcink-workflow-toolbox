@@ -3,8 +3,8 @@ Contributors: muze233, npcink
 Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
-Tested up to: 7.0
-Stable tag: 0.1.1
+Tested up to: 7.1
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -216,6 +216,16 @@ outside Toolbox.
 4. Site Check decision queue with local findings, handling paths, and optional Cloud detail.
 
 == Changelog ==
+
+= 0.2.0 =
+
+* Moved bounded media recognition continuation into Toolbox with stable ID
+  cursors, single-event WP-Cron progress, bounded retries, and failure-only
+  administrator recovery.
+* Switched Cloud media artifact delivery to the dedicated Addon facade while
+  preserving Core review, Adapter execution, and WordPress write boundaries.
+* Added missing-only contextual ALT pagination, explicit editor apply, and
+  namespaced decorative metadata that persists through native WordPress save.
 
 = 0.1.1 =
 

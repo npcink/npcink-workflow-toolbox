@@ -102,7 +102,7 @@
       "owner": "toolbox_site_media_projection_bridge",
       "write_posture": "suggestion_only_projection_refresh",
       "direct_wordpress_write": false,
-      "boundary_note": "Explicit bounded local-media batch handoff through Toolkit inventory, Cloud vision, and Cloud Site Knowledge; no media metadata or WordPress content write."
+      "boundary_note": "Explicit bounded local-media continuation through a stable Toolbox cursor, Toolkit inventory, Cloud vision, and Cloud Site Knowledge; no generic runtime, media metadata, or WordPress content write."
     },
     {
       "route": "/agent-feedback",

@@ -31,13 +31,8 @@ final class Cloud_Image_Artifact_Transport {
 		}
 
 		$client = apply_filters( 'npcink_toolbox_cloud_image_artifact_client', null, $artifact );
-		if ( ! is_object( $client ) && function_exists( 'npcink_cloud_addon_verified_runtime_client' ) ) {
-			$client = npcink_cloud_addon_verified_runtime_client();
-		}
-		if ( is_wp_error( $client ) ) {
-			return $client;
-		}
-		if ( ! is_object( $client ) || ! method_exists( $client, 'pull_media_artifact' ) || ! method_exists( $client, 'acknowledge_media_artifact_delivery' ) ) {
+		$use_facade = ! is_object( $client ) && function_exists( 'npcink_cloud_addon_pull_media_artifact' ) && function_exists( 'npcink_cloud_addon_acknowledge_media_artifact_delivery' );
+		if ( ! $use_facade && ( ! is_object( $client ) || ! method_exists( $client, 'pull_media_artifact' ) || ! method_exists( $client, 'acknowledge_media_artifact_delivery' ) ) ) {
 			return new WP_Error(
 				'npcink_toolbox_cloud_image_artifact_transport_unavailable',
 				__( 'Connect and verify Npcink Cloud Addon before receiving generated images.', 'npcink-workflow-toolbox' ),
@@ -46,7 +41,7 @@ final class Cloud_Image_Artifact_Transport {
 		}
 
 		$artifact_id = (string) $validated['artifact_id'];
-		$download    = $client->pull_media_artifact( $artifact_id, sanitize_text_field( $trace_id ) );
+		$download    = $use_facade ? npcink_cloud_addon_pull_media_artifact( $artifact_id, sanitize_text_field( $trace_id ) ) : $client->pull_media_artifact( $artifact_id, sanitize_text_field( $trace_id ) );
 		if ( is_wp_error( $download ) ) {
 			return $download;
 		}
@@ -92,7 +87,7 @@ final class Cloud_Image_Artifact_Transport {
 			'received_byte_size' => strlen( $contents ),
 			'received_checksum'  => $actual_checksum,
 		);
-		$ack = $client->acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) );
+		$ack = $use_facade ? npcink_cloud_addon_acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) ) : $client->acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) );
 		if ( is_wp_error( $ack ) ) {
 			return $ack;
 		}

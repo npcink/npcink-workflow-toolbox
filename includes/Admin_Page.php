@@ -60,6 +60,17 @@ final class Admin_Page {
 		);
 	}
 
+	/** Resumes a paused internal media-recognition continuation. */
+	public function handle_resume_media_recognition(): void {
+		if ( ! current_user_can( self::MENU_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to manage Npcink AI.', 'npcink-workflow-toolbox' ) );
+		}
+		check_admin_referer( 'npcink_toolbox_resume_media_recognition' );
+		apply_filters( 'npcink_toolbox_media_recognition_resume', array() );
+		wp_safe_redirect( $this->image_batch_tool_url( 'media-batch-optimize' ) );
+		exit;
+	}
+
 	public function render_suite_overview(): void {
 		if ( ! current_user_can( self::MENU_CAPABILITY ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage Npcink AI.', 'npcink-workflow-toolbox' ) );
@@ -4430,6 +4441,9 @@ final class Admin_Page {
 	private function render_media_derivative_batch_tool( string $endpoint, string $title, string $description, string $tool_id, bool $active = false ): void {
 		$toolbox_policy      = $this->get_media_derivative_toolbox_policy();
 		$single_attachment_id = $this->media_derivative_single_attachment_id();
+		if ( $single_attachment_id <= 0 && $active ) {
+			$this->render_media_recognition_recovery();
+		}
 		?>
 		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch<?php echo $single_attachment_id > 0 ? ' npcink-toolbox__card--single-media' : ''; ?>" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative <?php echo $active ? '' : 'hidden'; ?>>
 			<?php if ( $single_attachment_id <= 0 ) : ?>
@@ -4443,6 +4457,24 @@ final class Admin_Page {
 			<?php endif; ?>
 			<?php if ( $single_attachment_id <= 0 ) : ?><div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div><?php endif; ?>
 		</form>
+		<?php
+	}
+
+	/** Renders recovery only after the internal continuation has paused. */
+	private function render_media_recognition_recovery(): void {
+		$status = apply_filters( 'npcink_toolbox_media_recognition_status', array() );
+		if ( ! is_array( $status ) || 'paused' !== sanitize_key( (string) ( $status['state'] ?? '' ) ) ) {
+			return;
+		}
+		?>
+		<div class="npcink-toolbox__result-notice is-warning" data-toolbox-media-recognition-recovery>
+			<p><?php esc_html_e( 'Background image recognition paused after repeated failures. Review the Cloud connection, then resume the same batch.', 'npcink-workflow-toolbox' ); ?></p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<?php wp_nonce_field( 'npcink_toolbox_resume_media_recognition' ); ?>
+				<input type="hidden" name="action" value="npcink_toolbox_resume_media_recognition" />
+				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Resume background recognition', 'npcink-workflow-toolbox' ); ?></button>
+			</form>
+		</div>
 		<?php
 	}
 

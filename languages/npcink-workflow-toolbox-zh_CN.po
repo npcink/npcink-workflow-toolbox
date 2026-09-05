@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Npcink Workflow Toolbox 0.1.1\n"
+"Project-Id-Version: Npcink Workflow Toolbox 0.2.0\n"
 "Report-Msgid-Bugs-To: https://npc.ink/\n"
 "POT-Creation-Date: 2026-06-06 00:00+0800\n"
 "PO-Revision-Date: 2026-08-11 00:00+0800\n"
@@ -8602,3 +8602,19 @@ msgstr "历史与恢复"
 #: includes/Admin_Page.php
 msgid "Completed batches remain recoverable for 30 days. Single-image backup files expire through daily maintenance; batch backups stay until explicitly cleaned up. The current Media Library image is never removed."
 msgstr "已完成批次默认可在 30 天内恢复。单图备份文件由每日维护到期清理；批次备份会保留，直到明确执行清理。当前媒体库图片不会被删除。"
+
+#: includes/Admin_Page.php
+msgid "Background image recognition paused after repeated failures. Review the Cloud connection, then resume the same batch."
+msgstr "后台图片识别在连续失败后已暂停。请检查 Cloud 连接，然后继续同一批次。"
+
+#: includes/Admin_Page.php
+msgid "Resume background recognition"
+msgstr "继续后台图片识别"
+
+#: includes/Media_Fingerprint_Scan.php
+msgid "Once Weekly"
+msgstr "每周一次"
+
+#: includes/Rest_Controller.php
+msgid "Media recognition continuation is unavailable."
+msgstr "媒体识别续跑当前不可用。"

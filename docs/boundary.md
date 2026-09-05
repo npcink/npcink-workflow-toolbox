@@ -258,6 +258,14 @@ upload/import, SEO mutation, content indexing, or re-indexing without a new
 boundary decision. Write-like outcomes must be prepared as suggestions or Core
 proposal handoffs, not executed by Toolbox.
 
+The sole media-recognition continuation is a narrow exception to the general
+scheduler/runtime prohibition. It may keep one non-autoloaded stable `after_id`
+cursor, pending counts, current Cloud `run_id`, bounded retry state, one atomic
+lock, and one single-event WP-Cron wakeup. It may call only Addon facades and
+must not inspect Addon options, credentials, runtime clients, provider truth,
+or legacy Addon plan state. It owns no generic queue, Cloud execution truth,
+Core review, Adapter execution, or WordPress write.
+
 Nightly Inspection Cloud runtime routes are compatibility bridges for existing
 callers only. Runtime entitlement, quota, batch limit, retention, recent run,
 status, result, and retry detail belong in Cloud Addon Runtime Runs, not in a

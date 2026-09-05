@@ -960,9 +960,6 @@
 		}
 
 		function addItem(source, attrs, block, index, suffix) {
-			if (items.length >= 12) {
-				return;
-			}
 			const attributes = attrs && typeof attrs === 'object' ? attrs : {};
 			const url = String(attributes.url || attributes.src || attributes.poster || '').trim();
 			const id = parseInt(attributes.id || attributes.mediaId || attributes.media_id || '0', 10) || 0;
@@ -1010,7 +1007,7 @@
 				attrs.images.forEach((image, galleryIndex) => addItem('content_gallery', image, block, index, ':gallery-' + String(galleryIndex + 1)));
 			}
 		});
-		return items.slice(0, 12);
+		return items;
 	}
 
 	function browserSelectedText() {
@@ -8640,9 +8637,37 @@
 						payload.selected_block_text = '';
 						payload.selected_block_name = '';
 					}
-						let flowResult = runOptions.timeoutMs
-							? await postJsonWithTimeout('editor/content-support', payload, runOptions.timeoutMs)
-							: await postJson('editor/content-support', payload);
+						let flowResult;
+						if (intent === 'image_alt_suggestions' && Array.isArray(payload.media_items) && payload.media_items.length > 12) {
+							const pages = [];
+							const perPage = 12;
+							for (let page = 1; page <= Math.ceil(payload.media_items.length / perPage); page += 1) {
+								const pagePayload = Object.assign({}, payload, { page, per_page: perPage });
+								pages.push(runOptions.timeoutMs
+									? await postJsonWithTimeout('editor/content-support', pagePayload, runOptions.timeoutMs)
+									: await postJson('editor/content-support', pagePayload));
+							}
+							const first = pages[0] || {};
+							const firstSection = first.sections && first.sections.image_alt_suggestions;
+							const mergedItems = mergeUniqueByKey(
+								[],
+								pages.reduce((all, resultPage) => all.concat(resultPage && resultPage.sections && resultPage.sections.image_alt_suggestions && Array.isArray(resultPage.sections.image_alt_suggestions.items) ? resultPage.sections.image_alt_suggestions.items : []), []),
+								(item) => item && item.occurrence_id ? String(item.occurrence_id) : ''
+							);
+							flowResult = Object.assign({}, first, {
+								sections: Object.assign({}, first.sections || {}, {
+									image_alt_suggestions: Object.assign({}, firstSection || {}, {
+										items: mergedItems,
+										image_occurrence_count: mergedItems.length,
+										missing_alt_count: mergedItems.filter((item) => !String(item.current_alt || '')).length,
+									}),
+								}),
+							});
+						} else {
+							flowResult = runOptions.timeoutMs
+								? await postJsonWithTimeout('editor/content-support', payload, runOptions.timeoutMs)
+								: await postJson('editor/content-support', payload);
+						}
 						if (paragraphIntegrityBefore) {
 							const paragraphIntegrityAfter = currentEditorContentIntegritySnapshot(runContext.content, runContext.post_id);
 							const paragraphIntegrity = editorContentIntegrityCheck(
@@ -8689,12 +8714,6 @@
 								sections: Object.assign({}, current.sections || {}, mergedFlowResult.sections || {}),
 							});
 							});
-					if (intent === 'image_alt_suggestions') {
-						const contextualAltSection = flowResult && flowResult.sections ? flowResult.sections.image_alt_suggestions : null;
-						if (isContextualImageAltReview(contextualAltSection)) {
-							await applyContextualAltToDraft(contextualAltSection, null, { automatic: true });
-						}
-					}
 					if (intent === 'publish_preflight' && runOptions.reopenPreflightModal) {
 						setPreflightModalOpen(true);
 					}
@@ -8865,6 +8884,9 @@
 						const decorative = Boolean(decorativeInput && decorativeInput.checked);
 						const finalAlt = decorative ? '' : normalizeEditorAlt(input.value);
 						const expectedOldAlt = normalizeEditorAlt(source.current_alt || '');
+						if (expectedOldAlt) {
+							return;
+						}
 						if (!finalAlt && !decorative) {
 							validationMessage = __('An empty ALT value requires the decorative-image option.', 'npcink-workflow-toolbox');
 							return;
@@ -8915,7 +8937,23 @@
 				setContextualAltApplyStatus(null);
 				try {
 					changes.forEach((change) => {
-						blockDispatcher.updateBlockAttributes(change.block_client_id, { alt: change.final_alt });
+					const currentBlock = blockSelector.getBlock(change.block_client_id);
+					const metadata = currentBlock && currentBlock.attributes && currentBlock.attributes.metadata && typeof currentBlock.attributes.metadata === 'object'
+						? Object.assign({}, currentBlock.attributes.metadata)
+						: {};
+					const namespace = metadata.npcink && typeof metadata.npcink === 'object' ? Object.assign({}, metadata.npcink) : {};
+					if (change.decorative) {
+						namespace.decorative = true;
+						metadata.npcink = namespace;
+					} else if (Object.prototype.hasOwnProperty.call(namespace, 'decorative')) {
+						delete namespace.decorative;
+						if (Object.keys(namespace).length) {
+							metadata.npcink = namespace;
+						} else {
+							delete metadata.npcink;
+						}
+					}
+					blockDispatcher.updateBlockAttributes(change.block_client_id, { alt: change.final_alt, metadata });
 					});
 					const unapplied = changes.some((change) => {
 						const block = blockSelector.getBlock(change.block_client_id);
