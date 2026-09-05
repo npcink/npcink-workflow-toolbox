@@ -56,15 +56,20 @@ final class Media_Recognition_Continuation {
 		return is_array( $state ) ? $this->normalize_state( $state ) : $this->default_state();
 	}
 
-	/** @return array<string,mixed> */
-	public function start( array $input = array() ): array {
+	/** @return array<string,mixed>|WP_Error */
+	public function start( array $input = array() ) {
 		$current = $this->status();
 		if ( in_array( $current['state'], array( 'queued', 'processing', 'retrying', 'paused' ), true ) ) {
 			return $current;
 		}
+		$initiated_by = get_current_user_id();
+		if ( $initiated_by <= 0 || ! current_user_can( 'upload_files' ) ) {
+			return new WP_Error( 'npcink_toolbox_media_recognition_permission_denied', 'You do not have permission to start media recognition.' );
+		}
 
 		$state                     = $this->default_state();
 		$state['plan_id']          = 'media_recognition_' . wp_generate_uuid4();
+		$state['initiated_by']     = $initiated_by;
 		$state['per_page']         = max( 1, min( self::MAX_PER_PAGE, absint( $input['per_page'] ?? self::MAX_PER_PAGE ) ) );
 		$state['state']            = 'queued';
 		$state['next_eligible_at'] = gmdate( 'c' );
@@ -74,13 +79,18 @@ final class Media_Recognition_Continuation {
 		return $state;
 	}
 
-	/** @return array<string,mixed> */
-	public function resume(): array {
+	/** @return array<string,mixed>|WP_Error */
+	public function resume() {
 		$state = $this->status();
 		if ( 'paused' !== $state['state'] ) {
 			return $state;
 		}
+		$initiated_by = get_current_user_id();
+		if ( $initiated_by <= 0 || ! current_user_can( 'upload_files' ) ) {
+			return new WP_Error( 'npcink_toolbox_media_recognition_permission_denied', 'You do not have permission to resume media recognition.' );
+		}
 
+		$state['initiated_by']     = $initiated_by;
 		$state['state']            = 'queued';
 		$state['pause_reason']     = '';
 		$state['retry_count']      = 0;
@@ -108,11 +118,30 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 
+		$previous_user_id = get_current_user_id();
 		try {
+			$initiated_by = absint( $state['initiated_by'] ?? 0 );
+			if ( $initiated_by <= 0 ) {
+				$this->pause_for_permission( $state );
+				return;
+			}
+			wp_set_current_user( $initiated_by );
+			if ( ! current_user_can( 'upload_files' ) ) {
+				$this->pause_for_permission( $state );
+				return;
+			}
 			$this->advance( $state );
 		} finally {
+			wp_set_current_user( $previous_user_id );
 			$this->release_lock( $lock_token );
 		}
+	}
+
+	/** @param array<string,mixed> $state */
+	private function pause_for_permission( array $state ): void {
+		$state['state']        = 'paused';
+		$state['pause_reason'] = 'initiator_permission_revoked';
+		update_option( self::OPTION_NAME, $state, false );
 	}
 
 	/** @param array<string,mixed> $state */
@@ -139,7 +168,7 @@ final class Media_Recognition_Continuation {
 		$state['has_more']      = ! empty( $result['has_more'] );
 		$state['pending_counts'] = array(
 			'processed' => absint( $result['indexed_items'] ?? 0 ),
-			'qualified' => absint( $result['visual_evidence_reused_items'] ?? 0 ),
+			'qualified' => absint( $result['visual_evidence_reused_items'] ?? 0 ) + absint( $result['visual_evidence_recognized_items'] ?? 0 ),
 			'skipped'   => absint( $result['screened_items'] ?? 0 ),
 			'failed'    => 0,
 		);
@@ -171,7 +200,8 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 
-		$remote_state = sanitize_key( (string) ( $run['status'] ?? $run['data']['status'] ?? '' ) );
+		$run_data     = is_array( $run['data'] ?? null ) ? $run['data'] : $run;
+		$remote_state = sanitize_key( (string) ( $run_data['status'] ?? '' ) );
 		if ( ! in_array( $remote_state, array( 'completed', 'succeeded', 'failed', 'error', 'skipped' ), true ) ) {
 			$state['state'] = 'processing';
 			update_option( self::OPTION_NAME, $state, false );
@@ -180,6 +210,7 @@ final class Media_Recognition_Continuation {
 		}
 		if ( in_array( $remote_state, array( 'failed', 'error' ), true ) ) {
 			$state['run_id'] = '';
+			$state['pending_counts'] = $this->empty_counts();
 			$this->retry_or_pause( $state, 'cloud_run_' . $remote_state );
 			return;
 		}
@@ -192,15 +223,43 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 
-		$counts = $this->result_counts( $result );
+		$evidence = $this->result_evidence( $result );
+		if ( is_wp_error( $evidence ) ) {
+			$this->retry_or_pause( $state, $evidence->get_error_code() );
+			return;
+		}
+		$counts = $this->result_counts( $evidence );
 		if ( is_wp_error( $counts ) ) {
 			$this->retry_or_pause( $state, $counts->get_error_code() );
 			return;
 		}
-		$state['pending_counts']['qualified'] += $counts['qualified'];
-		$state['pending_counts']['skipped']   += $counts['skipped'];
-		$state['pending_counts']['failed']    += $counts['failed'];
-		$state['run_id']                       = '';
+		$sync = $this->client->refresh_site_media_index_batch(
+			array(
+				'after_id'              => absint( $state['next_cursor']['after_id'] ?? 0 ),
+				'per_page'              => $state['per_page'],
+				'upload_scope'           => $state['plan_id'],
+				'image_context_evidence' => $evidence,
+			)
+		);
+		if ( is_wp_error( $sync ) ) {
+			$this->retry_or_pause( $state, $sync->get_error_code() );
+			return;
+		}
+		if ( '' !== sanitize_text_field( (string) ( $sync['visual_evidence_run_id'] ?? $sync['run_id'] ?? '' ) ) ) {
+			$this->retry_or_pause( $state, 'media_recognition_result_replay_invalid' );
+			return;
+		}
+		$state['has_more']      = ! empty( $sync['has_more'] );
+		$state['pending_cursor'] = array(
+			'after_id' => absint( $sync['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ),
+		);
+		$state['pending_counts'] = array(
+			'processed' => absint( $sync['indexed_items'] ?? 0 ),
+			'qualified' => $counts['qualified'],
+			'skipped'   => absint( $sync['screened_items'] ?? 0 ) + $counts['skipped'],
+			'failed'    => $counts['failed'],
+		);
+		$state['run_id'] = '';
 		$state                                 = $this->commit_pending_batch( $state );
 		$state['retry_count']                  = 0;
 		$state['pause_reason']                 = '';
@@ -276,13 +335,23 @@ final class Media_Recognition_Continuation {
 		return array( 'token' => (string) $lock['token'], 'acquired_at' => absint( $lock['acquired_at'] ) );
 	}
 
-	/** @param array<string,mixed> $response @return array{qualified:int,skipped:int,failed:int}|WP_Error */
-	private function result_counts( array $response ) {
+	/** @param array<string,mixed> $response @return array<string,mixed>|WP_Error */
+	private function result_evidence( array $response ) {
 		$result = is_array( $response['data']['result'] ?? null ) ? $response['data']['result'] : ( is_array( $response['result'] ?? null ) ? $response['result'] : array() );
-		if ( 'image_context_evidence.v1' !== (string) ( $result['contract_version'] ?? '' ) || 'image_context_evidence' !== (string) ( $result['artifact_type'] ?? '' ) ) {
+		if (
+			'image_context_evidence.v1' !== (string) ( $result['contract_version'] ?? '' )
+			|| 'image_context_evidence' !== (string) ( $result['artifact_type'] ?? '' )
+			|| 'suggestion_only' !== (string) ( $result['write_posture'] ?? '' )
+			|| false !== ( $result['direct_wordpress_write'] ?? null )
+		) {
 			return new WP_Error( 'media_recognition_result_contract_invalid', 'Cloud returned an incompatible media recognition result.' );
 		}
 
+		return $result;
+	}
+
+	/** @param array<string,mixed> $result @return array{qualified:int,skipped:int,failed:int} */
+	private function result_counts( array $result ): array {
 		$qualified = count(
 			array_filter(
 				(array) ( $result['items'] ?? array() ),
@@ -302,7 +371,7 @@ final class Media_Recognition_Continuation {
 		return array(
 			'plan_id' => '', 'stable_order' => 'id_asc', 'next_cursor' => array( 'after_id' => 0 ),
 			'pending_cursor' => array( 'after_id' => 0 ), 'pending_counts' => $this->empty_counts(),
-			'run_id' => '', 'state' => 'idle', 'processed' => 0, 'failed' => 0, 'skipped' => 0,
+			'initiated_by' => 0, 'run_id' => '', 'state' => 'idle', 'processed' => 0, 'failed' => 0, 'skipped' => 0,
 			'qualified' => 0, 'retry_count' => 0, 'next_eligible_at' => '', 'pause_reason' => '',
 			'per_page' => self::MAX_PER_PAGE, 'has_more' => false,
 		);
@@ -317,6 +386,7 @@ final class Media_Recognition_Continuation {
 			$this->default_state(),
 			array(
 				'plan_id' => sanitize_text_field( (string) ( $state['plan_id'] ?? '' ) ),
+				'initiated_by' => absint( $state['initiated_by'] ?? 0 ),
 				'stable_order' => 'id_asc',
 				'next_cursor' => array( 'after_id' => absint( $next_cursor['after_id'] ?? 0 ) ),
 				'pending_cursor' => array( 'after_id' => absint( $pending_cursor['after_id'] ?? $next_cursor['after_id'] ?? 0 ) ),

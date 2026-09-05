@@ -2702,9 +2702,31 @@ final class Provider_Client {
 		$evidence_request['max_items']       = $per_page;
 		$evidence_request['dispatch_mode']  = 'background_completion';
 		$evidence_requested = ! empty( $evidence_request['items'] );
-		$evidence = $evidence_requested
-			? $this->resolve_media_image_context_evidence( $evidence_request, false, $upload_scope )
-			: array();
+		$provided_evidence = is_array( $input['image_context_evidence'] ?? null ) ? $input['image_context_evidence'] : array();
+		if ( ! empty( $provided_evidence ) ) {
+			if (
+				'image_context_evidence.v1' !== (string) ( $provided_evidence['contract_version'] ?? '' )
+				|| 'image_context_evidence' !== (string) ( $provided_evidence['artifact_type'] ?? '' )
+				|| 'suggestion_only' !== (string) ( $provided_evidence['write_posture'] ?? '' )
+				|| false !== ( $provided_evidence['direct_wordpress_write'] ?? null )
+			) {
+				return new WP_Error( 'media_recognition_result_contract_invalid', 'Cloud returned an incompatible media recognition result.' );
+			}
+			$evidence = array(
+				'contract_version'       => 'image_context_evidence.v1',
+				'items'                  => $this->sanitize_payload( $provided_evidence['items'] ?? array() ),
+				'requested_count'        => count( $evidence_request['items'] ),
+				'submitted_count'        => 0,
+				'reused_count'           => 0,
+				'recognized_count'       => count( (array) ( $provided_evidence['items'] ?? array() ) ),
+				'write_posture'          => 'suggestion_only',
+				'direct_wordpress_write' => false,
+			);
+		} else {
+			$evidence = $evidence_requested
+				? $this->resolve_media_image_context_evidence( $evidence_request, false, $upload_scope )
+				: array();
+		}
 		if ( is_wp_error( $evidence ) ) {
 			return $evidence;
 		}

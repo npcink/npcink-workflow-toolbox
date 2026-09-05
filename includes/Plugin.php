@@ -105,7 +105,7 @@ final class Plugin {
 	}
 
 	/** Starts one bounded local continuation through the existing bridge. */
-	public function start_media_recognition( $value, $input = array() ): array {
+	public function start_media_recognition( $value, $input = array() ) {
 		return $this->media_recognition_continuation->start( is_array( $input ) ? $input : array() );
 	}
 
@@ -115,7 +115,7 @@ final class Plugin {
 	}
 
 	/** Resumes only an already-paused continuation. */
-	public function resume_media_recognition( $value = array() ): array {
+	public function resume_media_recognition( $value = array() ) {
 		return $this->media_recognition_continuation->resume();
 	}
 
