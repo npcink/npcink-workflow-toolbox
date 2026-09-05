@@ -76,10 +76,22 @@ final class Media_Fingerprint_Scan {
 		}
 	}
 
+	/** @return array<string,mixed> */
+	public function status(): array {
+		$enabled = $this->enabled();
+		$next_run = $enabled ? wp_next_scheduled( self::HOOK ) : false;
+		$overdue = is_int( $next_run ) && $next_run > 0 && $next_run < time() - DAY_IN_SECONDS;
+		return array(
+			'enabled' => $enabled,
+			'next_run' => is_int( $next_run ) ? $next_run : 0,
+			'overdue' => $overdue,
+			'status' => ! $enabled ? 'disabled' : ( $overdue ? 'overdue' : ( $next_run ? 'scheduled' : 'not_scheduled' ) ),
+		);
+	}
+
 	private function enabled(): bool {
-		return (bool) apply_filters( 'npcink_toolbox_media_fingerprint_scan_enabled', false )
+		return (bool) apply_filters( 'npcink_toolbox_media_fingerprint_scan_enabled', true )
 			&& (bool) apply_filters( 'npcink_toolbox_cloud_addon_verified', false )
-			&& (bool) apply_filters( 'npcink_toolbox_site_knowledge_transport_enabled', false )
-			&& ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON );
+			&& (bool) apply_filters( 'npcink_toolbox_site_knowledge_transport_enabled', false );
 	}
 }

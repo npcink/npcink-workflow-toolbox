@@ -128,16 +128,14 @@ function createFixture() {
 	assert(attachmentId > 0 && imageUrl, 'The fixture attachment exposes an id and URL.');
 	const attachmentAlt = wpCli(['eval', `echo (string) get_post_meta(${attachmentId}, '_wp_attachment_image_alt', true);`]);
 	const existingAlt = '人工填写的蓝色陶瓷杯 ALT';
-	const imageBlock = `<!-- wp:image {"id":${attachmentId},"sizeSlug":"large","linkDestination":"none"} --><figure class="wp-block-image size-large"><img src="${imageUrl}" alt="" class="wp-image-${attachmentId}"/></figure><!-- /wp:image -->`;
-	const imageBlockWithExistingAlt = `<!-- wp:image {"id":${attachmentId},"sizeSlug":"large","linkDestination":"none"} --><figure class="wp-block-image size-large"><img src="${imageUrl}" alt="${existingAlt}" class="wp-image-${attachmentId}"/></figure><!-- /wp:image -->`;
-	const content = [
-		'<!-- wp:heading --><h2 class="wp-block-heading">工作日咖啡补给</h2><!-- /wp:heading -->',
-		'<!-- wp:paragraph --><p>早晨先倒入手冲咖啡，蓝色马克杯放在白色桌面上，帮助读者理解办公桌上的饮用场景。</p><!-- /wp:paragraph -->',
-		imageBlock,
-		'<!-- wp:heading --><h2 class="wp-block-heading">蓝色陶瓷杯的设计细节</h2><!-- /wp:heading -->',
-		'<!-- wp:paragraph --><p>杯身采用简洁的蓝色釉面和圆润把手，本图用于说明产品外观，而不是咖啡冲泡步骤。</p><!-- /wp:paragraph -->',
-		imageBlockWithExistingAlt,
-	].join('\n');
+	const contentParts = [];
+	for (let index = 1; index <= 13; index += 1) {
+		const alt = index <= 10 ? '' : existingAlt;
+		contentParts.push(`<!-- wp:heading --><h2 class="wp-block-heading">咖啡杯场景 ${index}</h2><!-- /wp:heading -->`);
+		contentParts.push(`<!-- wp:paragraph --><p>第 ${index} 张图用于说明工作日咖啡杯在桌面上的具体使用场景。</p><!-- /wp:paragraph -->`);
+		contentParts.push(`<!-- wp:image {"id":${attachmentId},"sizeSlug":"large","linkDestination":"none"} --><figure class="wp-block-image size-large"><img src="${imageUrl}" alt="${alt}" class="wp-image-${attachmentId}"/></figure><!-- /wp:image -->`);
+	}
+	const content = contentParts.join('\n');
 	const postId = parseInt(wpCli([
 		'post',
 		'create',
@@ -226,41 +224,65 @@ try {
 	});
 
 	await page.waitForSelector('.npcink-toolbox-editor-support__flow', { timeout: 30000 });
-	const flow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Article image ALT|文章图片 ALT/ });
-	assert(await flow.count() === 1, 'Editor exposes one default Article Image ALT (SEO) workflow.');
-	await flow.locator('button').click({ timeout: 30000 });
+	const standaloneAltFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Article image ALT|文章图片 ALT/ });
+	assert(await standaloneAltFlow.count() === 0, 'Editor does not expose a separate Article Image ALT workflow.');
+	const discoverabilityFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Publish preflight|发布预检/ });
+	assert(await discoverabilityFlow.count() === 1, 'Editor uses the existing SEO-aware Publish preflight workflow as the ALT entry point.');
+	await discoverabilityFlow.locator('button').click({ timeout: 30000 });
+	await page.waitForSelector('.npcink-toolbox-editor-support__discoverability-media', { timeout: 45000 });
+	await page.locator('.npcink-toolbox-editor-support__discoverability-media button').filter({ hasText: /Preview contextual ALT|预览上下文 ALT/ }).click({ timeout: 30000 });
 
 	await page.waitForSelector('.npcink-toolbox-editor-support__contextual-alt-card', { timeout: 30000 });
-	const cards = page.locator('.npcink-toolbox-editor-support__contextual-alt-card');
-	assert(await cards.count() === 2, 'The same attachment is reviewed as two article occurrences.');
-	assert(await page.getByText(/Existing ALT preserved|已有 ALT 已保留/).count() === 1, 'The editor visibly marks the existing human ALT as preserved.');
-	const inputs = page.locator('[data-toolbox-contextual-alt-input]');
-	assert(await inputs.count() === 2, 'Each image occurrence gets an editable contextual ALT draft.');
-	const values = await inputs.evaluateAll((elements) => elements.map((element) => element.value));
-	assert(values.every(Boolean), 'Both occurrence drafts contain contextual ALT text.');
-	assert(values[0] !== values[1], 'Different article contexts produce different ALT drafts for the same attachment.');
-	assert(values[0].includes('工作日咖啡补给'), 'The first ALT draft uses the nearest coffee-section heading.');
-	assert(values[1].includes('蓝色陶瓷杯的设计细节'), 'The second ALT draft uses the nearest product-detail heading.');
+	let cards = page.locator('.npcink-toolbox-editor-support__contextual-alt-card');
+	assert(await cards.count() === 10, 'The first review page contains exactly ten image occurrences.');
+	let inputs = page.locator('[data-toolbox-contextual-alt-input]');
+	assert(await inputs.count() === 10, 'The first page exposes ten contextual ALT drafts.');
+	const firstPageValues = await inputs.evaluateAll((elements) => elements.map((element) => element.value));
+	assert(firstPageValues.every(Boolean), 'Every first-page occurrence receives a local contextual ALT draft.');
 
-	const contextualRequests = requests.filter((request) => request.url.includes('/wp-json/npcink-toolbox/v1/editor/content-support') && request.body.includes('image_alt_suggestions'));
-	assert(contextualRequests.length === 1, 'Contextual ALT review makes one bounded Toolbox REST request.');
 	await waitForCount(() => contextualResponses.length, 1);
-	const contextualSection = contextualResponses[0].sections.image_alt_suggestions;
-	assert(contextualSection.provider_execution === 'none' && contextualSection.visual_fallback_used_count === 0, 'Useful article context avoids an unnecessary Cloud vision fallback.');
-	assert((contextualRequests[0].body.match(new RegExp(String(fixture.attachmentId), 'g')) || []).length >= 2, 'The request preserves both occurrences of the reused attachment.');
-	assert(!requests.some((request) => /proposal|approve-and-execute|cloud/i.test(request.url)), 'The preview calls no Core proposal, execution, or Cloud route.');
-
-	await page.waitForSelector('text=/applied to the current editor|应用到当前编辑器/', { timeout: 30000 });
-	const appliedAltValues = await page.evaluate(() => window.wp.data.select('core/block-editor').getBlocks()
+	const firstSection = contextualResponses[0].sections.image_alt_suggestions;
+	assert(firstSection.provider_execution === 'none' && firstSection.occurrence_offset === 0 && firstSection.total_occurrence_count === 13, 'Initial ALT review is cache-only and reports the complete occurrence count.');
+	const untouchedAltValues = await page.evaluate(() => window.wp.data.select('core/block-editor').getBlocks()
 		.filter((block) => block.name === 'core/image')
 		.map((block) => String(block.attributes.alt || '')));
-	assert(appliedAltValues.length === 2 && appliedAltValues[0] === values[0] && appliedAltValues[1] === fixture.existingAlt, 'Automatic apply fills the missing occurrence and preserves the existing human ALT on the reused image.');
-	const editorDirty = await page.evaluate(() => Boolean(window.wp.data.select('core/editor').isEditedPostDirty()));
-	assert(editorDirty, 'Automatic missing-ALT application marks the Gutenberg post dirty for the native Save or Update action.');
+	assert(untouchedAltValues.length === 13 && untouchedAltValues.slice(0, 10).every((alt) => alt === '') && untouchedAltValues.slice(10).every((alt) => alt === fixture.existingAlt), 'Preview does not automatically change Gutenberg ALT values.');
+
+	const customAlt = '人工审阅后的第一个咖啡杯场景';
+	await inputs.nth(0).fill(customAlt);
+	await page.locator('[data-toolbox-contextual-alt-decorative]').nth(1).check();
+	await page.locator('button').filter({ hasText: /Next page|下一页/ }).click();
+	await page.waitForFunction(() => document.body.textContent.includes('Page 2 of 2') || document.body.textContent.includes('第 2 页'));
+	cards = page.locator('.npcink-toolbox-editor-support__contextual-alt-card');
+	assert(await cards.count() === 3, 'The second review page contains the remaining three occurrences.');
+	assert(await page.getByText(/Existing ALT preserved|已有 ALT 已保留/).count() === 3, 'Existing ALT values on the second page are visibly preserved and read-only.');
+	const applyButton = page.locator('button').filter({ hasText: /Apply ALT to draft|应用 ALT 到草稿|将 ALT 应用到草稿/ });
+	assert(await applyButton.isEnabled(), 'Final Apply remains available on a page with no editable item because earlier reviewed pages contain changes.');
+
+	await waitForCount(() => contextualResponses.length, 2);
+	let contextualRequests = requests.filter((request) => request.url.includes('/wp-json/npcink-toolbox/v1/editor/content-support') && request.body.includes('image_alt_suggestions'));
+	const requestPayloads = contextualRequests.map((request) => JSON.parse(request.body));
+	assert(requestPayloads[0].media_items.length === 10 && requestPayloads[1].media_items.length === 3, 'Each ALT request carries only its current occurrence page.');
+	assert(requestPayloads[0].occurrence_offset === 0 && requestPayloads[1].occurrence_offset === 10 && requestPayloads.every((payload) => payload.visual_recognition_consent === false), 'Paging sends stable offsets and never grants implicit visual-recognition consent.');
+
+	await page.locator('button').filter({ hasText: /Previous page|上一页/ }).click();
+	await page.waitForFunction(() => document.body.textContent.includes('Page 1 of 2') || document.body.textContent.includes('第 1 页'));
+	inputs = page.locator('[data-toolbox-contextual-alt-input]');
+	assert(await inputs.nth(0).inputValue() === customAlt && await page.locator('[data-toolbox-contextual-alt-decorative]').nth(1).isChecked(), 'Edited ALT and decorative state survive cross-page navigation.');
+	await page.locator('button').filter({ hasText: /Next page|下一页/ }).click();
+	await page.waitForFunction(() => document.body.textContent.includes('Page 2 of 2') || document.body.textContent.includes('第 2 页'));
+	await page.locator('button').filter({ hasText: /Apply ALT to draft|应用 ALT 到草稿|将 ALT 应用到草稿/ }).click();
+	await page.waitForSelector('text=/applied to the current editor|应用到当前编辑器/', { timeout: 30000 });
+
+	const appliedBlocks = await page.evaluate(() => window.wp.data.select('core/block-editor').getBlocks()
+		.filter((block) => block.name === 'core/image')
+		.map((block) => ({ alt: String(block.attributes.alt || ''), decorative: Boolean(block.attributes.metadata && block.attributes.metadata.npcink && block.attributes.metadata.npcink.decorative) })));
+	assert(appliedBlocks.length === 13 && appliedBlocks[0].alt === customAlt && appliedBlocks[1].alt === '' && appliedBlocks[1].decorative, 'Confirmed review applies the edited ALT and persists the decorative marker in Gutenberg state.');
+	assert(appliedBlocks.slice(2, 10).every((block) => block.alt) && appliedBlocks.slice(10).every((block) => block.alt === fixture.existingAlt), 'Final Apply fills only reviewed empty core/image ALT and preserves every existing ALT.');
 	assert(!requests.some((request) => /reviewed-action-intents|contextual-alt-audit|approve-and-execute/.test(request.url)), 'Native editor ALT apply sends no Core audit or hidden execution request.');
 	await waitForCount(
 		() => feedbackPayloads.filter((payload) => payload && payload.source_action_id === 'alt_suggestion_applied_to_editor').length,
-		1
+		10
 	);
 	const appliedFeedback = feedbackPayloads.find((payload) => payload && payload.source_action_id === 'alt_suggestion_applied_to_editor');
 	assert(
@@ -271,13 +293,11 @@ try {
 			&& appliedFeedback.evidence_ref_ids.length === 0,
 		'ALT draft apply emits one metadata-only quality event without evidence identifiers.'
 	);
-	const editedApplyButton = page.locator('button').filter({ hasText: /Apply edited ALT changes|应用编辑后的 ALT/ });
-	assert(await editedApplyButton.count() === 1, 'Manual apply remains optional for later ALT edits instead of blocking the automatic path.');
 	assert(!requests.some((request) => /\/wp-json\/wp\/v2\/(posts|media)\//.test(request.url) && request.body), 'The apply action does not save the post or mutate media through wp/v2.');
 	const attachmentAltAfter = wpCli(['eval', `echo (string) get_post_meta(${fixture.attachmentId}, '_wp_attachment_image_alt', true);`]);
 	assert(attachmentAltAfter === fixture.attachmentAlt, 'The contextual article ALT apply leaves attachment-global media ALT unchanged.');
 
-	const savedEditedAlt = `${values[0]}（人工微调）`;
+	const savedEditedAlt = `${customAlt}（保存前微调）`;
 	await page.evaluate((nextAlt) => {
 		const imageBlock = window.wp.data.select('core/block-editor').getBlocks()
 			.find((block) => block.name === 'core/image' && String(block.attributes.alt || '') !== '人工填写的蓝色陶瓷杯 ALT');
@@ -307,10 +327,10 @@ try {
 		'Successful native WordPress save correlates the edited ALT outcome to its apply event.'
 	);
 	const serializedFeedback = JSON.stringify(feedbackPayloads);
-	assert(!serializedFeedback.includes(values[0]) && !serializedFeedback.includes(savedEditedAlt), 'ALT quality events contain no suggested or saved ALT text.');
+	assert(!serializedFeedback.includes(customAlt) && !serializedFeedback.includes(savedEditedAlt), 'ALT quality events contain no suggested or saved ALT text.');
 	const savedPostContent = wpCli(['post', 'get', String(postId), '--field=post_content']);
 	assert(savedPostContent.includes(savedEditedAlt), 'The temporary article persisted the edited block ALT through the native WordPress save.');
-	assert(!feedbackPayloads.some((payload) => payload && payload.source_action_id === 'alt_saved_unchanged'), 'An edited saved ALT is not misclassified as unchanged.');
+	assert(!feedbackPayloads.some((payload) => payload && payload.source_action_id === 'alt_saved_unchanged' && payload.source_object_id === appliedFeedback.source_object_id), 'The edited saved occurrence is not misclassified as unchanged while other accepted occurrences keep their own outcomes.');
 	const attachmentAltAfterSave = wpCli(['eval', `echo (string) get_post_meta(${fixture.attachmentId}, '_wp_attachment_image_alt', true);`]);
 	assert(attachmentAltAfterSave === fixture.attachmentAlt, 'Saving the article still leaves attachment-global media ALT unchanged.');
 

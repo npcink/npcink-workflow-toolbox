@@ -103,7 +103,7 @@ final class Provider_Client {
 	 * @param array<string,mixed> $request Image context evidence request.
 	 * @return array<string,mixed>|\WP_Error
 	 */
-	private function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false, string $upload_scope = '' ) {
+	public function resolve_media_image_context_evidence( array $request, bool $sync_fresh_projection = false, string $upload_scope = '', bool $allow_recognition = true ) {
 		$requested_items = is_array( $request['items'] ?? null ) ? $request['items'] : array();
 		$prepared_items  = array();
 		$fingerprints    = array();
@@ -178,6 +178,10 @@ final class Provider_Client {
 			if ( isset( $cached_by_id[ $attachment_id ] ) ) {
 				continue;
 			}
+			if ( ! $allow_recognition ) {
+				$miss_items[] = $item;
+				continue;
+			}
 			$artifact = $this->upload_local_media_visual_artifact(
 				$attachment_id,
 				$fingerprints[ $attachment_id ] ?? '',
@@ -196,7 +200,7 @@ final class Provider_Client {
 		$fresh_by_id = array();
 		$fresh_run_id = '';
 		$fresh_status = '';
-		if ( ! empty( $miss_items ) ) {
+		if ( $allow_recognition && ! empty( $miss_items ) ) {
 			$miss_request                    = $request;
 			$miss_request['items']           = $miss_items;
 			$miss_request['requested_count'] = count( $miss_items );
@@ -239,9 +243,10 @@ final class Provider_Client {
 			'contract_version'       => 'image_context_evidence.v1',
 			'items'                  => $this->sanitize_payload( $resolved_items ),
 			'requested_count'        => count( $prepared_items ),
-			'submitted_count'        => count( $miss_items ),
+			'submitted_count'        => $allow_recognition ? count( $miss_items ) : 0,
 			'reused_count'           => count( $cached_by_id ),
 			'recognized_count'       => count( $fresh_by_id ),
+			'recognition_required_attachment_ids' => array_values( array_map( 'absint', array_keys( array_diff_key( $prepared_items, $cached_by_id, $fresh_by_id ) ) ) ),
 			'projection_queued'      => $projection_queued,
 			'write_posture'          => 'suggestion_only',
 			'direct_wordpress_write' => false,
@@ -2625,11 +2630,23 @@ final class Provider_Client {
 	public function refresh_site_media_index_batch( array $input ) {
 		$page = max( 1, absint( $input['page'] ?? 1 ) );
 		$per_page = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );
-		$uses_stable_cursor = array_key_exists( 'after_id', $input );
+		$target_attachment_ids = array_slice( $this->sanitize_absint_list( $input['attachment_ids'] ?? array() ), 0, $per_page );
+		$uses_targeted_ids = ! empty( $target_attachment_ids );
+		$uses_stable_cursor = ! $uses_targeted_ids && array_key_exists( 'after_id', $input );
 		$after_id = absint( $input['after_id'] ?? 0 );
 		$upload_scope = preg_replace( '/[^A-Za-z0-9._:-]/', '', (string) ( $input['upload_scope'] ?? '' ) );
 		$upload_scope = is_string( $upload_scope ) ? substr( $upload_scope, 0, 96 ) : '';
-		$inventory = $uses_stable_cursor
+		$inventory = $uses_targeted_ids
+			? $this->toolkit_media_inventory(
+				array(
+					'mime_type'     => 'image',
+					'attachment_ids' => $target_attachment_ids,
+					'page'          => 1,
+					'per_page'      => $per_page,
+					'stable_order'  => 'id_asc',
+				)
+			)
+			: ( $uses_stable_cursor
 			? $this->toolkit_media_inventory_after_id( $after_id, $per_page )
 			: $this->toolkit_media_inventory(
 				array(
@@ -2638,15 +2655,15 @@ final class Provider_Client {
 					'per_page'    => $per_page,
 					'stable_order' => 'id_asc',
 				)
-			);
+			) );
 		if ( is_wp_error( $inventory ) ) {
 			return $inventory;
 		}
 
 		$items = is_array( $inventory['items'] ?? null ) ? $inventory['items'] : array();
-		$has_more = $uses_stable_cursor
+		$has_more = $uses_targeted_ids ? false : ( $uses_stable_cursor
 			? ! empty( $inventory['continuation_has_more'] )
-			: $page * $per_page < absint( $inventory['total'] ?? count( $items ) );
+			: $page * $per_page < absint( $inventory['total'] ?? count( $items ) ) );
 		$next_after_id = $uses_stable_cursor ? absint( $inventory['continuation_after_id'] ?? $after_id ) : 0;
 		if ( empty( $items ) ) {
 			return array(

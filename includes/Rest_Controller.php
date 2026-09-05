@@ -1901,8 +1901,9 @@ final class Rest_Controller {
 			'tag_ids'             => $this->csv_absint_list( (string) $request->get_param( 'tag_ids' ) ),
 			'featured_media'      => absint( $request->get_param( 'featured_media' ) ),
 			'media_items'         => $this->editor_media_items_from_request( $request ),
-			'page'                => max( 1, absint( $request->get_param( 'page' ) ?: 1 ) ),
-			'per_page'            => max( 1, min( 12, absint( $request->get_param( 'per_page' ) ?: 12 ) ) ),
+			'occurrence_offset'   => max( 0, absint( $request->get_param( 'occurrence_offset' ) ) ),
+			'total_occurrence_count' => max( 0, absint( $request->get_param( 'total_occurrence_count' ) ) ),
+			'visual_recognition_consent' => (bool) $request->get_param( 'visual_recognition_consent' ),
 			'content_blocks'      => $this->editor_content_blocks_from_request( $request ),
 			'comment_id'          => absint( $request->get_param( 'comment_id' ) ),
 			'comment_author'      => sanitize_text_field( (string) $request->get_param( 'comment_author' ) ),
@@ -2060,6 +2061,7 @@ final class Rest_Controller {
 			'context_after'   => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_after'] ?? '' ), 240 ) ),
 			'context_caption' => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_caption'] ?? '' ), 220 ) ),
 			'context_summary' => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_summary'] ?? '' ), 360 ) ),
+			'decorative'      => ! empty( $item['decorative'] ),
 			'target_scope'    => 'post_block_alt',
 		);
 		if ( $attachment_id > 0 ) {
@@ -2104,43 +2106,58 @@ final class Rest_Controller {
 				static fn( $item ): bool => is_array( $item ) && '' !== trim( (string) ( $item['occurrence_id'] ?? '' ) )
 			)
 		);
-		$page        = max( 1, absint( $context['page'] ?? 1 ) );
-		$per_page    = max( 1, min( 12, absint( $context['per_page'] ?? 12 ) ) );
-		$total_items = count( $items );
-		$items       = array_slice( $items, ( $page - 1 ) * $per_page, $per_page );
+		$offset      = max( 0, absint( $context['occurrence_offset'] ?? 0 ) );
+		$per_page    = 10;
+		$total_items = max( count( $items ), absint( $context['total_occurrence_count'] ?? 0 ) );
 		if ( empty( $items ) ) {
 			return array(
 				'artifact_type'          => 'current_article_image_alt_suggestions.v1',
+				'contract_version'       => 'current_article_image_alt_context_review.v1',
 				'status'                 => 'empty',
 				'message'                => __( 'No image blocks were found in the current article. Add an image block before previewing contextual ALT.', 'npcink-workflow-toolbox' ),
 				'write_posture'          => 'suggestion_only',
 				'final_write_path'       => 'core_proposal_required',
 				'direct_wordpress_write' => false,
 				'items'                  => array(),
+				'occurrence_offset'      => $offset,
+				'per_page'               => $per_page,
+				'total_occurrence_count' => $total_items,
+				'has_previous_page'      => $offset > 0,
+				'has_next_page'          => false,
+				'visual_recognition_required_count' => 0,
 			);
 		}
 
-		$visual_fallback = $this->editor_article_image_visual_fallback( $items );
+		$visual_evidence = $this->editor_article_image_visual_evidence( $items, ! empty( $context['visual_recognition_consent'] ) );
 		$review_items    = array();
-		$visual_fallback_used_count = 0;
-		foreach ( array_slice( $items, 0, 12 ) as $index => $item ) {
+		$visual_evidence_used_count = 0;
+		$visual_recognition_required_count = 0;
+		foreach ( array_slice( $items, 0, $per_page ) as $index => $item ) {
 			if ( ! is_array( $item ) ) {
 				continue;
 			}
 			$current_alt    = sanitize_text_field( (string) ( $item['alt'] ?? '' ) );
 			$attachment_id  = absint( $item['attachment_id'] ?? 0 );
-			$visual_evidence = $visual_fallback[ $attachment_id ] ?? array();
-			$suggested_alt  = $this->editor_contextual_image_alt_draft( $item, $context, $visual_evidence );
-			$visual_fallback_used = ! empty( $visual_evidence ) && $this->editor_article_image_needs_visual_fallback( $item );
-			if ( $visual_fallback_used ) {
-				++$visual_fallback_used_count;
+			$item_visual_evidence = $visual_evidence['items'][ $attachment_id ] ?? array();
+			$needs_visual_evidence = $this->editor_article_image_needs_visual_evidence( $item );
+			$suggested_alt  = $this->editor_contextual_image_alt_draft( $item, $context, $item_visual_evidence );
+			$visual_evidence_used = ! empty( $item_visual_evidence ) && $needs_visual_evidence;
+			if ( $visual_evidence_used ) {
+				++$visual_evidence_used_count;
+			}
+			$visual_evidence_status = 'not_required';
+			if ( $needs_visual_evidence ) {
+				$visual_evidence_status = $visual_evidence_used ? sanitize_key( (string) ( $item_visual_evidence['evidence_reuse'] ?? 'available' ) ) : 'recognition_required';
+				if ( 'recognition_required' === $visual_evidence_status ) {
+					++$visual_recognition_required_count;
+				}
 			}
 			$context_data = array(
 				'heading' => sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) ),
 				'before'  => sanitize_textarea_field( (string) ( $item['context_before'] ?? '' ) ),
 				'after'   => sanitize_textarea_field( (string) ( $item['context_after'] ?? '' ) ),
 				'caption' => sanitize_textarea_field( (string) ( $item['context_caption'] ?? '' ) ),
-				'visual_fallback' => $visual_fallback_used ? $this->editor_article_image_visual_summary( $visual_evidence ) : '',
+				'visual_evidence' => $visual_evidence_used ? $this->editor_article_image_visual_summary( $item_visual_evidence ) : '',
 			);
 			$review_items[] = array(
 				'occurrence_id'            => sanitize_text_field( (string) ( $item['occurrence_id'] ?? 'article-image-' . ( $index + 1 ) ) ),
@@ -2153,14 +2170,15 @@ final class Rest_Controller {
 				'current_alt'              => $current_alt,
 				'suggested_alt'            => $suggested_alt,
 				'candidate_review_status'  => '' === $current_alt ? 'contextual_draft' : 'existing_alt_review',
-				'candidate_basis'          => array_values( array_filter( array( 'article_context', '' !== $context_data['caption'] ? 'figure_caption' : '', '' !== $context_data['heading'] ? 'nearest_heading' : '', '' !== $context_data['before'] || '' !== $context_data['after'] ? 'adjacent_text' : '', $visual_fallback_used ? 'silent_ai_vision_fallback' : '' ) ) ),
+				'candidate_basis'          => array_values( array_filter( array( 'article_context', '' !== $context_data['caption'] ? 'figure_caption' : '', '' !== $context_data['heading'] ? 'nearest_heading' : '', '' !== $context_data['before'] || '' !== $context_data['after'] ? 'adjacent_text' : '', $visual_evidence_used ? 'visual_evidence' : '' ) ) ),
 				'context'                  => $context_data,
 				'context_fingerprint'      => hash( 'sha256', wp_json_encode( $context_data ) ?: '' ),
 				'target_scope'             => 'post_block_alt',
 				'needs_human_visual_check' => false,
-				'visual_fallback_used'      => $visual_fallback_used,
-				'visual_fallback_source'    => $visual_fallback_used ? sanitize_key( (string) ( $visual_evidence['source'] ?? 'cloud_or_host_runtime' ) ) : '',
-				'visual_confirmation_basis' => $visual_fallback_used ? 'author_present_in_post_editor' : 'article_context_only',
+				'visual_evidence_status'    => $visual_evidence_status,
+				'visual_evidence_used'      => $visual_evidence_used,
+				'visual_evidence_source'    => $visual_evidence_used ? sanitize_key( (string) ( $item_visual_evidence['source'] ?? 'cloud_or_host_runtime' ) ) : '',
+				'decorative'                => ! empty( $item['decorative'] ),
 				'decorative_option'        => 'operator_may_choose_empty_alt',
 				'write_status'             => 'preview_only_not_submitted',
 			);
@@ -2172,20 +2190,23 @@ final class Rest_Controller {
 			'composition_role'      => 'current_article_contextual_alt_review',
 			'status'                => 'ready',
 			'runtime_owner'         => 'npcink-workflow-toolbox',
-			'provider_execution'    => $visual_fallback_used_count > 0 ? 'optional_cloud_visual_fallback' : 'none',
-			'source_policy'         => 'current_article_context_with_silent_visual_fallback',
+			'provider_execution'    => ! empty( $context['visual_recognition_consent'] ) && $visual_evidence_used_count > 0 ? 'explicit_visual_recognition' : 'none',
+			'source_policy'         => 'article_context_then_current_fingerprint_cache_then_explicit_recognition',
 			'target_scope'          => 'post_block_alt',
 			'post_id'               => absint( $context['post_id'] ?? 0 ),
 			'post_title'            => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
-			'image_occurrence_count' => count( $review_items ),
+			'image_occurrence_count' => $total_items,
+			'page_occurrence_count'  => count( $review_items ),
 			'missing_alt_count'     => count( array_filter( $review_items, static fn( array $item ): bool => '' === (string) ( $item['current_alt'] ?? '' ) ) ),
-			'visual_fallback_used_count' => $visual_fallback_used_count,
-			'visual_confirmation_policy' => 'no_extra_step_author_present_and_native_save',
+			'visual_evidence_used_count' => $visual_evidence_used_count,
+			'visual_recognition_required_count' => $visual_recognition_required_count,
+			'visual_confirmation_policy' => 'explicit_operator_action_before_provider_call',
 			'items'                 => $review_items,
-			'page'                  => $page,
+			'occurrence_offset'     => $offset,
 			'per_page'              => $per_page,
 			'total_occurrence_count' => $total_items,
-			'has_next_page'         => ( $page * $per_page ) < $total_items,
+			'has_previous_page'     => $offset > 0,
+			'has_next_page'         => ( $offset + count( $review_items ) ) < $total_items,
 			'write_posture'         => 'suggestion_only',
 			'editor_apply_path'      => 'local_admin_consent_audit_then_editor_state',
 			'final_write_path'      => 'wordpress_editor_save_after_confirmation',
@@ -2195,7 +2216,7 @@ final class Rest_Controller {
 			'guardrails'            => array(
 				'context_decides_image_purpose',
 				'visual_facts_are_used_only_when_article_context_is_insufficient',
-				'visual_runtime_failure_is_silent_and_non_blocking',
+				'provider_calls_require_explicit_operator_consent',
 				'no_keyword_stuffing',
 				'decorative_images_may_use_empty_alt',
 				'no_attachment_global_alt_write',
@@ -2236,7 +2257,7 @@ final class Rest_Controller {
 		return '';
 	}
 
-	private function editor_article_image_needs_visual_fallback( array $item ): bool {
+	private function editor_article_image_needs_visual_evidence( array $item ): bool {
 		if ( '' !== trim( sanitize_text_field( (string) ( $item['alt'] ?? '' ) ) ) ) {
 			return false;
 		}
@@ -2255,11 +2276,11 @@ final class Rest_Controller {
 	 * @param array<int,array<string,mixed>> $items Article image occurrences.
 	 * @return array<int,array<string,mixed>> Evidence indexed by attachment id.
 	 */
-	private function editor_article_image_visual_fallback( array $items ): array {
+	private function editor_article_image_visual_evidence( array $items, bool $allow_recognition ): array {
 		$request_items = array();
 		$requested_ids = array();
-		foreach ( array_slice( $items, 0, 12 ) as $item ) {
-			if ( ! is_array( $item ) || ! $this->editor_article_image_needs_visual_fallback( $item ) ) {
+		foreach ( array_slice( $items, 0, 10 ) as $item ) {
+			if ( ! is_array( $item ) || ! $this->editor_article_image_needs_visual_evidence( $item ) ) {
 				continue;
 			}
 			$attachment_id = absint( $item['attachment_id'] ?? 0 );
@@ -2288,7 +2309,7 @@ final class Rest_Controller {
 			return array();
 		}
 
-		$evidence = $this->client->request_image_context_evidence(
+		$evidence = $this->client->resolve_media_image_context_evidence(
 			array(
 				'contract_version'          => 'image_context_evidence_request.v1',
 				'artifact_type'             => 'image_context_evidence_request',
@@ -2299,16 +2320,19 @@ final class Rest_Controller {
 				'execution_created'         => false,
 				'no_local_model'            => true,
 				'no_media_write'            => true,
-				'source_policy'             => 'bounded_article_image_urls_for_silent_visual_fallback',
+				'source_policy'             => 'local_attachment_current_fingerprint_only',
 				'expected_response_contract' => 'image_context_evidence.v1',
 				'requested_count'           => count( $request_items ),
 				'max_items'                 => count( $request_items ),
 				'items'                     => $request_items,
-				'operator_next_action'      => 'silent_runtime_fallback_no_extra_ui',
-			)
+				'operator_next_action'      => $allow_recognition ? 'explicit_visual_recognition_confirmed' : 'review_recognition_required',
+			),
+			$allow_recognition,
+			$allow_recognition ? 'article_alt_review' : '',
+			$allow_recognition
 		);
 		if ( empty( $evidence ) ) {
-			return array();
+			return array( 'items' => array() );
 		}
 
 		$indexed = array();
@@ -2330,7 +2354,10 @@ final class Rest_Controller {
 			);
 		}
 
-		return $indexed;
+		return array(
+			'items' => $indexed,
+			'recognition_required_attachment_ids' => array_values( array_map( 'absint', (array) ( $evidence['recognition_required_attachment_ids'] ?? array() ) ) ),
+		);
 	}
 
 	private function editor_article_image_visual_summary( array $evidence ): string {
