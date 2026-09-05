@@ -3662,7 +3662,13 @@ final class Admin_Page {
 						<?php $this->render_watermark_template_options( $templates, (string) $template_settings['default_template'], $fallback_logo_id, false ); ?>
 					</select>
 				</label>
-				<p><span><?php echo esc_html( sprintf( __( '%d built-in presets', 'npcink-workflow-toolbox' ), count( $built_in ) ) ); ?></span> · <span data-toolbox-watermark-template-count><?php echo esc_html( sprintf( __( '%1$d/%2$d custom templates', 'npcink-workflow-toolbox' ), count( $custom_templates ), 20 ) ); ?></span></p>
+				<?php
+				/* translators: %d: Number of built-in watermark presets. */
+				$built_in_summary = sprintf( __( '%d built-in presets', 'npcink-workflow-toolbox' ), count( $built_in ) );
+				/* translators: 1: Number of custom watermark templates, 2: Maximum number of templates. */
+				$custom_summary = sprintf( __( '%1$d/%2$d custom templates', 'npcink-workflow-toolbox' ), count( $custom_templates ), 20 );
+				?>
+				<p><span><?php echo esc_html( $built_in_summary ); ?></span> · <span data-toolbox-watermark-template-count><?php echo esc_html( $custom_summary ); ?></span></p>
 			</div>
 
 			<div class="npcink-toolbox__watermark-library-workspace">
@@ -4489,6 +4495,7 @@ final class Admin_Page {
 		if ( 'awaiting_confirmation' === $state && 'changed_attachments' === sanitize_key( (string) ( $status['scope'] ?? '' ) ) ) {
 			?>
 			<div class="npcink-toolbox__result-notice is-warning" data-toolbox-changed-media-recognition-confirmation>
+				<?php /* translators: %d: Number of changed image files. */ ?>
 				<p><?php echo esc_html( sprintf( __( '%d image file(s) changed and need fresh visual evidence. No Cloud recognition has run.', 'npcink-workflow-toolbox' ), count( (array) ( $status['attachment_ids'] ?? array() ) ) ) ); ?></p>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<?php wp_nonce_field( 'npcink_toolbox_confirm_changed_media_recognition' ); ?>

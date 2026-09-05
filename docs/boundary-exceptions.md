@@ -149,6 +149,44 @@ Primary decision records:
 - [ADR-004: Bundle Local Automation Runtime As An Isolated Module](decisions/ADR-004-bundle-local-automation-runtime-as-isolated-module.md)
 - [ADR-005: Use WP-Cron Local Preview And Cloud Batch Runtime For Nightly Automation](decisions/ADR-005-wp-cron-cloud-batch-orchestration.md)
 
+## Exception 5 - Exact-Manifest Local Media Optimization
+
+Status: accepted bounded administrator batch.
+
+Owner: Toolbox owns selection, one confirmation, foreground continuation, and
+the bounded manifest record; Toolkit owns every file replacement, backup,
+verification, lineage, and restore.
+
+Allowed scope:
+
+- one currently present WordPress administrator;
+- one frozen `toolbox_media_optimization_batch.v1` manifest containing no more
+  than 1000 Media Library attachments;
+- every item bound to its current main-file SHA-256;
+- only the fixed `auto_safe.v1` WebP policy and the documented resize choice;
+- one confirmation bound to the exact manifest digest;
+- foreground, browser-driven, one-item-at-a-time Toolkit replacements;
+- bounded local history and explicit item-by-item restore.
+
+Hard stop:
+
+- no external Agent, OpenClaw, CLI, Cron, background worker, or Cloud callback
+  may start or continue this local batch;
+- no open-ended attachment selection, mutable manifest, generic workflow
+  runner, queue, scheduler, lease, retry worker, or approval store;
+- no Toolbox-owned file replacement, backup registry, media registry, or final
+  write implementation;
+- no article/media creation batch, attachment ALT batch, URL/settings repair,
+  manual quality, crop, watermark, AVIF, or other uncontracted transform.
+
+External, open-ended, and other write-like batches remain Core/Adapter governed.
+This exception does not grant those callers the present-administrator lane.
+
+Primary contracts:
+
+- [Media Optimization V1](media-optimization-v1.md)
+- [ADR-015: Exact-manifest local media optimization](decisions/ADR-015-exact-manifest-local-media-optimization.md)
+
 ## Current Non-Exceptions
 
 These are not exceptions and must remain outside Toolbox ownership:
@@ -156,7 +194,7 @@ These are not exceptions and must remain outside Toolbox ownership:
 - Cloud Checks or Troubleshooting Checks product surfaces;
 - Site Knowledge indexing, rebuild, delete, or vector collection lifecycle;
 - AI image generation as a provider playground;
-- final publish, media upload, featured-image batch replacement, or SEO meta
-  mutation without governed handoff;
+- final publish, media upload, open-ended featured-image or attachment
+  replacement batches, or SEO meta mutation without governed handoff;
 - workflow runtime queues, schedulers, leases, retries, run tables, or approval
   stores.

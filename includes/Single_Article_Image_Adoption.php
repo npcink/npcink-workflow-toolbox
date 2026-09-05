@@ -253,11 +253,11 @@ final class Single_Article_Image_Adoption {
 		if ( is_array( $candidate['cloud_artifact'] ?? null ) && array() !== $candidate['cloud_artifact'] ) {
 			$received = ( new Cloud_Image_Artifact_Transport() )->receive( $candidate['cloud_artifact'], 'image_adoption_' . wp_generate_uuid4() );
 			if ( is_wp_error( $received ) ) {
-				@unlink( $tmp_file );
+				wp_delete_file( $tmp_file );
 				return $received;
 			}
 			if ( false === file_put_contents( $tmp_file, (string) $received['body'] ) ) {
-				@unlink( $tmp_file );
+				wp_delete_file( $tmp_file );
 				return new WP_Error( 'npcink_toolbox_image_adoption_artifact_tempfile_failed', __( 'WordPress could not prepare the verified generated image for import.', 'npcink-workflow-toolbox' ), array( 'status' => 500 ) );
 			}
 		} else {
@@ -274,14 +274,14 @@ final class Single_Article_Image_Adoption {
 				)
 			);
 			if ( is_wp_error( $response ) ) {
-				@unlink( $tmp_file );
+				wp_delete_file( $tmp_file );
 				return $response;
 			}
 			$status = (int) wp_remote_retrieve_response_code( $response );
 		}
 		$size   = is_file( $tmp_file ) ? (int) filesize( $tmp_file ) : 0;
 		if ( 200 !== $status || $size <= 0 || $size > self::MAX_FILE_BYTES ) {
-			@unlink( $tmp_file );
+			wp_delete_file( $tmp_file );
 			return new WP_Error(
 				'npcink_toolbox_image_adoption_download_invalid',
 				__( 'The remote image download was empty, too large, or returned an unexpected status.', 'npcink-workflow-toolbox' ),
@@ -294,7 +294,7 @@ final class Single_Article_Image_Adoption {
 		$height     = is_array( $image_info ) ? absint( $image_info[1] ?? 0 ) : 0;
 		$mime       = is_array( $image_info ) ? sanitize_text_field( (string) ( $image_info['mime'] ?? '' ) ) : '';
 		if ( $width <= 0 || $height <= 0 || $width * $height > self::MAX_IMAGE_PIXELS || ! str_starts_with( $mime, 'image/' ) ) {
-			@unlink( $tmp_file );
+			wp_delete_file( $tmp_file );
 			return new WP_Error(
 				'npcink_toolbox_image_adoption_image_invalid',
 				__( 'The downloaded file is not a supported image or exceeds the pixel limit.', 'npcink-workflow-toolbox' ),
@@ -304,7 +304,7 @@ final class Single_Article_Image_Adoption {
 
 		$extension = $this->extension_for_mime( $mime );
 		if ( '' === $extension ) {
-			@unlink( $tmp_file );
+			wp_delete_file( $tmp_file );
 			return new WP_Error( 'npcink_toolbox_image_adoption_mime_unsupported', __( 'The downloaded image format is not supported.', 'npcink-workflow-toolbox' ), array( 'status' => 422 ) );
 		}
 		$filename = preg_replace( '/\.[a-z0-9]+$/i', '', $filename ) . '.' . $extension;

@@ -2,7 +2,8 @@
 /** Browser proof for the one-click media optimization check and preview flow. */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
@@ -17,12 +18,12 @@ function assert(condition, message) {
 
 function wpCli(args) {
 	return execFileSync(
-		env('WP_CLI_PHP', `${process.env.HOME}/Library/Application Support/Local/lightning-services/php-8.2.29+0/bin/darwin-arm64/bin/php`),
+		env('WP_CLI_PHP', `${process.env.HOME}/Library/Application Support/Local/lightning-services/php-8.5.3+1/bin/darwin-arm64/bin/php`),
 		[
 			'-d', 'display_errors=0', '-d', 'error_reporting=8191',
-			'-d', `mysqli.default_socket=${env('WP_DB_SOCKET', `${process.env.HOME}/Library/Application Support/Local/run/PvPC4seEm/mysql/mysqld.sock`)}`,
+			'-d', `mysqli.default_socket=${env('WP_DB_SOCKET', `${process.env.HOME}/Library/Application Support/Local/run/NPb24Zg9g/mysql/mysqld.sock`)}`,
 			env('WP_CLI_BIN', '/opt/homebrew/bin/wp'),
-			`--path=${env('WP_PATH', '/Users/muze/Local Sites/npcink/app/public')}`,
+			`--path=${env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public')}`,
 			'--no-color', ...args,
 		],
 		{ encoding: 'utf8' }
@@ -57,10 +58,13 @@ echo wp_json_encode(array(
 	}));
 }
 
-const baseUrl = env('WP_BASE_URL', 'http://npcink.local').replace(/\/$/, '');
+const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const fixtureDate = '2001-01-02';
 let browser = null;
+let page = null;
 let attachmentId = 0;
+let sourceBytes = null;
+const requests = [];
 try {
 	const { chromium } = await loadPlaywright();
 	const launch = { headless: process.env.HEADLESS !== '0' };
@@ -73,7 +77,7 @@ $id=0; $path=''; try {
 	$path=trailingslashit($upload['path']).'toolbox-one-click-preview-'.wp_generate_password(8,false,false).'.png';
 	if (!function_exists('imagecreatetruecolor')) throw new RuntimeException('GD is unavailable.');
 	$im=imagecreatetruecolor(640,360); $bg=imagecolorallocate($im,32,94,150); imagefilledrectangle($im,0,0,640,360,$bg);
-	if (!imagepng($im,$path)) throw new RuntimeException('Fixture image write failed.'); imagedestroy($im);
+	if (!imagepng($im,$path)) throw new RuntimeException('Fixture image write failed.');
 	$inserted=wp_insert_attachment(array('post_mime_type'=>'image/png','post_title'=>'Toolbox one-click preview','post_status'=>'inherit','post_date'=>'${fixtureDate} 12:00:00','post_date_gmt'=>'${fixtureDate} 12:00:00'),$path,0,true);
 	if (is_wp_error($inserted)) throw new RuntimeException($inserted->get_error_message()); $id=(int)$inserted;
 	require_once ABSPATH.'wp-admin/includes/image.php'; $metadata=wp_generate_attachment_metadata($id,$path);
@@ -81,11 +85,54 @@ $id=0; $path=''; try {
 	echo $id;
 } catch (Throwable $error) { if ($id>0) wp_delete_attachment($id,true); elseif ($path && file_exists($path)) wp_delete_file($path); fwrite(STDERR,$error->getMessage()); exit(1); }` ]));
 	assert(attachmentId > 0, 'Temporary browser-smoke attachment was created after Playwright launched.');
+	sourceBytes = readFileSync(wpCli(['eval', `echo get_attached_file(${attachmentId});`]));
 
 	const context = await browser.newContext({ ignoreHTTPSErrors: true });
 	await context.addCookies(authCookies(baseUrl));
-	const page = await context.newPage();
-	const requests = [];
+	await context.route('**/wp-json/npcink-toolbox/v1/media-optimization-health', async (route) => {
+		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ready: true }) });
+	});
+	const artifact = {
+		artifact_id: 'art_0123456789abcdef0123456789abcdef',
+		expires_at: '2099-01-01T00:00:00Z',
+		mime_type: 'image/png',
+		format: 'png',
+		width: 640,
+		height: 360,
+		filesize_bytes: sourceBytes.length,
+		sha256: createHash('sha256').update(sourceBytes).digest('hex'),
+		suggested_filename: 'toolbox-browser-preview.png',
+		filename_basis: 'browser_fixture',
+		processing_warnings: [],
+		transform_facts: { fixture: true },
+	};
+	await context.route(/\/wp-json\/npcink-toolbox\/v1\/media-derivative-preview(?:\/.*)?$/, async (route) => {
+		const requestUrl = new URL(route.request().url());
+		if (route.request().method() === 'POST' && requestUrl.pathname.endsWith('/media-derivative-preview')) {
+			await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ run_id: 'browser-preview-run' }) });
+			return;
+		}
+		if (requestUrl.pathname.endsWith('/media-derivative-preview/browser-preview-run/result')) {
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					cloud_result: { artifact },
+					local_review: {
+						method: 'POST',
+						endpoint: `${baseUrl}/wp-json/npcink-toolbox/v1/media-derivative-local-review/${artifact.artifact_id}`,
+						artifact,
+					},
+				}),
+			});
+			return;
+		}
+		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ status: 'completed' }) });
+	});
+	await context.route('**/wp-json/npcink-toolbox/v1/media-derivative-local-review/*', async (route) => {
+		await route.fulfill({ status: 200, contentType: 'image/png', body: sourceBytes });
+	});
+	page = await context.newPage();
 	page.on('request', (request) => requests.push({ url: request.url(), method: request.method(), postData: request.postData() || '' }));
 	await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&tab=image&tool=batch-optimize`, { waitUntil: 'domcontentloaded', timeout: 45000 });
 	assert(!page.url().includes('wp-login.php'), 'Browser opened the Toolbox admin surface as an administrator.');
@@ -117,7 +164,7 @@ $id=0; $path=''; try {
 		const form = document.querySelector('form[data-toolbox-tool-panel="media-batch-optimize"]');
 		const states = form?.__npcinkMediaDerivativeBatchStates;
 		return Array.isArray(states) && states.some((state) => Number(state?.batchCandidate?.attachment_id) === id && state?.localReviewStatus === 'verified');
-	}, attachmentId, { timeout: 90000 });
+	}, attachmentId, { timeout: 30000 });
 
 	const ui = await page.evaluate((id) => {
 		const form = document.querySelector('form[data-toolbox-tool-panel="media-batch-optimize"]');
@@ -142,6 +189,23 @@ $id=0; $path=''; try {
 	assert(requests.some((request) => request.url.includes('/npcink-toolbox/v1/media-derivative-preview')), 'The browser checks the representative sample through the Cloud preview route.');
 	assert(requests.some((request) => request.method === 'POST' && request.url.includes('/npcink-toolbox/v1/media-derivative-local-review/')), 'The browser reads verified preview bytes through same-origin POST.');
 	assert(!requests.some((request) => /read-requests|run-read-ability|proposals|approve-and-execute/.test(request.url)), 'The read-only check creates no Core read authorization, proposal, or execution request.');
+} catch (error) {
+	if (page) {
+		const artifactDir = env('SMOKE_ARTIFACT_DIR', 'build/smoke');
+		mkdirSync(artifactDir, { recursive: true });
+		const screenshotPath = `${artifactDir}/media-derivative-preview-browser-failure.png`;
+		await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
+		const resultText = await page.locator('form[data-toolbox-tool-panel="media-batch-optimize"] .npcink-toolbox__result').innerText().catch(() => '');
+		const stateDebug = await page.evaluate(() => {
+			const form = document.querySelector('form[data-toolbox-tool-panel="media-batch-optimize"]');
+			return form && Array.isArray(form.__npcinkMediaDerivativeBatchStates) ? form.__npcinkMediaDerivativeBatchStates : [];
+		}).catch(() => []);
+		console.error(`FAIL: Media derivative browser screenshot: ${screenshotPath}`);
+		console.error(`FAIL: Media derivative browser result: ${resultText.replace(/\s+/g, ' ').trim().slice(0, 1200)}`);
+		console.error(`FAIL: Media derivative browser states: ${JSON.stringify(stateDebug, null, 2)}`);
+		console.error(`FAIL: Media derivative browser REST requests: ${JSON.stringify(requests.filter((request) => request.url.includes('/wp-json/')), null, 2)}`);
+	}
+	throw error;
 } finally {
 	try { if (browser) await browser.close(); }
 	finally {

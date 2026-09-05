@@ -11,14 +11,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class WP_REST_Request {
 	private string $route;
+	private string $method;
+	/** @var array<string,string> */
+	private array $headers;
 
-	public function __construct( string $route ) {
-		$this->route = $route;
+	/** @param array<string,string> $headers */
+	public function __construct( string $route, string $method = 'GET', array $headers = array() ) {
+		$this->route   = $route;
+		$this->method  = $method;
+		$this->headers = array_change_key_case( $headers, CASE_LOWER );
 	}
 
 	public function get_route(): string {
 		return $this->route;
 	}
+
+	public function get_method(): string {
+		return $this->method;
+	}
+
+	public function get_header( string $name ): string {
+		return (string) ( $this->headers[ strtolower( $name ) ] ?? '' );
+	}
+}
+
+define( 'LOGGED_IN_COOKIE', 'npcink_test_logged_in' );
+
+function wp_verify_nonce( string $nonce, string $action ): bool {
+	return 'valid-rest-nonce' === $nonce && 'wp_rest' === $action;
+}
+
+function wp_parse_url( string $url, int $component = -1 ) {
+	return parse_url( $url, $component );
+}
+
+function home_url( string $path = '/' ): string {
+	return 'https://example.test' . $path;
+}
+
+function admin_url( string $path = '/' ): string {
+	return 'https://example.test/wp-admin/' . ltrim( $path, '/' );
+}
+
+function absint( $value ): int {
+	return abs( (int) $value );
 }
 
 if ( ! function_exists( 'current_user_can' ) ) {
@@ -100,6 +136,8 @@ $route_scope     = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class,
 $route_scope->setAccessible( true );
 $permission = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'permission' );
 $permission->setAccessible( true );
+$present_admin_ui = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'is_present_admin_ui_request' );
+$present_admin_ui->setAccessible( true );
 
 $assert( 'cap.toolbox.knowledge.search' === $route_scope->invoke( $rest_controller, '/site-knowledge/search' ), 'Site Knowledge search maps to the knowledge search scope.' );
 $assert( 'cap.toolbox.nightly_inspection' === $route_scope->invoke( $rest_controller, '/nightly-inspection/cloud-batch/run_abc/result' ), 'Nightly dynamic result route maps to the nightly scope.' );
@@ -110,6 +148,15 @@ $allowed = $permission->invoke( $rest_controller, new WP_REST_Request( '/npcink-
 $denied  = $permission->invoke( $rest_controller, new WP_REST_Request( '/npcink-toolbox/v1/status' ) );
 $assert( true === $allowed, 'REST host filter can grant the matching scoped route.' );
 $assert( false === $denied, 'REST host filter does not grant a mismatched scoped route.' );
+
+$local_request = static fn( array $headers ): WP_REST_Request => new WP_REST_Request( '/npcink-toolbox/v1/media-optimization-batches/media_opt_abc/confirm', 'POST', $headers );
+$_COOKIE[ LOGGED_IN_COOKIE ] = 'logged-in-session';
+$assert( true === $present_admin_ui->invoke( $rest_controller, $local_request( array( 'X-WP-Nonce' => 'valid-rest-nonce', 'Origin' => 'https://example.test' ) ) ), 'Present-admin gate accepts a same-origin cookie-authenticated REST request with a valid nonce.' );
+$assert( false === $present_admin_ui->invoke( $rest_controller, $local_request( array( 'Origin' => 'https://example.test' ) ) ), 'Present-admin gate rejects an application-password-style request without a REST nonce.' );
+$assert( false === $present_admin_ui->invoke( $rest_controller, $local_request( array( 'X-WP-Nonce' => 'invalid', 'Origin' => 'https://example.test' ) ) ), 'Present-admin gate rejects an invalid REST nonce.' );
+$assert( false === $present_admin_ui->invoke( $rest_controller, $local_request( array( 'X-WP-Nonce' => 'valid-rest-nonce', 'Origin' => 'https://external.test' ) ) ), 'Present-admin gate rejects a cross-origin request.' );
+unset( $_COOKIE[ LOGGED_IN_COOKIE ] );
+$assert( false === $present_admin_ui->invoke( $rest_controller, $local_request( array( 'X-WP-Nonce' => 'valid-rest-nonce', 'Origin' => 'https://example.test' ) ) ), 'Present-admin gate rejects a request without the logged-in cookie.' );
 
 $rest_filter_call = $GLOBALS['npcink_toolbox_security_smoke_filters'][0] ?? array();
 $assert(

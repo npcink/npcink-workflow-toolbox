@@ -157,10 +157,15 @@ Privacy: https://www.pexels.com/privacy-policy/
 
 == Privacy ==
 
-Npcink Workflow Toolbox stores two local WordPress options:
+Npcink Workflow Toolbox stores local WordPress options for feature settings,
+non-secret site guidance, media optimization settings and templates, bounded
+foreground media optimization history, media-recognition continuation, the
+latest local Nightly Inspection dry-run preview, and a fallback hot-topic
+snapshot. Short-lived transients cache hot-topic and editor request results.
 
-* `npcink_toolbox_settings` for feature flags and local settings;
-* `npcink_toolbox_content_context` for non-secret site guidance.
+Uninstall removes those Toolbox-owned options, transients, locks, and scheduled
+hooks. It does not delete posts, imported or optimized Media Library items, or
+Abilities Toolkit-owned media backups and lineage records.
 
 Do not store provider secrets, private customer data, billing details, or write
 authorization in the content context fields.
@@ -174,9 +179,12 @@ service.
 
 = Does this plugin write or publish my content automatically? =
 
-No. The default content-support flows return suggestions, candidates, previews,
-and handoff plans. Final WordPress writes require the separate governed host
-workflow.
+The default content-support flows only return suggestions, candidates,
+previews, and handoff plans. The Media Library Optimization workflow is the
+narrow exception: after an administrator checks and confirms one exact
+attachment-and-SHA-256 manifest, the browser delegates each reversible file
+replacement to Abilities Toolkit. It never publishes posts or runs as an
+unattended batch.
 
 = Can I use it without Npcink Cloud? =
 
@@ -205,20 +213,20 @@ import media or set featured images by themselves.
 = What happens when I accept a suggestion? =
 
 Accepted choices can be packaged into a governed handoff plan. Core proposal
-approval, preflight, audit, and the final WordPress ability execution remain
-outside Toolbox.
-
-== Screenshots ==
-
-1. Toolbox overview with capability health and the review-only site check entry.
-2. Site Profile fields for non-secret SEO, AEO, and GEO guidance.
-3. Post editor Npcink Content Support panel with fixed review and handoff actions.
-4. Site Check decision queue with local findings, handling paths, and optional Cloud detail.
+approval, preflight, audit, and final WordPress ability execution remain
+outside Toolbox except for the explicitly confirmed local media operations
+described above.
 
 == Changelog ==
 
 = 0.2.0 =
 
+* Added the administrator-confirmed exact-manifest Media Library optimization
+  flow with foreground progress, failure isolation, history, and restore.
+* Restricted local write exceptions to same-origin WordPress cookie sessions
+  with a valid REST nonce.
+* Completed uninstall cleanup for Toolbox-owned settings, caches, continuation
+  state, batch history, previews, locks, and scheduled hooks.
 * Moved bounded media recognition continuation into Toolbox with stable ID
   cursors, single-event WP-Cron progress, bounded retries, and failure-only
   administrator recovery.
