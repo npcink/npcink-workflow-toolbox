@@ -4,7 +4,7 @@ Workflow Toolbox is the sole WordPress-side owner of media-recognition continuat
 
 ## Local State
 
-The non-autoloaded `npcink_toolbox_media_recognition_continuation` option records one plan with stable `id_asc` traversal, the next committed `after_id` cursor, a pending cursor and counts, the current Cloud `run_id`, state, processed/failed/skipped/qualified counters, retry count, next eligible time, and pause reason. It is not a workflow queue or Cloud run mirror.
+The non-autoloaded `npcink_toolbox_media_recognition_continuation` option records one plan with stable `id_asc` traversal, the initiating user ID for Cron-time capability revalidation, the next committed `after_id` cursor, a pending cursor and counts, the current Cloud `run_id`, state, processed/failed/skipped/qualified counters, retry count, next eligible time, and pause reason. It is not a workflow queue or Cloud result mirror.
 
 The single-event `npcink_toolbox_continue_media_recognition` hook advances at most one batch while holding a self-healing atomic option lock. A cursor advances only after a local-only page completes or the corresponding Cloud run and `image_context_evidence.v1` result succeed.
 
