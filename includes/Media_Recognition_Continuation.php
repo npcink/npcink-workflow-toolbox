@@ -28,6 +28,7 @@ final class Media_Recognition_Continuation {
 	public function register_hooks(): void {
 		add_action( 'init', array( $this, 'ensure_schedule' ) );
 		add_action( self::CRON_HOOK, array( $this, 'process' ) );
+		add_action( 'npcink_abilities_toolkit_media_file_version_changed', array( $this, 'queue_changed_attachment' ), 10, 2 );
 	}
 
 	public static function deactivate(): void {
@@ -59,7 +60,7 @@ final class Media_Recognition_Continuation {
 	/** @return array<string,mixed>|WP_Error */
 	public function start( array $input = array() ) {
 		$current = $this->status();
-		if ( in_array( $current['state'], array( 'queued', 'processing', 'retrying', 'paused' ), true ) ) {
+		if ( in_array( $current['state'], array( 'awaiting_confirmation', 'queued', 'processing', 'retrying', 'paused' ), true ) ) {
 			return $current;
 		}
 		$initiated_by = get_current_user_id();
@@ -69,6 +70,7 @@ final class Media_Recognition_Continuation {
 
 		$state                     = $this->default_state();
 		$state['plan_id']          = 'media_recognition_' . wp_generate_uuid4();
+		$state['scope']            = 'full';
 		$state['initiated_by']     = $initiated_by;
 		$state['per_page']         = max( 1, min( self::MAX_PER_PAGE, absint( $input['per_page'] ?? self::MAX_PER_PAGE ) ) );
 		$state['state']            = 'queued';
@@ -76,6 +78,45 @@ final class Media_Recognition_Continuation {
 		update_option( self::OPTION_NAME, $state, false );
 		$this->schedule( 1 );
 
+		return $state;
+	}
+
+	/** Records a changed attachment without starting recognition. */
+	public function queue_changed_attachment( int $attachment_id, array $facts = array() ): void {
+		if ( $attachment_id <= 0 ) {
+			return;
+		}
+		$state = $this->status();
+		if ( 'awaiting_confirmation' === $state['state'] && 'changed_attachments' === $state['scope'] ) {
+			$state['attachment_ids'] = $this->normalize_attachment_ids( array_merge( $state['attachment_ids'], array( $attachment_id ) ) );
+			update_option( self::OPTION_NAME, $state, false );
+			return;
+		}
+		$active = in_array( $state['state'], array( 'queued', 'processing', 'retrying', 'paused' ), true );
+		if ( $active ) {
+			$state['pending_attachment_ids'] = $this->normalize_attachment_ids( array_merge( $state['pending_attachment_ids'], array( $attachment_id ) ) );
+		} else {
+			$state = $this->changed_attachments_state( array( $attachment_id ) );
+		}
+		update_option( self::OPTION_NAME, $state, false );
+	}
+
+	/** @return array<string,mixed>|WP_Error */
+	public function confirm_changed_attachments() {
+		$state = $this->status();
+		if ( 'awaiting_confirmation' !== $state['state'] || 'changed_attachments' !== $state['scope'] ) {
+			return $state;
+		}
+		$initiated_by = get_current_user_id();
+		if ( $initiated_by <= 0 || ! current_user_can( 'upload_files' ) ) {
+			return new WP_Error( 'npcink_toolbox_media_recognition_permission_denied', 'You do not have permission to confirm media recognition.' );
+		}
+		$state['initiated_by'] = $initiated_by;
+		$state['confirmation_status'] = 'confirmed';
+		$state['state'] = 'queued';
+		$state['next_eligible_at'] = gmdate( 'c' );
+		update_option( self::OPTION_NAME, $state, false );
+		$this->schedule( 1 );
 		return $state;
 	}
 
@@ -152,12 +193,22 @@ final class Media_Recognition_Continuation {
 		}
 
 		$state['state'] = 'processing';
+		$batch_attachment_ids = 'changed_attachments' === $state['scope']
+			? array_slice( array_values( array_filter( $state['attachment_ids'], static fn( int $id ): bool => $id > absint( $state['next_cursor']['after_id'] ?? 0 ) ) ), 0, $state['per_page'] )
+			: array();
+		if ( 'changed_attachments' === $state['scope'] && empty( $batch_attachment_ids ) ) {
+			$state['has_more'] = false;
+			$state = $this->commit_pending_batch( $state );
+			update_option( self::OPTION_NAME, $state, false );
+			return;
+		}
 		$result = $this->client->refresh_site_media_index_batch(
-			array(
+			array_filter( array(
 				'after_id'    => absint( $state['next_cursor']['after_id'] ?? 0 ),
 				'per_page'    => $state['per_page'],
 				'upload_scope' => $state['plan_id'],
-			)
+				'attachment_ids' => $batch_attachment_ids,
+			), static fn( $value, $key ): bool => 'attachment_ids' !== $key || ! empty( $value ), ARRAY_FILTER_USE_BOTH )
 		);
 		if ( is_wp_error( $result ) ) {
 			$this->retry_or_pause( $state, $result->get_error_code() );
@@ -165,7 +216,10 @@ final class Media_Recognition_Continuation {
 		}
 
 		$state['run_id']        = sanitize_text_field( (string) ( $result['visual_evidence_run_id'] ?? $result['run_id'] ?? '' ) );
-		$state['has_more']      = ! empty( $result['has_more'] );
+		$state['current_batch_attachment_ids'] = $batch_attachment_ids;
+		$state['has_more']      = 'changed_attachments' === $state['scope']
+			? count( array_filter( $state['attachment_ids'], static fn( int $id ): bool => $id > ( ! empty( $batch_attachment_ids ) ? max( $batch_attachment_ids ) : 0 ) ) ) > 0
+			: ! empty( $result['has_more'] );
 		$state['pending_counts'] = array(
 			'processed' => absint( $result['indexed_items'] ?? 0 ),
 			'qualified' => absint( $result['visual_evidence_reused_items'] ?? 0 ) + absint( $result['visual_evidence_recognized_items'] ?? 0 ),
@@ -173,7 +227,7 @@ final class Media_Recognition_Continuation {
 			'failed'    => 0,
 		);
 		$state['pending_cursor'] = array(
-			'after_id' => absint( $result['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ),
+			'after_id' => ! empty( $batch_attachment_ids ) ? max( $batch_attachment_ids ) : absint( $result['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ),
 		);
 
 		if ( '' !== $state['run_id'] ) {
@@ -234,12 +288,13 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 		$sync = $this->client->refresh_site_media_index_batch(
-			array(
+			array_filter( array(
 				'after_id'              => absint( $state['next_cursor']['after_id'] ?? 0 ),
 				'per_page'              => $state['per_page'],
 				'upload_scope'           => $state['plan_id'],
+				'attachment_ids'         => $state['current_batch_attachment_ids'],
 				'image_context_evidence' => $evidence,
-			)
+			), static fn( $value, $key ): bool => 'attachment_ids' !== $key || ! empty( $value ), ARRAY_FILTER_USE_BOTH )
 		);
 		if ( is_wp_error( $sync ) ) {
 			$this->retry_or_pause( $state, $sync->get_error_code() );
@@ -249,10 +304,13 @@ final class Media_Recognition_Continuation {
 			$this->retry_or_pause( $state, 'media_recognition_result_replay_invalid' );
 			return;
 		}
-		$state['has_more']      = ! empty( $sync['has_more'] );
-		$state['pending_cursor'] = array(
-			'after_id' => absint( $sync['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ),
-		);
+		$committed_after_id = 'changed_attachments' === $state['scope']
+			? absint( $state['pending_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ?? 0 )
+			: absint( $sync['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] );
+		$state['has_more']      = 'changed_attachments' === $state['scope']
+			? count( array_filter( $state['attachment_ids'], static fn( int $id ): bool => $id > $committed_after_id ) ) > 0
+			: ! empty( $sync['has_more'] );
+		$state['pending_cursor'] = array( 'after_id' => $committed_after_id );
 		$state['pending_counts'] = array(
 			'processed' => absint( $sync['indexed_items'] ?? 0 ),
 			'qualified' => $counts['qualified'],
@@ -277,7 +335,11 @@ final class Media_Recognition_Continuation {
 		}
 		$state['next_cursor']    = $state['pending_cursor'];
 		$state['pending_counts'] = $this->empty_counts();
+		$state['current_batch_attachment_ids'] = array();
 		$state['state']          = ! empty( $state['has_more'] ) ? 'queued' : 'complete';
+		if ( 'complete' === $state['state'] && ! empty( $state['pending_attachment_ids'] ) ) {
+			$state = $this->changed_attachments_state( $state['pending_attachment_ids'] );
+		}
 		return $state;
 	}
 
@@ -370,6 +432,7 @@ final class Media_Recognition_Continuation {
 	private function default_state(): array {
 		return array(
 			'plan_id' => '', 'stable_order' => 'id_asc', 'next_cursor' => array( 'after_id' => 0 ),
+			'scope' => 'full', 'confirmation_status' => 'not_required', 'attachment_ids' => array(), 'pending_attachment_ids' => array(), 'current_batch_attachment_ids' => array(),
 			'pending_cursor' => array( 'after_id' => 0 ), 'pending_counts' => $this->empty_counts(),
 			'initiated_by' => 0, 'run_id' => '', 'state' => 'idle', 'processed' => 0, 'failed' => 0, 'skipped' => 0,
 			'qualified' => 0, 'retry_count' => 0, 'next_eligible_at' => '', 'pause_reason' => '',
@@ -386,6 +449,11 @@ final class Media_Recognition_Continuation {
 			$this->default_state(),
 			array(
 				'plan_id' => sanitize_text_field( (string) ( $state['plan_id'] ?? '' ) ),
+				'scope' => 'changed_attachments' === sanitize_key( (string) ( $state['scope'] ?? '' ) ) ? 'changed_attachments' : 'full',
+				'confirmation_status' => sanitize_key( (string) ( $state['confirmation_status'] ?? 'not_required' ) ),
+				'attachment_ids' => $this->normalize_attachment_ids( $state['attachment_ids'] ?? array() ),
+				'pending_attachment_ids' => $this->normalize_attachment_ids( $state['pending_attachment_ids'] ?? array() ),
+				'current_batch_attachment_ids' => $this->normalize_attachment_ids( $state['current_batch_attachment_ids'] ?? array() ),
 				'initiated_by' => absint( $state['initiated_by'] ?? 0 ),
 				'stable_order' => 'id_asc',
 				'next_cursor' => array( 'after_id' => absint( $next_cursor['after_id'] ?? 0 ) ),
@@ -412,5 +480,23 @@ final class Media_Recognition_Continuation {
 	/** @return array{processed:int,qualified:int,skipped:int,failed:int} */
 	private function empty_counts(): array {
 		return array( 'processed' => 0, 'qualified' => 0, 'skipped' => 0, 'failed' => 0 );
+	}
+
+	/** @param array<int,int> $attachment_ids @return array<string,mixed> */
+	private function changed_attachments_state( array $attachment_ids ): array {
+		$state = $this->default_state();
+		$state['plan_id'] = 'media_changes_' . wp_generate_uuid4();
+		$state['scope'] = 'changed_attachments';
+		$state['attachment_ids'] = $this->normalize_attachment_ids( $attachment_ids );
+		$state['confirmation_status'] = 'awaiting_confirmation';
+		$state['state'] = 'awaiting_confirmation';
+		return $state;
+	}
+
+	/** @param mixed $ids @return array<int,int> */
+	private function normalize_attachment_ids( $ids ): array {
+		$normalized = array_values( array_unique( array_filter( array_map( 'absint', is_array( $ids ) ? $ids : array() ) ) ) );
+		sort( $normalized, SORT_NUMERIC );
+		return $normalized;
 	}
 }

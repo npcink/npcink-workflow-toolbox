@@ -6369,6 +6369,21 @@ msgstr "文章上下文"
 msgid "Current block ALT: "
 msgstr "当前区块 ALT："
 
+msgid "This existing ALT looks weak. Review it manually; Toolbox will not overwrite it."
+msgstr "这个已有 ALT 可能较弱，请手动检查；Toolbox 不会覆盖它。"
+
+msgid "Review, edit, and apply confirmed empty ALT values"
+msgstr "审阅、编辑并应用已确认的空 ALT"
+
+msgid "Toolbox editor UI; Gutenberg owns the final post save"
+msgstr "Toolbox 编辑器界面；Gutenberg 负责最终保存文章"
+
+msgid "Local context and current-fingerprint cache; explicit Cloud recognition only when requested"
+msgstr "优先使用本地上下文和当前指纹缓存；仅在明确请求时使用 Cloud 识别"
+
+msgid "Confirmed empty core/image ALT values may update editor state; no automatic post save or attachment ALT write"
+msgstr "已确认的空 core/image ALT 可更新编辑器状态；不会自动保存文章或写入附件 ALT"
+
 msgid "Contextual ALT draft"
 msgstr "上下文 ALT 草稿"
 
@@ -8618,3 +8633,38 @@ msgstr "每周一次"
 #: includes/Rest_Controller.php
 msgid "Media recognition continuation is unavailable."
 msgstr "媒体识别续跑当前不可用。"
+msgid "The weekly media fingerprint scan is overdue. Check the site server cron before relying on background freshness checks."
+msgstr "每周媒体指纹扫描已逾期。依赖后台新鲜度检查前，请先检查站点服务器 Cron。"
+
+msgid "%d image file(s) changed and need fresh visual evidence. No Cloud recognition has run."
+msgstr "%d 个图片文件已变化，需要新的视觉证据。Cloud 识别尚未运行。"
+
+msgid "Confirm visual recognition"
+msgstr "确认视觉识别"
+
+msgid "Review empty image ALT values page by page. Visual recognition runs only after you request it; nothing is applied until final confirmation."
+msgstr "请逐页审阅空的图片 ALT。只有您明确请求后才会运行视觉识别，最终确认前不会应用任何更改。"
+
+msgid "Page %1$d of %2$d"
+msgstr "第 %1$d 页，共 %2$d 页"
+
+msgid "Visual recognition needed"
+msgstr "需要视觉识别"
+
+msgid "Ready for review"
+msgstr "可供审阅"
+
+msgid "Previous page"
+msgstr "上一页"
+
+msgid "Next page"
+msgstr "下一页"
+
+msgid "Recognize images on this page"
+msgstr "识别本页图片"
+
+msgid "Review every page before applying changes."
+msgstr "应用更改前请审阅所有页面。"
+
+msgid "V1 defaults are Draft From Source Materials, Publish Preflight, Category Suggestions, Tag Suggestions, Internal Link Candidates, and Image Candidates. Article ALT is available inside Discoverability."
+msgstr "V1 默认入口包括从来源材料起草、发布前检查、分类建议、标签建议、内链候选和图片候选。文章 ALT 位于可发现性入口中。"

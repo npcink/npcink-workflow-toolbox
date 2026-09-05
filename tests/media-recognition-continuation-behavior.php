@@ -61,6 +61,41 @@ namespace Npcink_Toolbox {
 	$GLOBALS['continuation_options'] = array();
 	$GLOBALS['continuation_events'] = array();
 	$client->results = array(
+		array( 'indexed_items' => 2, 'visual_evidence_reused_items' => 0, 'visual_evidence_recognized_items' => 2, 'screened_items' => 0, 'has_more' => false, 'next_cursor' => array( 'after_id' => 22 ) ),
+	);
+	$client->inputs = array();
+	$owner->queue_changed_attachment( 22 );
+	$owner->queue_changed_attachment( 11 );
+	$owner->queue_changed_attachment( 22 );
+	$awaiting = $owner->status();
+	\continuation_assert( 'awaiting_confirmation' === $awaiting['state'] && 'changed_attachments' === $awaiting['scope'] && array( 11, 22 ) === $awaiting['attachment_ids'], 'Changed attachment Hooks merge into one sorted awaiting-confirmation plan.' );
+	\continuation_assert( array() === $client->inputs && array() === $GLOBALS['continuation_events'], 'Discovery does not call Provider work or schedule continuation processing.' );
+	$confirmed = $owner->confirm_changed_attachments();
+	\continuation_assert( 'queued' === $confirmed['state'] && 'confirmed' === $confirmed['confirmation_status'], 'An authorized administrator explicitly confirms the changed-attachment plan.' );
+	unset( $GLOBALS['continuation_events']['npcink_toolbox_continue_media_recognition'] );
+	wp_set_current_user( 0 );
+	$owner->process();
+	$targeted_complete = $owner->status();
+	\continuation_assert( array( 11, 22 ) === $client->inputs[0]['attachment_ids'] && 'complete' === $targeted_complete['state'], 'Confirmed processing sends only the sorted changed attachment batch.' );
+	wp_set_current_user( 1 );
+
+	$GLOBALS['continuation_options'] = array();
+	$GLOBALS['continuation_events'] = array();
+	$client->inputs = array();
+	$client->results = array( array( 'indexed_items' => 1, 'visual_evidence_reused_items' => 1, 'visual_evidence_recognized_items' => 0, 'screened_items' => 0, 'has_more' => false, 'next_cursor' => array( 'after_id' => 50 ) ) );
+	$owner->start();
+	$owner->queue_changed_attachment( 77 );
+	unset( $GLOBALS['continuation_events']['npcink_toolbox_continue_media_recognition'] );
+	wp_set_current_user( 0 );
+	$owner->process();
+	$followup = $owner->status();
+	\continuation_assert( 'awaiting_confirmation' === $followup['state'] && array( 77 ) === $followup['attachment_ids'], 'Changes discovered during a full plan become one follow-up confirmation instead of a duplicate active plan.' );
+	\continuation_assert( 0 === $followup['processed'] && 0 === $followup['qualified'] && 0 === $followup['skipped'] && 0 === $followup['failed'] && 0 === $followup['next_cursor']['after_id'], 'A follow-up changed-attachment plan does not inherit counters or cursors from the completed full plan.' );
+	wp_set_current_user( 1 );
+
+	$GLOBALS['continuation_options'] = array();
+	$GLOBALS['continuation_events'] = array();
+	$client->results = array(
 		array( 'indexed_items' => 2, 'visual_evidence_reused_items' => 1, 'visual_evidence_run_id' => 'run-media-1', 'has_more' => true, 'next_cursor' => array( 'after_id' => 42 ) ),
 		array( 'indexed_items' => 2, 'visual_evidence_run_id' => '', 'screened_items' => 0, 'has_more' => true, 'next_cursor' => array( 'after_id' => 42 ) ),
 	);
@@ -76,6 +111,36 @@ namespace Npcink_Toolbox {
 	$continued = $owner->status();
 	\continuation_assert( 'queued' === $continued['state'] && 42 === $continued['next_cursor']['after_id'] && 1 === $continued['qualified'], 'A validated Cloud result commits the actual qualified item count once.' );
 	\continuation_assert( 'image_context_evidence.v1' === $client->inputs[2]['image_context_evidence']['contract_version'], 'Validated Cloud evidence enters the same-batch Site Knowledge sync without option persistence.' );
+	wp_set_current_user( 1 );
+
+	$GLOBALS['continuation_options'] = array();
+	$GLOBALS['continuation_events'] = array();
+	$GLOBALS['continuation_run_responses'] = array( array( 'status' => 'ok', 'data' => array( 'status' => 'succeeded' ) ) );
+	$GLOBALS['continuation_result_responses'] = array( array( 'data' => array( 'result' => array( 'artifact_type' => 'image_context_evidence', 'contract_version' => 'image_context_evidence.v1', 'items' => array( array( 'attachment_id' => '10' ) ), 'progress' => array( 'failed_items' => 0, 'skipped_items' => 0 ), 'write_posture' => 'suggestion_only', 'direct_wordpress_write' => false ) ) ) );
+	$client->inputs = array();
+	$client->results = array(
+		array( 'indexed_items' => 10, 'visual_evidence_reused_items' => 0, 'visual_evidence_run_id' => 'run-targeted-1', 'has_more' => false, 'next_cursor' => array( 'after_id' => 0 ) ),
+		array( 'indexed_items' => 10, 'visual_evidence_run_id' => '', 'screened_items' => 0, 'has_more' => false, 'next_cursor' => array( 'after_id' => 0 ) ),
+		array( 'indexed_items' => 2, 'visual_evidence_reused_items' => 2, 'visual_evidence_recognized_items' => 0, 'screened_items' => 0, 'has_more' => false, 'next_cursor' => array( 'after_id' => 0 ) ),
+	);
+	foreach ( range( 1, 12 ) as $attachment_id ) {
+		$owner->queue_changed_attachment( $attachment_id );
+	}
+	$owner->confirm_changed_attachments();
+	wp_set_current_user( 0 );
+	unset( $GLOBALS['continuation_events']['npcink_toolbox_continue_media_recognition'] );
+	$owner->process();
+	$targeted_waiting = $owner->status();
+	\continuation_assert( 'processing' === $targeted_waiting['state'] && 10 === $targeted_waiting['pending_cursor']['after_id'], 'An asynchronous targeted batch holds the highest selected attachment id as its pending cursor.' );
+	unset( $GLOBALS['continuation_events']['npcink_toolbox_continue_media_recognition'] );
+	$owner->process();
+	$targeted_continued = $owner->status();
+	\continuation_assert( 'queued' === $targeted_continued['state'] && 10 === $targeted_continued['next_cursor']['after_id'], 'Targeted Cloud replay cannot reset the local attachment cursor returned as zero by the Provider client.' );
+	unset( $GLOBALS['continuation_events']['npcink_toolbox_continue_media_recognition'] );
+	$owner->process();
+	$targeted_finished = $owner->status();
+	\continuation_assert( range( 1, 10 ) === $client->inputs[0]['attachment_ids'] && range( 1, 10 ) === $client->inputs[1]['attachment_ids'] && array( 11, 12 ) === $client->inputs[2]['attachment_ids'], 'Targeted asynchronous continuation advances once and processes only the remaining attachment ids.' );
+	\continuation_assert( 'complete' === $targeted_finished['state'] && 12 === $targeted_finished['next_cursor']['after_id'], 'A multi-batch targeted plan completes at the final attachment id.' );
 	wp_set_current_user( 1 );
 
 	$GLOBALS['continuation_options'] = array();

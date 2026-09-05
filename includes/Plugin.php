@@ -77,6 +77,7 @@ final class Plugin {
 		$this->media_fingerprint_scan->register_hooks();
 		$this->media_recognition_continuation->register_hooks();
 		add_action( 'admin_post_npcink_toolbox_resume_media_recognition', array( $this->admin_page, 'handle_resume_media_recognition' ) );
+		add_action( 'admin_post_npcink_toolbox_confirm_changed_media_recognition', array( $this->admin_page, 'handle_confirm_changed_media_recognition' ) );
 		add_action( 'rest_api_init', array( $this->rest_controller, 'register_routes' ) );
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_with_npcink_abilities_toolkit' ), 1 );
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_native_category' ) );
@@ -87,6 +88,8 @@ final class Plugin {
 		add_filter( 'npcink_toolbox_media_recognition_start', array( $this, 'start_media_recognition' ), 10, 2 );
 		add_filter( 'npcink_toolbox_media_recognition_status', array( $this, 'media_recognition_status' ) );
 		add_filter( 'npcink_toolbox_media_recognition_resume', array( $this, 'resume_media_recognition' ) );
+		add_filter( 'npcink_toolbox_changed_media_recognition_confirm', array( $this, 'confirm_changed_media_recognition' ) );
+		add_filter( 'npcink_toolbox_media_fingerprint_scan_status', array( $this, 'media_fingerprint_scan_status' ) );
 	}
 
 	/**
@@ -117,6 +120,16 @@ final class Plugin {
 	/** Resumes only an already-paused continuation. */
 	public function resume_media_recognition( $value = array() ) {
 		return $this->media_recognition_continuation->resume();
+	}
+
+	/** Confirms a queued changed-attachment recognition plan. */
+	public function confirm_changed_media_recognition( $value = array() ) {
+		return $this->media_recognition_continuation->confirm_changed_attachments();
+	}
+
+	/** Returns read-only weekly scan scheduling health. */
+	public function media_fingerprint_scan_status( $value = array() ): array {
+		return $this->media_fingerprint_scan->status();
 	}
 
 	/**

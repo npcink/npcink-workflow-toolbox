@@ -40,6 +40,14 @@ namespace {
 		return trim( (string) $value );
 	}
 
+	function sanitize_textarea_field( $value ): string {
+		return trim( (string) $value );
+	}
+
+	function __( string $value, string $domain = '' ): string {
+		return $value;
+	}
+
 	$GLOBALS['npcink_toolbox_media_test_meta'] = array();
 
 	function get_post_meta( int $post_id, string $key, bool $single = false ) {
@@ -47,8 +55,17 @@ namespace {
 		return $GLOBALS['npcink_toolbox_media_test_meta'][ $post_id ][ $key ] ?? array();
 	}
 
+	$GLOBALS['npcink_toolbox_media_provider_calls'] = 0;
+
 	function npcink_cloud_addon_request_image_context_evidence( array $request, string $trace_id, string $idempotency_key ) {
+		++$GLOBALS['npcink_toolbox_media_provider_calls'];
 		return new WP_Error( 'cloud_media_recognition_temporarily_unavailable' );
+	}
+
+	if ( ! function_exists( 'apply_filters' ) ) {
+		function apply_filters( string $tag, $value, ...$args ) {
+			return $value;
+		}
 	}
 
 	function npcink_toolbox_media_recognition_error_assert( bool $condition, string $message ): void {
@@ -96,6 +113,16 @@ namespace {
 	npcink_toolbox_media_recognition_error_assert(
 		array() === $interactive_result,
 		'Interactive image evidence keeps the existing non-blocking empty fallback.'
+	);
+
+	$provider_calls_before_cache_only = $GLOBALS['npcink_toolbox_media_provider_calls'];
+	$cache_only_result = $client->resolve_media_image_context_evidence( $request, false, '', false );
+	npcink_toolbox_media_recognition_error_assert(
+		is_array( $cache_only_result )
+			&& 0 === (int) ( $cache_only_result['submitted_count'] ?? -1 )
+			&& array( 42 ) === ( $cache_only_result['recognition_required_attachment_ids'] ?? array() )
+			&& $provider_calls_before_cache_only === $GLOBALS['npcink_toolbox_media_provider_calls'],
+		'Cache-only visual evidence resolution reports the miss without calling Cloud recognition.'
 	);
 
 	$reflection = new \ReflectionClass( $client );

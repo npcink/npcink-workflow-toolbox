@@ -71,6 +71,17 @@ final class Admin_Page {
 		exit;
 	}
 
+	/** Confirms recognition for fingerprint changes discovered in the background. */
+	public function handle_confirm_changed_media_recognition(): void {
+		if ( ! current_user_can( self::MENU_CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to manage Npcink AI.', 'npcink-workflow-toolbox' ) );
+		}
+		check_admin_referer( 'npcink_toolbox_confirm_changed_media_recognition' );
+		apply_filters( 'npcink_toolbox_changed_media_recognition_confirm', array() );
+		wp_safe_redirect( $this->image_batch_tool_url( 'media-batch-optimize' ) );
+		exit;
+	}
+
 	public function render_suite_overview(): void {
 		if ( ! current_user_can( self::MENU_CAPABILITY ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage Npcink AI.', 'npcink-workflow-toolbox' ) );
@@ -4462,8 +4473,33 @@ final class Admin_Page {
 
 	/** Renders recovery only after the internal continuation has paused. */
 	private function render_media_recognition_recovery(): void {
+		$scan_status = apply_filters( 'npcink_toolbox_media_fingerprint_scan_status', array() );
+		if ( is_array( $scan_status ) && ! empty( $scan_status['overdue'] ) ) {
+			?>
+			<div class="npcink-toolbox__result-notice is-warning" data-toolbox-media-fingerprint-scan-overdue>
+				<p><?php esc_html_e( 'The weekly media fingerprint scan is overdue. Check the site server cron before relying on background freshness checks.', 'npcink-workflow-toolbox' ); ?></p>
+			</div>
+			<?php
+		}
 		$status = apply_filters( 'npcink_toolbox_media_recognition_status', array() );
-		if ( ! is_array( $status ) || 'paused' !== sanitize_key( (string) ( $status['state'] ?? '' ) ) ) {
+		if ( ! is_array( $status ) ) {
+			return;
+		}
+		$state = sanitize_key( (string) ( $status['state'] ?? '' ) );
+		if ( 'awaiting_confirmation' === $state && 'changed_attachments' === sanitize_key( (string) ( $status['scope'] ?? '' ) ) ) {
+			?>
+			<div class="npcink-toolbox__result-notice is-warning" data-toolbox-changed-media-recognition-confirmation>
+				<p><?php echo esc_html( sprintf( __( '%d image file(s) changed and need fresh visual evidence. No Cloud recognition has run.', 'npcink-workflow-toolbox' ), count( (array) ( $status['attachment_ids'] ?? array() ) ) ) ); ?></p>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<?php wp_nonce_field( 'npcink_toolbox_confirm_changed_media_recognition' ); ?>
+					<input type="hidden" name="action" value="npcink_toolbox_confirm_changed_media_recognition" />
+					<button type="submit" class="button button-primary"><?php esc_html_e( 'Confirm visual recognition', 'npcink-workflow-toolbox' ); ?></button>
+				</form>
+			</div>
+			<?php
+			return;
+		}
+		if ( 'paused' !== $state ) {
 			return;
 		}
 		?>
