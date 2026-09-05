@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted.
+Superseded by ADR-017.
+
+This record is retained as historical context. Toolbox no longer exposes the
+local image-adoption route or execution path.
 
 ## Date
 

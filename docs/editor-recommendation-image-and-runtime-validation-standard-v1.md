@@ -151,6 +151,6 @@ fixture，不为回归测试消耗 Provider 预算；同时验证临时文章、
 - [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)
 - [Site Knowledge Vector Operations Contract](site-knowledge-vector-operations-contract.md)
 - [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
-- [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
+- [ADR-017: Retire Single-Image Local Write Exceptions](decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 - [ADR-013: WordPress-First Content And Recommendation Contracts](decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
 - [Development Workflow](development-workflow.md)

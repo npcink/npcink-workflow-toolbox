@@ -31,7 +31,7 @@ The manifest is stored in one bounded WordPress option as a resumable execution 
 
 ## Consequences
 
-This lane does not create or auto-approve Core proposals and does not change Core or Adapter contracts. It cannot be used by an external agent, Cron, a background worker, or a Cloud control plane. Manual formatting, quality, cropping, watermarking, AVIF, and other transformations remain in the existing advanced single-image path.
+This lane does not create or auto-approve Core proposals and does not change Core or Adapter contracts. It cannot be used by an external agent, Cron, a background worker, or a Cloud control plane. Single-image import, formatting, cropping, watermarking, replacement, and restore use the Adapter to Core to Toolkit governed path defined by ADR-017.
 
 Building the candidate manifest is read-only and is part of the administrator's explicit check action. The one strong confirmation is reserved for starting writes against the frozen manifest digest.
 

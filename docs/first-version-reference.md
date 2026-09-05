@@ -122,10 +122,9 @@ the Scheduled Review sub tab. Scheduled Review uses the Nightly/Morning Brief
 preview and folded optional local fallback settings, but it is not presented as
 a second site-check product. Its Cloud run recovery action links to Cloud Addon
 Runtime Runs instead of rendering run recovery controls locally.
-The admin Image Handling tab defaults to Media Library Optimization. Single-image actions
-start from the WordPress media-library attachment details panel or image row
-actions, then carry that attachment into Batch Image ALT or Media Library Optimization.
-Images. The old `tab=image&tool=optimize` and
+The admin Image Handling tab defaults to Media Library Optimization. Media
+Library attachment details and row actions expose ALT review; single-image
+import, replacement, and restore use the Adapter/Core/Toolkit path. The old `tab=image&tool=optimize` and
 `toolbox_tab=tools&toolbox_tool=media-derivative` URLs are deprecated and fall
 back to `tab=image&tool=batch-optimize`; Toolbox no longer exposes a standalone
 one-image picker page. The media library bulk action can send selected
@@ -504,7 +503,6 @@ The first-version route matrix is exact:
 - `POST /flows/article-plan`
 - `POST /flows/image-candidate-adoption-plan`
 - `POST /local-admin-consent/featured-image`
-- `POST /strong-local-confirmation/image-adoption`
 - `POST /flows/site-knowledge-review-plan`
 - `POST /flows/nightly-inspection-review-plan`
 - `POST /flows/content-metadata-apply-plan`

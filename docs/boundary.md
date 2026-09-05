@@ -2,7 +2,8 @@
 
 ADR-015 permits one narrow present-admin write lane for `auto_safe.v1` Media Library optimization. Toolbox owns only the frozen local manifest, foreground progress, and confirmation receipt. Cloud owns derivative analysis and short-lived Artifacts; Toolkit owns every replacement, backup, verification, lineage record, and restore. This lane creates no Core proposal because the exact manifest is strongly confirmed once by the present administrator. It is unavailable to agents, background execution, Cron, or arbitrary media transforms, and does not change Core or Adapter contracts.
 
-The read-only `/strong-local-confirmation/media-derivative-backups/{attachment_id}` route lists Toolkit-owned backups for one editable attachment so the existing local restore workbench can be reopened. It does not restore, delete, or modify media.
+ADR-017 retires the Toolbox single-image import, replacement, backup-listing,
+and restore routes. Those writes use Adapter, Core, and Toolkit.
 
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 
@@ -220,10 +221,6 @@ human-readable allowlist and must stay aligned with that table and
 - `/flows/image-candidate-adoption-plan`
 - `/flows/article-audio-adoption-plan`
 - `/local-admin-consent/featured-image`
-- `/strong-local-confirmation/image-adoption`
-- `/strong-local-confirmation/media-derivative`
-- `/strong-local-confirmation/media-derivative-restore`
-- `/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `/flows/site-knowledge-review-plan`
 - `/flows/nightly-inspection-review-plan`
 - `/flows/content-metadata-apply-plan`
@@ -288,16 +285,10 @@ write-like changes keep using Core proposal handoff or Adapter/Core/Abilities
 user actions until a separate boundary decision defines the specific local
 write and audit contract.
 
-ADR-010 adds a separate `strong_local_confirmation` route:
-`/strong-local-confirmation/image-adoption`. It allows one present editor to
-import one fully previewed external HTTPS image or AI-generated Cloud artifact
-and optionally set it as the current article's featured image. Import requires
-`upload_files`; all actions require `edit_post`, an exact confirmed action,
-safe remote download or signed artifact delivery, image MIME/checksum/dimension
-limits, and compensation rollback.
-This route is unavailable to batch, background, Cloud callback, Adapter, Agent,
-CLI, publishing, replacement, or cross-object flows. Cloud remains candidate
-runtime/transport only and receives no WordPress write authority.
+ADR-017 supersedes ADR-010 and ADR-011. Toolbox has no single-image local-write
+route. Image import, candidate featured-image adoption, attachment replacement,
+and restore use the Adapter/Core/Toolkit governed path. Cloud remains
+candidate/runtime transport only and receives no WordPress write authority.
 
 `/flows/article-plan` prepares a Core-ready `article_write_plan` for
 `npcink-toolbox/build-article-write-plan`. It is a planning artifact route,
@@ -539,12 +530,9 @@ Editor image candidate review may delegate already retrieved candidates to
 still owns the image-source UX and Cloud/provider request; Toolkit does not
 search providers, generate images, download files, import media, or write
 WordPress state.
-When a selected candidate belongs to the current editor's one-image workflow,
-`/strong-local-confirmation/image-adoption` may import it or set it as featured
-without creating a Core proposal. `/local-admin-consent/featured-image` remains
-the historical existing-attachment proof. External/background callers,
-multi-image or multi-post requests, replacement, publishing, and incomplete
-previews keep using governed paths.
+`/local-admin-consent/featured-image` remains the historical existing-
+attachment proof. Candidate import and all other durable media writes use the
+governed path.
 Editor-side adoption may submit that plan through Adapter `/proposals/from-plan`,
 display the Core receipt and governance link, then stop. Core stays the
 approval, preflight, proposal, and audit owner, and Abilities stay the final
@@ -558,8 +546,7 @@ not approve, preflight, execute, schedule, queue, or directly write WordPress
 content.
 
 `media_optimization_v1` is the fixed governed name for the image optimization
-workflow. Single-image ALT and advanced optimization actions start from the
-media-library attachment details panel or image row actions. The default Media
+workflow. The default Media
 Library Optimization workbench instead follows ADR-015: it freezes a bounded
 attachment-and-SHA-256 manifest, shows Cloud-qualified samples, and requires one
 present-administrator confirmation before Toolkit executes each replacement or
@@ -583,17 +570,8 @@ projection consumes only the validated `media_derivative_result.v1.artifact`
 shape. Toolbox projects the local review POST transport separately and never
 adds it to the Cloud artifact. The `/media-derivative-optimization-payload`
 projection delegates proposal-payload
-construction to Cloud Addon for governed batch flows. A contextual single-image
-flow does not call this projection: after exact same-origin preview verification
-and explicit confirmation it may call
-`/strong-local-confirmation/media-derivative`, which authorizes only the
-existing Toolkit adoption transaction for that request and returns backup,
-reference-repair, rollback, and verification evidence without a Core proposal.
-The paired `/strong-local-confirmation/media-derivative-restore` route restores
-one still-available recorded Toolkit backup after the same present-admin
-confirmation, backing up the current file first; expired backups fail closed.
-Batch selection and every background, delegated, or external-client flow remain
-Core-governed. The preview surface
+construction to Cloud Addon for governed flows. Single-image replacement and
+restore continue through Adapter/Core/Toolkit. The preview surface
 may POST `/media-derivative-local-review/{artifact_id}` for operator review.
 That queryless route requires an authenticated administrator and `X-WP-Nonce`,
 accepts only `{artifact: exact local12}` JSON with a matching path artifact id,
@@ -601,8 +579,7 @@ passes it to Cloud Addon for verified receive and delivery ACK, and returns
 no-store/nosniff bytes. The browser uses and revokes a short-lived Blob object
 URL; it accepts no query parameter, self-signed authorization, remote URL,
 token, or storage locator. The local review endpoint is not a public Cloud URL
-or a WordPress media write. Outside the documented ADR-011 request-scoped
-exception, Toolbox must not
+or a WordPress media write. Toolbox must not
 store site media policy truth, own Cloud credentials, create an artifact
 registry, approve proposals, execute proposals, replace attachment files, or
 update attachment metadata.

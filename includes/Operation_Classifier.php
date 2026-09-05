@@ -232,11 +232,24 @@ final class Operation_Classifier {
 	}
 
 	private function is_always_core_kind( string $kind ): bool {
-		return in_array( $kind, array( self::KIND_DELETE, self::KIND_SETTINGS_CHANGE, self::KIND_PERMISSION_CHANGE, self::KIND_EXTERNAL_ACCOUNT_CHANGE, self::KIND_BATCH_PLAN ), true );
+		return in_array(
+			$kind,
+			array(
+				self::KIND_IMPORT_MEDIA,
+				self::KIND_ADOPT_REVIEWED_IMAGE,
+				self::KIND_REPLACE_FILE,
+				self::KIND_DELETE,
+				self::KIND_SETTINGS_CHANGE,
+				self::KIND_PERMISSION_CHANGE,
+				self::KIND_EXTERNAL_ACCOUNT_CHANGE,
+				self::KIND_BATCH_PLAN,
+			),
+			true
+		);
 	}
 
 	private function is_high_impact_single_object_kind( string $kind ): bool {
-		return in_array( $kind, array( self::KIND_IMPORT_MEDIA, self::KIND_ADOPT_REVIEWED_IMAGE, self::KIND_PUBLISH, self::KIND_UNPUBLISH, self::KIND_REPLACE_FILE, self::KIND_OVERWRITE_CONTENT ), true );
+		return in_array( $kind, array( self::KIND_PUBLISH, self::KIND_UNPUBLISH, self::KIND_OVERWRITE_CONTENT ), true );
 	}
 
 	/**

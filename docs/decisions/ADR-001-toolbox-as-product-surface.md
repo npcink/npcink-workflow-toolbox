@@ -105,10 +105,9 @@ Rejected as the only surface. Host/runtime integration remains a future option.
   attribution/source metadata, not as AI image-generation providers. Unsplash
   candidates must preserve download tracking. AI-generated image candidates are
   a separate explicit mode that may use a host runtime seam. Toolbox must not
-  own model routing, prompt management, or provider billing. ADR-010 supersedes
-  this ADR's original blanket prohibition on media import and featured-image
-  writes only for one editor-present, fully reviewed, strongly confirmed image
-  adoption transaction; every broader media write remains outside Toolbox.
+  own model routing, prompt management, or provider billing. ADR-017 restores
+  this ADR's original boundary: media import and candidate featured-image
+  adoption remain outside Toolbox and use Adapter/Core/Toolkit.
 - Vector provider configuration, embedding, indexing, re-index jobs, rerank,
   and vector collection lifecycle belong to Cloud-managed Site Knowledge, not
   local Toolbox settings.

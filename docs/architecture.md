@@ -1,6 +1,8 @@
 # Architecture
 
-Attachment-scoped recovery lookup uses `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}` to reopen the existing single-image workbench without adding a backup registry or write owner.
+ADR-017 removes Toolbox's single-image local import, replacement, backup-
+listing, and restore paths. Adapter submits governed plans to Core and Toolkit
+performs approved WordPress writes.
 
 ## Authoritative Write-Lane Split
 
@@ -379,10 +381,6 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/flows/image-candidate-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/local-admin-consent/featured-image`
-- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/image-adoption`
-- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative`
-- `POST /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-restore`
-- `GET /wp-json/npcink-toolbox/v1/strong-local-confirmation/media-derivative-backups/{attachment_id}`
 - `POST /wp-json/npcink-toolbox/v1/flows/site-knowledge-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/nightly-inspection-review-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/content-metadata-apply-plan`
@@ -741,10 +739,9 @@ delivery detail. Toolbox only consumes Site Knowledge results inside its other
 workflows.
 
 The admin **Image Handling** tab groups image-first buttons by operator job and
-defaults to **Media Library Optimization**. Single-image actions start from the WordPress
-media-library attachment details panel or image row actions, then enter the same
-	selected Batch Image ALT Review or Media Library Optimization workbenches used by bulk
-selections.
+defaults to **Media Library Optimization**. Media Library row and attachment
+details expose ALT review only; single-image import, replacement, and restore
+use the governed external-client path.
 It no longer exposes a standalone one-image optimization picker or a
 single-article image text helper; article-specific image text needs current
 	editor context in the editor sidebar. The separate **Batch Image ALT Review** group
@@ -845,20 +842,15 @@ The modal renders image candidates with previews, source links,
 attribution, provider metadata, license-review state, and preserved Unsplash
 download tracking when present. It does not upload media, set featured images,
 or create a write proposal directly.
-ADR-010 adds a separate single-article transaction: after exact preview and one
-explicit editor confirmation, Toolbox may safely import one external or
-AI-generated image and optionally set it as featured. The service performs the
-HTTPS fetch or Cloud Addon signed artifact pull/ACK, byte/MIME/checksum/dimension
-validation, attachment creation, bounded metadata persistence, and compensation rollback. Multi-image, background,
-external, replacement, and cross-object operations still use governed paths.
+ADR-017 retires the former ADR-010 transaction. Reviewed external or AI-
+generated candidates become plans for Adapter/Core/Toolkit; Toolbox does not
+download or import them.
 The selected-block toolbar exposes selection-only paragraph review and paragraph
 image shortcuts. Paragraph review returns clarity, fact-boundary, tone, and
 editing-direction notes without replacement copy. The image shortcut opens the
 same modal as an image-icon paragraph image suggestion shortcut. In that mode
-the selected paragraph or block is the primary image context and the default
-reviewed action imports one image and inserts a `core/image` block into visible
-editor state; article content persists only on the normal WordPress save. The
-sidebar image-source entry remains the article-level featured-image path.
+the selected paragraph or block is the primary image context. Existing media
+may be inserted into visible editor state; new media import remains governed.
 The modal is implemented as a reusable image-source picker. Future settings or
 other image fields can open it with a manual query and optional context, then
 listen for the selected `image_candidate.v1` and media SEO payload. That
@@ -876,8 +868,7 @@ SEO suggestions. This keeps image-source reuse fast for editor and settings
 surfaces without turning Toolbox into an image index, provider router, media
 registry, or write executor.
 
-`media_optimization_v1` is the architecture name for media-library single-image
-actions and the default Media Library Optimization workbench. ADR-015 permits
+`media_optimization_v1` is the architecture name for the default Media Library Optimization workbench. ADR-015 permits
 one bounded exception for the present administrator: Toolbox freezes an exact
 attachment-and-SHA-256 manifest, renders representative Cloud-qualified samples,
 records one confirmation, and runs a foreground loop that delegates every
@@ -890,9 +881,8 @@ and history. It is not a custom table, `/workflow-runs` route, queue, scheduler,
 retry lease, approval registry, artifact registry, or second media truth. The
 default flow creates no Core proposal and cannot be invoked by OpenClaw, an
 external Agent, Cron, or a background worker. Those callers, open-ended media
-batches, article/media creation, and URL/settings repair continue through the
-governed Core/Adapter path. Advanced attachment-scoped transforms continue under
-ADR-011 strong confirmation.
+batches, article/media creation, URL/settings repair, and single-image
+transforms continue through the governed Core/Adapter path.
 
 Toolbox no longer renders a Cloud Checks or Troubleshooting Checks secondary
 panel. Cloud connection checks, hosted runtime health, provider/search/image

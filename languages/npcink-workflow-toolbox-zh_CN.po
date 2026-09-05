@@ -6402,23 +6402,17 @@ msgstr "仅供预览。不会保存、提交到 Core 或写入媒体库。"
 msgid "Npcink AI"
 msgstr "Npcink AI"
 
-msgid "Work on this image from the media library. Suggestions and previews stay review-only until you submit accepted changes for review."
-msgstr "从媒体库处理这张图片。建议和预览仅供审阅，只有提交已接受的更改后才会进入审核。"
+msgid "Review this image from the media library."
+msgstr "从媒体库审阅这张图片。"
 
 msgid "Complete ALT for this image"
 msgstr "补全这张图片的 ALT"
 
-msgid "Optimize this image"
-msgstr "优化这张图片"
-
-msgid "For multiple images, select them in the Media Library list and use the Npcink bulk actions."
-msgstr "如需处理多张图片，请在媒体库列表中选择图片，然后使用 Npcink 批量操作。"
+msgid "Use the Media Library bulk action for governed image optimization."
+msgstr "请使用媒体库批量操作执行受治理的图片优化。"
 
 msgid "Npcink ALT"
 msgstr "Npcink ALT"
-
-msgid "Npcink optimize"
-msgstr "Npcink 优化"
 
 msgid "Npcink: complete ALT for selected images"
 msgstr "Npcink：补全所选图片 ALT"
@@ -7668,97 +7662,9 @@ msgstr "AI 审阅段落期间文章正文发生了变化，本次结果已丢弃
 msgid "Content integrity verified: %d characters before and after the AI review; no article text was added, removed, or changed."
 msgstr "正文完整性已验证：AI 审阅前后均为 %d 个字符，未检测到正文增删改。"
 
-#: includes/Single_Article_Image_Adoption.php
-msgid "Choose one supported single-image adoption action."
-msgstr "请选择一种受支持的单图采用操作。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "The current article is required for image adoption."
-msgstr "采用图片时必须指定当前文章。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "You do not have permission to edit this article."
-msgstr "你没有权限编辑这篇文章。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "Review the exact image action and confirm it before continuing."
-msgstr "请审阅并确认本次确切的图片操作后再继续。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "This image action is outside the single-article confirmation boundary."
-msgstr "此图片操作超出了单篇文章确认边界。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "You do not have permission to upload images."
-msgstr "你没有权限上传图片。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "The image was not adopted because WordPress could not set it as the featured image. The new attachment was removed."
-msgstr "WordPress 无法将该图片设为特色图片，因此未采用该图片；新建附件已删除。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "Choose one existing Media Library image."
-msgstr "请选择一张媒体库中的现有图片。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "WordPress could not set the selected Media Library image as featured."
-msgstr "WordPress 无法将所选媒体库图片设为特色图片。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "The reviewed image must provide a safe HTTPS download URL."
-msgstr "已审阅图片必须提供安全的 HTTPS 下载地址。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "This image candidate is blocked by its license review status."
-msgstr "此图片候选因授权审阅状态而被阻止。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "WordPress could not prepare a temporary image file."
-msgstr "WordPress 无法准备临时图片文件。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "The remote image download was empty, too large, or returned an unexpected status."
-msgstr "远程图片下载内容为空、尺寸过大或返回了异常状态。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "The downloaded file is not a supported image or exceeds the pixel limit."
-msgstr "下载的文件不是受支持的图片，或超过了像素上限。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "The downloaded image format is not supported."
-msgstr "不支持所下载图片的格式。"
-
-#: assets/editor-content-support.js
-msgid "The reviewed image is now in the Media Library. Paragraph and inline actions also add it to the visible editor draft."
-msgstr "已审阅图片现已导入媒体库；段落和行内操作也会将它加入当前可见的编辑器草稿。"
-
-#: assets/editor-content-support.js
-msgid "The reviewed image is now the featured image."
-msgstr "已审阅图片现已设为特色图片。"
-
-#: assets/editor-content-support.js
-msgid "Import this one reviewed image into the Media Library and set it as the featured image of the current article?"
-msgstr "将这张已审阅图片导入媒体库，并设为当前文章的特色图片？"
-
-#: assets/editor-content-support.js
-msgid "Set this existing Media Library image as the featured image of the current article?"
-msgstr "将这张媒体库现有图片设为当前文章的特色图片？"
-
-#: assets/editor-content-support.js
-msgid "Import this one reviewed image into the Media Library?"
-msgstr "将这张已审阅图片导入媒体库？"
-
 #: assets/editor-content-support.js
 msgid "Could not insert the selected Media Library image into the current editor."
 msgstr "无法将所选媒体库图片插入当前编辑器。"
-
-#: assets/editor-content-support.js
-msgid "The image action was cancelled. No WordPress data changed."
-msgstr "图片操作已取消，WordPress 数据没有发生变化。"
-
-#: assets/editor-content-support.js
-msgid "The image was imported, but it could not be inserted into the visible editor draft. It remains available in the Media Library."
-msgstr "图片已导入，但无法插入当前可见的编辑器草稿；它仍可在媒体库中使用。"
 
 #: includes/Cloud_Image_Artifact_Transport.php
 msgid "Connect and verify Npcink Cloud Addon before receiving generated images."
@@ -7775,14 +7681,6 @@ msgstr "Cloud 未确认已验证的生成图片传输。"
 #: includes/Cloud_Image_Artifact_Transport.php
 msgid "The generated image artifact contract is invalid or expired."
 msgstr "生成图片 artifact 合同无效或已过期。"
-
-#: includes/Single_Article_Image_Adoption.php
-msgid "WordPress could not prepare the verified generated image for import."
-msgstr "WordPress 无法准备已验证的生成图片以供导入。"
-
-#: assets/editor-content-support.js
-msgid "Showing verified host-generated image candidates. Review one image before importing it or setting featured media."
-msgstr "正在显示已验证的托管生成图片候选。导入或设置特色图片前，请审阅其中一张图片。"
 
 #: includes/Provider_Client.php
 msgid "The generated image preview set exceeds the local memory budget. Request fewer or smaller images."
@@ -7956,16 +7854,6 @@ msgstr "文章内容中的已知图片引用会在同一本地事务中更新。
 #: includes/Admin_Page.php
 msgid "Restore original image"
 msgstr "恢复原图"
-
-#: includes/Single_Image_Media_Optimization.php
-msgid "Review and confirm the original-image restore before continuing."
-msgstr "请先确认恢复原图，再继续。"
-
-msgid "The selected backup does not match the confirmed restore target."
-msgstr "所选备份与已确认的恢复目标不匹配。"
-
-msgid "The selected backup is no longer available for restore."
-msgstr "所选备份已不可用于恢复。"
 
 #: includes/Admin_Page.php
 msgid "Original image backup retention"

@@ -481,19 +481,6 @@ For the editor image recommendation modal, run:
 NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-image-recommendation-browser
 ```
 
-After changing the single-image adoption route, its REST dependencies, or the
-editor adoption error surface, run the real HTTP browser smoke as well:
-
-```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-image-adoption-browser
-```
-
-This smoke uses a disposable article, a deterministic local PNG response, and
-the real authenticated WordPress REST route. It makes no Provider or Cloud
-call, proves the browser PHP process does not rely on WP-CLI-preloaded helpers,
-and removes the imported attachment, article, login helper, and temporary MU
-filter during cleanup.
-
 This opens the real Gutenberg sidebar on a disposable local draft and
 intercepts only image candidate reads with deterministic suggestion-only
 fixtures. It verifies source and hosted-image modes, reviewed generation
@@ -891,7 +878,6 @@ as a Toolbox code failure or adding local provider/quota ownership.
 For the fixed ADR-015 Media Library Optimization flow, run:
 
 ```bash
-composer test:single-image-media-optimization
 composer test:media-optimization-batches
 composer test:media-derivative-local-review
 ```
@@ -922,10 +908,10 @@ contracts; they do not describe the default Toolbox batch:
 - `composer smoke:media-derivative-batch-plan` and the media conversion
   review-set browser smoke for the historical read-only review-set contract.
 
-Advanced attachment-scoped format, quality, crop, and watermark transforms
-remain under ADR-011 strong confirmation. URL/settings repair, open-ended media
-batches, and article/media creation remain Core/Adapter governed. Do not route
-those paths through the ADR-015 exact-manifest exception.
+Attachment-scoped format, quality, crop, watermark, replacement, and restore,
+plus URL/settings repair, open-ended media batches, and article/media creation,
+remain Core/Adapter governed. Do not route those paths through the ADR-015
+exact-manifest exception.
 
 For the media ALT/caption Toolkit extraction gate, run:
 

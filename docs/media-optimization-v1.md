@@ -75,8 +75,8 @@ source of truth.
 The default flow creates no Core proposal. That exception does not weaken the
 governance requirements for other media paths:
 
-- Advanced single-image format, quality, crop, or watermark work uses the
-  existing attachment-scoped strong-confirmation transaction under ADR-011.
+- Single-image format, quality, crop, watermark, replacement, and restore use
+  the Adapter/Core/Toolkit governed path under ADR-017.
 - External Agent and OpenClaw requests remain Core/Adapter-governed.
 - Article/media creation batches remain Core/Adapter-governed.
 - Hard-coded content URL and settings reference repairs remain separate Core
@@ -94,7 +94,6 @@ approval system. New media write surfaces require a separate boundary decision.
 ## Verification
 
 ```bash
-composer test:single-image-media-optimization
 composer test:media-optimization-batches
 composer test:media-derivative-local-review
 composer test:all

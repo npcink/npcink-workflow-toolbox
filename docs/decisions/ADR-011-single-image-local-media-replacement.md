@@ -1,6 +1,9 @@
 # ADR-011: Single-Image Local Media Replacement
 
-Status: accepted.
+Status: superseded by ADR-017.
+
+This record is retained as historical context. Toolbox no longer exposes the
+single-image replacement, backup-listing, or restore workbench.
 
 ## Context
 

@@ -53,59 +53,38 @@ Primary decision record:
 
 - [ADR-003: Local Admin Consent Requires A Separate Write Boundary](decisions/ADR-003-local-admin-consent-boundary.md)
 
-ADR-003's no-import stop remains true for this legacy route. ADR-010 defines a
-separate route, classification, permission model, and compensation contract;
-it does not silently widen `/local-admin-consent/featured-image`.
+ADR-003's no-import stop remains true for this legacy route. ADR-017 retired
+the former ADR-010 import path and does not widen
+`/local-admin-consent/featured-image`.
 
 ## Exception 2 - Single-Article Strong Local Image Adoption
 
-Status: accepted bounded editor transaction.
+Status: retired by ADR-017.
 
-Owner: Toolbox editor UI and local WordPress write; Cloud Addon is candidate
-runtime transport only.
+The local import and featured-image adoption route, class, and editor actions
+have been removed. Image candidates remain reviewable suggestions; import,
+metadata, and optional featured-image writes now go through Adapter, Core, and
+Toolkit. No compatibility handler remains.
 
-Allowed scope:
+Historical record:
 
-- one logged-in editor with `edit_post` and, for import, `upload_files`;
-- one current article and one fully previewed image;
-- `import_only`, `set_featured_existing`, or `import_and_set_featured`;
-- exact source, license state, media fields, and final action shown before one
-  explicit confirmation;
-- safe HTTPS download, MIME and dimension verification, and 10 MiB limit;
-- deletion of a newly created attachment and featured-image restoration when a
-  combined transaction fails.
-
-Hard stop:
-
-- no batch, background, cron, CLI, Adapter, Agent, or Cloud callback execution;
-- no publish, attachment replacement, unrelated attachment mutation, taxonomy,
-  settings, permissions, SEO, or cross-object write;
-- no custom audit table, approval store, retry worker, or local run history.
-
-Primary contracts:
-
-- [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
 - [ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
+- [ADR-017: Retire Single-Image Local Write Exceptions](decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 
 ## Exception 3 - Single-Image Strong Local Media Replacement
 
-Status: accepted bounded Media Library transaction.
+Status: retired by ADR-017.
 
-Allowed scope: one present admin action, one image attachment, one exact
-same-origin derivative preview, one explicit `replace_current` confirmation,
-Toolkit-owned backup/reference-repair/rollback execution, read-only listing of
-that attachment's Toolkit backups, and one explicitly confirmed restore of an
-available backup after its same-origin preview loads successfully.
+The local replacement, backup-listing, and restore routes and workbench have
+been removed. Single-image replacement and restore now use Adapter, Core, and
+Toolkit. ADR-015's exact-manifest administrator batch remains a separate active
+exception and must not be treated as compatibility for this retired path.
 
-Hard stop: no batch, background, Adapter, Agent, Cloud callback, save-as-new,
-queue, approval store, backup registry, or authorization of any Toolkit ability
-other than `adopt-cloud-media-derivative`, `list-media-backups`, and
-`restore-media-backup` for the exact request being handled.
-
-Primary contracts:
+Historical records:
 
 - [Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
 - [ADR-011: Single-Image Local Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
+- [ADR-017: Retire Single-Image Local Write Exceptions](decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 
 ## Exception 4 - Local Fallback WP-Cron Preview
 

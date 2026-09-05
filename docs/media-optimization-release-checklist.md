@@ -9,7 +9,6 @@ Core smokes only for external Agent, OpenClaw, and other proposal-owned paths.
 ## Source Gates
 
 ```bash
-composer test:single-image-media-optimization
 composer test:media-optimization-batches
 composer test:media-derivative-local-review
 composer test:all
@@ -67,7 +66,8 @@ task explicitly authorizes real media writes.
 
 ## Separate Governed Paths
 
-- Advanced single-image transforms remain under ADR-011 strong confirmation.
+- Single-image transforms use the Adapter/Core/Toolkit governed path under
+  ADR-017.
 - External Agent/OpenClaw and open-ended media batches remain Core/Adapter
   governed.
 - Hard-coded URL and settings repairs remain Core proposals.

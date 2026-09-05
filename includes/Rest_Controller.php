@@ -54,10 +54,6 @@ final class Rest_Controller {
 		$this->post( '/flows/image-candidate-adoption-plan', 'image_candidate_adoption_plan' );
 		$this->post( '/flows/article-audio-adoption-plan', 'article_audio_adoption_plan' );
 		$this->post( '/local-admin-consent/featured-image', 'local_admin_consent_featured_image' );
-		$this->post( '/strong-local-confirmation/image-adoption', 'strong_local_confirmation_image_adoption' );
-		$this->post( '/strong-local-confirmation/media-derivative', 'strong_local_confirmation_media_derivative' );
-		$this->post( '/strong-local-confirmation/media-derivative-restore', 'strong_local_confirmation_media_derivative_restore' );
-		$this->get( '/strong-local-confirmation/media-derivative-backups/(?P<attachment_id>[0-9]+)', 'strong_local_confirmation_media_derivative_backups' );
 		$this->post( '/media-optimization-manifest', 'media_optimization_manifest' );
 		$this->get( '/media-optimization-health', 'media_optimization_health' );
 		$this->post( '/media-optimization-batches', 'media_optimization_batch_create' );
@@ -134,7 +130,7 @@ final class Rest_Controller {
 			return false;
 		}
 
-		if ( in_array( $route, array( '/local-admin-consent/featured-image', '/strong-local-confirmation/image-adoption', '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore', '/media-optimization-manifest', '/media-optimization-batches', '/media-backup-cleanup/confirm' ), true ) ) {
+		if ( in_array( $route, array( '/local-admin-consent/featured-image', '/media-optimization-manifest', '/media-optimization-batches', '/media-backup-cleanup/confirm' ), true ) ) {
 			return true;
 		}
 
@@ -194,9 +190,6 @@ final class Rest_Controller {
 		if ( preg_match( '#^/nightly-inspection/cloud-batch/[A-Za-z0-9._:-]+(?:/result|/retry)?$#', $route ) ) {
 			return 'cap.toolbox.nightly_inspection';
 		}
-		if ( preg_match( '#^/strong-local-confirmation/media-derivative-backups/[0-9]+$#', $route ) ) {
-			return 'cap.toolbox.image_adoption';
-		}
 		if ( preg_match( '#^/media-optimization-batches(?:/current|/media_opt_[A-Za-z0-9]+(?:/confirm|/items/[0-9]+/(?:complete|restore))?)?$#', $route ) ) {
 			return 'cap.toolbox.image_adoption';
 		}
@@ -226,9 +219,6 @@ final class Rest_Controller {
 			'/flows/image-candidate-adoption-plan'         => 'cap.toolbox.workflow_suggest',
 			'/flows/article-audio-adoption-plan'           => 'cap.toolbox.workflow_suggest',
 			'/local-admin-consent' . '/featured-image'     => 'cap.toolbox.local_admin_consent',
-			'/strong-local-confirmation/image-adoption'    => 'cap.toolbox.image_adoption',
-			'/strong-local-confirmation/media-derivative'  => 'cap.toolbox.image_adoption',
-			'/strong-local-confirmation/media-derivative-restore' => 'cap.toolbox.image_adoption',
 			'/media-optimization-manifest'                 => 'cap.toolbox.image_adoption',
 			'/media-optimization-health'                   => 'cap.toolbox.image_adoption',
 			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
@@ -972,18 +962,6 @@ final class Rest_Controller {
 				),
 			)
 		);
-	}
-
-	public function strong_local_confirmation_image_adoption( WP_REST_Request $request ) {
-		$result = ( new Single_Article_Image_Adoption() )->execute( $request );
-
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
-	}
-
-	public function strong_local_confirmation_media_derivative( WP_REST_Request $request ) {
-		$result = ( new Single_Image_Media_Optimization() )->execute( $request );
-
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
 	public function media_optimization_batch_create( WP_REST_Request $request ) {
@@ -1799,82 +1777,17 @@ final class Rest_Controller {
 	}
 
 	private function post( string $route, string $method, array $args = array() ): void {
-		$permission_callback = '/strong-local-confirmation/image-adoption' === $route
-			? array( $this, 'permission_single_article_image_adoption' )
-			: ( '/strong-local-confirmation/media-derivative' === $route ? array( $this, 'permission_single_image_media_optimization' ) : ( '/strong-local-confirmation/media-derivative-restore' === $route ? array( $this, 'permission_single_image_media_derivative_restore' ) : array( $this, 'permission' ) ) );
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
 			$route,
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, $method ),
-				'permission_callback' => $permission_callback,
+				'permission_callback' => array( $this, 'permission' ),
 				'args'                => $args,
 			)
 		);
 	}
-
-	public function permission_single_article_image_adoption( WP_REST_Request $request ): bool {
-		if ( ! $this->is_present_admin_ui_request( $request ) ) {
-			return false;
-		}
-		$post_id = absint( $request->get_param( 'post_id' ) );
-		if ( $post_id <= 0 || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		$action = sanitize_key( (string) $request->get_param( 'action' ) );
-		if ( in_array( $action, array( Single_Article_Image_Adoption::ACTION_IMPORT_ONLY, Single_Article_Image_Adoption::ACTION_IMPORT_AND_SET_FEATURED ), true ) ) {
-			return current_user_can( 'upload_files' );
-		}
-
-		return Single_Article_Image_Adoption::ACTION_SET_FEATURED_EXISTING === $action;
-	}
-
-	public function permission_single_image_media_optimization( WP_REST_Request $request ): bool {
-		if ( ! $this->is_present_admin_ui_request( $request ) ) {
-			return false;
-		}
-		$input = $request->get_param( 'input' );
-		$attachment_id = is_array( $input ) ? absint( $input['attachment_id'] ?? 0 ) : 0;
-		$route = '/strong-local-confirmation/media-derivative';
-		$allowed = $attachment_id > 0
-			&& current_user_can( 'manage_options' )
-			&& current_user_can( 'upload_files' )
-			&& current_user_can( 'edit_post', $attachment_id );
-
-		return $allowed && $this->filtered_rest_permission( true, $request, $this->rest_route_scope( $route ), $route );
-	}
-
-	public function permission_single_image_media_derivative_restore( WP_REST_Request $request ): bool {
-		if ( ! $this->is_present_admin_ui_request( $request ) ) {
-			return false;
-		}
-		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
-		$route = '/strong-local-confirmation/media-derivative-restore';
-		$allowed = $attachment_id > 0
-			&& current_user_can( 'manage_options' )
-			&& current_user_can( 'upload_files' )
-			&& current_user_can( 'edit_post', $attachment_id );
-
-		return $allowed && $this->filtered_rest_permission( true, $request, $this->rest_route_scope( $route ), $route );
-	}
-
-	public function strong_local_confirmation_media_derivative_backups( WP_REST_Request $request ) {
-		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
-		if ( $attachment_id <= 0 || ! current_user_can( 'manage_options' ) || ! current_user_can( 'upload_files' ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return new WP_Error( 'npcink_toolbox_media_backup_permission_denied', __( 'You do not have permission to view image backups.', 'npcink-workflow-toolbox' ), array( 'status' => 403 ) );
-		}
-		$result = ( new Single_Image_Media_Optimization() )->list_backups( $attachment_id );
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
-	}
-
-	public function strong_local_confirmation_media_derivative_restore( WP_REST_Request $request ) {
-		$result = ( new Single_Image_Media_Optimization() )->restore( $request );
-
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
-	}
-
 
 	private function get( string $route, string $method ): void {
 		register_rest_route(
