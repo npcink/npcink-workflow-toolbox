@@ -37,7 +37,7 @@ of attachment replacement, backup, verification, lineage, and restore.
 
 - The default batch creates no Core proposal.
 - Advanced attachment-scoped format, quality, crop, and watermark transforms
-  remain under ADR-011 strong confirmation.
+  use the Adapter/Core/Toolkit governed path under ADR-017.
 - External Agent, OpenClaw, open-ended media batches, article/media creation,
   and URL/settings repair remain Core/Adapter governed.
 - The local manifest is resumable browser-driven state, not a queue, scheduler,
@@ -50,7 +50,6 @@ of attachment replacement, backup, verification, lineage, and restore.
 ## Verification
 
 ```bash
-composer test:single-image-media-optimization
 composer test:media-optimization-batches
 composer test:media-derivative-local-review
 composer test:all

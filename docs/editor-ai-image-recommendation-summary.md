@@ -26,15 +26,15 @@ image generation flow.
 ## Boundary
 
 Toolbox owns the editor product surface, local modal behavior, short-lived
-result display, reviewed prompt selection, and Core/Adapter handoff UI.
+result display, reviewed prompt selection, and read-only adoption-plan output.
 
 Cloud owns provider search, image-source provider routing, query rewriting,
 visual brief generation, candidate rerank, quality filtering, and hosted AI
 image generation.
 
-Adapter and Core own governed proposal intake, approval, preflight, execution,
-and audit for media import, media metadata, SEO fields, and featured-image
-changes.
+OpenClaw or another third-party client sends the reviewed plan through Adapter.
+Core owns proposal intake, approval, preflight, and audit; Toolkit owns the
+approved WordPress media write.
 
 Toolbox must not:
 
@@ -45,8 +45,10 @@ Toolbox must not:
 - create a second approval store, image registry, workflow runtime, or audit
   truth.
 
-The only local write exception remains the existing-attachment featured-image
-Local Admin Consent path, with Core audit and rollback requirements.
+The only local featured-image write exception remains the historical
+existing-attachment Local Admin Consent path, with Core audit and rollback
+requirements. ADR-017 retired the former single-image import, replacement, and
+restore exceptions without compatibility routes or hidden controls.
 
 ## Speed Strategy
 
@@ -91,15 +93,12 @@ The source recommendation mode should be image-first:
 - the right inspector shows actions and optional details for the selected
   candidate.
 
-The right inspector should keep primary actions close together:
-
-- `Adopt` applies or submits the selected image through the governed path for
-  the current context;
-- `Import only` imports media without making it the featured image when the
-  selected context allows that path;
-- both buttons should remain in one row where possible;
-- button loading state must attach to the clicked action, not the neighboring
-  action.
+The right inspector is a review surface. It may return a selected candidate to
+an explicitly registered caller, and it may insert an existing Media Library
+attachment into the visible current draft under ADR-006. It does not expose
+local `Adopt`, `Import only`, replacement, restore, or direct image proposal
+submission controls. External and generated candidates continue through the
+OpenClaw/client -> Adapter -> Core -> Toolkit path.
 
 For a selected site-media result, the same inspector also shows:
 
@@ -115,16 +114,17 @@ write attachment ALT.
 
 The editor may silently submit metadata-only quality events through the existing
 Agent Feedback route. A site-media search event carries only a random session
-id, result-count bucket, result/error status, entry surface, and later adoption
-status. It never carries the search text or ALT suggestion.
+id, result-count bucket, result/error status, entry surface, candidate-selection
+status, or existing-editor insertion status. It never carries the search text
+or ALT suggestion.
 
 Details should be collapsed unless needed:
 
 - media SEO fields are under `More SEO fields`;
 - source and attribution details are under `Source details`;
 - quality observation is passive and does not add manual feedback controls;
-- Core record links should point to Core instead of rendering raw audit JSON in
-  Toolbox.
+- no Core record link appears because image execution is initiated by the
+  external client rather than this Toolbox modal.
 
 Avoid explanatory text that only repeats implementation boundaries, such as
 "Toolbox does not directly write media", inside the primary inspector. Keep

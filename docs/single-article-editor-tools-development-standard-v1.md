@@ -1,14 +1,19 @@
 # Single-Article Editor Tools Development Standard v1
 
-Status: active.
+The strong-local-confirmation image adoption sections are historical and were
+retired by ADR-017. Current image import and featured-image adoption use the
+Adapter/Core/Toolkit governed path.
+
+Status: superseded by ADR-017 for image import, adoption, replacement, and
+restore.
 
 Date: 2026-08-11.
 
 ## Purpose
 
-This standard turns the recent editor-tool discussions and the existing
-Toolbox implementation history into one development rule for small,
-single-article, visibly confirmed features.
+This standard preserves the implementation history and reusable review lessons
+from the former single-article local-write flow. It no longer authorizes a
+Toolbox image write path. Current implementations follow ADR-017.
 
 The target product shape is a useful two-plugin installation:
 
@@ -16,12 +21,16 @@ The target product shape is a useful two-plugin installation:
 npcink-workflow-toolbox + npcink-cloud-addon
 ```
 
-Toolbox owns the WordPress editor interaction and the bounded local write.
-Cloud Addon owns signed transport to hosted runtime. Cloud may generate or
-retrieve candidates, but it never imports media, changes a post, or becomes a
-second WordPress control plane.
+Toolbox owns candidate review, preview, and read-only planning. Cloud Addon owns
+signed transport to hosted runtime. Image import or adoption proceeds through
+Adapter, Core, and Toolkit; Cloud never becomes a WordPress control plane.
 
 ## Historical Lessons
+
+The strong-local-confirmation, eligibility, permission, and rollback sections
+below describe the superseded ADR-010 implementation. They are retained only
+as historical design evidence and must not be used to restore local handlers,
+routes, or controls.
 
 ### 1. Feature names do not justify new plugins
 
@@ -241,14 +250,12 @@ boundary.
 
 ## Verification Gate
 
-Every implementation must include:
+Current implementations must include:
 
-- static route and boundary-contract tests;
-- classifier coverage for single-image import;
-- WordPress behavior smoke for existing attachment featured assignment;
-- WordPress behavior smoke for remote import and combined rollback;
-- editor JavaScript coverage proving imported media is inserted only into
-  visible editor state for paragraph/inline use;
+- static contracts proving the retired routes and classes remain absent;
+- classifier coverage proving import, adoption, and replacement require Core;
+- browser coverage proving candidate review exposes no local adoption action;
+- five-plugin acceptance for the Adapter, Core, and Toolkit governed path;
 - PHP lint and `composer test:all` before closeout.
 
 ## Local Test Lanes
@@ -263,17 +270,15 @@ composer test:all
 
 This is the required repository gate and consumes no Provider credit.
 
-### WordPress adoption behavior
+### Governed WordPress handoff
 
 ```bash
-composer smoke:single-article-image-adoption
-composer smoke:ai-image-artifact-adoption
+composer accept:local-five-plugin
 ```
 
-These smokes use deterministic local fixtures. They prove confirmation,
-capabilities, HTTPS import handling, artifact integrity, independent preview
-and adoption pulls, attachment creation, featured-image assignment,
-provenance, compensation, and cleanup without a real Cloud or Provider call.
+This acceptance uses deterministic local fixtures to prove the
+Toolbox-to-Adapter-to-Core-to-Toolkit boundary without a real Cloud or Provider
+call. It does not restore the retired single-image local-write handlers.
 
 ### Toolbox-to-Addon transport integration
 

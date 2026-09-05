@@ -1,6 +1,7 @@
 # Single-Image Media Workbench Standard v1
 
-Status: active product and engineering standard.
+Status: historical; retired by ADR-017. Toolbox no longer exposes this
+workbench or its local replacement and restore routes.
 
 ## Purpose
 

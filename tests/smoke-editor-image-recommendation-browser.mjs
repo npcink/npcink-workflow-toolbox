@@ -342,10 +342,15 @@ try {
 	await imageFlow.locator('button').click();
 
 	await page.waitForSelector('.npcink-toolbox-editor-support__image-modal', { timeout: 30000 });
-	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length > 0, null, { timeout: 10000 });
 	assert(await page.locator('.npcink-toolbox-editor-support__image-results').count() === 1, 'The modal renders the image grid in the left results pane.');
 	assert(await page.locator('.npcink-toolbox-editor-support__image-inspector').count() === 1, 'The modal renders mode and review controls in the right inspector.');
 	assert(await page.getByRole('button', { name: /AI generation|AI 生成/ }).count() === 1, 'Featured-image mode exposes the AI-generation option.');
+	assert(await page.locator('.npcink-toolbox-editor-support__image-card').count() === 0, 'The default site-media mode waits for an explicit operator search.');
+	await page.getByRole('button', { name: /External image library|外部图库/ }).click();
+	const externalQuery = '自然光下的独立工作空间';
+	await page.locator('.npcink-toolbox-editor-support__image-inspector input[type="search"]').fill(externalQuery);
+	await page.getByRole('button', { name: /Search image sources|搜索图片来源/ }).click();
+	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length > 0, null, { timeout: 10000 });
 	let externalSearchFeedback = null;
 	for (let index = 0; index < 20 && !externalSearchFeedback; index += 1) {
 		externalSearchFeedback = requests
@@ -363,7 +368,7 @@ try {
 		}
 	}
 	assert(externalSearchFeedback && externalSearchFeedback.source_object_type === 'media_search_session', 'External image-source search emits a correlated metadata-only completion event.');
-	assert(externalSearchFeedback.source_object_id && externalSearchFeedback.handoff_id.includes(externalSearchFeedback.source_object_id), 'External image-source search and later adoption share a random quality session identifier.');
+	assert(externalSearchFeedback.source_object_id && externalSearchFeedback.handoff_id.includes(externalSearchFeedback.source_object_id), 'External image-source search uses a random quality session identifier.');
 
 	await page.getByRole('button', { name: /Site media library|站内媒体库/ }).click();
 	const libraryQuery = '自然光下的木质书桌和笔记本电脑';
@@ -375,7 +380,7 @@ try {
 	assert(await page.getByText(/Why this image matches|为什么匹配这张图片/).count() === 1, 'The selected site-media candidate shows its semantic match reason.');
 		assert(await page.getByText(/Suggested ALT text|建议的 ALT 文本/).count() === 1, 'The selected site-media candidate shows the reused ALT suggestion.');
 		assert(await page.locator('.npcink-toolbox-editor-support__image-evidence-item p').filter({ hasText: '自然光下摆放笔记本电脑和绿植的木质书桌' }).count() === 1, 'The visible ALT suggestion comes from the candidate evidence.');
-		assert(await page.getByRole('button', { name: /Adopt|采用/ }).count() === 1, 'Existing site media keeps the explicit human adoption action.');
+		assert(await page.getByRole('button', { name: /^(Adopt|采用|Import only|仅导入)$/ }).count() === 0, 'Candidate review exposes no retired local image-adoption action.');
 		const mediaSearchFeedback = requests
 			.filter((item) => item.url.includes('/npcink-toolbox/v1/agent-feedback'))
 			.map((item) => {
@@ -385,7 +390,8 @@ try {
 					return {};
 				}
 			})
-			.find((item) => item.source_action_id === 'media_search_completed');
+			.filter((item) => item.source_action_id === 'media_search_completed')
+			.at(-1);
 		assert(mediaSearchFeedback && mediaSearchFeedback.source_object_type === 'media_search_session', 'Site-media search emits one correlated metadata-only completion event.');
 		assert(mediaSearchFeedback.handoff_id.includes(mediaSearchFeedback.source_object_id), 'The search handoff uses the random quality session instead of an attachment identifier.');
 		assert(mediaSearchFeedback.feedback_labels.includes('media_search_has_results'), 'The search completion event records that local candidates were returned.');

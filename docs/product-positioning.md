@@ -1,6 +1,6 @@
 # Product Positioning
 
-Media Library optimization uses a simple default flow: choose a time and image-type range, inspect representative Cloud-qualified samples, confirm once, then watch foreground progress and use batch history for restore. Encoding choices, quality thresholds, fingerprints, Providers, and Artifact details stay out of the default surface. Advanced one-image processing remains separate.
+Media Library optimization uses a simple default flow: choose a time and image-type range, inspect representative Cloud-qualified samples, confirm once, then watch foreground progress and use batch history for restore. Encoding choices, quality thresholds, fingerprints, Providers, and Artifact details stay out of the default surface. Single-image import, replacement, and restore use the Adapter/Core/Toolkit governed path.
 
 Status: active for the first Toolbox build.
 
@@ -47,9 +47,8 @@ The product has two intentionally different commit paths:
   visible and editable editor state. They become durable only when the author
   uses normal WordPress Publish or Update. This `native_editor_commit` path
   does not create a Core proposal or Core audit record.
-- For one fully previewed image in the current article, an editor-present
-  `strong_local_confirmation` action may import one external or AI-generated
-  image and optionally set it as featured under ADR-010.
+- Image import, candidate featured-image adoption, replacement, and restore use
+  Adapter, Core, and Toolkit under ADR-017.
 - In plugin-admin batch execution surfaces, selected writes become Core
   proposals unless an accepted ADR defines a narrower bounded lane. ADR-015 is
   the sole current exception: one present administrator confirms an exact
@@ -59,8 +58,7 @@ The native-editor rule applies only to the current article and its normal save
 transaction. Under ADR-014, one explicit action may apply at most eight
 individually reviewed internal links to the current article's visible editor
 state without becoming a governed batch merely because it has multiple
-selections. ADR-010 separately permits one immediate, reversible media import
-for the same present editor after an exact preview and explicit confirmation.
+selections. Durable media import remains a governed cross-object write.
 Hidden post-save execution, replacement, cross-object/global writes,
 external/background actions, and governed batches remain on the Core proposal
 path. Cross-post insertion and backend content patching are governed writes,
@@ -253,8 +251,8 @@ explicit candidate mode: callers may provide reviewed generated image URLs, or
 a host may provide a bounded generated-image runtime seam. The legacy
 route/ability ids may still say "image-generation" for compatibility, but
 Toolbox must not own model routing, prompt management, or provider billing.
-One reviewed local import may use ADR-010; Cloud still owns only candidate
-runtime and transport. Keep this seam aligned with
+Reviewed image adoption uses Adapter, Core, and Toolkit; Cloud still owns only
+candidate runtime and transport. Keep this seam aligned with
 `docs/adversarial-boundary-review.md` and `docs/boundary-exceptions.md` so the
 compatibility name does not become new runtime ownership.
 
