@@ -112,7 +112,7 @@ NPCINK_TOOLBOX_ARTICLE_CORE_SMOKE_PURGE=1 \
 	wp_cli eval-file "$ROOT/tests/smoke-article-draft-core-proof.php"
 
 printf '%s\n' '[five-plugin] lane 2/2: Cloud Addon no-credit suggestion transport'
-NPCINK_TOOLBOX_HTTP_GUARD_ALLOWED_URL='http://127.0.0.1:8010/v1/runtime/execute' \
+NPCINK_TOOLBOX_HTTP_GUARD_ALLOWED_URLS='http://127.0.0.1:8010/v1/runtime/execute,http://127.0.0.1:8010/v1/runtime/media/artifacts/art_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/download,http://127.0.0.1:8010/v1/runtime/media/artifacts/art_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/delivery-ack' \
 	wp_cli eval-file "$ROOT/tests/smoke-ai-image-cloud-addon-transport.php"
 
 printf '%s\n' 'PASS: five-plugin local acceptance completed without a real Cloud request.'

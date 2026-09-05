@@ -122,8 +122,56 @@ final class Rest_Controller {
 	public function permission( $request = null ): bool {
 		$route          = $request instanceof WP_REST_Request ? $this->normalize_route_for_scope( (string) $request->get_route() ) : '';
 		$required_scope = $this->rest_route_scope( $route );
+		if ( $request instanceof WP_REST_Request && $this->requires_present_admin_ui( $route, $request->get_method() ) && ! $this->is_present_admin_ui_request( $request ) ) {
+			return false;
+		}
 
 		return $this->filtered_rest_permission( current_user_can( 'manage_options' ), $request, $required_scope, $route );
+	}
+
+	private function requires_present_admin_ui( string $route, string $method ): bool {
+		if ( 'POST' !== strtoupper( $method ) ) {
+			return false;
+		}
+
+		if ( in_array( $route, array( '/local-admin-consent/featured-image', '/strong-local-confirmation/image-adoption', '/strong-local-confirmation/media-derivative', '/strong-local-confirmation/media-derivative-restore', '/media-optimization-manifest', '/media-optimization-batches', '/media-backup-cleanup/confirm' ), true ) ) {
+			return true;
+		}
+
+		return 1 === preg_match( '#^/media-optimization-batches/media_opt_[A-Za-z0-9]+(?:/confirm|/items/[0-9]+/(?:complete|restore))$#', $route );
+	}
+
+	private function is_present_admin_ui_request( WP_REST_Request $request ): bool {
+		$nonce = (string) $request->get_header( 'X-WP-Nonce' );
+		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return false;
+		}
+
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) || empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
+			return false;
+		}
+
+		$source = (string) ( $request->get_header( 'Origin' ) ?: $request->get_header( 'Referer' ) );
+		if ( '' === $source ) {
+			return false;
+		}
+
+		$source_origin = $this->url_origin( $source );
+		return '' !== $source_origin && in_array( $source_origin, array( $this->url_origin( home_url( '/' ) ), $this->url_origin( admin_url( '/' ) ) ), true );
+	}
+
+	private function url_origin( string $url ): string {
+		$scheme = strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) );
+		$host   = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		$port   = absint( wp_parse_url( $url, PHP_URL_PORT ) );
+		if ( '' === $scheme || '' === $host || ! in_array( $scheme, array( 'http', 'https' ), true ) ) {
+			return '';
+		}
+		if ( 0 === $port ) {
+			$port = 'https' === $scheme ? 443 : 80;
+		}
+
+		return $scheme . '://' . $host . ':' . $port;
 	}
 
 	private function filtered_rest_permission( bool $allowed, $request, string $required_scope, string $route ): bool {
@@ -1767,6 +1815,9 @@ final class Rest_Controller {
 	}
 
 	public function permission_single_article_image_adoption( WP_REST_Request $request ): bool {
+		if ( ! $this->is_present_admin_ui_request( $request ) ) {
+			return false;
+		}
 		$post_id = absint( $request->get_param( 'post_id' ) );
 		if ( $post_id <= 0 || ! current_user_can( 'edit_post', $post_id ) ) {
 			return false;
@@ -1781,6 +1832,9 @@ final class Rest_Controller {
 	}
 
 	public function permission_single_image_media_optimization( WP_REST_Request $request ): bool {
+		if ( ! $this->is_present_admin_ui_request( $request ) ) {
+			return false;
+		}
 		$input = $request->get_param( 'input' );
 		$attachment_id = is_array( $input ) ? absint( $input['attachment_id'] ?? 0 ) : 0;
 		$route = '/strong-local-confirmation/media-derivative';
@@ -1793,6 +1847,9 @@ final class Rest_Controller {
 	}
 
 	public function permission_single_image_media_derivative_restore( WP_REST_Request $request ): bool {
+		if ( ! $this->is_present_admin_ui_request( $request ) ) {
+			return false;
+		}
 		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
 		$route = '/strong-local-confirmation/media-derivative-restore';
 		$allowed = $attachment_id > 0
@@ -4076,6 +4133,7 @@ final class Rest_Controller {
 		$sections = array();
 		foreach ( array_slice( is_array( $output['sections'] ?? null ) ? $output['sections'] : array(), 0, 20 ) as $index => $section ) {
 			$section = is_array( $section ) ? $section : array( 'body' => $section );
+			/* translators: %d: One-based section number. */
 			$heading = sanitize_text_field( (string) ( $section['heading'] ?? $section['title'] ?? sprintf( __( 'Section %d', 'npcink-workflow-toolbox' ), $index + 1 ) ) );
 			$body = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $section['body'] ?? $section['content'] ?? '' ) ) ), 700, '' );
 			if ( '' !== $heading || '' !== $body ) {

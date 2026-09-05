@@ -29,6 +29,11 @@ exists:
 WP_CLI_BIN=/opt/homebrew/bin/wp composer plugin-check:release
 ```
 
+The command builds an isolated distribution directory using `.distignore` and
+runs Plugin Check in update mode with strict JSON output. It does not inspect
+whatever copy happens to be installed in the local WordPress site. Any
+reported error produces a nonzero exit code.
+
 Do not rely on a passing `composer test:all` or `composer check:wporg` alone
 for WordPress.org review readiness. `composer test:all` protects the internal
 Toolbox contracts; `composer check:wporg` protects local recurring static

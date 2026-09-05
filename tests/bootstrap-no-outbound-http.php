@@ -4,15 +4,19 @@
  *
  * This file is loaded through WP-CLI --require for every preflight and smoke
  * process. It blocks outbound HTTP before command execution and records any
- * attempted URL for the parent shell gate. One exact loopback URL may be
- * allowed for the Cloud Addon transport lane, where a later filter returns the
- * deterministic mock response before a socket is opened.
+ * attempted URL for the parent shell gate. Exact loopback URLs may be allowed
+ * for the Cloud Addon transport lane, where a later filter returns deterministic
+ * mock responses before a socket is opened.
  *
  * @package Npcink_Toolbox
  */
 
-$toolbox_http_guard_allowed_url = trim( (string) getenv( 'NPCINK_TOOLBOX_HTTP_GUARD_ALLOWED_URL' ) );
-$toolbox_http_guard_log         = trim( (string) getenv( 'NPCINK_TOOLBOX_HTTP_GUARD_LOG' ) );
+$toolbox_http_guard_allowed_urls = array_values(
+	array_filter(
+		array_map( 'trim', explode( ',', (string) getenv( 'NPCINK_TOOLBOX_HTTP_GUARD_ALLOWED_URLS' ) ) )
+	)
+);
+$toolbox_http_guard_log = trim( (string) getenv( 'NPCINK_TOOLBOX_HTTP_GUARD_LOG' ) );
 
 // WordPress 6.9+ checks due cron events during shutdown and otherwise spawns a
 // loopback HTTP request. Acceptance owns no scheduler work, so keep that
@@ -25,12 +29,12 @@ if ( ! defined( 'WP_HTTP_BLOCK_EXTERNAL' ) ) {
 	define( 'WP_HTTP_BLOCK_EXTERNAL', true );
 }
 
-$toolbox_install_http_guard = static function () use ( $toolbox_http_guard_allowed_url, $toolbox_http_guard_log ): void {
+$toolbox_install_http_guard = static function () use ( $toolbox_http_guard_allowed_urls, $toolbox_http_guard_log ): void {
 	add_filter(
 		'pre_http_request',
-		static function ( $preempt, $parsed_args, $url ) use ( $toolbox_http_guard_allowed_url, $toolbox_http_guard_log ) {
+		static function ( $preempt, $parsed_args, $url ) use ( $toolbox_http_guard_allowed_urls, $toolbox_http_guard_log ) {
 			$url = (string) $url;
-			if ( '' !== $toolbox_http_guard_allowed_url && hash_equals( $toolbox_http_guard_allowed_url, $url ) ) {
+			if ( in_array( $url, $toolbox_http_guard_allowed_urls, true ) ) {
 				return $preempt;
 			}
 

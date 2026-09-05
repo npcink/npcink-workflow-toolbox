@@ -11,6 +11,10 @@ The previous batch workbench created one Core proposal per image. That posture i
 Toolbox may use one strong local confirmation for a frozen media optimization manifest only when all of these conditions hold:
 
 - the actor is a currently present WordPress administrator;
+- every local planning, confirmation, replacement, and restore POST is made by
+  a same-origin WordPress admin page with the logged-in cookie and a valid
+  `wp_rest` nonce; application-password and delegated external requests fail
+  closed;
 - Toolbox invokes Toolkit's existing read-only media planning ability through an administrator-protected local route, without a separate Core read approval;
 - Toolkit produced a bounded manifest of at most 1000 Media Library attachments;
 - every item binds its attachment ID to the current main-file SHA-256;
