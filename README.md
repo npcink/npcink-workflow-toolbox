@@ -1,5 +1,10 @@
 # Npcink Workflow Toolbox
 
+The editor's `整理` action now requests an inline Cloud-formatted body and applies
+validated text to the visible Gutenberg editor with undo, without invoking save
+or publish. See [Content formatting](docs/editor-content-format-v1.md) for its
+bounded paragraph/list/line-break repairs and fail-closed contract.
+
 Media recognition continuation ownership and failure recovery are documented in [Media Recognition Continuation](docs/media-recognition-continuation.md).
 
 The default Media Library optimization flow is `choose range -> check samples -> confirm once and run -> history and restore`. It uses Cloud `auto_safe.v1` analysis while WordPress and Abilities Toolkit retain all file replacement, backup, and restore authority. See `docs/decisions/ADR-015-exact-manifest-local-media-optimization.md`.
@@ -206,7 +211,7 @@ expect to stay discoverable from the root README:
 The default button coverage gate is machine-readable in
 [Fixed Button Contract Table](docs/fixed-button-contract-table.json). It records
 the runtime owner, write lane, handoff owner, and current Adapter parity status
-for all twelve committed buttons; partial parity is reported
+for all thirteen current buttons; partial parity is reported
 rather than hidden. New default editor flows must add their own contract row.
 
 ### Boundary Exceptions Only

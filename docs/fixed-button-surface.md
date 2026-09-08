@@ -27,6 +27,7 @@ registry, runtime, approval store, queue, or write executor.
 
 | Button | Surface | Input | Output artifact | Runtime | Handoff | Boundary |
 | --- | --- | --- | --- | --- | --- | --- |
+| Format Content (`整理`) | Editor Content Support | exact current Gutenberg body | `content_format_candidate.v1` | Cloud deterministic formatting via the named Addon facade | one click applies validated text to current editor state; native WordPress save remains separate | `native_editor_commit`; spacing-only candidate, stable block IDs, undo, stale/error rejection, no backend save or publish; see [contract](editor-content-format-v1.md) |
 | Prepare Article From Source Or Brief | Editor Content Support sidebar entry plus three-step work modal | public URL, manual brief, or both | optional `source_extraction_preview.v1`, then `article_writing_pack.v1`, request-scoped `article_writing_pack_review.v1`, and optional `article_draft_preview.v1` | Cloud exact-URL reader when needed, Cloud Site Knowledge vectors, and hosted suggestion/draft runtime | the modal separates source input, direction confirmation, and draft review; metadata/navigation-only extraction stops; otherwise the human may load a usable draft into an empty current Gutenberg body or explicitly submit it through the existing article plan to Core | `default_button_v1`; no durable workflow state, full translation, existing-body replacement, title/excerpt overwrite, local URL fetch, media import, approval store, Core approval/execution, automatic save, or publish |
 | Site Check | Admin Site Check | bounded public site snapshot | `site_ops_insight_pack.v1` plus optional `site_ops_cloud_analysis_request.v1` / `site_ops_cloud_analysis_result.v1` detail | local deterministic scan; optional Cloud runtime/detail | operator chooses manual action or later Core-ready handoff candidate | `default_button_v1`; no local run table, queue, retry owner, proposal creation, or WordPress write |
 | Publish Preflight | Editor Content Support | current draft title, content, excerpt, terms, media, and source context | `pre_publish_review.v1` and optional `seo_meta_handoff_preview.v1` | local and hosted suggestion support | Core/Adapter/Abilities for any accepted SEO or publish-related write | `default_button_v1`; no publishing, no SEO mutation, no body replacement |
@@ -42,7 +43,7 @@ registry, runtime, approval store, queue, or write executor.
 
 ## Adapter Parity Audit
 
-The current twelve-button audit deliberately distinguishes three levels instead
+The current thirteen-button audit deliberately distinguishes three levels instead
 of claiming universal parity prematurely:
 
 - `workflow_projection_proven`: the Toolkit workflow definition, Toolbox

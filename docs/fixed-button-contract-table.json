@@ -6,6 +6,19 @@
   "external_client_owner": "npcink-ai-client-adapter",
   "buttons": [
     {
+      "button_id": "format_content",
+      "label": "Format Content",
+      "surface": "editor_content_support",
+      "source_contracts": ["content_format_request.v2", "content_format_candidate.v1", "content_format_candidate.v2"],
+      "runtime_owner": "npcink_cloud_via_cloud_addon",
+      "write_lane": "native_editor_commit",
+      "handoff_owner": "wordpress_native_save",
+      "adapter_parity_status": "partial_contract_reuse",
+      "source_file": "assets/editor-content-format.js",
+      "source_marker": "content_format_candidate.v2",
+      "direct_wordpress_write": false
+    },
+    {
       "button_id": "site_check",
       "label": "Site Check",
       "surface": "admin_site_check",
