@@ -221,6 +221,10 @@ described above.
 
 = 0.2.0 =
 
+* Added bounded paragraph/list/line-break repair to Cloud content formatting.
+* Added Cloud-backed content formatting in the Gutenberg sidebar, with local
+  integrity checks, stale-response rejection and undo; no automatic save.
+
 * Added the administrator-confirmed exact-manifest Media Library optimization
   flow with foreground progress, failure isolation, history, and restore.
 * Restricted local write exceptions to same-origin WordPress cookie sessions

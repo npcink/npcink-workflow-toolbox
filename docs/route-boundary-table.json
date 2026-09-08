@@ -273,7 +273,7 @@
       "owner": "toolbox_editor_surface",
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Editor content-support suggestions only; missing contextual ALT may use the existing silent visual-evidence fallback and is applied only to Gutenberg editor state for native WordPress save, without Core audit or attachment metadata mutation."
+      "boundary_note": "Editor content-support suggestions only; format_content sends exact unsaved text through the no-store Cloud formatting facade and returns a validated candidate for native editor state only. Missing contextual ALT may use the existing silent visual-evidence fallback and is applied only to Gutenberg editor state for native WordPress save, without Core audit or attachment metadata mutation."
     },
     {
       "route": "/media-derivative-handoff",

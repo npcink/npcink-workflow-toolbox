@@ -644,6 +644,11 @@
 
 	const flows = [
 		{
+			intent: 'format_content',
+			label: __('整理', 'npcink-workflow-toolbox'),
+			group: 'research_adaptation',
+		},
+		{
 			intent: 'source_adaptation_review',
 			label: __('Draft from source materials', 'npcink-workflow-toolbox'),
 			description: __('Provide a reference URL or brief, confirm the writing direction, then generate a review-only draft. Nothing is saved or published automatically.', 'npcink-workflow-toolbox'),
@@ -10854,6 +10859,7 @@
 							createElement('h4', null, group.label),
 							defaultFlows.filter((flow) => flow.group === group.id).map((flow) =>
 								{
+										if (flow.intent === 'format_content') return window.NpcinkToolboxContentFormat ? createElement(window.NpcinkToolboxContentFormat.Control, { key: flow.intent, disabled: Boolean(running) }) : null;
 										const flowActionLabel = flow.intent === 'image_candidates'
 											? __('Open', 'npcink-workflow-toolbox')
 											: (flow.intent === 'source_adaptation_review'

@@ -324,9 +324,9 @@ toolbox_assert( false !== strpos( $readme, 'compatibility allowlist, not an owne
 toolbox_assert( false !== strpos( $readme, '### Boundary Exceptions Only' ) && false !== strpos( $readme, 'do not grant' ) && false !== strpos( $readme, 'scheduler truth, queues, run tables, leases, retries' ) && false !== strpos( $readme, 'Core proposal creation, or WordPress writes' ), 'README keeps accepted exceptions separate from default Toolbox runtime ownership.' );
 toolbox_assert( false !== strpos( $readme, 'Provider keys and routing' ) && false !== strpos( $readme, 'belong in Cloud/Addons or dedicated connector owners' ) && false !== strpos( $readme, 'provider keys, private credentials, request logs, quota' ) && false !== strpos( $readme, 'billing records, or write authorization' ), 'README keeps Site Context and provider-secret ownership separate.' );
 toolbox_assert( false !== strpos( $readme, 'Fixed Button Surface' ) && false !== strpos( $readme, 'docs/fixed-button-surface.md' ), 'README links the fixed button surface matrix.' );
-toolbox_assert( false !== strpos( $readme, 'Fixed Button Contract Table' ) && false !== strpos( $readme, 'docs/fixed-button-contract-table.json' ) && false !== strpos( $readme, 'all twelve committed buttons' ), 'README links the machine-readable twelve-button coverage gate.' );
+toolbox_assert( false !== strpos( $readme, 'Fixed Button Contract Table' ) && false !== strpos( $readme, 'docs/fixed-button-contract-table.json' ) && false !== strpos( $readme, 'all thirteen current buttons' ), 'README links the machine-readable thirteen-button coverage gate.' );
 $fixed_button_table = json_decode( (string) file_get_contents( $root . '/docs/fixed-button-contract-table.json' ), true );
-toolbox_assert( is_array( $fixed_button_table ) && 'npcink_fixed_button_contract_table.v1' === (string) ( $fixed_button_table['schema_version'] ?? '' ) && 12 === count( (array) ( $fixed_button_table['buttons'] ?? array() ) ), 'Fixed-button contract table records exactly twelve committed buttons.' );
+toolbox_assert( is_array( $fixed_button_table ) && 'npcink_fixed_button_contract_table.v1' === (string) ( $fixed_button_table['schema_version'] ?? '' ) && 13 === count( (array) ( $fixed_button_table['buttons'] ?? array() ) ), 'Fixed-button contract table records exactly thirteen buttons.' );
 $article_writing_pack_doc = file_get_contents( $root . '/docs/article-writing-pack-v1.md' );
 foreach ( array( 'article_writing_pack.v1', 'url_reference', 'source_materials', 'editorial_brief', 'operator_confirmed=false', 'manual_brief', 'mixed', 'article_writing_pack_review.v1', 'article_draft_preview.v1', 'single_synchronous_draft_preview_request', 'article_draft_review_feedback.v1', 'single_draft_regeneration_request', 'durable_review_state=false', 'must consume the reviewed pack', 'body_insertion=false', 'direct_wordpress_write": false' ) as $required_writing_pack_contract ) {
 	toolbox_assert( false !== $article_writing_pack_doc && false !== strpos( $article_writing_pack_doc, $required_writing_pack_contract ), 'Article writing pack contract preserves additive typed inputs, stateless confirmation, and no-write draft preview boundary: ' . $required_writing_pack_contract );
@@ -1767,7 +1767,7 @@ toolbox_assert( 'npcink-workflow-toolbox' === (string) ( $cloud_bridge_table['lo
 $cloud_bridge_rows = is_array( $cloud_bridge_table['bridges'] ?? null ) ? $cloud_bridge_table['bridges'] : array();
 toolbox_assert( ! empty( $cloud_bridge_rows ), 'Cloud bridge contract table contains bridge rows.' );
 $cloud_bridge_ids = array();
-$cloud_bridge_source = $client . $rest . $abilities . $auto_sync . $architecture_doc . $boundary_doc . $connector_exposure_doc;
+$cloud_bridge_source = $client . $rest . $abilities . $auto_sync . $architecture_doc . $boundary_doc . $connector_exposure_doc . file_get_contents( $root . '/includes/Editor_Content_Format.php' );
 foreach ( $cloud_bridge_rows as $cloud_bridge_row ) {
 	$bridge_id = (string) ( $cloud_bridge_row['bridge_id'] ?? '' );
 	$cloud_bridge_ids[] = $bridge_id;

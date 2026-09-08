@@ -7,6 +7,27 @@
   "default_direct_wordpress_write": false,
   "bridges": [
     {
+      "bridge_id": "editor-content-format",
+      "local_entrypoints": ["/editor/content-support:format_content"],
+      "source_owner": "toolbox_editor",
+      "cloud_owner": "npcink-ai-cloud",
+      "execution_path": "cloud_addon_scenario_facade",
+      "cloud_ability": "npcink-toolbox/format-content",
+      "contract_version": "content_format_request.v2",
+      "result_contracts": ["content_format_candidate.v1", "content_format_candidate.v2"],
+      "execution_pattern": "inline",
+      "data_classification": "pii",
+      "storage_mode": "no_store",
+      "retention_ttl_seconds": 0,
+      "provider_secret_owner": "cloud_addon",
+      "write_posture": "suggestion_only",
+      "final_write_path": "native_editor_commit",
+      "direct_wordpress_write": false,
+      "toolbox_control_plane_owner": false,
+      "toolbox_must_not_own": ["formatting_algorithm", "provider_credentials", "automatic_save", "wordpress_backend_write"],
+      "source_markers": ["npcink_cloud_addon_execute_toolbox_content_format_runtime", "content_format_candidate.v2"]
+    },
+    {
       "bridge_id": "image-source-cloud-request",
       "local_entrypoints": ["/image-candidates", "npcink-toolbox/search-image-source"],
       "source_owner": "toolbox_operator_surface",
