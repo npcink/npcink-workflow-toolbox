@@ -159,11 +159,18 @@ await context.addCookies([{ ...secureAuth, url: auth.url, httpOnly: true, sameSi
 	assert.deepEqual(errors, []);
 	console.log('PASS: Cloud failure preserves text; no post-write requests or page errors.');
 	await page.setViewportSize({ width: 390, height: 844 });
-	await page.evaluate(() => wp.data.dispatch('core/edit-post').openGeneralSidebar('npcink-toolbox-editor-content-support/npcink-content-support-sidebar'));
+	// Gutenberg closes the active sidebar when entering its mobile breakpoint.
+	await page.waitForFunction(() => wp.data.select('core/viewport').isViewportMatch('< medium'));
+	await button.waitFor({ state: 'hidden', timeout: 10000 });
+	await page.evaluate(() => {
+		const editor = wp.data.dispatch('core/editor');
+		const sidebar = editor.openGeneralSidebar ? editor : wp.data.dispatch('core/edit-post');
+		sidebar.openGeneralSidebar('npcink-toolbox-editor-content-support/npcink-content-support-sidebar');
+	});
 	await button.waitFor({ timeout: 10000 });
-	await page.screenshot({ path: new URL('../build/smoke/content-format-mobile.png', import.meta.url).pathname, fullPage: true });
 	const box = await button.boundingBox();
 	assert.ok(box && box.x >= 0 && box.x + box.width <= 391);
+	await page.screenshot({ path: new URL('../build/smoke/content-format-mobile.png', import.meta.url).pathname, fullPage: true });
 	console.log('PASS: Formatting control fits mobile viewport.');
 } catch (error) {
 	if (diagnosticPage) console.log('Formatting notice:', await diagnosticPage.locator('.npcink-toolbox-editor-format').innerText().catch(() => 'not available'));
