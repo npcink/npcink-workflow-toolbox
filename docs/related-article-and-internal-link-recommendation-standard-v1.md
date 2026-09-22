@@ -371,7 +371,16 @@ gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共
 - “主题”“文章”“内容”“这里”等泛化词必须拒绝；
 - 没有安全锚文本时不得回退到文章标题作为最终 Apply 锚文本；
 - 没有 `source_match` 时不显示 Apply，只允许复制链接或打开目标文章；
+- 同时要求 `candidate_source=cloud_vector` 和
+  `retrieval_status=cloud_vector_evidence`；精确锚点本身不能让 local fallback
+  或 Cloud unavailable 候选变为可应用。REST 的 `can_apply_to_editor`、按钮和
+  impression 中的 applicable 分母必须一致，旧缓存中的可应用标记不能越过证据检查；
 - Toolbox 只做安全校验和编辑器事务，不重新实现语义关键词推荐算法。
+
+资格回归包括 `node tests/internal-link-editor-behavior.mjs`，以及本地 WordPress 的
+`wp eval-file tests/smoke-editor-internal-link-eligibility.php`（只读现有公开文章）。
+性能排障先回放相同浏览器输入并拆分 Cloud 计算，不因健康检查成功或 CLI 短样本
+通过就认定浏览器可用，也不直接提高 HTTP 超时掩盖热点。
 
 ### 11.2 原生保存验收
 
