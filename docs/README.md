@@ -13,6 +13,7 @@ Start from the active documents below before changing code.
 - [Roadmap](roadmap.md)
 - [First Version Reference](first-version-reference.md)
 - [Feature Ownership And Plugin Boundary](feature-ownership-and-plugin-boundary.md)
+- [Admin UI Design Standard v1](admin-ui-design-standard-v1.md)
 - [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
 - [Cross-Repo Boundary Matrix](cross-repo-boundary-matrix.md)
 - [Cross-Repo Database Boundary](cross-repo-database-boundary.md)

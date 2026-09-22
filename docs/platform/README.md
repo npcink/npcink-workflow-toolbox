@@ -75,6 +75,7 @@ Start here before multi-repository design or implementation:
 - [AI Development Quality Workflow](../ai-development-quality-workflow.md)
 - [AI Change Envelope Template](../ai-change-envelope-template.md)
 - [Pull Request Publishing Standard v1](pr-publishing-standard-v1.md)
+- [Admin UI Design Standard v1](../admin-ui-design-standard-v1.md) — cross-project admin visual, component, and status-vocabulary standard; authoritative owner is this repository (Toolbox), covering the five wp-admin plugins and the `npcink-ai-cloud` portal.
 - [Development Workflow](../development-workflow.md)
 
 Use Core docs only for governance-specific truth:
