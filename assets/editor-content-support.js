@@ -7107,6 +7107,8 @@
 		const visibleCandidates = candidates.filter((item) => excludedCandidates.indexOf(item) < 0).slice(0, 8);
 		const canApplyCandidate = (item) => Boolean(
 			item.canApplyToEditor
+			&& section && section.candidate_source === 'cloud_vector'
+			&& (section.retrieval_status || section.source_status) === 'cloud_vector_evidence'
 			&& item.candidateRelevance !== 'weak'
 			&& item.sourceMatch
 			&& item.sourceMatch.block_client_id
