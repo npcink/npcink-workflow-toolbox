@@ -274,6 +274,27 @@ const feedbackContext = helpers.recommendationFeedbackContext({
 }, 'internal_links');
 assert.equal(feedbackContext.candidateCount, 2);
 assert.equal(feedbackContext.applicableCount, 1);
+for (const [candidateSource, retrievalStatus, expectedCount] of [
+	['cloud_vector', 'cloud_vector_evidence', 1],
+	['local_fallback', 'no_cloud_evidence', 0],
+	['cloud_unavailable', 'cloud_unavailable', 0],
+	['local_fallback', 'cloud_vector_evidence', 0],
+	['cloud_vector', '', 0],
+]) {
+	const context = helpers.recommendationFeedbackContext({ sections: { internal_links: {
+		candidate_source: candidateSource,
+		retrieval_status: retrievalStatus,
+		recommendation_candidates: [{
+			id: 'cached-eligibility', can_apply_to_editor: true,
+			candidate_source: candidateSource,
+			anchor_or_context: '内容工作流',
+			target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: 'https://example.test/alpha/' },
+			source_match: { block_client_id: 'batch-block', matched_text: '内容工作流' },
+		}],
+	} } }, 'internal_links');
+	assert.equal(context.candidateCount, 1, 'Reference candidates remain available');
+	assert.equal(context.applicableCount, expectedCount, 'Cached Apply flags cannot override retrieval evidence');
+}
 assert.deepEqual(Array.from(feedbackContext.reasonCodes), [
 	'candidate_count_1_3',
 	'applicable_count_1_3',

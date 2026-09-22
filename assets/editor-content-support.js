@@ -5976,19 +5976,21 @@
 				const title = plainTextFromHtml(readableItemText(item.label || item.name || source.title || item.id, __('Internal link candidate', 'npcink-workflow-toolbox')));
 				const targetUrl = readableItemText(item.target_url || targetRef.url || item.source_candidate_ref || source.target_url || source.url, '');
 				const anchorText = readableItemText(item.anchor_or_context || item.value || source.anchor_or_context || source.suggested_anchor_text, '');
+				const candidateSource = internalLinkContractValue(item.candidate_source || source.candidate_source || section.candidate_source);
+				const retrievalStatus = internalLinkContractValue(section.retrieval_status || section.source_status);
 				return {
 					id: readableItemText(item.id || source.target_post_id || String(index + 1), String(index + 1)),
 					title,
 					anchorText,
-					canApplyToEditor: item.can_apply_to_editor === true,
+					canApplyToEditor: item.can_apply_to_editor === true && candidateSource === 'cloud_vector' && retrievalStatus === 'cloud_vector_evidence',
 					anchorQualityStatus: readableItemText(item.anchor_quality_status, ''),
 					targetUrl,
 					targetPostId: Number(targetRef.post_id || source.target_post_id || 0),
 					targetStatus: readableItemText(targetRef.status || source.target_status, ''),
 					targetPostType: readableItemText(targetRef.post_type || source.target_post_type, ''),
-					candidateSource: internalLinkContractValue(item.candidate_source || source.candidate_source || section.candidate_source),
+					candidateSource,
 					candidateRelevance: internalLinkContractValue(item.candidate_relevance || source.candidate_relevance),
-					retrievalStatus: internalLinkContractValue(section.retrieval_status || section.source_status),
+					retrievalStatus,
 					reason: internalLinkReasonText(item.evidence_note || item.reason || item.detail || source.reason),
 					placementHint: readableItemText(source.placement_hint || item.placement_hint, ''),
 					sourceMatch: item.source_match && typeof item.source_match === 'object'

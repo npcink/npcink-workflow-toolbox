@@ -4848,7 +4848,10 @@ final class Rest_Controller {
 		$artifact['cloud_result_count'] = count( $related_content_evidence );
 		$artifact['fallback_used'] = 'local_fallback' === $source_status;
 		$artifact['toolkit_artifact'] = $data;
-		$artifact['recommendation_candidates'] = $this->editor_internal_link_recommendation_candidates( $items );
+		$artifact['recommendation_candidates'] = $this->editor_internal_link_recommendation_candidates(
+			$items,
+			'cloud_vector' === $source_status && 'cloud_vector_evidence' === $retrieval_status
+		);
 		$artifact['final_write_path'] = 'native_editor_commit';
 		$artifact['direct_wordpress_write'] = false;
 		$artifact['owner_label'] = 'human_editor';
@@ -5113,7 +5116,7 @@ final class Rest_Controller {
 		);
 	}
 
-	private function editor_internal_link_recommendation_candidates( array $items ): array {
+	private function editor_internal_link_recommendation_candidates( array $items, bool $cloud_evidence_available ): array {
 		$candidates = array();
 		foreach ( array_slice( $items, 0, 8 ) as $index => $item ) {
 			$title  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
@@ -5134,7 +5137,7 @@ final class Rest_Controller {
 			if ( ! in_array( $candidate_relevance, array( 'strong', 'review', 'weak' ), true ) ) {
 				$candidate_relevance = '';
 			}
-			$can_apply_to_editor = '' !== $matched_anchor && $target_is_public_local;
+			$can_apply_to_editor = $cloud_evidence_available && '' !== $matched_anchor && $target_is_public_local;
 			if ( '' === $title && '' === $anchor && '' === $url ) {
 				continue;
 			}
