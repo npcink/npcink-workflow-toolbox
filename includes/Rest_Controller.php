@@ -5116,7 +5116,7 @@ final class Rest_Controller {
 		);
 	}
 
-	private function editor_internal_link_recommendation_candidates( array $items, bool $cloud_evidence_available = true ): array {
+	private function editor_internal_link_recommendation_candidates( array $items, bool $cloud_evidence_available ): array {
 		$candidates = array();
 		foreach ( array_slice( $items, 0, 8 ) as $index => $item ) {
 			$title  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
