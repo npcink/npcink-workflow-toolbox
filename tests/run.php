@@ -563,7 +563,11 @@ $batch_classification = $classifier->classify(
 );
 toolbox_assert( 'core_proposal_required' === (string) ( $batch_classification['classification'] ?? '' ), 'Operation classifier sends external batch writes to Core proposal review.' );
 
-$provider_client = file_get_contents( $root . '/includes/Provider_Client.php' );
+$provider_client_source_files = glob( $root . '/includes/*.php' );
+$provider_client              = '';
+foreach ( $provider_client_source_files as $provider_client_source_file ) {
+	$provider_client .= "\n" . (string) file_get_contents( $provider_client_source_file );
+}
 $settings_source = file_get_contents( $root . '/includes/Settings.php' );
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'AI_IMAGE_PROMPT_CHARS = 4000' ) && false !== strpos( $provider_client, 'self::AI_IMAGE_PROMPT_CHARS' ), 'Provider client bounds AI image prompts before Cloud calls.' );
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'AUDIO_GENERATION_TEXT_CHARS = 5000' ) && false !== strpos( $provider_client, "'audio_generation_request.v1'" ) && false !== strpos( $provider_client, "'npcink-toolbox/generate-audio'" ) && false !== strpos( $provider_client, 'normalize_audio_generation_response' ) && false !== strpos( $provider_client, 'npcink_cloud_addon_execute_toolbox_audio_generation_runtime' ) && false !== strpos( $provider_client, 'toolbox_audio_generation_runtime_request' ), 'Provider client routes bounded article audio candidates through the Cloud Addon audio generation transport contract.' );
@@ -1102,7 +1106,11 @@ toolbox_assert( false !== strpos( $auto_sync, 'health_snapshot' ) && false !== s
 
 $editor_js = file_get_contents( $root . '/assets/editor-content-support.js' );
 toolbox_assert( false !== strpos( $editor_js, "'aria-pressed': imageSearchMode === 'library' ? 'true' : 'false',\n\t\t\t\t\t\tdisabled: Boolean(imageRunning),\n\t\t\t\t\t\tonClick: () => switchImageSearchMode('library')" ) && false !== strpos( $editor_js, "'aria-pressed': imageSearchMode === 'source' ? 'true' : 'false',\n\t\t\t\t\t\tdisabled: Boolean(imageRunning),\n\t\t\t\t\t\tonClick: () => switchImageSearchMode('source')" ) && false !== strpos( $editor_js, "'aria-pressed': imageSearchMode === 'generate' ? 'true' : 'false',\n\t\t\t\t\t\tdisabled: Boolean(imageRunning),\n\t\t\t\t\t\tonClick: () => switchImageSearchMode('generate')" ), 'Image-source mode tabs remain available but are disabled while a recommendation request is running.' );
-$client    = file_get_contents( $root . '/includes/Provider_Client.php' );
+$client_source_files = glob( $root . '/includes/*.php' );
+$client              = '';
+foreach ( $client_source_files as $client_source_file ) {
+	$client .= "\n" . (string) file_get_contents( $client_source_file );
+}
 $editor_css = file_get_contents( $root . '/assets/editor-content-support.css' );
 toolbox_assert( false === strpos( $editor_js, "intent: 'related_articles'" ) && false === strpos( $editor_js, 'renderRelatedArticleCandidateSection' ) && false === strpos( $editor_js, 'related_article_copy' ) && false === strpos( $editor_js, 'related_article_open' ) && false === strpos( $editor_js, 'related_article_ignored' ), 'Editor removes the obsolete related-article intent and its duplicate state and feedback paths.' );
 toolbox_assert( false !== strpos( $editor_js, 'Site Knowledge is temporarily unavailable' ) && false !== strpos( $editor_js, 'cloud_unavailable' ) && false !== strpos( $editor_js, 'no_cloud_evidence' ), 'Site-citation UI exposes concise retrieval-state guidance only when results may be incomplete.' );
