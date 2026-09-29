@@ -1042,7 +1042,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 	}
 
 
-	private function hosted_ai_content_image_attachment_ids( string $content ): array {
+	public function hosted_ai_content_image_attachment_ids( string $content ): array {
 		$ids = array();
 		if ( '' === trim( $content ) ) {
 			return $ids;
