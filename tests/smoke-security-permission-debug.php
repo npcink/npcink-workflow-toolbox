@@ -113,6 +113,7 @@ if ( ! defined( 'NPCINK_TOOLBOX_DISABLE_RAW_RESPONSES' ) ) {
 $root = dirname( __DIR__ );
 require_once $root . '/includes/Plugin.php';
 require_once $root . '/includes/Settings.php';
+require_once $root . '/includes/Provider_Client_Support.php';
 require_once $root . '/includes/Provider_Client.php';
 require_once $root . '/includes/Rest_Controller.php';
 require_once $root . '/includes/Abilities.php';
@@ -276,7 +277,11 @@ $assert( false === $public_host->invoke( $rest_controller, '2001:db8::1' ), 'Sou
 $assert( true === $public_host->invoke( $rest_controller, '2606:4700:4700::1111' ), 'Source URL validation permits a global IPv6 address.' );
 $assert( true === $public_host->invoke( $rest_controller, '93.184.216.34' ), 'Source URL validation permits a public IP address.' );
 
-$provider_source = (string) file_get_contents( $root . '/includes/Provider_Client.php' );
+$provider_source_files = glob( $root . '/includes/*.php' );
+$provider_source       = '';
+foreach ( $provider_source_files as $provider_source_file ) {
+	$provider_source .= "\n" . (string) file_get_contents( $provider_source_file );
+}
 $rest_source     = (string) file_get_contents( $root . '/includes/Rest_Controller.php' );
 $assert( false === strpos( $provider_source, "settings->get( 'include_raw_responses' )" ), 'Provider normalizers cannot bypass the centralized raw-response policy.' );
 $assert( false !== strpos( $rest_source, 'wp_http_validate_url' ) && false !== strpos( $rest_source, '$safe_port' ) && false !== strpos( $rest_source, '100.64.0.0/10' ) && false !== strpos( $rest_source, '2001:db8::/32' ) && false !== strpos( $rest_source, 'Cloud Addon owns fetch-time DNS and redirect validation' ), 'External source URLs reject literal special-purpose addresses and non-standard ports while Cloud Addon owns fetch-time DNS validation.' );

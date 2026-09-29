@@ -41,6 +41,7 @@ if ( ! function_exists( 'absint' ) ) {
 }
 
 $root = dirname( __DIR__ );
+require_once $root . '/includes/Provider_Client_Support.php';
 require_once $root . '/includes/Provider_Client.php';
 
 $fail = static function ( string $message ): void {

@@ -16,6 +16,7 @@ namespace {
 }
 namespace Npcink_Toolbox { final class Settings {} }
 namespace {
+	require_once dirname( __DIR__ ) . '/includes/Provider_Client_Support.php';
 	require_once dirname( __DIR__ ) . '/includes/Provider_Client.php';
 	$reflection = new ReflectionClass( new Npcink_Toolbox\Provider_Client( new Npcink_Toolbox\Settings() ) );
 	$method = $reflection->getMethod( 'media_fingerprint_scan_candidate_ids' );
