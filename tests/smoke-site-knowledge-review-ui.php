@@ -28,7 +28,11 @@ function npcink_toolbox_sk_review_smoke_assert( bool $condition, string $message
 
 $admin_js = file_get_contents( $root . '/assets/admin.js' );
 $admin_page = file_get_contents( $root . '/includes/Admin_Page.php' );
-$client   = file_get_contents( $root . '/includes/Provider_Client.php' );
+$client_source_files = glob( $root . '/includes/*.php' );
+$client              = '';
+foreach ( $client_source_files as $client_source_file ) {
+	$client .= "\n" . (string) file_get_contents( $client_source_file );
+}
 $rest     = file_get_contents( $root . '/includes/Rest_Controller.php' );
 $abilities = file_get_contents( $root . '/includes/Abilities.php' );
 
