@@ -451,6 +451,7 @@ if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
 
 require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Client_Support.php';
+require_once dirname( __DIR__ ) . '/includes/Provider_Hosted_AI_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
@@ -723,7 +724,7 @@ npcink_toolbox_progressive_assert(
 	&& '' === $missing_title_body,
 	'Source-body slicing accepts a publisher suffix but fails closed when the article heading is absent.'
 );
-$provider_reflection = new ReflectionClass( Npcink_Toolbox\Provider_Client::class );
+$provider_reflection = new ReflectionClass( Npcink_Toolbox\Provider_Hosted_AI_Service::class );
 $provider_without_constructor = $provider_reflection->newInstanceWithoutConstructor();
 $source_context_method = $provider_reflection->getMethod( 'hosted_ai_source_article_context' );
 $source_context_method->setAccessible( true );
