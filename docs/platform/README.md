@@ -34,6 +34,18 @@ a way that can drift from the owner repository.
 | Operator UI, fixed buttons, suggestion artifacts, Core-ready plans, cross-repo quality gates | `npcink-workflow-toolbox` | Full local product-surface guidance. |
 | Cloud Base URL/API key settings, signed transport, entitlement and runtime detail reads | `npcink-cloud-addon` | Shallow transport ownership and handoff guidance. |
 
+## Host Approval Contract Pointer
+
+The host-side commit gate for Toolkit-owned write and destructive abilities is
+documented authoritatively in the `npcink-abilities-toolkit` repository at
+`docs/host-approval-contract.md`
+(<https://github.com/npcink/npcink-abilities-toolkit/blob/master/docs/host-approval-contract.md>).
+Toolkit owns the gate contract; `npcink-ai-client-adapter` is the first
+implementer of its runtime channel, and any third-party host may implement the
+toolkit-prefixed `npcink_abilities_toolkit_write_commit_allowed` filter
+instead. This index links to the contract without forking or restating its
+rules.
+
 ## WordPress Admin Navigation Ownership
 
 `npcink-workflow-toolbox` is the sole owner of the optional top-level
