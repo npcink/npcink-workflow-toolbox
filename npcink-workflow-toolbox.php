@@ -32,6 +32,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Media_Alt_Caption_Service.p
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Hosted_AI_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Site_Knowledge_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Content_Collector_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Discoverability_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Client.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Recognition_Continuation.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Fingerprint_Scan.php';
