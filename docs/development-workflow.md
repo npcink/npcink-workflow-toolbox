@@ -168,7 +168,8 @@ composer quality:matrix:run
 ```
 
 This command does not require Docker on the MBA/M5. The five WordPress
-repositories run their configured local gates. Cloud source evidence comes from
+repositories and the development-only Eval Lab run their configured local
+gates. Cloud source evidence comes from
 the required GitHub checks attached to the exact clean Cloud `HEAD`; dirty,
 unpushed, pending, or missing evidence is reported as `needs_validation`.
 When a normal sibling checkout contains unrelated work, select a known clean

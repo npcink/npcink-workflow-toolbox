@@ -43,6 +43,13 @@ $repos = array(
 		'gate_notes' => 'Cloud Addon transport, settings, and WordPress plugin contracts.',
 	),
 	array(
+		'name'       => 'npcink-eval-lab',
+		'paths'      => array( 'npcink-eval-lab' ),
+		'gate'       => 'composer test:wordpress-ai-provider && composer check',
+		'remote_owners' => array( 'npcink', 'muze-page' ),
+		'gate_notes' => 'Development-only WordPress AI Provider acceptance and quality evidence.',
+	),
+	array(
 		'name'       => 'npcink-ai-cloud',
 		'paths'      => array( 'npcink-ai-cloud' ),
 		'gate'       => 'GitHub CI checks for the exact clean Cloud HEAD',
@@ -244,10 +251,12 @@ function npcink_quality_matrix_resolve_path( string $family_root, array $paths )
  *
  * @param string $remote_url Origin URL.
  * @param string $repo_name Repository name.
+ * @param array  $owners Repository owners accepted by the source-control contract.
  * @return bool
  */
-function npcink_quality_matrix_remote_matches( string $remote_url, string $repo_name ): bool {
-	$pattern = '~(?:^|[:/])npcink/' . preg_quote( $repo_name, '~' ) . '(?:\.git)?/?$~i';
+function npcink_quality_matrix_remote_matches( string $remote_url, string $repo_name, array $owners = array( 'npcink' ) ): bool {
+	$owner_pattern = implode( '|', array_map( static fn( $owner ): string => preg_quote( (string) $owner, '~' ), $owners ) );
+	$pattern       = '~(?:^|[:/])(?:' . $owner_pattern . ')/' . preg_quote( $repo_name, '~' ) . '(?:\.git)?/?$~i';
 	return 1 === preg_match( $pattern, trim( $remote_url ) );
 }
 
@@ -342,8 +351,8 @@ foreach ( $repos as $repo ) {
 			exit( 2 );
 		}
 		$origin = npcink_quality_matrix_run( 'git remote get-url origin', $path );
-		if ( 0 !== $origin['exit_code'] || ! npcink_quality_matrix_remote_matches( $origin['output'], $repo['name'] ) ) {
-			fwrite( STDERR, "Repository override origin does not match npcink/{$repo['name']}: {$path}\n" );
+		if ( 0 !== $origin['exit_code'] || ! npcink_quality_matrix_remote_matches( $origin['output'], $repo['name'], (array) ( $repo['remote_owners'] ?? array( 'npcink' ) ) ) ) {
+			fwrite( STDERR, "Repository override origin does not match the registered source repository for {$repo['name']}: {$path}\n" );
 			exit( 2 );
 		}
 	}
