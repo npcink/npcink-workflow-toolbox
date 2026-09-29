@@ -122,9 +122,13 @@ The first version provides:
 
 ## Boundary
 
-All first-version surfaces (admin pages, editor sidebar, dashboard widget, and
-REST routes) require `manage_options`; editor-role (`edit_posts`) access is a
-deliberately deferred scoped-permission decision, not a current capability.
+Admin pages, the dashboard widget, the `/flows/*` and `/ai/*` routes, and
+every governed handoff surface require `manage_options`. ADR-018 scopes the
+post editor Content Support sidebar, its `/editor/content-support` route, and
+the metadata-only `/agent-feedback` route to `edit_posts` users; the
+`npcink_toolbox_rest_permission` and `npcink_toolbox_ability_permission`
+filters remain the authoritative host channel for tightening or broadening
+any scope.
 
 Toolbox primarily returns suggestions and planning artifacts. ADR-017 retires
 the former ADR-010/011 local image import, replacement, and restore exceptions.
@@ -175,6 +179,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-013: WordPress-First Content And Recommendation Contracts](docs/decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
 - [ADR-014: Current-Article Multi-Link Editor Transaction](docs/decisions/ADR-014-current-article-multi-link-editor-transaction.md)
 - [ADR-017: Retire Single-Image Local Write Exceptions](docs/decisions/ADR-017-retire-single-image-local-write-exceptions.md)
+- [ADR-018: Scoped Editor Permissions For The Content-Support Sidebar](docs/decisions/ADR-018-editor-scoped-permissions.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:

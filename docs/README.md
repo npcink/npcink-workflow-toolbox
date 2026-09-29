@@ -145,6 +145,7 @@ Start from the active documents below before changing code.
 - [ADR-012: Bound Media Backup Retention](decisions/ADR-012-media-backup-retention-setting.md)
 - [ADR-013: WordPress-First Content And Recommendation Contracts](decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
 - [ADR-014: Current-Article Multi-Link Editor Transaction](decisions/ADR-014-current-article-multi-link-editor-transaction.md)
+- [ADR-018: Scoped Editor Permissions For The Content-Support Sidebar](decisions/ADR-018-editor-scoped-permissions.md)
 
 ## Archived Closeouts
 
