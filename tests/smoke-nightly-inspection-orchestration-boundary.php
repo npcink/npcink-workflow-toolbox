@@ -59,7 +59,11 @@ foreach ( array( "'direct_wordpress_write'", "'final_write_path'", "'core_propos
 	$assert_contains( $cloud_merger, $required_cloud_merger_text, 'Cloud Batch result merge remains review-only.' );
 }
 
-$provider = (string) file_get_contents( $root . '/includes/Provider_Client.php' );
+$provider_source_files = glob( $root . '/includes/*.php' );
+$provider              = '';
+foreach ( $provider_source_files as $provider_source_file ) {
+	$provider .= "\n" . (string) file_get_contents( $provider_source_file );
+}
 foreach ( array( "'cloud_role'            => 'runtime_detail'", "'cloud_scheduler_truth'        => false", "'core_proposal_created'        => false", "'direct_wordpress_write'       => false", 'npcink_cloud_addon_get_toolbox_runtime_run(', 'npcink_cloud_addon_get_toolbox_runtime_run_result(' ) as $required_provider_text ) {
 	$assert_contains( $provider, $required_provider_text, 'Provider client keeps Cloud Batch as runtime/detail bridge.' );
 }
