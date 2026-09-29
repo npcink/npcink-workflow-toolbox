@@ -127,7 +127,7 @@ $id=0; $path=''; try {
 	page.on('request', (request) => {
 		if (request.url().includes('/wp-json/')) requests.push({ url: request.url(), method: request.method(), body: request.postData() || '' });
 	});
-	await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&tab=image&tool=batch-optimize`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+	await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools&toolbox_tool=media-batch-optimize`, { waitUntil: 'domcontentloaded', timeout: 45000 });
 	assert(!page.url().includes('wp-login.php'), 'The browser opened Toolbox as an administrator.');
 	await page.waitForFunction(() => Boolean(window.NpcinkToolbox?.restUrl), null, { timeout: 15000 });
 	await page.evaluate(({ date }) => {

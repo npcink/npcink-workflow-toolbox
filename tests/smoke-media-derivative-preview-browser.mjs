@@ -134,7 +134,7 @@ $id=0; $path=''; try {
 	});
 	page = await context.newPage();
 	page.on('request', (request) => requests.push({ url: request.url(), method: request.method(), postData: request.postData() || '' }));
-	await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&tab=image&tool=batch-optimize`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+	await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools&toolbox_tool=media-batch-optimize`, { waitUntil: 'domcontentloaded', timeout: 45000 });
 	assert(!page.url().includes('wp-login.php'), 'Browser opened the Toolbox admin surface as an administrator.');
 	await page.waitForFunction(() => Boolean(window.NpcinkToolbox?.restUrl), null, { timeout: 15000 });
 

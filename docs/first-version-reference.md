@@ -117,17 +117,18 @@ inside Site Check. **Current Check** contains the ordinary manual report.
 `toolbox_tab=advanced` may remain only as a compatibility alias into the
 hidden Site Check panel instead of rendering a separate directory or listing
 Site Check detail and Scheduled Review preview as parallel choices.
-`toolbox_tab=morning-brief` may remain only as a compatibility alias that opens
-the Scheduled Review sub tab. Scheduled Review uses the Nightly/Morning Brief
+The removed `toolbox_tab=morning-brief` alias used to open the Scheduled
+Review sub tab; use `toolbox_tab=operations-insights` with
+`site_check_tab=scheduled-review` instead. Scheduled Review uses the Nightly/Morning Brief
 preview and folded optional local fallback settings, but it is not presented as
 a second site-check product. Its Cloud run recovery action links to Cloud Addon
 Runtime Runs instead of rendering run recovery controls locally.
 The admin Image Handling tab defaults to Media Library Optimization. Media
 Library attachment details and row actions expose ALT review; single-image
-import, replacement, and restore use the Adapter/Core/Toolkit path. The old `tab=image&tool=optimize` and
-`toolbox_tab=tools&toolbox_tool=media-derivative` URLs are deprecated and fall
-back to `tab=image&tool=batch-optimize`; Toolbox no longer exposes a standalone
-one-image picker page. The media library bulk action can send selected
+import, replacement, and restore use the Adapter/Core/Toolkit path. Admin URLs
+use canonical `toolbox_tab`/`toolbox_tool` parameters only; the historical
+`tab`/`tool` alias URLs were removed in the pre-release cleanup. Toolbox no
+longer exposes a standalone one-image picker page. The media library bulk action can send selected
 attachment IDs into Batch Image ALT or Media Library Optimization. Toolbox owns
 the exact-manifest check, one administrator confirmation, foreground progress,
 and history presentation; Toolkit owns each replacement and restore. The
@@ -142,12 +143,12 @@ retired. Site content opportunity review belongs in Site Check; the
 bounded `content_snapshot_suggestions` helper remains route-only/internal for
 hosted AI composition.
 Reviewed draft write plans remain route/Ability-only for future import
-workflows and machine clients. The old article-brief, article-assistant, and
-article-plan URLs remain compatibility paths that fall back to Site Check, not
-operator-facing admin tools. Batch media entry points use
-`tab=image&tool=bulk-alt` and `tab=image&tool=batch-optimize`;
-deprecated `tool=optimize` and legacy `toolbox_tool=media-derivative` URLs
-canonicalize to Media Library Optimization. The
+workflows and machine clients. The article-brief, article-assistant, and
+article-plan compatibility URLs were removed in the pre-release cleanup;
+article-brief and article-assistant no longer have REST routes at all, and old
+article-plan URLs fall back to the default Image Handling tool. Batch media
+entry points use `toolbox_tab=tools&toolbox_tool=media-alt-caption-review` and
+`toolbox_tab=tools&toolbox_tool=media-batch-optimize`. The
 lower-level `taxonomy_tags` intent remains available to the route but is not a
 separate default button in the editor UI.
 

@@ -5,7 +5,8 @@ existing Toolbox and Abilities outputs into one reviewable `article_draft_v1`
 artifact. It is now retired from the operator-facing Toolbox admin surface and
 from the public Toolbox Ability catalog.
 
-The legacy REST route remains only as a compatibility path for older callers.
+The legacy REST route and its compatibility path were removed in the 2026-09
+pre-release cleanup; the pre-release stage had no external callers to preserve.
 New workflows should use the smaller surfaces around a human-written article:
 taxonomy/tag choices, internal links, image candidates, SEO/AEO/GEO
 suggestions, media metadata, publish/readiness checks, or the reviewed draft
@@ -34,7 +35,8 @@ The current budget is:
 
 ## Contract
 
-- REST route: `POST /wp-json/npcink-toolbox/v1/flows/article-assistant`
+- REST route: removed in the 2026-09 pre-release cleanup (was
+  `POST /wp-json/npcink-toolbox/v1/flows/article-assistant`)
 - Ability id: none. The former `npcink-toolbox/build-article-assistant`
   Ability is retired.
 - Artifact type: `article_assistant_workbench`

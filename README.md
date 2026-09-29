@@ -108,6 +108,10 @@ The first version provides:
   leases, retries, dead letters, or WordPress content writes;
 - Cloud-managed web search status, plus read-only Cloud-managed image-source
   and vector availability;
+- an administrator dashboard **Zhihu hot topics** widget that shows a cached
+  Cloud-managed hot-topic snapshot with an explicit nonce-gated refresh action;
+  it is a read-only operator signal surface and performs no proposal, write,
+  or background work;
 - an operator-filled content discoverability context for SEO, AEO, and GEO
   guidance that can be exposed to third-party AI callers;
 - REST endpoints for image-source candidates, site knowledge/search, content
@@ -117,6 +121,10 @@ The first version provides:
 - static tests and PHP syntax linting.
 
 ## Boundary
+
+All first-version surfaces (admin pages, editor sidebar, dashboard widget, and
+REST routes) require `manage_options`; editor-role (`edit_posts`) access is a
+deliberately deferred scoped-permission decision, not a current capability.
 
 Toolbox primarily returns suggestions and planning artifacts. ADR-017 retires
 the former ADR-010/011 local image import, replacement, and restore exceptions.
@@ -255,8 +263,6 @@ registered.
 
 - `GET /wp-json/npcink-toolbox/v1/status`
 - `POST /wp-json/npcink-toolbox/v1/image-candidates`
-- `POST /wp-json/npcink-toolbox/v1/vector-search`
-- `POST /wp-json/npcink-toolbox/v1/knowledge-search`
 - `POST /wp-json/npcink-toolbox/v1/web-search/test`
 - `POST /wp-json/npcink-toolbox/v1/web-search/diagnostics`
 - `GET /wp-json/npcink-toolbox/v1/site-knowledge/status`
@@ -274,8 +280,6 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/ai/site-helpers`
 - `POST /wp-json/npcink-toolbox/v1/ai/image-generation` (legacy hosted image
   candidate normalization seam only)
-- `POST /wp-json/npcink-toolbox/v1/flows/article-brief`
-- `POST /wp-json/npcink-toolbox/v1/flows/article-assistant`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/image-candidate-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
@@ -340,12 +344,15 @@ High-risk entries are intentionally constrained:
   Cloud-owned runtime runs. Toolbox must not store server-side run history,
   own retry policy, expose a recovery workspace, schedule work, create Core
   proposals, or write WordPress data.
-- `/flows/article-assistant` is route-only compatibility and must stay hidden
-  from the default operator UI. Normal editorial work belongs in the editor
+- The retired `/vector-search`, `/knowledge-search`,
+  `/flows/article-brief`, and `/flows/article-assistant` compatibility routes
+  have been removed outright in the pre-release cleanup; there are no external
+  callers to keep compatible. Normal editorial work belongs in the editor
   content-support sidebar or reviewed Core handoff flows.
 
-`/flows/article-brief` remains an API composition primitive for OpenClaw and
-external AI callers; it is not exposed as a current operator-facing admin tool.
+The retired `/flows/article-brief` route has been removed; OpenClaw and other
+external AI callers should use `npcink-toolbox/build-ai-article-writing-pack`
+and the editor content-support routes instead.
 
 The status route distinguishes registered Toolbox surfaces from currently
 available Cloud execution. Cloud-backed actions report `registered`,
@@ -441,12 +448,12 @@ authorization:
 - `npcink-toolbox/build-content-discoverability-brief`
 - `npcink-toolbox/build-ai-article-writing-pack`
 
-The legacy `/vector-search`, `/flows/article-brief`, `/flows/article-assistant`,
-and `/flows/media-brief` REST routes remain compatibility surfaces, but they are
-no longer registered as public Toolbox abilities. New AI callers should use
+The `/vector-search`, `/knowledge-search`, `/flows/article-brief`, and
+`/flows/article-assistant` compatibility REST routes have been removed; the
+pre-release stage has no users to keep them compatible for. `/flows/media-brief`
+remains a current media planning route. New AI callers should use
 `npcink-toolbox/search-site-knowledge`, `npcink-toolbox/build-article-write-plan`,
-content-support routes, or editor/media-specific routes instead of those legacy
-ability ids.
+content-support routes, or editor/media-specific routes.
 
 When `npcink-abilities-toolkit` is active, Toolbox uses its public registration
 helpers so the tools can be discovered by existing Npcink consumers.
@@ -489,11 +496,9 @@ into one suggestion-only pack. It is a convenience fallback for broad prompts,
 not the default SEO/AEO/GEO, taxonomy, link, image, or publish-readiness
 surface.
 
-The legacy Article Assistant REST flow can still compose one local
-`article_draft_v1` workbench artifact from topic, evidence candidates,
-image-source candidates, site context, operator notes, and an optional reviewed
-draft. It is route-only compatibility, not an operator-facing tool and not a
-public Toolbox ability. Reviewed draft write-plan handoffs should use
+The legacy Article Assistant REST flow and its local `article_draft_v1`
+workbench composition have been removed with the compatibility cleanup.
+Reviewed draft write-plan handoffs should use
 `npcink-toolbox/build-article-write-plan` through REST or Abilities; normal
 editorial work should stay in the editor content-support sidebar.
 
@@ -711,11 +716,13 @@ The admin **Image Handling** tab defaults to media work, with **Batch Optimize
 Images** as the first visible workbench. Single-image ALT and optimization
 actions start from the media-library attachment details panel or media list row
 actions, then carry that attachment into the same selected-image workbenches
-used for batches. The old `tab=image&tool=optimize` and
-`toolbox_tab=tools&toolbox_tool=media-derivative` URLs are deprecated and fall
-back to `tab=image&tool=batch-optimize`; Toolbox no longer exposes a standalone
+used for batches. Admin URLs use the canonical `toolbox_tab` and `toolbox_tool` parameters only;
+the historical `tab`/`tool` alias URLs (`tab=image&tool=optimize`,
+`tool=bulk-alt`, `tool=batch-optimize`, `toolbox_tool=media-derivative`) were
+removed in the pre-release cleanup. Toolbox no longer exposes a standalone
 one-image picker page. Media library bulk actions can send selected images to
-`tab=image&tool=bulk-alt` or `tab=image&tool=batch-optimize`. Site helpers
+`toolbox_tab=tools&toolbox_tool=media-alt-caption-review` or
+`toolbox_tab=tools&toolbox_tool=media-batch-optimize`. Site helpers
 remain secondary low-frequency checks, while content preparation and reviewed
 handoffs live in their own admin surface.
 
@@ -814,8 +821,8 @@ product research, support context, or article preparation should call the Cloud
 runtime and preserve returned source URLs in their evidence packs. Toolbox does
 not verify truth, write WordPress content, or expose provider keys.
 
-The legacy `vector-search` route is a compatibility pointer only.
-Toolbox no longer stores vector provider keys, embedding models, dimensions,
+The legacy `vector-search` route has been removed. Toolbox does not store
+vector provider keys, embedding models, dimensions,
 provider endpoints, collection names, or local vector database settings. New
 Ability callers should use Cloud-managed Site Knowledge for semantic site
 context through `npcink-toolbox/search-site-knowledge`.

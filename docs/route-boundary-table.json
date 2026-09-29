@@ -7,7 +7,9 @@
     {
       "route": "/status",
       "documented_route": "/status",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.status.read",
       "owner": "toolbox_status_surface",
       "write_posture": "read_only",
@@ -17,7 +19,9 @@
     {
       "route": "/image-candidates",
       "documented_route": "/image-candidates",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_source",
       "owner": "toolbox_image_source_surface",
       "write_posture": "suggestion_only",
@@ -25,29 +29,11 @@
       "boundary_note": "Image-source candidate action only; no media import or featured-image write."
     },
     {
-      "route": "/vector-search",
-      "documented_route": "/vector-search",
-      "methods": ["POST"],
-      "scope": "cap.toolbox.vector_search",
-      "owner": "legacy_rest_compatibility",
-      "write_posture": "suggestion_only",
-      "direct_wordpress_write": false,
-      "boundary_note": "REST compatibility pointer for Cloud-managed Site Knowledge; not local vector or RAG ownership."
-    },
-    {
-      "route": "/knowledge-search",
-      "documented_route": "/knowledge-search",
-      "methods": ["POST"],
-      "scope": "cap.toolbox.knowledge.search",
-      "owner": "cloud_site_knowledge_bridge",
-      "write_posture": "suggestion_only",
-      "direct_wordpress_write": false,
-      "boundary_note": "Semantic context candidates only; Cloud owns indexing and vector lifecycle."
-    },
-    {
       "route": "/web-search/test",
       "documented_route": "/web-search/test",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.web_search",
       "owner": "cloud_web_search_bridge",
       "write_posture": "suggestion_only",
@@ -57,7 +43,9 @@
     {
       "route": "/web-search/diagnostics",
       "documented_route": "/web-search/diagnostics",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.web_search",
       "owner": "cloud_web_search_bridge",
       "write_posture": "read_only",
@@ -67,7 +55,9 @@
     {
       "route": "/site-knowledge/status",
       "documented_route": "/site-knowledge/status",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.knowledge.read",
       "owner": "cloud_site_knowledge_bridge",
       "write_posture": "read_only",
@@ -77,7 +67,9 @@
     {
       "route": "/site-knowledge/search",
       "documented_route": "/site-knowledge/search",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.knowledge.search",
       "owner": "cloud_site_knowledge_bridge",
       "write_posture": "suggestion_only",
@@ -87,7 +79,9 @@
     {
       "route": "/site-knowledge/sync",
       "documented_route": "/site-knowledge/sync",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.knowledge.sync",
       "owner": "cloud_site_knowledge_bridge",
       "write_posture": "refresh_manifest_only",
@@ -97,7 +91,9 @@
     {
       "route": "/site-media/index-batch",
       "documented_route": "/site-media/index-batch",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.knowledge.sync",
       "owner": "toolbox_site_media_projection_bridge",
       "write_posture": "suggestion_only_projection_refresh",
@@ -107,7 +103,9 @@
     {
       "route": "/agent-feedback",
       "documented_route": "/agent-feedback",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.feedback.write",
       "owner": "cloud_eval_metadata",
       "write_posture": "eval_metadata_only",
@@ -117,7 +115,9 @@
     {
       "route": "/agent-feedback/summary",
       "documented_route": "/agent-feedback/summary",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.feedback.read",
       "owner": "cloud_eval_metadata",
       "write_posture": "read_only",
@@ -127,7 +127,9 @@
     {
       "route": "/ai/content-support",
       "documented_route": "/ai/content-support",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "suggestion_only",
@@ -137,7 +139,9 @@
     {
       "route": "/ai/site-helpers",
       "documented_route": "/ai/site-helpers",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "suggestion_only",
@@ -147,7 +151,9 @@
     {
       "route": "/ai/image-generation",
       "documented_route": "/ai/image-generation",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_source",
       "owner": "hosted_image_candidate_bridge",
       "write_posture": "suggestion_only",
@@ -155,29 +161,11 @@
       "boundary_note": "Legacy hosted image candidate normalization seam only; Cloud owns generation runtime and credentials."
     },
     {
-      "route": "/flows/article-brief",
-      "documented_route": "/flows/article-brief",
-      "methods": ["POST"],
-      "scope": "cap.toolbox.workflow_suggest",
-      "owner": "legacy_rest_compatibility",
-      "write_posture": "suggestion_only",
-      "direct_wordpress_write": false,
-      "boundary_note": "Compatibility planning flow only; no article write authority."
-    },
-    {
-      "route": "/flows/article-assistant",
-      "documented_route": "/flows/article-assistant",
-      "methods": ["POST"],
-      "scope": "cap.toolbox.workflow_suggest",
-      "owner": "legacy_rest_compatibility",
-      "write_posture": "suggestion_only",
-      "direct_wordpress_write": false,
-      "boundary_note": "Route-only compatibility; hidden from default operator surface."
-    },
-    {
       "route": "/flows/article-plan",
       "documented_route": "/flows/article-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -187,7 +175,9 @@
     {
       "route": "/flows/image-candidate-adoption-plan",
       "documented_route": "/flows/image-candidate-adoption-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -197,7 +187,9 @@
     {
       "route": "/flows/article-audio-adoption-plan",
       "documented_route": "/flows/article-audio-adoption-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -207,7 +199,9 @@
     {
       "route": "/local-admin-consent/featured-image",
       "documented_route": "/local-admin-consent/featured-image",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.local_admin_consent",
       "owner": "local_admin_consent_exception",
       "write_posture": "local_admin_consent_exception",
@@ -218,7 +212,9 @@
     {
       "route": "/flows/site-knowledge-review-plan",
       "documented_route": "/flows/site-knowledge-review-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -228,7 +224,9 @@
     {
       "route": "/flows/nightly-inspection-review-plan",
       "documented_route": "/flows/nightly-inspection-review-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -238,7 +236,9 @@
     {
       "route": "/flows/content-metadata-apply-plan",
       "documented_route": "/flows/content-metadata-apply-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -248,7 +248,9 @@
     {
       "route": "/flows/media-alt-caption-review-plan",
       "documented_route": "/flows/media-alt-caption-review-plan",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -258,7 +260,9 @@
     {
       "route": "/flows/media-brief",
       "documented_route": "/flows/media-brief",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "suggestion_only",
@@ -268,7 +272,9 @@
     {
       "route": "/editor/content-support",
       "documented_route": "/editor/content-support",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_editor_surface",
       "write_posture": "suggestion_only",
@@ -278,7 +284,9 @@
     {
       "route": "/media-derivative-handoff",
       "documented_route": "/media-derivative-handoff",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "core_handoff_only",
@@ -288,7 +296,9 @@
     {
       "route": "/media-optimization-manifest",
       "documented_route": "/media-optimization-manifest",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "npcink_abilities_toolkit",
       "write_posture": "read_only",
@@ -298,7 +308,9 @@
     {
       "route": "/media-optimization-health",
       "documented_route": "/media-optimization-health",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "cloud_addon",
       "write_posture": "read_only",
@@ -308,7 +320,10 @@
     {
       "route": "/media-optimization-batches",
       "documented_route": "/media-optimization-batches",
-      "methods": ["GET", "POST"],
+      "methods": [
+        "GET",
+        "POST"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "toolbox_exact_manifest_state",
       "write_posture": "local_execution_record",
@@ -318,7 +333,9 @@
     {
       "route": "/media-optimization-batches/current",
       "documented_route": "/media-optimization-batches/current",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "toolbox_exact_manifest_state",
       "write_posture": "read_only",
@@ -328,7 +345,9 @@
     {
       "route": "/media-backup-cleanup/preview",
       "documented_route": "/media-backup-cleanup/preview",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "npcink_abilities_toolkit",
       "write_posture": "read_only",
@@ -338,7 +357,9 @@
     {
       "route": "/media-backup-cleanup/confirm",
       "documented_route": "/media-backup-cleanup/confirm",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "npcink_abilities_toolkit",
       "write_posture": "strong_local_confirmation_exception",
@@ -349,7 +370,9 @@
     {
       "route": "/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/confirm",
       "documented_route": "/media-optimization-batches/{batch_id}/confirm",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "toolbox_exact_manifest_state",
       "write_posture": "strong_local_confirmation_record",
@@ -359,7 +382,9 @@
     {
       "route": "/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/complete",
       "documented_route": "/media-optimization-batches/{batch_id}/items/{attachment_id}/complete",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "npcink_abilities_toolkit",
       "write_posture": "strong_local_confirmation_exception",
@@ -370,7 +395,9 @@
     {
       "route": "/media-optimization-batches/(?P<batch_id>media_opt_[A-Za-z0-9]+)/items/(?P<attachment_id>[0-9]+)/restore",
       "documented_route": "/media-optimization-batches/{batch_id}/items/{attachment_id}/restore",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.image_adoption",
       "owner": "npcink_abilities_toolkit",
       "write_posture": "strong_local_confirmation_exception",
@@ -381,7 +408,9 @@
     {
       "route": "/media-derivative-preview",
       "documented_route": "/media-derivative-preview",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_fixed_workflow_surface",
       "write_posture": "preview_only",
@@ -391,7 +420,9 @@
     {
       "route": "/media-derivative-preview/(?P<run_id>[A-Za-z0-9._:-]+)",
       "documented_route": "/media-derivative-preview/{run_id}",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "cloud_addon_runtime_projection",
       "write_posture": "read_only",
@@ -401,7 +432,9 @@
     {
       "route": "/media-derivative-preview/(?P<run_id>[A-Za-z0-9._:-]+)/result",
       "documented_route": "/media-derivative-preview/{run_id}/result",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "cloud_addon_runtime_projection",
       "write_posture": "read_only",
@@ -411,7 +444,9 @@
     {
       "route": "/media-derivative-optimization-payload",
       "documented_route": "/media-derivative-optimization-payload",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "cloud_addon_payload_projection",
       "write_posture": "core_handoff_only",
@@ -421,7 +456,9 @@
     {
       "route": "/media-derivative-local-review/(?P<artifact_id>art_[0-9a-f]{32})",
       "documented_route": "/media-derivative-local-review/{artifact_id}",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_local_review_projection",
       "write_posture": "preview_only",
@@ -431,7 +468,9 @@
     {
       "route": "/nightly-inspection/cloud-runtime-entitlement",
       "documented_route": "/nightly-inspection/cloud-runtime-entitlement",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.nightly_inspection",
       "owner": "cloud_runtime_bridge",
       "write_posture": "read_only",
@@ -441,7 +480,9 @@
     {
       "route": "/nightly-inspection/cloud-batch",
       "documented_route": "/nightly-inspection/cloud-batch",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.nightly_inspection",
       "owner": "cloud_runtime_bridge",
       "write_posture": "cloud_runtime_detail",
@@ -451,7 +492,9 @@
     {
       "route": "/nightly-inspection/cloud-batch/recent",
       "documented_route": "/nightly-inspection/cloud-batch/recent",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.nightly_inspection",
       "owner": "cloud_runtime_bridge",
       "write_posture": "read_only",
@@ -461,7 +504,9 @@
     {
       "route": "/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)",
       "documented_route": "/nightly-inspection/cloud-batch/{run_id}",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "scope": "cap.toolbox.nightly_inspection",
       "owner": "cloud_runtime_bridge",
       "write_posture": "read_only",
@@ -471,7 +516,10 @@
     {
       "route": "/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/result",
       "documented_route": "/nightly-inspection/cloud-batch/{run_id}/result",
-      "methods": ["GET", "POST"],
+      "methods": [
+        "GET",
+        "POST"
+      ],
       "scope": "cap.toolbox.nightly_inspection",
       "owner": "cloud_runtime_bridge",
       "write_posture": "cloud_runtime_detail",
@@ -481,7 +529,9 @@
     {
       "route": "/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/retry",
       "documented_route": "/nightly-inspection/cloud-batch/{run_id}/retry",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "scope": "cap.toolbox.nightly_inspection",
       "owner": "cloud_runtime_bridge",
       "write_posture": "cloud_runtime_detail",
