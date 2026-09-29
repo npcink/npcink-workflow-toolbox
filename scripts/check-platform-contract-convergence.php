@@ -64,7 +64,7 @@ npcink_contract_file_contains(
 
 $quality_matrix = file_get_contents( $root . '/scripts/cross-repo-quality-matrix.php' );
 npcink_contract_check( false !== $quality_matrix && false === strpos( $quality_matrix, 'wp-magick-toolbox' ), 'Npcink quality matrix excludes wp-magick-toolbox' );
-foreach ( array( 'npcink-governance-core', 'npcink-abilities-toolkit', 'npcink-ai-client-adapter', 'npcink-workflow-toolbox', 'npcink-cloud-addon', 'npcink-ai-cloud' ) as $repo_name ) {
+foreach ( array( 'npcink-governance-core', 'npcink-abilities-toolkit', 'npcink-ai-client-adapter', 'npcink-workflow-toolbox', 'npcink-cloud-addon', 'npcink-eval-lab', 'npcink-ai-cloud' ) as $repo_name ) {
 	npcink_contract_check( false !== $quality_matrix && false !== strpos( $quality_matrix, "'name'       => '{$repo_name}'" ), "Npcink quality matrix includes {$repo_name}" );
 }
 
