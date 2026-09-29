@@ -1,6 +1,7 @@
 # AI Code Review Standard v1
 
-Status: proposed — pending the first operator-configured model-backed trial.
+Status: proposed — model-backed trial completed 2026-09-29; per-repo CI
+rollout pending operator confirmation.
 
 Purpose: adopt `alibaba/open-code-review` (OpenCodeReview, Apache-2.0) as the
 shared advisory AI reviewer across Npcink repositories, with one machine-level
@@ -21,8 +22,27 @@ Local machine verification completed before this standard was written:
   - `ocr delegate preview` on the code PR #134 range selected the two changed
     PHP files, and `ocr delegate rule` resolved a PHP ruleset that explicitly
     defers to PHPStan/PHPCS-enforced findings.
-- Model-backed review remains unverified until the operator configures a
-  provider key. That trial is the adoption gate for per-repo CI rollout.
+- Model-backed trial completed 2026-09-29 on the operator-configured
+  `z-ai-coding` provider (`glm-5.3`, BigModel coding endpoint); `ocr llm test`
+  passed including the tool-call round trip.
+- Precision check: `ocr review` on the merged, CI-clean PR #134 range
+  (2 PHP files, 113 changed lines) produced 0 comments after ~50 tool calls,
+  in 8m32s, ~1.43M input tokens (~91% cache reads). No false positives.
+- Recall check: a local-only throwaway branch with one probe file planting
+  five WordPress defect classes (wrong capability, loose-`==` guard bypass,
+  unvalidated request key with PHP 8.1 deprecation, dead try/catch that
+  conflated DB failure with an empty result, unparameterized SQL, unescaped
+  admin echo) was reviewed and the tool reported: the per-ID
+  `current_user_can( 'delete_post', ... )` capability correction, a
+  high-severity loose-comparison guard-bypass explanation, the missing-key /
+  PHP 8.1 finding, and the dead try/catch finding whose suggested fix embeds
+  `$wpdb->prepare` (covering the SQL-injection plant). The unescaped-echo
+  finding is inconclusive: the round-2 request for that file failed with
+  `context deadline exceeded` under the then-default 300s timeout.
+- Tuning applied after the trial: `providers.z-ai-coding.timeout_sec = 600`
+  to absorb long agentic rounds. Per-review cost on the coding plan is
+  roughly 1.4M input tokens (mostly cached) and 8-10 minutes wall clock, so
+  CI rollout keeps PR-event-only triggering and the docs-only auto-skip.
 
 ## Scope
 
