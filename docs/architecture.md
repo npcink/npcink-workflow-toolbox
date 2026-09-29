@@ -37,7 +37,17 @@ Status: MVP architecture.
 | `npcink-workflow-toolbox.php` | Plugin header and bootstrap. |
 | `Plugin` | Shared service construction and hook registration. |
 | `Settings` | Option defaults, sanitization, non-secret compatibility settings, and content context export. Provider secrets, key rotation, quotas, billing, request logs, and routing remain Cloud/host/connector owned. |
-| `Provider_Client` | Cloud image-source runtime calls, explicit AI-generated image candidate normalization, Cloud-managed site knowledge calls, Cloud-managed web search status, manual Site Check Cloud detail runtime calls, and fixed-flow planning actions. |
+| `Provider_Client` | Facade over the provider cluster services. Keeps every public signature as a delegation entrypoint and directly owns the site-media recognition continuation, image-source Cloud execution, article audio generation, agent feedback, manual Site Check Cloud detail runtime calls, and the shared Site Knowledge Cloud runtime execution. |
+| `Provider_Client_Support` | Abstract shared base for the facade and every provider service: Settings dependency plus payload classification, payload/debug sanitization, output contracts, and bounded text helpers. Internal plumbing, not an extension point. |
+| `Provider_Nightly_Inspection_Service` | Nightly Inspection Cloud batch submit/status/result/retry/entitlement bridges with payload minimization and response normalization. Cloud stays runtime owner. |
+| `Provider_Ai_Image_Service` | Reviewed-prompt hosted AI image generation runtime request, AI-generated candidate extraction/normalization, and the shared `image_candidate.v1` contract normalization. |
+| `Provider_Web_Search_Service` | Cloud web search test/diagnostic bridges, evidence helpers for article and discoverability flows, and Cloud web search response normalization. |
+| `Provider_Media_Alt_Caption_Service` | Metadata-only `media_alt_caption_review_set.v1` building with candidate quality assessment, rejection screening, and bounded visual-evidence reuse. |
+| `Provider_Hosted_AI_Service` | Hosted content-support and site-helper runtime requests with bounded source preparation, prompts, quality contracts, structured output decoding, and media ALT snapshot input assembly. |
+| `Provider_Site_Knowledge_Service` | Site Knowledge search/status/sync ability calls, Cloud boundary and ownership projections, and Cloud agent handoff display filtering. |
+| `Provider_Content_Collector_Service` | Read-only bounded collectors: hosted AI post/site snapshots, article and media-library ALT metadata snapshots, and Site Knowledge sync manifest documents/comments. |
+| `Provider_Discoverability_Service` | Bounded discoverability source resolution and suggestion-only SEO/AEO/GEO field and slug candidates. |
+| `Provider_Workflow_Plans_Service` | Review-only fixed-flow planning artifacts: article write/batch/media-batch plans, image and audio adoption plans, review plans, media briefs, derivative handoffs, writing packs, and the discoverability brief. |
 | `Rest_Controller` | Admin-facing REST routes for tool execution. |
 | `Admin_Page` | WordPress admin tool surface, sole Npcink AI navigation shell, non-secret compatibility/status forms, and content context form. The shell centralizes navigation only; it does not absorb another plugin's settings or authority. |
 | `Ability_Surface_Metadata` | Read-only local projection of Toolbox-owned workflow defaults, route-only compatibility entries, runtime ownership, handoff posture, and overlap policy. It is not an ability registry, workflow registry, provider picker, request log, or approval store. |

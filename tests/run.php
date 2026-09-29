@@ -1111,6 +1111,37 @@ $client              = '';
 foreach ( $client_source_files as $client_source_file ) {
 	$client .= "\n" . (string) file_get_contents( $client_source_file );
 }
+$provider_service_files = array(
+	'Provider_Client_Support',
+	'Provider_Nightly_Inspection_Service',
+	'Provider_Ai_Image_Service',
+	'Provider_Web_Search_Service',
+	'Provider_Media_Alt_Caption_Service',
+	'Provider_Hosted_AI_Service',
+	'Provider_Site_Knowledge_Service',
+	'Provider_Content_Collector_Service',
+	'Provider_Discoverability_Service',
+	'Provider_Workflow_Plans_Service',
+);
+foreach ( $provider_service_files as $provider_service_file ) {
+	toolbox_assert( is_file( $root . '/includes/' . $provider_service_file . '.php' ), "Provider cluster service file {$provider_service_file}.php exists." );
+	toolbox_assert( false !== strpos( $main, "includes/{$provider_service_file}.php" ), "Provider cluster service file {$provider_service_file}.php is loaded through the plugin bootstrap only." );
+}
+toolbox_assert( false !== strpos( $client, 'final class Provider_Client extends Provider_Client_Support' ), 'Provider_Client stays the public facade over the shared provider support base.' );
+$provider_service_delegates = array(
+	'nightly'          => 'submit_nightly_inspection_cloud_batch',
+	'ai_image'         => 'run_ai_image_generation',
+	'web_search'       => 'test_cloud_web_search',
+	'media_alt'        => 'build_media_alt_caption_review_set',
+	'hosted_ai'        => 'run_hosted_ai_content_support',
+	'site_knowledge'   => 'search_site_knowledge',
+	'collectors'       => 'collect_site_knowledge_documents',
+	'discoverability'  => 'resolve_discoverability_source',
+	'plans'            => 'build_article_write_plan',
+);
+foreach ( $provider_service_delegates as $provider_service_property => $provider_service_entry ) {
+	toolbox_assert( false !== strpos( $client, "return \$this->{$provider_service_property}->{$provider_service_entry}(" ), "Provider_Client facade delegates {$provider_service_entry} to its cluster service." );
+}
 $editor_css = file_get_contents( $root . '/assets/editor-content-support.css' );
 toolbox_assert( false === strpos( $editor_js, "intent: 'related_articles'" ) && false === strpos( $editor_js, 'renderRelatedArticleCandidateSection' ) && false === strpos( $editor_js, 'related_article_copy' ) && false === strpos( $editor_js, 'related_article_open' ) && false === strpos( $editor_js, 'related_article_ignored' ), 'Editor removes the obsolete related-article intent and its duplicate state and feedback paths.' );
 toolbox_assert( false !== strpos( $editor_js, 'Site Knowledge is temporarily unavailable' ) && false !== strpos( $editor_js, 'cloud_unavailable' ) && false !== strpos( $editor_js, 'no_cloud_evidence' ), 'Site-citation UI exposes concise retrieval-state guidance only when results may be incomplete.' );
