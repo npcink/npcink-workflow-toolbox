@@ -28,6 +28,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Client_Support.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Nightly_Inspection_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Ai_Image_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Web_Search_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Media_Alt_Caption_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Client.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Recognition_Continuation.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Fingerprint_Scan.php';
