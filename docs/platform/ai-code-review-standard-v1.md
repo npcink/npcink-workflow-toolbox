@@ -7,6 +7,62 @@ shared advisory AI reviewer across Npcink repositories, with one machine-level
 local install, a single canonical workflow template, and per-repository CI
 enrollment. It complements, and never replaces, deterministic gates.
 
+## Rollout Closeout - 2026-09-29
+
+All enrollments landed the same day; every PR below is merged and its topic
+branches (local and remote) were cleaned up.
+
+| Repository | PRs | Delivered |
+| --- | --- | --- |
+| `npcink-abilities-toolkit` | #141, #142, #146 | workflow, AGENTS.md gate, first closed-loop defect fix |
+| `npcink-workflow-toolbox` | #151, #152 | this standard + template, AGENTS.md gate |
+| `npcink-governance-core` | #83 | workflow + AGENTS.md gate |
+| `npcink-ai-client-adapter` | #43 | workflow + AGENTS.md gate |
+| `npcink-cloud-addon` | #189 | workflow + AGENTS.md gate |
+| `npcink-ai-cloud` | #1049 | workflow + AGENTS.md gate |
+| `npcink-eval-lab` | #80 | workflow (default branch `main`) |
+| `npcink-device-inventory` | #6 | workflow |
+
+First real-world catch and closed loop: the CI reviewer flagged on
+`npcink-abilities-toolkit` #143 that a countable admin string used `__()`
+with `%d` and no plural forms — a WordPress.org translation-readiness defect
+outside the reach of PHPStan, `test:all`, and `check:wporg`. Because that PR
+was already in auto-merge, the finding landed after merge; the pre-publish
+local gate added the same day exists to catch this class earlier. The defect
+was fixed in #146, which also added the missing zh_CN `Plural-Forms:
+nplurals=1` header — `msgfmt --check-header` then surfaced and removed a
+pre-existing invalid `msgstr[1]` on an older plural entry. The fix branch
+re-ran the local gate and reviewed clean with the reviewer explicitly
+verifying `msgid_plural` coverage. Cost observed: a 3-file/14-line review
+used ~51K tokens in 77 seconds, versus ~1.43M tokens (91% cached) and 8.5
+minutes for a two-file feature-sized diff.
+
+Operational lessons recorded for future rollouts:
+
+- Advisory review plus immediate auto-merge means CI comments can arrive after
+  merge. The pre-publish local gate is the mitigation; do not make the LLM
+  review a required check to "fix" this.
+- The default 300s provider timeout is too tight for long agentic rounds on
+  GLM-5.3; `providers.<name>.timeout_sec = 600` resolved intermittent
+  `context deadline exceeded` failures.
+- github.com git-over-HTTPS failed intermittently all day while
+  `api.github.com` stayed reachable. The publisher's built-in retry plus
+  patience loops (25-45s pauses, up to ~10 attempts) always recovered;
+  SSH-remote repositories were unaffected.
+- Repositories differ in GitHub's auto-delete-head-branch setting; verify
+  remote branch state after merge instead of assuming either behavior.
+- With parallel AI sessions active, all enrollment work was done in
+  throwaway `/tmp` worktrees off freshly fetched `origin/<default>`; shared
+  main worktrees were never switched. Watch for the default branch name
+  (`main` on `npcink-eval-lab`).
+- `pnpm run pr:publish` refuses in a worktree without `node_modules`; invoke
+  the same `scripts/publish-pr.sh` directly there.
+
+Deliberately deferred: Gitee-hosted repositories (GitHub Actions cannot run;
+the machine-level CLI still serves them), lower-activity GitHub repositories
+(`npcink-ad`, `npcink-pay-refund`, `npcink-site-toolbox`, and similar), and
+the optional eval-lab triad comparison in Layer 3.
+
 ## Verification Record - 2026-09-29
 
 Local machine verification completed before this standard was written:
