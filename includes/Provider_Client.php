@@ -395,6 +395,26 @@ final class Provider_Client extends Provider_Client_Support {
 		return $this->discoverability->content_discoverability_candidate( $field, $source, $context );
 	}
 	/**
+	 * Delegates to the media ALT/caption service.
+	 */
+	public function build_media_alt_caption_review_set( array $media_snapshot, int $max_items, array $image_context_evidence = array() ) : array {
+		return $this->media_alt->build_media_alt_caption_review_set( $media_snapshot, $max_items, $image_context_evidence );
+	}
+
+	/**
+	 * Delegates to the media ALT/caption service.
+	 */
+	public function maybe_request_media_alt_caption_image_context_evidence( array $review_set ) : array {
+		return $this->media_alt->maybe_request_media_alt_caption_image_context_evidence( $review_set );
+	}
+
+	/**
+	 * Delegates to the media ALT/caption service.
+	 */
+	public function local_media_alt_caption_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'optional_not_requested' ) : array {
+		return $this->media_alt->local_media_alt_caption_review_response( $runtime_payload, $review_set, $cloud_status );
+	}
+	/**
 	 * Requests bounded Cloud-owned visual evidence without exposing the runtime
 	 * client or adding another Toolbox route.
 	 *
