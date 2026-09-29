@@ -125,6 +125,8 @@ WordPress write authority.
 
 Before granting non-admin access, review
 [`Scoped Permissions First Version`](scoped-permissions-first-version.md). A
-host may grant narrower Toolbox scopes, but Toolbox itself must keep the default
-`manage_options` gate and must not treat a Toolbox scope as Core approval,
+host may grant narrower or broader Toolbox scopes; the ADR-018 defaults relax
+only the editor suggestion and agent-feedback scopes to `edit_posts`, every
+other scope keeps the `manage_options` gate, and Toolbox must not treat a
+Toolbox scope as Core approval,
 Adapter execution, indexing lifecycle, quota, billing, or request-log authority.

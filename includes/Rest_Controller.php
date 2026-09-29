@@ -28,6 +28,12 @@ final class Rest_Controller {
 	private Provider_Client $client;
 	private Publish_Preflight_Service $publish_preflight;
 
+	/** ADR-018 scoped default capabilities; every unlisted scope and the fallback stay manage_options. */
+	private const SCOPED_DEFAULT_CAPABILITIES = array(
+		'cap.toolbox.editor_suggest' => 'edit_posts',
+		'cap.toolbox.feedback.write' => 'edit_posts',
+	);
+
 	public function __construct( Settings $settings, Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
 		$this->settings          = $settings;
 		$this->client            = $client;
@@ -118,7 +124,16 @@ final class Rest_Controller {
 			return false;
 		}
 
-		return $this->filtered_rest_permission( current_user_can( 'manage_options' ), $request, $required_scope, $route );
+		$default_capability = self::default_capability_for_scope( $required_scope );
+		return $this->filtered_rest_permission( current_user_can( $default_capability ), $request, $required_scope, $route );
+	}
+
+	public static function default_capability_for_scope( string $scope ): string {
+		return self::SCOPED_DEFAULT_CAPABILITIES[ $scope ] ?? 'manage_options';
+	}
+
+	public static function user_can_use_editor_support(): bool {
+		return current_user_can( self::default_capability_for_scope( 'cap.toolbox.editor_suggest' ) );
 	}
 
 	private function requires_present_admin_ui( string $route, string $method ): bool {
@@ -218,7 +233,7 @@ final class Rest_Controller {
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
 			'/flows/media-alt-caption-review-plan'         => 'cap.toolbox.workflow_suggest',
 			'/flows/media-brief'                           => 'cap.toolbox.workflow_suggest',
-			'/editor/content-support'                      => 'cap.toolbox.workflow_suggest',
+			'/editor/content-support'                      => 'cap.toolbox.editor_suggest',
 			'/media-derivative-handoff'                    => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-preview'                    => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-optimization-payload'       => 'cap.toolbox.workflow_suggest',

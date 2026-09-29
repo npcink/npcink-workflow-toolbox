@@ -260,7 +260,10 @@ Workflow and composition contracts remain indexed at
 
 ## REST Routes
 
-All routes require a logged-in user with `manage_options`. This list is a
+All routes require a logged-in user. The default capability is
+`manage_options`, except the ADR-018 scoped defaults: `/editor/content-support`
+(`cap.toolbox.editor_suggest`) and `/agent-feedback`
+(`cap.toolbox.feedback.write`) accept `edit_posts`. This list is a
 compatibility allowlist, not an ownership claim: routes marked in the boundary
 docs as Cloud-owned bridges, legacy compatibility seams, or explicit boundary
 exceptions must keep those limits even though their first-version paths remain
@@ -467,8 +470,10 @@ Core governance abilities or first-party WordPress abilities.
 
 Ability metadata includes Toolbox scopes such as `cap.toolbox.image_source`,
 `cap.toolbox.vector_search`, and `cap.toolbox.workflow_suggest`. Content context uses
-`cap.toolbox.context.read`. The first admin REST surface remains
-`manage_options` gated; external AI/app-key authorization should be enforced by
+`cap.toolbox.context.read`. REST routes default to `manage_options` except the
+ADR-018 `edit_posts` scoped defaults for the editor content-support sidebar
+and agent feedback; ability execution keeps the `manage_options` default and
+external AI/app-key authorization should be enforced by
 Core or the host that consumes the ability scope metadata. First-version host
 integration hooks are `npcink_toolbox_rest_permission` and
 `npcink_toolbox_ability_permission`.

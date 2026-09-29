@@ -21,7 +21,7 @@ final class Editor_Content_Support {
 	}
 
 	public function enqueue(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Rest_Controller::user_can_use_editor_support() ) {
 			return;
 		}
 
