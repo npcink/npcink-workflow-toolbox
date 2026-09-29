@@ -1,7 +1,6 @@
 # AI Code Review Standard v1
 
-Status: proposed — model-backed trial completed 2026-09-29; per-repo CI
-rollout pending operator confirmation.
+Status: active.
 
 Purpose: adopt `alibaba/open-code-review` (OpenCodeReview, Apache-2.0) as the
 shared advisory AI reviewer across Npcink repositories, with one machine-level
@@ -50,7 +49,9 @@ This standard covers the same repositories as the PR publishing standard
 (`npcink-abilities-toolkit`, `npcink-governance-core`,
 `npcink-ai-client-adapter`, `npcink-workflow-toolbox`, `npcink-cloud-addon`,
 `npcink-ai-cloud`). Repositories enroll one at a time; `npcink-abilities-toolkit`
-is the pilot. Independent repositories adopt it only after their own review.
+is the pilot and enrolled first on 2026-09-29 after the operator confirmed the
+model-backed trial. Independent repositories adopt it only after their own
+review.
 
 ## Deployment Layers
 
