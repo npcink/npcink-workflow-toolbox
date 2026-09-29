@@ -202,8 +202,6 @@ human-readable allowlist and must stay aligned with that table and
 
 - `/status`
 - `/image-candidates`
-- `/vector-search`
-- `/knowledge-search`
 - `/web-search/test`
 - `/web-search/diagnostics`
 - `/site-knowledge/status`
@@ -215,8 +213,6 @@ human-readable allowlist and must stay aligned with that table and
 - `/ai/content-support`
 - `/ai/site-helpers`
 - `/ai/image-generation`
-- `/flows/article-brief`
-- `/flows/article-assistant`
 - `/flows/article-plan`
 - `/flows/image-candidate-adoption-plan`
 - `/flows/article-audio-adoption-plan`

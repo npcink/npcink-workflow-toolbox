@@ -34,15 +34,33 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 		/** @var array<string,mixed> */
 		private array $query_params;
 
+		private string $route = '';
+
+		private string $method = 'POST';
+
 		/**
 		 * @param array<string,mixed> $path_params Path parameters.
 		 * @param array<string,mixed> $json_params JSON body parameters.
 		 * @param array<string,mixed> $query_params Query parameters.
+		 * @param string $route Matched REST route.
 		 */
-		public function __construct( array $path_params, array $json_params = array(), array $query_params = array() ) {
+		public function __construct( array $path_params, array $json_params = array(), array $query_params = array(), string $route = '' ) {
 			$this->path_params  = $path_params;
 			$this->json_params  = $json_params;
 			$this->query_params = $query_params;
+			$this->route        = $route;
+		}
+
+		public function get_route(): string {
+			return $this->route;
+		}
+
+		public function get_method(): string {
+			return $this->method;
+		}
+
+		public function get_header( string $key ) {
+			return null;
 		}
 
 		/** @return array<string,mixed> */
@@ -103,6 +121,10 @@ function current_user_can( string $capability ): bool {
 	return 'manage_options' === $capability && true === $npcink_toolbox_local_review_can_manage;
 }
 
+function apply_filters( string $tag, $value ) {
+	return $value;
+}
+
 function npcink_cloud_addon_receive_media_derivative_artifact( array $artifact ) {
 	global $npcink_toolbox_local_review_receive_calls, $npcink_toolbox_local_review_received_artifact;
 	++$npcink_toolbox_local_review_receive_calls;
@@ -153,9 +175,10 @@ $request_for = static function ( array $artifact, array $query = array(), ?strin
 	);
 };
 
-npcink_toolbox_local_review_assert( false === $controller->permission_media_derivative_local_review(), 'Local review denies users without manage_options.' );
+$permission_request = new WP_REST_Request( array( 'artifact_id' => $artifact_id ), array(), array(), '/npcink-toolbox/v1/media-derivative-local-review/' . $artifact_id );
+npcink_toolbox_local_review_assert( false === $controller->permission( $permission_request ), 'Local review denies users without manage_options through the shared filtered permission path.' );
 $npcink_toolbox_local_review_can_manage = true;
-npcink_toolbox_local_review_assert( true === $controller->permission_media_derivative_local_review(), 'Local review accepts an administrator after WordPress REST cookie authentication.' );
+npcink_toolbox_local_review_assert( true === $controller->permission( $permission_request ), 'Local review accepts an administrator through the shared filtered permission path.' );
 
 $route_args_method = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'media_derivative_local_review_route_args' );
 $route_args_method->setAccessible( true );

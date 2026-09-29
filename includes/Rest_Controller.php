@@ -36,8 +36,6 @@ final class Rest_Controller {
 
 	public function register_routes(): void {
 		$this->post( '/image-candidates', 'image_candidates' );
-		$this->post( '/vector-search', 'knowledge_search' );
-		$this->post( '/knowledge-search', 'knowledge_search' );
 		$this->post( '/web-search/test', 'web_search_test' );
 		$this->post( '/web-search/diagnostics', 'web_search_diagnostics' );
 		$this->post( '/site-knowledge/search', 'site_knowledge_search' );
@@ -48,8 +46,6 @@ final class Rest_Controller {
 		$this->post( '/ai/content-support', 'hosted_ai_content_support' );
 		$this->post( '/ai/site-helpers', 'hosted_ai_site_helper' );
 		$this->post( '/ai/image-generation', 'ai_image_generation' );
-		$this->post( '/flows/article-brief', 'article_brief' );
-		$this->post( '/flows/article-assistant', 'article_assistant' );
 		$this->post( '/flows/article-plan', 'article_plan' );
 		$this->post( '/flows/image-candidate-adoption-plan', 'image_candidate_adoption_plan' );
 		$this->post( '/flows/article-audio-adoption-plan', 'article_audio_adoption_plan' );
@@ -109,7 +105,7 @@ final class Rest_Controller {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'serve_media_derivative_local_review' ),
-				'permission_callback' => array( $this, 'permission_media_derivative_local_review' ),
+				'permission_callback' => array( $this, 'permission' ),
 				'args'                => $this->media_derivative_local_review_route_args(),
 			)
 		);
@@ -200,8 +196,6 @@ final class Rest_Controller {
 		$scopes = array(
 			'/status'                                      => 'cap.toolbox.status.read',
 			'/image-candidates'                            => 'cap.toolbox.image_source',
-			'/vector-search'                               => 'cap.toolbox.vector_search',
-			'/knowledge-search'                            => 'cap.toolbox.knowledge.search',
 			'/web-search/test'                             => 'cap.toolbox.web_search',
 			'/web-search/diagnostics'                      => 'cap.toolbox.web_search',
 			'/site-knowledge/status'                       => 'cap.toolbox.knowledge.read',
@@ -213,8 +207,6 @@ final class Rest_Controller {
 			'/ai/content-support'                          => 'cap.toolbox.workflow_suggest',
 			'/ai/site-helpers'                             => 'cap.toolbox.workflow_suggest',
 			'/ai/image-generation'                         => 'cap.toolbox.image_source',
-			'/flows/article-brief'                         => 'cap.toolbox.workflow_suggest',
-			'/flows/article-assistant'                     => 'cap.toolbox.workflow_suggest',
 			'/flows/article-plan'                          => 'cap.toolbox.workflow_suggest',
 			'/flows/image-candidate-adoption-plan'         => 'cap.toolbox.workflow_suggest',
 			'/flows/article-audio-adoption-plan'           => 'cap.toolbox.workflow_suggest',
@@ -451,23 +443,6 @@ final class Rest_Controller {
 		return new WP_Error( 'npcink_toolbox_media_recognition_unavailable', __( 'Media recognition continuation is unavailable.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );
 	}
 
-	public function knowledge_search( WP_REST_Request $request ) {
-		$query = trim( sanitize_textarea_field( (string) $request->get_param( 'query' ) ) );
-		$vector = trim( sanitize_textarea_field( (string) $request->get_param( 'vector' ) ) );
-		if ( '' === $query && '' === $vector ) {
-			return new WP_Error(
-				'npcink_toolbox_missing_vector_input',
-				__( 'A query or vector field is required for vector search.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$input_type = sanitize_key( (string) ( $request->get_param( 'input_type' ) ?: 'auto' ) );
-		$input = '' !== $query ? $query : $vector;
-		$max_results = max( 1, min( 10, (int) ( $request->get_param( 'max_results' ) ?: 4 ) ) );
-		return rest_ensure_response( $this->client->vector_search( $input, $max_results, $input_type ) );
-	}
-
 	public function site_knowledge_status( WP_REST_Request $request ) {
 		$public_post_ids = $this->public_site_knowledge_post_ids();
 		$status = $this->client->get_site_knowledge_status(
@@ -634,15 +609,6 @@ final class Rest_Controller {
 		);
 	}
 
-	public function article_brief( WP_REST_Request $request ) {
-		$topic = $this->required_text( $request, 'topic' );
-		if ( is_wp_error( $topic ) ) {
-			return $topic;
-		}
-
-		return rest_ensure_response( $this->client->build_article_brief( $topic, ! empty( $request->get_param( 'include_knowledge' ) ) ) );
-	}
-
 	public function hosted_ai_content_support( WP_REST_Request $request ) {
 		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
 		return rest_ensure_response( $this->client->run_hosted_ai_content_support( is_array( $params ) ? $params : array() ) );
@@ -801,11 +767,6 @@ final class Rest_Controller {
 		}
 
 		return rest_ensure_response( $this->client->get_agent_feedback_summary( is_array( $params ) ? $params : array() ) );
-	}
-
-	public function article_assistant( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-		return rest_ensure_response( $this->client->build_article_assistant( is_array( $params ) ? $params : array() ) );
 	}
 
 	public function article_plan( WP_REST_Request $request ) {
@@ -1630,10 +1591,6 @@ final class Rest_Controller {
 		);
 
 		return is_wp_error( $payload ) ? $payload : rest_ensure_response( $payload );
-	}
-
-	public function permission_media_derivative_local_review(): bool {
-		return current_user_can( 'manage_options' );
 	}
 
 	public function serve_media_derivative_local_review( WP_REST_Request $request ) {

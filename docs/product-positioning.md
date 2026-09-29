@@ -77,6 +77,12 @@ semantics.
 
 ## Primary Users
 
+The first version is administrator-only: every Toolbox surface (admin pages,
+editor sidebar, dashboard widget, REST routes) is gated by `manage_options`.
+Editor-role (`edit_posts`) access stays a deferred scoped-permission decision
+until a narrower capability model is designed; do not advertise editor access
+as a current capability.
+
 - WordPress administrators who want controlled AI tools without touching raw
   provider APIs.
 - Editors who need taxonomy/tag, internal-link, image-source, SEO/AEO/GEO, and

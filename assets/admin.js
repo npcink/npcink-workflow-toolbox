@@ -6602,71 +6602,12 @@
 		return workspace;
 	}
 
-	function publicTabForToolboxTab(tab) {
-		if (tab === 'tools') {
-			return 'image';
-		}
-		return tab;
-	}
-
-	function toolboxTabFromPublicTab(tab) {
-		if (tab === 'image') {
-			return 'tools';
-		}
-		if (tab === 'content' || tab === 'content-preparation') {
-			return 'operations-insights';
-		}
-		if (tab === 'morning-brief' || tab === 'scheduled-review' || tab === 'scheduled_review') {
-			return 'operations-insights';
-		}
-		return tab;
-	}
-
-	function isRetiredContentTool(tool) {
-		return [
-			'ai-content-snapshot-suggestions',
-			'image-candidate-adoption',
-			'article-brief',
-			'article-assistant',
-			'article-plan',
-		].includes(tool);
-	}
-
-	function publicToolForToolboxTool(tool) {
-		if (tool === 'media-alt-caption-review') {
-			return 'bulk-alt';
-		}
-		if (tool === 'media-batch-optimize') {
-			return 'batch-optimize';
-		}
-		return tool;
-	}
-
-	function toolboxToolFromPublicTool(tool) {
-		if (tool === 'optimize') {
-			return 'media-batch-optimize';
-		}
-		if (tool === 'media-derivative') {
-			return 'media-batch-optimize';
-		}
-		if (tool === 'bulk-alt') {
-			return 'media-alt-caption-review';
-		}
-		if (tool === 'batch-optimize') {
-			return 'media-batch-optimize';
-		}
-		if (tool === 'settings' || tool === 'image_settings') {
-			return 'image-settings';
-		}
-		return tool;
-	}
-
 	function toolUrlState(workspace, target) {
 		return {
-			tab: publicTabForToolboxTab(toolboxTabForWorkspace(workspace) || 'tools'),
-			tool: publicToolForToolboxTool(target),
-			toolbox_tab: null,
-			toolbox_tool: null,
+			tab: null,
+			tool: null,
+			toolbox_tab: toolboxTabForWorkspace(workspace) || 'tools',
+			toolbox_tool: target,
 			site_check_tab: null,
 			site_ops_insights_preview: null,
 			site_ops_cloud_analysis: null,
@@ -6770,9 +6711,9 @@
 		}
 
 		updateToolboxUrl({
-			tab: publicTabForToolboxTab(target),
+			tab: null,
 			tool: null,
-			toolbox_tab: null,
+			toolbox_tab: target,
 			toolbox_tool: null,
 			site_check_tab: target === 'operations-insights' ? activeSiteCheckTab() : null,
 		});
@@ -6804,9 +6745,9 @@
 
 		if (updateUrl) {
 			updateToolboxUrl({
-				tab: 'operations-insights',
+				tab: null,
 				tool: null,
-				toolbox_tab: null,
+				toolbox_tab: 'operations-insights',
 				toolbox_tool: null,
 				site_check_tab: target === 'current-check' ? null : target,
 			});
@@ -6882,24 +6823,10 @@
 
 	function initUrlState() {
 		const params = new URL(window.location.href).searchParams;
-		const rawRequestedTab = params.get('tab') || params.get('toolbox_tab') || '';
-		const rawRequestedTool = params.get('tool') || params.get('toolbox_tool') || '';
-		const requestedTab = toolboxTabFromPublicTab(rawRequestedTab);
-		const requestedSiteCheckTab = params.get('site_check_tab') || (rawRequestedTab === 'morning-brief' ? 'scheduled-review' : '') || (params.get('nightly_inspection_preview') === '1' ? 'scheduled-review' : '');
-		let requestedTool = toolboxToolFromPublicTool(rawRequestedTool);
+		const requestedTab = params.get('toolbox_tab') || '';
+		const requestedTool = params.get('toolbox_tool') || '';
+		const requestedSiteCheckTab = params.get('site_check_tab') || (params.get('nightly_inspection_preview') === '1' ? 'scheduled-review' : '');
 		let tab = requestedTab;
-		let canonicalizeToolUrl = false;
-		let canonicalizeRetiredContentUrl = (rawRequestedTab === 'content' || rawRequestedTab === 'content-preparation') && !rawRequestedTool;
-
-		if (rawRequestedTool === 'optimize' || rawRequestedTool === 'media-derivative') {
-			requestedTool = 'media-batch-optimize';
-			canonicalizeToolUrl = true;
-		}
-		if (isRetiredContentTool(rawRequestedTool)) {
-			requestedTool = '';
-			tab = 'operations-insights';
-			canonicalizeRetiredContentUrl = true;
-		}
 
 		const requestedToolWorkspace = requestedTool ? toolWorkspaceForTarget(requestedTool) : null;
 		const requestedToolTab = requestedToolWorkspace ? toolboxTabForWorkspace(requestedToolWorkspace) : '';
@@ -6909,13 +6836,10 @@
 			if (!tab || !requestedTabWorkspace || !hasTarget(requestedTabWorkspace, '[data-toolbox-tool-target]', 'data-toolbox-tool-target', requestedTool)) {
 				tab = requestedToolTab;
 			}
-			canonicalizeToolUrl = canonicalizeToolUrl || params.has('toolbox_tab') || params.has('toolbox_tool') || rawRequestedTab !== publicTabForToolboxTab(tab) || rawRequestedTool !== publicToolForToolboxTool(requestedTool);
 		}
 
-		if (!tab) {
-			if (requestedToolTab) {
-				tab = requestedToolTab;
-			}
+		if (!tab && requestedToolTab) {
+			tab = requestedToolTab;
 		}
 
 		if (tab) {
@@ -6923,30 +6847,12 @@
 		}
 		if (tab === 'operations-insights') {
 			activateSiteCheckTab(requestedSiteCheckTab === 'scheduled-review' ? 'scheduled-review' : 'current-check', false);
-			if (rawRequestedTab === 'morning-brief') {
-				updateToolboxUrl({
-					tab: 'operations-insights',
-					tool: null,
-					toolbox_tab: null,
-					toolbox_tool: null,
-					site_check_tab: 'scheduled-review',
-				});
-			}
 		}
 		if (tab === 'tools' && requestedTool) {
 			activateToolPanel(requestedTool, false, toolWorkspaceForTab(tab) || requestedToolWorkspace);
-			if (canonicalizeToolUrl || hasPreviewActionParams(params)) {
+			if (params.has('tab') || params.has('tool') || hasPreviewActionParams(params)) {
 				updateToolboxUrl(toolUrlState(toolWorkspaceForTab(tab) || requestedToolWorkspace, requestedTool));
 			}
-		}
-		if (canonicalizeRetiredContentUrl) {
-			updateToolboxUrl({
-				tab: null,
-				tool: null,
-				toolbox_tab: 'operations-insights',
-				toolbox_tool: null,
-				site_check_tab: null,
-			});
 		}
 	}
 

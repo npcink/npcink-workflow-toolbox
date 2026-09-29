@@ -140,7 +140,7 @@ if (!$user) {
 }
 wp_set_current_user($user->ID);
 wp_set_auth_cookie($user->ID, false, is_ssl());
-wp_safe_redirect(admin_url('admin.php?page=npcink-toolbox&tab=image&tool=media-alt-caption-review'));
+wp_safe_redirect(admin_url('admin.php?page=npcink-toolbox&toolbox_tab=tools&toolbox_tool=media-alt-caption-review'));
 exit;
 `);
 	return {
@@ -227,8 +227,8 @@ function forbiddenExecutionRequests(requests) {
 
 async function openAltCaptionPanel(page, baseUrl) {
 	const paths = [
-		'/wp-admin/admin.php?page=npcink-toolbox&tab=image&tool=media-alt-caption-review',
-		'/wp-admin/tools.php?page=npcink-toolbox&tab=image&tool=media-alt-caption-review',
+		'/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools&toolbox_tool=media-alt-caption-review',
+		'/wp-admin/tools.php?page=npcink-toolbox&toolbox_tab=tools&toolbox_tool=media-alt-caption-review',
 	];
 	for (const path of paths) {
 		await page.goto(`${baseUrl}${path}`, { waitUntil: 'domcontentloaded', timeout: 45000 });

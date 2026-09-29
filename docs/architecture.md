@@ -44,6 +44,7 @@ Status: MVP architecture.
 | `Editor_Content_Support` | Post editor document panel entrypoint for fixed content-support flows. |
 | `Article_Audio_Playback` | Frontend single-post playback entry for already adopted article audio metadata. It reads protected post meta or a host-projected approved audio packet and does not generate, adopt, or write audio. |
 | `Abilities` | WordPress Abilities API exposure for Toolbox actions. |
+| `Dashboard_Widget` / `Hot_Topic_Pool` | Administrator dashboard Zhihu hot-topics widget: reads a Cloud-managed cached snapshot (transient plus stale backup option) and refreshes only through an explicit nonce-gated administrator action. Read-only operator signal surface; no proposal, write, or queue ownership. |
 | `Site_Ops_Snapshot_Collector` | Bounded read-only collector for Site Check: public posts/pages, approved-comment signals, media metadata, taxonomy summaries, and site info. |
 | `Site_Ops_Insight_Builder` | Deterministic `site_ops_insight_pack.v1` builder that ranks local site-check findings for manual handling, existing fixed workflows, or optional Cloud detail without Cloud calls, persistence, proposals, or WordPress writes. |
 | `Site_Ops_Cloud_Request_Builder` | Contract-only `site_ops_cloud_analysis_request.v1` builder for Cloud runtime/detail analysis; it does not call Cloud, create local runtime state, schedule work, persist runs, create proposals, or write WordPress data. |
@@ -67,12 +68,28 @@ Core-governed recipes, and Toolbox surfaces before a new plugin is considered.
 
 ## Current Data Storage
 
-The MVP storage allowlist is intentionally small:
+The Toolbox-owned state allowlist is intentionally small and is mirrored by
+`uninstall.php` cleanup:
 
 - `npcink_toolbox_settings`
 - `npcink_toolbox_content_context`
-- one disabled Local Fallback Preview latest-preview option named by the local
-  automation runtime boundary when that exception is enabled
+- `npcink_toolbox_media_optimization_settings`
+- `npcink_toolbox_watermark_templates`
+- `npcink_toolbox_zhihu_hot_topic_pool_backup_v1` (stale Cloud hot-topic snapshot
+  backup; non-secret titles only)
+- `npcink_toolbox_media_optimization_batches` (bounded ADR-015 batch manifest,
+  max 20)
+- `npcink_toolbox_media_recognition_continuation` and
+  `npcink_toolbox_media_recognition_continuation_lock` (single continuation
+  cursor and its atomic lock)
+- `npcink_toolbox_site_knowledge_auto_sync_queue` (retired legacy option, deleted
+  only as cleanup)
+- `npcink_local_automation_runtime_nightly_inspection_latest_preview` and
+  `npcink_local_automation_runtime_nightly_inspection_schedule_signature`
+  (disabled Local Fallback Preview state)
+- bounded short-lived transients: the `npcink_toolbox_editor_` editor flow
+  result cache (TTL 300) and the Zhihu hot-topic pool cache
+  `npcink_toolbox_zhihu_hot_topic_pool_v2` (TTL 1800)
 
 The settings option may contain feature flags and non-secret compatibility
 settings only. It must not contain web search provider keys, vector provider
@@ -164,9 +181,9 @@ Current connector routes:
 | Host-generated image candidate seam | Host-generated image candidates | `/image-candidates` with `provider=ai_generated` |
 | Cloud Site Knowledge | Semantic site context | `/site-knowledge/*` and vector compatibility pointer |
 
-The legacy `/vector-search` route remains only as a compatibility pointer. It
-does not query a local vector database or call local embedding providers.
-Vector provider details live in Npcink Cloud.
+The legacy `/vector-search` route has been removed. Toolbox does not query a
+local vector database or call local embedding providers. Vector provider
+details live in Npcink Cloud.
 
 Reserved provider slots:
 
@@ -189,8 +206,8 @@ Cloud, `search-image-source` is the general local image-candidate ability
 that wraps the Cloud `npcink-toolbox/search-image-source` runtime ability on the
 `image-source.managed` profile, and
 `search-site-knowledge` is the general Cloud-managed semantic site-context
-ability. The legacy `/vector-search` route remains a REST compatibility pointer
-only and is no longer registered as a public Toolbox ability. Article writing
+ability. The legacy `/vector-search` route has been removed and was never registered
+as a public Toolbox ability. Article writing
 packs and article write plans are only one workflow family built from those
 lower-level tools; the old article brief route is compatibility-only.
 
@@ -235,8 +252,7 @@ wrapper abilities:
 
 These are read/suggestion tools. They must not imply final WordPress write
 approval, media import approval, or indexing lifecycle ownership. The legacy
-`/flows/article-assistant` REST route remains route-only compatibility and is
-not registered as a public Toolbox ability.
+`/flows/article-assistant` REST route has been removed.
 `npcink-toolbox/build-article-write-plan` assembles a Core-ready
 `article_write_plan` for a reviewed draft and leaves proposal creation,
 approval, preflight, audit, and final execution outside Toolbox.
@@ -326,9 +342,9 @@ Cloud Addon runtime seam, not local connector credentials.
 `search-site-knowledge` is the high-level ability
 for semantic site search, related content, writing context, internal-link
 candidates, refresh suggestions, image-context lookup, FAQ candidates, content
-gap analysis, and publish preflight duplicate checks. `/vector-search` remains
-a REST compatibility route only and should not be used for new low-level vector
-integrations or Ability clients.
+gap analysis, and publish preflight duplicate checks. The removed
+`/vector-search` route should not be used for new low-level vector integrations
+or Ability clients; use `/site-knowledge/search` instead.
 
 The host can intercept site knowledge execution with
 `npcink_toolbox_site_knowledge_cloud_request` or adjust the runtime payload
@@ -362,8 +378,6 @@ Current routes require `manage_options`:
 
 - `GET /wp-json/npcink-toolbox/v1/status`
 - `POST /wp-json/npcink-toolbox/v1/image-candidates`
-- `POST /wp-json/npcink-toolbox/v1/vector-search`
-- `POST /wp-json/npcink-toolbox/v1/knowledge-search`
 - `POST /wp-json/npcink-toolbox/v1/web-search/test`
 - `POST /wp-json/npcink-toolbox/v1/web-search/diagnostics`
 - `GET /wp-json/npcink-toolbox/v1/site-knowledge/status`
@@ -375,8 +389,6 @@ Current routes require `manage_options`:
 - `POST /wp-json/npcink-toolbox/v1/ai/content-support`
 - `POST /wp-json/npcink-toolbox/v1/ai/site-helpers`
 - `POST /wp-json/npcink-toolbox/v1/ai/image-generation`
-- `POST /wp-json/npcink-toolbox/v1/flows/article-brief`
-- `POST /wp-json/npcink-toolbox/v1/flows/article-assistant`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/image-candidate-adoption-plan`
 - `POST /wp-json/npcink-toolbox/v1/flows/article-audio-adoption-plan`
@@ -467,9 +479,9 @@ Knowledge evidence so an operator can hand it to Core when a specific local
 review is warranted. It is not a workflow runtime, queue, approval route,
 preflight route, or write executor.
 
-`/knowledge-search` and `/vector-search` remain compatibility aliases for the
-first local MVP. New REST clients should use `/site-knowledge/search`, and new
-Ability clients should use `npcink-toolbox/search-site-knowledge`.
+The `/knowledge-search` and `/vector-search` compatibility aliases have been
+removed. REST clients use `/site-knowledge/search`, and Ability clients use
+`npcink-toolbox/search-site-knowledge`.
 
 The route surface is intentionally controlled by a static matrix in
 `tests/run.php`. The matrix must stay exact: adding a route requires updating
@@ -727,9 +739,7 @@ administrator may explicitly run Cloud detail and render the suggestion-only
 Cloud batch owner, local queue, Core proposal creator, or WordPress write path.
 Nightly Inspection fallback preview settings live in the low-frequency
 **Scheduled Review** sub tab inside Site Check, beside the **Current Check**
-manual report. The former Advanced directory is not rendered as a separate top-level tab; `toolbox_tab=advanced` remains a compatibility alias into Site Check.
-`toolbox_tab=morning-brief` remains a compatibility alias that opens Site
-Check's Scheduled Review sub tab. Cloud run status, result reads, recent runs,
+manual report. The former Advanced directory is not rendered as a separate top-level tab, and the `toolbox_tab=advanced` and `toolbox_tab=morning-brief` aliases have been removed; use `toolbox_tab=operations-insights` with `site_check_tab=scheduled-review` instead. Cloud run status, result reads, recent runs,
 and recovery live in Cloud Addon Runtime Runs. They do not live inside Cloud
 Checks. That keeps recurring inspection preview and Cloud run recovery separate
 from ordinary connection diagnostics without restoring a default Site Check
@@ -750,14 +760,13 @@ single-article image text helper; article-specific image text needs current
 standalone content opportunity admin tool is retired; site-level opportunities
 are reviewed through Site Check.
 The old Article Planning Bundle is not an operator-facing admin tool;
-`/flows/article-brief` remains available only as a compatibility REST route for
-OpenClaw or external AI callers. The old `tool=article-assistant` and
-`tool=article-plan` URLs fall back to Site Check instead of restoring
-draft-side backend tools.
-Batch entry points use `tab=image&tool=bulk-alt` and
-`tab=image&tool=batch-optimize`; deprecated `tool=optimize` and legacy
-`toolbox_tool=media-derivative` URLs remain accepted only as compatibility
-aliases that canonicalize to Media Library Optimization.
+The `/flows/article-brief` compatibility REST route has been removed; OpenClaw
+and external AI callers use `npcink-toolbox/build-ai-article-writing-pack` and
+the editor content-support routes. Old `tool=article-assistant` and
+`tool=article-plan` URLs now fall back to the default Image Handling tool.
+Batch entry points use `toolbox_tab=tools&toolbox_tool=media-alt-caption-review`
+and `toolbox_tab=tools&toolbox_tool=media-batch-optimize`; the deprecated
+`tab`/`tool` alias URLs were removed in the pre-release compatibility cleanup.
 The writing-pack entry, publish preflight, direct existing-category and
 existing-tag suggestions, internal-link candidates, current-article ALT review,
 and image candidates stay as default post editor buttons. Article narration and
@@ -895,9 +904,9 @@ site checks and Nightly/Morning Brief preview, plus Image Handling for
 selected-media review/handoff flows. The hidden Site Check compatibility panel has two
 internal sections: **Current Check** contains the manual report, while
 **Scheduled Review** exposes scheduled preview, optional local fallback settings,
-and Cloud recovery links. `toolbox_tab=advanced`
-and `toolbox_tab=morning-brief` may remain only as compatibility aliases into
-the same tab. Cloud Runtime Runs in Cloud Addon owns
+and Cloud recovery links. The former `toolbox_tab=advanced` and
+`toolbox_tab=morning-brief` aliases were removed; the same tab is reached with
+`toolbox_tab=operations-insights`. Cloud Runtime Runs in Cloud Addon owns
 Nightly Inspection runtime
 entitlement, quota, batch limit, retention, recent/status/result, and retry
 detail. Cloud runtime routes may remain bounded call sites for compatibility,

@@ -215,8 +215,8 @@ final class Admin_Page {
 
 	private function image_batch_tool_url( string $tool, array $attachment_ids = array() ): string {
 		$args = array(
-			'tab'  => 'image',
-			'tool' => $tool,
+			'toolbox_tab'  => 'tools',
+			'toolbox_tool' => $tool,
 		);
 		$attachment_ids = array_values(
 			array_filter(
@@ -256,7 +256,7 @@ final class Admin_Page {
 			'html'  => sprintf(
 				'<div class="npcink-toolbox-media-library-action"><p>%1$s</p><p><a class="button" href="%2$s">%3$s</a></p><p class="description">%4$s</p></div>',
 				esc_html__( 'Review this image from the media library.', 'npcink-workflow-toolbox' ),
-				esc_url( $this->image_batch_tool_url( 'bulk-alt', array( $attachment_id ) ) ),
+				esc_url( $this->image_batch_tool_url( 'media-alt-caption-review', array( $attachment_id ) ) ),
 				esc_html__( 'Complete ALT for this image', 'npcink-workflow-toolbox' ),
 				esc_html__( 'Use the Media Library bulk action for governed image optimization.', 'npcink-workflow-toolbox' )
 			),
@@ -284,7 +284,7 @@ final class Admin_Page {
 
 		$actions['npcink_toolbox_alt'] = sprintf(
 			'<a href="%1$s">%2$s</a>',
-			esc_url( $this->image_batch_tool_url( 'bulk-alt', array( $attachment_id ) ) ),
+			esc_url( $this->image_batch_tool_url( 'media-alt-caption-review', array( $attachment_id ) ) ),
 			esc_html__( 'Npcink ALT', 'npcink-workflow-toolbox' )
 		);
 		return $actions;
@@ -330,7 +330,7 @@ final class Admin_Page {
 			$image_ids[] = $attachment_id;
 		}
 
-		$tool = 'npcink_toolbox_batch_alt' === $action ? 'bulk-alt' : 'batch-optimize';
+		$tool = 'npcink_toolbox_batch_alt' === $action ? 'media-alt-caption-review' : 'media-batch-optimize';
 		return $this->image_batch_tool_url( $tool, $image_ids );
 	}
 
@@ -588,23 +588,7 @@ final class Admin_Page {
 	}
 
 	private function requested_toolbox_tab(): string {
-		$requested = $this->query_text_param( 'toolbox_tab' );
-		if ( '' === $requested ) {
-			$requested = $this->query_text_param( 'tab' );
-		}
-		$requested = sanitize_key( $requested );
-		if ( 'image' === $requested ) {
-			$requested = 'tools';
-		}
-		if ( 'content' === $requested || 'content-preparation' === $requested ) {
-			$requested = 'operations-insights';
-		}
-		if ( 'advanced' === $requested || 'site-check' === $requested || 'site_check' === $requested ) {
-			$requested = 'operations-insights';
-		}
-		if ( 'morning-brief' === $requested || 'scheduled-review' === $requested || 'scheduled_review' === $requested ) {
-			$requested = 'operations-insights';
-		}
+		$requested = sanitize_key( $this->query_text_param( 'toolbox_tab' ) );
 
 		$allowed = array(
 			'start'               => true,
@@ -616,15 +600,10 @@ final class Admin_Page {
 	}
 
 	private function requested_site_check_tab(): string {
-		$requested   = sanitize_key( $this->query_text_param( 'site_check_tab' ) );
-		$toolbox_tab = $this->query_text_param( 'toolbox_tab' );
-		if ( '' === $toolbox_tab ) {
-			$toolbox_tab = $this->query_text_param( 'tab' );
-		}
-		$toolbox_tab      = sanitize_key( $toolbox_tab );
+		$requested       = sanitize_key( $this->query_text_param( 'site_check_tab' ) );
 		$nightly_preview = $this->query_text_param( 'nightly_inspection_preview' );
 
-		if ( 'scheduled-review' === $requested || 'scheduled_review' === $requested || 'morning-brief' === $toolbox_tab || 'scheduled-review' === $toolbox_tab || '1' === $nightly_preview ) {
+		if ( 'scheduled-review' === $requested || '1' === $nightly_preview ) {
 			return 'scheduled-review';
 		}
 
@@ -632,22 +611,14 @@ final class Admin_Page {
 	}
 
 	private function requested_toolbox_tool(): string {
-		$requested = $this->query_text_param( 'toolbox_tool' );
-		if ( '' === $requested ) {
-			$requested = $this->query_text_param( 'tool' );
-		}
-		$requested = sanitize_key( $requested );
+		$requested = sanitize_key( $this->query_text_param( 'toolbox_tool' ) );
 
-		$aliases = array(
-			'optimize'         => 'media-batch-optimize',
-			'media-derivative' => 'media-batch-optimize',
-			'batch-optimize'   => 'media-batch-optimize',
-			'bulk-alt'         => 'media-alt-caption-review',
-			'settings'         => 'image-settings',
-			'image_settings'   => 'image-settings',
+		$allowed = array(
+			'media-batch-optimize'    => true,
+			'media-alt-caption-review' => true,
+			'image-settings'          => true,
 		);
-
-		return $aliases[ $requested ] ?? $requested;
+		return isset( $allowed[ $requested ] ) ? $requested : 'media-batch-optimize';
 	}
 
 	private function render_start_panel( array $content_context, bool $cloud_ready ): void {
