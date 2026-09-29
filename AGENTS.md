@@ -129,6 +129,17 @@ Default gate:
 composer test:all
 ```
 
+Advisory AI review gate (run before `composer pr:publish`):
+
+```bash
+ocr review --from origin/master --to HEAD
+```
+
+Treat findings as a second opinion: fix real defects or record why they are
+acceptable. Follows AI Code Review Standard v1 in
+`docs/platform/ai-code-review-standard-v1.md`; the CI workflow posting the same
+review on pull requests is advisory and never a required check.
+
 Composer metadata:
 
 ```bash
