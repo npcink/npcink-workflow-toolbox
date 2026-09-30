@@ -103,6 +103,7 @@ Start from the active documents below before changing code.
 - [Site Check Operator Loop](full-site-insights-operator-loop.md)
 - [Site Check Decision Entry Closeout](site-check-decision-entry-closeout-2026-06-30.md)
 - [Site Check Visibility Reassessment](site-check-visibility-reassessment-2026-07-10.md)
+- [Comment Moderation Review Set](comment-moderation-review-set.md)
 - [Site Check Scheduled Review Cloud Addon Closeout](site-check-scheduled-review-cloud-addon-closeout-2026-07-01.md)
 - [Operator Path Validation Closeout](operator-path-validation-closeout-2026-07-02.md)
 - [Batch Automation Governance Plan](batch-automation-governance-plan.md)
