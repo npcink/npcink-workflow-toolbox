@@ -160,6 +160,14 @@ media mutation, and hidden post-save execution remain Core-proposal paths.
 `wp-magick-toolbox` is independent of `npcink-workflow-toolbox` and is not part
 of this platform authority map or its release matrix.
 
+## Pending Platform Decisions
+
+- [`mcp-governance-surface-decision.md`](mcp-governance-surface-decision.md)
+  (2026-09, proposed): whether and where the suite projects its governed
+  channel onto MCP, including the enforced-boundary bridging requirement and
+  the upstream approval-hook draft. No repository may implement MCP runtime
+  or MCP tool projection until this decision is accepted.
+
 ## Cleanup Rule For Existing Core Docs
 
 Existing Core documents that are governance-specific should remain in Core.
