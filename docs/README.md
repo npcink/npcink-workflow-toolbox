@@ -121,6 +121,7 @@ Start from the active documents below before changing code.
 - [Site Knowledge UI Migration Closeout](archive/2026-06/site-knowledge-ui-migration-closeout-2026-06-30.md)
 - [Cloud Bulk Article Import](cloud-bulk-article-import.md)
 - [Content Assistant Surface Lessons](content-assistant-surface-lessons.md)
+- [Scoped Editor Permissions Lessons](scoped-editor-permissions-lessons-2026-09.md)
 - [OpenClaw Content Discoverability Handoff](openclaw-content-discoverability-handoff.md)
 - [OpenClaw SEO/GEO/AEO Acceptance Summary](openclaw-seo-geo-aeo-acceptance-summary.md)
 - [OpenClaw Batch Media Optimization Handoff](openclaw-batch-media-optimization-handoff.md)
