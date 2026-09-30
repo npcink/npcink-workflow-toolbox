@@ -21,4 +21,5 @@ require_once dirname( __DIR__ ) . '/includes/Provider_Site_Knowledge_Service.php
 require_once dirname( __DIR__ ) . '/includes/Provider_Content_Collector_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Discoverability_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Workflow_Plans_Service.php';
+require_once dirname( __DIR__ ) . '/includes/Provider_Agent_Feedback_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Client.php';
