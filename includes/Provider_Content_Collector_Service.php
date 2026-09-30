@@ -580,4 +580,75 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 
 		return $documents;
 	}
+
+	/**
+	 * Bounded pending-comment sample for the Cloud comment moderation review.
+	 *
+	 * Collects only approved-would-be-public fields: comment content truncated
+	 * to 2000 characters, author display name, author URL, and a bounded parent
+	 * post title. Comment author email, IP address, and user agent are never
+	 * collected or forwarded.
+	 */
+	public function collect_hosted_ai_comment_moderation_sample( int $limit ): array {
+		$limit    = max( 1, min( 50, $limit ) );
+		$comments = array();
+		if ( function_exists( 'get_comments' ) ) {
+			$comments = get_comments(
+				array(
+					'status'  => 'hold',
+					'type'    => 'comment',
+					'number'  => $limit,
+					'orderby' => 'comment_date_gmt',
+					'order'   => 'DESC',
+				)
+			);
+		}
+
+		$items = array();
+		foreach ( $comments as $comment ) {
+			if ( ! is_object( $comment ) ) {
+				continue;
+			}
+			$comment_id = absint( $comment->comment_ID ?? 0 );
+			if ( 0 >= $comment_id ) {
+				continue;
+			}
+
+			$post_id    = absint( $comment->comment_post_ID ?? 0 );
+			$post_title = '';
+			if ( $post_id && function_exists( 'get_post_status' ) && 'publish' === (string) get_post_status( $post_id ) && function_exists( 'get_the_title' ) ) {
+				$post_title = sanitize_text_field( wp_trim_words( (string) get_the_title( $post_id ), 20, '' ) );
+			}
+			$content = (string) ( $comment->comment_content ?? '' );
+			if ( function_exists( 'mb_substr' ) ) {
+				$content = mb_substr( $content, 0, 2000 );
+			} else {
+				$content = substr( $content, 0, 2000 );
+			}
+
+			$items[] = array(
+				'comment_id'  => $comment_id,
+				'post_id'     => $post_id,
+				'post_title'  => $post_title,
+				'author_name' => sanitize_text_field( (string) ( $comment->comment_author ?? '' ) ),
+				'author_url'  => esc_url_raw( (string) ( $comment->comment_author_url ?? '' ) ),
+				'content'     => sanitize_textarea_field( $content ),
+				'date_gmt'    => sanitize_text_field( (string) ( $comment->comment_date_gmt ?? '' ) ),
+			);
+		}
+
+		$pending_total = count( $items );
+		if ( function_exists( 'wp_count_comments' ) ) {
+			$counts        = wp_count_comments();
+			$pending_total = absint( $counts->moderated ?? 0 );
+		}
+
+		return array(
+			'snapshot_policy' => 'pending_hold_approved_would_be_public_fields_only',
+			'sampled_status'  => 'hold',
+			'limit'           => $limit,
+			'pending_total'   => $pending_total,
+			'items'           => $items,
+		);
+	}
 }

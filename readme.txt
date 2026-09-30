@@ -123,7 +123,11 @@ Toolbox.
 
 Data that may be sent depends on the feature used and may include the submitted
 query, selected post identifiers, public post/page titles, public excerpts,
-public URLs, approved public comment excerpts for selected public entries, image
+public URLs, approved public comment excerpts for selected public entries,
+pending comment content with author display name, author URL, and the public
+parent post title for the bounded comment moderation review (never comment
+author email, IP address, or user agent, and no parent post title is sent when
+the parent post is not public), image
 metadata already visible in WordPress, operator-entered content context, and
 operator-entered prompts or review notes. Provider API keys are not exposed to AI
 callers through Toolbox responses.

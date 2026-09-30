@@ -29,6 +29,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Nightly_Inspection_Service.
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Ai_Image_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Web_Search_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Media_Alt_Caption_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Comment_Moderation_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Hosted_AI_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Site_Knowledge_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Content_Collector_Service.php';

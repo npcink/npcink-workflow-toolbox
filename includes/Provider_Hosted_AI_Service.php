@@ -431,7 +431,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 
 	public function run_hosted_ai_site_helper( array $input ) {
 		$intent = sanitize_key( (string) ( $input['intent'] ?? '' ) );
-		if ( ! in_array( $intent, array( 'media_alt_suggestions', 'content_snapshot_suggestions' ), true ) ) {
+		if ( ! in_array( $intent, array( 'media_alt_suggestions', 'content_snapshot_suggestions', 'comment_moderation_suggestions' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_hosted_ai_site_helper_intent',
 				__( 'A supported AI site-helper intent is required.', 'npcink-workflow-toolbox' ),
@@ -467,15 +467,27 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				$media_alt_caption_review_set = $this->client->build_media_alt_caption_review_set( $media_snapshot, $review_set_limit, $image_context_evidence );
 			}
 		}
+		$comment_sample_limit = absint( $input['comment_sample_size'] ?? ( $input['sample_size'] ?? 50 ) );
+		if ( 0 >= $comment_sample_limit ) {
+			$comment_sample_limit = 50;
+		}
+		$comment_sample_limit = max( 1, min( 50, $comment_sample_limit ) );
+		$comment_sample       = 'comment_moderation_suggestions' === $intent
+			? $this->client->collect_hosted_ai_comment_moderation_sample( $comment_sample_limit )
+			: array();
+		$comment_moderation_review_set = 'comment_moderation_suggestions' === $intent
+			? $this->client->build_comment_moderation_review_set( $comment_sample )
+			: array();
 		$source           = array(
 			'focus'                  => wp_trim_words( $focus, 80, '' ),
 			'site_snapshot'          => 'content_snapshot_suggestions' === $intent ? $this->client->collect_hosted_ai_site_snapshot() : array(),
 			'media_snapshot'         => 'media_alt_suggestions' === $intent ? $media_snapshot : array(),
 			'image_context_evidence' => 'media_alt_suggestions' === $intent ? $image_context_evidence : array(),
-			'source_policy'          => sanitize_key( (string) ( $input['source_policy'] ?? ( 'media_alt_suggestions' === $intent ? ( $media_snapshot['snapshot_policy'] ?? 'current_article_media_metadata_only' ) : 'bounded_public_content_opportunity_sample_only' ) ) ),
+			'comment_sample'         => 'comment_moderation_suggestions' === $intent ? $comment_sample : array(),
+			'source_policy'          => sanitize_key( (string) ( $input['source_policy'] ?? ( 'media_alt_suggestions' === $intent ? ( $media_snapshot['snapshot_policy'] ?? 'current_article_media_metadata_only' ) : ( 'comment_moderation_suggestions' === $intent ? 'pending_hold_approved_would_be_public_fields_only' : 'bounded_public_content_opportunity_sample_only' ) ) ) ),
 		);
 		$prompt           = $this->hosted_ai_site_helper_prompt( $intent, $source, $context );
-		$data_classification = 'media_alt_suggestions' === $intent ? 'pii' : 'public_site_content';
+		$data_classification = in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions' ), true ) ? 'pii' : 'public_site_content';
 
 		$runtime_payload = array(
 			'ability_name'        => 'npcink-toolbox/ai-site-helper',
@@ -496,7 +508,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				),
 				'params'           => array(
 					'temperature' => 0.2,
-					'max_tokens'  => 800,
+					'max_tokens'  => 'comment_moderation_suggestions' === $intent ? min( 4000, 400 + ( $comment_sample_limit * 45 ) ) : 800,
 				),
 				'quality_contract' => $quality_contract,
 			),
@@ -521,7 +533,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			);
 		}
 		$classification_input = $input;
-		if ( 'media_alt_suggestions' === $intent ) {
+		if ( in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions' ), true ) ) {
 			$classification_input['runtime_data_classification'] = 'pii';
 		}
 		$runtime_payload = $this->runtime_payload_with_data_classification( $runtime_payload, $data_classification, $classification_input );
@@ -531,13 +543,19 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			if ( 'media_alt_suggestions' === $intent ) {
 				return $this->client->local_media_alt_caption_review_response( $runtime_payload, $media_alt_caption_review_set, $handled->get_error_code() );
 			}
+			if ( 'comment_moderation_suggestions' === $intent ) {
+				return $this->client->local_comment_moderation_review_response( $runtime_payload, $comment_moderation_review_set, $handled->get_error_code() );
+			}
 			return $handled;
 		}
 		if ( is_array( $handled ) ) {
-			return $this->normalize_hosted_ai_site_helper_response( $handled, $runtime_payload, $intent, $media_alt_caption_review_set );
+			return $this->normalize_hosted_ai_site_helper_response( $handled, $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample );
 		}
 		if ( 'media_alt_suggestions' === $intent ) {
 			return $this->client->local_media_alt_caption_review_response( $runtime_payload, $media_alt_caption_review_set );
+		}
+		if ( 'comment_moderation_suggestions' === $intent ) {
+			return $this->client->local_comment_moderation_review_response( $runtime_payload, $comment_moderation_review_set, 'cloud_required' );
 		}
 
 		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_site_helper_runtime' ) ) {
@@ -555,7 +573,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			return $response;
 		}
 
-		return $this->normalize_hosted_ai_site_helper_response( is_array( $response ) ? $response : array(), $runtime_payload, $intent, $media_alt_caption_review_set );
+		return $this->normalize_hosted_ai_site_helper_response( is_array( $response ) ? $response : array(), $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample );
 	}
 
 
@@ -658,7 +676,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 	}
 
 
-	private function normalize_hosted_ai_site_helper_response( array $response, array $runtime_payload, string $intent, array $local_review_set = array() ): array {
+	private function normalize_hosted_ai_site_helper_response( array $response, array $runtime_payload, string $intent, array $local_review_set = array(), array $comment_sample = array() ): array {
 		$result      = $this->extract_cloud_runtime_result( $response );
 		$output_text = sanitize_textarea_field(
 			(string) (
@@ -671,6 +689,12 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		$quality_contract = $this->hosted_ai_site_helper_quality_contract( $intent );
 		$opportunities    = 'content_snapshot_suggestions' === $intent && is_array( $result['opportunities'] ?? null )
 			? $this->sanitize_payload( $result['opportunities'] )
+			: array();
+		$classifications = 'comment_moderation_suggestions' === $intent && is_array( $result['classifications'] ?? null )
+			? $this->sanitize_payload( $result['classifications'] )
+			: array();
+		$comment_moderation_review_set = 'comment_moderation_suggestions' === $intent
+			? $this->client->build_comment_moderation_review_set( $comment_sample, $classifications, 'ready' )
 			: array();
 
 		return $this->with_output_contract(
@@ -692,6 +716,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				'review_checklist'           => $this->sanitize_string_list( $quality_contract['review_checklist'] ?? array() ),
 				'reject_if'                  => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
 				'media_alt_caption_review_set' => 'media_alt_suggestions' === $intent ? $this->sanitize_payload( $local_review_set ) : array(),
+				'comment_moderation_review_set' => 'comment_moderation_suggestions' === $intent ? $this->sanitize_payload( $comment_moderation_review_set ) : array(),
 				'write_posture'              => 'suggestion_only',
 				'final_write_path'           => 'core_proposal_required',
 				'direct_wordpress_write'     => false,
@@ -960,6 +985,23 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 					'The result gives a full-site health score or crawler-style coverage claim.',
 					'The result claims search indexing, ranking, or analytics facts not present in the sample.',
 					'The result creates a task queue, approval flow, or automatic write plan.',
+				),
+			),
+			'comment_moderation_suggestions' => array(
+				'output_shape'     => array(
+					'classifications'       => 'one object per supplied pending comment with comment_id, classification (spam, legitimate, or uncertain), confidence (0 to 1), reasons, and suggested_action (open_in_wordpress_moderation_queue or review_manually)',
+					'moderation_summary'    => 'brief note about the bounded pending-comment sample only',
+					'assumptions_to_verify' => 'short list of assumptions the operator must check',
+				),
+				'review_checklist' => array(
+					'Treat every classification as a review hint; the operator decides in native WordPress moderation.',
+					'Review uncertain rows manually before acting; uncertain is a valid terminal answer.',
+					'Never approve, mark spam, trash, or delete comments from this suggestion.',
+				),
+				'reject_if'        => array(
+					'The result claims to have approved, marked, trashed, deleted, or changed any comment.',
+					'The result invents classifications for comment ids not present in the supplied sample.',
+					'The result asks for comment author email, IP address, user agent, or other private metadata.',
 				),
 			),
 		);
@@ -1297,6 +1339,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		$task = array(
 			'media_alt_suggestions'      => 'Generate reviewable ALT and caption suggestions from the supplied current-article image metadata, or from an explicitly requested media-library sample. Do not claim to see the image pixels; require human visual confirmation for each item.',
 			'content_snapshot_suggestions' => 'Generate 3 to 5 practical content opportunity suggestions from the supplied bounded public site-content opportunity sample only. Prefer maintenance actions such as refresh stale content, expand thin coverage, add internal links, clarify summaries, or add a featured image. Return opportunities as JSON-compatible objects when possible. Do not return a full site audit, crawler report, health score, or write plan.',
+			'comment_moderation_suggestions' => 'Classify each supplied pending comment as spam, legitimate, or uncertain for operator review, with a confidence value, short reasons, and a triage-only suggested action. Use only the supplied comment content, author display name, author URL, and parent post title; never request or assume comment author email, IP address, or user agent. Uncertain is a valid terminal answer. Return classifications as JSON-compatible objects when possible. Do not approve, mark, trash, delete, or change any comment.',
 		)[ $intent ] ?? 'Generate reviewable WordPress site-helper suggestions from the supplied sample only.';
 		$quality_contract = $this->hosted_ai_site_helper_quality_contract( $intent );
 

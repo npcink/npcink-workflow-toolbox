@@ -22,6 +22,8 @@ final class Provider_Client extends Provider_Client_Support {
 
 	private Provider_Media_Alt_Caption_Service $media_alt;
 
+	private Provider_Comment_Moderation_Service $comment_moderation;
+
 	private Provider_Hosted_AI_Service $hosted_ai;
 
 	private Provider_Site_Knowledge_Service $site_knowledge;
@@ -498,6 +500,27 @@ final class Provider_Client extends Provider_Client_Support {
 	 */
 	public function local_media_alt_caption_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'optional_not_requested' ) : array {
 		return $this->media_alt->local_media_alt_caption_review_response( $runtime_payload, $review_set, $cloud_status );
+	}
+
+	/**
+	 * Collects the bounded pending-comment moderation sample.
+	 */
+	public function collect_hosted_ai_comment_moderation_sample( int $limit ) : array {
+		return $this->collectors->collect_hosted_ai_comment_moderation_sample( $limit );
+	}
+
+	/**
+	 * Delegates to the comment moderation service.
+	 */
+	public function build_comment_moderation_review_set( array $sample, array $classifications = array(), string $cloud_status = 'cloud_required' ) : array {
+		return $this->comment_moderation->build_comment_moderation_review_set( $sample, $classifications, $cloud_status );
+	}
+
+	/**
+	 * Delegates to the comment moderation service.
+	 */
+	public function local_comment_moderation_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ) : array {
+		return $this->comment_moderation->local_comment_moderation_review_response( $runtime_payload, $review_set, $cloud_status );
 	}
 	/**
 	 * @return array{path:string,filename:string,mime_type:string,media_fingerprint:string}|array{}
