@@ -31,6 +31,7 @@ final class Rest_Controller {
 	/** ADR-018 scoped default capabilities; every unlisted scope and the fallback stay manage_options. */
 	private const SCOPED_DEFAULT_CAPABILITIES = array(
 		'cap.toolbox.editor_suggest' => 'edit_posts',
+		'cap.toolbox.image_source'   => 'edit_posts',
 		'cap.toolbox.feedback.write' => 'edit_posts',
 	);
 

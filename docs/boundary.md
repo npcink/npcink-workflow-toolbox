@@ -201,7 +201,9 @@ human-readable allowlist and must stay aligned with that table and
 `Rest_Controller::rest_route_scope()`.
 
 Default REST capability maps by scope under ADR-018:
-`cap.toolbox.editor_suggest` (`/editor/content-support`) and
+`cap.toolbox.editor_suggest` (`/editor/content-support`),
+`cap.toolbox.image_source` (`/image-candidates` and `/ai/image-generation`,
+the editor modal's candidate-only transport), and
 `cap.toolbox.feedback.write` (`/agent-feedback`) default to `edit_posts`;
 every other scope and the `cap.toolbox.admin` fallback keep `manage_options`.
 The `npcink_toolbox_rest_permission` filter remains the authoritative host

@@ -262,8 +262,10 @@ Workflow and composition contracts remain indexed at
 
 All routes require a logged-in user. The default capability is
 `manage_options`, except the ADR-018 scoped defaults: `/editor/content-support`
-(`cap.toolbox.editor_suggest`) and `/agent-feedback`
-(`cap.toolbox.feedback.write`) accept `edit_posts`. This list is a
+(`cap.toolbox.editor_suggest`), `/image-candidates` and
+`/ai/image-generation` (`cap.toolbox.image_source`, the editor modal's
+candidate transport), and `/agent-feedback` (`cap.toolbox.feedback.write`)
+accept `edit_posts`. This list is a
 compatibility allowlist, not an ownership claim: routes marked in the boundary
 docs as Cloud-owned bridges, legacy compatibility seams, or explicit boundary
 exceptions must keep those limits even though their first-version paths remain

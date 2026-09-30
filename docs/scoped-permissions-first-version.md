@@ -4,8 +4,9 @@ Status: implementation guide for host integrations.
 
 Toolbox derives every REST route and ability from a `cap.toolbox.*` scope and
 maps each scope to a default WordPress capability. Most scopes keep
-`manage_options`; ADR-018 relaxes only the editor suggestion and Agent
-feedback scopes to `edit_posts`. Scoped permissions are otherwise a host
+`manage_options`; ADR-018 relaxes only the editor suggestion, image-source
+candidate, and Agent feedback scopes to `edit_posts`. Scoped permissions are
+otherwise a host
 integration contract: Core, an app-key host, or a trusted site integration
 may use the permission filters to grant narrower or broader access to
 selected routes or abilities.
@@ -26,6 +27,7 @@ point; the editor sidebar visibility check reuses it.
 | Scope | Default capability |
 | --- | --- |
 | `cap.toolbox.editor_suggest` | `edit_posts` (ADR-018) |
+| `cap.toolbox.image_source` | `edit_posts` (ADR-018) |
 | `cap.toolbox.feedback.write` | `edit_posts` (ADR-018) |
 | every other `cap.toolbox.*` scope | `manage_options` |
 | `cap.toolbox.admin` fallback (unknown routes) | `manage_options`, fail closed |
@@ -44,7 +46,7 @@ ownership, and runtime/write posture, use the machine-readable
 | Scope | REST routes | Ability examples | Notes |
 | --- | --- | --- | --- |
 | `cap.toolbox.status.read` | `/status` | none | Readiness only; no provider secrets or execution. |
-| `cap.toolbox.image_source` | `/image-candidates`, `/ai/image-generation` | `npcink-toolbox/search-image-source`, `npcink-toolbox/generate-image` | Candidate generation only; no media import or featured-image write. |
+| `cap.toolbox.image_source` | `/image-candidates`, `/ai/image-generation` | `npcink-toolbox/search-image-source`, `npcink-toolbox/generate-image` | Candidate generation only; no media import or featured-image write. Default `edit_posts` under ADR-018 because the editor image-source modal calls these routes for its suggestion flow; ability execution keeps the `manage_options` default. |
 | `cap.toolbox.vector_search` | `/vector-search` | none | REST compatibility pointer for Cloud-managed Site Knowledge; new Ability clients should use `npcink-toolbox/search-site-knowledge`. |
 | `cap.toolbox.knowledge.read` | `/site-knowledge/status` | `npcink-toolbox/get-site-knowledge-status` | Read-only Cloud status projection. |
 | `cap.toolbox.knowledge.search` | `/knowledge-search`, `/site-knowledge/search` | `npcink-toolbox/search-site-knowledge` | Semantic context candidates only. |
@@ -69,7 +71,7 @@ ownership, and runtime/write posture, use the machine-readable
    import, indexing lifecycle, quota, billing, or request-log authority.
 5. The default capability map is only the unfiltered default. Returning
    `false` from `npcink_toolbox_rest_permission` re-tightens any scope,
-   including the ADR-018 editor and feedback scopes.
+   including the ADR-018 editor, image-source, and feedback scopes.
 6. When in doubt, leave `manage_options` as the effective gate.
 
 ## Verification

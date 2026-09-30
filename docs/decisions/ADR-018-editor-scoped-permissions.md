@@ -46,8 +46,9 @@ instead of hardcoding `manage_options`:
 | Scope | Routes | Default capability |
 | --- | --- | --- |
 | `cap.toolbox.editor_suggest` (new) | `/editor/content-support` | `edit_posts` |
+| `cap.toolbox.image_source` | `/image-candidates`, `/ai/image-generation` | `edit_posts` |
 | `cap.toolbox.feedback.write` | `/agent-feedback` | `edit_posts` |
-| every other scope (`workflow_suggest`, `image_adoption`, `local_admin_consent`, `nightly_inspection`, knowledge/image/web/status/feedback-read scopes) | all `/flows/*`, `/ai/*`, media, Site Check, status, and sync routes | `manage_options` (unchanged) |
+| every other scope (`workflow_suggest`, `image_adoption`, `local_admin_consent`, `nightly_inspection`, knowledge/web/status/feedback-read scopes) | all `/flows/*` and remaining `/ai/*` routes, media, Site Check, status, and sync routes | `manage_options` (unchanged) |
 | `cap.toolbox.admin` fallback | unknown routes | `manage_options` (fail closed, unchanged) |
 
 The editor sidebar script registration and visibility check use the same
@@ -95,6 +96,18 @@ admin-only default would silently drop eval coverage for editor-role actions.
 The feedback contract already forbids article body text, prompts, user email,
 provider secrets, free-form notes, and any write authorization.
 
+`cap.toolbox.image_source` is opened to `edit_posts` because the editor
+image-source modal — the product surface for the `image_candidates` suggestion
+flow this ADR opens — calls `/image-candidates` directly for its primary
+search and completion requests. Both routes in the scope return
+candidate-only `image_candidate.v1` evidence with attribution, license-review
+state, and Unsplash download tracking preserved; `/ai/image-generation` is the
+same modal's reviewed-prompt hosted candidate request and stays a candidate
+normalization seam (Cloud owns generation runtime, model routing, and quota;
+Toolbox owns neither). Media import, featured-image adoption, and every other
+durable write keep the governed Adapter/Core/Toolkit path, and the admin
+image tools stay behind the `manage_options` admin menu capability.
+
 ### Filters stay authoritative
 
 The scoped map only changes the default value passed into
@@ -133,6 +146,14 @@ adoption plans, metadata apply plans, media derivative handoffs) to editors.
 That is broader than the sidebar need and includes proposal-creating
 handoffs. Rejected.
 
+### Gate admin-flow sidebar actions per role in JavaScript
+
+Localizing a capability flag and hiding adoption/handoff buttons for
+editor-role users would mask the permission seam instead of documenting it.
+The server-side boundary stays authoritative either way; the first scoped
+version documents that those actions surface permission errors for
+editor-role users. Deferred as UX polish.
+
 ### Split capabilities per intent inside the editor route
 
 Per-intent permission checks inside one route would duplicate the intent
@@ -146,10 +167,13 @@ rulings above are recorded here instead. Rejected.
   the Content Support sidebar and its suggestion-only flows, including the
   writing-pack draft stage and `format_content`; other roles do not see it.
 - Editor-role users remain denied on adoption/metadata handoff submissions,
-  `/ai/*` routes, admin pages, media optimization, local-admin-consent,
-  Site Check, and the dashboard widget; those sidebar actions surface
-  permission errors for them until the deferred handoff decision.
-- The editor route's host-filter scope changes to `cap.toolbox.editor_suggest`;
+  remaining `/ai/*` routes, admin pages, media optimization,
+  local-admin-consent, Site Check, and the dashboard widget; those sidebar
+  actions surface permission errors for them until the deferred handoff
+  decision.
+- The editor route's host-filter scope changes to `cap.toolbox.editor_suggest`,
+  and `/image-candidates` plus `/ai/image-generation` keep
+  `cap.toolbox.image_source` while inheriting its relaxed default;
   `docs/route-boundary-table.json`, `docs/scoped-permissions-first-version.md`,
   the README REST section, and the boundary/architecture docs are updated in
   the same change.

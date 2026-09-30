@@ -79,12 +79,15 @@ semantics.
 
 ADR-018 introduces scoped editor permissions: the post editor Content Support
 sidebar, its `/editor/content-support` route (`cap.toolbox.editor_suggest`),
-and the metadata-only `/agent-feedback` route (`cap.toolbox.feedback.write`)
+the `/image-candidates` and `/ai/image-generation` image-source candidate
+routes (`cap.toolbox.image_source`), and the metadata-only `/agent-feedback`
+route (`cap.toolbox.feedback.write`)
 default to `edit_posts`, so administrators, editors, and authors can run the
-suggestion-only editor flows, including the writing-pack draft stage and
+suggestion-only editor flows, including image-source candidates, the
+writing-pack draft stage, and
 `format_content`. Every other surface — admin pages, Site Check, media
 optimization, local-admin-consent, the dashboard widget, and the `/flows/*`
-and `/ai/*` routes — stays `manage_options`; adoption and metadata-apply
+routes — stays `manage_options`; adoption and metadata-apply
 handoff submissions remain administrator-facing in the first scoped version.
 Hosts can tighten or broaden any scope through `npcink_toolbox_rest_permission`
 and `npcink_toolbox_ability_permission`.

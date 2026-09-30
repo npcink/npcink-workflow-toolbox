@@ -26,7 +26,8 @@
       "owner": "toolbox_image_source_surface",
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Image-source candidate action only; no media import or featured-image write."
+      "boundary_note": "Image-source candidate action only; no media import or featured-image write. Default capability edit_posts under ADR-018 for the editor image-source suggestion modal; adoption and other writes stay governed.",
+      "default_capability": "edit_posts"
     },
     {
       "route": "/web-search/test",
@@ -159,7 +160,8 @@
       "owner": "hosted_image_candidate_bridge",
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Legacy hosted image candidate normalization seam only; Cloud owns generation runtime and credentials."
+      "boundary_note": "Legacy hosted image candidate normalization seam only; Cloud owns generation runtime and credentials. Default capability edit_posts under ADR-018 for the editor image-source suggestion modal; adoption and other writes stay governed.",
+      "default_capability": "edit_posts"
     },
     {
       "route": "/flows/article-plan",

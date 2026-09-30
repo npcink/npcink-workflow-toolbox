@@ -148,8 +148,8 @@ below is the human-readable summary and must stay aligned with that table.
 
 1. Admin user submits a tool form or REST request.
 2. `Rest_Controller` checks the scope-mapped default capability
-   (`edit_posts` for the ADR-018 editor suggestion and agent-feedback scopes,
-   `manage_options` otherwise).
+   (`edit_posts` for the ADR-018 editor suggestion, image-source, and
+   agent-feedback scopes, `manage_options` otherwise).
 3. `Provider_Client` calls Cloud image-source runtime, a host AI image
    generation seam when explicitly requested, or Cloud-managed Site Knowledge.
    Cloud-managed web search is executed by Npcink Cloud rather than a local
@@ -366,8 +366,8 @@ hooks, skips local fallback queue ownership, and only displays bridge health or
 the Cloud Addon install-and-verify requirement.
 
 The REST surface defaults to `manage_options` by scope, relaxed to `edit_posts`
-only for the ADR-018 `cap.toolbox.editor_suggest` and
-`cap.toolbox.feedback.write` scopes; ability execution keeps the
+only for the ADR-018 `cap.toolbox.editor_suggest`, `cap.toolbox.image_source`,
+and `cap.toolbox.feedback.write` scopes; ability execution keeps the
 `manage_options` default.
 External AI access should be mediated by Core/app-key scope checks in the host
 that consumes these ability definitions. The host can use
@@ -380,7 +380,8 @@ grant narrower access without treating every Toolbox action as one permission.
 ## REST Surface
 
 Current routes require the scope-mapped default capability (`manage_options`,
-except `/editor/content-support` and `/agent-feedback`, which accept
+except `/editor/content-support`, `/image-candidates`, `/ai/image-generation`,
+and `/agent-feedback`, which accept
 `edit_posts` under ADR-018):
 
 - `GET /wp-json/npcink-toolbox/v1/status`
