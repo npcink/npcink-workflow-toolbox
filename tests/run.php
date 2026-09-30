@@ -573,7 +573,7 @@ toolbox_assert( false !== $provider_client && false !== strpos( $provider_client
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'AUDIO_GENERATION_TEXT_CHARS = 5000' ) && false !== strpos( $provider_client, "'audio_generation_request.v1'" ) && false !== strpos( $provider_client, "'npcink-toolbox/generate-audio'" ) && false !== strpos( $provider_client, 'normalize_audio_generation_response' ) && false !== strpos( $provider_client, 'npcink_cloud_addon_execute_toolbox_audio_generation_runtime' ) && false !== strpos( $provider_client, 'toolbox_audio_generation_runtime_request' ), 'Provider client routes bounded article audio candidates through the Cloud Addon audio generation transport contract.' );
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'build_article_audio_adoption_plan' ) && false !== strpos( $provider_client, "'article_audio_adoption_plan.v1'" ) && false !== strpos( $provider_client, "'npcink-abilities-toolkit/build-article-audio-adoption-plan'" ) && false !== strpos( $provider_client, "'npcink-abilities-toolkit/adopt-article-audio'" ) && false !== strpos( $provider_client, "'no_audio_meta_write_in_toolbox'" ) && false !== strpos( $provider_client, "'no_media_import_in_toolbox'" ), 'Provider client prepares article audio adoption as a Core-governed plan without Toolbox audio metadata writes or media import.' );
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'article_audio_content_hash' ) && false !== strpos( $provider_client, 'article_audio_word_count' ) && false !== strpos( $provider_client, '_npcink_toolbox_article_audio_source_content_hash' ) && false !== strpos( $provider_client, "'audio_freshness'" ) && false !== strpos( $provider_client, "'hash_match_current_else_word_count_delta_thresholds'" ), 'Provider client includes source-content fingerprint and freshness policy evidence in article audio adoption plans.' );
-toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'private function trim_chars' ) && false !== strpos( $provider_client, 'mb_substr( $value, 0, $max_chars )' ), 'Provider client has a shared character trimmer for bounded AI prompt inputs.' );
+toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'protected function trim_chars' ) && false !== strpos( $provider_client, 'mb_substr( $value, 0, $max_chars )' ), 'Provider client has a shared character trimmer for bounded AI prompt inputs.' );
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'ARTICLE_PLAN_CONTENT_CHARS = 60000' ) && false !== strpos( $provider_client, 'PAYLOAD_MAX_DEPTH = 8' ) && false !== strpos( $provider_client, 'sanitize_payload( $value, int $depth = 0' ), 'Provider client bounds article plan content and recursive payload sanitization.' );
 toolbox_assert( false !== $provider_client && false !== strpos( $provider_client, 'public function request_image_context_evidence' ) && false !== strpos( $provider_client, "'image_context_evidence_request.v1'" ) && false !== strpos( $provider_client, "'image_context_evidence.v1'" ) && false !== strpos( $provider_client, "'suggestion_only'" ) && false !== strpos( $provider_client, "'direct_wordpress_write'" ), 'Provider client exposes one bounded validated visual-evidence seam without another Toolbox route or write path.' );
 toolbox_assert( false !== strpos( $provider_client, 'sanitize_debug_payload' ) && false !== strpos( $provider_client, 'is_sensitive_payload_key' ) && false !== strpos( $provider_client, "'[redacted]'" ), 'Provider debug payloads are redacted and bounded before raw responses are returned.' );
@@ -1110,6 +1110,37 @@ $client_source_files = glob( $root . '/includes/*.php' );
 $client              = '';
 foreach ( $client_source_files as $client_source_file ) {
 	$client .= "\n" . (string) file_get_contents( $client_source_file );
+}
+$provider_service_files = array(
+	'Provider_Client_Support',
+	'Provider_Nightly_Inspection_Service',
+	'Provider_Ai_Image_Service',
+	'Provider_Web_Search_Service',
+	'Provider_Media_Alt_Caption_Service',
+	'Provider_Hosted_AI_Service',
+	'Provider_Site_Knowledge_Service',
+	'Provider_Content_Collector_Service',
+	'Provider_Discoverability_Service',
+	'Provider_Workflow_Plans_Service',
+);
+foreach ( $provider_service_files as $provider_service_file ) {
+	toolbox_assert( is_file( $root . '/includes/' . $provider_service_file . '.php' ), "Provider cluster service file {$provider_service_file}.php exists." );
+	toolbox_assert( false !== strpos( $main, "includes/{$provider_service_file}.php" ), "Provider cluster service file {$provider_service_file}.php is loaded through the plugin bootstrap only." );
+}
+toolbox_assert( false !== strpos( $client, 'final class Provider_Client extends Provider_Client_Support' ), 'Provider_Client stays the public facade over the shared provider support base.' );
+$provider_service_delegates = array(
+	'nightly'          => 'submit_nightly_inspection_cloud_batch',
+	'ai_image'         => 'run_ai_image_generation',
+	'web_search'       => 'test_cloud_web_search',
+	'media_alt'        => 'build_media_alt_caption_review_set',
+	'hosted_ai'        => 'run_hosted_ai_content_support',
+	'site_knowledge'   => 'search_site_knowledge',
+	'collectors'       => 'collect_site_knowledge_documents',
+	'discoverability'  => 'resolve_discoverability_source',
+	'plans'            => 'build_article_write_plan',
+);
+foreach ( $provider_service_delegates as $provider_service_property => $provider_service_entry ) {
+	toolbox_assert( false !== strpos( $client, "return \$this->{$provider_service_property}->{$provider_service_entry}(" ), "Provider_Client facade delegates {$provider_service_entry} to its cluster service." );
 }
 $editor_css = file_get_contents( $root . '/assets/editor-content-support.css' );
 toolbox_assert( false === strpos( $editor_js, "intent: 'related_articles'" ) && false === strpos( $editor_js, 'renderRelatedArticleCandidateSection' ) && false === strpos( $editor_js, 'related_article_copy' ) && false === strpos( $editor_js, 'related_article_open' ) && false === strpos( $editor_js, 'related_article_ignored' ), 'Editor removes the obsolete related-article intent and its duplicate state and feedback paths.' );

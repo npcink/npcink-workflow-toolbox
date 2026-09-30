@@ -168,7 +168,11 @@ if ( false === $toolkit_fixture_json || ! is_array( $toolkit_fixture ) ) {
 	npcink_contract_check( 'approval_request' === ( $media_workflow['handoff']['kind'] ?? '' ), 'Toolkit media optimization definition preserves Core approval handoff' );
 }
 
-$toolbox_projection_source = file_get_contents( $root . '/includes/Provider_Client.php' );
+$toolbox_projection_source_files = glob( $root . '/includes/*.php' );
+$toolbox_projection_source       = '';
+foreach ( $toolbox_projection_source_files as $toolbox_projection_source_file ) {
+	$toolbox_projection_source .= "\n" . (string) file_get_contents( $toolbox_projection_source_file );
+}
 npcink_contract_check( false !== $toolbox_projection_source && false !== strpos( $toolbox_projection_source, "'definition_owner'            => 'npcink-abilities-toolkit'" ), 'Toolbox media optimization is a Toolkit-owned fixed-button projection' );
 foreach ( array( 'recipe_id', 'contract_version', 'entrypoint_ability_id', 'required_scope', 'failure_policy' ) as $field ) {
 	$value = (string) ( $media_workflow[ $field ] ?? '' );

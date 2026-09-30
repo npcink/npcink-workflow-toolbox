@@ -41,6 +41,8 @@ if ( ! function_exists( 'absint' ) ) {
 }
 
 $root = dirname( __DIR__ );
+require_once $root . '/includes/Provider_Client_Support.php';
+require_once $root . '/includes/Provider_Nightly_Inspection_Service.php';
 require_once $root . '/includes/Provider_Client.php';
 
 $fail = static function ( string $message ): void {
@@ -54,8 +56,8 @@ $assert = static function ( bool $condition, string $message ) use ( $fail ): vo
 	}
 };
 
-$client = ( new ReflectionClass( \Npcink_Toolbox\Provider_Client::class ) )->newInstanceWithoutConstructor();
-$method = new ReflectionMethod( \Npcink_Toolbox\Provider_Client::class, 'nightly_inspection_cloud_batch_items' );
+$client = ( new ReflectionClass( \Npcink_Toolbox\Provider_Nightly_Inspection_Service::class ) )->newInstanceWithoutConstructor();
+$method = new ReflectionMethod( \Npcink_Toolbox\Provider_Nightly_Inspection_Service::class, 'nightly_inspection_cloud_batch_items' );
 $method->setAccessible( true );
 
 $snapshot = array(

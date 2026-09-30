@@ -83,7 +83,7 @@ namespace Npcink_Toolbox {
 }
 
 namespace {
-	require_once dirname( __DIR__ ) . '/includes/Provider_Client.php';
+	require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 
 	$client  = new Npcink_Toolbox\Provider_Client( new Npcink_Toolbox\Settings() );
 	$request = array(
