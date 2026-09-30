@@ -26,7 +26,8 @@
       "owner": "toolbox_image_source_surface",
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Image-source candidate action only; no media import or featured-image write."
+      "boundary_note": "Image-source candidate action only; no media import or featured-image write. Default capability edit_posts under ADR-018 for the editor image-source suggestion modal; adoption and other writes stay governed.",
+      "default_capability": "edit_posts"
     },
     {
       "route": "/web-search/test",
@@ -110,7 +111,8 @@
       "owner": "cloud_eval_metadata",
       "write_posture": "eval_metadata_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Agent feedback metadata only; no approval, audit, or WordPress write truth."
+      "boundary_note": "Agent feedback metadata only; default capability edit_posts under ADR-018 so editor-role sidebar actions keep reporting; no approval, audit, or WordPress write truth.",
+      "default_capability": "edit_posts"
     },
     {
       "route": "/agent-feedback/summary",
@@ -158,7 +160,8 @@
       "owner": "hosted_image_candidate_bridge",
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Legacy hosted image candidate normalization seam only; Cloud owns generation runtime and credentials."
+      "boundary_note": "Legacy hosted image candidate normalization seam only; Cloud owns generation runtime and credentials. Default capability edit_posts under ADR-018 for the editor image-source suggestion modal; adoption and other writes stay governed.",
+      "default_capability": "edit_posts"
     },
     {
       "route": "/flows/article-plan",
@@ -275,11 +278,12 @@
       "methods": [
         "POST"
       ],
-      "scope": "cap.toolbox.workflow_suggest",
+      "scope": "cap.toolbox.editor_suggest",
       "owner": "toolbox_editor_surface",
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
-      "boundary_note": "Editor content-support suggestions only; format_content sends exact unsaved text through the no-store Cloud formatting facade and returns a validated candidate for native editor state only. Missing contextual ALT may use the existing silent visual-evidence fallback and is applied only to Gutenberg editor state for native WordPress save, without Core audit or attachment metadata mutation."
+      "boundary_note": "Editor content-support suggestions only with the ADR-018 scoped edit_posts default; adoption and /flows/* handoffs stay manage_options. format_content sends exact unsaved text through the no-store Cloud formatting facade and returns a validated candidate for native editor state only. Missing contextual ALT may use the existing silent visual-evidence fallback and is applied only to Gutenberg editor state for native WordPress save, without Core audit or attachment metadata mutation.",
+      "default_capability": "edit_posts"
     },
     {
       "route": "/media-derivative-handoff",

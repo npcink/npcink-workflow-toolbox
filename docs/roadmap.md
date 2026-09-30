@@ -282,4 +282,7 @@ and should stay in Cloud Batch Runtime result detail and reviewed Core handoff; 
 - request log ownership;
 - cost and quota display;
 - multisite behavior;
-- scoped non-admin permissions.
+- relaxing editor-role access beyond the ADR-018 editor suggestion and
+  feedback scopes, such as adoption or metadata handoff submissions;
+- an ability-side or app-key scoped authorization model for external AI
+  callers beyond the host-mediated permission filters.

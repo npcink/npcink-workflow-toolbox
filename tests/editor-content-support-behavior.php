@@ -61,9 +61,13 @@ if ( ! class_exists( 'WP_REST_Response' ) ) {
 if ( ! class_exists( 'WP_REST_Request' ) ) {
 	class WP_REST_Request {
 		private array $params;
+		private string $route;
+		private string $method;
 
-		public function __construct( array $params = array() ) {
+		public function __construct( array $params = array(), string $route = '', string $method = 'POST' ) {
 			$this->params = $params;
+			$this->route  = $route;
+			$this->method = $method;
 		}
 
 		public function get_param( string $key ) {
@@ -72,6 +76,22 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 
 		public function get_params(): array {
 			return $this->params;
+		}
+
+		public function get_json_params() {
+			return $this->params;
+		}
+
+		public function get_route(): string {
+			return $this->route;
+		}
+
+		public function get_method(): string {
+			return $this->method;
+		}
+
+		public function get_header( string $name ): string {
+			return '';
 		}
 	}
 }
@@ -445,6 +465,7 @@ if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
 		public const OPTION_NAME         = 'npcink_toolbox_settings';
 		public const CONTEXT_OPTION_NAME = 'npcink_toolbox_content_context';
 		public const MEDIA_OPTION_NAME   = 'npcink_toolbox_media_settings';
+		public const REST_NAMESPACE      = 'npcink-toolbox/v1';
 	}
 	class_alias( Npcink_Toolbox_Progressive_Plugin_Stub::class, 'Npcink_Toolbox\\Plugin' );
 }
@@ -452,6 +473,7 @@ if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
 require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
+require_once dirname( __DIR__ ) . '/includes/Editor_Content_Format.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
 
 $settings   = new Npcink_Toolbox\Settings();
@@ -478,8 +500,16 @@ function wp_html_excerpt( string $str, int $count, string $more = '' ): string {
 	return $short . ( is_array( $words ) && count( $words ) > $count ? $more : '' );
 }
 
-function current_user_can( string $capability ): bool {
-	return true;
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'manage_options', 'edit_posts', 'edit_post', 'upload_files', 'moderate_comments' );
+$GLOBALS['npcink_toolbox_simulated_editable_post_ids'] = array( 31 );
+
+function current_user_can( string $capability, $object_id = null ): bool {
+	$granted = $GLOBALS['npcink_toolbox_simulated_capabilities'] ?? array( 'manage_options', 'edit_posts', 'edit_post' );
+	if ( 'edit_post' === $capability ) {
+		$editable = $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] ?? array( 31 );
+		return in_array( 'edit_posts', $granted, true ) && in_array( (int) $object_id, $editable, true );
+	}
+	return in_array( $capability, $granted, true );
 }
 
 function npcink_toolbox_editor_flow_record_write( string $fn ): void {
@@ -611,5 +641,56 @@ npcink_toolbox_editor_flow_assert( isset( $preflight_run['data']['sections']['di
 npcink_toolbox_editor_flow_assert( array() === $npcink_toolbox_editor_flow_writes, 'No editor content-support intent performed a WordPress write (' . implode( ', ', $npcink_toolbox_editor_flow_writes ) . ').' );
 npcink_toolbox_editor_flow_assert( array() === $npcink_toolbox_progressive_writing_pack_inputs, 'No default-button intent fired a hosted-AI writing-pack or draft request.' );
 npcink_toolbox_editor_flow_assert( 1 === $npcink_toolbox_progressive_source_reader_calls, 'Only publish preflight requests external search evidence; other default intents fire none.' );
+
+/**
+ * ADR-018 permission behavior: an edit_posts-only user passes the scoped
+ * editor suggestion and agent-feedback routes, while admin-gated scopes and
+ * the unknown-route fallback stay denied for that user.
+ */
+$permission_probe = static function ( string $route ) use ( $controller ): bool {
+	return $controller->permission( new WP_REST_Request( array( 'intent' => 'publish_preflight' ), '/' . Npcink_Toolbox\Plugin::REST_NAMESPACE . $route, 'POST' ) );
+};
+
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts' );
+npcink_toolbox_editor_flow_assert( true === $permission_probe( '/editor/content-support' ), 'Editor-role users pass the scoped editor content-support permission.' );
+npcink_toolbox_editor_flow_assert( true === $permission_probe( '/agent-feedback' ), 'Editor-role users pass the scoped agent-feedback permission.' );
+npcink_toolbox_editor_flow_assert( true === $permission_probe( '/image-candidates' ) && true === $permission_probe( '/ai/image-generation' ), 'Editor-role users pass the scoped image-source candidate routes used by the editor modal.' );
+npcink_toolbox_editor_flow_assert( false === $permission_probe( '/flows/article-plan' ), 'Editor-role users are denied the admin-gated article-plan flow route.' );
+npcink_toolbox_editor_flow_assert( false === $permission_probe( '/flows/content-metadata-apply-plan' ), 'Editor-role users are denied the admin-gated metadata apply-plan route.' );
+npcink_toolbox_editor_flow_assert( false === $permission_probe( '/ai/content-support' ), 'Editor-role users are denied the admin-gated generic AI route.' );
+npcink_toolbox_editor_flow_assert( false === $permission_probe( '/status' ), 'Editor-role users are denied the admin-gated status route.' );
+npcink_toolbox_editor_flow_assert( false === $permission_probe( '/not-a-registered-route' ), 'Editor-role users are denied unknown routes through the manage_options fallback scope.' );
+
+// The local-admin-consent route is additionally guarded by the present-admin-UI
+// nonce gate, so a plain permission() probe is denied for every role and proves
+// nothing about the capability map; pin the scope mappings directly instead.
+npcink_toolbox_editor_flow_assert( 'manage_options' === Npcink_Toolbox\Rest_Controller::default_capability_for_scope( 'cap.toolbox.local_admin_consent' ), 'The local-admin-consent scope keeps the manage_options default capability.' );
+npcink_toolbox_editor_flow_assert( 'manage_options' === Npcink_Toolbox\Rest_Controller::default_capability_for_scope( 'cap.toolbox.workflow_suggest' ) && 'manage_options' === Npcink_Toolbox\Rest_Controller::default_capability_for_scope( 'cap.toolbox.admin' ), 'The workflow-suggest scope and the unknown-route fallback keep the manage_options default capability.' );
+npcink_toolbox_editor_flow_assert( 'edit_posts' === Npcink_Toolbox\Rest_Controller::default_capability_for_scope( 'cap.toolbox.editor_suggest' ) && 'edit_posts' === Npcink_Toolbox\Rest_Controller::default_capability_for_scope( 'cap.toolbox.image_source' ) && 'edit_posts' === Npcink_Toolbox\Rest_Controller::default_capability_for_scope( 'cap.toolbox.feedback.write' ), 'The ADR-018 editor suggestion, image-source, and feedback scopes map to edit_posts.' );
+
+// format_content keeps its per-post boundary: the edit_posts user may format
+// their own post (proven by reaching the missing-Cloud-Addon stop) and is
+// denied for a post they cannot edit.
+$format_request = static function ( int $post_id ): WP_Error {
+	$result = Npcink_Toolbox\Editor_Content_Format::request( new WP_REST_Request( array( 'content' => '这是一段需要整理的正文。', 'intent' => 'format_content', 'post_id' => $post_id ) ) );
+	return $result instanceof WP_Error ? $result : new WP_Error( '', '', array() );
+};
+npcink_toolbox_editor_flow_assert( 'npcink_content_format_unavailable' === $format_request( 31 )->get_error_code(), 'The format_content intent passes the scoped permission gate for the author own post and stops only at the missing Cloud Addon facade.' );
+npcink_toolbox_editor_flow_assert( 'npcink_content_format_permission' === $format_request( 999 )->get_error_code(), 'The format_content intent stays denied for a post the edit_posts user cannot edit.' );
+
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts', 'manage_options' );
+npcink_toolbox_editor_flow_assert( true === $permission_probe( '/flows/article-plan' ) && true === $permission_probe( '/editor/content-support' ), 'Administrator users pass both scoped and admin-gated Toolbox routes.' );
+
+// Attachment metadata resolution inside the editor route stays object-authorized:
+// enumerating attachment ids requires upload_files regardless of the route scope.
+$attachment_item = new ReflectionMethod( Npcink_Toolbox\Rest_Controller::class, 'editor_attachment_media_item' );
+$attachment_item->setAccessible( true );
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts' );
+npcink_toolbox_editor_flow_assert( array() === $attachment_item->invoke( $controller, 31, 'featured_media' ), 'Editor-role users without upload_files cannot resolve attachment metadata by id.' );
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts', 'upload_files' );
+npcink_toolbox_editor_flow_assert( array() !== $attachment_item->invoke( $controller, 31, 'featured_media' ), 'Users with upload_files resolve attachment metadata for the editor media context.' );
+
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array();
+npcink_toolbox_editor_flow_assert( false === $permission_probe( '/editor/content-support' ) && false === $permission_probe( '/agent-feedback' ), 'Users without the scoped capability are denied even the relaxed editor routes.' );
 
 echo "Editor content support behavior checks passed.\n";

@@ -161,6 +161,15 @@ media mutation, and hidden post-save execution remain Core-proposal paths.
 `wp-magick-toolbox` is independent of `npcink-workflow-toolbox` and is not part
 of this platform authority map or its release matrix.
 
+## Pending Platform Decisions
+
+- [`mcp-governance-surface-decision.md`](mcp-governance-surface-decision.md)
+  (2026-09, accepted 2026-09-30): the governed MCP surface ships as an
+  `mcp` subcommand of the existing `@npcink/openclaw-adapter-cli` package
+  (`npcink-ai-client-adapter` `packages/adapter-cli`), stdio first, v0
+  read/propose tools only. No new repository is chartered; no WordPress
+  runtime changes are authorized for MCP projection.
+
 ## Cleanup Rule For Existing Core Docs
 
 Existing Core documents that are governance-specific should remain in Core.

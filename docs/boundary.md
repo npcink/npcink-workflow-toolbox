@@ -200,6 +200,17 @@ is [Route Boundary Table](route-boundary-table.json). The list below is the
 human-readable allowlist and must stay aligned with that table and
 `Rest_Controller::rest_route_scope()`.
 
+Default REST capability maps by scope under ADR-018:
+`cap.toolbox.editor_suggest` (`/editor/content-support`),
+`cap.toolbox.image_source` (`/image-candidates` and `/ai/image-generation`,
+the editor modal's candidate-only transport), and
+`cap.toolbox.feedback.write` (`/agent-feedback`) default to `edit_posts`;
+every other scope and the `cap.toolbox.admin` fallback keep `manage_options`.
+The `npcink_toolbox_rest_permission` filter remains the authoritative host
+channel for tightening or broadening any scope. Editor-role users therefore
+cannot submit adoption, metadata-apply, or other `/flows/*` handoffs in the
+first scoped version; those actions stay administrator-facing.
+
 - `/status`
 - `/image-candidates`
 - `/web-search/test`

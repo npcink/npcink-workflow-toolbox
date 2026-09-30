@@ -122,9 +122,13 @@ The first version provides:
 
 ## Boundary
 
-All first-version surfaces (admin pages, editor sidebar, dashboard widget, and
-REST routes) require `manage_options`; editor-role (`edit_posts`) access is a
-deliberately deferred scoped-permission decision, not a current capability.
+Admin pages, the dashboard widget, the `/flows/*` and `/ai/*` routes, and
+every governed handoff surface require `manage_options`. ADR-018 scopes the
+post editor Content Support sidebar, its `/editor/content-support` route, and
+the metadata-only `/agent-feedback` route to `edit_posts` users; the
+`npcink_toolbox_rest_permission` and `npcink_toolbox_ability_permission`
+filters remain the authoritative host channel for tightening or broadening
+any scope.
 
 Toolbox primarily returns suggestions and planning artifacts. ADR-017 retires
 the former ADR-010/011 local image import, replacement, and restore exceptions.
@@ -175,6 +179,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-013: WordPress-First Content And Recommendation Contracts](docs/decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
 - [ADR-014: Current-Article Multi-Link Editor Transaction](docs/decisions/ADR-014-current-article-multi-link-editor-transaction.md)
 - [ADR-017: Retire Single-Image Local Write Exceptions](docs/decisions/ADR-017-retire-single-image-local-write-exceptions.md)
+- [ADR-018: Scoped Editor Permissions For The Content-Support Sidebar](docs/decisions/ADR-018-editor-scoped-permissions.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:
@@ -255,7 +260,12 @@ Workflow and composition contracts remain indexed at
 
 ## REST Routes
 
-All routes require a logged-in user with `manage_options`. This list is a
+All routes require a logged-in user. The default capability is
+`manage_options`, except the ADR-018 scoped defaults: `/editor/content-support`
+(`cap.toolbox.editor_suggest`), `/image-candidates` and
+`/ai/image-generation` (`cap.toolbox.image_source`, the editor modal's
+candidate transport), and `/agent-feedback` (`cap.toolbox.feedback.write`)
+accept `edit_posts`. This list is a
 compatibility allowlist, not an ownership claim: routes marked in the boundary
 docs as Cloud-owned bridges, legacy compatibility seams, or explicit boundary
 exceptions must keep those limits even though their first-version paths remain
@@ -462,8 +472,10 @@ Core governance abilities or first-party WordPress abilities.
 
 Ability metadata includes Toolbox scopes such as `cap.toolbox.image_source`,
 `cap.toolbox.vector_search`, and `cap.toolbox.workflow_suggest`. Content context uses
-`cap.toolbox.context.read`. The first admin REST surface remains
-`manage_options` gated; external AI/app-key authorization should be enforced by
+`cap.toolbox.context.read`. REST routes default to `manage_options` except the
+ADR-018 `edit_posts` scoped defaults for the editor content-support sidebar
+and agent feedback; ability execution keeps the `manage_options` default and
+external AI/app-key authorization should be enforced by
 Core or the host that consumes the ability scope metadata. First-version host
 integration hooks are `npcink_toolbox_rest_permission` and
 `npcink_toolbox_ability_permission`.
