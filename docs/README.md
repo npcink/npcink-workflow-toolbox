@@ -157,3 +157,7 @@ current product contracts.
 
 - [Cloud Vector Recommendation Funnel Closeout - 2026-08-24](archive/2026-08/cloud-vector-recommendation-funnel-closeout-2026-08-24.md) records local and M4 candidate evidence for exact anchors, reviewed batch Apply, native-save confirmation, metadata-only rollups, and the real-user observation stop point; it is not merge, production, or recommendation-quality authority.
 - [Recommendation Quality MVP Closeout - 2026-08-30](archive/2026-08/recommendation-quality-mvp-closeout-2026-08-30.md) records the Cloud ranking fixes, separate image-prompt work, Toolbox action telemetry, Eval Lab GPT/Grok evidence, ownership boundary, and staged small-feature lessons.
+
+## Closeouts
+
+- [Pre-Release Hardening Closeout - 2026-09-30](pre-release-hardening-closeout-2026-09-30.md) records the positioning audit verdict, the delete-compatibility-early decision, the behavior-tests-unlock-refactors method, and the remaining known small items (i18n loader, weekly fingerprint cron documentation, label language, editor intent convergence).
