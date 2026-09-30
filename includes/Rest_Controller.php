@@ -1822,7 +1822,9 @@ final class Rest_Controller {
 	}
 
 	private function editor_attachment_media_item( int $attachment_id, string $source ): array {
-		if ( $attachment_id <= 0 || ( function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) ) {
+		if ( $attachment_id <= 0
+			|| ( function_exists( 'current_user_can' ) && ! current_user_can( 'upload_files' ) )
+			|| ( function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) ) {
 			return array();
 		}
 
@@ -2328,9 +2330,12 @@ final class Rest_Controller {
 		$author     = sanitize_text_field( (string) ( $context['comment_author'] ?? '' ) );
 		$status     = '';
 
-		if ( $comment_id > 0 && function_exists( 'get_comment' ) ) {
-			$comment = get_comment( $comment_id );
-			if ( $comment ) {
+		if ( $comment_id > 0
+			&& function_exists( 'get_comment' )
+			&& ( ! function_exists( 'current_user_can' ) || current_user_can( 'moderate_comments' ) ) ) {
+			$comment         = get_comment( $comment_id );
+			$context_post_id = absint( $context['post_id'] ?? 0 );
+			if ( $comment && ( $context_post_id < 1 || absint( $comment->comment_post_ID ?? 0 ) === $context_post_id ) ) {
 				$text   = '' !== $text ? $text : sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $comment->comment_content ?? '' ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) );
 				$author = '' !== $author ? $author : sanitize_text_field( (string) ( $comment->comment_author ?? '' ) );
 				$status = sanitize_key( (string) ( $comment->comment_approved ?? '' ) );

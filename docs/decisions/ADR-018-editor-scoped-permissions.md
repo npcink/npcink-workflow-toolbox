@@ -108,6 +108,15 @@ Toolbox owns neither). Media import, featured-image adoption, and every other
 durable write keep the governed Adapter/Core/Toolkit path, and the admin
 image tools stay behind the `manage_options` admin menu capability.
 
+Object-level guards keep server-side object reads inside the editor route
+object-authorized now that the route accepts `edit_posts` users:
+`comment_reply_suggestion` reads a stored comment only when the user has
+`moderate_comments` and the comment belongs to the current post, otherwise it
+falls back to operator-supplied or selected text; attachment metadata
+resolution (featured image, media items, and the media-library prefetch)
+requires `upload_files`, matching WordPress core media visibility, so lower
+roles cannot enumerate comment content or attachment metadata by id.
+
 ### Filters stay authoritative
 
 The scoped map only changes the default value passed into

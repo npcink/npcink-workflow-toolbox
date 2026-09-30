@@ -500,7 +500,7 @@ function wp_html_excerpt( string $str, int $count, string $more = '' ): string {
 	return $short . ( is_array( $words ) && count( $words ) > $count ? $more : '' );
 }
 
-$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'manage_options', 'edit_posts', 'edit_post' );
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'manage_options', 'edit_posts', 'edit_post', 'upload_files', 'moderate_comments' );
 $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] = array( 31 );
 
 function current_user_can( string $capability, $object_id = null ): bool {
@@ -648,7 +648,7 @@ npcink_toolbox_editor_flow_assert( 1 === $npcink_toolbox_progressive_source_read
  * the unknown-route fallback stay denied for that user.
  */
 $permission_probe = static function ( string $route ) use ( $controller ): bool {
-	return $controller->permission( new WP_REST_Request( array( 'intent' => 'publish_preflight' ), '/npcink-toolbox/v1' . $route, 'POST' ) );
+	return $controller->permission( new WP_REST_Request( array( 'intent' => 'publish_preflight' ), '/' . Npcink_Toolbox\Plugin::REST_NAMESPACE . $route, 'POST' ) );
 };
 
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts' );
@@ -680,6 +680,15 @@ npcink_toolbox_editor_flow_assert( 'npcink_content_format_permission' === $forma
 
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts', 'manage_options' );
 npcink_toolbox_editor_flow_assert( true === $permission_probe( '/flows/article-plan' ) && true === $permission_probe( '/editor/content-support' ), 'Administrator users pass both scoped and admin-gated Toolbox routes.' );
+
+// Attachment metadata resolution inside the editor route stays object-authorized:
+// enumerating attachment ids requires upload_files regardless of the route scope.
+$attachment_item = new ReflectionMethod( Npcink_Toolbox\Rest_Controller::class, 'editor_attachment_media_item' );
+$attachment_item->setAccessible( true );
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts' );
+npcink_toolbox_editor_flow_assert( array() === $attachment_item->invoke( $controller, 31, 'featured_media' ), 'Editor-role users without upload_files cannot resolve attachment metadata by id.' );
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts', 'upload_files' );
+npcink_toolbox_editor_flow_assert( array() !== $attachment_item->invoke( $controller, 31, 'featured_media' ), 'Users with upload_files resolve attachment metadata for the editor media context.' );
 
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array();
 npcink_toolbox_editor_flow_assert( false === $permission_probe( '/editor/content-support' ) && false === $permission_probe( '/agent-feedback' ), 'Users without the scoped capability are denied even the relaxed editor routes.' );
