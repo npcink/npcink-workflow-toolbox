@@ -163,10 +163,11 @@ of this platform authority map or its release matrix.
 ## Pending Platform Decisions
 
 - [`mcp-governance-surface-decision.md`](mcp-governance-surface-decision.md)
-  (2026-09, proposed): whether and where the suite projects its governed
-  channel onto MCP, including the enforced-boundary bridging requirement and
-  the upstream approval-hook draft. No repository may implement MCP runtime
-  or MCP tool projection until this decision is accepted.
+  (2026-09, accepted 2026-09-30): the governed MCP surface ships as an
+  `mcp` subcommand of the existing `@npcink/openclaw-adapter-cli` package
+  (`npcink-ai-client-adapter` `packages/adapter-cli`), stdio first, v0
+  read/propose tools only. No new repository is chartered; no WordPress
+  runtime changes are authorized for MCP projection.
 
 ## Cleanup Rule For Existing Core Docs
 

@@ -1,14 +1,35 @@
 # MCP Governance Surface Decision - 2026-09
 
-Status: proposed decision record. No repository is authorized to implement
-MCP runtime or MCP-facing tool projection until this decision is accepted by
-the platform operator.
+Status: accepted 2026-09-30 with the resolution recorded below. The
+governed MCP surface ships as an `mcp` subcommand of the existing
+`@npcink/openclaw-adapter-cli` package in `npcink-ai-client-adapter`; no new
+repository is chartered.
 
 Source review: `npcink-ai-client-adapter`
 `docs/adapter-positioning-notes-2026-09.md` Phase 3 and
 `docs/threat-model.md` (boundary classes). This record follows the platform
 authority rule: it does not fork Adapter, Core, or Toolkit contracts; it
-records a pending placement decision and links to owners.
+records the placement decision and links to owners.
+
+## Resolution (2026-09-30)
+
+The operator accepted the governed MCP surface with these decisions:
+
+| Question | Decision |
+| --- | --- |
+| Q1 ownership | No new repository. The surface is a stdio MCP server embedded as an `mcp` subcommand of the existing `@npcink/openclaw-adapter-cli` package, reusing existing local key-pair profiles and the Adapter REST channel. Operator rationale: the suite already spans multiple plugins; adding another repository would raise coordination cost without a concrete second-client demand. |
+| Q2 tool scope | v0 exposes status, read, read-request, and propose tools only. Execute tools are deferred to a later phase and must go through approve-and-execute semantics with the `npcink.execute` key scope. |
+| Q3 transport | stdio first, matching local clients and the existing CLI profile model. Streamable HTTP is deferred. |
+| Q4 naming | Moot under Q1; the `npcink-mcp-gateway` working name is retired. |
+| Coexistence | Phase 1 operator guidance only (do not expose write-class abilities through ungoverned MCP paths). Detection work is deferred. |
+| Upstream proposal | Deferred until the governed loop is observable through MCP; the draft stays in this repository. |
+| Release note | The CLI 0.3.0 package is intentionally not published to npm yet; it ships with the `mcp` subcommand in a later combined release. |
+
+Implementation stays inside `npcink-ai-client-adapter`
+`packages/adapter-cli`: client-side tooling only, no WordPress runtime
+changes, no new final write path, and no change to the Adapter, Core,
+Toolkit, or Toolbox charters. The option analysis below is kept as the
+decision rationale.
 
 ## Background
 
