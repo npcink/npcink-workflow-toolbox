@@ -28,6 +28,8 @@ abstract class Provider_Client_Support {
 	protected const SITE_KNOWLEDGE_SYNC_MAX_BYTES = 750000;
 	protected const ARTICLE_PLAN_CONTENT_CHARS = 60000;
 	protected const ARTICLE_PLAN_NOTES_CHARS = 12000;
+	protected const SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES = 262144;
+
 	protected const AUDIO_GENERATION_TEXT_CHARS = 5000;
 
 	protected Settings $settings;
@@ -631,4 +633,131 @@ abstract class Provider_Client_Support {
 
 		return true;
 	}
+
+	protected function local_media_visual_source( int $attachment_id ): array {
+		if ( 0 >= $attachment_id || ! function_exists( 'get_attached_file' ) || ! function_exists( 'wp_upload_dir' ) ) {
+			return array();
+		}
+		$path        = get_attached_file( $attachment_id );
+		$upload_dir  = wp_upload_dir();
+		$upload_root = realpath( (string) ( $upload_dir['basedir'] ?? '' ) );
+		$real_path   = is_string( $path ) ? realpath( $path ) : false;
+		if (
+			false === $upload_root
+			|| false === $real_path
+			|| ! is_file( $real_path )
+			|| ! is_readable( $real_path )
+			|| ( $upload_root !== $real_path && 0 !== strpos( $real_path, trailingslashit( $upload_root ) ) )
+		) {
+			return array();
+		}
+		$file_size = filesize( $real_path );
+		if ( false === $file_size || 0 >= $file_size || 8 * MB_IN_BYTES < $file_size ) {
+			return array();
+		}
+		$original_mime_type = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $real_path ) : '';
+		if ( ! is_string( $original_mime_type ) || ! in_array( $original_mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+			return array();
+		}
+		$fingerprint = hash_file( 'sha256', $real_path );
+		if ( ! is_string( $fingerprint ) || '' === $fingerprint ) {
+			return array();
+		}
+		$source_path = $real_path;
+		if ( $file_size > self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES && function_exists( 'wp_get_attachment_metadata' ) ) {
+			$metadata = wp_get_attachment_metadata( $attachment_id );
+			$sizes    = is_array( $metadata ) && is_array( $metadata['sizes'] ?? null ) ? $metadata['sizes'] : array();
+			$candidates = array();
+			foreach ( $sizes as $size ) {
+				if ( ! is_array( $size ) || empty( $size['file'] ) ) {
+					continue;
+				}
+				$candidate_path = realpath( dirname( $real_path ) . DIRECTORY_SEPARATOR . basename( (string) $size['file'] ) );
+				if (
+					false === $candidate_path
+					|| ! is_file( $candidate_path )
+					|| ! is_readable( $candidate_path )
+					|| 0 !== strpos( $candidate_path, trailingslashit( $upload_root ) )
+				) {
+					continue;
+				}
+				$candidate_size = filesize( $candidate_path );
+				if ( false === $candidate_size || 0 >= $candidate_size || self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES < $candidate_size ) {
+					continue;
+				}
+				$candidates[] = array(
+					'path' => $candidate_path,
+					'area' => absint( $size['width'] ?? 0 ) * absint( $size['height'] ?? 0 ),
+				);
+			}
+			usort(
+				$candidates,
+				static function ( array $left, array $right ): int {
+					return (int) $right['area'] <=> (int) $left['area'];
+				}
+			);
+			if ( ! empty( $candidates ) ) {
+				$source_path = (string) $candidates[0]['path'];
+			}
+		}
+		$source_size = filesize( $source_path );
+		if ( false === $source_size || 0 >= $source_size || self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES < $source_size ) {
+			return array();
+		}
+		$mime_type = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $source_path ) : $original_mime_type;
+		if ( ! is_string( $mime_type ) || ! in_array( $mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+			return array();
+		}
+		$extension = array(
+			'image/avif' => 'avif',
+			'image/jpeg' => 'jpg',
+			'image/png'  => 'png',
+			'image/webp' => 'webp',
+		)[ $mime_type ];
+
+		return array(
+			'path'              => $source_path,
+			'filename'          => 'site-media-' . $attachment_id . '.' . $extension,
+			'mime_type'         => $mime_type,
+			'media_fingerprint' => 'sha256:' . strtolower( $fingerprint ),
+		);
+	}
+
+
+	protected function runtime_safe_media_fingerprint( string $fingerprint ): string {
+		$fingerprint = trim( sanitize_text_field( $fingerprint ) );
+		if ( '' === $fingerprint ) {
+			return '';
+		}
+		if ( 1 === preg_match( '/^sha256:[a-f0-9]{64}$/i', $fingerprint ) ) {
+			return strtolower( $fingerprint );
+		}
+
+		if ( 1 === preg_match( '/^[a-f0-9]{64}$/i', $fingerprint ) ) {
+			return 'sha256:' . strtolower( $fingerprint );
+		}
+
+		return '';
+	}
+
+
+	protected function runtime_safe_media_url( string $url ): string {
+		$url = esc_url_raw( $url, array( 'http', 'https' ) );
+		if ( '' === $url || 1 !== preg_match( '~^(https?://[^/?#]+)(.*)$~i', $url, $matches ) ) {
+			return '';
+		}
+
+		$suffix = preg_replace_callback(
+			'/%[0-9A-Fa-f]{2}|\d/',
+			static function ( array $token ): string {
+				return '%' === $token[0][0]
+					? $token[0]
+					: '%' . strtoupper( bin2hex( $token[0] ) );
+			},
+			$matches[2]
+		);
+
+		return $matches[1] . ( is_string( $suffix ) ? $suffix : '' );
+	}
+
 }
