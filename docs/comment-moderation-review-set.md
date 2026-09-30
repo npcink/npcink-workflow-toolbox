@@ -34,7 +34,7 @@ Allowed per-comment fields:
 - comment content, truncated to 2000 characters;
 - author display name;
 - author URL;
-- bounded parent post title for context;
+- bounded parent post title for context, only when the parent post is public;
 - source comment id.
 
 Never sent for this intent:
