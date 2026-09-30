@@ -2002,12 +2002,14 @@
 		const titleByIntent = {
 			media_alt_suggestions: 'Review image ALT suggestions',
 			content_snapshot_suggestions: 'Content opportunities',
-			comment_moderation_suggestions: 'Review pending comment classifications'
+			comment_moderation_suggestions: 'Review pending comment classifications',
+			flagged_media_suggestions: 'Review flagged media'
 		};
 		const summaryByIntent = {
 			media_alt_suggestions: 'Review and edit missing ALT drafts. Visually confirmed rows may be submitted to Core review; this scan does not change media ALT.',
 			content_snapshot_suggestions: 'Review opportunities from a bounded sample. This is not a full site audit and does not change content.',
-			comment_moderation_suggestions: 'Cloud classification hints for pending comments. Handle moderation in WordPress; this review does not change comment status.'
+			comment_moderation_suggestions: 'Cloud classification hints for pending comments. Handle moderation in WordPress; this review does not change comment status.',
+			flagged_media_suggestions: 'Stored Cloud safety statuses for a bounded recent image sample. Handle flagged images in WordPress; this review does not change media.'
 		};
 		const result = renderShell(
 			form,
@@ -2036,6 +2038,8 @@
 		renderMediaAltCaptionReviewSet(result, payload.media_alt_caption_review_set, form, payload);
 
 		renderCommentModerationReviewSet(result, payload.comment_moderation_review_set, form);
+
+		renderFlaggedMediaReviewSet(result, payload.flagged_media_review_set, form);
 
 		const renderedOpportunities = intent === 'content_snapshot_suggestions' ? renderContentOpportunitySuggestions(result, payload) : false;
 		if (payload.output_text && intent !== 'media_alt_suggestions' && !renderedOpportunities) {
@@ -2135,6 +2139,84 @@
 		}
 
 		section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('No comment status was changed. Classifications are review hints only.')));
+		if (reviewSet.retry_guidance) {
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', String(reviewSet.retry_guidance)));
+		}
+		container.appendChild(section);
+	}
+
+	function renderFlaggedMediaReviewSet(container, reviewSet, form) {
+		if (!reviewSet || typeof reviewSet !== 'object' || !reviewSet.contract_version) {
+			return;
+		}
+		const summary = asObject(reviewSet.eligibility_summary);
+		const section = createSection(t('Flagged media review'));
+		const meta = el('div', 'npcink-toolbox__result-meta');
+		appendMeta(meta, t('Sampled'), summary.sampled_count);
+		appendMeta(meta, t('Flagged'), summary.selected_count);
+		appendMeta(meta, t('Safe'), summary.safe_count);
+		appendMeta(meta, t('Unknown'), summary.blocked_count);
+		appendMeta(meta, t('Cloud'), reviewSet.cloud_status ? formatLabel(reviewSet.cloud_status) : '');
+		section.appendChild(meta);
+
+		const editUrl = form.getAttribute('data-toolbox-attachment-edit-url') || '';
+		const cloudReady = reviewSet.cloud_status === 'ready';
+
+		if (!cloudReady) {
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('Cloud safety status is required. Connect the Cloud Addon runtime, then rerun this review. No local fallback assessment exists.')));
+		}
+
+		const selected = asArray(reviewSet.selected_items);
+		if (selected.length) {
+			const list = el('div', 'npcink-toolbox__batch-list');
+			selected.forEach((item) => {
+				if (!item || typeof item !== 'object') {
+					return;
+				}
+				const row = el('div', 'npcink-toolbox__batch-row');
+				const body = el('span', 'npcink-toolbox__batch-row-body');
+				const confidence = item.confidence === undefined || item.confidence === null ? '' : ' (' + String(item.confidence) + ')';
+				body.appendChild(el('strong', '', t('Flagged') + confidence));
+				const label = String(item.filename || item.title || '');
+				body.appendChild(el('small', '', label ? t('Media: ') + label : ''));
+				const reasons = asArray(item.reasons);
+				if (reasons.length) {
+					body.appendChild(el('small', '', t('Reasons: ') + reasons.slice(0, 3).join(' · ')));
+				}
+				row.appendChild(body);
+				if (editUrl && item.attachment_id) {
+					const link = el('a', 'button button-small');
+					link.href = editUrl + '&post=' + encodeURIComponent(String(item.attachment_id));
+					link.textContent = t('Open attachment in WordPress');
+					row.appendChild(link);
+				}
+				list.appendChild(row);
+			});
+			section.appendChild(list);
+		}
+
+		if (cloudReady) {
+			const blocked = asArray(reviewSet.blocked_items);
+			if (blocked.length) {
+				const blockedSection = createSection(t('Needs manual review'));
+				const list = el('div', 'npcink-toolbox__batch-list');
+				blocked.slice(0, 10).forEach((item) => {
+					if (!item || typeof item !== 'object') {
+						return;
+					}
+					const row = el('div', 'npcink-toolbox__batch-row');
+					const body = el('span', 'npcink-toolbox__batch-row-body');
+					body.appendChild(el('strong', '', '# ' + String(item.attachment_id || '')));
+					body.appendChild(el('small', 'npcink-toolbox__batch-status', formatLabel(String(item.blocked_reason || ''))));
+					row.appendChild(body);
+					list.appendChild(row);
+				});
+				blockedSection.appendChild(list);
+				section.appendChild(blockedSection);
+			}
+		}
+
+		section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('No media was changed. Deletion is not part of this stage.')));
 		if (reviewSet.retry_guidance) {
 			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', String(reviewSet.retry_guidance)));
 		}
