@@ -1,7 +1,8 @@
 # Comment Moderation Review Set
 
-Status: accepted boundary and data contract; the site-helper intent
-implementation lands as a separate change.
+Status: accepted; the site-helper intent, pii lane, review set, and Site Check
+comment moderation section are implemented. The Cloud-side classification
+runtime behavior remains pending Cloud scheduling.
 
 ## Purpose
 

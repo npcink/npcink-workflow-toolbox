@@ -2001,11 +2001,13 @@
 		const intent = String(payload.intent || '');
 		const titleByIntent = {
 			media_alt_suggestions: 'Review image ALT suggestions',
-			content_snapshot_suggestions: 'Content opportunities'
+			content_snapshot_suggestions: 'Content opportunities',
+			comment_moderation_suggestions: 'Review pending comment classifications'
 		};
 		const summaryByIntent = {
 			media_alt_suggestions: 'Review and edit missing ALT drafts. Visually confirmed rows may be submitted to Core review; this scan does not change media ALT.',
-			content_snapshot_suggestions: 'Review opportunities from a bounded sample. This is not a full site audit and does not change content.'
+			content_snapshot_suggestions: 'Review opportunities from a bounded sample. This is not a full site audit and does not change content.',
+			comment_moderation_suggestions: 'Cloud classification hints for pending comments. Handle moderation in WordPress; this review does not change comment status.'
 		};
 		const result = renderShell(
 			form,
@@ -2033,6 +2035,8 @@
 
 		renderMediaAltCaptionReviewSet(result, payload.media_alt_caption_review_set, form, payload);
 
+		renderCommentModerationReviewSet(result, payload.comment_moderation_review_set, form);
+
 		const renderedOpportunities = intent === 'content_snapshot_suggestions' ? renderContentOpportunitySuggestions(result, payload) : false;
 		if (payload.output_text && intent !== 'media_alt_suggestions' && !renderedOpportunities) {
 			const pre = el('pre', 'npcink-toolbox__result-raw');
@@ -2044,6 +2048,97 @@
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Suggestions only. No media or WordPress content was changed.'));
 			result.appendChild(createRawDetails(payload, 'Complete payload'));
 		}
+	}
+
+	function renderCommentModerationReviewSet(container, reviewSet, form) {
+		if (!reviewSet || typeof reviewSet !== 'object' || !reviewSet.contract_version) {
+			return;
+		}
+		const summary = asObject(reviewSet.eligibility_summary);
+		const section = createSection(t('Pending comment classifications'));
+		const meta = el('div', 'npcink-toolbox__result-meta');
+		appendMeta(meta, t('Pending'), summary.pending_total);
+		appendMeta(meta, t('Sampled'), summary.sampled_count);
+		appendMeta(meta, t('Classified'), summary.selected_count);
+		appendMeta(meta, t('Blocked'), summary.blocked_count);
+		appendMeta(meta, t('Cloud'), reviewSet.cloud_status ? formatLabel(reviewSet.cloud_status) : '');
+		section.appendChild(meta);
+
+		const queueUrl = form.getAttribute('data-toolbox-comments-queue-url') || '';
+		const editUrl = form.getAttribute('data-toolbox-comment-edit-url') || '';
+		const cloudReady = reviewSet.cloud_status === 'ready';
+
+		if (!cloudReady) {
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('Cloud classification is required. Connect the Cloud Addon runtime, then rerun this review. No local fallback classification exists.')));
+		}
+
+		const selected = asArray(reviewSet.selected_items);
+		if (selected.length) {
+			const list = el('div', 'npcink-toolbox__batch-list');
+			selected.forEach((item) => {
+				if (!item || typeof item !== 'object') {
+					return;
+				}
+				const row = el('div', 'npcink-toolbox__batch-row');
+				const body = el('span', 'npcink-toolbox__batch-row-body');
+				const classification = String(item.classification || 'uncertain');
+				const confidence = item.confidence === undefined || item.confidence === null ? '' : ' (' + String(item.confidence) + ')';
+				body.appendChild(el('strong', '', t('Classification: ') + classification + confidence));
+				const byline = t('Author: ') + String(item.author_name || '');
+				body.appendChild(el('small', '', item.post_title ? byline + t(' · on ') + String(item.post_title) : byline));
+				const excerpt = String(item.content || '');
+				if (excerpt) {
+					body.appendChild(el('small', '', truncate(excerpt, 180)));
+				}
+				const reasons = asArray(item.reasons);
+				if (reasons.length) {
+					body.appendChild(el('small', '', t('Reasons: ') + reasons.slice(0, 3).join(' · ')));
+				}
+				row.appendChild(body);
+				if (editUrl && item.comment_id) {
+					const link = el('a', 'button button-small');
+					link.href = editUrl + '&c=' + encodeURIComponent(String(item.comment_id));
+					link.textContent = t('Open in WordPress moderation');
+					row.appendChild(link);
+				}
+				list.appendChild(row);
+			});
+			section.appendChild(list);
+		}
+
+		if (cloudReady) {
+			const blocked = asArray(reviewSet.blocked_items);
+			if (blocked.length) {
+				const blockedSection = createSection(t('Needs manual review'));
+				const list = el('div', 'npcink-toolbox__batch-list');
+				blocked.slice(0, 10).forEach((item) => {
+					if (!item || typeof item !== 'object') {
+						return;
+					}
+					const row = el('div', 'npcink-toolbox__batch-row');
+					const body = el('span', 'npcink-toolbox__batch-row-body');
+					body.appendChild(el('strong', '', '# ' + String(item.comment_id || '')));
+					body.appendChild(el('small', 'npcink-toolbox__batch-status', formatLabel(String(item.blocked_reason || ''))));
+					row.appendChild(body);
+					list.appendChild(row);
+				});
+				blockedSection.appendChild(list);
+				section.appendChild(blockedSection);
+			}
+		}
+
+		if (queueUrl) {
+			const queueLink = el('a', 'button');
+			queueLink.href = queueUrl;
+			queueLink.textContent = t('Open the WordPress moderation queue');
+			section.appendChild(queueLink);
+		}
+
+		section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', t('No comment status was changed. Classifications are review hints only.')));
+		if (reviewSet.retry_guidance) {
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', String(reviewSet.retry_guidance)));
+		}
+		container.appendChild(section);
 	}
 
 	function selectedMediaAltCaptionReviewItems(container) {

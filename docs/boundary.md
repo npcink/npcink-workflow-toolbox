@@ -486,13 +486,13 @@ tables, retries, scheduler truth, Core proposals, or WordPress writes.
 
 `/ai/site-helpers` sends one bounded site-helper request to the Cloud hosted AI
 runtime. Its first intents are `media_alt_suggestions` and
-`content_snapshot_suggestions`. The separately accepted
-`comment_moderation_suggestions` intent contract is recorded in
-[Comment Moderation Review Set](comment-moderation-review-set.md): it may send
+`content_snapshot_suggestions`. The accepted `comment_moderation_suggestions`
+intent, its `pii` no-store lane, and the Site Check comment moderation review
+section are implemented per
+[Comment Moderation Review Set](comment-moderation-review-set.md): they send
 only approved-would-be-public pending-comment fields, never comment author
-email, IP address, or user agent, rides the `pii` no-store classification, and
-returns a suggestion-only `comment_moderation_review_set.v1` without changing
-comment status. The editor uses current-article media metadata
+email, IP address, or user agent, and return a suggestion-only
+`comment_moderation_review_set.v1` without changing comment status. The editor uses current-article media metadata
 for single-post image text review; the backend uses only an explicit small
 media-library sample for batch review-set selection. Cloud owns the AI output
 and the result is suggestion-only. This route must not claim full-site

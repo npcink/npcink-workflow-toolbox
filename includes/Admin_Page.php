@@ -1004,7 +1004,8 @@ final class Admin_Page {
 				</div>
 			<?php endif; ?>
 		</section>
-			</section>
+			<?php $this->render_comment_moderation_review_tool(); ?>
+		</section>
 
 			<section class="npcink-toolbox__ops-panel" data-toolbox-site-check-panel="scheduled-review"<?php echo 'scheduled-review' === $active_site_check_tab ? '' : ' hidden'; ?>>
 				<?php $this->render_morning_brief_panel( $settings, $cloud_ready, $nightly_preview, true ); ?>
@@ -3709,6 +3710,43 @@ final class Admin_Page {
 				<button type="button" class="button-link-delete" data-toolbox-delete-watermark-template><?php esc_html_e( 'Delete template', 'npcink-workflow-toolbox' ); ?></button>
 			</div>
 		</details>
+		<?php
+	}
+
+	/**
+	 * Renders the Site Check comment moderation review form.
+	 *
+	 * Zero-write surface: the form only requests bounded Cloud classification
+	 * hints for pending comments. Toolbox never approves, marks spam, trashes,
+	 * or deletes comments here; first-action links open native WordPress
+	 * moderation screens.
+	 */
+	private function render_comment_moderation_review_tool(): void {
+		?>
+		<form class="npcink-toolbox__card npcink-toolbox__card--comment-moderation" data-toolbox-endpoint="ai/site-helpers" data-toolbox-comment-moderation-review
+			data-toolbox-comments-queue-url="<?php echo esc_url( admin_url( 'edit-comments.php?comment_status=moderated' ) ); ?>"
+			data-toolbox-comment-edit-url="<?php echo esc_url( admin_url( 'comment.php?action=editcomment' ) ); ?>">
+			<div class="npcink-toolbox__section-heading">
+				<div>
+					<h3><?php esc_html_e( 'Comment moderation review', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Cloud AI classifies the newest pending comments as spam, legitimate, or uncertain, with reasons. You decide in WordPress.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+			</div>
+			<input type="hidden" name="intent" value="comment_moderation_suggestions" />
+			<div class="npcink-toolbox__split">
+				<label>
+					<span><?php esc_html_e( 'Comments to review', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="comment_sample_size">
+						<option value="20"><?php esc_html_e( '20 newest pending comments', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="50" selected="selected"><?php esc_html_e( '50 newest pending comments', 'npcink-workflow-toolbox' ); ?></option>
+					</select>
+				</label>
+				<a class="button" href="<?php echo esc_url( admin_url( 'edit-comments.php?comment_status=moderated' ) ); ?>"><?php esc_html_e( 'Open the WordPress moderation queue', 'npcink-workflow-toolbox' ); ?></a>
+			</div>
+			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'This review is read-only: Toolbox never approves, marks spam, trashes, or deletes comments. Handle every moderation action in WordPress.', 'npcink-workflow-toolbox' ); ?></div>
+			<button type="submit" class="button button-primary"><?php esc_html_e( 'Review pending comments', 'npcink-workflow-toolbox' ); ?></button>
+			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+		</form>
 		<?php
 	}
 

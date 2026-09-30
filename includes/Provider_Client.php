@@ -133,6 +133,8 @@ final class Provider_Client extends Provider_Client_Support {
 
 		$this->media_alt = new Provider_Media_Alt_Caption_Service( $settings, $this );
 
+		$this->comment_moderation = new Provider_Comment_Moderation_Service( $settings, $this );
+
 		$this->hosted_ai = new Provider_Hosted_AI_Service( $settings, $this );
 
 		$this->site_knowledge = new Provider_Site_Knowledge_Service( $settings, $this );
