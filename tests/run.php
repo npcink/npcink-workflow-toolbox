@@ -393,6 +393,7 @@ toolbox_assert( false !== $composer && false !== strpos( $composer, 'bash script
 toolbox_assert( false !== $distignore && false !== strpos( $distignore, "\n.gitignore\n" ) && false !== strpos( $distignore, "\nscripts\n" ) && false !== strpos( $distignore, "\ntests\n" ) && false !== strpos( $distignore, "\ndocs\n" ), 'Release package excludes hidden files, development scripts, tests, and docs.' );
 toolbox_assert( false !== strpos( $composer, '"test:progressive-recommendations": "php tests/progressive-recommendations-behavior.php"' ) && false !== strpos( $composer, '@test:progressive-recommendations' ), 'Composer runs progressive recommendation behavior checks in the default test gate.' );
 toolbox_assert( false !== strpos( $composer, '"test:editor-content-support": "php tests/editor-content-support-behavior.php"' ) && false !== strpos( $composer, '@test:editor-content-support' ), 'Composer runs editor content-support behavior checks in the default test gate.' );
+toolbox_assert( false !== strpos( $composer, '"test:provider-services": "php tests/provider-services-behavior.php"' ) && false !== strpos( $composer, '@test:provider-services' ), 'Composer runs provider cluster service behavior checks in the default test gate.' );
 toolbox_assert( false !== strpos( $composer, '"test:performance-baseline": "php tests/performance-baseline-behavior.php"' ) && false !== strpos( $composer, '@test:performance-baseline' ), 'Composer runs pure performance baseline behavior checks in the default test gate.' );
 toolbox_assert( false !== strpos( $composer, '"test:editor-progressive-js": "php tests/smoke-editor-progressive-js-contract.php"' ) && false !== strpos( $composer, '@test:editor-progressive-js' ), 'Composer runs the editor progressive JavaScript contract in the default test gate.' );
 toolbox_assert( false !== strpos( file_get_contents( __FILE__ ), '--filter=' ) && false !== strpos( file_get_contents( __FILE__ ), '--quiet' ) && false !== strpos( file_get_contents( __FILE__ ), 'No static contract checks matched filter' ), 'Static contract runner supports quiet output, focused filters, and empty-filter failure.' );
@@ -1122,6 +1123,11 @@ $provider_service_files = array(
 	'Provider_Content_Collector_Service',
 	'Provider_Discoverability_Service',
 	'Provider_Workflow_Plans_Service',
+	'Provider_Agent_Feedback_Service',
+	'Provider_Site_Ops_Cloud_Service',
+	'Provider_Article_Audio_Service',
+	'Provider_Image_Source_Service',
+	'Provider_Media_Recognition_Service',
 );
 foreach ( $provider_service_files as $provider_service_file ) {
 	toolbox_assert( is_file( $root . '/includes/' . $provider_service_file . '.php' ), "Provider cluster service file {$provider_service_file}.php exists." );
@@ -1138,6 +1144,11 @@ $provider_service_delegates = array(
 	'collectors'       => 'collect_site_knowledge_documents',
 	'discoverability'  => 'resolve_discoverability_source',
 	'plans'            => 'build_article_write_plan',
+	'agent_feedback_service'   => 'submit_agent_feedback',
+	'site_ops_cloud_service'   => 'run_site_ops_cloud_analysis',
+	'article_audio_service'    => 'run_audio_generation',
+	'image_source_service'     => 'image_candidates',
+	'media_recognition_service' => 'request_image_context_evidence',
 );
 foreach ( $provider_service_delegates as $provider_service_property => $provider_service_entry ) {
 	toolbox_assert( false !== strpos( $client, "return \$this->{$provider_service_property}->{$provider_service_entry}(" ), "Provider_Client facade delegates {$provider_service_entry} to its cluster service." );
