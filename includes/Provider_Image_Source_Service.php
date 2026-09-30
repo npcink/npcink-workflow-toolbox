@@ -515,13 +515,13 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 			}
 		}
 		$evidence_by_attachment_id = array();
-		$status                    = $this->client->get_site_knowledge_status(
+		$evidence_status           = $this->client->get_site_knowledge_status(
 			array(
 				'media_attachment_ids' => array_slice( $attachment_ids, 0, 20 ),
 			)
 		);
-		if ( is_array( $status ) ) {
-			foreach ( (array) ( $status['media_evidence_items'] ?? array() ) as $evidence_item ) {
+		if ( is_array( $evidence_status ) ) {
+			foreach ( (array) ( $evidence_status['media_evidence_items'] ?? array() ) as $evidence_item ) {
 				if ( ! is_array( $evidence_item ) ) {
 					continue;
 				}

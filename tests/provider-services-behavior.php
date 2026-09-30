@@ -230,9 +230,19 @@ function apply_filters( string $hook, $value, ...$args ) {
 		);
 	}
 	if ( 'npcink_toolbox_site_knowledge_cloud_request' === $hook ) {
-		global $npcink_toolbox_progressive_site_knowledge_inputs;
+		global $npcink_toolbox_progressive_site_knowledge_inputs, $npcink_toolbox_site_knowledge_status_mode;
 		$site_knowledge_runtime = is_array( $args[0] ?? null ) ? $args[0] : array();
 		$npcink_toolbox_progressive_site_knowledge_inputs[] = is_array( $site_knowledge_runtime['input'] ?? null ) ? $site_knowledge_runtime['input'] : array();
+		if ( 'npcink-cloud/site-knowledge-status' === (string) ( $args[1] ?? '' ) ) {
+			if ( 'error' === ( $npcink_toolbox_site_knowledge_status_mode ?? '' ) ) {
+				return new WP_Error( 'npcink_toolbox_site_knowledge_status_failed', 'Cloud status unavailable', array( 'status' => 503 ) );
+			}
+			return array(
+				'status' => 'ok',
+				'run_id' => 'media-evidence-status-run',
+				'data'   => array( 'result' => array( 'status' => 'ready', 'media_evidence_items' => array() ) ),
+			);
+		}
 		return array(
 			'status' => 'ok',
 			'run_id' => 'writing-pack-knowledge-run',
@@ -343,10 +353,32 @@ function get_terms( array $args ): array {
 	return array();
 }
 
+function npcink_toolbox_provider_services_media_inventory( array $input ): array {
+	return array(
+		'success' => true,
+		'data'    => array(
+			'items' => array(
+				array(
+					'attachment_id'     => 88,
+					'url'               => 'https://example.test/library/workflow.jpg',
+					'title'             => 'AI workflow diagram',
+					'alt'               => 'AI workflow recommendation diagram',
+					'mime_type'         => 'image/jpeg',
+					'media_fingerprint' => 'sha256:' . str_repeat( 'a', 64 ),
+					'format_inspection' => array( 'width' => 1200, 'height' => 800 ),
+				),
+			),
+		),
+	);
+}
+
 function npcink_abilities_toolkit_get_registered(): array {
 	return array(
 		'npcink-abilities-toolkit/suggest-post-taxonomy-terms' => array(
 			'execute_callback' => 'npcink_toolbox_progressive_taxonomy_suggestions',
+		),
+		'npcink-abilities-toolkit/get-media-inventory-health' => array(
+			'execute_callback' => 'npcink_toolbox_provider_services_media_inventory',
 		),
 	);
 }
@@ -488,6 +520,10 @@ $controller = new Npcink_Toolbox\Rest_Controller( $settings, $client, $preflight
  * facade-driven editor flow tests.
  */
 
+function sanitize_file_name( string $value ): string {
+	return preg_replace( '/[^A-Za-z0-9._-]/', '', $value ) ?? '';
+}
+
 function parse_blocks( string $content ): array {
 	$blocks = array();
 	preg_match_all( '/<!-- wp:([a-z0-9\/-]+) (\{.*?\}) -->/', $content, $matches, PREG_SET_ORDER );
@@ -582,5 +618,18 @@ npcink_toolbox_provider_services_assert( false === strpos( $quality_json, 'wp_in
 // 7. Attachment id extraction is deterministic for mixed markup.
 $ids = $hosted_ai->hosted_ai_content_image_attachment_ids( '<!-- wp:image {"id":31} --><img class="wp-image-31"> plain <img src="x.png"> <!-- wp:image {"id":45} -->' );
 npcink_toolbox_provider_services_assert( in_array( 31, $ids, true ) && in_array( 45, $ids, true ) && ! in_array( 0, $ids, true ), 'Attachment id extraction finds block ids and skips images without ids.' );
+
+// 8. Site-media search keeps a sanitized string status even when the
+//    evidence status call answers with a full response payload or fails.
+$GLOBALS['npcink_toolbox_site_knowledge_status_mode'] = 'ready';
+$site_media = $client->image_candidates( 'AI workflow diagram', array( 'provider' => 'site_media', 'per_page' => 5 ) );
+npcink_toolbox_provider_services_assert( is_array( $site_media ), 'Site-media search returns a candidate response.' );
+npcink_toolbox_provider_services_assert( 'ready' === (string) ( $site_media['status'] ?? '' ), 'Site-media search reports the sanitized Cloud readiness string, not the raw status payload (regression: shadowed status).' );
+npcink_toolbox_provider_services_assert( ! empty( $site_media['images'] ) && 88 === absint( $site_media['images'][0]['attachment_id'] ?? 0 ), 'Site-media search surfaces the inventoried attachment as an image candidate.' );
+
+$GLOBALS['npcink_toolbox_site_knowledge_status_mode'] = 'error';
+$site_media_error = $client->image_candidates( 'AI workflow diagram', array( 'provider' => 'site_media', 'per_page' => 5 ) );
+npcink_toolbox_provider_services_assert( is_array( $site_media_error ), 'Site-media search survives a failing evidence status call without a fatal (regression: WP_Error status).' );
+npcink_toolbox_provider_services_assert( 'ready' === (string) ( $site_media_error['status'] ?? '' ), 'Site-media search keeps its Cloud search status when the evidence status call fails.' );
 
 echo "Provider services behavior checks passed.\n";
