@@ -17,15 +17,18 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 abstract class Provider_Client_Support {
-	private const PAYLOAD_MAX_DEPTH = 8;
-	private const PAYLOAD_MAX_ITEMS = 80;
-	private const PAYLOAD_MAX_STRING_CHARS = 4000;
-	private const DEBUG_PAYLOAD_MAX_DEPTH = 6;
-	private const DEBUG_PAYLOAD_MAX_ITEMS = 40;
-	private const DEBUG_PAYLOAD_MAX_STRING_CHARS = 2000;
-	private const HTTP_CONNECT_TIMEOUT = 5;
-	private const SITE_KNOWLEDGE_CONTENT_CHARS = 30000;
-	private const SITE_KNOWLEDGE_SYNC_MAX_BYTES = 750000;
+	protected const PAYLOAD_MAX_DEPTH = 8;
+	protected const PAYLOAD_MAX_ITEMS = 80;
+	protected const PAYLOAD_MAX_STRING_CHARS = 4000;
+	protected const DEBUG_PAYLOAD_MAX_DEPTH = 6;
+	protected const DEBUG_PAYLOAD_MAX_ITEMS = 40;
+	protected const DEBUG_PAYLOAD_MAX_STRING_CHARS = 2000;
+	protected const HTTP_CONNECT_TIMEOUT = 5;
+	protected const SITE_KNOWLEDGE_CONTENT_CHARS = 30000;
+	protected const SITE_KNOWLEDGE_SYNC_MAX_BYTES = 750000;
+	protected const ARTICLE_PLAN_CONTENT_CHARS = 60000;
+	protected const ARTICLE_PLAN_NOTES_CHARS = 12000;
+	protected const AUDIO_GENERATION_TEXT_CHARS = 5000;
 
 	protected Settings $settings;
 

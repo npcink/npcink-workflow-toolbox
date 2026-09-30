@@ -56,7 +56,7 @@ $assert = static function ( bool $condition, string $message ) use ( $fail ): vo
 	}
 };
 
-$client = ( new ReflectionClass( \Npcink_Toolbox\Provider_Client::class ) )->newInstanceWithoutConstructor();
+$client = ( new ReflectionClass( \Npcink_Toolbox\Provider_Nightly_Inspection_Service::class ) )->newInstanceWithoutConstructor();
 $method = new ReflectionMethod( \Npcink_Toolbox\Provider_Nightly_Inspection_Service::class, 'nightly_inspection_cloud_batch_items' );
 $method->setAccessible( true );
 

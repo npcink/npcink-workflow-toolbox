@@ -450,8 +450,7 @@ if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
 }
 
 require_once dirname( __DIR__ ) . '/includes/Settings.php';
-require_once dirname( __DIR__ ) . '/includes/Provider_Client_Support.php';
-require_once dirname( __DIR__ ) . '/includes/Provider_Client.php';
+require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
 

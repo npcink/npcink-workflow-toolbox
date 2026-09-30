@@ -113,8 +113,7 @@ if ( ! defined( 'NPCINK_TOOLBOX_DISABLE_RAW_RESPONSES' ) ) {
 $root = dirname( __DIR__ );
 require_once $root . '/includes/Plugin.php';
 require_once $root . '/includes/Settings.php';
-require_once $root . '/includes/Provider_Client_Support.php';
-require_once $root . '/includes/Provider_Client.php';
+require_once $root . '/tests/load-provider-client.php';
 require_once $root . '/includes/Rest_Controller.php';
 require_once $root . '/includes/Abilities.php';
 require_once $root . '/includes/Editor_Content_Support.php';

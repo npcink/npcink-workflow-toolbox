@@ -21,8 +21,6 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
-	private const ARTICLE_PLAN_CONTENT_CHARS = 60000;
-	private const ARTICLE_PLAN_NOTES_CHARS = 12000;
 
 	private Provider_Client $client;
 

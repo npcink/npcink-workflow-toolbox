@@ -31,7 +31,6 @@ final class Provider_Client extends Provider_Client_Support {
 	private Provider_Discoverability_Service $discoverability;
 
 	private Provider_Workflow_Plans_Service $plans;
-	private const AUDIO_GENERATION_TEXT_CHARS = 5000;
 	private const SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES = 262144;
 	private const MEDIA_FINGERPRINT_SCAN_LOOKBACK_DAYS = 7;
 
