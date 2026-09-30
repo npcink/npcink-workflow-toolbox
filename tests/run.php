@@ -1123,6 +1123,11 @@ $provider_service_files = array(
 	'Provider_Content_Collector_Service',
 	'Provider_Discoverability_Service',
 	'Provider_Workflow_Plans_Service',
+	'Provider_Agent_Feedback_Service',
+	'Provider_Site_Ops_Cloud_Service',
+	'Provider_Article_Audio_Service',
+	'Provider_Image_Source_Service',
+	'Provider_Media_Recognition_Service',
 );
 foreach ( $provider_service_files as $provider_service_file ) {
 	toolbox_assert( is_file( $root . '/includes/' . $provider_service_file . '.php' ), "Provider cluster service file {$provider_service_file}.php exists." );
@@ -1139,6 +1144,11 @@ $provider_service_delegates = array(
 	'collectors'       => 'collect_site_knowledge_documents',
 	'discoverability'  => 'resolve_discoverability_source',
 	'plans'            => 'build_article_write_plan',
+	'agent_feedback_service'   => 'submit_agent_feedback',
+	'site_ops_cloud_service'   => 'run_site_ops_cloud_analysis',
+	'article_audio_service'    => 'run_audio_generation',
+	'image_source_service'     => 'image_candidates',
+	'media_recognition_service' => 'request_image_context_evidence',
 );
 foreach ( $provider_service_delegates as $provider_service_property => $provider_service_entry ) {
 	toolbox_assert( false !== strpos( $client, "return \$this->{$provider_service_property}->{$provider_service_entry}(" ), "Provider_Client facade delegates {$provider_service_entry} to its cluster service." );

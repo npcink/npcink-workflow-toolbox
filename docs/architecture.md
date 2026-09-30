@@ -37,7 +37,12 @@ Status: MVP architecture.
 | `npcink-workflow-toolbox.php` | Plugin header and bootstrap. |
 | `Plugin` | Shared service construction and hook registration. |
 | `Settings` | Option defaults, sanitization, non-secret compatibility settings, and content context export. Provider secrets, key rotation, quotas, billing, request logs, and routing remain Cloud/host/connector owned. |
-| `Provider_Client` | Facade over the provider cluster services. Keeps every public signature as a delegation entrypoint and directly owns the site-media recognition continuation, image-source Cloud execution, article audio generation, agent feedback, manual Site Check Cloud detail runtime calls, and the shared Site Knowledge Cloud runtime execution. |
+| `Provider_Client` | Facade over the provider cluster services. Keeps every public signature as a delegation entrypoint and directly owns the site-media recognition continuation (`refresh_site_media_index_batch`, `scan_media_fingerprint_changes`) and the shared Site Knowledge Cloud runtime execution; both stay pinned to the facade so the aggregated span contracts keep their order. |
+| `Provider_Agent_Feedback_Service` | Silent metadata-only Agent feedback submission and bounded summary reads for Cloud eval rollups; no learning or approval truth. |
+| `Provider_Site_Ops_Cloud_Service` | Performs the manual Site Check Cloud detail runtime calls and normalizes `site_ops_cloud_analysis_result.v1`; suggestion-only, no local run state. |
+| `Provider_Article_Audio_Service` | Article narration/audio-summary Cloud generation requests and response normalization; adoption stays on the governed plan path. |
+| `Provider_Image_Source_Service` | Cloud image-source execution with visual brief, query suggestions, candidate extraction/dedupe, and site media library search; candidates stay suggestion-only. |
+| `Provider_Media_Recognition_Service` | Bounded visual context evidence requests and resolution over the Cloud visual-evidence projection with upload/reuse policy; no attachment writes. |
 | `Provider_Client_Support` | Abstract shared base for the facade and every provider service: Settings dependency plus payload classification, payload/debug sanitization, output contracts, and bounded text helpers. Internal plumbing, not an extension point. |
 | `Provider_Nightly_Inspection_Service` | Nightly Inspection Cloud batch submit/status/result/retry/entitlement bridges with payload minimization and response normalization. Cloud stays runtime owner. |
 | `Provider_Ai_Image_Service` | Reviewed-prompt hosted AI image generation runtime request, AI-generated candidate extraction/normalization, and the shared `image_candidate.v1` contract normalization. |
