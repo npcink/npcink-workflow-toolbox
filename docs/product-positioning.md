@@ -77,11 +77,20 @@ semantics.
 
 ## Primary Users
 
-The first version is administrator-only: every Toolbox surface (admin pages,
-editor sidebar, dashboard widget, REST routes) is gated by `manage_options`.
-Editor-role (`edit_posts`) access stays a deferred scoped-permission decision
-until a narrower capability model is designed; do not advertise editor access
-as a current capability.
+ADR-018 introduces scoped editor permissions: the post editor Content Support
+sidebar, its `/editor/content-support` route (`cap.toolbox.editor_suggest`),
+the `/image-candidates` and `/ai/image-generation` image-source candidate
+routes (`cap.toolbox.image_source`), and the metadata-only `/agent-feedback`
+route (`cap.toolbox.feedback.write`)
+default to `edit_posts`, so administrators, editors, and authors can run the
+suggestion-only editor flows, including image-source candidates, the
+writing-pack draft stage, and
+`format_content`. Every other surface — admin pages, Site Check, media
+optimization, local-admin-consent, the dashboard widget, and the `/flows/*`
+routes — stays `manage_options`; adoption and metadata-apply
+handoff submissions remain administrator-facing in the first scoped version.
+Hosts can tighten or broaden any scope through `npcink_toolbox_rest_permission`
+and `npcink_toolbox_ability_permission`.
 
 - WordPress administrators who want controlled AI tools without touching raw
   provider APIs.

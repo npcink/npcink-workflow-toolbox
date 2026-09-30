@@ -86,7 +86,8 @@ Reuse `POST /npcink-toolbox/v1/editor/content-support` with exactly:
 {"intent":"format_content","post_id":123,"content":"exact current Gutenberg serialization"}
 ```
 
-Cookie/REST-nonce authentication, `manage_options`, and the target `edit_post`
+Cookie/REST-nonce authentication, the ADR-018 scoped editor capability
+(`edit_posts`), and the target `edit_post`
 capability are required. Text must be valid UTF-8, nonempty, at most 100000
 bytes. This intent bypasses the ordinary sanitized/truncated context builder
 and transient cache. No draft body or result is persisted by Toolbox.

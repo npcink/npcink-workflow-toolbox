@@ -22,7 +22,7 @@ final class Editor_Content_Format {
 			|| ! is_int( $post_id ) || $post_id < 1 ) {
 			return self::error( 'input', '正文为空、过长或请求格式不正确，原文未改动。', 400 );
 		}
-		if ( ! current_user_can( 'manage_options' ) || ! current_user_can( 'edit_post', $post_id ) || ! get_post( $post_id ) ) {
+		if ( ! Rest_Controller::user_can_use_editor_support() || ! current_user_can( 'edit_post', $post_id ) || ! get_post( $post_id ) ) {
 			return self::error( 'permission', '没有整理这篇文章的权限。', 403 );
 		}
 		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_content_format_runtime' ) ) {

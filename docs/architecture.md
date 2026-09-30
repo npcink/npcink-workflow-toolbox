@@ -147,7 +147,9 @@ is [Cloud Bridge Contract Table](cloud-bridge-contract-table.json). The flow
 below is the human-readable summary and must stay aligned with that table.
 
 1. Admin user submits a tool form or REST request.
-2. `Rest_Controller` checks `manage_options`.
+2. `Rest_Controller` checks the scope-mapped default capability
+   (`edit_posts` for the ADR-018 editor suggestion, image-source, and
+   agent-feedback scopes, `manage_options` otherwise).
 3. `Provider_Client` calls Cloud image-source runtime, a host AI image
    generation seam when explicitly requested, or Cloud-managed Site Knowledge.
    Cloud-managed web search is executed by Npcink Cloud rather than a local
@@ -363,7 +365,10 @@ Addon after its bridge is installed and verified. Toolbox clears retired legacy
 hooks, skips local fallback queue ownership, and only displays bridge health or
 the Cloud Addon install-and-verify requirement.
 
-The first admin REST surface remains `manage_options` gated by default.
+The REST surface defaults to `manage_options` by scope, relaxed to `edit_posts`
+only for the ADR-018 `cap.toolbox.editor_suggest`, `cap.toolbox.image_source`,
+and `cap.toolbox.feedback.write` scopes; ability execution keeps the
+`manage_options` default.
 External AI access should be mediated by Core/app-key scope checks in the host
 that consumes these ability definitions. The host can use
 `npcink_toolbox_rest_permission` and
@@ -374,7 +379,10 @@ grant narrower access without treating every Toolbox action as one permission.
 
 ## REST Surface
 
-Current routes require `manage_options`:
+Current routes require the scope-mapped default capability (`manage_options`,
+except `/editor/content-support`, `/image-candidates`, `/ai/image-generation`,
+and `/agent-feedback`, which accept
+`edit_posts` under ADR-018):
 
 - `GET /wp-json/npcink-toolbox/v1/status`
 - `POST /wp-json/npcink-toolbox/v1/image-candidates`
@@ -786,7 +794,9 @@ comment, media, preview, confirm, or apply responsibilities to Toolbox.
 ## Editor Surface
 
 Toolbox registers a **Npcink Content Support** plugin sidebar in the block
-editor for users who can run the existing Toolbox REST tools. The sidebar is
+editor for users who pass the ADR-018 scoped editor suggestion capability
+(`edit_posts` through the same `default_capability_for_scope()` decision as
+the `/editor/content-support` route). The sidebar is
 opened from the editor top toolbar. It is a high-frequency entrypoint for the
 same fixed workflows that the admin surface owns:
 

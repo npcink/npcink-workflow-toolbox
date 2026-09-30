@@ -28,6 +28,13 @@ final class Rest_Controller {
 	private Provider_Client $client;
 	private Publish_Preflight_Service $publish_preflight;
 
+	/** ADR-018 scoped default capabilities; every unlisted scope and the fallback stay manage_options. */
+	private const SCOPED_DEFAULT_CAPABILITIES = array(
+		'cap.toolbox.editor_suggest' => 'edit_posts',
+		'cap.toolbox.image_source'   => 'edit_posts',
+		'cap.toolbox.feedback.write' => 'edit_posts',
+	);
+
 	public function __construct( Settings $settings, Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
 		$this->settings          = $settings;
 		$this->client            = $client;
@@ -118,7 +125,16 @@ final class Rest_Controller {
 			return false;
 		}
 
-		return $this->filtered_rest_permission( current_user_can( 'manage_options' ), $request, $required_scope, $route );
+		$default_capability = self::default_capability_for_scope( $required_scope );
+		return $this->filtered_rest_permission( current_user_can( $default_capability ), $request, $required_scope, $route );
+	}
+
+	public static function default_capability_for_scope( string $scope ): string {
+		return self::SCOPED_DEFAULT_CAPABILITIES[ $scope ] ?? 'manage_options';
+	}
+
+	public static function user_can_use_editor_support(): bool {
+		return current_user_can( self::default_capability_for_scope( 'cap.toolbox.editor_suggest' ) );
 	}
 
 	private function requires_present_admin_ui( string $route, string $method ): bool {
@@ -218,7 +234,7 @@ final class Rest_Controller {
 			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
 			'/flows/media-alt-caption-review-plan'         => 'cap.toolbox.workflow_suggest',
 			'/flows/media-brief'                           => 'cap.toolbox.workflow_suggest',
-			'/editor/content-support'                      => 'cap.toolbox.workflow_suggest',
+			'/editor/content-support'                      => 'cap.toolbox.editor_suggest',
 			'/media-derivative-handoff'                    => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-preview'                    => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-optimization-payload'       => 'cap.toolbox.workflow_suggest',
@@ -1806,7 +1822,9 @@ final class Rest_Controller {
 	}
 
 	private function editor_attachment_media_item( int $attachment_id, string $source ): array {
-		if ( $attachment_id <= 0 || ( function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) ) {
+		if ( $attachment_id <= 0
+			|| ( function_exists( 'current_user_can' ) && ! current_user_can( 'upload_files' ) )
+			|| ( function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) ) {
 			return array();
 		}
 
@@ -2312,9 +2330,12 @@ final class Rest_Controller {
 		$author     = sanitize_text_field( (string) ( $context['comment_author'] ?? '' ) );
 		$status     = '';
 
-		if ( $comment_id > 0 && function_exists( 'get_comment' ) ) {
-			$comment = get_comment( $comment_id );
-			if ( $comment ) {
+		if ( $comment_id > 0
+			&& function_exists( 'get_comment' )
+			&& ( ! function_exists( 'current_user_can' ) || current_user_can( 'moderate_comments' ) ) ) {
+			$comment         = get_comment( $comment_id );
+			$context_post_id = absint( $context['post_id'] ?? 0 );
+			if ( $comment && ( $context_post_id < 1 || absint( $comment->comment_post_ID ?? 0 ) === $context_post_id ) ) {
 				$text   = '' !== $text ? $text : sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $comment->comment_content ?? '' ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) );
 				$author = '' !== $author ? $author : sanitize_text_field( (string) ( $comment->comment_author ?? '' ) );
 				$status = sanitize_key( (string) ( $comment->comment_approved ?? '' ) );
