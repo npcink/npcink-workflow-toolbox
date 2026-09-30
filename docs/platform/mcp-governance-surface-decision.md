@@ -18,7 +18,7 @@ The operator accepted the governed MCP surface with these decisions:
 | Question | Decision |
 | --- | --- |
 | Q1 ownership | No new repository. The surface is a stdio MCP server embedded as an `mcp` subcommand of the existing `@npcink/openclaw-adapter-cli` package, reusing existing local key-pair profiles and the Adapter REST channel. Operator rationale: the suite already spans multiple plugins; adding another repository would raise coordination cost without a concrete second-client demand. |
-| Q2 tool scope | v0 exposes status, read, read-request, and propose tools only. Execute tools are deferred to a later phase and must go through approve-and-execute semantics with the `npcink.execute` key scope. |
+| Q2 tool scope | v0 exposes status, read, read-request, and propose tools only. Execute tools are deferred to a later phase and must go through approve-and-execute semantics with the `npcink.execute` key scope. Shipped 2026-09-30 as the sanctioned follow-up: `commit_preflight` (`intent="preflight"`), `execute_approved`, and `approve_and_execute` (both `intent="commit"`) in `@npcink/openclaw-adapter-cli` 0.4.0, gated by the `npcink.execute` key scope and the Adapter execution allowlist. |
 | Q3 transport | stdio first, matching local clients and the existing CLI profile model. Streamable HTTP is deferred. |
 | Q4 naming | Moot under Q1; the `npcink-mcp-gateway` working name is retired. |
 | Coexistence | Phase 1 operator guidance only (do not expose write-class abilities through ungoverned MCP paths). Detection work is deferred. |
