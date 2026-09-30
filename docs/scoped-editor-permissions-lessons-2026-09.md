@@ -97,3 +97,17 @@ per-role sidebar gating as UX polish.
 contract assertions), `composer check:wporg`, and two advisory
 `ocr review` passes were green on the merged revision (`26e2bbf`); PR #157
 squash-merged with both required checks successful.
+
+## Cross-Repo Follow-Up: Cloud Addon Quota Exposure
+
+ADR-018 opened `/image-candidates` and `/ai/image-generation` to
+`edit_posts` users. That widens the caller set of the Cloud Addon hosted
+image-generation transport (`grok-imagine-image-quality` profile) from
+administrators to every editor. Toolbox's permission side is settled; the
+quota/billing side belongs to `npcink-cloud-addon` and the Cloud service
+plane. Before promoting editor access beyond trials, `npcink-cloud-addon`
+should confirm: per-user or per-role quota accounting for hosted image
+requests, entitlement diagnostics that name the acting user rather than
+the site, and request-log attribution that keeps editor-issued generation
+calls auditable. This repository tracks the concern here; no Toolbox
+change is required.
