@@ -230,7 +230,14 @@ The preferred follow-up order remains:
 
 1. media ALT and caption review set;
 2. taxonomy and tag review set;
-3. internal-link review set.
+3. internal-link review set;
+4. comment moderation review set.
+
+The comment moderation review set follows the accepted data contract in
+[Comment Moderation Review Set](comment-moderation-review-set.md): at most 50
+pending comments per request, approved-would-be-public fields only, `pii`
+no-store classification, suggestion-only output with
+`comment_status_unchanged`, and no local queue or comment status writes.
 
 These should remain bounded planning or Core handoff surfaces. The media
 ALT/caption P0 must not become direct media metadata writes, automatic proposal
