@@ -13,11 +13,8 @@ defined( 'ABSPATH' ) || exit;
 
 final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 
-	private Provider_Client $client;
-
-	public function __construct( Settings $settings, Provider_Client $client ) {
+	public function __construct( Settings $settings ) {
 		parent::__construct( $settings );
-		$this->client = $client;
 	}
 
 	public function run_site_ops_cloud_analysis( array $cloud_request ) {

@@ -119,7 +119,7 @@ final class Provider_Client extends Provider_Client_Support {
 
 		$this->article_audio_service = new Provider_Article_Audio_Service( $settings, $this );
 
-		$this->site_ops_cloud_service = new Provider_Site_Ops_Cloud_Service( $settings, $this );
+		$this->site_ops_cloud_service = new Provider_Site_Ops_Cloud_Service( $settings );
 
 		$this->agent_feedback_service = new Provider_Agent_Feedback_Service( $settings, $this );
 
