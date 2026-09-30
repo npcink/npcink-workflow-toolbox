@@ -35,6 +35,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Content_Collector_Service.p
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Discoverability_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Workflow_Plans_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Agent_Feedback_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Site_Ops_Cloud_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Client.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Recognition_Continuation.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Fingerprint_Scan.php';
