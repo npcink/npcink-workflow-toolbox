@@ -8556,3 +8556,72 @@ msgstr "应用更改前请审阅所有页面。"
 
 msgid "V1 defaults are Draft From Source Materials, Publish Preflight, Category Suggestions, Tag Suggestions, Internal Link Candidates, and Image Candidates. Article ALT is available inside Discoverability."
 msgstr "V1 默认入口包括从来源材料起草、发布前检查、分类建议、标签建议、内链候选和图片候选。文章 ALT 位于可发现性入口中。"
+
+msgid "Comment moderation review"
+msgstr "评论审核"
+
+msgid "Cloud AI classifies the newest pending comments as spam, legitimate, or uncertain, with reasons. You decide in WordPress."
+msgstr "云端 AI 将最新的待审评论分类为垃圾、正常或存疑,并附理由。最终由你在 WordPress 中决定。"
+
+msgid "Comments to review"
+msgstr "要审核的评论数"
+
+msgid "20 newest pending comments"
+msgstr "最新 20 条待审评论"
+
+msgid "50 newest pending comments"
+msgstr "最新 50 条待审评论"
+
+msgid "Open the WordPress moderation queue"
+msgstr "打开 WordPress 审核队列"
+
+msgid "This review is read-only: Toolbox never approves, marks spam, trashes, or deletes comments. Handle every moderation action in WordPress."
+msgstr "本审核为只读:Toolbox 绝不批准、标记垃圾、移入回收站或删除评论。所有审核操作都在 WordPress 中完成。"
+
+msgid "Review pending comments"
+msgstr "审核待审评论"
+
+msgid "Review pending comment classifications"
+msgstr "审阅待审评论分类"
+
+msgid "Cloud classification hints for pending comments. Handle moderation in WordPress; this review does not change comment status."
+msgstr "待审评论的云端分类提示。请在 WordPress 中完成审核;本审核不更改评论状态。"
+
+msgid "Pending comment classifications"
+msgstr "待审评论分类"
+
+msgid "Cloud classification is required. Connect the Cloud Addon runtime, then rerun this review. No local fallback classification exists."
+msgstr "需要云端分类。请连接 Cloud Addon 运行时后重新运行本审核。不存在本地兜底分类。"
+
+msgid "Classification: "
+msgstr "分类:"
+
+msgid "Author: "
+msgstr "作者:"
+
+msgid " · on "
+msgstr " · 发表于 "
+
+msgid "Reasons: "
+msgstr "理由:"
+
+msgid "Open in WordPress moderation"
+msgstr "在 WordPress 审核中打开"
+
+msgid "Needs manual review"
+msgstr "需人工审核"
+
+msgid "Pending"
+msgstr "待审"
+
+msgid "Sampled"
+msgstr "已采样"
+
+msgid "Classified"
+msgstr "已分类"
+
+msgid "Blocked"
+msgstr "被拦"
+
+msgid "No comment status was changed. Classifications are review hints only."
+msgstr "未更改任何评论状态。分类仅为审核提示。"

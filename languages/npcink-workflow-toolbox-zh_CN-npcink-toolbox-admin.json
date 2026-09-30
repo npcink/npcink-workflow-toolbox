@@ -676,7 +676,23 @@
       "Expired backup cleanup": ["过期备份清理"],
       "Ask me before cleanup": ["清理前询问我"],
       "Clean up automatically": ["自动清理"],
-      "Save backup retention": ["保存备份保留设置"]
+      "Save backup retention": ["保存备份保留设置"],
+      "Review pending comment classifications": ["审阅待审评论分类"],
+      "Cloud classification hints for pending comments. Handle moderation in WordPress; this review does not change comment status.": ["待审评论的云端分类提示。请在 WordPress 中完成审核;本审核不更改评论状态。"],
+      "Pending comment classifications": ["待审评论分类"],
+      "Cloud classification is required. Connect the Cloud Addon runtime, then rerun this review. No local fallback classification exists.": ["需要云端分类。请连接 Cloud Addon 运行时后重新运行本审核。不存在本地兜底分类。"],
+      "Classification: ": ["分类:"],
+      "Author: ": ["作者:"],
+      " · on ": [" · 发表于 "],
+      "Reasons: ": ["理由:"],
+      "Open in WordPress moderation": ["在 WordPress 审核中打开"],
+      "Needs manual review": ["需人工审核"],
+      "Pending": ["待审"],
+      "Sampled": ["已采样"],
+      "Classified": ["已分类"],
+      "Blocked": ["被拦"],
+      "No comment status was changed. Classifications are review hints only.": ["未更改任何评论状态。分类仅为审核提示。"],
+      "Open the WordPress moderation queue": ["打开 WordPress 审核队列"]
       ,"Image Settings": ["图片设置"]
       ,"Image settings": ["图片设置"]
       ,"Manage watermark templates and original-image backup retention.": ["管理水印模板和原图备份保留时间。"]

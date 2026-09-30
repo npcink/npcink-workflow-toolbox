@@ -617,7 +617,9 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			$post_id    = absint( $comment->comment_post_ID ?? 0 );
 			$post_title = '';
 			if ( $post_id && function_exists( 'get_post_status' ) && 'publish' === (string) get_post_status( $post_id ) && function_exists( 'get_the_title' ) ) {
-				$post_title = sanitize_text_field( wp_trim_words( (string) get_the_title( $post_id ), 20, '' ) );
+				// Explicit character bound: wp_trim_words switches to character mode on character-count locales and would truncate mid-word.
+				$post_title = sanitize_text_field( (string) get_the_title( $post_id ) );
+				$post_title = function_exists( 'mb_substr' ) ? mb_substr( $post_title, 0, 80 ) : substr( $post_title, 0, 80 );
 			}
 			$content = (string) ( $comment->comment_content ?? '' );
 			if ( function_exists( 'mb_substr' ) ) {

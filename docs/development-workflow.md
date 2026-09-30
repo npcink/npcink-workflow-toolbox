@@ -662,6 +662,26 @@ native Update or Publish. The browser test should reuse the existing Toolbox
 Playwright smoke infrastructure and record console/network errors plus the
 final editor state.
 
+For the comment moderation review set, run:
+
+```bash
+composer smoke:comment-moderation-trial
+```
+
+This uses the `/ai/site-helpers` `comment_moderation_suggestions` intent
+against a local WordPress site with the site-helper host filter mocked, so it
+does not require Cloud availability. It creates temporary hold comments,
+verifies the pii prompt omits comment author email, IP address, and user agent
+and sends a parent post title only for public posts, checks the
+`comment_moderation_review_set.v1` counts and triage-only classification
+handling, proves comment statuses stay unchanged, exercises the fail-closed
+`cloud_required` path, and removes every temporary object. On this workstation
+the local default PHP path may not exist; when the smoke reports a missing
+`lightning-services/php-8.5.3` binary, override `WP_CLI_PHP` (for example
+`/opt/homebrew/bin/php`), point `WP_PATH` at the local site, and set
+`WP_DB_SOCKET` to the active Local MySQL socket. It stays outside
+`composer test:all`.
+
 For boundary-sensitive work, use
 [Adversarial Boundary Review](adversarial-boundary-review.md) as the triage
 ledger after model-backed review. Every finding must be classified as
