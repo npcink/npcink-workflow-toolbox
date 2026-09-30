@@ -92,6 +92,11 @@ implementing it inside Toolbox.
   a separate contract.
 - Keep `cap.toolbox.*` as the stable first-version scope naming unless Core
   explicitly changes the contract.
+- Relaxing any REST capability or adding a lower-capability scope requires an
+  object-level authorization audit of every server-side object read on the
+  affected routes in the same change; rule by the transport routes the client
+  actually calls, not by intent names. Record the audit in the PR body. See
+  `docs/scoped-editor-permissions-lessons-2026-09.md`.
 - Update docs when public REST, ability ids, workflow shape, lifecycle, or
   product boundary changes.
 - For cross-repository Cloud closeout, use the exact-SHA GitHub source gate in
