@@ -231,7 +231,15 @@ The preferred follow-up order remains:
 1. media ALT and caption review set;
 2. taxonomy and tag review set;
 3. internal-link review set;
-4. comment moderation review set.
+4. comment moderation review set;
+5. flagged media review set.
+
+The flagged media review set follows the accepted contract in
+[Flagged Media Review Set](flagged-media-review.md): at most 50 recent
+attachments per request, media metadata only (no pixels), `pii` no-store
+classification, suggestion-only output with `media_unchanged`, and no media
+deletion until the Toolkit/Core governed path exists. Its deletion policy
+branches are the specification input for that future path.
 
 The comment moderation review set follows the accepted data contract in
 [Comment Moderation Review Set](comment-moderation-review-set.md): at most 50

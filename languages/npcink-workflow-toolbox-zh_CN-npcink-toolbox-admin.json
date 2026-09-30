@@ -692,7 +692,16 @@
       "Classified": ["已分类"],
       "Blocked": ["被拦"],
       "No comment status was changed. Classifications are review hints only.": ["未更改任何评论状态。分类仅为审核提示。"],
-      "Open the WordPress moderation queue": ["打开 WordPress 审核队列"]
+      "Open the WordPress moderation queue": ["打开 WordPress 审核队列"],
+      "Review flagged media": ["审查违规媒体"],
+      "Stored Cloud safety statuses for a bounded recent image sample. Handle flagged images in WordPress; this review does not change media.": ["近期有界图片样本的云端安全状态。请在 WordPress 中处理被标记图片;本审查不更改媒体。"],
+      "Flagged media review": ["违规媒体审查"],
+      "Cloud safety status is required. Connect the Cloud Addon runtime, then rerun this review. No local fallback assessment exists.": ["需要云端安全状态。请连接 Cloud Addon 运行时后重新运行本审查。不存在本地兜底评估。"],
+      "Flagged": ["已标记"],
+      "Safe": ["安全"],
+      "Media: ": ["媒体:"],
+      "Open attachment in WordPress": ["在 WordPress 中打开附件"],
+      "No media was changed. Deletion is not part of this stage.": ["未更改任何媒体。本阶段不包含删除。"]
       ,"Image Settings": ["图片设置"]
       ,"Image settings": ["图片设置"]
       ,"Manage watermark templates and original-image backup retention.": ["管理水印模板和原图备份保留时间。"]

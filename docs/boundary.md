@@ -492,7 +492,15 @@ section are implemented per
 [Comment Moderation Review Set](comment-moderation-review-set.md): they send
 only approved-would-be-public pending-comment fields, never comment author
 email, IP address, or user agent, and return a suggestion-only
-`comment_moderation_review_set.v1` without changing comment status. The editor uses current-article media metadata
+`comment_moderation_review_set.v1` without changing comment status. The
+accepted `flagged_media_suggestions` intent and its Image Handling review
+surface follow [Flagged Media Review Set](flagged-media-review.md): they send
+only bounded recent media metadata (no pixels), ride the same `pii` no-store
+lane, return a suggestion-only `flagged_media_review_set.v1` with
+`media_unchanged`, never delete or replace media, and record the dual-branch
+deletion policy (no-backup direct delete for confirmed illegal content;
+backup-recoverable governed deletion for general non-compliant content) as the
+specification input for the future Toolkit/Core path. The editor uses current-article media metadata
 for single-post image text review; the backend uses only an explicit small
 media-library sample for batch review-set selection. Cloud owns the AI output
 and the result is suggestion-only. This route must not claim full-site

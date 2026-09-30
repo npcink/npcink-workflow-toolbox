@@ -217,6 +217,7 @@ expect to stay discoverable from the root README:
 [Adversarial Boundary Findings Triage](docs/adversarial-boundary-findings-triage.md),
 [Boundary Exceptions Registry](docs/boundary-exceptions.md),
 [Comment Moderation Review Set](docs/comment-moderation-review-set.md),
+[Flagged Media Review Set](docs/flagged-media-review.md),
 [Route Boundary Table](docs/route-boundary-table.json),
 [Ability Boundary Table](docs/ability-boundary-table.json),
 [Cloud Bridge Contract Table](docs/cloud-bridge-contract-table.json),
@@ -225,7 +226,7 @@ expect to stay discoverable from the root README:
 The default button coverage gate is machine-readable in
 [Fixed Button Contract Table](docs/fixed-button-contract-table.json). It records
 the runtime owner, write lane, handoff owner, and current Adapter parity status
-for all thirteen current buttons; partial parity is reported
+for all fourteen current buttons; partial parity is reported
 rather than hidden. New default editor flows must add their own contract row.
 
 ### Boundary Exceptions Only

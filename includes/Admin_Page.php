@@ -3276,6 +3276,18 @@ final class Admin_Page {
 			),
 			array(
 				'surface'     => 'image',
+				'group'       => __( 'Flagged Media', 'npcink-workflow-toolbox' ),
+				'group_id'    => 'image-flagged-review',
+				'id'          => 'flagged-media-review',
+				'endpoint'    => 'ai/site-helpers',
+				'title'       => __( 'Flagged Media Review', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Ask Cloud for the stored content-safety status of recent images and review flagged ones. Read-only; deletion is not part of this stage.', 'npcink-workflow-toolbox' ),
+				'intent'      => 'flagged_media_suggestions',
+				'button'      => __( 'Review flagged media', 'npcink-workflow-toolbox' ),
+				'custom'      => 'flagged_media_review',
+			),
+			array(
+				'surface'     => 'image',
 				'group'       => __( 'Settings', 'npcink-workflow-toolbox' ),
 				'group_id'    => 'image-settings',
 				'id'          => 'image-settings',
@@ -3436,6 +3448,17 @@ final class Admin_Page {
 								(string) $tool['button'],
 								$active_tool_id === (string) $tool['id'],
 								$cloud_ready
+							);
+							continue;
+						}
+						if ( 'flagged_media_review' === (string) ( $tool['custom'] ?? '' ) ) {
+							$this->render_flagged_media_review_tool(
+								(string) $tool['endpoint'],
+								(string) $tool['title'],
+								(string) $tool['description'],
+								(string) $tool['id'],
+								(string) $tool['button'],
+								$active_tool_id === (string) $tool['id']
 							);
 							continue;
 						}
@@ -3745,6 +3768,36 @@ final class Admin_Page {
 			</div>
 			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'This review is read-only: Toolbox never approves, marks spam, trashes, or deletes comments. Handle every moderation action in WordPress.', 'npcink-workflow-toolbox' ); ?></div>
 			<button type="submit" class="button button-primary"><?php esc_html_e( 'Review pending comments', 'npcink-workflow-toolbox' ); ?></button>
+			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Renders the flagged media review form.
+	 *
+	 * Zero-write surface: asks Cloud for stored content-safety statuses of a
+	 * bounded recent media sample and renders flagged items for manual review.
+	 * Deletion, trashing, detaching, and replacement stay outside Toolbox.
+	 */
+	private function render_flagged_media_review_tool( string $endpoint, string $title, string $description, string $tool_id, string $button, bool $active = false ): void {
+		?>
+		<form class="npcink-toolbox__card npcink-toolbox__card--flagged-media" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-flagged-media-review
+			data-toolbox-attachment-edit-url="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>" <?php echo $active ? '' : 'hidden'; ?>>
+			<h2><?php echo esc_html( $title ); ?></h2>
+			<p><?php echo esc_html( $description ); ?></p>
+			<input type="hidden" name="intent" value="flagged_media_suggestions" />
+			<div class="npcink-toolbox__split">
+				<label>
+					<span><?php esc_html_e( 'Images to check', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="media_sample_size">
+						<option value="20"><?php esc_html_e( '20 newest images', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="50" selected="selected"><?php esc_html_e( '50 newest images', 'npcink-workflow-toolbox' ); ?></option>
+					</select>
+				</label>
+			</div>
+			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'This review is read-only: Toolbox never deletes, trashes, detaches, or replaces media. Handle flagged images manually in WordPress; deletion belongs to a future governed path.', 'npcink-workflow-toolbox' ); ?></div>
+			<button type="submit" class="button button-primary"><?php echo esc_html( $button ); ?></button>
 			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
 		</form>
 		<?php

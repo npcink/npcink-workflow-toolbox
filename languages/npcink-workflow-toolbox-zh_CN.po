@@ -8625,3 +8625,51 @@ msgstr "被拦"
 
 msgid "No comment status was changed. Classifications are review hints only."
 msgstr "未更改任何评论状态。分类仅为审核提示。"
+
+msgid "Flagged Media"
+msgstr "违规媒体"
+
+msgid "Flagged Media Review"
+msgstr "违规媒体审查"
+
+msgid "Ask Cloud for the stored content-safety status of recent images and review flagged ones. Read-only; deletion is not part of this stage."
+msgstr "向云端查询近期图片的内容安全状态并审查被标记项。只读;本阶段不包含删除。"
+
+msgid "Review flagged media"
+msgstr "审查违规媒体"
+
+msgid "Images to check"
+msgstr "要检查的图片数"
+
+msgid "20 newest images"
+msgstr "最新 20 张图片"
+
+msgid "50 newest images"
+msgstr "最新 50 张图片"
+
+msgid "This review is read-only: Toolbox never deletes, trashes, detaches, or replaces media. Handle flagged images manually in WordPress; deletion belongs to a future governed path."
+msgstr "本审查为只读:Toolbox 绝不删除、移入回收站、取消关联或替换媒体。被标记图片请在 WordPress 中手动处理;删除属于未来的治理路径。"
+
+msgid "Flagged media review"
+msgstr "违规媒体审查"
+
+msgid "Stored Cloud safety statuses for a bounded recent image sample. Handle flagged images in WordPress; this review does not change media."
+msgstr "近期有界图片样本的云端安全状态。请在 WordPress 中处理被标记图片;本审查不更改媒体。"
+
+msgid "Cloud safety status is required. Connect the Cloud Addon runtime, then rerun this review. No local fallback assessment exists."
+msgstr "需要云端安全状态。请连接 Cloud Addon 运行时后重新运行本审查。不存在本地兜底评估。"
+
+msgid "Flagged"
+msgstr "已标记"
+
+msgid "Safe"
+msgstr "安全"
+
+msgid "Media: "
+msgstr "媒体:"
+
+msgid "Open attachment in WordPress"
+msgstr "在 WordPress 中打开附件"
+
+msgid "No media was changed. Deletion is not part of this stage."
+msgstr "未更改任何媒体。本阶段不包含删除。"

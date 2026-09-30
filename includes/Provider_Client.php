@@ -24,6 +24,8 @@ final class Provider_Client extends Provider_Client_Support {
 
 	private Provider_Comment_Moderation_Service $comment_moderation;
 
+	private Provider_Flagged_Media_Service $flagged_media;
+
 	private Provider_Hosted_AI_Service $hosted_ai;
 
 	private Provider_Site_Knowledge_Service $site_knowledge;
@@ -134,6 +136,8 @@ final class Provider_Client extends Provider_Client_Support {
 		$this->media_alt = new Provider_Media_Alt_Caption_Service( $settings, $this );
 
 		$this->comment_moderation = new Provider_Comment_Moderation_Service( $settings, $this );
+
+		$this->flagged_media = new Provider_Flagged_Media_Service( $settings, $this );
 
 		$this->hosted_ai = new Provider_Hosted_AI_Service( $settings, $this );
 
@@ -523,6 +527,20 @@ final class Provider_Client extends Provider_Client_Support {
 	 */
 	public function local_comment_moderation_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ) : array {
 		return $this->comment_moderation->local_comment_moderation_review_response( $runtime_payload, $review_set, $cloud_status );
+	}
+
+	/**
+	 * Delegates to the flagged media service.
+	 */
+	public function build_flagged_media_review_set( array $sample, array $safety_statuses = array(), string $cloud_status = 'cloud_required' ) : array {
+		return $this->flagged_media->build_flagged_media_review_set( $sample, $safety_statuses, $cloud_status );
+	}
+
+	/**
+	 * Delegates to the flagged media service.
+	 */
+	public function local_flagged_media_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ) : array {
+		return $this->flagged_media->local_flagged_media_review_response( $runtime_payload, $review_set, $cloud_status );
 	}
 	/**
 	 * @return array{path:string,filename:string,mime_type:string,media_fingerprint:string}|array{}
