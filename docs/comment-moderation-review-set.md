@@ -13,6 +13,14 @@ runtime, and renders the returned per-comment classifications as a review-only
 list inside Site Check. The operator handles the actual moderation through the
 native WordPress comment administration screens.
 
+Surface visibility is an explicit product decision rather than an oversight:
+the Site Check panel is intentionally absent from the default admin tab
+navigation while its problem statement, action model, and acceptance loop are
+reassessed, so this review section is reachable only through the compatibility
+URL `toolbox_tab=operations-insights`. The review set follows that surface's
+visibility; do not advertise it as a default operator entry or add a nav item
+without the separate Site Check product-loop decision.
+
 This is not a comment workflow owner. Toolbox does not approve comments, mark
 spam, trash, delete, edit, or publish replies from this artifact. Comment
 moderation, status changes, and comment workflow governance remain local

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Npcink Workflow Toolbox
  * Description: Fixed AI workflow buttons for WordPress operators, with review-only suggestions and governed handoff plans.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Requires at least: 6.9
  * Requires PHP: 8.0
  * Author: Npcink
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NPCINK_TOOLBOX_VERSION', '0.2.0' );
+define( 'NPCINK_TOOLBOX_VERSION', '0.3.0' );
 define( 'NPCINK_TOOLBOX_FILE', __FILE__ );
 define( 'NPCINK_TOOLBOX_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NPCINK_TOOLBOX_URL', plugin_dir_url( __FILE__ ) );

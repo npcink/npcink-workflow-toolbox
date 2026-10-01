@@ -1,6 +1,8 @@
 # WordPress.org Submission Pack
 
-Status: prepared for the Npcink Workflow Toolbox 0.1.1 WordPress.org plugin submission.
+Status: prepared for the Npcink Workflow Toolbox 0.3.0 WordPress.org plugin
+submission. The 0.1.1 approval, publication, and zh_CN translation history is
+recorded in the closeouts linked below.
 
 The current release-readiness closeout is recorded in
 [`WordPress.org Release Readiness Closeout - 2026-06-29`](wordpress-org-release-readiness-closeout-2026-06-29.md).
@@ -11,9 +13,9 @@ The post-approval publication and zh_CN translation closeout is recorded in
 
 - Plugin name: Npcink Workflow Toolbox
 - Suggested slug: npcink-workflow-toolbox
-- Version: 0.1.1
+- Version: 0.3.0
 - Requires at least: 6.9
-- Tested up to: 7.0
+- Tested up to: 7.1
 - Requires PHP: 8.0
 - License: GPLv2 or later
 - Tags: ai, seo, editorial-workflow, media, content
