@@ -270,6 +270,18 @@ must not inspect Addon options, credentials, runtime clients, provider truth,
 or legacy Addon plan state. It owns no generic queue, Cloud execution truth,
 Core review, Adapter execution, or WordPress write.
 
+The weekly media fingerprint scan is the one recurring WP-Cron exception.
+`npcink_toolbox_weekly_media_fingerprint_scan` may register one custom
+`npcink_toolbox_weekly` recurrence and one recurring event from `init` only
+while the Cloud Addon is verified and Site Knowledge transport is enabled, and
+it clears its own schedule when disabled or deactivated. Each run reads at most
+100 bounded attachment fingerprint deltas through the existing Site Knowledge
+projection and emits one `npcink_abilities_toolkit_media_file_version_changed`
+action per changed attachment for Toolkit recognition staleness. It performs no
+Cloud vision call, media or attachment write, queue, retry, lease, run record,
+or WordPress content write, and it is not generic scheduler or runtime
+ownership.
+
 Nightly Inspection Cloud runtime routes are compatibility bridges for existing
 callers only. Runtime entitlement, quota, batch limit, retention, recent run,
 status, result, and retry detail belong in Cloud Addon Runtime Runs, not in a
