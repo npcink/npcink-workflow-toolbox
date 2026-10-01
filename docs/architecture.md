@@ -452,6 +452,15 @@ lock and one single-event WP-Cron wakeup advance at most one batch. This narrow
 continuation does not become a generic workflow runtime or move Cloud execution,
 Toolkit inventory, Core review, Adapter execution, or WordPress write truth.
 
+`includes/Media_Fingerprint_Scan.php` owns the one recurring scheduled event:
+the weekly `npcink_toolbox_weekly_media_fingerprint_scan` WP-Cron run behind a
+custom `npcink_toolbox_weekly` recurrence. It schedules itself from `init` only
+while the Cloud Addon is verified and Site Knowledge transport is enabled, reads
+at most 100 bounded attachment fingerprint deltas through `Provider_Client`, and
+fires one `npcink_abilities_toolkit_media_file_version_changed` action per
+changed attachment. It stores no option, queue, retry, lease, or run record and
+performs no media, attachment, or content write.
+
 Media derivative result responses keep two independent projections. The
 `cloud_result.artifact` member is the exact artifact validated from
 `media_derivative_result.v3`; `local_review` contains one queryless same-origin

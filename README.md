@@ -362,6 +362,16 @@ High-risk entries are intentionally constrained:
   callers to keep compatible. Normal editorial work belongs in the editor
   content-support sidebar or reviewed Core handoff flows.
 
+The weekly media fingerprint scan is the one recurring Toolbox WP-Cron event:
+`npcink_toolbox_weekly_media_fingerprint_scan` behind a custom
+`npcink_toolbox_weekly` recurrence, scheduled from `init` only while the Cloud
+Addon is verified and Site Knowledge transport is enabled. Each run reads at
+most 100 bounded attachment fingerprint deltas through the Site Knowledge
+projection and emits per-attachment
+`npcink_abilities_toolkit_media_file_version_changed` actions for Toolkit
+recognition staleness. It performs no media or content writes and owns no
+queue, retry, run record, or scheduler truth.
+
 The retired `/flows/article-brief` route has been removed; OpenClaw and other
 external AI callers should use `npcink-toolbox/build-ai-article-writing-pack`
 and the editor content-support routes instead.
