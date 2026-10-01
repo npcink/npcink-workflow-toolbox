@@ -1,7 +1,9 @@
 # WordPress.org Submission Pack
 
-Status: prepared for the Npcink Workflow Toolbox 0.3.0 WordPress.org plugin
-submission. The 0.1.1 approval, publication, and zh_CN translation history is
+Status: published. Version 0.3.0 was released to WordPress.org SVN as
+revision 3723781 on 2026-10-02; the publication and verification record is
+[`WordPress.org 0.3.0 Publication Closeout - 2026-10-02`](archive/2026-10/wordpress-org-publication-0-3-0-closeout-2026-10-02.md).
+The 0.1.1 approval, publication, and zh_CN translation history is
 recorded in the closeouts linked below.
 
 The current release-readiness closeout is recorded in
