@@ -1172,6 +1172,7 @@
       "No new search keywords were generated. Edit the search description and try again.": ["暂无新的搜索关键词，请修改搜索描述后重试。"],
       "Loading image candidates": ["正在加载图片候选"],
       "AI quota is exhausted. Use the current search query or enter one manually.": ["AI 配额已用完，请使用当前搜索词或手动输入。"]
+      ,"Format text": ["整理"]
     }
   }
 }

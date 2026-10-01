@@ -433,9 +433,9 @@
 
 	function renderMediaDerivativeProgress(form, stage, detail) {
 		const stages = [
-			{ id: 'upload', label: 'Upload source' },
-			{ id: 'process', label: 'Cloud processing' },
-			{ id: 'read', label: 'Read result' },
+			{ id: 'upload', label: t('Upload source') },
+			{ id: 'process', label: t('Cloud processing') },
+			{ id: 'read', label: t('Read result') },
 		];
 		const activeIndex = Math.max(0, stages.findIndex((item) => item.id === stage));
 		const result = renderShell(
@@ -1041,7 +1041,7 @@
 			if (!config.adapterRestUrl) {
 				throw { message: 'Npcink Adapter REST URL is unavailable.' };
 			}
-			renderTextResult(form, 'Building Site Knowledge review plan...', 'pending');
+			renderTextResult(form, t('Building Site Knowledge review plan...'), 'pending');
 			const plan = await postJson(config.restUrl, 'flows/site-knowledge-review-plan', {
 				proposal_input: handoff && handoff.proposal_input ? handoff.proposal_input : {},
 				handoff: handoff || {},
@@ -1059,24 +1059,24 @@
 				},
 			});
 			renderProposalCreated(form, proposalFromPlanResponse(bridge), {
-				title: 'Site Knowledge review proposal submitted',
-				summary: 'Core created a blocked review proposal from Site Knowledge evidence. Human title and content input are required before approval, preflight, or execution can proceed.',
-				rawTitle: 'Core Site Knowledge review response',
+				title: t('Site Knowledge review proposal submitted'),
+				summary: t('Core created a blocked review proposal from Site Knowledge evidence. Human title and content input are required before approval, preflight, or execution can proceed.'),
+				rawTitle: t('Core Site Knowledge review response'),
 				receiptContext: {
 					handoffType: 'site_knowledge_review_plan',
 					sourceItemId: 'site_knowledge_agent_handoff',
-					sourceLabel: 'Site Knowledge review evidence',
+					sourceLabel: t('Site Knowledge review evidence'),
 					targetAbilityId: 'npcink-abilities-toolkit/create-draft',
 				},
 			});
 		} catch (error) {
-			renderErrorResult(form, error, 'Could not submit the Site Knowledge review proposal.', {
-				title: 'Site Knowledge Core handoff failed',
-				rawTitle: 'Site Knowledge Core handoff error payload',
+			renderErrorResult(form, error, t('Could not submit the Site Knowledge review proposal.'), {
+				title: t('Site Knowledge Core handoff failed'),
+				rawTitle: t('Site Knowledge Core handoff error payload'),
 				receiptContext: {
 					handoffType: 'site_knowledge_review_plan',
 					sourceItemId: 'site_knowledge_agent_handoff',
-					sourceLabel: 'Site Knowledge review evidence',
+					sourceLabel: t('Site Knowledge review evidence'),
 					targetAbilityId: 'npcink-abilities-toolkit/create-draft',
 				},
 			});
@@ -1345,7 +1345,7 @@
 		container.appendChild(summary);
 
 		const details = el('details', 'npcink-toolbox__result-details');
-		details.appendChild(el('summary', '', '查看文章索引状态'));
+		details.appendChild(el('summary', '', t('View article index status')));
 		const list = el('div', 'npcink-toolbox__result-meta');
 		const visible = [...notIndexed, ...statuses.filter((item) => item && item.status !== 'not_indexed')].slice(0, 50);
 		visible.forEach((item) => {
@@ -1355,7 +1355,7 @@
 			appendMeta(list, item && item.post_id ? '#' + String(item.post_id) : t('文章'), value);
 		});
 		if (statuses.length > visible.length) {
-			list.appendChild(el('small', 'description', '仅显示前 50 篇，未索引文章优先。'));
+			list.appendChild(el('small', 'description', t('Only the first 50 entries are shown; unindexed articles come first.')));
 		}
 		details.appendChild(list);
 		container.appendChild(details);
@@ -1872,14 +1872,14 @@
 	function renderHostedAiContentSupport(form, payload) {
 		const intent = String(payload.intent || '');
 		const titleByIntent = {
-			title_summary: 'Title and summary suggestions',
-			article_outline: 'Outline suggestions',
-			polish_notes: 'Polish suggestions'
+			title_summary: t('Title and summary suggestions'),
+			article_outline: t('Outline suggestions'),
+			polish_notes: t('Polish suggestions')
 		};
 		const summaryByIntent = {
-			title_summary: 'Review concise title, excerpt, SEO, and answer-summary options before using them anywhere.',
-			article_outline: 'Use this as a working structure for a human-written article, not as generated body copy.',
-			polish_notes: 'Review the revised wording and keep the original meaning under editor control.'
+			title_summary: t('Review concise title, excerpt, SEO, and answer-summary options before using them anywhere.'),
+			article_outline: t('Use this as a working structure for a human-written article, not as generated body copy.'),
+			polish_notes: t('Review the revised wording and keep the original meaning under editor control.')
 		};
 		const result = renderShell(
 			form,
@@ -4101,19 +4101,19 @@
 			const preflight = planDataFromEnvelope(state.preflightEnvelope);
 			if (preflight && preflight.artifact_type === 'media_adoption_preflight_summary') {
 				const ready = preflight.readiness && preflight.readiness.can_submit_core_proposal;
-				result.appendChild(el('div', ready ? 'npcink-toolbox__result-notice is-ok' : 'npcink-toolbox__result-notice is-warning', ready ? '采用预检通过。提交 Core 提案前请确认摘要。' : '采用预检需要处理后再提交 Core 提案。'));
+				result.appendChild(el('div', ready ? 'npcink-toolbox__result-notice is-ok' : 'npcink-toolbox__result-notice is-warning', ready ? t('Adoption preflight passed. Confirm the summary before submitting the Core proposal.') : t('Resolve the adoption preflight findings before submitting the Core proposal.')));
 				const preflightMeta = el('div', 'npcink-toolbox__result-meta');
-				appendMeta(preflightMeta, '提案就绪', ready ? '是' : '否');
-				appendMeta(preflightMeta, '内容引用文章', preflight.content_reference_summary ? preflight.content_reference_summary.post_count : '');
-				appendMeta(preflightMeta, 'URL 替换数', preflight.content_reference_summary ? preflight.content_reference_summary.replacement_count : '');
-				appendMeta(preflightMeta, '设置引用扫描', preflight.settings_reference_summary && preflight.settings_reference_summary.scan_available ? '可单独扫描' : '不可用');
+				appendMeta(preflightMeta, t('Proposal ready'), ready ? t('Yes') : t('No'));
+				appendMeta(preflightMeta, t('Content-referenced posts'), preflight.content_reference_summary ? preflight.content_reference_summary.post_count : '');
+				appendMeta(preflightMeta, t('URL replacements'), preflight.content_reference_summary ? preflight.content_reference_summary.replacement_count : '');
+				appendMeta(preflightMeta, t('Settings reference scan'), preflight.settings_reference_summary && preflight.settings_reference_summary.scan_available ? t('Scannable separately') : t('Unavailable'));
 				result.appendChild(preflightMeta);
 				if (preflight.settings_reference_summary && preflight.settings_reference_summary.scan_available) {
-					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', '后台设置、主题或其他插件里的旧图片 URL 不会自动随媒体采用一起替换；需要时请使用“提交设置 URL 修复”。'));
+					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('Old image URLs in backend settings, themes, or other plugins are not replaced automatically with media adoption; use "Submit settings URL repair" when needed.')));
 				}
-				renderArtifactSummary(result, '采用预检', preflight);
+				renderArtifactSummary(result, t('Adoption preflight'), preflight);
 			} else if (state.preflightEnvelope.error) {
-				result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', '采用预检不可用：' + state.preflightEnvelope.error));
+				result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('Adoption preflight unavailable: ') + state.preflightEnvelope.error));
 			}
 		}
 		result.appendChild(createRawDetails(payload, 'Cloud result payload'));
@@ -5149,7 +5149,7 @@
 			throw { message: 'Paste a local uploads URL before resolving an attachment.' };
 		}
 
-		renderTextResult(form, 'Resolving media URL...', 'pending');
+		renderTextResult(form, t('Resolving media URL...'), 'pending');
 		const resolutionEnvelope = await postJson(config.adapterRestUrl, 'run-read-ability', {
 			ability_id: 'npcink-abilities-toolkit/resolve-media-attachment-by-url',
 			input: {
@@ -5163,7 +5163,7 @@
 			renderTextResult(form, t('Media URL resolved to attachment #') + String(resolution.attachment_id) + t('. Generate a preview to continue.'), 'ok');
 			return;
 		}
-		renderTextResult(form, 'Media URL resolution returned candidates. Choose one attachment before generating a preview.', 'warning');
+		renderTextResult(form, t('Media URL resolution returned candidates. Choose one attachment before generating a preview.'), 'warning');
 	}
 
 	async function buildMediaDerivativeBatchPlan(form) {
@@ -5173,7 +5173,7 @@
 
 		await ensureMediaOptimizationCloudReady(form);
 		const input = mediaDerivativeBatchPlanInput(form);
-		renderTextResult(form, 'Building media derivative batch plan...', 'pending');
+		renderTextResult(form, t('Building media derivative batch plan...'), 'pending');
 		const planEnvelope = await postJson(config.restUrl, 'media-optimization-manifest', input);
 		await completeMediaDerivativeBatchPlan(form, planEnvelope);
 	}
@@ -5591,18 +5591,18 @@
 				message: 'The same-origin preview image must load successfully before Core submission.',
 			};
 		}
-		renderTextResult(form, 'Submitting Core optimization proposal...', 'pending');
+		renderTextResult(form, t('Submitting Core optimization proposal...'), 'pending');
 		const bridge = await postJson(config.adapterRestUrl, 'proposals', {
 			ability_id: 'npcink-abilities-toolkit/adopt-cloud-media-derivative',
-			title: 'Replace media file with reviewed Cloud derivative',
-			summary: 'Review one visually confirmed derivative, output filename, backup evidence, and rollback path before replacing the current attachment file.',
+			title: t('Replace media file with reviewed Cloud derivative'),
+			summary: t('Review one visually confirmed derivative, output filename, backup evidence, and rollback path before replacing the current attachment file.'),
 			input: proposalInputFromState(state),
 			preview: state.proposalPayload,
 		});
 		renderProposalCreated(form, proposalFromPlanResponse(bridge), {
-			title: 'Media optimization proposal submitted',
-			summary: 'Core created one governed replacement proposal. Approval and execution remain outside Toolbox.',
-			rawTitle: 'Core media optimization response',
+			title: t('Media optimization proposal submitted'),
+			summary: t('Core created one governed replacement proposal. Approval and execution remain outside Toolbox.'),
+			rawTitle: t('Core media optimization response'),
 		});
 	}
 
@@ -6229,18 +6229,18 @@
 		if (mergedCount !== null && mergedCount > 0) {
 			return {
 				label: String(mergedCount) + ' local priorities',
-				description: 'Review the matched scheduled review priorities before proposal work.'
+				description: t('Review the matched scheduled review priorities before proposal work.')
 			};
 		}
 		if (actionCount !== null && actionCount > 0) {
 			return {
 				label: String(actionCount) + ' Cloud review items',
-				description: 'Load or inspect the result before proposal work.'
+				description: t('Load or inspect the result before proposal work.')
 			};
 		}
 		return {
-			label: 'No review items',
-			description: 'No follow-up is ready from this inspection result.'
+			label: t('No review items'),
+			description: t('No follow-up is ready from this inspection result.')
 		};
 	}
 
@@ -6635,7 +6635,7 @@
 			throw { message: 'Select or enter an image attachment before building a URL repair proposal.' };
 		}
 
-		renderTextResult(form, 'Building media URL repair plan...', 'pending');
+		renderTextResult(form, t('Building media URL repair plan...'), 'pending');
 		const planEnvelope = await postJson(config.adapterRestUrl, 'run-read-ability', {
 			ability_id: 'npcink-abilities-toolkit/build-media-reference-repair-plan',
 			input,
@@ -6658,16 +6658,16 @@
 			return;
 		}
 
-		renderTextResult(form, 'Submitting URL repair proposal...', 'pending');
+		renderTextResult(form, t('Submitting URL repair proposal...'), 'pending');
 		const bridge = await postJson(config.adapterRestUrl, 'proposals/from-plan', {
 			plan_ability_id: 'npcink-abilities-toolkit/build-media-reference-repair-plan',
 			plan,
 			plan_input: input,
 		});
 		renderProposalCreated(form, proposalFromPlanResponse(bridge), {
-			title: 'URL repair proposal submitted',
-			summary: 'Exact hard-coded media URLs are now in Core review as patch-post-content actions. WordPress writes still require Core approval and preflight.',
-			rawTitle: 'Core plan-to-proposal response',
+			title: t('URL repair proposal submitted'),
+			summary: t('Exact hard-coded media URLs are now in Core review as patch-post-content actions. WordPress writes still require Core approval and preflight.'),
+			rawTitle: t('Core plan-to-proposal response'),
 		});
 	}
 
@@ -6681,7 +6681,7 @@
 			throw { message: 'Select or enter an image attachment before building a settings URL repair proposal.' };
 		}
 
-		renderTextResult(form, 'Building settings URL repair plan...', 'pending');
+		renderTextResult(form, t('Building settings URL repair plan...'), 'pending');
 		const planEnvelope = await postJson(config.adapterRestUrl, 'run-read-ability', {
 			ability_id: 'npcink-abilities-toolkit/build-media-settings-reference-repair-plan',
 			input,
@@ -6704,16 +6704,16 @@
 			return;
 		}
 
-		renderTextResult(form, 'Submitting settings URL repair proposal...', 'pending');
+		renderTextResult(form, t('Submitting settings URL repair proposal...'), 'pending');
 		const bridge = await postJson(config.adapterRestUrl, 'proposals/from-plan', {
 			plan_ability_id: 'npcink-abilities-toolkit/build-media-settings-reference-repair-plan',
 			plan,
 			plan_input: input,
 		});
 		renderProposalCreated(form, proposalFromPlanResponse(bridge), {
-			title: 'Settings URL repair proposal submitted',
-			summary: 'Exact hard-coded media URLs in settings are now in Core review as patch-setting-value actions. WordPress writes still require Core approval and preflight.',
-			rawTitle: 'Core plan-to-proposal response',
+			title: t('Settings URL repair proposal submitted'),
+			summary: t('Exact hard-coded media URLs in settings are now in Core review as patch-setting-value actions. WordPress writes still require Core approval and preflight.'),
+			rawTitle: t('Core plan-to-proposal response'),
 		});
 	}
 
@@ -7893,12 +7893,12 @@
 				if (selectButton && form.contains(selectButton)) {
 					event.preventDefault();
 					if (!window.wp || !window.wp.media) {
-						renderTextResult(form, 'WordPress media picker is unavailable on this page.', 'error');
+						renderTextResult(form, t('WordPress media picker is unavailable on this page.'), 'error');
 						return;
 					}
 					const frame = window.wp.media({
-						title: 'Select image',
-						button: { text: 'Use image' },
+						title: t('Select image'),
+						button: { text: t('Use image') },
 						library: { type: 'image' },
 						multiple: false,
 					});
