@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,7 +41,12 @@ The plugin provides a WordPress admin surface and post-editor panel for:
   backups, visible restore review, and a bounded 30- or 90-day retention choice;
 * Cloud-managed site knowledge search, status, and sync requests when a
   compatible host runtime is connected;
-* review-only Scheduled Review previews, with Cloud runtime inspection and recovery routed to Cloud Addon.
+* review-only Scheduled Review previews, with Cloud runtime inspection and recovery routed to Cloud Addon;
+* scoped editor access so authors and editors can run the post editor's
+  suggestion-only content-support flows without administrator rights;
+* read-only comment moderation and flagged media review sets that send one
+  bounded sample to the Cloud runtime and render suggestion-only
+  classifications or safety statuses without changing comment status or media.
 
 Toolbox returns suggestions, candidates, previews, and planning artifacts. It
 does not publish posts, approve proposals, import media, create terms, update SEO
@@ -127,7 +132,8 @@ public URLs, approved public comment excerpts for selected public entries,
 pending comment content with author display name, author URL, and the public
 parent post title for the bounded comment moderation review (never comment
 author email, IP address, or user agent, and no parent post title is sent when
-the parent post is not public), image
+the parent post is not public), bounded recent
+image metadata (never image pixels) for the flagged media safety review, image
 metadata already visible in WordPress, operator-entered content context, and
 operator-entered prompts or review notes. Provider API keys are not exposed to AI
 callers through Toolbox responses.
@@ -222,6 +228,21 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.3.0 =
+
+* Added scoped editor permissions so authors and editors can use the post
+  editor Content Support suggestion flows without administrator access.
+* Added the read-only comment moderation review set with strict
+  pending-comment privacy limits and native WordPress moderation links.
+* Added the read-only flagged media review set in Image Handling for bounded
+  recent image samples with Cloud safety statuses; no media are changed.
+* Removed the retired vector-search, knowledge-search, article-brief, and
+  article-assistant compatibility routes and legacy admin URL aliases.
+* Split the provider client into focused services behind the same facade and
+  hardened service behavior coverage.
+* Kept every suggestion review-only; final WordPress writes still require Core
+  proposal approval.
 
 = 0.2.0 =
 
