@@ -645,7 +645,7 @@
 	const flows = [
 		{
 			intent: 'format_content',
-			label: __('整理', 'npcink-workflow-toolbox'),
+			label: __('Format text', 'npcink-workflow-toolbox'),
 			group: 'research_adaptation',
 		},
 		{

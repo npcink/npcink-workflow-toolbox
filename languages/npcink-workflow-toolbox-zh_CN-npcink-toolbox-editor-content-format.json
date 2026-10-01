@@ -1,0 +1,40 @@
+{
+  "translation-revision-date": "2026-10-02 00:00+0800",
+  "generator": "Codex",
+  "domain": "messages",
+  "locale_data": {
+    "messages": {
+      "": {
+        "domain": "messages",
+        "lang": "zh_CN",
+        "plural-forms": "nplurals=1; plural=0;"
+      },
+      "Format text": ["整理"],
+      "Formattable text needs no changes; the remaining content was skipped. The original text is unchanged.": ["可处理的文字无需调整，其余内容已跳过，原文未改动。"],
+      "Formattable text was formatted; protected content stays unchanged.": ["可处理的文字已整理，受保护内容保持不变。"],
+      "Formatting failed. The original text is unchanged.": ["整理失败，原文未改动。"],
+      "Formatting text": ["整理中"],
+      "Paragraphs, lists, or line breaks were formatted; links and media stay unchanged.": ["段落、列表或换行已整理，链接与媒体保持不变。"],
+      "Protected content changed. The original text is unchanged.": ["受保护的内容发生变化，原文未改动。"],
+      "Text spacing was adjusted; paragraphs and lists stay unchanged.": ["已调整文字间距，段落与列表未变。"],
+      "The article body has been formatted.": ["正文已整理。"],
+      "The article body is empty. Nothing to format.": ["正文为空，无需整理。"],
+      "The article body needs no changes.": ["正文无需调整。"],
+      "The article changed while waiting. This result was not applied.": ["等待期间正文已修改，本次结果未应用。"],
+      "The article contains blocks that formatting does not support yet. The original text is unchanged.": ["正文包含暂不支持整理的区块，原文未改动。"],
+      "The article contains unsupported structure.": ["正文包含未支持的结构。"],
+      "The article has later edits. Use the editor undo.": ["正文已有后续修改，请使用编辑器的撤销。"],
+      "The block structure changed. The original text is unchanged.": ["区块结构发生变化，原文未改动。"],
+      "The formatting request timed out. The original text is unchanged.": ["整理请求超时，原文未改动。"],
+      "The formatting result changed the original or protected content. The original text is unchanged.": ["整理结果改变了原文或受保护内容，原文未改动。"],
+      "The formatting result contains invalid blocks.": ["整理结果包含无效区块。"],
+      "The formatting result could not be restored as editor blocks. The original text is unchanged.": ["整理结果无法完整还原为编辑器区块，原文未改动。"],
+      "The formatting result could not be restored as valid blocks.": ["整理结果无法还原为有效区块。"],
+      "The formatting result failed the body protection check. The original text is unchanged.": ["整理结果未通过正文保护校验，原文未改动。"],
+      "The formatting result needs review. The original text is unchanged.": ["整理结果需要复核，原文未改动。"],
+      "The formatting status is inconsistent. The original text is unchanged.": ["整理状态不一致，原文未改动。"],
+      "This formatting has been undone.": ["已撤销本次整理。"],
+      "Undo this text formatting": ["撤销本次整理"]
+    }
+  }
+}

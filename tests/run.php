@@ -903,7 +903,7 @@ toolbox_assert( false !== strpos( $admin_js, 'One-run planning artifact' ) && fa
 toolbox_assert( false !== strpos( $admin_js, 'initMediaDerivativeControls' ) && false !== strpos( $admin_js, 'runMediaDerivative' ) && false !== strpos( $admin_js, 'submitMediaDerivativeProposal' ) && false !== strpos( $admin_js, 'submitMediaReferenceRepairProposal' ) && false !== strpos( $admin_js, 'submitMediaSettingsReferenceRepairProposal' ), 'Admin JavaScript runs the media derivative preview, replacement proposal, post reference repair, and settings reference repair proposal flows through Adapter routes.' );
 toolbox_assert( false !== strpos( $admin_js, 'data-toolbox-media-derivative-preview-only' ) && false !== strpos( $admin_js, 'createMediaDerivativePreview(input, mediaDetails, previewOnly, (stage, detail)' ) && false !== strpos( $admin_js, 'This check does not submit a Core proposal or write media.' ), 'Admin JavaScript keeps Cloud Check media derivative previews proposal-free while reporting transient progress.' );
 toolbox_assert( false !== strpos( $admin_js, 'media-derivative-preview' ) && false !== strpos( $admin_js, 'media-derivative-optimization-payload' ) && false === strpos( $admin_js, 'media-derivative-runs' ) && false === strpos( $admin_js, 'media-derivative-proposal-payload' ) && false !== strpos( $admin_js, "ability_id: 'npcink-abilities-toolkit/adopt-cloud-media-derivative'" ), 'Media derivative preview uses Toolbox thin projections and keeps governed adoption behind Adapter and Core.' );
-toolbox_assert( false !== strpos( $admin_js, 'preflightInputFromState' ) && false !== strpos( $admin_js, "ability_id: 'npcink-abilities-toolkit/build-media-adoption-preflight-summary'" ) && false !== strpos( $admin_js, '采用预检通过' ) && false !== strpos( $admin_js, '设置引用扫描' ), 'Media derivative preview runs and renders the read-only adoption preflight summary.' );
+toolbox_assert( false !== strpos( $admin_js, 'preflightInputFromState' ) && false !== strpos( $admin_js, "ability_id: 'npcink-abilities-toolkit/build-media-adoption-preflight-summary'" ) && false !== strpos( $admin_js, "t('Adoption preflight passed. Confirm the summary before submitting the Core proposal.')" ) && false !== strpos( $admin_js, "t('Settings reference scan')" ), 'Media derivative preview runs and renders the read-only adoption preflight summary.' );
 toolbox_assert( false !== strpos( $admin_js, 'resolveMediaAttachmentUrl' ) && false !== strpos( $admin_js, "ability_id: 'npcink-abilities-toolkit/resolve-media-attachment-by-url'" ) && false !== strpos( $admin_js, 'data-toolbox-use-media-resolution-candidate' ), 'Media derivative URL resolution calls the local read-only resolver ability and lets the operator choose a candidate.' );
 toolbox_assert( false !== strpos( $admin_js, 'buildMediaDerivativeBatchPlan' ) && false !== strpos( $admin_js, "postJson(config.restUrl, 'media-optimization-manifest', input)" ) && false !== strpos( $admin_js, 'representativeMediaCandidates' ) && false !== strpos( $admin_js, 'submitMediaDerivativeBatchProposals' ) && false !== strpos( $admin_js, "optimization_profile: 'auto_safe.v1'" ), 'Media derivative batch admin flow builds a frozen auto-safe manifest through the local Toolkit read route, checks representative samples, and runs after one confirmation.' );
 toolbox_assert( false !== strpos( $admin_js, "'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/confirm'" ) && false !== strpos( $admin_js, "'/complete'") && false !== strpos( $admin_js, "batch.status === 'paused'" ), 'Media derivative batch execution confirms the exact manifest, records one item at a time, and honors server stop state.' );
@@ -1098,6 +1098,31 @@ foreach ( array_unique( $admin_js_translation_matches[2] ?? array() ) as $admin_
 	}
 }
 toolbox_assert( array() === $missing_admin_js_translations, 'Bundled zh_CN admin script translation JSON covers every literal admin t() string: ' . implode( ' | ', array_slice( $missing_admin_js_translations, 0, 8 ) ) );
+$format_js = file_get_contents( $root . '/assets/editor-content-format.js' );
+$format_json = file_get_contents( $root . '/languages/npcink-workflow-toolbox-zh_CN-npcink-toolbox-editor-content-format.json' );
+toolbox_assert( false !== $format_json && null !== json_decode( $format_json, true ) && false !== strpos( $format_json, '"Format text": ["整理"]' ) && false !== strpos( $format_json, '"Formatting text": ["整理中"]' ) && false !== strpos( $format_json, '"Undo this text formatting": ["撤销本次整理"]' ), 'Bundled zh_CN editor format script translation JSON is valid and covers the format button labels.' );
+preg_match_all( '/\bt\(\s*(["\'])((?:\\\\.|(?!\1).)*)\1\s*\)/s', (string) $format_js, $format_js_translation_matches );
+$missing_format_js_translations = array();
+foreach ( array_unique( $format_js_translation_matches[2] ?? array() ) as $format_js_msgid ) {
+	$normalized_format_msgid = stripcslashes( $format_js_msgid );
+	if ( false === strpos( (string) $format_json, json_encode( $normalized_format_msgid, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ) {
+		$missing_format_js_translations[] = $normalized_format_msgid;
+	}
+}
+toolbox_assert( array() === $missing_format_js_translations, 'Bundled zh_CN editor format script translation JSON covers every literal format t() string: ' . implode( ' | ', array_slice( $missing_format_js_translations, 0, 8 ) ) );
+toolbox_assert( false === strpos( (string) $format_js, "'整理'" ) && false === strpos( (string) $format_js, 'savePost(' ) && false === strpos( (string) $format_js, 'localStorage' ), 'Editor format script keeps UI copy behind the Toolbox text domain and preserves the no-persistence contract.' );
+$editor_format_php = file_get_contents( $root . '/includes/Editor_Content_Format.php' );
+preg_match_all( '/(?:__|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\(\s*(["\'])((?:\\\\.|(?!\1).)*)\1\s*,\s*(["\'])npcink-workflow-toolbox\3/s', (string) $editor_format_php, $editor_format_php_translation_matches );
+$missing_editor_format_php_translations = array();
+foreach ( array_unique( $editor_format_php_translation_matches[2] ?? array() ) as $editor_format_php_msgid ) {
+	$normalized_format_php_msgid = str_replace( array( "\\'", '\\"' ), array( "'", '"' ), $editor_format_php_msgid );
+	$po_format_msgid = 'msgid "' . str_replace( '"', '\\"', $normalized_format_php_msgid ) . '"';
+	if ( false === strpos( (string) $zh_cn_po, $po_format_msgid ) ) {
+		$missing_editor_format_php_translations[] = $normalized_format_php_msgid;
+	}
+}
+toolbox_assert( array() === $missing_editor_format_php_translations, 'Bundled zh_CN translation covers every literal Editor_Content_Format gettext string: ' . implode( ' | ', array_slice( $missing_editor_format_php_translations, 0, 8 ) ) );
+toolbox_assert( false !== strpos( (string) $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-format'" ) && false !== strpos( (string) $editor_support, "'wp-block-editor', 'wp-i18n'" ), 'Editor content format script registers the wp-i18n dependency and Toolbox script translation path.' );
 toolbox_assert( false !== strpos( $admin_json, '"Cloud returned image candidates only. Media import still requires editor image adoption and Core approval."' ) && false !== strpos( $admin_json, '"Submitting Core proposal "' ), 'Bundled zh_CN admin script translation JSON covers runtime result and Core handoff progress copy.' );
 toolbox_assert( false !== strpos( $admin_json, '"Cloud Addon is waiting for the debounce window.' ) && false !== strpos( $admin_json, '"Bridge state": ["桥接状态"]' ), 'Bundled zh_CN admin script translation JSON covers Site Knowledge bridge guidance.' );
 toolbox_assert( false !== strpos( $admin_json, '"Cloud boundary truth": ["Cloud 边界真源"]' ) && false !== strpos( $admin_json, '"Source content owner": ["源内容所有者"]' ) && false !== strpos( $admin_json, '"Cloud creates WordPress writes": ["Cloud 创建 WordPress 写入"]' ), 'Bundled zh_CN admin script translation JSON covers Site Knowledge boundary owner/truth copy.' );

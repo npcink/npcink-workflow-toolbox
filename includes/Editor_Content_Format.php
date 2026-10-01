@@ -20,13 +20,13 @@ final class Editor_Content_Format {
 		if ( array( 'content', 'intent', 'post_id' ) !== $keys || ! is_string( $content )
 			|| '' === trim( $content ) || strlen( $content ) > 100000 || 1 !== preg_match( '//u', $content )
 			|| ! is_int( $post_id ) || $post_id < 1 ) {
-			return self::error( 'input', '正文为空、过长或请求格式不正确，原文未改动。', 400 );
+			return self::error( 'input', __( 'The article body is empty, too long, or the request format is invalid. The original text is unchanged.', 'npcink-workflow-toolbox' ), 400 );
 		}
 		if ( ! Rest_Controller::user_can_use_editor_support() || ! current_user_can( 'edit_post', $post_id ) || ! get_post( $post_id ) ) {
-			return self::error( 'permission', '没有整理这篇文章的权限。', 403 );
+			return self::error( 'permission', __( 'You do not have permission to format this article.', 'npcink-workflow-toolbox' ), 403 );
 		}
 		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_content_format_runtime' ) ) {
-			return self::error( 'unavailable', 'Cloud Addon 尚未就绪，原文未改动。', 503 );
+			return self::error( 'unavailable', __( 'Cloud Addon is not ready yet. The original text is unchanged.', 'npcink-workflow-toolbox' ), 503 );
 		}
 		$response = npcink_cloud_addon_execute_toolbox_content_format_runtime( array(
 			'content' => $content,
@@ -35,11 +35,11 @@ final class Editor_Content_Format {
 		) );
 		if ( is_wp_error( $response ) ) {
 			// Never echo arbitrary upstream errors or runtime payloads into the editor.
-			return self::error( 'cloud', '云端整理暂不可用，原文未改动。', 502 );
+			return self::error( 'cloud', __( 'Cloud formatting is temporarily unavailable. The original text is unchanged.', 'npcink-workflow-toolbox' ), 502 );
 		}
 		$result = $response['data']['result'] ?? null;
 		if ( ! self::valid_result( $content, $result ) ) {
-			return self::error( 'candidate', '整理结果未通过正文保护校验，原文未改动。', 422 );
+			return self::error( 'candidate', __( 'The formatting result failed the body protection check. The original text is unchanged.', 'npcink-workflow-toolbox' ), 422 );
 		}
 		$result['post_id'] = $post_id;
 		$result['persisted'] = false;
