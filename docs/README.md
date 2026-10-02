@@ -52,6 +52,9 @@ Start from the active documents below before changing code.
 - [Cloud Addon Transport Product Acceptance](archive/2026-07/cloud-addon-transport-product-acceptance-2026-07-04.md)
 - [WordPress.org Publication And Translation Closeout](archive/2026-07/wordpress-org-publication-translation-closeout-2026-07-03.md)
 - [WordPress.org 0.3.0 Publication Closeout](archive/2026-10/wordpress-org-publication-0-3-0-closeout-2026-10-02.md)
+- [Translation Source Language Policy](translation-source-language-policy.md)
+- [Operator Terminology Standard v1](platform/operator-terminology-standard-v1.md)
+- [UX Hardening Operator Trial 2026-10](ux-hardening-operator-trial-2026-10.md)
 
 ## Product Surfaces
 
