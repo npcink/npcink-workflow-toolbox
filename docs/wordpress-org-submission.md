@@ -102,6 +102,18 @@ Before submitting the plugin zip:
 
 ```bash
 composer check:wporg
-WP_CLI_BIN=/opt/homebrew/bin/wp composer plugin-check:release
 composer test:all
+```
+
+Then run the Plugin Check package gate with the workstation environment
+documented in the
+[WordPress.org Release Gate](wordpress-org-release-gate.md)
+(wp-cli.phar plus the Local site path and MySQL socket); the 0.3.0 publication
+used:
+
+```bash
+SOCK="$HOME/Library/Application Support/Local/run/s63K4c8XP/mysql/mysqld.sock"
+WP_CLI=/tmp/wp-cli.phar WP_CLI_PHP=/opt/homebrew/bin/php \
+WP_PATH="/Users/muze/Local Sites/magick-ai/app/public" \
+WP_DB_SOCKET="$SOCK" composer plugin-check:release
 ```

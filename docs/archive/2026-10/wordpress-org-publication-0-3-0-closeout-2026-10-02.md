@@ -112,6 +112,24 @@ platform rescans stable tags automatically, typically within hours). A manual
 import remains optional per the 2026-07-03 closeout precedent and PTE status
 is unchanged.
 
+## Remaining Known Items
+
+Non-blocking items deliberately left open at this closeout:
+
+- the authenticated REST performance baseline batches required by
+  [Security And Performance Release Gate](../../security-performance-release-gate.md)
+  were not captured this cycle; timing remains observation-only, so this does
+  not block the release;
+- the zh_CN editor script translation load was not browser-verified; the
+  catalogs are registered through `wp_set_script_translations` and covered by
+  static contracts, and a local-site browser smoke remains a follow-up;
+- the GlotPress 0.3.0 version project was not present at closeout time; the
+  platform rescans stable tags automatically and a manual import stays
+  optional;
+- the sixteen non-default editor intents remain callable as documented
+  mid-term convergence work, unchanged from the pre-release hardening
+  closeout.
+
 ## Boundary
 
 This closeout records release operations only. The public slug stays
