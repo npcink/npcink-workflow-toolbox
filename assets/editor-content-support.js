@@ -31,6 +31,10 @@
 	const PROGRESSIVE_RECOMMENDATION_TIMEOUT_MS = 2500;
 	const PROGRESSIVE_RECOMMENDATION_DEBOUNCE_MS = 1600;
 	const IMAGE_SOURCE_FAST_TIMEOUT_MS = 8000;
+	// Generous ceiling for hosted draft generation, image generation, and media
+	// briefs: long enough for legitimate processing, low enough that a hung
+	// Cloud call can never pin the sidebar spinner forever.
+	const CONTENT_SUPPORT_LONG_TIMEOUT_MS = 120000;
 	const IMAGE_SOURCE_AUTO_FALLBACK_MAX_ATTEMPTS = 2;
 	const IMAGE_RESULT_CACHE_TTL = 5 * 60 * 1000;
 	const IMAGE_RESULT_CACHE_MAX_ENTRIES = 20;
@@ -1171,12 +1175,19 @@
 		return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 180);
 	}
 
-	async function postJsonWithTimeout(path, payload, timeoutMs, timeoutMessage, timeoutCode) {
+	async function postJsonWithTimeout(path, payload, timeoutMs, timeoutMessage, timeoutCode, externalSignal) {
+		if (externalSignal && externalSignal.aborted) {
+			throw { code: 'npcink_toolbox_request_cancelled', message: __('Request cancelled. Nothing was written.', 'npcink-workflow-toolbox') };
+		}
 		if (!timeoutMs || typeof window === 'undefined' || typeof window.AbortController !== 'function') {
 			return postJson(path, payload);
 		}
 		const controller = new window.AbortController();
 		const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+		const forwardCancel = () => controller.abort();
+		if (externalSignal && typeof externalSignal.addEventListener === 'function') {
+			externalSignal.addEventListener('abort', forwardCancel, { once: true });
+		}
 		try {
 			const response = await fetch(joinRestUrl(config.restUrl, path), {
 				method: 'POST',
@@ -1194,14 +1205,23 @@
 			return body;
 		} catch (error) {
 			if (error && error.name === 'AbortError') {
+				if (externalSignal && externalSignal.aborted) {
+					throw {
+						code: 'npcink_toolbox_request_cancelled',
+						message: __('Request cancelled. Nothing was written.', 'npcink-workflow-toolbox'),
+					};
+				}
 				throw {
 					code: timeoutCode || 'npcink_toolbox_progressive_timeout',
-					message: timeoutMessage || __('Local suggestions timed out. Showing cached suggestions if available.', 'npcink-workflow-toolbox'),
+					message: timeoutMessage || __('The request timed out. Nothing was written; try again when you are ready.', 'npcink-workflow-toolbox'),
 				};
 			}
 			throw error;
 		} finally {
 			window.clearTimeout(timeout);
+			if (externalSignal && typeof externalSignal.removeEventListener === 'function') {
+				externalSignal.removeEventListener('abort', forwardCancel);
+			}
 		}
 	}
 
@@ -8100,6 +8120,23 @@
 			const [imageSearchMode, setImageSearchMode] = useState('source');
 			const imageSearchModeRef = useRef('source');
 			const imageSourceRequestSeqRef = useRef(0);
+			// Long Cloud flows (draft generation, hosted image, media brief) must never
+			// leave the sidebar stuck on a spinner: every run gets a cancellable signal
+			// and a generous default timeout.
+			const activeContentRequestRef = useRef(null);
+			function beginContentRequest() {
+				if (activeContentRequestRef.current && typeof activeContentRequestRef.current.abort === 'function') {
+					activeContentRequestRef.current.abort();
+				}
+				const controller = typeof window !== 'undefined' && typeof window.AbortController === 'function' ? new window.AbortController() : null;
+				activeContentRequestRef.current = controller;
+				return controller ? controller.signal : undefined;
+			}
+			function cancelActiveContentRequest() {
+				if (activeContentRequestRef.current && typeof activeContentRequestRef.current.abort === 'function') {
+					activeContentRequestRef.current.abort();
+				}
+			}
 			imageSearchModeRef.current = imageSearchMode;
 			const [imageMode, setImageMode] = useState('featured');
 		const [aiImageAspectRatio, setAiImageAspectRatio] = useState('16:9');
@@ -8377,11 +8414,12 @@
 				const shouldApplyProgressiveResult = () => progressiveMountedRef.current && progressiveRequestSeqRef.current === requestSeq && progressiveCurrentKeyRef.current === key;
 				setProgressiveStatus({ status: 'loading', message: __('Preparing local suggestions...', 'npcink-workflow-toolbox') });
 				try {
-					const flowResult = await postJsonWithTimeout(
-						'editor/content-support',
-						progressiveRecommendationPayload(postContext),
-						PROGRESSIVE_RECOMMENDATION_TIMEOUT_MS
-					);
+				const flowResult = await postJsonWithTimeout(
+					'editor/content-support',
+					progressiveRecommendationPayload(postContext),
+					PROGRESSIVE_RECOMMENDATION_TIMEOUT_MS,
+					__('Local suggestions timed out. Showing cached suggestions if available.', 'npcink-workflow-toolbox')
+				);
 					if (!shouldApplyProgressiveResult()) {
 						return;
 					}
@@ -8592,9 +8630,14 @@
 						payload.selected_block_name = '';
 					}
 						let flowResult;
-						flowResult = runOptions.timeoutMs
-							? await postJsonWithTimeout('editor/content-support', payload, runOptions.timeoutMs)
-							: await postJson('editor/content-support', payload);
+						flowResult = await postJsonWithTimeout(
+							'editor/content-support',
+							payload,
+							runOptions.timeoutMs || CONTENT_SUPPORT_LONG_TIMEOUT_MS,
+							__('The request timed out. Nothing was written; try again when you are ready.', 'npcink-workflow-toolbox'),
+							'npcink_toolbox_content_support_timeout',
+							beginContentRequest()
+						);
 						if (intent === 'image_alt_suggestions') {
 							const altSection = flowResult && flowResult.sections ? flowResult.sections.image_alt_suggestions : null;
 							if (altSection && Array.isArray(altSection.items)) {
@@ -9517,11 +9560,18 @@
 				}
 				try {
 					const refreshVariant = '';
-					const result = await postJson('flows/media-brief', {
-						post_id: postId,
-						image_mode: activePicker.imageUse,
-						refresh_variant: refreshVariant,
-					});
+					const result = await postJsonWithTimeout(
+						'flows/media-brief',
+						{
+							post_id: postId,
+							image_mode: activePicker.imageUse,
+							refresh_variant: refreshVariant,
+						},
+						CONTENT_SUPPORT_LONG_TIMEOUT_MS,
+						__('The image plan request timed out. Nothing was written; try again when you are ready.', 'npcink-workflow-toolbox'),
+						'npcink_toolbox_media_brief_timeout',
+						beginContentRequest()
+					);
 					if (targetSearchMode === 'generate') {
 						const pair = firstImagePromptCandidate(result);
 						const prompt = pair.displayPrompt || (result && result.query ? String(result.query) : '');
@@ -9592,7 +9642,7 @@
 				editorAiImageGenerationFeedbackPayload(qualitySessionId, activePicker, 'ai_image_generation_requested', 'ignored', [], promptReasonCodes)
 			);
 			try {
-				const result = await postJson('ai/image-generation', {
+				const result = await postJsonWithTimeout('ai/image-generation', {
 					prompt,
 					prompt_source_locale: hasCjkText(sourcePrompt) ? 'zh_CN' : 'en',
 					prompt_translation_mode: hasReviewedPair ? 'preplanned_pair' : (translationRequired ? 'required' : 'none'),
@@ -9628,7 +9678,7 @@
 							ability_name: 'npcink-cloud/generate-image',
 						},
 					},
-				});
+				}, CONTENT_SUPPORT_LONG_TIMEOUT_MS, __('The image request timed out. No image was written; review the prompt and try again.', 'npcink-workflow-toolbox'), 'npcink_toolbox_ai_image_timeout', beginContentRequest());
 				if (result && (result.code || (result.data && result.data.cloud_error_code))) {
 					throw result;
 				}
@@ -10595,7 +10645,12 @@
 							'section',
 								{ className: 'npcink-toolbox-editor-support__image-results' },
 								imageGuidance ? createElement(Notice, { status: 'info', isDismissible: false }, imageGuidance) : null,
-								imageSearchBusy ? createElement('div', { className: 'npcink-toolbox-editor-support__running' }, createElement(Spinner, null), createElement('span', null, imageRunningLabel)) : null,
+								imageSearchBusy ? createElement('div', { className: 'npcink-toolbox-editor-support__running' }, createElement(Spinner, null), createElement('span', null, imageRunningLabel), (imageRunning === 'brief' || imageRunning === 'generate') ? createElement(Button, {
+									type: 'button',
+									size: 'compact',
+									variant: 'tertiary',
+									onClick: () => cancelActiveContentRequest(),
+								}, __('Cancel', 'npcink-workflow-toolbox')) : null) : null,
 								imageSearchBusy && activeSearchMode !== 'generate' ? renderImageLoadingGrid() : null,
 								visibleImageResult && !imageSearchBusy ? renderImageCandidateCards(images, visibleImageResult, selectedImage, selectImageCandidate, setImagePreviewLightbox, useSuggestedImageQuery, activePicker) : null,
 								!imageRunning ? imageCompletionNotice : null
@@ -10791,7 +10846,13 @@
 							'div',
 							{ className: 'npcink-toolbox-editor-support__view-title' },
 							createElement('strong', null, resultTitle),
-							createElement('span', null, running ? __('Running content support flow...', 'npcink-workflow-toolbox') : resultScopeLabel(rerunIntent))
+							createElement('span', null, running ? __('Running content support flow...', 'npcink-workflow-toolbox') : resultScopeLabel(rerunIntent)),
+							running ? createElement(Button, {
+								type: 'button',
+								size: 'compact',
+								variant: 'tertiary',
+								onClick: () => cancelActiveContentRequest(),
+							}, __('Cancel', 'npcink-workflow-toolbox')) : null
 						),
 							rerunIntent && flowAcceptsUserInstruction(rerunIntent) ? (isCitationRerun ? createElement(
 								'details',
@@ -10900,7 +10961,13 @@
 							'div',
 							{ className: 'npcink-toolbox-editor-support__running' },
 							createElement(Spinner, null),
-							createElement('span', null, __('Running content support flow...', 'npcink-workflow-toolbox'))
+							createElement('span', null, __('Running content support flow...', 'npcink-workflow-toolbox')),
+							createElement(Button, {
+								type: 'button',
+								size: 'compact',
+								variant: 'tertiary',
+								onClick: () => cancelActiveContentRequest(),
+							}, __('Cancel', 'npcink-workflow-toolbox'))
 						) : null,
 						error ? createElement(Notice, { status: 'error', isDismissible: false }, error) : null,
 						result ? renderResult(result, resultControls) : null

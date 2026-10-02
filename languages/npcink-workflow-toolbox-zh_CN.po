@@ -9499,3 +9499,18 @@ msgstr "快速上手"
 
 msgid "Three steps to your first AI-assisted task. Nothing is written without your review."
 msgstr "三步完成你的第一个 AI 辅助任务。未经你审阅不会写入任何内容。"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Request cancelled. Nothing was written."
+msgstr "请求已取消，未写入任何内容。"
+
+msgid "The request timed out. Nothing was written; try again when you are ready."
+msgstr "请求超时，未写入任何内容；准备好后可重试。"
+
+msgid "The image plan request timed out. Nothing was written; try again when you are ready."
+msgstr "图片计划请求超时，未写入任何内容；准备好后可重试。"
+
+msgid "The image request timed out. No image was written; review the prompt and try again."
+msgstr "图片请求超时，未生成任何图片；请检查提示词后重试。"

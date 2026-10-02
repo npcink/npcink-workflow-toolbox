@@ -1330,7 +1330,12 @@
       "Uses the current article title, excerpt, and body context to recommend source images or request a host-generated featured image candidate. Paragraph selection is ignored for this entry.": ["使用当前文章标题、摘要和正文上下文推荐图片来源，或请求托管生成的特色图候选。此入口忽略段落选中内容。"],
       "Visual recognition needed": ["需要视觉识别"],
       "Weak relevance": ["弱相关"],
-      "Zhihu": ["知乎"]
+      "Zhihu": ["知乎"],
+      "Cancel": ["取消"],
+      "Request cancelled. Nothing was written.": ["请求已取消，未写入任何内容。"],
+      "The request timed out. Nothing was written; try again when you are ready.": ["请求超时，未写入任何内容；准备好后可重试。"],
+      "The image plan request timed out. Nothing was written; try again when you are ready.": ["图片计划请求超时，未写入任何内容；准备好后可重试。"],
+      "The image request timed out. No image was written; review the prompt and try again.": ["图片请求超时，未生成任何图片；请检查提示词后重试。"]
     }
   }
 }
