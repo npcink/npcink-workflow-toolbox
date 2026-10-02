@@ -175,6 +175,7 @@
       "@smoke:nightly-inspection-orchestration-boundary",
       "@smoke:site-ops-insights-builder",
       "@smoke:site-ops-cloud-request"
-    ]
+    ],
+    "smoke:ux-hardening-browser": "node tests/smoke-ux-hardening-browser.mjs"
   }
 }
