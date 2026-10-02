@@ -636,6 +636,9 @@ final class Admin_Page {
 		</div>
 
 		<div class="npcink-toolbox__start" data-toolbox-start>
+			<?php if ( ! $cloud_ready ) : ?>
+				<?php $this->render_getting_started_steps( $content_context ); ?>
+			<?php endif; ?>
 			<details class="npcink-toolbox__start-advanced">
 				<summary>
 					<span><?php esc_html_e( 'System status', 'npcink-workflow-toolbox' ); ?></span>
@@ -644,6 +647,64 @@ final class Admin_Page {
 				<?php $this->render_npcink_capability_health_summary( $content_context, $cloud_ready ); ?>
 			</details>
 		</div>
+		<?php
+	}
+
+	private function render_getting_started_steps( array $content_context ): void {
+		$addon_installed = $this->is_suite_submenu_registered( 'npcink-cloud-addon' );
+		$profile_ready   = $this->content_context_ready( $content_context );
+		$steps = array(
+			array(
+				'done' => false,
+				/* translators: %d: getting-started step number. */
+				'title' => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 1 ),
+				'label' => __( 'Connect Npcink Cloud', 'npcink-workflow-toolbox' ),
+				'help' => __( 'Install and verify the Cloud Addon so hosted search, images, and checks can run.', 'npcink-workflow-toolbox' ),
+				'url' => $addon_installed ? $this->cloud_addon_details_url() : admin_url( 'plugins.php' ),
+				'action' => $addon_installed ? __( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ) : __( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ),
+			),
+			array(
+				'done' => $profile_ready,
+				/* translators: %d: getting-started step number. */
+				'title' => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 2 ),
+				'label' => __( 'Fill the site profile', 'npcink-workflow-toolbox' ),
+				'help' => __( 'A short site brief makes AI suggestions match your audience. This works even before Cloud is connected.', 'npcink-workflow-toolbox' ),
+				'url' => add_query_arg( array( 'page' => self::MENU_SLUG, 'toolbox_tab' => 'context' ), admin_url( 'admin.php' ) ),
+				'action' => __( 'Open site profile', 'npcink-workflow-toolbox' ),
+			),
+			array(
+				'done' => false,
+				/* translators: %d: getting-started step number. */
+				'title' => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 3 ),
+				'label' => __( 'Try your first image task', 'npcink-workflow-toolbox' ),
+				'help' => __( 'Check optimizable Media Library images and review Cloud-qualified previews before anything changes.', 'npcink-workflow-toolbox' ),
+				'url' => add_query_arg( array( 'page' => self::MENU_SLUG, 'toolbox_tab' => 'tools' ), admin_url( 'admin.php' ) ),
+				'action' => __( 'Open image handling', 'npcink-workflow-toolbox' ),
+			),
+		);
+		?>
+		<section class="npcink-toolbox__card" aria-label="<?php esc_attr_e( 'Getting started', 'npcink-workflow-toolbox' ); ?>">
+			<div class="npcink-toolbox__section-heading">
+				<div>
+					<h3><?php esc_html_e( 'Getting started', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Three steps to your first AI-assisted task. Nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+			</div>
+			<ol style="margin:0;padding-left:20px;display:grid;gap:10px;">
+				<?php foreach ( $steps as $step ) : ?>
+					<li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;">
+						<span>
+							<strong><?php echo esc_html( $step['title'] . ': ' . $step['label'] ); ?></strong>
+							<?php if ( $step['done'] ) : ?>
+								<span style="color:#00a32a;font-weight:600;"> — <?php esc_html_e( 'Done', 'npcink-workflow-toolbox' ); ?></span>
+							<?php endif; ?>
+							<br /><span class="description"><?php echo esc_html( $step['help'] ); ?></span>
+						</span>
+						<a class="button" href="<?php echo esc_url( $step['url'] ); ?>"><?php echo esc_html( $step['action'] ); ?></a>
+					</li>
+				<?php endforeach; ?>
+			</ol>
+		</section>
 		<?php
 	}
 
@@ -2944,6 +3005,13 @@ final class Admin_Page {
 				<?php esc_html_e( 'AI-powered search, image suggestions, content library search, and hosted checks stay unavailable until the service is connected. Basic site profile editing remains available.', 'npcink-workflow-toolbox' ); ?>
 				<?php echo esc_html( $this->cloud_runtime_unavailable_reason_label() ); ?>
 			</span>
+			<p style="margin:8px 0 0;">
+				<?php if ( $this->is_suite_submenu_registered( 'npcink-cloud-addon' ) ) : ?>
+					<a class="button button-primary" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ); ?></a>
+				<?php else : ?>
+					<a class="button button-primary" href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>"><?php esc_html_e( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ); ?></a>
+				<?php endif; ?>
+			</p>
 		</div>
 		<?php
 	}
