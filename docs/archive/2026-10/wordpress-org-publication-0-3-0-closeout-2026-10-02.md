@@ -114,18 +114,27 @@ is unchanged.
 
 ## Remaining Known Items
 
-Non-blocking items deliberately left open at this closeout:
+Post-publication follow-ups were executed the same day; the current state is:
 
 - the authenticated REST performance baseline batches required by
   [Security And Performance Release Gate](../../security-performance-release-gate.md)
-  were not captured this cycle; timing remains observation-only, so this does
-  not block the release;
-- the zh_CN editor script translation load was not browser-verified; the
-  catalogs are registered through `wp_set_script_translations` and covered by
-  static contracts, and a local-site browser smoke remains a follow-up;
-- the GlotPress 0.3.0 version project was not present at closeout time; the
-  platform rescans stable tags automatically and a manual import stays
-  optional;
+  were captured on 2026-10-02 against `https://magick-ai.local`
+  (WP 7.1.1, zh_CN, plugin active, authenticated `GET /status`, 1 warmup plus
+  10 samples per batch, three batches): medians 23.4 / 24.0 / 23.3 ms,
+  P95 31.7 / 31.0 / 30.2 ms, all HTTP 200, consistent statuses, valid JSON,
+  identical probe signature. `build/perf/toolbox-baseline-2.jsonl` is the
+  designated reference (`build/perf/toolbox-reference.jsonl`); timing remains
+  observation-only with no enforced threshold;
+- the zh_CN script translation load was verified at runtime on the same site:
+  `load_script_textdomain()` resolved all three bundled catalogs
+  (`npcink-toolbox-editor-content-format`, `npcink-toolbox-editor-content-support`,
+  `npcink-toolbox-admin`) and returned the expected entries, including
+  `Format text` -> 整理 for the new format catalog. The legacy
+  `locale_data.messages` Jed envelope is accepted by core, so no catalog
+  regeneration is needed;
+- the GlotPress 0.3.0 version project was still not present at the final
+  session check; the platform rescans stable tags automatically and a manual
+  import stays optional because zh_CN ships bundled with the plugin;
 - the sixteen non-default editor intents remain callable as documented
   mid-term convergence work, unchanged from the pre-release hardening
   closeout.
