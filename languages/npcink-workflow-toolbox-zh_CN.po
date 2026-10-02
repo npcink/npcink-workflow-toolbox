@@ -9463,3 +9463,39 @@ msgstr "请检查失败的行，然后选择再次重试失败预览或取消选
 
 msgid "Keep the current selection, resolve the reported issue, then use the same preview action again. Toolbox will not retry automatically."
 msgstr "请保持当前选择，解决报告的问题后重新执行同一预览操作。Toolbox 不会自动重试。"
+
+msgid "Install the Cloud Addon plugin"
+msgstr "安装 Cloud Addon 插件"
+
+msgid "Open Cloud Addon settings"
+msgstr "打开 Cloud Addon 设置"
+
+msgid "Step %d"
+msgstr "第 %d 步"
+
+msgid "Connect Npcink Cloud"
+msgstr "连接 Npcink Cloud"
+
+msgid "Install and verify the Cloud Addon so hosted search, images, and checks can run."
+msgstr "安装并验证 Cloud Addon，托管搜索、图片建议和检查才能运行。"
+
+msgid "Fill the site profile"
+msgstr "填写站点画像"
+
+msgid "A short site brief makes AI suggestions match your audience. This works even before Cloud is connected."
+msgstr "简短的站点简介能让 AI 建议更贴合你的受众。即使尚未连接 Cloud 也可以先填写。"
+
+msgid "Try your first image task"
+msgstr "试试第一个图片任务"
+
+msgid "Check optimizable Media Library images and review Cloud-qualified previews before anything changes."
+msgstr "先检查媒体库中可优化的图片并审阅 Cloud 认证的预览，确认后才会有任何更改。"
+
+msgid "Open image handling"
+msgstr "打开图片处理"
+
+msgid "Getting started"
+msgstr "快速上手"
+
+msgid "Three steps to your first AI-assisted task. Nothing is written without your review."
+msgstr "三步完成你的第一个 AI 辅助任务。未经你审阅不会写入任何内容。"
