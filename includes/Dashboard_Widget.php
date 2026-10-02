@@ -50,6 +50,8 @@ final class Dashboard_Widget {
 		$pool  = $this->hot_topic_pool->read_cached();
 		$items = is_array( $pool['items'] ?? null ) ? $pool['items'] : array();
 
+		$this->render_refresh_notice();
+
 		echo '<p class="description">' . esc_html__( '今日热榜标题速览。这里不做选题处理，只帮助快速判断外部热点。', 'npcink-workflow-toolbox' ) . '</p>';
 
 		if ( array() === $items ) {
@@ -104,6 +106,31 @@ final class Dashboard_Widget {
 		echo '</div>';
 	}
 
+	private function render_refresh_notice(): void {
+		$status = sanitize_key( (string) filter_input( INPUT_GET, 'npcink_toolbox_hot_topic_refresh' ) );
+		if ( '' === $status ) {
+			return;
+		}
+
+		if ( 'ready' === $status ) {
+			$message = __( '热榜已刷新。', 'npcink-workflow-toolbox' );
+			$color   = '#00a32a';
+		} elseif ( 'empty' === $status ) {
+			$message = __( '刷新完成，但云端没有返回热榜数据。', 'npcink-workflow-toolbox' );
+			$color   = '#996800';
+		} elseif ( 'stale' === $status ) {
+			$message = __( '刷新失败，当前显示的是上一次缓存的热榜。', 'npcink-workflow-toolbox' );
+			$color   = '#996800';
+		} elseif ( 'failed' === $status ) {
+			$message = __( '刷新失败，请稍后重试。', 'npcink-workflow-toolbox' );
+			$color   = '#d63638';
+		} else {
+			return;
+		}
+
+		echo '<p style="margin:8px 0 0;font-weight:600;color:' . esc_attr( $color ) . ';">' . esc_html( $message ) . '</p>';
+	}
+
 	private function render_hot_topic_meta( array $pool ): void {
 		$parts = array();
 		if ( isset( $pool['fetched_at'] ) ) {
@@ -112,7 +139,7 @@ final class Dashboard_Widget {
 		}
 		if ( isset( $pool['cache_status'] ) ) {
 			$cache_status = 'stale' === sanitize_key( (string) $pool['cache_status'] )
-				? __( '本地备份', 'npcink-workflow-toolbox' )
+				? __( '本地备份，数据可能已过期', 'npcink-workflow-toolbox' )
 				: __( '本地', 'npcink-workflow-toolbox' );
 			/* translators: %s: user-facing cache status. */
 			$parts[] = sprintf( __( '缓存：%s', 'npcink-workflow-toolbox' ), $cache_status );

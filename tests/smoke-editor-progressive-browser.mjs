@@ -289,6 +289,9 @@ try {
 	const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport });
 	await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseUrl }).catch(() => {});
 	page = await context.newPage();
+	// Browser smokes stand in for a present, confirmed operator, so accept the
+	// reviewed window.confirm dialogs the hardened flows now require.
+	page.on('dialog', (dialog) => dialog.accept());
 	const requests = [];
 	const consoleErrors = [];
 	const networkErrors = [];

@@ -186,7 +186,9 @@ final class Article_Audio_Playback {
 		$audio['source_content_hash'] = sanitize_text_field( (string) ( $audio['source_content_hash'] ?? '' ) );
 		$audio['source_word_count'] = absint( $audio['source_word_count'] ?? 0 );
 		$audio['source_generated_at'] = sanitize_text_field( (string) ( $audio['source_generated_at'] ?? '' ) );
-		$audio['freshness']        = $this->freshness_for_post( $post_id, $audio );
+		// Freshness hashes the full post content but only an editor can ever see it,
+		// so anonymous visitors skip the per-request hashing cost.
+		$audio['freshness']        = current_user_can( 'edit_post', (int) $post_id ) ? $this->freshness_for_post( $post_id, $audio ) : array();
 
 		return $audio;
 	}

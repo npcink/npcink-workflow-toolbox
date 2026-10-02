@@ -646,6 +646,7 @@
 		{
 			intent: 'format_content',
 			label: __('Format text', 'npcink-workflow-toolbox'),
+			description: __('Tidy paragraph spacing, lists, and line breaks in the current draft. Links and media stay unchanged; one click undoes the change.', 'npcink-workflow-toolbox'),
 			group: 'research_adaptation',
 		},
 		{
@@ -1410,22 +1411,44 @@
 		};
 	}
 
+	function coreHandoffNextActionLabel(action) {
+		if (action === 'review_and_execute_in_core') {
+			return __('Continue in Governance Core to review and execute this proposal.', 'npcink-workflow-toolbox');
+		}
+		if (action === 'review_in_core') {
+			return __('Continue in Governance Core to review this proposal.', 'npcink-workflow-toolbox');
+		}
+		return '';
+	}
+
 	function renderCoreHandoffReceipt(receipt) {
 		if (!receipt || typeof receipt !== 'object') {
 			return null;
 		}
+		const nextActionLabel = coreHandoffNextActionLabel(receipt.operator_next_action);
 		const items = [
-			{ name: __('Receipt', 'npcink-workflow-toolbox'), value: receipt.contract_version, status: receipt.receipt_owner },
 			{ name: __('Core proposal', 'npcink-workflow-toolbox'), value: receipt.proposal_id, status: receipt.status },
-			{ name: __('Target ability', 'npcink-workflow-toolbox'), value: receipt.target_ability_id, status: 'core_governance_record' },
 			{ name: __('Source item', 'npcink-workflow-toolbox'), value: receipt.source_item_id || receipt.source_label, status: receipt.handoff_type },
-			{ name: __('Next action', 'npcink-workflow-toolbox'), value: receipt.operator_next_action, status: receipt.storage },
+		];
+		if (nextActionLabel) {
+			items.push({ name: __('Next action', 'npcink-workflow-toolbox'), value: nextActionLabel });
+		}
+		const technicalItems = [
+			{ name: __('Receipt', 'npcink-workflow-toolbox'), value: receipt.contract_version, status: receipt.receipt_owner },
+			{ name: __('Target ability', 'npcink-workflow-toolbox'), value: receipt.target_ability_id, status: 'core_governance_record' },
+			{ name: __('Next action code', 'npcink-workflow-toolbox'), value: receipt.operator_next_action, status: receipt.storage },
 		];
 		return createElement(
 			'div',
 			{ className: 'npcink-toolbox-editor-support__handoff-receipt' },
 			createElement('h4', null, __('Core handoff receipt', 'npcink-workflow-toolbox')),
 			renderItems(items, __('No Core handoff receipt returned.', 'npcink-workflow-toolbox')),
+			createElement(
+				'details',
+				{ className: 'npcink-toolbox-editor-support__handoff-receipt-details' },
+				createElement('summary', null, __('Technical details', 'npcink-workflow-toolbox')),
+				renderItems(technicalItems, __('No technical receipt details returned.', 'npcink-workflow-toolbox'))
+			),
 			receipt.core_url ? createElement(
 				'a',
 				{
@@ -1783,10 +1806,11 @@
 			return createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, emptyLabel || __('No candidates returned.', 'npcink-workflow-toolbox'));
 		}
 
+		const visible = items.slice(0, 8);
 		return createElement(
 			'ul',
 			{ className: 'npcink-toolbox-editor-support__list' },
-			items.slice(0, 8).map((item, index) => {
+			visible.map((item, index) => {
 				const title = readableItemText(item.name || item.title || item.label || item.source_title || item.url || item.download_url || item.id, __('Candidate', 'npcink-workflow-toolbox'));
 				const detail = [
 					readableItemText(item.value, ''),
@@ -1805,7 +1829,17 @@
 						createElement('span', null, __('Action: ', 'npcink-workflow-toolbox') + recommendationCandidateActionClassLabel(item))
 					)
 				);
-			})
+			}),
+			items.length > visible.length ? createElement(
+				'li',
+				{ key: 'list-truncation-note', className: 'npcink-toolbox-editor-support__muted' },
+				sprintf(
+					/* translators: 1: number of items shown, 2: total number of items returned. */
+					__('Showing %1$d of %2$d items.', 'npcink-workflow-toolbox'),
+					visible.length,
+					items.length
+				)
+			) : null
 		);
 	}
 
@@ -3190,7 +3224,7 @@
 							role: 'button',
 							tabIndex: 0,
 							'aria-pressed': selected ? 'true' : 'false',
-							'aria-label': __('Select image candidate', 'npcink-workflow-toolbox') + ' ' + String(index + 1),
+							'aria-label': __('Select image candidate', 'npcink-workflow-toolbox') + ' ' + String(index + 1) + (image.alt_description || image.description ? ': ' + String(image.alt_description || image.description) : ''),
 							onClick: () => onSelectImage(image),
 							onKeyDown: (event) => {
 								if (event.key === 'Enter' || event.key === ' ') {
@@ -5382,7 +5416,7 @@
 		);
 	}
 
-	function renderAudioGenerationSection(section, audioAdoptionControls, audioPlaybackControls) {
+	function renderAudioGenerationSection(section, audioAdoptionControls, audioPlaybackControls, copyControls) {
 		const items = audioGenerationItems(section);
 		const script = String(section && section.script ? section.script : '').trim();
 		const isAudioSummary = Boolean(section && section.candidate_type === 'article_audio_summary');
@@ -5392,7 +5426,20 @@
 			createElement('p', { key: 'audio-help', className: 'npcink-toolbox-editor-support__muted' }, __('Generated audio candidate. Preview it here; adoption goes through Core and writes the article audio reference, while Toolbox does not edit the post directly.', 'npcink-workflow-toolbox')),
 		];
 		if (shouldShowScript) {
+			const truncated = script.length > 1200;
 			blocks.push(createElement('pre', { key: 'audio-script', className: 'npcink-toolbox-editor-support__code' }, truncateText(script, 1200)));
+			if (truncated && copyControls && copyControls.copyValue) {
+				blocks.push(createElement(
+					Button,
+					{
+						key: 'audio-script-copy',
+						type: 'button',
+						variant: 'tertiary',
+						onClick: () => copyControls.copyValue(script),
+					},
+					__('Copy full script', 'npcink-workflow-toolbox')
+				));
+			}
 		}
 		if (!items.length) {
 			blocks.push(renderItems([], __('No audio candidate returned.', 'npcink-workflow-toolbox')));
@@ -5448,6 +5495,9 @@
 		}
 		if (audioAdoptionControls && audioAdoptionControls.result) {
 			blocks.push(createElement('div', { key: 'audio-adoption-result' }, renderAudioAdoptionResult(audioAdoptionControls.result)));
+		}
+		if (copyControls && copyControls.copyStatus) {
+			blocks.push(createElement(Notice, { key: 'audio-copy-status', status: copyControls.copyStatus.status || 'success', isDismissible: false }, copyControls.copyStatus.message));
 		}
 		return createElement('div', { className: 'npcink-toolbox-editor-support__audio-generation' }, blocks);
 	}
@@ -5729,19 +5779,20 @@
 									},
 									__('Apply excerpt', 'npcink-workflow-toolbox')
 								) : null,
-								allowCopy ? createElement(
+								allowCopy && controls && controls.copyValue ? createElement(
 									Button,
 									{
 										type: 'button',
 									variant: 'tertiary',
-									onClick: () => copyTextToClipboard(item.detail).catch(() => {}),
+									onClick: () => controls.copyValue(item.detail),
 									},
 									__('Copy', 'npcink-workflow-toolbox')
 								) : null
 							)
 						);
 					})
-			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, emptyLabel)
+			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, emptyLabel),
+			allowCopy && controls && controls.copyStatus ? createElement(Notice, { status: controls.copyStatus.status || 'success', isDismissible: false }, controls.copyStatus.message) : null
 		);
 	}
 
@@ -5769,17 +5820,18 @@
 					},
 					__('Apply slug', 'npcink-workflow-toolbox')
 				) : null,
-				createElement(
+				controls && controls.copyValue ? createElement(
 					Button,
 					{
 						type: 'button',
 						variant: 'tertiary',
-						onClick: () => copyTextToClipboard(slugItem.detail).catch(() => {}),
+						onClick: () => controls.copyValue(slugItem.detail),
 					},
 					__('Copy', 'npcink-workflow-toolbox')
-				)
+				) : null
 			),
-			status ? createElement(Notice, { status: status.status || 'success', isDismissible: false }, status.message) : null
+			status ? createElement(Notice, { status: status.status || 'success', isDismissible: false }, status.message) : null,
+			controls && controls.copyStatus && controls.copyStatus.status === 'error' ? createElement(Notice, { status: 'error', isDismissible: false }, controls.copyStatus.message) : null
 		);
 	}
 
@@ -7825,7 +7877,7 @@
 			}
 
 			if (sections.audio_generation) {
-				blocks.push(renderAudioGenerationSection(sections.audio_generation, metadataHandoffControls && metadataHandoffControls.audioAdoption, metadataHandoffControls && metadataHandoffControls.audioPlayback));
+				blocks.push(renderAudioGenerationSection(sections.audio_generation, metadataHandoffControls && metadataHandoffControls.audioAdoption, metadataHandoffControls && metadataHandoffControls.audioPlayback, metadataHandoffControls));
 				if (sections.audio_generation.audio) {
 					blocks.push(renderHostedAiDiagnostics(sections.audio_generation.audio, { defaultOpen: false, highlightMissingText: false, summaryLabel: __('Run details', 'npcink-workflow-toolbox') }));
 				}
@@ -8098,6 +8150,16 @@
 				const [titleApplyStatus, setTitleApplyStatus] = useState(null);
 				const [excerptApplyStatus, setExcerptApplyStatus] = useState(null);
 				const [slugApplyStatus, setSlugApplyStatus] = useState(null);
+				const [copyStatus, setCopyStatus] = useState(null);
+
+				const copyReviewedValue = async function (value) {
+					try {
+						await copyTextToClipboard(value);
+						setCopyStatus({ status: 'success', message: __('Copied. Paste it where you need it.', 'npcink-workflow-toolbox') });
+					} catch (copyError) {
+						setCopyStatus({ status: 'error', message: __('Could not copy. Select the text manually instead.', 'npcink-workflow-toolbox') });
+					}
+				};
 				const [evidenceModalBlocks, setEvidenceModalBlocks] = useState(null);
 				const [preflightModalOpen, setPreflightModalOpen] = useState(false);
 				const [progressiveResult, setProgressiveResult] = useState(null);
@@ -10599,8 +10661,10 @@
 				titleApplyStatus,
 				applyExcerpt: applyRecommendedExcerpt,
 				excerptApplyStatus,
-				applySlug: applyRecommendedSlug,
-				slugApplyStatus,
+					applySlug: applyRecommendedSlug,
+					slugApplyStatus,
+					copyValue: copyReviewedValue,
+					copyStatus,
 					openEvidence: setEvidenceModalBlocks,
 					openPreflightModal: () => setPreflightModalOpen(true),
 					rerunPreflight: rerunIntent === 'publish_preflight' ? () => {
