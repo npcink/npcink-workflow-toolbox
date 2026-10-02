@@ -9442,3 +9442,24 @@ msgstr "用途"
 
 msgid "Review Cloud content-safety flags for recent images. Read-only."
 msgstr "审阅 Cloud 对近期图片的内容安全标记。仅只读。"
+
+msgid "Check Cloud quota or entitlement, then use the same preview action again. Any successful preview evidence already shown is preserved."
+msgstr "请检查 Cloud 配额或权益，然后重新执行同一预览操作。已展示的成功预览证据会保留。"
+
+msgid "Wait briefly, then use the same preview action again. Toolbox will not retry automatically."
+msgstr "请稍候片刻，然后重新执行同一预览操作。Toolbox 不会自动重试。"
+
+msgid "Generate a new preview before artifact expiry; do not submit this item to Core until the verified image is visible."
+msgstr "请在产物过期前重新生成预览；在已验证的图片可见之前，请勿将此项提交到 Core。"
+
+msgid "Keep the reviewed preview, resolve the Core handoff error, then submit again. Existing successful Core proposals are not resubmitted."
+msgstr "请保留已审阅的预览，解决 Core 交接错误后再重新提交。已成功的 Core 提案不会重复提交。"
+
+msgid "Check that Npcink Cloud is connected, then start the optimization again. Already completed images in this batch are kept."
+msgstr "请确认 Npcink Cloud 已连接，然后重新开始优化。本批次中已完成的图片会保留。"
+
+msgid "Review the failed rows, then choose Retry failed previews again or deselect those rows. Successful previews remain unchanged."
+msgstr "请检查失败的行，然后选择再次重试失败预览或取消选中这些行。成功的预览保持不变。"
+
+msgid "Keep the current selection, resolve the reported issue, then use the same preview action again. Toolbox will not retry automatically."
+msgstr "请保持当前选择，解决报告的问题后重新执行同一预览操作。Toolbox 不会自动重试。"

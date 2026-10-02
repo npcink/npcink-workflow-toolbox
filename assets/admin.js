@@ -489,24 +489,24 @@
 			|| errorContainsCode(error, 'cloud_entitlement_required', new WeakSet())
 			|| /quota|billing|entitlement/i.test(message)
 		) {
-			return 'Check Cloud quota or entitlement, then use the same preview action again. Any successful preview evidence already shown is preserved.';
+			return t('Check Cloud quota or entitlement, then use the same preview action again. Any successful preview evidence already shown is preserved.');
 		}
 		if (/timeout|did not finish|pending/i.test(message)) {
-			return 'Wait briefly, then use the same preview action again. Toolbox will not retry automatically.';
+			return t('Wait briefly, then use the same preview action again. Toolbox will not retry automatically.');
 		}
 		if (/local review|verified preview|artifact.*expir/i.test(message)) {
-			return 'Generate a new preview before artifact expiry; do not submit this item to Core until the verified image is visible.';
+			return t('Generate a new preview before artifact expiry; do not submit this item to Core until the verified image is visible.');
 		}
 		if (context === 'proposal') {
-			return 'Keep the reviewed preview, resolve the Core handoff error, then submit again. Existing successful Core proposals are not resubmitted.';
+			return t('Keep the reviewed preview, resolve the Core handoff error, then submit again. Existing successful Core proposals are not resubmitted.');
 		}
 		if (context === 'media-batch') {
-			return 'Check that Npcink Cloud is connected, then start the optimization again. Already completed images in this batch are kept.';
+			return t('Check that Npcink Cloud is connected, then start the optimization again. Already completed images in this batch are kept.');
 		}
 		if (context === 'batch-retry') {
-			return 'Review the failed rows, then choose Retry failed previews again or deselect those rows. Successful previews remain unchanged.';
+			return t('Review the failed rows, then choose Retry failed previews again or deselect those rows. Successful previews remain unchanged.');
 		}
-		return 'Keep the current selection, resolve the reported issue, then use the same preview action again. Toolbox will not retry automatically.';
+		return t('Keep the current selection, resolve the reported issue, then use the same preview action again. Toolbox will not retry automatically.');
 	}
 
 	function renderMediaDerivativeFailure(form, error, context) {
@@ -5547,6 +5547,11 @@
 	async function submitMediaDerivativeBatchProposals(form) {
 		let batch = asObject(form.__npcinkMediaOptimizationBatch);
 		if (!batch.batch_id) throw { message: t('Check optimizable images before starting.') };
+		// One foreground run per form: a second concurrent loop would double-replace
+		// images and overwrite the shared batch state from two directions.
+		if (form.hasAttribute('data-toolbox-media-batch-running')) {
+			return;
+		}
 		const selectedCount = selectedMediaBatchCandidates(form).length;
 		const resuming = ['running', 'paused'].includes(String(batch.status || ''));
 		if (!resuming && !window.confirm(t('Start optimizing the selected images now? ') + String(selectedCount) + t(' selected image(s) will be replaced with Cloud-qualified versions. Originals stay available for restore.'))) {
