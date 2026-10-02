@@ -8835,7 +8835,7 @@ msgid "Actual channel"
 msgstr "实际渠道"
 
 msgid "Agent"
-msgstr "代理客户端"
+msgstr "Agent"
 
 msgid "Approval"
 msgstr "审批"
