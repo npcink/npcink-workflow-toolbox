@@ -1335,7 +1335,8 @@
       "Request cancelled. Nothing was written.": ["请求已取消，未写入任何内容。"],
       "The request timed out. Nothing was written; try again when you are ready.": ["请求超时，未写入任何内容；准备好后可重试。"],
       "The image plan request timed out. Nothing was written; try again when you are ready.": ["图片计划请求超时，未写入任何内容；准备好后可重试。"],
-      "The image request timed out. No image was written; review the prompt and try again.": ["图片请求超时，未生成任何图片；请检查提示词后重试。"]
+      "The image request timed out. No image was written; review the prompt and try again.": ["图片请求超时，未生成任何图片；请检查提示词后重试。"],
+      "This request was replaced by a newer one. Nothing was written.": ["该请求已被更新的请求取代，未写入任何内容。"]
     }
   }
 }

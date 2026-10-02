@@ -1205,6 +1205,12 @@
 			return body;
 		} catch (error) {
 			if (error && error.name === 'AbortError') {
+				if (externalSignal && externalSignal.__toolboxSuperseded) {
+					throw {
+						code: 'npcink_toolbox_request_superseded',
+						message: __('This request was replaced by a newer one. Nothing was written.', 'npcink-workflow-toolbox'),
+					};
+				}
 				if (externalSignal && externalSignal.aborted) {
 					throw {
 						code: 'npcink_toolbox_request_cancelled',
@@ -8101,6 +8107,7 @@
 		const [running, setRunning] = useState('');
 		const [result, setResult] = useState(null);
 		const [error, setError] = useState('');
+		const [requestNotice, setRequestNotice] = useState(null);
 		const [supportView, setSupportView] = useState('menu');
 		const [contextualResult, setContextualResult] = useState(false);
 		const [activeFlowIntent, setActiveFlowIntent] = useState('');
@@ -8126,11 +8133,19 @@
 			const activeContentRequestRef = useRef(null);
 			function beginContentRequest() {
 				if (activeContentRequestRef.current && typeof activeContentRequestRef.current.abort === 'function') {
+					// The new run supersedes the old one; its abort is not a user cancel and
+					// must not surface as an error notice.
+					if (activeContentRequestRef.current.signal) {
+						activeContentRequestRef.current.signal.__toolboxSuperseded = true;
+					}
 					activeContentRequestRef.current.abort();
 				}
 				const controller = typeof window !== 'undefined' && typeof window.AbortController === 'function' ? new window.AbortController() : null;
 				activeContentRequestRef.current = controller;
 				return controller ? controller.signal : undefined;
+			}
+			function endContentRequest() {
+				activeContentRequestRef.current = null;
 			}
 			function cancelActiveContentRequest() {
 				if (activeContentRequestRef.current && typeof activeContentRequestRef.current.abort === 'function') {
@@ -8520,6 +8535,7 @@
 					setActiveFlowIntent(displayIntent);
 					setRunning(intent);
 						setError('');
+						setRequestNotice(null);
 						setPreflightModalOpen(false);
 						if (runOptions.preserveResult) {
 							setResult((current) => current);
@@ -8719,14 +8735,21 @@
 						setProgressiveStatus({ status: 'success', message: __('Local suggestions are ready.', 'npcink-workflow-toolbox') });
 					}
 					} catch (requestError) {
-						setError(requestError && requestError.message ? requestError.message : __('Request failed.', 'npcink-workflow-toolbox'));
-						setSupportView(intent === 'source_adaptation_review' ? 'menu' : 'result');
-						if (intent === 'source_adaptation_review') {
-							setSourceWorkflowModalOpen(true);
+						if (requestError && requestError.code === 'npcink_toolbox_request_superseded') {
+							// A newer run owns the surface state now; stay silent.
+						} else if (requestError && requestError.code === 'npcink_toolbox_request_cancelled') {
+							setRequestNotice({ kind: 'info', message: requestError.message });
+						} else {
+							setError(requestError && requestError.message ? requestError.message : __('Request failed.', 'npcink-workflow-toolbox'));
+							setSupportView(intent === 'source_adaptation_review' ? 'menu' : 'result');
+							if (intent === 'source_adaptation_review') {
+								setSourceWorkflowModalOpen(true);
+							}
 						}
-				} finally {
-					setRunning('');
-				}
+					} finally {
+						setRunning('');
+						endContentRequest();
+					}
 			}
 
 			function updateDraftReviewStatus(status) {
@@ -9590,9 +9613,16 @@
 						setImageGuidance(__('Generated an article image plan from the saved post context. Review candidates before source search, hosted-image request, or external governed adoption.', 'npcink-workflow-toolbox'));
 					}
 			} catch (requestError) {
-				setImageError(requestError && requestError.message ? requestError.message : __('Image plan generation failed.', 'npcink-workflow-toolbox'));
+				if (requestError && requestError.code === 'npcink_toolbox_request_superseded') {
+					// A newer request owns the image surface state now; stay silent.
+				} else if (requestError && requestError.code === 'npcink_toolbox_request_cancelled') {
+					setImageGuidance(requestError.message);
+				} else {
+					setImageError(requestError && requestError.message ? requestError.message : __('Image plan generation failed.', 'npcink-workflow-toolbox'));
+				}
 			} finally {
 				setImageRunning('');
+				endContentRequest();
 			}
 		}
 
@@ -9691,12 +9721,19 @@
 				);
 				setImageGuidance(__('Showing verified host-generated image candidates. Review one image for the external governed adoption path.', 'npcink-workflow-toolbox'));
 			} catch (requestError) {
-				submitImplicitAgentFeedback(
-					editorAiImageGenerationFeedbackPayload(qualitySessionId, activePicker, 'ai_image_generation_runtime_error', 'ignored', ['media_search_runtime_error'], promptReasonCodes.concat([imageGenerationErrorReasonCode(requestError)]))
-				);
-				setImageError(formatImageErrorMessage(requestError, __('Hosted image candidate request failed.', 'npcink-workflow-toolbox')));
+				if (requestError && requestError.code === 'npcink_toolbox_request_superseded') {
+					// A newer request owns the image surface state now; stay silent.
+				} else if (requestError && requestError.code === 'npcink_toolbox_request_cancelled') {
+					setImageGuidance(requestError.message);
+				} else {
+					submitImplicitAgentFeedback(
+						editorAiImageGenerationFeedbackPayload(qualitySessionId, activePicker, 'ai_image_generation_runtime_error', 'ignored', ['media_search_runtime_error'], promptReasonCodes.concat([imageGenerationErrorReasonCode(requestError)]))
+					);
+					setImageError(formatImageErrorMessage(requestError, __('Hosted image candidate request failed.', 'npcink-workflow-toolbox')));
+				}
 			} finally {
 				setImageRunning('');
+				endContentRequest();
 			}
 		}
 
@@ -10263,6 +10300,7 @@
 								createElement(Spinner, null),
 								createElement('span', null, __('Preparing article materials...', 'npcink-workflow-toolbox'))
 							) : null,
+							requestNotice ? createElement(Notice, { status: requestNotice.kind === 'info' ? 'info' : 'warning', isDismissible: false }, requestNotice.message) : null,
 							error ? createElement(Notice, { status: 'error', isDismissible: false }, error) : null,
 							stageContent
 						),
@@ -10846,13 +10884,7 @@
 							'div',
 							{ className: 'npcink-toolbox-editor-support__view-title' },
 							createElement('strong', null, resultTitle),
-							createElement('span', null, running ? __('Running content support flow...', 'npcink-workflow-toolbox') : resultScopeLabel(rerunIntent)),
-							running ? createElement(Button, {
-								type: 'button',
-								size: 'compact',
-								variant: 'tertiary',
-								onClick: () => cancelActiveContentRequest(),
-							}, __('Cancel', 'npcink-workflow-toolbox')) : null
+							createElement('span', null, running ? __('Running content support flow...', 'npcink-workflow-toolbox') : resultScopeLabel(rerunIntent))
 						),
 							rerunIntent && flowAcceptsUserInstruction(rerunIntent) ? (isCitationRerun ? createElement(
 								'details',
@@ -10969,8 +11001,9 @@
 								onClick: () => cancelActiveContentRequest(),
 							}, __('Cancel', 'npcink-workflow-toolbox'))
 						) : null,
-						error ? createElement(Notice, { status: 'error', isDismissible: false }, error) : null,
-						result ? renderResult(result, resultControls) : null
+							requestNotice ? createElement(Notice, { status: requestNotice.kind === 'info' ? 'info' : 'warning', isDismissible: false }, requestNotice.message) : null,
+							error ? createElement(Notice, { status: 'error', isDismissible: false }, error) : null,
+							result ? renderResult(result, resultControls) : null
 					) : createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__menu-view' },
