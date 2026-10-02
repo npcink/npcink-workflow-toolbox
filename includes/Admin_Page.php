@@ -152,7 +152,7 @@ final class Admin_Page {
 		wp_enqueue_script(
 			'npcink-toolbox-admin',
 			NPCINK_TOOLBOX_URL . 'assets/admin.js',
-			array(),
+			array( 'wp-i18n' ),
 			$script_version,
 			true
 		);
@@ -844,6 +844,11 @@ final class Admin_Page {
 		$has_cloud_analysis = null !== $cloud_analysis;
 		?>
 		<div class="npcink-toolbox__panel-header">
+			<p style="margin:0 0 6px;">
+				<a class="button" href="<?php echo esc_url( add_query_arg( array( 'page' => self::MENU_SLUG, 'toolbox_tab' => 'start' ), admin_url( 'admin.php' ) ) ); ?>">
+					&larr; <?php esc_html_e( 'Back to Overview', 'npcink-workflow-toolbox' ); ?>
+				</a>
+			</p>
 			<h2><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></h2>
 			<p><?php esc_html_e( 'Run one read-only check that routes current site issues to the right fixed workflow, manual review, or optional Cloud detail. It does not create Core proposals or WordPress writes.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>

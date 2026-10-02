@@ -8808,3 +8808,7 @@ msgid "Submitting settings URL repair proposal..."
 msgstr "正在提交设置 URL 修复提案..."
 msgid "WordPress media picker is unavailable on this page."
 msgstr "当前页面无法使用 WordPress 媒体选择器。"
+
+#: includes/Admin_Page.php
+msgid "Back to Overview"
+msgstr "返回概览"
