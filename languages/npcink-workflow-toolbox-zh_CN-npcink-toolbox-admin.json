@@ -43,7 +43,6 @@
       "Cloud returned host-generated image candidates. Review the image and source status before adoption.": ["Cloud 返回了托管生成图片候选。采用前请审阅图片和来源状态。"],
       "Cloud did not return a usable image URL.": ["Cloud 没有返回可用的图片 URL。"],
       "Generated images are candidates only. Use editor image adoption and Core review before importing or inserting media.": ["生成图片仅为候选。导入或插入媒体前，请在编辑器侧栏采用图片并经过 Core 审阅。"],
-
       "Provider": ["提供方"],
       "Query": ["查询"],
       "Topic": ["主题"],
@@ -124,7 +123,7 @@
       "Match": ["匹配"],
       "Exact hits": ["精确命中"],
       "Source": ["来源"],
-      "Use": ["用途"],
+      "Use": ["使用"],
       "Provider calls": ["提供方调用"],
       "Sources": ["来源"],
       "Scenario": ["场景"],
@@ -169,26 +168,20 @@
       "Post": ["文章"],
       "Featured image": ["特色图"],
       "MIME": ["MIME"],
-      "Size": ["尺寸"],
+      "Size": ["大小"],
       "Bytes": ["字节"],
       "Expires": ["过期时间"],
       "Candidates": ["候选"],
-      "Skipped": ["已跳过"],
       "Matched": ["已匹配"],
       "Mode": ["模式"],
       "Requested": ["请求项"],
       "Previewed": ["已预览"],
       "Proposal path": ["提案路径"],
-
-      "Yes": ["是"],
-      "No": ["否"],
       "Included": ["已包含"],
       "Not ready": ["未就绪"],
       "Available": ["可用"],
       "Fallback defaults": ["降级默认值"],
       "Preserved": ["已保留"],
-      "Enabled in Cloud": ["Cloud 中已启用"],
-      "Disabled in Cloud": ["Cloud 中已禁用"],
       "Cloud boundary truth": ["Cloud 边界真源"],
       "Source content owner": ["源内容所有者"],
       "Delivery bridge owner": ["投递桥接所有者"],
@@ -214,7 +207,6 @@
       "Core default": ["Core 默认"],
       "Cloud": ["Cloud"],
       "source": ["来源"],
-
       "Operator feedback": ["运营者反馈"],
       "The governed handoff needs operator revision before it can continue.": ["治理交接需要运营者修订后才能继续。"],
       "Reasons": ["原因"],
@@ -262,7 +254,6 @@
       "External search": ["外部搜索"],
       "Live Cloud web search diagnostics belong in Cloud Addon. Use this bundle for combined fallback planning and handoff context.": ["实时 Cloud 网页搜索诊断属于 Cloud Addon。此包用于组合式降级规划和交接上下文。"],
       "Quality feedback is aggregate Cloud eval data only. Approval, preflight, media import, and final WordPress writes remain local.": ["质量反馈仅为 Cloud 聚合评估数据。审批、预检、媒体导入和最终 WordPress 写入仍保留在本地。"],
-
       "Article optimization suggestions": ["文章优化建议"],
       "Discoverability suggestions": ["可发现性建议"],
       "Site checkup suggestions": ["站点检查建议"],
@@ -271,7 +262,7 @@
       "Image and media suggestions": ["图片和媒体建议"],
       "Next action recommendation": ["下一步操作建议"],
       "AI suggestions": ["AI 建议"],
-      "Image text suggestions": ["图像文字建议"],
+      "Image text suggestions": ["图片文字建议"],
       "Content opportunities": ["内容机会"],
       "AI site-helper suggestions": ["AI 站点助手建议"],
       "Review suggested ALT and captions for images used by the selected article before any media-library edit.": ["在编辑媒体库前，请先审阅所选文章图片的 ALT 和说明文字建议。"],
@@ -305,7 +296,6 @@
       "No duplicate-risk candidates returned.": ["没有返回重复风险候选。"],
       "Image candidate search failed.": ["图片候选搜索失败。"],
       "No discoverability suggestions returned.": ["没有返回可发现性建议。"],
-
       "Article write plan": ["文章写入计划"],
       "Core-ready planning artifact. Review it, then hand it to Core from-plan intake for approval.": ["Core 就绪的规划制品。请审阅后交给 Core from-plan 入口审批。"],
       "Plan is not ready for Core proposal intake. Review risk and blocked claims before handoff.": ["计划尚未准备好进入 Core 提案入口。交接前请审阅风险和被阻止声明。"],
@@ -322,7 +312,6 @@
       "Local workbench artifact returned. Revise evidence, context, or reviewed draft before Core handoff.": ["本地工作台制品已返回。Core 交接前请修订证据、上下文或已审阅草稿。"],
       "Review required: ": ["需要审阅："],
       "Blocked claims must be removed before Core handoff.": ["Core 交接前必须移除被阻止声明。"],
-
       "Media derivative handoff": ["媒体衍生交接"],
       "One-run planning artifact. Run the local ability and review the derivative through Core governance before any WordPress media write.": ["一次性规划制品。任何 WordPress 媒体写入前，请运行本地能力并通过 Core 治理审阅衍生结果。"],
       "Ability input": ["能力输入"],
@@ -336,64 +325,63 @@
       "License or source review is required before approval.": ["审批前需要完成许可证或来源审阅。"],
       "Candidate evidence": ["候选证据"],
       "Planned write actions": ["计划写入操作"],
-
       "Media derivative preview": ["媒体衍生预览"],
-	  "Cloud Runtime": ["Cloud 运行时"],
-	  "Local WordPress": ["本地 WordPress"],
-	  "Generate preview": ["生成预览"],
-	  "Regenerate preview": ["重新生成预览"],
-	  "Compare the optimized preview with the original. No Media Library file has been changed.": ["请对比优化预览与原图。媒体库文件尚未发生更改。"],
-	  "Optimized image": ["优化后图片"],
-	  "File size": ["文件大小"],
-	  "Loading and verifying the optimized preview...": ["正在加载并验证优化预览……"],
-	  "Preview verified. Review the comparison, then confirm the replacement.": ["预览已验证。请检查对比结果，然后确认替换。"],
-	  "When the preview is visibly verified, confirm the replacement statement to enable local application. The original image is backed up automatically.": ["预览完成目视确认后，请勾选替换说明以启用本地应用。系统会自动备份原图。"],
-	  "The optimized preview could not be securely loaded. Generate it again.": ["无法安全加载优化预览，请重新生成。"],
-	  "Technical details": ["技术详情"],
-	  "Image updated": ["图片已更新"],
-	  "The reviewed image is now active in the Media Library. The original was backed up automatically for restoration.": ["已审阅的图片现已应用到媒体库，并已自动备份原图，以便需要时恢复。"],
-	  "File name": ["文件名"],
-	  "Original size": ["原始大小"],
-	  "Optimized size": ["优化后大小"],
-	  "Saved": ["已节省"],
-	  "Size change": ["大小变化"],
-	  "Backup created": ["备份已创建"],
-	  "Backup evidence returned": ["已返回备份证据"],
-	  "Content references updated:": ["内容引用已更新："],
-	  "posts": ["篇文章"],
-	  "replacements": ["处替换"],
-	  "No post-content image references needed updating.": ["无需更新文章内容中的图片引用。"],
-	  "Replacement verified": ["替换验证通过"],
-	  "Review the technical verification details": ["请检查技术验证详情"],
-	  "View media details": ["查看媒体详情"],
-	  "Restore original image": ["恢复原图"],
-	  "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？系统会先自动备份当前优化后的图片。"],
-	  "Restoring the original image and backing up the current image...": ["正在恢复原图并备份当前图片……"],
-	  "Original image restored": ["原图已恢复"],
-	  "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["原图已重新应用到媒体库，并已自动备份优化后的图片。"],
-	  "Restore verified": ["恢复验证通过"],
-	  "Applying the verified image and automatically backing up the original...": ["正在应用已验证图片并自动备份原图……"],
-	  "Generating media preview": ["正在生成图片预览"],
-	  "Upload source": ["上传源图片"],
-	  "Cloud processing": ["Cloud 处理中"],
-	  "Read result": ["读取结果"],
-	  "Media preview progress": ["图片预览进度"],
-	  "Current state:": ["当前状态："],
-	  "Toolbox is preparing short-lived review evidence. No WordPress media is changed during these steps.": ["Toolbox 正在准备短期审阅证据；这些步骤不会更改 WordPress 媒体。"],
-	  "Preparing the selected image for Cloud processing.": ["正在准备所选图片以供 Cloud 处理。"],
-	  "Uploading the selected WordPress image through Cloud Addon.": ["正在通过 Cloud Addon 上传所选 WordPress 图片。"],
-	  "Source accepted. Cloud is generating the optimized image.": ["源图片已接收，Cloud 正在生成优化后图片。"],
-	  "Cloud is processing the uploaded source.": ["Cloud 正在处理已上传的源图片。"],
-	  "Cloud processing finished. Reading and verifying the short-lived result.": ["Cloud 处理已完成，正在读取并验证短期结果。"],
-	  "The result descriptor passed validation. Loading the image for visual verification.": ["结果描述已通过验证，正在加载图片以供目视确认。"],
-	  "Cloud generated an optimized preview for local confirmation. No media has been changed yet.": ["Cloud 已生成用于本地确认的优化预览，媒体尚未更改。"],
-	  "No crop": ["不裁剪"],
-	  "Effect preview shown on image": ["已在图片上显示效果示意"],
-	  "No watermark effect": ["当前无水印效果"],
-	  "Current template:": ["当前模板："],
-	  "Custom settings": ["自定义设置"],
-	  "Configured watermark logo": ["已配置的水印 Logo"],
-	  "Logo not configured": ["Logo 尚未配置"],
+      "Cloud Runtime": ["Cloud 运行时"],
+      "Local WordPress": ["本地 WordPress"],
+      "Generate preview": ["生成预览"],
+      "Regenerate preview": ["重新生成预览"],
+      "Compare the optimized preview with the original. No Media Library file has been changed.": ["请对比优化预览与原图。媒体库文件尚未发生更改。"],
+      "Optimized image": ["优化后图片"],
+      "File size": ["文件大小"],
+      "Loading and verifying the optimized preview...": ["正在加载并验证优化预览……"],
+      "Preview verified. Review the comparison, then confirm the replacement.": ["预览已验证。请检查对比结果，然后确认替换。"],
+      "When the preview is visibly verified, confirm the replacement statement to enable local application. The original image is backed up automatically.": ["预览完成目视确认后，请勾选替换说明以启用本地应用。系统会自动备份原图。"],
+      "The optimized preview could not be securely loaded. Generate it again.": ["无法安全加载优化预览，请重新生成。"],
+      "Technical details": ["技术详情"],
+      "Image updated": ["图片已更新"],
+      "The reviewed image is now active in the Media Library. The original was backed up automatically for restoration.": ["已审阅的图片现已应用到媒体库，并已自动备份原图，以便需要时恢复。"],
+      "File name": ["文件名"],
+      "Original size": ["原始大小"],
+      "Optimized size": ["优化后大小"],
+      "Saved": ["已节省"],
+      "Size change": ["大小变化"],
+      "Backup created": ["备份已创建"],
+      "Backup evidence returned": ["已返回备份证据"],
+      "Content references updated:": ["内容引用已更新："],
+      "posts": ["篇文章"],
+      "replacements": ["处替换"],
+      "No post-content image references needed updating.": ["无需更新文章内容中的图片引用。"],
+      "Replacement verified": ["替换验证通过"],
+      "Review the technical verification details": ["请检查技术验证详情"],
+      "View media details": ["查看媒体详情"],
+      "Restore original image": ["恢复原图"],
+      "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？当前优化图会先自动备份。"],
+      "Restoring the original image and backing up the current image...": ["正在恢复原图，并备份当前图片……"],
+      "Original image restored": ["原图已恢复"],
+      "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["媒体库中已重新启用原图。优化图已自动备份。"],
+      "Restore verified": ["恢复已验证"],
+      "Applying the verified image and automatically backing up the original...": ["正在应用已验证图片并自动备份原图……"],
+      "Generating media preview": ["正在生成图片预览"],
+      "Upload source": ["上传源图片"],
+      "Cloud processing": ["Cloud 处理中"],
+      "Read result": ["读取结果"],
+      "Media preview progress": ["图片预览进度"],
+      "Current state:": ["当前状态："],
+      "Toolbox is preparing short-lived review evidence. No WordPress media is changed during these steps.": ["Toolbox 正在准备短期审阅证据；这些步骤不会更改 WordPress 媒体。"],
+      "Preparing the selected image for Cloud processing.": ["正在准备所选图片以供 Cloud 处理。"],
+      "Uploading the selected WordPress image through Cloud Addon.": ["正在通过 Cloud Addon 上传所选 WordPress 图片。"],
+      "Source accepted. Cloud is generating the optimized image.": ["源图片已接收，Cloud 正在生成优化后图片。"],
+      "Cloud is processing the uploaded source.": ["Cloud 正在处理已上传的源图片。"],
+      "Cloud processing finished. Reading and verifying the short-lived result.": ["Cloud 处理已完成，正在读取并验证短期结果。"],
+      "The result descriptor passed validation. Loading the image for visual verification.": ["结果描述已通过验证，正在加载图片以供目视确认。"],
+      "Cloud generated an optimized preview for local confirmation. No media has been changed yet.": ["Cloud 已生成用于本地确认的优化预览，媒体尚未更改。"],
+      "No crop": ["不裁剪"],
+      "Effect preview shown on image": ["已在图片上显示效果示意"],
+      "No watermark effect": ["当前无水印效果"],
+      "Current template:": ["当前模板："],
+      "Custom settings": ["自定义设置"],
+      "Configured watermark logo": ["已配置的水印 Logo"],
+      "Logo not configured": ["Logo 尚未配置"],
       "Cloud generated a short-lived derivative artifact. Submit a Core replacement proposal before any local adoption.": ["Cloud 生成了短期衍生制品。本地采用前请提交 Core 替换提案。"],
       "Toolbox did not return a canonical local review projection for the Cloud artifact.": ["Toolbox 未返回与 Cloud 制品一致的规范本地审阅投影。"],
       "Generated derivative preview": ["生成的衍生预览"],
@@ -432,42 +420,41 @@
       "Core proposal submitted": ["Core 提案已提交"],
       "The derivative artifact is now in Core review as a local media replacement proposal. WordPress writes still require Core approval and preflight.": ["衍生制品现在已作为本地媒体替换提案进入 Core 审阅。WordPress 写入仍需要 Core 审批和预检。"],
       "Open in Core review": ["在 Core 审阅中打开"],
-
       "Media derivative run did not finish before the preview timeout. Poll the run result again from Adapter.": ["媒体衍生运行未在预览超时前完成。请再次从 Adapter 轮询运行结果。"],
       "Select an image attachment before generating a preview.": ["生成预览前请选择一个图片附件。"],
       "Adapter did not return a Cloud run id.": ["Adapter 未返回 Cloud 运行 ID。"],
       "Cloud result did not include a derivative artifact id.": ["Cloud 结果未包含衍生制品 ID。"],
       "Npcink Adapter REST URL is unavailable.": ["Npcink Adapter REST URL 不可用。"],
-	      "Submitting media derivative run...": ["正在提交媒体衍生运行..."],
-	      "Cloud generated a short-lived derivative preview. This check does not submit a Core proposal or write media.": ["Cloud 生成了短期衍生预览。此检查不会提交 Core 提案或写入媒体。"],
-	      "Paste a local uploads URL before resolving an attachment.": ["解析附件前请粘贴本地上传 URL。"],
+      "Submitting media derivative run...": ["正在提交媒体衍生运行..."],
+      "Cloud generated a short-lived derivative preview. This check does not submit a Core proposal or write media.": ["Cloud 生成了短期衍生预览。此检查不会提交 Core 提案或写入媒体。"],
+      "Paste a local uploads URL before resolving an attachment.": ["解析附件前请粘贴本地上传 URL。"],
       "Resolving media URL...": ["正在解析媒体 URL..."],
       "Media URL resolved to attachment #": ["媒体 URL 已解析为附件 #"],
       ". Generate a preview to continue.": ["。生成预览以继续。"],
       "Media URL resolution returned candidates. Choose one attachment before generating a preview.": ["媒体 URL 解析返回了候选。生成预览前请选择一个附件。"],
-	      "Building media derivative batch plan...": ["正在构建媒体衍生批量计划..."],
-	      "Batch plan ready. Review candidates and generate selected previews.": ["批量计划已就绪。请审阅候选并生成所选预览。"],
-	      "Review list ready. Select images and generate previews.": ["审阅列表已就绪。请选择图片并生成预览。"],
-	      "Select at least one batch candidate before generating previews.": ["生成预览前请至少选择一个批量候选。"],
-	      "Generating preview ": ["正在生成预览 "],
-	      " of ": [" / "],
-	      "Generate selected batch previews before submitting Core proposals.": ["提交 Core 提案前请先生成所选批量预览。"],
-	      "Generate selected previews before submitting items for review.": ["提交审核前请先生成所选预览。"],
-	      "Submitting Core proposal ": ["正在提交 Core 提案 "],
-	      "Submitting review request ": ["正在提交审核请求 "],
-	      "Replace media file with Cloud derivative": ["用 Cloud 衍生结果替换媒体文件"],
-	      "Review one short-lived Cloud derivative artifact before local WordPress media replacement. Final writes require Core approval and preflight.": ["本地 WordPress 媒体替换前，请审阅一个短期 Cloud 衍生制品。最终写入需要 Core 审批和预检。"],
-	      "Batch review submission stopped": ["批量审核提交已停止"],
-	      "One selected preview failed before all review requests were submitted. Review the failed item and retry after revision.": ["所有审核请求提交完成前，有一个所选预览失败。请检查失败项并修改后重试。"],
-	      "Batch proposals submitted": ["批量提案已提交"],
-	      "Batch review requests submitted": ["批量审核请求已提交"],
-	      "Selected derivative artifacts are now in Core review. WordPress writes still require Core approval and preflight.": ["所选衍生制品现在已进入 Core 审阅。WordPress 写入仍需 Core 审批和预检。"],
-	      "Selected previews are now waiting for review. WordPress media is not changed here.": ["所选预览正在等待审核。这里不会更改 WordPress 媒体。"],
-	      "Continue approval and final media changes in the review system.": ["请在审核系统中继续审批和最终媒体变更。"],
-	      "Retry after revising the failed preview, authorization, or review input.": ["请修改失败预览、授权或审核输入后重试。"],
-	      "If more media are needed, rebuild the review list rather than reusing stale previews.": ["如需处理更多媒体，请重新生成审阅列表，不要复用过期预览。"],
-	      "Review request details": ["审核请求详情"],
-	      "Generate a derivative preview before submitting a Core proposal.": ["提交 Core 提案前请先生成衍生预览。"],
+      "Building media derivative batch plan...": ["正在构建媒体衍生批量计划..."],
+      "Batch plan ready. Review candidates and generate selected previews.": ["批量计划已就绪。请审阅候选并生成所选预览。"],
+      "Review list ready. Select images and generate previews.": ["审阅列表已就绪。请选择图片并生成预览。"],
+      "Select at least one batch candidate before generating previews.": ["生成预览前请至少选择一个批量候选。"],
+      "Generating preview ": ["正在生成预览 "],
+      " of ": [" / "],
+      "Generate selected batch previews before submitting Core proposals.": ["提交 Core 提案前请先生成所选批量预览。"],
+      "Generate selected previews before submitting items for review.": ["提交审核前请先生成所选预览。"],
+      "Submitting Core proposal ": ["正在提交 Core 提案 "],
+      "Submitting review request ": ["正在提交审核请求 "],
+      "Replace media file with Cloud derivative": ["用 Cloud 衍生结果替换媒体文件"],
+      "Review one short-lived Cloud derivative artifact before local WordPress media replacement. Final writes require Core approval and preflight.": ["本地 WordPress 媒体替换前，请审阅一个短期 Cloud 衍生制品。最终写入需要 Core 审批和预检。"],
+      "Batch review submission stopped": ["批量审核提交已停止"],
+      "One selected preview failed before all review requests were submitted. Review the failed item and retry after revision.": ["所有审核请求提交完成前，有一个所选预览失败。请检查失败项并修改后重试。"],
+      "Batch proposals submitted": ["批量提案已提交"],
+      "Batch review requests submitted": ["批量审核请求已提交"],
+      "Selected derivative artifacts are now in Core review. WordPress writes still require Core approval and preflight.": ["所选衍生制品现在已进入 Core 审阅。WordPress 写入仍需 Core 审批和预检。"],
+      "Selected previews are now waiting for review. WordPress media is not changed here.": ["所选预览正在等待审核。这里不会更改 WordPress 媒体。"],
+      "Continue approval and final media changes in the review system.": ["请在审核系统中继续审批和最终媒体变更。"],
+      "Retry after revising the failed preview, authorization, or review input.": ["请修改失败预览、授权或审核输入后重试。"],
+      "If more media are needed, rebuild the review list rather than reusing stale previews.": ["如需处理更多媒体，请重新生成审阅列表，不要复用过期预览。"],
+      "Review request details": ["审核请求详情"],
+      "Generate a derivative preview before submitting a Core proposal.": ["提交 Core 提案前请先生成衍生预览。"],
       "Reviewed media details are required before Toolbox can submit one media optimization proposal. Add title, alt, caption, description, or source type, then generate the preview again.": ["工具箱提交媒体优化提案前需要已审阅的媒体详情。请添加标题、ALT、说明文字、描述或来源类型，然后重新生成预览。"],
       "Submitting Core optimization proposal...": ["正在提交 Core 优化提案..."],
       "Media optimization proposal submitted": ["媒体优化提案已提交"],
@@ -487,7 +474,6 @@
       "Server cron action": ["服务器 cron 操作"],
       "Start indexing": ["开始索引"],
       "Refresh index": ["刷新索引"],
-
       "Select or enter an image attachment before building a URL repair proposal.": ["构建 URL 修复提案前请选择或输入图片附件。"],
       "Building media URL repair plan...": ["正在构建媒体 URL 修复计划..."],
       "No exact URL repairs found": ["未找到精确 URL 修复项"],
@@ -528,7 +514,6 @@
       "Submitting to Core review ": ["正在提交到 Core 审核 "],
       "Preparing handoff preview...": ["正在准备交接预览..."],
       "Could not prepare handoff preview.": ["无法准备交接预览。"],
-      "Image text suggestions": ["图片文字建议"],
       "Choose useful suggestions, then prepare a review handoff preview. Toolbox will not change media metadata here.": ["选择有用的建议，然后准备审核交接预览。Toolbox 不会在这里修改媒体元数据。"],
       "Batch complete image ALT": ["批量补全图片 ALT"],
       "Review suggested ALT text for selected images, then prepare a handoff preview. Toolbox will not change media metadata here.": ["审阅所选图片的 ALT 建议，然后准备交接预览。Toolbox 不会在这里修改媒体元数据。"],
@@ -538,7 +523,6 @@
       "Reviewable images": ["可审阅图片"],
       "Suggested images": ["有建议图片"],
       "Excluded": ["已排除"],
-      "Skipped": ["已跳过"],
       "Sample size": ["样本数量"],
       "Scanned images": ["已扫描图片"],
       "These are suggestions only. Media metadata was not changed.": ["这些只是建议，媒体元数据没有被更改。"],
@@ -582,12 +566,10 @@
       "Ready to update": ["可更新"],
       "Local preview rows": ["本地预览行"],
       "Need manual check": ["需要人工确认"],
-      "Excluded": ["已排除"],
       "No ALT suggestions are ready for review from this sample. Try another sample or review excluded images.": ["这个样本里没有可审核的 ALT 建议。可以换一个样本，或查看已排除图片。"],
       "Review the rows below. Some images still need visual confirmation before any future Core handoff.": ["请审核下方各行。部分图片在未来进入 Core 交接前仍需人工看图确认。"],
       "Review the rows below and edit suggested ALT if needed before preparing a handoff preview.": ["请审核下方各行，必要时调整 ALT 建议，然后准备交接预览。"],
       "Quality scores and review hints are preview-only triage. They do not authorize proposals, approvals, execution, or media writes.": ["质量分和审核提示仅用于预览分流，不授权提案、审批、执行或媒体写入。"],
-      "Use": ["使用"],
       "Image": ["图片"],
       "ALT review": ["ALT 审核"],
       "Candidate status: ": ["候选状态："],
@@ -611,10 +593,7 @@
       "Ready for Core review": ["可进入 Core 审核"],
       "Preview only": ["仅预览"],
       "Submit selected rows for Core review": ["提交选中行给 Core 审核"],
-      "Prepare handoff preview": ["准备交接预览"],
       "Preparing Core review...": ["正在准备 Core 审核..."],
-      "Preparing handoff preview...": ["正在准备交接预览..."],
-      " of ": [" / "],
       "Could not prepare Core review.": ["无法准备 Core 审核。"],
       "Could not prepare the ALT handoff preview.": ["无法准备 ALT 交接预览。"],
       "Advanced: full payload": ["高级：完整载荷"],
@@ -625,7 +604,6 @@
       "Submitted": ["已提交"],
       "Updated": ["已更新"],
       "Needs Core review": ["需要 Core 审核"],
-      "Failed": ["失败"],
       "Core executed approved ALT updates. Media metadata changes are recorded by Core and WordPress abilities.": ["Core 已执行通过的 ALT 更新。媒体元数据变更由 Core 和 WordPress Ability 记录。"],
       "Some proposals were created but Core policy kept them for manual review.": ["部分提案已创建，但 Core 策略将它们保留为人工审核。"],
       "One selected ALT row could not be submitted.": ["有一条选中的 ALT 无法提交。"],
@@ -663,12 +641,6 @@
       "Normal": ["正常"],
       ", ": ["，"],
       " | ": ["｜"],
-      "Restore original image": ["恢复原图"],
-      "Restore the original image? The current optimized image will be backed up first.": ["恢复原图？当前优化图会先自动备份。"],
-      "Restoring the original image and backing up the current image...": ["正在恢复原图，并备份当前图片……"],
-      "Original image restored": ["原图已恢复"],
-      "The original image is active again in the Media Library. The optimized image was backed up automatically.": ["媒体库中已重新启用原图。优化图已自动备份。"],
-      "Restore verified": ["恢复已验证"],
       "Original image backup retention": ["原图备份保留时间"],
       "Backups are retained for 30 days. Choose whether cleanup requires your confirmation or runs automatically for backups created after this setting is enabled. The current Media Library image is never removed.": ["备份固定保留 30 天。请选择清理是否需要您的确认，或仅对启用此设置后新创建的备份自动执行。当前媒体库图片永远不会被删除。"],
       "Keep backups for": ["备份保留时间"],
@@ -701,125 +673,229 @@
       "Safe": ["安全"],
       "Media: ": ["媒体:"],
       "Open attachment in WordPress": ["在 WordPress 中打开附件"],
-      "No media was changed. Deletion is not part of this stage.": ["未更改任何媒体。本阶段不包含删除。"]
-      ,"Image Settings": ["图片设置"]
-      ,"Image settings": ["图片设置"]
-      ,"Manage watermark templates and original-image backup retention.": ["管理水印模板和原图备份保留时间。"]
-      ,"Watermark templates and backup retention.": ["水印模板与备份保留时间。"]
-      ,"Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.": ["在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"]
-      ,"Image ALT Review": ["图片 ALT 审核"]
-      ,"Core authorization": ["Core 一次性授权"]
-      ,"About Toolbox": ["工具箱说明"]
-      ,"Restore image": ["恢复图片"]
-      ,"View backups and restore": ["查看备份并恢复"]
-      ,"Open the image workbench to review available backups before restoring.": ["打开图片工作区，查看可用备份后再恢复。"]
-      ,"Npcink restore": ["Npcink 恢复"]
-      ,"Checking available image backups...": ["正在查询可用的图片备份……"]
-      ,"The latest restorable original-image backup is visibly loaded. Use Restore original image to continue.": ["最新可恢复的原图备份已成功显示。请点击“恢复原图”继续。"]
-      ,"No restorable backup is available for this image.": ["这张图片目前没有可恢复的备份。"]
-      ,"Could not check image backups.": ["无法查询图片备份。"]
-      ,"Original image backup available": ["原图备份可用"]
-      ,"Backup time": ["备份时间"]
-      ,"Unknown": ["未知"]
-      ,"Format": ["格式"]
-      ,"Size": ["大小"]
-      ,"Backup original": ["备份原图"]
-      ,"Backup original preview": ["备份原图预览"]
-      ,"Original image backup": ["原图备份"]
-      ,"Current image": ["当前图片"]
-      ,"Needs confirmation": ["需要确认"]
-      ,"View large image": ["查看大图"]
-      ,"Close large image": ["关闭大图"]
-      ,"Side by side": ["左右对比"]
-      ,"Slider comparison": ["滑杆对比"]
-      ,"Comparison position": ["对比位置"]
-      ,"Compare the current image with the original-image backup, then confirm the restore.": ["对比当前图片和备份原图，确认无误后再恢复。"]
-	  ,"Images found": ["找到的图片"]
-	  ,"Estimated saving": ["预计节省"]
-	  ,"Skipped during check": ["检查时跳过"]
-	  ,"Maximum batch size": ["单批最多数量"]
-	  ,"Images to optimize": ["要优化的图片"]
-	  ,"Cloud checked this image and skipped it because the safe saving threshold was not met.": ["云端已检查此图片；由于未达到安全节省门槛，已跳过。"]
-	  ,"Original": ["原图"]
-	  ,"Latest batch": ["最近批次"]
-	  ,"Optimized ": ["已优化 "]
-	  ,"skipped ": ["已跳过 "]
-	  ,"failed ": ["失败 "]
-	  ," saved": [" 已节省"]
-	  ,"Restore period has ended. Backups are still kept until you separately choose to clean them up.": ["恢复提示期已结束。备份仍会保留，直到您另行确认清理。"]
-	  ,"Individual and whole-batch restore remain available until ": ["单图和整批恢复仍可用，提示期限至 "]
-	  ,"Restore selected image": ["恢复所选图片"]
-	  ,"Restore whole batch": ["恢复整个批次"]
-	  ,"Restoring ": ["正在恢复 "]
-	  ,"Batch restore finished. Review any items that could not be restored.": ["整批恢复已完成，请检查未能恢复的项目。"]
-	  ,"Checking sample ": ["正在检查样本 "]
-	  ,"Check complete. Review the samples, then start optimization once.": ["检查完成。确认样本效果后，即可一次开始优化。"]
-	  ,"Optimizing ": ["正在优化 "]
-	  ,"Completed: ": ["成功："]
-	  ,"Skipped: ": ["跳过："]
-	  ,"Failed: ": ["失败："]
-	  ,"Optimization complete. Originals remain available for restore.": ["优化完成，原图仍可用于恢复。"]
-	  ,"Optimization paused. Completed items were kept; continue when ready.": ["优化已暂停，已完成项目均已保留，可在准备好后继续。"]
-	  ,"Start optimization": ["开始优化"]
-	  ,"Sample preview could not be verified. Check the images again before starting optimization.": ["样本预览未能验证。请重新检查图片后再开始优化。"]
-	  ,"Continue optimization": ["继续优化"]
-      ,"Media read authorization required": ["需要授权读取媒体"]
-      ,"Core will record a one-time read authorization. Confirm the scope to build the candidate list.": ["Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"]
-      ,"Request ID": ["请求编号"]
-      ,"Data scope": ["数据范围"]
-      ,"Media and attachment metadata": ["媒体与附件元数据"]
-      ,"Privacy": ["隐私处理"]
-      ,"Strict redaction": ["严格脱敏"]
-      ,"Writes": ["写入"]
-      ,"None": ["无"]
-      ,"This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.": ["此授权仅适用于当前筛选条件，且只能使用一次。不包含上传、提案或 WordPress 修改权限。"]
-      ,"Authorize and build list": ["授权并生成列表"]
-      ,"Open Core": ["打开 Core"]
-      ,"No image candidates have been read yet. Authorize the request to continue.": ["尚未读取图片候选。请先授权后继续。"]
-      ,"There are ": ["有 "]
-      ," expired backup(s) eligible for administrator cleanup. Current media files are never removed.": [" 个过期备份可由管理员清理。当前媒体文件永远不会被删除。"]
-      ,"Clean expired backups": ["清理过期备份"]
-      ,"No expired backups are available for cleanup.": ["没有可清理的过期备份。"]
-      ,"Clean the expired media backups now? Current media files will not be removed.": ["现在清理过期媒体备份吗？当前媒体文件不会被删除。"]
-      ,"Expired backup cleanup finished.": ["过期备份清理已完成。"]
-      ,"Adoption preflight": ["采用预检"]
-      ,"Adoption preflight passed. Confirm the summary before submitting the Core proposal.": ["采用预检通过。提交 Core 提案前请确认摘要。"]
-      ,"Adoption preflight unavailable: ": ["采用预检不可用："]
-      ,"Building Site Knowledge review plan...": ["正在构建 Site Knowledge 审阅计划..."]
-      ,"Content-referenced posts": ["内容引用文章"]
-      ,"Core Site Knowledge review response": ["Core Site Knowledge 审阅响应"]
-      ,"Core created a blocked review proposal from Site Knowledge evidence. Human title and content input are required before approval, preflight, or execution can proceed.": ["Core 已根据 Site Knowledge 证据创建待审阅提案。批准、预检或执行前需要人工填写标题和内容。"]
-      ,"Core created one governed replacement proposal. Approval and execution remain outside Toolbox.": ["Core 已创建一个受治理的替换提案。批准与执行仍在 Toolbox 之外。"]
-      ,"Could not submit the Site Knowledge review proposal.": ["无法提交 Site Knowledge 审阅提案。"]
-      ,"Load or inspect the result before proposal work.": ["提案工作前请先加载或查看结果。"]
-      ,"No follow-up is ready from this inspection result.": ["本次巡检结果尚无待办跟进。"]
-      ,"No review items": ["暂无审阅项"]
-      ,"Old image URLs in backend settings, themes, or other plugins are not replaced automatically with media adoption; use \"Submit settings URL repair\" when needed.": ["后台设置、主题或其他插件里的旧图片 URL 不会自动随媒体采用一起替换；需要时请使用“提交设置 URL 修复”。"]
-      ,"Only the first 50 entries are shown; unindexed articles come first.": ["仅显示前 50 篇，未索引文章优先。"]
-      ,"Outline suggestions": ["大纲建议"]
-      ,"Polish suggestions": ["润色建议"]
-      ,"Proposal ready": ["提案就绪"]
-      ,"Replace media file with reviewed Cloud derivative": ["用已审阅的云端衍生图替换媒体文件"]
-      ,"Resolve the adoption preflight findings before submitting the Core proposal.": ["采用预检需要处理后再提交 Core 提案。"]
-      ,"Review concise title, excerpt, SEO, and answer-summary options before using them anywhere.": ["在任何地方使用前，请先审阅精简的标题、摘要、SEO 和答案摘要选项。"]
-      ,"Review one visually confirmed derivative, output filename, backup evidence, and rollback path before replacing the current attachment file.": ["替换当前附件文件前，请审阅视觉确认的衍生图、输出文件名、备份证据和回滚路径。"]
-      ,"Review the matched scheduled review priorities before proposal work.": ["提案工作前请先审阅匹配的定期巡检优先级。"]
-      ,"Review the revised wording and keep the original meaning under editor control.": ["审阅修改后的措辞，并在编辑控制下保持原意。"]
-      ,"Scannable separately": ["可单独扫描"]
-      ,"Select image": ["选择图片"]
-      ,"Settings URL repair proposal submitted": ["设置 URL 修复提案已提交"]
-      ,"Settings reference scan": ["设置引用扫描"]
-      ,"Site Knowledge Core handoff error payload": ["Site Knowledge Core 交接错误负载"]
-      ,"Site Knowledge Core handoff failed": ["Site Knowledge Core 交接失败"]
-      ,"Site Knowledge review evidence": ["Site Knowledge 审阅证据"]
-      ,"Site Knowledge review proposal submitted": ["Site Knowledge 审阅提案已提交"]
-      ,"Submitting settings URL repair proposal...": ["正在提交设置 URL 修复提案..."]
-      ,"Title and summary suggestions": ["标题与摘要建议"]
-      ,"URL replacements": ["URL 替换数"]
-      ,"Unavailable": ["不可用"]
-      ,"Use this as a working structure for a human-written article, not as generated body copy.": ["请将其作为人工撰写文章的工作结构，而不是生成的正文。"]
-      ,"View article index status": ["查看文章索引状态"]
-      ,"WordPress media picker is unavailable on this page.": ["当前页面无法使用 WordPress 媒体选择器。"]
+      "No media was changed. Deletion is not part of this stage.": ["未更改任何媒体。本阶段不包含删除。"],
+      "Image Settings": ["图片设置"],
+      "Image settings": ["图片设置"],
+      "Manage watermark templates and original-image backup retention.": ["管理水印模板和原图备份保留时间。"],
+      "Watermark templates and backup retention.": ["水印模板与备份保留时间。"],
+      "Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.": ["在这里管理低频图片设置。审核和执行工具仍保留在各自的标签页中。"],
+      "Image ALT Review": ["图片 ALT 审核"],
+      "Core authorization": ["Core 一次性授权"],
+      "About Toolbox": ["工具箱说明"],
+      "Restore image": ["恢复图片"],
+      "View backups and restore": ["查看备份并恢复"],
+      "Open the image workbench to review available backups before restoring.": ["打开图片工作区，查看可用备份后再恢复。"],
+      "Npcink restore": ["Npcink 恢复"],
+      "Checking available image backups...": ["正在查询可用的图片备份……"],
+      "The latest restorable original-image backup is visibly loaded. Use Restore original image to continue.": ["最新可恢复的原图备份已成功显示。请点击“恢复原图”继续。"],
+      "No restorable backup is available for this image.": ["这张图片目前没有可恢复的备份。"],
+      "Could not check image backups.": ["无法查询图片备份。"],
+      "Original image backup available": ["原图备份可用"],
+      "Backup time": ["备份时间"],
+      "Backup original": ["备份原图"],
+      "Backup original preview": ["备份原图预览"],
+      "Original image backup": ["原图备份"],
+      "Current image": ["当前图片"],
+      "Needs confirmation": ["需要确认"],
+      "View large image": ["查看大图"],
+      "Close large image": ["关闭大图"],
+      "Side by side": ["左右对比"],
+      "Slider comparison": ["滑杆对比"],
+      "Comparison position": ["对比位置"],
+      "Compare the current image with the original-image backup, then confirm the restore.": ["对比当前图片和备份原图，确认无误后再恢复。"],
+      "Images found": ["找到的图片"],
+      "Estimated saving": ["预计节省"],
+      "Skipped during check": ["检查时跳过"],
+      "Maximum batch size": ["单批最多数量"],
+      "Images to optimize": ["要优化的图片"],
+      "Cloud checked this image and skipped it because the safe saving threshold was not met.": ["云端已检查此图片；由于未达到安全节省门槛，已跳过。"],
+      "Original": ["原图"],
+      "Latest batch": ["最近批次"],
+      "Optimized ": ["已优化 "],
+      "skipped ": ["已跳过 "],
+      "failed ": ["失败 "],
+      " saved": [" 已节省"],
+      "Restore period has ended. Backups are still kept until you separately choose to clean them up.": ["恢复提示期已结束。备份仍会保留，直到您另行确认清理。"],
+      "Individual and whole-batch restore remain available until ": ["单图和整批恢复仍可用，提示期限至 "],
+      "Restore selected image": ["恢复所选图片"],
+      "Restore whole batch": ["恢复整个批次"],
+      "Restoring ": ["正在恢复 "],
+      "Batch restore finished. Review any items that could not be restored.": ["整批恢复已完成，请检查未能恢复的项目。"],
+      "Checking sample ": ["正在检查样本 "],
+      "Check complete. Review the samples, then start optimization once.": ["检查完成。确认样本效果后，即可一次开始优化。"],
+      "Optimizing ": ["正在优化 "],
+      "Completed: ": ["成功："],
+      "Skipped: ": ["跳过："],
+      "Failed: ": ["失败："],
+      "Optimization complete. Originals remain available for restore.": ["优化完成，原图仍可用于恢复。"],
+      "Optimization paused. Completed items were kept; continue when ready.": ["优化已暂停，已完成项目均已保留，可在准备好后继续。"],
+      "Start optimization": ["开始优化"],
+      "Sample preview could not be verified. Check the images again before starting optimization.": ["样本预览未能验证。请重新检查图片后再开始优化。"],
+      "Continue optimization": ["继续优化"],
+      "Media read authorization required": ["需要授权读取媒体"],
+      "Core will record a one-time read authorization. Confirm the scope to build the candidate list.": ["Core 将记录一次性读取授权。确认范围后，即可生成候选列表。"],
+      "Request ID": ["请求编号"],
+      "Data scope": ["数据范围"],
+      "Media and attachment metadata": ["媒体与附件元数据"],
+      "Privacy": ["隐私处理"],
+      "Strict redaction": ["严格脱敏"],
+      "Writes": ["写入"],
+      "None": ["无"],
+      "This authorization applies only to the current filters and can be used once. It does not approve uploads, proposals, or WordPress changes.": ["此授权仅适用于当前筛选条件，且只能使用一次。不包含上传、提案或 WordPress 修改权限。"],
+      "Authorize and build list": ["授权并生成列表"],
+      "Open Core": ["打开 Core"],
+      "No image candidates have been read yet. Authorize the request to continue.": ["尚未读取图片候选。请先授权后继续。"],
+      "There are ": ["有 "],
+      " expired backup(s) eligible for administrator cleanup. Current media files are never removed.": [" 个过期备份可由管理员清理。当前媒体文件永远不会被删除。"],
+      "Clean expired backups": ["清理过期备份"],
+      "No expired backups are available for cleanup.": ["没有可清理的过期备份。"],
+      "Clean the expired media backups now? Current media files will not be removed.": ["现在清理过期媒体备份吗？当前媒体文件不会被删除。"],
+      "Expired backup cleanup finished.": ["过期备份清理已完成。"],
+      "Adoption preflight": ["采用预检"],
+      "Adoption preflight passed. Confirm the summary before submitting the Core proposal.": ["采用预检通过。提交 Core 提案前请确认摘要。"],
+      "Adoption preflight unavailable: ": ["采用预检不可用："],
+      "Building Site Knowledge review plan...": ["正在构建 Site Knowledge 审阅计划..."],
+      "Content-referenced posts": ["内容引用文章"],
+      "Core Site Knowledge review response": ["Core Site Knowledge 审阅响应"],
+      "Core created a blocked review proposal from Site Knowledge evidence. Human title and content input are required before approval, preflight, or execution can proceed.": ["Core 已根据 Site Knowledge 证据创建待审阅提案。批准、预检或执行前需要人工填写标题和内容。"],
+      "Core created one governed replacement proposal. Approval and execution remain outside Toolbox.": ["Core 已创建一个受治理的替换提案。批准与执行仍在 Toolbox 之外。"],
+      "Could not submit the Site Knowledge review proposal.": ["无法提交 Site Knowledge 审阅提案。"],
+      "Load or inspect the result before proposal work.": ["提案工作前请先加载或查看结果。"],
+      "No follow-up is ready from this inspection result.": ["本次巡检结果尚无待办跟进。"],
+      "No review items": ["暂无审阅项"],
+      "Old image URLs in backend settings, themes, or other plugins are not replaced automatically with media adoption; use \"Submit settings URL repair\" when needed.": ["后台设置、主题或其他插件里的旧图片 URL 不会自动随媒体采用一起替换；需要时请使用“提交设置 URL 修复”。"],
+      "Only the first 50 entries are shown; unindexed articles come first.": ["仅显示前 50 篇，未索引文章优先。"],
+      "Outline suggestions": ["大纲建议"],
+      "Polish suggestions": ["润色建议"],
+      "Proposal ready": ["提案就绪"],
+      "Replace media file with reviewed Cloud derivative": ["用已审阅的云端衍生图替换媒体文件"],
+      "Resolve the adoption preflight findings before submitting the Core proposal.": ["采用预检需要处理后再提交 Core 提案。"],
+      "Review concise title, excerpt, SEO, and answer-summary options before using them anywhere.": ["在任何地方使用前，请先审阅精简的标题、摘要、SEO 和答案摘要选项。"],
+      "Review one visually confirmed derivative, output filename, backup evidence, and rollback path before replacing the current attachment file.": ["替换当前附件文件前，请审阅视觉确认的衍生图、输出文件名、备份证据和回滚路径。"],
+      "Review the matched scheduled review priorities before proposal work.": ["提案工作前请先审阅匹配的定期巡检优先级。"],
+      "Review the revised wording and keep the original meaning under editor control.": ["审阅修改后的措辞，并在编辑控制下保持原意。"],
+      "Scannable separately": ["可单独扫描"],
+      "Select image": ["选择图片"],
+      "Settings URL repair proposal submitted": ["设置 URL 修复提案已提交"],
+      "Settings reference scan": ["设置引用扫描"],
+      "Site Knowledge Core handoff error payload": ["Site Knowledge Core 交接错误负载"],
+      "Site Knowledge Core handoff failed": ["Site Knowledge Core 交接失败"],
+      "Site Knowledge review evidence": ["Site Knowledge 审阅证据"],
+      "Site Knowledge review proposal submitted": ["Site Knowledge 审阅提案已提交"],
+      "Submitting settings URL repair proposal...": ["正在提交设置 URL 修复提案..."],
+      "Title and summary suggestions": ["标题与摘要建议"],
+      "URL replacements": ["URL 替换数"],
+      "Unavailable": ["不可用"],
+      "Use this as a working structure for a human-written article, not as generated body copy.": ["请将其作为人工撰写文章的工作结构，而不是生成的正文。"],
+      "View article index status": ["查看文章索引状态"],
+      "WordPress media picker is unavailable on this page.": ["当前页面无法使用 WordPress 媒体选择器。"],
+      " Retry them individually.": [" 请逐张重试。"],
+      " image(s) could not be restored: ": [" 张图片未能恢复："],
+      " optimized image(s) in this batch to their originals now?": [" 张已优化图片恢复为原图吗？"],
+      " selected image(s) will be replaced with Cloud-qualified versions. Originals stay available for restore.": [" 张选中图片将被替换为 Cloud 认证的安全版本。原图保留，可随时恢复。"],
+      "ALT draft rows": ["ALT 草稿行数"],
+      "Accepted and recorded": ["已接受并记录"],
+      "Actual channel": ["实际渠道"],
+      "Agent": ["代理客户端"],
+      "Approval": ["审批"],
+      "Aspect ratio": ["宽高比"],
+      "Average score": ["平均分"],
+      "Batch limit": ["批量上限"],
+      "Batch restore finished, but ": ["整批恢复已完成，但 "],
+      "Batch restore finished. Every image in this batch is back to its original.": ["整批恢复已完成，本批所有图片均已恢复原图。"],
+      "Caption-only rows": ["仅 caption 行数"],
+      "Check optimizable images before starting.": ["请先检查可优化图片，再开始优化。"],
+      "Choose an optimized image to restore.": ["请选择一张要恢复的已优化图片。"],
+      "Clear all site profile fields? This cannot be undone.": ["清空全部站点画像字段？此操作不可撤销。"],
+      "Cloud output": ["Cloud 输出"],
+      "Cloud provider mode": ["Cloud 提供方模式"],
+      "Cloud role": ["Cloud 角色"],
+      "Cloud scheduler truth": ["调度真源在 Cloud"],
+      "Cloud service is unavailable.": ["Cloud 服务不可用。"],
+      "Connect Npcink Cloud and try again.": ["请连接 Npcink Cloud 后重试。"],
+      "Contract": ["契约"],
+      "Copied": ["已复制"],
+      "Copy JSON to clipboard": ["复制 JSON 到剪贴板"],
+      "Copy failed; select the JSON text manually.": ["复制失败，请手动选择 JSON 文本。"],
+      "Could not save feedback. Try again.": ["反馈保存失败，请重试。"],
+      "Critical": ["严重"],
+      "Crop": ["裁剪"],
+      "Direct writes": ["直接写入"],
+      "Eligible": ["符合条件"],
+      "Estimated saving is extrapolated from the small sample checked above; the real result may differ.": ["预计节省由上方少量抽样外推得出，实际结果可能不同。"],
+      "Failed actions": ["失败动作"],
+      "Failure": ["失败"],
+      "Failure code": ["失败代码"],
+      "Feedback status": ["反馈状态"],
+      "File saving": ["文件节省"],
+      "Fill the form with this template? Your current field values will be replaced.": ["用此模板填充表单？当前字段内容将被覆盖。"],
+      "Finished": ["已完成"],
+      "Groups": ["分组"],
+      "Handoff type": ["交接类型"],
+      "Input scope": ["输入范围"],
+      "Merged priorities": ["合并优先级"],
+      "Need context confirmation": ["需确认上下文"],
+      "Need visual evidence": ["需视觉识别"],
+      "Next action": ["下一步"],
+      "No failed previews are available to retry.": ["没有可重试的失败预览。"],
+      "Normalize": ["规范化"],
+      "Npcink Toolbox REST URL is unavailable.": ["Npcink Toolbox REST 地址不可用。"],
+      "Original is clearer": ["原图更清晰"],
+      "Other": ["其他"],
+      "Overall": ["总体"],
+      "Pack": ["数据包"],
+      "Pack contract": ["数据包契约"],
+      "Package": ["打包"],
+      "Partial success": ["部分成功"],
+      "Patch actions": ["修补动作"],
+      "Payload": ["载荷"],
+      "Payload modes": ["载荷模式"],
+      "Priority": ["优先级"],
+      "Receipt": ["回执"],
+      "Rejected and recorded": ["已拒绝并记录"],
+      "Remaining": ["剩余"],
+      "Restore all ": ["恢复全部 "],
+      "Result": ["结果"],
+      "Retention": ["保留期"],
+      "Retry action": ["重试动作"],
+      "Retry owner": ["重试归属"],
+      "Retryable": ["可重试"],
+      "Returned": ["已返回"],
+      "Reviewable": ["可审阅"],
+      "Run limit": ["运行上限"],
+      "Run state": ["运行状态"],
+      "Run status": ["运行状态"],
+      "Runs": ["运行次数"],
+      "Runtime owner": ["运行时归属"],
+      "Sample looks good": ["样本效果可接受"],
+      "Sample needs work": ["样本需要改进"],
+      "Sample review pending": ["待样本反馈"],
+      "Saving sample feedback...": ["正在保存样本反馈..."],
+      "Savings are too low": ["节省幅度过低"],
+      "Scanned": ["已扫描"],
+      "Scope mode": ["范围模式"],
+      "Score version": ["评分版本"],
+      "Should not be processed": ["不应被处理"],
+      "Source item": ["来源条目"],
+      "Source priority": ["来源优先级"],
+      "Start optimizing the selected images now? ": ["现在开始优化选中图片？"],
+      "Started": ["已开始"],
+      "Storage": ["存储"],
+      "Submitting Core review...": ["正在提交 Core 审核..."],
+      "Target": ["目标"],
+      "Taxonomy": ["分类法"],
+      "The optimization run was interrupted before finishing. Reload this page and use \"Continue optimization\" from the batch history to resume.": ["优化运行在完成前被中断。请重新加载本页，并从批量历史中使用“继续优化”恢复运行。"],
+      "Toolbox policy": ["Toolbox 策略"],
+      "Used": ["已使用"],
+      "Verified": ["已验证"],
+      "Verified preview ready. Cloud Addon received and checked the result bytes for this local review.": ["预览已验证就绪。Cloud Addon 已接收并校验本次本地审阅的结果字节。"],
+      "Verified preview ready. Compare it with the original before Core review.": ["预览已验证就绪。提交 Core 审核前请先与原图对比。"],
+      "Verified result could not be displayed. Generate a new preview before expiry; do not submit this item to Core yet.": ["已验证的结果无法显示。请在过期前重新生成预览；暂不要将此项提交到 Core。"],
+      "Version": ["版本"],
+      "Visual quality is lower": ["视觉质量下降"],
+      "Vocabulary": ["词表"],
+      "Warnings": ["警告"],
+      "Worker phase": ["工作阶段"]
     }
   }
 }

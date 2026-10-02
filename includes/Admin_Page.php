@@ -92,6 +92,13 @@ final class Admin_Page {
 			<p><?php esc_html_e( 'Installed Npcink WordPress tools and their independent administration surfaces.', 'npcink-workflow-toolbox' ); ?></p>
 			<h2><?php esc_html_e( 'Installed Surfaces', 'npcink-workflow-toolbox' ); ?></h2>
 			<table class="widefat striped" style="max-width: 920px;">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Surface', 'npcink-workflow-toolbox' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Purpose', 'npcink-workflow-toolbox' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Action', 'npcink-workflow-toolbox' ); ?></th>
+					</tr>
+				</thead>
 				<tbody>
 					<?php
 					$this->render_suite_overview_row( __( 'Core', 'npcink-workflow-toolbox' ), __( 'Review proposals, approval decisions, commit preflight, audit, and client access tokens.', 'npcink-workflow-toolbox' ), 'npcink-governance-core' );
@@ -995,13 +1002,15 @@ final class Admin_Page {
 						<details class="npcink-toolbox__result-details">
 							<summary><?php esc_html_e( 'Copy site check JSON', 'npcink-workflow-toolbox' ); ?></summary>
 							<p class="description"><?php esc_html_e( 'This local preview is not stored automatically and does not create a run, queue, Core proposal, or WordPress write.', 'npcink-workflow-toolbox' ); ?></p>
-							<textarea class="large-text code" rows="12" readonly><?php echo esc_textarea( (string) wp_json_encode( $pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ); ?></textarea>
+							<p><button type="button" class="button" data-toolbox-copy-json><?php esc_html_e( 'Copy JSON to clipboard', 'npcink-workflow-toolbox' ); ?></button></p>
+							<textarea class="large-text code" rows="12" readonly data-toolbox-copy-json-source><?php echo esc_textarea( (string) wp_json_encode( $pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ); ?></textarea>
 						</details>
 						<?php if ( array() !== $cloud_request ) : ?>
 							<details class="npcink-toolbox__result-details">
 								<summary><?php esc_html_e( 'Copy Cloud detail request JSON', 'npcink-workflow-toolbox' ); ?></summary>
 								<p class="description"><?php esc_html_e( 'This contract is prepared for Cloud runtime detail. Copying it does not call Cloud, schedule work, store a local run, create Core proposals, or write WordPress data.', 'npcink-workflow-toolbox' ); ?></p>
-								<textarea class="large-text code" rows="12" readonly><?php echo esc_textarea( (string) wp_json_encode( $cloud_request, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ); ?></textarea>
+								<p><button type="button" class="button" data-toolbox-copy-json><?php esc_html_e( 'Copy JSON to clipboard', 'npcink-workflow-toolbox' ); ?></button></p>
+								<textarea class="large-text code" rows="12" readonly data-toolbox-copy-json-source><?php echo esc_textarea( (string) wp_json_encode( $cloud_request, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ); ?></textarea>
 							</details>
 						<?php endif; ?>
 						<p class="description"><?php esc_html_e( 'No local trend chart is shown because Toolbox does not store historical Site Check runs. Cross-run trend analysis belongs in Cloud runtime/detail output.', 'npcink-workflow-toolbox' ); ?></p>
@@ -3338,6 +3347,10 @@ final class Admin_Page {
 			'image-text-review' => array(
 				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media.', 'npcink-workflow-toolbox' ),
+			),
+			'image-flagged-review' => array(
+				'title'       => __( 'Flagged Media', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Review Cloud content-safety flags for recent images. Read-only.', 'npcink-workflow-toolbox' ),
 			),
 			'image-settings' => array(
 				'title'       => __( 'Settings', 'npcink-workflow-toolbox' ),

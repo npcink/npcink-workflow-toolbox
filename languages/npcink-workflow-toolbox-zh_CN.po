@@ -8812,3 +8812,633 @@ msgstr "当前页面无法使用 WordPress 媒体选择器。"
 #: includes/Admin_Page.php
 msgid "Back to Overview"
 msgstr "返回概览"
+
+msgid " Retry them individually."
+msgstr " 请逐张重试。"
+
+msgid " image(s) could not be restored: "
+msgstr " 张图片未能恢复："
+
+msgid " optimized image(s) in this batch to their originals now?"
+msgstr " 张已优化图片恢复为原图吗？"
+
+msgid " selected image(s) will be replaced with Cloud-qualified versions. Originals stay available for restore."
+msgstr " 张选中图片将被替换为 Cloud 认证的安全版本。原图保留，可随时恢复。"
+
+msgid "ALT draft rows"
+msgstr "ALT 草稿行数"
+
+msgid "Accepted and recorded"
+msgstr "已接受并记录"
+
+msgid "Actual channel"
+msgstr "实际渠道"
+
+msgid "Agent"
+msgstr "代理客户端"
+
+msgid "Approval"
+msgstr "审批"
+
+msgid "Average score"
+msgstr "平均分"
+
+msgid "Batch limit"
+msgstr "批量上限"
+
+msgid "Batch restore finished, but "
+msgstr "整批恢复已完成，但 "
+
+msgid "Batch restore finished. Every image in this batch is back to its original."
+msgstr "整批恢复已完成，本批所有图片均已恢复原图。"
+
+msgid "Caption-only rows"
+msgstr "仅 caption 行数"
+
+msgid "Check optimizable images before starting."
+msgstr "请先检查可优化图片，再开始优化。"
+
+msgid "Choose an optimized image to restore."
+msgstr "请选择一张要恢复的已优化图片。"
+
+msgid "Clear all site profile fields? This cannot be undone."
+msgstr "清空全部站点画像字段？此操作不可撤销。"
+
+msgid "Cloud output"
+msgstr "Cloud 输出"
+
+msgid "Cloud provider mode"
+msgstr "Cloud 提供方模式"
+
+msgid "Cloud role"
+msgstr "Cloud 角色"
+
+msgid "Cloud scheduler truth"
+msgstr "调度真源在 Cloud"
+
+msgid "Cloud service is unavailable."
+msgstr "Cloud 服务不可用。"
+
+msgid "Connect Npcink Cloud and try again."
+msgstr "请连接 Npcink Cloud 后重试。"
+
+msgid "Contract"
+msgstr "契约"
+
+msgid "Copied"
+msgstr "已复制"
+
+msgid "Copy JSON to clipboard"
+msgstr "复制 JSON 到剪贴板"
+
+msgid "Copy failed; select the JSON text manually."
+msgstr "复制失败，请手动选择 JSON 文本。"
+
+msgid "Could not save feedback. Try again."
+msgstr "反馈保存失败，请重试。"
+
+msgid "Critical"
+msgstr "严重"
+
+msgid "Crop"
+msgstr "裁剪"
+
+msgid "Direct writes"
+msgstr "直接写入"
+
+msgid "Eligible"
+msgstr "符合条件"
+
+msgid "Estimated saving is extrapolated from the small sample checked above; the real result may differ."
+msgstr "预计节省由上方少量抽样外推得出，实际结果可能不同。"
+
+msgid "Failed actions"
+msgstr "失败动作"
+
+msgid "Failure"
+msgstr "失败"
+
+msgid "Failure code"
+msgstr "失败代码"
+
+msgid "Feedback status"
+msgstr "反馈状态"
+
+msgid "File saving"
+msgstr "文件节省"
+
+msgid "Fill the form with this template? Your current field values will be replaced."
+msgstr "用此模板填充表单？当前字段内容将被覆盖。"
+
+msgid "Finished"
+msgstr "已完成"
+
+msgid "Groups"
+msgstr "分组"
+
+msgid "Handoff type"
+msgstr "交接类型"
+
+msgid "Merged priorities"
+msgstr "合并优先级"
+
+msgid "Need context confirmation"
+msgstr "需确认上下文"
+
+msgid "Need visual evidence"
+msgstr "需视觉识别"
+
+msgid "Next action"
+msgstr "下一步"
+
+msgid "No failed previews are available to retry."
+msgstr "没有可重试的失败预览。"
+
+msgid "Normalize"
+msgstr "规范化"
+
+msgid "Npcink Toolbox REST URL is unavailable."
+msgstr "Npcink Toolbox REST 地址不可用。"
+
+msgid "Original is clearer"
+msgstr "原图更清晰"
+
+msgid "Overall"
+msgstr "总体"
+
+msgid "Pack"
+msgstr "数据包"
+
+msgid "Pack contract"
+msgstr "数据包契约"
+
+msgid "Package"
+msgstr "打包"
+
+msgid "Partial success"
+msgstr "部分成功"
+
+msgid "Patch actions"
+msgstr "修补动作"
+
+msgid "Payload"
+msgstr "载荷"
+
+msgid "Payload modes"
+msgstr "载荷模式"
+
+msgid "Priority"
+msgstr "优先级"
+
+msgid "Receipt"
+msgstr "回执"
+
+msgid "Rejected and recorded"
+msgstr "已拒绝并记录"
+
+msgid "Remaining"
+msgstr "剩余"
+
+msgid "Restore all "
+msgstr "恢复全部 "
+
+msgid "Result"
+msgstr "结果"
+
+msgid "Retention"
+msgstr "保留期"
+
+msgid "Retry action"
+msgstr "重试动作"
+
+msgid "Retry owner"
+msgstr "重试归属"
+
+msgid "Retryable"
+msgstr "可重试"
+
+msgid "Returned"
+msgstr "已返回"
+
+msgid "Reviewable"
+msgstr "可审阅"
+
+msgid "Run limit"
+msgstr "运行上限"
+
+msgid "Run state"
+msgstr "运行状态"
+
+msgid "Run status"
+msgstr "运行状态"
+
+msgid "Runs"
+msgstr "运行次数"
+
+msgid "Runtime owner"
+msgstr "运行时归属"
+
+msgid "Sample looks good"
+msgstr "样本效果可接受"
+
+msgid "Sample needs work"
+msgstr "样本需要改进"
+
+msgid "Sample review pending"
+msgstr "待样本反馈"
+
+msgid "Saving sample feedback..."
+msgstr "正在保存样本反馈..."
+
+msgid "Savings are too low"
+msgstr "节省幅度过低"
+
+msgid "Scope mode"
+msgstr "范围模式"
+
+msgid "Score version"
+msgstr "评分版本"
+
+msgid "Should not be processed"
+msgstr "不应被处理"
+
+msgid "Source item"
+msgstr "来源条目"
+
+msgid "Source priority"
+msgstr "来源优先级"
+
+msgid "Start optimizing the selected images now? "
+msgstr "现在开始优化选中图片？"
+
+msgid "Started"
+msgstr "已开始"
+
+msgid "Storage"
+msgstr "存储"
+
+msgid "Submitting Core review..."
+msgstr "正在提交 Core 审核..."
+
+msgid "Target"
+msgstr "目标"
+
+msgid "Taxonomy"
+msgstr "分类法"
+
+msgid "The optimization run was interrupted before finishing. Reload this page and use \"Continue optimization\" from the batch history to resume."
+msgstr "优化运行在完成前被中断。请重新加载本页，并从批量历史中使用“继续优化”恢复运行。"
+
+msgid "Toolbox policy"
+msgstr "Toolbox 策略"
+
+msgid "Used"
+msgstr "已使用"
+
+msgid "Verified"
+msgstr "已验证"
+
+msgid "Verified preview ready. Cloud Addon received and checked the result bytes for this local review."
+msgstr "预览已验证就绪。Cloud Addon 已接收并校验本次本地审阅的结果字节。"
+
+msgid "Verified preview ready. Compare it with the original before Core review."
+msgstr "预览已验证就绪。提交 Core 审核前请先与原图对比。"
+
+msgid "Verified result could not be displayed. Generate a new preview before expiry; do not submit this item to Core yet."
+msgstr "已验证的结果无法显示。请在过期前重新生成预览；暂不要将此项提交到 Core。"
+
+msgid "Version"
+msgstr "版本"
+
+msgid "Visual quality is lower"
+msgstr "视觉质量下降"
+
+msgid "Vocabulary"
+msgstr "词表"
+
+msgid "Warnings"
+msgstr "警告"
+
+msgid "Worker phase"
+msgstr "工作阶段"
+
+msgid "Score"
+msgstr "评分"
+
+msgid "Severity"
+msgstr "严重程度"
+
+msgid "Artifact"
+msgstr "产物"
+
+msgid "Watermark"
+msgstr "水印"
+
+msgid "Proposal"
+msgstr "提案"
+
+msgid "Model"
+msgstr "模型"
+
+msgid "Workflow"
+msgstr "工作流"
+
+msgid "Truncated documents"
+msgstr "截断的文档"
+
+msgid "Submitted"
+msgstr "已提交"
+
+msgid "Mode"
+msgstr "模式"
+
+msgid "Matched"
+msgstr "已匹配"
+
+msgid "Sources"
+msgstr "来源"
+
+msgid "Retry after revision"
+msgstr "修订后可重试"
+
+msgid "Profile"
+msgstr "画像"
+
+msgid "Indexed chunks"
+msgstr "已索引分块"
+
+msgid "Article audio adoption plan prepared."
+msgstr "文章音频采纳计划已就绪。"
+
+msgid "Authorization"
+msgstr "授权"
+
+msgid "Close preview"
+msgstr "关闭预览"
+
+msgid "Cloud image search is taking too long. Try a shorter query or refresh again."
+msgstr "Cloud 图片搜索耗时过长。请尝试更短的关键词或重新刷新。"
+
+msgid "Content Metadata Delta"
+msgstr "内容元数据差异"
+
+msgid "Continue in Governance Core to review and execute this proposal."
+msgstr "请继续在 Governance Core 审阅并执行此提案。"
+
+msgid "Continue in Governance Core to review this proposal."
+msgstr "请继续在 Governance Core 审阅此提案。"
+
+msgid "Copied. Paste it where you need it."
+msgstr "已复制，粘贴到需要的地方即可。"
+
+msgid "Copy full script"
+msgstr "复制完整脚本"
+
+msgid "Core did not create an executable article audio adoption proposal from this plan."
+msgstr "Core 未从此计划创建可执行的文章音频采纳提案。"
+
+msgid "Core handoff failed."
+msgstr "Core 交接失败。"
+
+msgid "Core handoff receipt"
+msgstr "Core 交接回执"
+
+msgid "Core strong review"
+msgstr "Core 强审核"
+
+msgid "Could not adopt the article audio candidate through Core."
+msgstr "无法通过 Core 采纳该文章音频候选。"
+
+msgid "Could not copy. Select the text manually instead."
+msgstr "复制失败，请手动选择文本。"
+
+msgid "Could not create the Core metadata proposal."
+msgstr "无法创建 Core 元数据提案。"
+
+msgid "Create SEO Core review proposal"
+msgstr "创建 SEO Core 审核提案"
+
+msgid "Created Core review proposal(s). Review them in Governance Core before execution."
+msgstr "Core 审核提案已创建。请在 Governance Core 中审阅后再执行。"
+
+msgid "Created Core review proposal(s): "
+msgstr "已创建 Core 审核提案："
+
+msgid "Current post metadata can be reviewed for discoverability."
+msgstr "可对当前文章元数据进行可发现性审阅。"
+
+msgid "Delta categories"
+msgstr "分类差异"
+
+msgid "Delta tags"
+msgstr "标签差异"
+
+msgid "Empty"
+msgstr "空"
+
+msgid "Explicit editor Apply only; no automatic save or publish"
+msgstr "仅限编辑器内显式应用；不自动保存或发布"
+
+msgid "Fast local recommendations"
+msgstr "快速本地推荐"
+
+msgid "Freshness: "
+msgstr "新鲜度："
+
+msgid "Gutenberg could not apply the reviewed ALT values."
+msgstr "Gutenberg 无法应用审阅后的 ALT 值。"
+
+msgid "Handoff preview"
+msgstr "交接预览"
+
+msgid "Image preview"
+msgstr "图片预览"
+
+msgid "Loading more image candidates..."
+msgstr "正在加载更多图片候选..."
+
+msgid "Local preflight snapshot"
+msgstr "本地预检快照"
+
+msgid "Manage media index in Cloud Addon"
+msgstr "请在 Cloud Addon 中管理媒体索引"
+
+msgid "Matched: "
+msgstr "命中："
+
+msgid "Missing dependency"
+msgstr "缺少依赖"
+
+msgid "Next action code"
+msgstr "下一步代码"
+
+msgid "No Core handoff candidates returned."
+msgstr "没有返回 Core 交接候选。"
+
+msgid "No Core handoff receipt returned."
+msgstr "没有返回 Core 交接回执。"
+
+msgid "No SEO handoff preview returned."
+msgstr "没有返回 SEO 交接预览。"
+
+msgid "No category delta returned."
+msgstr "没有返回分类差异。"
+
+msgid "No comment reply suggestions returned."
+msgstr "没有返回评论回复建议。"
+
+msgid "No direct term creation"
+msgstr "不直接创建词条"
+
+msgid "No excerpt delta returned."
+msgstr "没有返回摘要差异。"
+
+msgid "No handoff preview returned."
+msgstr "没有返回交接预览。"
+
+msgid "No input scope returned."
+msgstr "没有返回输入范围。"
+
+msgid "No local preflight checks returned."
+msgstr "没有返回本地预检项。"
+
+msgid "No local recommendation candidates returned."
+msgstr "没有返回本地推荐候选。"
+
+msgid "No metadata diagnosis returned."
+msgstr "没有返回元数据诊断。"
+
+msgid "No outcome checks returned."
+msgstr "没有返回结果校验。"
+
+msgid "No ranking strategy returned."
+msgstr "没有返回排序策略。"
+
+msgid "No review metrics returned."
+msgstr "没有返回评审指标。"
+
+msgid "No review notes returned."
+msgstr "没有返回评审说明。"
+
+msgid "No tag delta returned."
+msgstr "没有返回标签差异。"
+
+msgid "No technical receipt details returned."
+msgstr "没有返回技术回执详情。"
+
+msgid "Open Core review and complete the approved adoption from there."
+msgstr "请打开 Core 审核，并在该处完成已批准的采纳。"
+
+msgid "Open in Core review"
+msgstr "前往 Core 审核"
+
+msgid "Outcome checks"
+msgstr "结果校验"
+
+msgid "Paste or select the comment text; add tone guidance if needed."
+msgstr "粘贴或选择评论文本；必要时补充语气要求。"
+
+msgid "Preview image larger"
+msgstr "放大预览图片"
+
+msgid "Ranking and dedupe strategy"
+msgstr "排序与去重策略"
+
+msgid "Related Site Knowledge"
+msgstr "相关站点知识"
+
+msgid "Reply option"
+msgstr "回复选项"
+
+msgid "Requesting"
+msgstr "请求中"
+
+msgid "Review / apply / copy / open"
+msgstr "审阅 / 应用 / 复制 / 打开"
+
+msgid "Review metrics"
+msgstr "评审指标"
+
+msgid "Review notes"
+msgstr "评审说明"
+
+msgid "Review only, no insert"
+msgstr "仅审阅，不插入"
+
+msgid "Review relevance"
+msgstr "审阅相关性"
+
+msgid "Review reply options before taking any comment action. Toolbox does not publish replies or change comment status."
+msgstr "请先审阅回复选项再执行评论操作。Toolbox 不会发布回复或更改评论状态。"
+
+msgid "Review-only suggestions. Toolbox does not publish comment replies or change comment status."
+msgstr "仅为审阅用建议。Toolbox 不会发布评论回复或更改评论状态。"
+
+msgid "SEO Core proposal created. Continue in Governance Core before execution."
+msgstr "SEO Core 提案已创建。请继续在 Governance Core 审阅后再执行。"
+
+msgid "SEO handoff item"
+msgstr "SEO 交接条目"
+
+msgid "Select an image candidate first."
+msgstr "请先选择一张图片候选。"
+
+msgid "Select at least one reviewed excerpt, tag, or category before creating a Core proposal."
+msgstr "创建 Core 提案前，请至少选择一项审阅过的摘要、标签或分类。"
+
+msgid "Select image candidate"
+msgstr "选择图片候选"
+
+msgid "Show %d weak relevance candidates"
+msgstr "显示 %d 条弱相关候选"
+
+msgid "Showing %1$d of %2$d items."
+msgstr "显示第 %1$d 项，共 %2$d 项。"
+
+msgid "Strong relevance"
+msgstr "强相关"
+
+msgid "Summary: "
+msgstr "摘要："
+
+msgid "Taxonomy: "
+msgstr "分类："
+
+msgid "Technical details"
+msgstr "技术详情"
+
+msgid "The browser could not load this audio preview. Open the audio URL to verify the provider file, then rerun if it has expired."
+msgstr "浏览器无法加载此音频预览。请打开音频地址确认文件有效，若已过期请重新生成。"
+
+msgid "This article has no URL to copy."
+msgstr "这篇文章没有可复制的链接。"
+
+msgid "This article has no URL to open."
+msgstr "这篇文章没有可打开的链接。"
+
+msgid "This audio candidate can be previewed, but it has no downloadable http(s) URL for local media import."
+msgstr "此音频候选可以预览，但没有可下载的 http(s) 地址用于本地媒体导入。"
+
+msgid "Tidy paragraph spacing, lists, and line breaks in the current draft. Links and media stay unchanged; one click undoes the change."
+msgstr "整理当前草稿的段落间距、列表和换行。链接与媒体保持不变；一键即可撤销。"
+
+msgid "Toolbox keeps this as an ephemeral local receipt. Core remains the canonical approval, preflight, execution, and audit record."
+msgstr "Toolbox 仅保留此临时回执。Core 仍是唯一的审批、预检、执行与审计记录。"
+
+msgid "Uses the current article title, excerpt, and body context to recommend source images or request a host-generated featured image candidate. Paragraph selection is ignored for this entry."
+msgstr "使用当前文章标题、摘要和正文上下文推荐图片来源，或请求托管生成的特色图候选。此入口忽略段落选中内容。"
+
+msgid "Weak relevance"
+msgstr "弱相关"
+
+msgid "Zhihu"
+msgstr "知乎"
+
+msgid "Surface"
+msgstr "界面"
+
+msgid "Purpose"
+msgstr "用途"
+
+msgid "Review Cloud content-safety flags for recent images. Read-only."
+msgstr "审阅 Cloud 对近期图片的内容安全标记。仅只读。"

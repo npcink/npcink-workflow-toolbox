@@ -402,14 +402,14 @@
 		result.appendChild(summaryNode);
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Provider', providerLabel(payload));
-		appendMeta(meta, 'Query', payload && payload.query);
-		appendMeta(meta, 'Topic', payload && payload.topic);
-		appendMeta(meta, 'Collection', payload && payload.collection);
-		appendMeta(meta, 'Input', payload && payload.input_type ? formatLabel(payload.input_type) : '');
-		appendMeta(meta, 'Embedding', payload && payload.embedding_provider ? formatLabel(payload.embedding_provider) : '');
-		appendMeta(meta, 'Model', payload && payload.embedding_model);
-		appendMeta(meta, 'Dimensions', payload && payload.embedding_dimensions);
+		appendMeta(meta, t('Provider'), providerLabel(payload));
+		appendMeta(meta, t('Query'), payload && payload.query);
+		appendMeta(meta, t('Topic'), payload && payload.topic);
+		appendMeta(meta, t('Collection'), payload && payload.collection);
+		appendMeta(meta, t('Input'), payload && payload.input_type ? formatLabel(payload.input_type) : '');
+		appendMeta(meta, t('Embedding'), payload && payload.embedding_provider ? formatLabel(payload.embedding_provider) : '');
+		appendMeta(meta, t('Model'), payload && payload.embedding_model);
+		appendMeta(meta, t('Dimensions'), payload && payload.embedding_dimensions);
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
 		}
@@ -500,6 +500,9 @@
 		if (context === 'proposal') {
 			return 'Keep the reviewed preview, resolve the Core handoff error, then submit again. Existing successful Core proposals are not resubmitted.';
 		}
+		if (context === 'media-batch') {
+			return 'Check that Npcink Cloud is connected, then start the optimization again. Already completed images in this batch are kept.';
+		}
 		if (context === 'batch-retry') {
 			return 'Review the failed rows, then choose Retry failed previews again or deselect those rows. Successful previews remain unchanged.';
 		}
@@ -510,7 +513,7 @@
 		const result = renderShell(
 			form,
 			{ provider: context === 'proposal' ? 'core governance' : 'cloud runtime' },
-			context === 'proposal' ? 'Core handoff needs attention' : 'Media preview needs attention',
+			context === 'proposal' ? 'Core handoff needs attention' : (context === 'media-batch' ? 'Optimization run needs attention' : 'Media preview needs attention'),
 			formatErrorMessage(error || {}, 'The requested media step did not finish.')
 		);
 		if (!result) {
@@ -553,9 +556,9 @@
 		const feedback = extractOperatorFeedback(error);
 		if (feedback) {
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Feedback status', feedback.status ? formatLabel(feedback.status) : '');
-			appendMeta(meta, 'Severity', feedback.severity ? formatLabel(feedback.severity) : '');
-			appendMeta(meta, 'Retry after revision', feedback.can_retry_after_revision === true ? 'Yes' : 'No');
+			appendMeta(meta, t('Feedback status'), feedback.status ? formatLabel(feedback.status) : '');
+			appendMeta(meta, t('Severity'), feedback.severity ? formatLabel(feedback.severity) : '');
+			appendMeta(meta, t('Retry after revision'), feedback.can_retry_after_revision === true ? t('Yes') : t('No'));
 			if (meta.childNodes.length) {
 				result.appendChild(meta);
 			}
@@ -646,14 +649,14 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Status', feedback.status ? formatLabel(feedback.status) : '');
-		appendMeta(meta, 'Severity', feedback.severity ? formatLabel(feedback.severity) : '');
-		appendMeta(meta, 'Retry after revision', feedback.can_retry_after_revision === true ? 'Yes' : 'No');
+		appendMeta(meta, t('Status'), feedback.status ? formatLabel(feedback.status) : '');
+		appendMeta(meta, t('Severity'), feedback.severity ? formatLabel(feedback.severity) : '');
+		appendMeta(meta, t('Retry after revision'), feedback.can_retry_after_revision === true ? t('Yes') : t('No'));
 		if (feedback.core_evidence && feedback.core_evidence.core_error_code) {
-			appendMeta(meta, 'Core code', feedback.core_evidence.core_error_code);
+			appendMeta(meta, t('Core code'), feedback.core_evidence.core_error_code);
 		}
 		if (feedback.core_evidence && feedback.core_evidence.proposal_id) {
-			appendMeta(meta, 'Proposal', feedback.core_evidence.proposal_id);
+			appendMeta(meta, t('Proposal'), feedback.core_evidence.proposal_id);
 		}
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
@@ -705,7 +708,7 @@
 				row.appendChild(el('p', '', truncate(item.content, 260)));
 			}
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Score', item.score);
+			appendMeta(meta, t('Score'), item.score);
 			if (meta.childNodes.length) {
 				row.appendChild(meta);
 			}
@@ -749,13 +752,13 @@
 				body.appendChild(links);
 			}
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Provider', image.provider ? formatLabel(image.provider) : '');
-			appendMeta(meta, 'ID', image.id);
-			appendMeta(meta, 'Suggested filename', image.suggested_filename);
-			appendMeta(meta, 'License review', image.license_review_status ? formatLabel(image.license_review_status) : '');
-			appendMeta(meta, 'Source type', image.source_type ? formatLabel(image.source_type) : '');
-			appendMeta(meta, 'Download tracking', image.download_location ? 'Preserved' : '');
-			appendMeta(meta, 'Photographer', image.photographer);
+			appendMeta(meta, t('Provider'), image.provider ? formatLabel(image.provider) : '');
+			appendMeta(meta, t('ID'), image.id);
+			appendMeta(meta, t('Suggested filename'), image.suggested_filename);
+			appendMeta(meta, t('License review'), image.license_review_status ? formatLabel(image.license_review_status) : '');
+			appendMeta(meta, t('Source type'), image.source_type ? formatLabel(image.source_type) : '');
+			appendMeta(meta, t('Download tracking'), image.download_location ? 'Preserved' : '');
+			appendMeta(meta, t('Photographer'), image.photographer);
 			if (meta.childNodes.length) {
 				body.appendChild(meta);
 			}
@@ -842,11 +845,11 @@
 			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', payload.message));
 		}
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Model', payload.model_id || (payload.usage_summary && payload.usage_summary.model_id));
-		appendMeta(meta, 'Run', payload.run_id);
-		appendMeta(meta, 'Candidates', count);
+		appendMeta(meta, t('Model'), payload.model_id || (payload.usage_summary && payload.usage_summary.model_id));
+		appendMeta(meta, t('Run'), payload.run_id);
+		appendMeta(meta, t('Candidates'), count);
 		if (payload.ai_generation && payload.ai_generation.aspect_ratio) {
-			appendMeta(meta, 'Aspect ratio', payload.ai_generation.aspect_ratio);
+			appendMeta(meta, t('Aspect ratio'), payload.ai_generation.aspect_ratio);
 		}
 		if (meta.childNodes.length) {
 			section.appendChild(meta);
@@ -951,8 +954,8 @@
 			const row = el('article', 'npcink-toolbox__result-item');
 			row.appendChild(el('h4', '', point.id ? 'Point ' + point.id : 'Match ' + (index + 1)));
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Score', point.score);
-			appendMeta(meta, 'Version', point.version);
+			appendMeta(meta, t('Score'), point.score);
+			appendMeta(meta, t('Version'), point.version);
 			if (meta.childNodes.length) {
 				row.appendChild(meta);
 			}
@@ -1008,10 +1011,10 @@
 		section.setAttribute('data-toolbox-site-knowledge-candidate', 'true');
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Status', formatLabel(candidate.status));
-		appendMeta(meta, 'Core submission', formatLabel(candidate.core_submission));
-		appendMeta(meta, 'Approval', formatLabel(candidate.approval_state));
-		appendMeta(meta, 'Evidence', candidate.evidence_count);
+		appendMeta(meta, t('Status'), formatLabel(candidate.status));
+		appendMeta(meta, t('Core submission'), formatLabel(candidate.core_submission));
+		appendMeta(meta, t('Approval'), formatLabel(candidate.approval_state));
+		appendMeta(meta, t('Evidence'), candidate.evidence_count);
 		section.appendChild(meta);
 		section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Candidate prepared locally only. It has not been submitted to Core, approved, preflighted, or executed.'));
 
@@ -1034,12 +1037,12 @@
 		const originalText = button ? button.textContent : '';
 		if (button) {
 			button.disabled = true;
-			button.textContent = 'Submitting Core review...';
+			button.textContent = t('Submitting Core review...');
 		}
 
 		try {
 			if (!config.adapterRestUrl) {
-				throw { message: 'Npcink Adapter REST URL is unavailable.' };
+				throw { message: t('Npcink Adapter REST URL is unavailable.') };
 			}
 			renderTextResult(form, t('Building Site Knowledge review plan...'), 'pending');
 			const plan = await postJson(config.restUrl, 'flows/site-knowledge-review-plan', {
@@ -1095,14 +1098,14 @@
 
 		const section = createSection('Governed handoff');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Write posture', handoff.write_posture || 'suggestion_only');
-		appendMeta(meta, 'Final write path', handoff.final_write_path || 'Core proposal required');
-		appendMeta(meta, 'Handoff type', handoff.handoff_type ? formatLabel(handoff.handoff_type) : '');
-		appendMeta(meta, 'Agent', handoff.agent_id ? formatLabel(handoff.agent_id) : '');
-		appendMeta(meta, 'Workflow', handoff.workflow ? formatLabel(handoff.workflow) : '');
-		appendMeta(meta, 'Cloud output', handoff.cloud_output ? formatLabel(handoff.cloud_output) : '');
-		appendMeta(meta, 'Evidence', handoff.evidence_count);
-		appendMeta(meta, 'Approval', handoff.requires_local_approval === true ? 'Local Core required' : '');
+		appendMeta(meta, t('Write posture'), handoff.write_posture || 'suggestion_only');
+		appendMeta(meta, t('Final write path'), handoff.final_write_path || 'Core proposal required');
+		appendMeta(meta, t('Handoff type'), handoff.handoff_type ? formatLabel(handoff.handoff_type) : '');
+		appendMeta(meta, t('Agent'), handoff.agent_id ? formatLabel(handoff.agent_id) : '');
+		appendMeta(meta, t('Workflow'), handoff.workflow ? formatLabel(handoff.workflow) : '');
+		appendMeta(meta, t('Cloud output'), handoff.cloud_output ? formatLabel(handoff.cloud_output) : '');
+		appendMeta(meta, t('Evidence'), handoff.evidence_count);
+		appendMeta(meta, t('Approval'), handoff.requires_local_approval === true ? 'Local Core required' : '');
 		section.appendChild(meta);
 
 		if (Array.isArray(handoff.next_steps) && handoff.next_steps.length) {
@@ -1145,10 +1148,10 @@
 						row.appendChild(createLink(ref.url, ref.url));
 					}
 					const refMeta = el('div', 'npcink-toolbox__result-meta');
-					appendMeta(refMeta, 'Source', ref.source_type ? formatLabel(ref.source_type) : '');
-					appendMeta(refMeta, 'Post', ref.post_id);
-					appendMeta(refMeta, 'Score', ref.score);
-					appendMeta(refMeta, 'Use', ref.suggested_use ? formatLabel(ref.suggested_use) : '');
+					appendMeta(refMeta, t('Source'), ref.source_type ? formatLabel(ref.source_type) : '');
+					appendMeta(refMeta, t('Post'), ref.post_id);
+					appendMeta(refMeta, t('Score'), ref.score);
+					appendMeta(refMeta, t('Use'), ref.suggested_use ? formatLabel(ref.suggested_use) : '');
 					row.appendChild(refMeta);
 					refs.appendChild(row);
 				});
@@ -1198,11 +1201,11 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Cloud runtime', payload.cloud_runtime || 'npcink_cloud_addon');
-		appendMeta(meta, 'Provider mode', payload.provider_mode ? formatLabel(payload.provider_mode) : '');
-		appendMeta(meta, 'Auto strategy', payload.auto_strategy ? formatLabel(payload.auto_strategy) : '');
-		appendMeta(meta, 'Resolved provider', payload.resolved_provider ? formatLabel(payload.resolved_provider) : '');
-		appendMeta(meta, 'Candidate contract', payload.candidate_contract_version);
+		appendMeta(meta, t('Cloud runtime'), payload.cloud_runtime || 'npcink_cloud_addon');
+		appendMeta(meta, t('Provider mode'), payload.provider_mode ? formatLabel(payload.provider_mode) : '');
+		appendMeta(meta, t('Auto strategy'), payload.auto_strategy ? formatLabel(payload.auto_strategy) : '');
+		appendMeta(meta, t('Resolved provider'), payload.resolved_provider ? formatLabel(payload.resolved_provider) : '');
+		appendMeta(meta, t('Candidate contract'), payload.candidate_contract_version);
 		if (Array.isArray(payload.active_sources) && payload.active_sources.length) {
 			appendMeta(
 				meta,
@@ -1270,8 +1273,8 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Stage', progress.stage ? localizedLabel(progress.stage) : '');
-		appendMeta(meta, 'Progress', typeof progress.percent === 'number' ? progress.percent + '%' : '');
+		appendMeta(meta, t('Stage'), progress.stage ? localizedLabel(progress.stage) : '');
+		appendMeta(meta, t('Progress'), typeof progress.percent === 'number' ? progress.percent + '%' : '');
 		appendMeta(
 			meta,
 			'Processed',
@@ -1279,16 +1282,16 @@
 				? String(progress.processed_documents || 0) + ' / ' + String(progress.total_documents)
 				: ''
 		);
-		appendMeta(meta, 'Indexed posts', coverage.indexed_posts);
-		appendMeta(meta, 'Indexed chunks', coverage.indexed_chunks);
-		appendMeta(meta, 'Truncated documents', coverage.truncated_documents);
-		appendMeta(meta, 'Failures', progress.failed_documents);
-		appendMeta(meta, 'Skipped', progress.skipped_documents);
-		appendMeta(meta, 'Quota skipped', progress.skipped_due_to_quota || quota.skipped_due_to_quota);
-		appendMeta(meta, 'Last sync', formatDateTime(coverage.last_sync_at));
-		appendMeta(meta, 'Active run', activeRun.run_id);
-		appendMeta(meta, 'Comments', coverage.comments_enabled === true ? 'Enabled in Cloud' : 'Disabled in Cloud');
-		appendMeta(meta, 'Cloud quota', quota.status ? localizedLabel(quota.status) : '');
+		appendMeta(meta, t('Indexed posts'), coverage.indexed_posts);
+		appendMeta(meta, t('Indexed chunks'), coverage.indexed_chunks);
+		appendMeta(meta, t('Truncated documents'), coverage.truncated_documents);
+		appendMeta(meta, t('Failures'), progress.failed_documents);
+		appendMeta(meta, t('Skipped'), progress.skipped_documents);
+		appendMeta(meta, t('Quota skipped'), progress.skipped_due_to_quota || quota.skipped_due_to_quota);
+		appendMeta(meta, t('Last sync'), formatDateTime(coverage.last_sync_at));
+		appendMeta(meta, t('Active run'), activeRun.run_id);
+		appendMeta(meta, t('Comments'), coverage.comments_enabled === true ? 'Enabled in Cloud' : 'Disabled in Cloud');
+		appendMeta(meta, t('Cloud quota'), quota.status ? localizedLabel(quota.status) : '');
 		appendMeta(
 			meta,
 			'Indexed documents quota',
@@ -1414,18 +1417,18 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Cloud boundary truth', boundary.contract_version || 'site_knowledge_status.v1');
-		appendMeta(meta, 'Source content owner', formatSiteKnowledgeOwner(ownership.source_content_owner));
-		appendMeta(meta, 'Delivery bridge owner', formatSiteKnowledgeOwner(ownership.delivery_bridge_owner));
-		appendMeta(meta, 'Index execution owner', formatSiteKnowledgeOwner(ownership.index_execution_owner));
-		appendMeta(meta, 'Vector storage owner', formatSiteKnowledgeOwner(ownership.vector_storage_owner));
-		appendMeta(meta, 'Approval owner', formatSiteKnowledgeOwner(ownership.approval_owner));
-		appendMeta(meta, 'Final write owner', formatSiteKnowledgeOwner(ownership.final_write_owner || ownership.wordpress_write_owner));
-		appendMeta(meta, 'Cloud is index truth', truth.cloud_is_index_truth === true ? 'Yes' : (truth.cloud_is_index_truth === false ? 'No' : ''));
-		appendMeta(meta, 'Cloud is WordPress control plane', truth.cloud_is_wordpress_control_plane === true ? 'Yes' : (truth.cloud_is_wordpress_control_plane === false ? 'No' : ''));
-		appendMeta(meta, 'Cloud creates WordPress writes', truth.cloud_creates_wordpress_writes === true ? 'Yes' : (truth.cloud_creates_wordpress_writes === false ? 'No' : ''));
-		appendMeta(meta, 'Cloud owns ability registry', truth.cloud_owns_ability_registry === true ? 'Yes' : (truth.cloud_owns_ability_registry === false ? 'No' : ''));
-		appendMeta(meta, 'Cloud owns workflow registry', truth.cloud_owns_workflow_registry === true ? 'Yes' : (truth.cloud_owns_workflow_registry === false ? 'No' : ''));
+		appendMeta(meta, t('Cloud boundary truth'), boundary.contract_version || 'site_knowledge_status.v1');
+		appendMeta(meta, t('Source content owner'), formatSiteKnowledgeOwner(ownership.source_content_owner));
+		appendMeta(meta, t('Delivery bridge owner'), formatSiteKnowledgeOwner(ownership.delivery_bridge_owner));
+		appendMeta(meta, t('Index execution owner'), formatSiteKnowledgeOwner(ownership.index_execution_owner));
+		appendMeta(meta, t('Vector storage owner'), formatSiteKnowledgeOwner(ownership.vector_storage_owner));
+		appendMeta(meta, t('Approval owner'), formatSiteKnowledgeOwner(ownership.approval_owner));
+		appendMeta(meta, t('Final write owner'), formatSiteKnowledgeOwner(ownership.final_write_owner || ownership.wordpress_write_owner));
+		appendMeta(meta, t('Cloud is index truth'), truth.cloud_is_index_truth === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Cloud is WordPress control plane'), truth.cloud_is_wordpress_control_plane === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Cloud creates WordPress writes'), truth.cloud_creates_wordpress_writes === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Cloud owns ability registry'), truth.cloud_owns_ability_registry === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Cloud owns workflow registry'), truth.cloud_owns_workflow_registry === true ? t('Yes') : t('No'));
 		if (meta.childNodes.length) {
 			container.appendChild(meta);
 		}
@@ -1438,17 +1441,17 @@
 		container.appendChild(el('div', notice.kind ? 'npcink-toolbox__result-notice is-' + notice.kind : 'npcink-toolbox__result-notice', notice.message));
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Change bridge', localizedLabel(status));
-		appendMeta(meta, 'Bridge owner', formatLabel(health.owner || 'cloud_addon'));
-		appendMeta(meta, 'Bridge state', siteKnowledgeChangeBridgeMeaning(health, status, bufferCount));
-		appendMeta(meta, 'Buffered changes', bufferCount);
-		appendMeta(meta, 'Next flush', formatDateTime(health.next_flush_at || health.next_queue_run_at));
-		appendMeta(meta, 'Daily check', formatDateTime(health.next_reconcile_at));
-		appendMeta(meta, 'WP-Cron disabled', health.wp_cron_disabled === true ? 'Yes' : 'No');
-		appendMeta(meta, 'Batch size', health.batch_size);
-		appendMeta(meta, 'Last delivery', formatDateTime(health.last_delivery_at || health.last_delivered_at));
-		appendMeta(meta, 'Last success', formatDateTime(health.last_success_at));
-		appendMeta(meta, 'Last error', health.last_error_code);
+		appendMeta(meta, t('Change bridge'), localizedLabel(status));
+		appendMeta(meta, t('Bridge owner'), formatLabel(health.owner || 'cloud_addon'));
+		appendMeta(meta, t('Bridge state'), siteKnowledgeChangeBridgeMeaning(health, status, bufferCount));
+		appendMeta(meta, t('Buffered changes'), bufferCount);
+		appendMeta(meta, t('Next flush'), formatDateTime(health.next_flush_at || health.next_queue_run_at));
+		appendMeta(meta, t('Daily check'), formatDateTime(health.next_reconcile_at));
+		appendMeta(meta, t('WP-Cron disabled'), health.wp_cron_disabled === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Batch size'), health.batch_size);
+		appendMeta(meta, t('Last delivery'), formatDateTime(health.last_delivery_at || health.last_delivered_at));
+		appendMeta(meta, t('Last success'), formatDateTime(health.last_success_at));
+		appendMeta(meta, t('Last error'), health.last_error_code);
 		if (meta.childNodes.length) {
 			container.appendChild(meta);
 		}
@@ -1570,14 +1573,14 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
-		appendMeta(meta, 'Run', payload.run_id);
-		appendMeta(meta, 'Action', sync.sync_mode ? 'Index refresh' : '');
-		appendMeta(meta, 'Accepted documents', sync.accepted_documents);
-		appendMeta(meta, 'Indexed documents', sync.indexed_documents);
-		appendMeta(meta, 'Indexed chunks', sync.indexed_chunks);
-		appendMeta(meta, 'Truncated documents', sync.truncated_documents);
-		appendMeta(meta, 'Failed documents', sync.failed_documents);
+		appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
+		appendMeta(meta, t('Run'), payload.run_id);
+		appendMeta(meta, t('Action'), sync.sync_mode ? 'Index refresh' : '');
+		appendMeta(meta, t('Accepted documents'), sync.accepted_documents);
+		appendMeta(meta, t('Indexed documents'), sync.indexed_documents);
+		appendMeta(meta, t('Indexed chunks'), sync.indexed_chunks);
+		appendMeta(meta, t('Truncated documents'), sync.truncated_documents);
+		appendMeta(meta, t('Failed documents'), sync.failed_documents);
 		result.appendChild(meta);
 		if (payload.message) {
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', payload.message));
@@ -1606,18 +1609,18 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Intent', payload.intent ? formatLabel(payload.intent) : '');
-		appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
+		appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
+		appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
 		if (payload.evidence_gate && typeof payload.evidence_gate === 'object') {
-			appendMeta(meta, 'Evidence', payload.evidence_gate.status ? formatLabel(payload.evidence_gate.status) : '');
+			appendMeta(meta, t('Evidence'), payload.evidence_gate.status ? formatLabel(payload.evidence_gate.status) : '');
 		}
 		if (payload.rerank && typeof payload.rerank === 'object') {
-			appendMeta(meta, 'Rerank', payload.rerank.status ? formatLabel(payload.rerank.status) : '');
-			appendMeta(meta, 'Rerank provider', payload.rerank.provider ? formatLabel(payload.rerank.provider) : '');
-			appendMeta(meta, 'Rerank model', payload.rerank.model);
-			appendMeta(meta, 'Rerank candidates', payload.rerank.candidate_count);
-			appendMeta(meta, 'Reranked', payload.rerank.reranked_count);
-			appendMeta(meta, 'Rerank fallback', payload.rerank.fallback ? formatLabel(payload.rerank.fallback) : '');
+			appendMeta(meta, t('Rerank'), payload.rerank.status ? formatLabel(payload.rerank.status) : '');
+			appendMeta(meta, t('Rerank provider'), payload.rerank.provider ? formatLabel(payload.rerank.provider) : '');
+			appendMeta(meta, t('Rerank model'), payload.rerank.model);
+			appendMeta(meta, t('Rerank candidates'), payload.rerank.candidate_count);
+			appendMeta(meta, t('Reranked'), payload.rerank.reranked_count);
+			appendMeta(meta, t('Rerank fallback'), payload.rerank.fallback ? formatLabel(payload.rerank.fallback) : '');
 		}
 		result.appendChild(meta);
 		if (payload.rerank && typeof payload.rerank === 'object' && payload.rerank.status === 'failed') {
@@ -1642,12 +1645,12 @@
 				appendHighlightedText(contextNode, truncate(context, 420), item.exact_query_match ? query : '');
 				row.appendChild(contextNode);
 				const rowMeta = el('div', 'npcink-toolbox__result-meta');
-				appendMeta(rowMeta, 'Score', item.score);
-				appendMeta(rowMeta, 'Match', item.match_type ? formatLabel(item.match_type) : '');
-				appendMeta(rowMeta, 'Exact hits', item.match_count);
-				appendMeta(rowMeta, 'Source', item.source_type ? formatLabel(item.source_type) : '');
-				appendMeta(rowMeta, 'Use', item.suggested_use ? formatLabel(item.suggested_use) : '');
-				appendMeta(rowMeta, 'Post', item.post_id);
+				appendMeta(rowMeta, t('Score'), item.score);
+				appendMeta(rowMeta, t('Match'), item.match_type ? formatLabel(item.match_type) : '');
+				appendMeta(rowMeta, t('Exact hits'), item.match_count);
+				appendMeta(rowMeta, t('Source'), item.source_type ? formatLabel(item.source_type) : '');
+				appendMeta(rowMeta, t('Use'), item.suggested_use ? formatLabel(item.suggested_use) : '');
+				appendMeta(rowMeta, t('Post'), item.post_id);
 				row.appendChild(rowMeta);
 				list.appendChild(row);
 			});
@@ -1673,23 +1676,23 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
-		appendMeta(meta, 'Intent', payload.intent ? formatLabel(payload.intent) : '');
-		appendMeta(meta, 'Cloud provider mode', payload.provider_mode ? formatLabel(payload.provider_mode) : 'Cloud Managed');
-		appendMeta(meta, 'Actual channel', payload.provider ? formatLabel(payload.provider) : '');
-		appendMeta(meta, 'Provider calls', payload.provider_call_count);
-		appendMeta(meta, 'Run', payload.run_id);
+		appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
+		appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
+		appendMeta(meta, t('Cloud provider mode'), payload.provider_mode ? formatLabel(payload.provider_mode) : 'Cloud Managed');
+		appendMeta(meta, t('Actual channel'), payload.provider ? formatLabel(payload.provider) : '');
+		appendMeta(meta, t('Provider calls'), payload.provider_call_count);
+		appendMeta(meta, t('Run'), payload.run_id);
 		if (payload.usage_summary && typeof payload.usage_summary === 'object') {
-			appendMeta(meta, 'Failure', payload.usage_summary.failure_reason ? formatLabel(payload.usage_summary.failure_reason) : '');
+			appendMeta(meta, t('Failure'), payload.usage_summary.failure_reason ? formatLabel(payload.usage_summary.failure_reason) : '');
 		}
 		if (payload.evidence_gate && typeof payload.evidence_gate === 'object') {
-			appendMeta(meta, 'Evidence', payload.evidence_gate.status ? formatLabel(payload.evidence_gate.status) : '');
-			appendMeta(meta, 'Sources', payload.evidence_gate.source_count);
+			appendMeta(meta, t('Evidence'), payload.evidence_gate.status ? formatLabel(payload.evidence_gate.status) : '');
+			appendMeta(meta, t('Sources'), payload.evidence_gate.source_count);
 		}
 		if (payload.evidence_pack && typeof payload.evidence_pack === 'object') {
-			appendMeta(meta, 'Pack', payload.evidence_pack.pack_type ? formatLabel(payload.evidence_pack.pack_type) : '');
-			appendMeta(meta, 'Pack contract', payload.evidence_pack.contract_version || payload.output_contract || 'search_evidence_pack.v1');
-			appendMeta(meta, 'Source priority', payload.source_priority || payload.evidence_pack.source_priority ? formatLabel(payload.source_priority || payload.evidence_pack.source_priority) : '');
+			appendMeta(meta, t('Pack'), payload.evidence_pack.pack_type ? formatLabel(payload.evidence_pack.pack_type) : '');
+			appendMeta(meta, t('Pack contract'), payload.evidence_pack.contract_version || payload.output_contract || 'search_evidence_pack.v1');
+			appendMeta(meta, t('Source priority'), payload.source_priority || payload.evidence_pack.source_priority ? formatLabel(payload.source_priority || payload.evidence_pack.source_priority) : '');
 		}
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
@@ -1710,9 +1713,9 @@
 				}
 				row.appendChild(el('p', '', truncate(item.snippet || '', 360)));
 				const rowMeta = el('div', 'npcink-toolbox__result-meta');
-				appendMeta(rowMeta, 'Score', item.score);
-				appendMeta(rowMeta, 'Source', item.source ? formatLabel(item.source) : '');
-				appendMeta(rowMeta, 'Write posture', item.write_posture ? formatLabel(item.write_posture) : '');
+				appendMeta(rowMeta, t('Score'), item.score);
+				appendMeta(rowMeta, t('Source'), item.source ? formatLabel(item.source) : '');
+				appendMeta(rowMeta, t('Write posture'), item.write_posture ? formatLabel(item.write_posture) : '');
 				row.appendChild(rowMeta);
 				list.appendChild(row);
 			});
@@ -1739,17 +1742,17 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Scenario', payload.scenario ? formatLabel(payload.scenario) : '');
-		appendMeta(meta, 'Triggered', payload.search_triggered === true ? 'Yes' : 'No');
-		appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
-		appendMeta(meta, 'Workflow', payload.workflow_artifact_type ? formatLabel(payload.workflow_artifact_type) : '');
-		appendMeta(meta, 'Provider', payload.cloud_provider ? formatLabel(payload.cloud_provider) : '');
-		appendMeta(meta, 'Provider calls', payload.provider_call_count);
-		appendMeta(meta, 'Results', payload.result_count);
-		appendMeta(meta, 'Sources', payload.source_count);
-		appendMeta(meta, 'Error code', payload.error_code ? formatLabel(payload.error_code) : '');
+		appendMeta(meta, t('Scenario'), payload.scenario ? formatLabel(payload.scenario) : '');
+		appendMeta(meta, t('Triggered'), payload.search_triggered === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
+		appendMeta(meta, t('Workflow'), payload.workflow_artifact_type ? formatLabel(payload.workflow_artifact_type) : '');
+		appendMeta(meta, t('Provider'), payload.cloud_provider ? formatLabel(payload.cloud_provider) : '');
+		appendMeta(meta, t('Provider calls'), payload.provider_call_count);
+		appendMeta(meta, t('Results'), payload.result_count);
+		appendMeta(meta, t('Sources'), payload.source_count);
+		appendMeta(meta, t('Error code'), payload.error_code ? formatLabel(payload.error_code) : '');
 		if (payload.usage_summary && typeof payload.usage_summary === 'object') {
-			appendMeta(meta, 'Evidence', payload.usage_summary.evidence_status ? formatLabel(payload.usage_summary.evidence_status) : '');
+			appendMeta(meta, t('Evidence'), payload.usage_summary.evidence_status ? formatLabel(payload.usage_summary.evidence_status) : '');
 		}
 		result.appendChild(meta);
 
@@ -1768,8 +1771,8 @@
 				}
 				row.appendChild(el('p', '', truncate(item.summary || item.snippet || '', 280)));
 				const rowMeta = el('div', 'npcink-toolbox__result-meta');
-				appendMeta(rowMeta, 'Source', item.source_type ? formatLabel(item.source_type) : item.source ? formatLabel(item.source) : '');
-				appendMeta(rowMeta, 'Status', item.verification_status ? formatLabel(item.verification_status) : '');
+				appendMeta(rowMeta, t('Source'), item.source_type ? formatLabel(item.source_type) : item.source ? formatLabel(item.source) : '');
+				appendMeta(rowMeta, t('Status'), item.verification_status ? formatLabel(item.verification_status) : '');
 				row.appendChild(rowMeta);
 				list.appendChild(row);
 			});
@@ -1893,14 +1896,14 @@
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
 		if (intent === 'media_alt_suggestions') {
-			appendMeta(meta, 'Service', providerLabel(payload));
-			appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
+			appendMeta(meta, t('Service'), providerLabel(payload));
+			appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
 		} else {
-			appendMeta(meta, 'Profile', payload.hosted_profile || 'text.ai');
-			appendMeta(meta, 'Model', payload.model_id || '');
-			appendMeta(meta, 'Intent', payload.intent ? formatLabel(payload.intent) : '');
-			appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
-			appendMeta(meta, 'Run', payload.run_id || '');
+			appendMeta(meta, t('Profile'), payload.hosted_profile || 'text.ai');
+			appendMeta(meta, t('Model'), payload.model_id || '');
+			appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
+			appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
+			appendMeta(meta, t('Run'), payload.run_id || '');
 		}
 		result.appendChild(meta);
 
@@ -1957,8 +1960,8 @@
 		const result = asObject(payload && payload.result);
 		const section = createSection('Content opportunities');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Opportunities', opportunities.length);
-		appendMeta(meta, 'Sample', result.snapshot_summary || payload.snapshot_summary || '');
+		appendMeta(meta, t('Opportunities'), opportunities.length);
+		appendMeta(meta, t('Sample'), result.snapshot_summary || payload.snapshot_summary || '');
 		section.appendChild(meta);
 
 		const list = el('div', 'npcink-toolbox__batch-list');
@@ -2023,11 +2026,11 @@
 
 		if (intent !== 'media_alt_suggestions') {
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Profile', payload.hosted_profile || 'text.ai');
-			appendMeta(meta, 'Model', payload.model_id || '');
-			appendMeta(meta, 'Intent', payload.intent ? formatLabel(payload.intent) : '');
-			appendMeta(meta, 'Status', payload.status ? formatLabel(payload.status) : '');
-			appendMeta(meta, 'Run', payload.run_id || '');
+			appendMeta(meta, t('Profile'), payload.hosted_profile || 'text.ai');
+			appendMeta(meta, t('Model'), payload.model_id || '');
+			appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
+			appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
+			appendMeta(meta, t('Run'), payload.run_id || '');
 			result.appendChild(meta);
 		}
 
@@ -2252,9 +2255,9 @@
 	function renderMediaAltCaptionCoreReceipts(container, receipts, failures) {
 		const section = createSection('Core review submission');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Submitted', receipts.length);
-		appendMeta(meta, 'Failed', failures.length);
-		appendMeta(meta, 'Status', failures.length ? 'Needs attention' : 'Waiting for Core review');
+		appendMeta(meta, t('Submitted'), receipts.length);
+		appendMeta(meta, t('Failed'), failures.length);
+		appendMeta(meta, t('Status'), failures.length ? 'Needs attention' : 'Waiting for Core review');
 		section.appendChild(meta);
 		section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Toolbox stopped after proposal submission. Core owns review and approval; Adapter and Toolkit perform any later governed write.'));
 		receipts.forEach((receipt) => {
@@ -2358,14 +2361,14 @@
 		const imageContextRequest = asObject(reviewSet.image_context_evidence_request);
 		const imageContextRequestItems = asArray(imageContextRequest.items);
 		const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Scanned images', eligibility.scanned_count);
-			appendMeta(meta, 'ALT draft rows', selectedItems.length);
-			appendMeta(meta, 'Local preview rows', eligibility.local_preview_candidate_count || eligibility.ready_for_handoff_count);
-		appendMeta(meta, 'Need context confirmation', eligibility.context_confirmation_count);
-		appendMeta(meta, 'Need manual check', imageContextRequestItems.length);
-		appendMeta(meta, 'Need visual evidence', eligibility.visual_evidence_request_count);
-		appendMeta(meta, 'Excluded', eligibility.blocked_count || blockedItems.length);
-		appendMeta(meta, 'Caption-only rows', captionOnlyItems.length);
+			appendMeta(meta, t('Scanned images'), eligibility.scanned_count);
+			appendMeta(meta, t('ALT draft rows'), selectedItems.length);
+			appendMeta(meta, t('Local preview rows'), eligibility.local_preview_candidate_count || eligibility.ready_for_handoff_count);
+		appendMeta(meta, t('Need context confirmation'), eligibility.context_confirmation_count);
+		appendMeta(meta, t('Need manual check'), imageContextRequestItems.length);
+		appendMeta(meta, t('Need visual evidence'), eligibility.visual_evidence_request_count);
+		appendMeta(meta, t('Excluded'), eligibility.blocked_count || blockedItems.length);
+		appendMeta(meta, t('Caption-only rows'), captionOnlyItems.length);
 		if (meta.childNodes.length) {
 			section.appendChild(meta);
 		}
@@ -2625,13 +2628,13 @@
 				row.appendChild(createLink(item.url, item.url));
 			}
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Score', item.score);
-			appendMeta(meta, 'Taxonomy', item.taxonomy ? formatLabel(item.taxonomy) : '');
-			appendMeta(meta, 'Vocabulary', item.controlled_vocabulary_status ? formatLabel(item.controlled_vocabulary_status) : '');
-			appendMeta(meta, 'Normalize', item.normalization_key);
-			appendMeta(meta, 'Post', item.post_id);
-			appendMeta(meta, 'Status', item.status ? formatLabel(item.status) : '');
-			appendMeta(meta, 'Provider', item.provider ? formatLabel(item.provider) : '');
+			appendMeta(meta, t('Score'), item.score);
+			appendMeta(meta, t('Taxonomy'), item.taxonomy ? formatLabel(item.taxonomy) : '');
+			appendMeta(meta, t('Vocabulary'), item.controlled_vocabulary_status ? formatLabel(item.controlled_vocabulary_status) : '');
+			appendMeta(meta, t('Normalize'), item.normalization_key);
+			appendMeta(meta, t('Post'), item.post_id);
+			appendMeta(meta, t('Status'), item.status ? formatLabel(item.status) : '');
+			appendMeta(meta, t('Provider'), item.provider ? formatLabel(item.provider) : '');
 			if (meta.childNodes.length) {
 				row.appendChild(meta);
 			}
@@ -2706,11 +2709,11 @@
 
 		const shell = createSection('Content Metadata Delta');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Artifact', delta.artifact_type ? formatLabel(delta.artifact_type) : '');
-		appendMeta(meta, 'Post', delta.target_post_id || '');
-		appendMeta(meta, 'Write posture', delta.write_posture || 'suggestion_only');
-		appendMeta(meta, 'Final path', delta.final_write_path || 'core_proposal_required');
-		appendMeta(meta, 'Direct write', delta.direct_wordpress_write === false ? 'disabled' : '');
+		appendMeta(meta, t('Artifact'), delta.artifact_type ? formatLabel(delta.artifact_type) : '');
+		appendMeta(meta, t('Post'), delta.target_post_id || '');
+		appendMeta(meta, t('Write posture'), delta.write_posture || 'suggestion_only');
+		appendMeta(meta, t('Final path'), delta.final_write_path || 'core_proposal_required');
+		appendMeta(meta, t('Direct write'), delta.direct_wordpress_write === false ? 'disabled' : '');
 		if (meta.childNodes.length) {
 			shell.appendChild(meta);
 		}
@@ -2731,12 +2734,12 @@
 		const summary = section.summary_candidates && typeof section.summary_candidates === 'object' ? section.summary_candidates : {};
 		const shell = createSection('Summary and terms optimization');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Artifact', section.artifact_type ? formatLabel(section.artifact_type) : '');
-		appendMeta(meta, 'Write posture', section.write_posture || 'suggestion_only');
-		appendMeta(meta, 'Final path', section.final_write_path || 'core_proposal_required');
+		appendMeta(meta, t('Artifact'), section.artifact_type ? formatLabel(section.artifact_type) : '');
+		appendMeta(meta, t('Write posture'), section.write_posture || 'suggestion_only');
+		appendMeta(meta, t('Final path'), section.final_write_path || 'core_proposal_required');
 		if (section.input_scope) {
-			appendMeta(meta, 'Input scope', section.input_scope.label || (section.input_scope.id ? formatLabel(section.input_scope.id) : ''));
-			appendMeta(meta, 'Scope mode', section.input_scope.operator_selected_mode ? formatLabel(section.input_scope.operator_selected_mode) : '');
+			appendMeta(meta, t('Input scope'), section.input_scope.label || (section.input_scope.id ? formatLabel(section.input_scope.id) : ''));
+			appendMeta(meta, t('Scope mode'), section.input_scope.operator_selected_mode ? formatLabel(section.input_scope.operator_selected_mode) : '');
 		}
 		if (meta.childNodes.length) {
 			shell.appendChild(meta);
@@ -2799,11 +2802,11 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Intent', payload.intent ? formatLabel(payload.intent) : '');
-		appendMeta(meta, 'Write posture', payload.write_posture || 'suggestion_only');
-		appendMeta(meta, 'Final path', payload.final_write_path || 'core_proposal_required');
+		appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
+		appendMeta(meta, t('Write posture'), payload.write_posture || 'suggestion_only');
+		appendMeta(meta, t('Final path'), payload.final_write_path || 'core_proposal_required');
 		if (payload.post_context && payload.post_context.post_id) {
-			appendMeta(meta, 'Post', payload.post_context.post_id);
+			appendMeta(meta, t('Post'), payload.post_context.post_id);
 		}
 		result.appendChild(meta);
 
@@ -2855,12 +2858,12 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Artifact', payload.artifact_type);
-		appendMeta(meta, 'Batch', payload.batch_id);
-		appendMeta(meta, 'Risk', risk.risk_level ? formatLabel(risk.risk_level) : '');
-		appendMeta(meta, 'Ready', ready ? 'Yes' : 'No');
-		appendMeta(meta, 'Final ability', action.target_ability_id);
-		appendMeta(meta, 'Post status', actionInput.status);
+		appendMeta(meta, t('Artifact'), payload.artifact_type);
+		appendMeta(meta, t('Batch'), payload.batch_id);
+		appendMeta(meta, t('Risk'), risk.risk_level ? formatLabel(risk.risk_level) : '');
+		appendMeta(meta, t('Ready'), ready ? t('Yes') : t('No'));
+		appendMeta(meta, t('Final ability'), action.target_ability_id);
+		appendMeta(meta, t('Post status'), actionInput.status);
 		result.appendChild(meta);
 
 		if (Array.isArray(risk.blocked_claims) && risk.blocked_claims.length) {
@@ -2893,14 +2896,14 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Attachment', payload.attachment_id);
-		appendMeta(meta, 'Ability', payload.ability_id);
-		appendMeta(meta, 'Format', abilityInput.preferred_format ? String(abilityInput.preferred_format).toUpperCase() : '');
-		appendMeta(meta, 'Max width', abilityInput.target_max_width ? abilityInput.target_max_width + 'px' : '');
-		appendMeta(meta, 'Quality', abilityInput.quality);
-		appendMeta(meta, 'Crop', mediaDerivativeCropLabel(abilityInput));
-		appendMeta(meta, 'Watermark', mediaDerivativeWatermarkLabel(abilityInput));
-		appendMeta(meta, 'Toolbox policy', payload.toolbox_policy_available ? 'Available' : 'Defaults');
+		appendMeta(meta, t('Attachment'), payload.attachment_id);
+		appendMeta(meta, t('Ability'), payload.ability_id);
+		appendMeta(meta, t('Format'), abilityInput.preferred_format ? String(abilityInput.preferred_format).toUpperCase() : '');
+		appendMeta(meta, t('Max width'), abilityInput.target_max_width ? abilityInput.target_max_width + 'px' : '');
+		appendMeta(meta, t('Quality'), abilityInput.quality);
+		appendMeta(meta, t('Crop'), mediaDerivativeCropLabel(abilityInput));
+		appendMeta(meta, t('Watermark'), mediaDerivativeWatermarkLabel(abilityInput));
+		appendMeta(meta, t('Toolbox policy'), payload.toolbox_policy_available ? 'Available' : 'Defaults');
 		result.appendChild(meta);
 
 		if (Array.isArray(payload.warnings) && payload.warnings.length) {
@@ -2929,12 +2932,12 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Source type', candidate.source_type ? formatLabel(candidate.source_type) : '');
-		appendMeta(meta, 'Provider', candidate.provider ? formatLabel(candidate.provider) : '');
-		appendMeta(meta, 'License', candidate.license_review_status ? formatLabel(candidate.license_review_status) : '');
-		appendMeta(meta, 'Actions', actions.length);
-		appendMeta(meta, 'Post', preview.post_id || '');
-		appendMeta(meta, 'Featured image', preview.set_featured_image ? 'Yes' : 'No');
+		appendMeta(meta, t('Source type'), candidate.source_type ? formatLabel(candidate.source_type) : '');
+		appendMeta(meta, t('Provider'), candidate.provider ? formatLabel(candidate.provider) : '');
+		appendMeta(meta, t('License'), candidate.license_review_status ? formatLabel(candidate.license_review_status) : '');
+		appendMeta(meta, t('Actions'), actions.length);
+		appendMeta(meta, t('Post'), preview.post_id || '');
+		appendMeta(meta, t('Featured image'), preview.set_featured_image ? t('Yes') : t('No'));
 		result.appendChild(meta);
 
 		if (preview.thumbnail_url || candidate.thumbnail_url || candidate.download_url) {
@@ -3948,13 +3951,13 @@
 		const section = el('div', 'npcink-toolbox__handoff-receipt');
 		section.appendChild(el('h4', '', 'Core handoff receipt'));
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Receipt', receipt.contract_version);
-		appendMeta(meta, 'Proposal', receipt.proposal_id);
-		appendMeta(meta, 'Status', receipt.status ? formatLabel(receipt.status) : '');
-		appendMeta(meta, 'Ability', receipt.target_ability_id);
-		appendMeta(meta, 'Source item', receipt.source_item_id || receipt.source_label);
-		appendMeta(meta, 'Next action', receipt.operator_next_action ? formatLabel(receipt.operator_next_action) : '');
-		appendMeta(meta, 'Storage', receipt.storage);
+		appendMeta(meta, t('Receipt'), receipt.contract_version);
+		appendMeta(meta, t('Proposal'), receipt.proposal_id);
+		appendMeta(meta, t('Status'), receipt.status ? formatLabel(receipt.status) : '');
+		appendMeta(meta, t('Ability'), receipt.target_ability_id);
+		appendMeta(meta, t('Source item'), receipt.source_item_id || receipt.source_label);
+		appendMeta(meta, t('Next action'), receipt.operator_next_action ? formatLabel(receipt.operator_next_action) : '');
+		appendMeta(meta, t('Storage'), receipt.storage);
 		section.appendChild(meta);
 		if (receipt.core_url) {
 			const actions = el('div', 'npcink-toolbox__result-actions');
@@ -4029,15 +4032,15 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Run', state.runId);
-		appendMeta(meta, 'Artifact', derivative.artifact_id || derivative.id);
-		appendMeta(meta, 'Format', derivative.format ? String(derivative.format).toUpperCase() : '');
-		appendMeta(meta, 'MIME', derivative.mime_type);
-		appendMeta(meta, 'Size', derivative.width && derivative.height ? derivative.width + ' x ' + derivative.height : '');
-		appendMeta(meta, 'Bytes', derivative.filesize_bytes);
-		appendMeta(meta, 'Expires', formatDateTime(derivative.expires_at));
-		appendMeta(meta, 'Crop', mediaDerivativeCropLabel(state.abilityInput));
-		appendMeta(meta, 'Watermark', mediaDerivativeWatermarkLabel(state.abilityInput));
+		appendMeta(meta, t('Run'), state.runId);
+		appendMeta(meta, t('Artifact'), derivative.artifact_id || derivative.id);
+		appendMeta(meta, t('Format'), derivative.format ? String(derivative.format).toUpperCase() : '');
+		appendMeta(meta, t('MIME'), derivative.mime_type);
+		appendMeta(meta, t('Size'), derivative.width && derivative.height ? derivative.width + ' x ' + derivative.height : '');
+		appendMeta(meta, t('Bytes'), derivative.filesize_bytes);
+		appendMeta(meta, t('Expires'), formatDateTime(derivative.expires_at));
+		appendMeta(meta, t('Crop'), mediaDerivativeCropLabel(state.abilityInput));
+		appendMeta(meta, t('Watermark'), mediaDerivativeWatermarkLabel(state.abilityInput));
 		result.appendChild(meta);
 		result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Cloud returned an exact artifact descriptor. Reading the image bytes is still required before Core handoff.'));
 
@@ -4065,7 +4068,7 @@
 					state.localReviewStatus = 'verified';
 					previewStatus.classList.remove('is-pending');
 					previewStatus.classList.add('is-ok');
-					previewStatus.textContent = 'Verified preview ready. Cloud Addon received and checked the result bytes for this local review.';
+					previewStatus.textContent = t('Verified preview ready. Cloud Addon received and checked the result bytes for this local review.');
 					updateMediaDerivativeSubmitState(form, state);
 				},
 				(error) => {
@@ -4138,19 +4141,19 @@
 		const heading = el('div', 'npcink-toolbox__batch-heading');
 		heading.appendChild(el('h4', '', 'Media conversion review set'));
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Eligible', eligibility.eligible_count || summary.candidate_count || candidates.length);
-		appendMeta(meta, 'Blocked', eligibility.blocked_count || summary.skipped_count || blockedItems.length || skipped.length);
-		appendMeta(meta, 'Matched', eligibility.items_total || eligibility.total_count || summary.total_matched);
+		appendMeta(meta, t('Eligible'), eligibility.eligible_count || summary.candidate_count || candidates.length);
+		appendMeta(meta, t('Blocked'), eligibility.blocked_count || summary.skipped_count || blockedItems.length || skipped.length);
+		appendMeta(meta, t('Matched'), eligibility.items_total || eligibility.total_count || summary.total_matched);
 		const selectedMetaItem = el('span', 'npcink-toolbox__result-meta-item');
 		selectedMetaItem.appendChild(el('span', 'npcink-toolbox__result-meta-label', 'Selected'));
 		selectedMetaItem.appendChild(el('span', 'npcink-toolbox__result-meta-value', eligibility.selected_count || candidates.length));
 		selectedMetaItem.setAttribute('data-toolbox-media-batch-selected-meta', '');
 		meta.appendChild(selectedMetaItem);
-		appendMeta(meta, 'Retryable', reviewSet.retryable || plan.retryable ? 'Yes' : 'No');
-		appendMeta(meta, 'Mode', reviewSet.mode || plan.plan_mode || 'dry_run');
-		appendMeta(meta, 'Contract', reviewSet.contract_version);
-		appendMeta(meta, 'Target', reviewSetScope.target_format ? String(reviewSetScope.target_format).toUpperCase() : '');
-		appendMeta(meta, 'Runtime owner', reviewSet.runtime_owner);
+		appendMeta(meta, t('Retryable'), reviewSet.retryable || plan.retryable ? t('Yes') : t('No'));
+		appendMeta(meta, t('Mode'), reviewSet.mode || plan.plan_mode || 'dry_run');
+		appendMeta(meta, t('Contract'), reviewSet.contract_version);
+		appendMeta(meta, t('Target'), reviewSetScope.target_format ? String(reviewSetScope.target_format).toUpperCase() : '');
+		appendMeta(meta, t('Runtime owner'), reviewSet.runtime_owner);
 		heading.appendChild(meta);
 		panel.appendChild(heading);
 
@@ -4248,11 +4251,11 @@
 		const heading = el('div', 'npcink-toolbox__batch-heading');
 		heading.appendChild(el('h4', '', 'URL resolution'));
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Status', resolution.match_status ? formatLabel(resolution.match_status) : '');
-		appendMeta(meta, 'Quality', resolution.resolution_quality ? formatLabel(resolution.resolution_quality) : '');
-		appendMeta(meta, 'Attachment', resolution.attachment_id);
-		appendMeta(meta, 'Candidates', candidates.length);
-		appendMeta(meta, 'Requested', resolution.requested_relative_file || mediaUrlValue(form));
+		appendMeta(meta, t('Status'), resolution.match_status ? formatLabel(resolution.match_status) : '');
+		appendMeta(meta, t('Quality'), resolution.resolution_quality ? formatLabel(resolution.resolution_quality) : '');
+		appendMeta(meta, t('Attachment'), resolution.attachment_id);
+		appendMeta(meta, t('Candidates'), candidates.length);
+		appendMeta(meta, t('Requested'), resolution.requested_relative_file || mediaUrlValue(form));
 		heading.appendChild(meta);
 		panel.appendChild(heading);
 
@@ -4417,16 +4420,16 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Selected', selectedCount);
-		appendMeta(meta, 'Returned', returnedCount);
-		appendMeta(meta, 'Verified', previewedCount);
-		appendMeta(meta, 'Submitted', submittedCount);
-		appendMeta(meta, 'Failed', failedCount);
-		appendMeta(meta, 'Partial success', batchContext.partial_success ? 'Yes' : 'No');
-		appendMeta(meta, 'Retryable', batchContext.retryable ? 'Yes' : 'No');
-		appendMeta(meta, 'Proposal path', 'Core review only');
-		appendMeta(meta, 'Crop', states.length ? mediaDerivativeCropLabel(states[0].abilityInput) : '');
-		appendMeta(meta, 'Watermark', states.length ? mediaDerivativeWatermarkLabel(states[0].abilityInput) : '');
+		appendMeta(meta, t('Selected'), selectedCount);
+		appendMeta(meta, t('Returned'), returnedCount);
+		appendMeta(meta, t('Verified'), previewedCount);
+		appendMeta(meta, t('Submitted'), submittedCount);
+		appendMeta(meta, t('Failed'), failedCount);
+		appendMeta(meta, t('Partial success'), batchContext.partial_success ? t('Yes') : t('No'));
+		appendMeta(meta, t('Retryable'), batchContext.retryable ? t('Yes') : t('No'));
+		appendMeta(meta, t('Proposal path'), 'Core review only');
+		appendMeta(meta, t('Crop'), states.length ? mediaDerivativeCropLabel(states[0].abilityInput) : '');
+		appendMeta(meta, t('Watermark'), states.length ? mediaDerivativeWatermarkLabel(states[0].abilityInput) : '');
 		result.appendChild(meta);
 
 		if (submittedCount > 0) {
@@ -4466,14 +4469,14 @@
 			const row = el('article', 'npcink-toolbox__result-item');
 			row.appendChild(el('h4', '', '#' + String(state.abilityInput && state.abilityInput.attachment_id ? state.abilityInput.attachment_id : '') + ' ' + String(candidate.title || (derivative.format ? String(derivative.format).toUpperCase() : 'Derivative'))));
 			const itemMeta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(itemMeta, 'Status', formatLabel(mediaBatchResultStatus(state)));
-			appendMeta(itemMeta, 'Artifact', derivative.artifact_id || derivative.id);
-			appendMeta(itemMeta, 'Proposal', proposalIdFromResponse(state.batchProposalResult));
-			appendMeta(itemMeta, 'Size', derivative.width && derivative.height ? derivative.width + ' x ' + derivative.height : '');
-			appendMeta(itemMeta, 'File saving', mediaBatchSavingsLabel(candidate.filesize_bytes, derivative.filesize_bytes));
-			appendMeta(itemMeta, 'Expires', formatDateTime(derivative.expires_at));
-			appendMeta(itemMeta, 'Crop', mediaDerivativeCropLabel(state.abilityInput));
-			appendMeta(itemMeta, 'Watermark', mediaDerivativeWatermarkLabel(state.abilityInput));
+			appendMeta(itemMeta, t('Status'), formatLabel(mediaBatchResultStatus(state)));
+			appendMeta(itemMeta, t('Artifact'), derivative.artifact_id || derivative.id);
+			appendMeta(itemMeta, t('Proposal'), proposalIdFromResponse(state.batchProposalResult));
+			appendMeta(itemMeta, t('Size'), derivative.width && derivative.height ? derivative.width + ' x ' + derivative.height : '');
+			appendMeta(itemMeta, t('File saving'), mediaBatchSavingsLabel(candidate.filesize_bytes, derivative.filesize_bytes));
+			appendMeta(itemMeta, t('Expires'), formatDateTime(derivative.expires_at));
+			appendMeta(itemMeta, t('Crop'), mediaDerivativeCropLabel(state.abilityInput));
+			appendMeta(itemMeta, t('Watermark'), mediaDerivativeWatermarkLabel(state.abilityInput));
 			row.appendChild(itemMeta);
 			if (candidate.reason || candidate.eligibility_reason || candidate.result_ref || candidate.result_reference) {
 				row.appendChild(el('p', '', [
@@ -4535,7 +4538,7 @@
 							if (verifiedReadStatus) {
 								verifiedReadStatus.classList.remove('is-pending');
 								verifiedReadStatus.classList.add('is-ok');
-								verifiedReadStatus.textContent = 'Verified preview ready. Compare it with the original before Core review.';
+								verifiedReadStatus.textContent = t('Verified preview ready. Compare it with the original before Core review.');
 							}
 							updateMediaBatchSelectedCount(form);
 							updateMediaBatchVerificationStatus(form);
@@ -4547,7 +4550,7 @@
 							if (verifiedReadStatus) {
 								verifiedReadStatus.classList.remove('is-pending');
 								verifiedReadStatus.classList.add('is-warning');
-								verifiedReadStatus.textContent = 'Verified result could not be displayed. Generate a new preview before expiry; do not submit this item to Core yet.';
+								verifiedReadStatus.textContent = t('Verified result could not be displayed. Generate a new preview before expiry; do not submit this item to Core yet.');
 							}
 							updateMediaBatchSelectedCount(form);
 							updateMediaBatchVerificationStatus(form);
@@ -4562,18 +4565,18 @@
 			}
 			const feedback = el('div', 'npcink-toolbox__media-canary-feedback');
 			feedback.setAttribute('data-toolbox-media-canary-feedback', '');
-			const feedbackStatus = el('span', 'npcink-toolbox__batch-status', 'Canary review pending');
+			const feedbackStatus = el('span', 'npcink-toolbox__batch-status', t('Sample review pending'));
 			feedbackStatus.setAttribute('data-toolbox-media-canary-feedback-status', '');
 			feedback.appendChild(feedbackStatus);
-			const acceptButton = el('button', 'button button-small', 'Accept canary');
+			const acceptButton = el('button', 'button button-small', t('Sample looks good'));
 			acceptButton.type = 'button';
 			acceptButton.setAttribute('data-toolbox-media-canary-accept', '');
-			const rejectButton = el('button', 'button button-small', 'Reject canary');
+			const rejectButton = el('button', 'button button-small', t('Sample needs work'));
 			rejectButton.type = 'button';
 			rejectButton.setAttribute('data-toolbox-media-canary-reject', '');
 			const reason = document.createElement('select');
 			reason.setAttribute('data-toolbox-media-canary-reason', '');
-			reason.innerHTML = '<option value="visual_quality_low">Visual quality is lower</option><option value="savings_too_low">Savings are too low</option><option value="original_clearer">Original is clearer</option><option value="unsafe_or_overreaching">Should not be processed</option><option value="other">Other</option>';
+			reason.innerHTML = '<option value="visual_quality_low">' + t('Visual quality is lower') + '</option><option value="savings_too_low">' + t('Savings are too low') + '</option><option value="original_clearer">' + t('Original is clearer') + '</option><option value="unsafe_or_overreaching">' + t('Should not be processed') + '</option><option value="other">' + t('Other') + '</option>';
 			reason.hidden = true;
 			feedback.appendChild(acceptButton);
 			feedback.appendChild(rejectButton);
@@ -4582,7 +4585,7 @@
 				acceptButton.disabled = true;
 				rejectButton.disabled = true;
 				reason.disabled = true;
-				feedbackStatus.textContent = 'Saving canary feedback...';
+				feedbackStatus.textContent = t('Saving sample feedback...');
 				try {
 					const candidateId = mediaBatchAttachmentId(state);
 					await postJson(config.adapterRestUrl, 'agent-feedback', {
@@ -4598,11 +4601,11 @@
 						source_score: Math.round(Number(candidate.filesize_bytes || 0) > 0 && Number(derivative.filesize_bytes || 0) > 0 ? Math.max(0, Math.min(100, (1 - Number(derivative.filesize_bytes) / Number(candidate.filesize_bytes)) * 100)) : 0),
 						evidence_ref_ids: [String(derivative.artifact_id || derivative.id || 'attachment:' + String(candidateId))],
 					});
-					feedbackStatus.textContent = outcome === 'accepted' ? 'Accepted and recorded' : 'Rejected and recorded';
-					feedbackStatus.classList.add('is-ok');
-					feedback.classList.add('is-complete');
-				} catch (error) {
-					feedbackStatus.textContent = 'Could not save feedback. Try again.';
+				feedbackStatus.textContent = outcome === 'accepted' ? t('Accepted and recorded') : t('Rejected and recorded');
+				feedbackStatus.classList.add('is-ok');
+				feedback.classList.add('is-complete');
+			} catch (error) {
+				feedbackStatus.textContent = t('Could not save feedback. Try again.');
 					feedbackStatus.classList.add('is-warning');
 					acceptButton.disabled = false;
 					rejectButton.disabled = false;
@@ -4646,9 +4649,9 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Proposal', proposalId);
-		appendMeta(meta, 'Status', proposal && proposal.status ? formatLabel(proposal.status) : '');
-		appendMeta(meta, 'Ability', proposal && proposal.ability_id);
+		appendMeta(meta, t('Proposal'), proposalId);
+		appendMeta(meta, t('Status'), proposal && proposal.status ? formatLabel(proposal.status) : '');
+		appendMeta(meta, t('Ability'), proposal && proposal.ability_id);
 		result.appendChild(meta);
 		if (proposalId && config.coreAdminUrl) {
 			const actions = el('div', 'npcink-toolbox__result-actions');
@@ -5069,7 +5072,7 @@
 
 	async function runMediaDerivative(form) {
 		if (!config.restUrl) {
-			throw { message: 'Npcink Toolbox REST URL is unavailable.' };
+			throw { message: t('Npcink Toolbox REST URL is unavailable.') };
 		}
 
 		const input = mediaDerivativeInput(form);
@@ -5142,7 +5145,7 @@
 
 	async function resolveMediaAttachmentUrl(form) {
 		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
+			throw { message: t('Npcink Adapter REST URL is unavailable.') };
 		}
 		const url = mediaUrlValue(form);
 		if (!url) {
@@ -5168,7 +5171,7 @@
 
 	async function buildMediaDerivativeBatchPlan(form) {
 		if (!config.restUrl) {
-			throw { message: 'Npcink Toolbox REST URL is unavailable.' };
+			throw { message: t('Npcink Toolbox REST URL is unavailable.') };
 		}
 
 		await ensureMediaOptimizationCloudReady(form);
@@ -5180,17 +5183,17 @@
 
 	async function ensureMediaOptimizationCloudReady(form) {
 		if (!config.restUrl) {
-			throw { message: 'Npcink Toolbox REST URL is unavailable.' };
+			throw { message: t('Npcink Toolbox REST URL is unavailable.') };
 		}
 
 		try {
 			const health = await getJson(config.restUrl, 'media-optimization-health');
 			if (health && health.ready === true) return health;
-			const reason = health && health.blocked_reason ? String(health.blocked_reason) : 'Cloud service is unavailable.';
-			throw { code: 'toolbox_media_cloud_unavailable', message: reason + ' Connect the M4 Cloud service and try again.' };
+			const reason = health && health.blocked_reason ? String(health.blocked_reason) : t('Cloud service is unavailable.');
+			throw { code: 'toolbox_media_cloud_unavailable', message: reason + ' ' + t('Connect Npcink Cloud and try again.') };
 		} catch (error) {
 			if (error && error.code === 'toolbox_media_cloud_unavailable') throw error;
-			throw { code: 'toolbox_media_cloud_unavailable', message: 'Cloud service is unavailable. Connect the M4 Cloud service and try again.' };
+			throw { code: 'toolbox_media_cloud_unavailable', message: t('Cloud service is unavailable.') + ' ' + t('Connect Npcink Cloud and try again.') };
 		}
 	}
 
@@ -5233,6 +5236,7 @@
 		appendMeta(meta, t('Skipped during check'), Number(planSummary.skipped_count || 0));
 		appendMeta(meta, t('Maximum batch size'), 1000);
 		host.appendChild(meta);
+		host.appendChild(el('p', 'description', t('Estimated saving is extrapolated from the small sample checked above; the real result may differ.')));
 		const failedIds = new Set(asArray(sampleStates).filter((state) => state && (state.batchPreviewError || state.localReviewStatus === 'failed')).map((state) => mediaBatchAttachmentId(state)).filter(Boolean));
 		const selection = el('details', 'npcink-toolbox__result-details');
 		selection.open = true;
@@ -5364,7 +5368,7 @@
 
 	async function restoreMediaOptimizationItem(form, attachmentId) {
 		const batch = asObject(form.__npcinkMediaOptimizationBatch);
-		if (!batch.batch_id || !attachmentId) throw { message: 'Choose an optimized image to restore.' };
+		if (!batch.batch_id || !attachmentId) throw { message: t('Choose an optimized image to restore.') };
 		const updated = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(attachmentId)) + '/restore', {});
 		form.__npcinkMediaOptimizationBatch = updated;
 		renderMediaOptimizationHistory(form, updated);
@@ -5374,15 +5378,25 @@
 	async function restoreWholeMediaOptimizationBatch(form) {
 		let batch = asObject(form.__npcinkMediaOptimizationBatch);
 		const items = asArray(batch.items).filter((item) => item.status === 'completed' && item.restore_status !== 'restored');
+		if (!window.confirm(t('Restore all ') + String(items.length) + t(' optimized image(s) in this batch to their originals now?'))) {
+			return;
+		}
+		const failedLabels = [];
 		for (let index = 0; index < items.length; index += 1) {
 			renderTextResult(form, t('Restoring ') + String(index + 1) + t(' of ') + String(items.length) + '...', 'pending');
 			try {
 				batch = await restoreMediaOptimizationItem(form, items[index].attachment_id);
 			} catch (error) {
-				// A failed restore is isolated; continue with the next recorded image.
+				// A failed restore is isolated; continue with the next recorded image,
+				// but keep it visible so the operator knows exactly which images remain optimized.
+				failedLabels.push(String(items[index].title || ('Image #' + items[index].attachment_id)));
 			}
 		}
-		renderTextResult(form, t('Batch restore finished. Review any items that could not be restored.'), 'ok');
+		if (failedLabels.length) {
+			renderTextResult(form, t('Batch restore finished, but ') + String(failedLabels.length) + t(' image(s) could not be restored: ') + failedLabels.join(', ') + t(' Retry them individually.'), 'error');
+		} else {
+			renderTextResult(form, t('Batch restore finished. Every image in this batch is back to its original.'), 'ok');
+		}
 	}
 
 	async function cleanupExpiredMediaBackups(form, button) {
@@ -5428,12 +5442,12 @@
 
 	async function runMediaDerivativeBatchPreviews(form) {
 		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
+			throw { message: t('Npcink Adapter REST URL is unavailable.') };
 		}
 
 		const candidates = selectedMediaBatchCandidates(form);
 		if (!candidates.length) {
-			throw { message: 'Select at least one batch candidate before generating previews.' };
+			throw { message: t('Select at least one batch candidate before generating previews.') };
 		}
 		syncWatermarkTemplateSelection(form);
 		const raw = serialize(form);
@@ -5490,7 +5504,7 @@
 		const states = Array.isArray(form.__npcinkMediaDerivativeBatchStates) ? form.__npcinkMediaDerivativeBatchStates : [];
 		const failedIndexes = states.map((state, index) => state && (state.batchPreviewError || state.localReviewStatus === 'failed') ? index : -1).filter((index) => index >= 0);
 		if (!failedIndexes.length) {
-			throw { message: 'No failed previews are available to retry.' };
+			throw { message: t('No failed previews are available to retry.') };
 		}
 
 		for (let offset = 0; offset < failedIndexes.length; offset += 1) {
@@ -5532,58 +5546,77 @@
 
 	async function submitMediaDerivativeBatchProposals(form) {
 		let batch = asObject(form.__npcinkMediaOptimizationBatch);
-		if (!batch.batch_id) throw { message: 'Check optimizable images before starting.' };
-		await ensureMediaOptimizationCloudReady(form);
-		batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/confirm', {
-			confirm: true,
-			manifest_digest: batch.manifest_digest,
-		});
-		form.__npcinkMediaOptimizationBatch = batch;
-		const progress = form.querySelector('[data-toolbox-media-batch-progress]');
-		if (progress) progress.hidden = false;
-		const selectedIds = new Set(selectedMediaBatchCandidates(form).map((candidate) => mediaBatchAttachmentId(candidate)).filter(Boolean));
-		const pending = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && selectedIds.has(mediaBatchAttachmentId(item)));
-		const deselected = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && !selectedIds.has(mediaBatchAttachmentId(item)));
-		for (let index = 0; index < deselected.length; index += 1) {
-			batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(deselected[index].attachment_id)) + '/complete', { status: 'skipped', reason: 'not_selected' });
-			form.__npcinkMediaOptimizationBatch = batch;
+		if (!batch.batch_id) throw { message: t('Check optimizable images before starting.') };
+		const selectedCount = selectedMediaBatchCandidates(form).length;
+		const resuming = ['running', 'paused'].includes(String(batch.status || ''));
+		if (!resuming && !window.confirm(t('Start optimizing the selected images now? ') + String(selectedCount) + t(' selected image(s) will be replaced with Cloud-qualified versions. Originals stay available for restore.'))) {
+			return;
 		}
-		for (let index = 0; index < pending.length; index += 1) {
-			const item = pending[index];
-			if (progress) progress.textContent = t('Optimizing ') + String(index + 1) + t(' of ') + String(pending.length) + '...';
-			let completion;
-			try {
-				const state = await createMediaDerivativePreview(asObject(item.cloud_request_input), {}, true, null, '', true);
-				const localReviewTransport = mediaDerivativeLocalReviewTransport(state.localReview);
-				completion = state.skipped
-					? { status: 'skipped', reason: asArray(state.optimization.decision_reasons)[0] || 'cloud_not_qualified' }
-					: { status: 'qualified', derivative_artifact: localReviewTransport ? localReviewTransport.artifact : null };
-			} catch (error) {
-				completion = { status: 'failed', reason: String(error && error.code || 'processing_failed') };
+		form.setAttribute('data-toolbox-media-batch-running', '1');
+		try {
+			await ensureMediaOptimizationCloudReady(form);
+			batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/confirm', {
+				confirm: true,
+				manifest_digest: batch.manifest_digest,
+			});
+			form.__npcinkMediaOptimizationBatch = batch;
+			const progress = form.querySelector('[data-toolbox-media-batch-progress]');
+			if (progress) progress.hidden = false;
+			const selectedIds = new Set(selectedMediaBatchCandidates(form).map((candidate) => mediaBatchAttachmentId(candidate)).filter(Boolean));
+			const pending = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && selectedIds.has(mediaBatchAttachmentId(item)));
+			const deselected = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && !selectedIds.has(mediaBatchAttachmentId(item)));
+			for (let index = 0; index < deselected.length; index += 1) {
+				batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(deselected[index].attachment_id)) + '/complete', { status: 'skipped', reason: 'not_selected' });
+				form.__npcinkMediaOptimizationBatch = batch;
 			}
-			batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(item.attachment_id)) + '/complete', completion);
-			form.__npcinkMediaOptimizationBatch = batch;
-			const summary = asObject(batch.summary);
-			if (progress) progress.textContent = [
-				t('Completed: ') + String(summary.success || 0),
-				t('Skipped: ') + String(summary.skipped || 0),
-				t('Failed: ') + String(summary.failed || 0),
-				mediaOptimizationBytes(summary.bytes_saved || 0) + t(' saved'),
-			].join(' · ');
-			if (batch.status === 'paused') break;
+			for (let index = 0; index < pending.length; index += 1) {
+				const item = pending[index];
+				if (progress) progress.textContent = t('Optimizing ') + String(index + 1) + t(' of ') + String(pending.length) + ' (' + String(pending.length ? Math.round(((index + 1) / pending.length) * 100) : 100) + '%)...';
+				let completion;
+				try {
+					const state = await createMediaDerivativePreview(asObject(item.cloud_request_input), {}, true, null, '', true);
+					const localReviewTransport = mediaDerivativeLocalReviewTransport(state.localReview);
+					completion = state.skipped
+						? { status: 'skipped', reason: asArray(state.optimization.decision_reasons)[0] || 'cloud_not_qualified' }
+						: { status: 'qualified', derivative_artifact: localReviewTransport ? localReviewTransport.artifact : null };
+				} catch (error) {
+					completion = { status: 'failed', reason: String(error && error.code || 'processing_failed') };
+				}
+				try {
+					batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(item.attachment_id)) + '/complete', completion);
+				} catch (error) {
+					// A dropped connection or interrupted request must not masquerade as a
+					// governance failure: the batch is recoverable from its history entry.
+					form.__npcinkMediaOptimizationBatch = batch;
+					renderMediaOptimizationHistory(form, batch);
+					renderTextResult(form, t('The optimization run was interrupted before finishing. Reload this page and use "Continue optimization" from the batch history to resume.'), 'warning');
+					return;
+				}
+				form.__npcinkMediaOptimizationBatch = batch;
+				const summary = asObject(batch.summary);
+				if (progress) progress.textContent = [
+					t('Completed: ') + String(summary.success || 0),
+					t('Skipped: ') + String(summary.skipped || 0),
+					t('Failed: ') + String(summary.failed || 0),
+					mediaOptimizationBytes(summary.bytes_saved || 0) + t(' saved'),
+				].join(' · ');
+				if (batch.status === 'paused') break;
+			}
+			renderMediaOptimizationHistory(form, batch);
+			renderTextResult(form, batch.status === 'completed' ? t('Optimization complete. Originals remain available for restore.') : t('Optimization paused. Completed items were kept; continue when ready.'), batch.status === 'completed' ? 'ok' : 'warning');
+		} finally {
+			form.removeAttribute('data-toolbox-media-batch-running');
 		}
-		renderMediaOptimizationHistory(form, batch);
-		renderTextResult(form, batch.status === 'completed' ? t('Optimization complete. Originals remain available for restore.') : t('Optimization paused. Completed items were kept; continue when ready.'), batch.status === 'completed' ? 'ok' : 'warning');
 	}
 
 	async function submitMediaDerivativeProposal(form) {
 		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
+			throw { message: t('Npcink Adapter REST URL is unavailable.') };
 		}
 
 		const state = form.__npcinkMediaDerivativeState;
 		if (!state || !state.proposalEnvelope || !state.derivative) {
-			throw { message: 'Generate a derivative preview before submitting a Core proposal.' };
+			throw { message: t('Generate a derivative preview before submitting a Core proposal.') };
 		}
 		if (!mediaDerivativeLocalReviewVerified(state)) {
 			throw {
@@ -5967,15 +6000,15 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Package', payload && payload.package_label ? payload.package_label : '');
-		appendMeta(meta, 'Status', payload && payload.status ? formatLabel(payload.status) : '');
-		appendMeta(meta, 'Used', runtime.used_nightly_inspection_runs);
-		appendMeta(meta, 'Remaining', runtime.remaining_nightly_inspection_runs);
-		appendMeta(meta, 'Run limit', runtime.max_nightly_inspection_runs_per_period);
-		appendMeta(meta, 'Batch limit', runtime.max_batch_items);
-		appendMeta(meta, 'Retention', runtime.result_retention_days ? runtime.result_retention_days + ' days' : '');
-		appendMeta(meta, 'Payload modes', Array.isArray(runtime.payload_modes) ? runtime.payload_modes.map(formatLabel).join(', ') : '');
-		appendMeta(meta, 'Cloud role', runtime.cloud_role ? formatLabel(runtime.cloud_role) : '');
+		appendMeta(meta, t('Package'), payload && payload.package_label ? payload.package_label : '');
+		appendMeta(meta, t('Status'), payload && payload.status ? formatLabel(payload.status) : '');
+		appendMeta(meta, t('Used'), runtime.used_nightly_inspection_runs);
+		appendMeta(meta, t('Remaining'), runtime.remaining_nightly_inspection_runs);
+		appendMeta(meta, t('Run limit'), runtime.max_nightly_inspection_runs_per_period);
+		appendMeta(meta, t('Batch limit'), runtime.max_batch_items);
+		appendMeta(meta, t('Retention'), runtime.result_retention_days ? runtime.result_retention_days + ' days' : '');
+		appendMeta(meta, t('Payload modes'), Array.isArray(runtime.payload_modes) ? runtime.payload_modes.map(formatLabel).join(', ') : '');
+		appendMeta(meta, t('Cloud role'), runtime.cloud_role ? formatLabel(runtime.cloud_role) : '');
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
 		}
@@ -6007,10 +6040,10 @@
 
 		const guidance = payload && payload.toolbox_guidance && typeof payload.toolbox_guidance === 'object' ? payload.toolbox_guidance : {};
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Runs', items.length);
-		appendMeta(meta, 'Next action', guidance.primary_next_action ? formatLabel(guidance.primary_next_action) : '');
-		appendMeta(meta, 'Cloud scheduler truth', guidance.cloud_scheduler_truth === false ? 'No' : '');
-		appendMeta(meta, 'Direct writes', payload && payload.safety && payload.safety.direct_wordpress_write === false ? 'No' : '');
+		appendMeta(meta, t('Runs'), items.length);
+		appendMeta(meta, t('Next action'), guidance.primary_next_action ? formatLabel(guidance.primary_next_action) : '');
+		appendMeta(meta, t('Cloud scheduler truth'), guidance.cloud_scheduler_truth === false ? t('No') : '');
+		appendMeta(meta, t('Direct writes'), payload && payload.safety && payload.safety.direct_wordpress_write === false ? t('No') : '');
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
 		}
@@ -6020,9 +6053,9 @@
 			const retry = nightlyCloudRetryGuidance(failurePayload);
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Latest retry candidate: ' + latestFailure.run_id + '. Retry guidance remains Cloud-owned and final writes remain local.'));
 			const retryMeta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(retryMeta, 'Retryable', nightlyCloudRetryable(failurePayload) ? 'Yes' : '');
-			appendMeta(retryMeta, 'Failed actions', Array.isArray(retry.failed_action_ids) ? retry.failed_action_ids.join(', ') : '');
-			appendMeta(retryMeta, 'Next action', retry.operator_next_action ? formatLabel(retry.operator_next_action) : '');
+			appendMeta(retryMeta, t('Retryable'), nightlyCloudRetryable(failurePayload) ? t('Yes') : '');
+			appendMeta(retryMeta, t('Failed actions'), Array.isArray(retry.failed_action_ids) ? retry.failed_action_ids.join(', ') : '');
+			appendMeta(retryMeta, t('Next action'), retry.operator_next_action ? formatLabel(retry.operator_next_action) : '');
 			if (retryMeta.childNodes.length) {
 				result.appendChild(retryMeta);
 			}
@@ -6035,10 +6068,10 @@
 				const row = el('article', 'npcink-toolbox__result-item');
 				row.appendChild(el('h4', '', String(item.run_id || 'Cloud run')));
 				const rowMeta = el('div', 'npcink-toolbox__result-meta');
-				appendMeta(rowMeta, 'Run status', item.status ? formatLabel(item.status) : '');
-				appendMeta(rowMeta, 'Result', item.result_status ? formatLabel(item.result_status) : '');
-				appendMeta(rowMeta, 'Reviewable', item.summary && item.summary.reviewable_count);
-				appendMeta(rowMeta, 'Retryable', nightlyCloudRetryable(card) ? 'Yes' : '');
+				appendMeta(rowMeta, t('Run status'), item.status ? formatLabel(item.status) : '');
+				appendMeta(rowMeta, t('Result'), item.result_status ? formatLabel(item.result_status) : '');
+				appendMeta(rowMeta, t('Reviewable'), item.summary && item.summary.reviewable_count);
+				appendMeta(rowMeta, t('Retryable'), nightlyCloudRetryable(card) ? t('Yes') : '');
 				row.appendChild(rowMeta);
 				const actions = el('div', 'npcink-toolbox__result-actions');
 				const use = el('button', 'button button-small', 'Use run');
@@ -6077,9 +6110,9 @@
 				item.appendChild(el('p', '', action.recommendation));
 			}
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Score', action && action.score);
-			appendMeta(meta, 'Severity', action && action.severity ? formatLabel(action.severity) : '');
-			appendMeta(meta, 'Writes', action && action.write_path ? action.write_path : 'None');
+			appendMeta(meta, t('Score'), action && action.score);
+			appendMeta(meta, t('Severity'), action && action.severity ? formatLabel(action.severity) : '');
+			appendMeta(meta, t('Writes'), action && action.write_path ? action.write_path : 'None');
 			if (meta.childNodes.length) {
 				item.appendChild(meta);
 			}
@@ -6108,12 +6141,12 @@
 		const section = createSection('Scheduled review queue');
 		const topSummary = brief.top_summary && typeof brief.top_summary === 'object' ? brief.top_summary : {};
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Scanned', topSummary.items_scanned);
-		appendMeta(meta, 'Reviewable', topSummary.reviewable_items);
-		appendMeta(meta, 'Warnings', topSummary.warnings);
-		appendMeta(meta, 'Critical', topSummary.critical);
-		appendMeta(meta, 'Average score', topSummary.average_score);
-		appendMeta(meta, 'Score version', topSummary.score_version);
+		appendMeta(meta, t('Scanned'), topSummary.items_scanned);
+		appendMeta(meta, t('Reviewable'), topSummary.reviewable_items);
+		appendMeta(meta, t('Warnings'), topSummary.warnings);
+		appendMeta(meta, t('Critical'), topSummary.critical);
+		appendMeta(meta, t('Average score'), topSummary.average_score);
+		appendMeta(meta, t('Score version'), topSummary.score_version);
 		if (meta.childNodes.length) {
 			section.appendChild(meta);
 		}
@@ -6144,11 +6177,11 @@
 					row.appendChild(el('p', '', item.evidence_summary));
 				}
 				const itemMeta = el('div', 'npcink-toolbox__result-meta');
-				appendMeta(itemMeta, 'Score', item.score);
-				appendMeta(itemMeta, 'Severity', item.severity ? formatLabel(item.severity) : '');
-				appendMeta(itemMeta, 'Priority', item.priority_reason ? formatLabel(item.priority_reason) : '');
-				appendMeta(itemMeta, 'Groups', Array.isArray(item.group_ids) ? item.group_ids.map(formatLabel).join(', ') : '');
-				appendMeta(itemMeta, 'Next action', item.recommended_next_action ? formatLabel(item.recommended_next_action) : '');
+				appendMeta(itemMeta, t('Score'), item.score);
+				appendMeta(itemMeta, t('Severity'), item.severity ? formatLabel(item.severity) : '');
+				appendMeta(itemMeta, t('Priority'), item.priority_reason ? formatLabel(item.priority_reason) : '');
+				appendMeta(itemMeta, t('Groups'), Array.isArray(item.group_ids) ? item.group_ids.map(formatLabel).join(', ') : '');
+				appendMeta(itemMeta, t('Next action'), item.recommended_next_action ? formatLabel(item.recommended_next_action) : '');
 				if (itemMeta.childNodes.length) {
 					row.appendChild(itemMeta);
 				}
@@ -6176,9 +6209,9 @@
 				action.object_id ? '#' + action.object_id : ''
 			].filter(Boolean).join(' ')));
 			const meta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(meta, 'Overall', action.score);
-			appendMeta(meta, 'Severity', action.severity ? formatLabel(action.severity) : '');
-			appendMeta(meta, 'Priority', action.priority_reason ? formatLabel(action.priority_reason) : '');
+			appendMeta(meta, t('Overall'), action.score);
+			appendMeta(meta, t('Severity'), action.severity ? formatLabel(action.severity) : '');
+			appendMeta(meta, t('Priority'), action.priority_reason ? formatLabel(action.priority_reason) : '');
 			item.appendChild(meta);
 			renderSupportItems(
 				item,
@@ -6251,16 +6284,16 @@
 		const retryGuidance = nightlyCloudRetryGuidance(payload);
 		const section = createSection('Cloud run detail');
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, 'Run state', nightlyCloudOutcomeLabel(payload));
-		appendMeta(meta, 'Worker phase', formatLabel(nightlyCloudRunPhase(payload)));
-		appendMeta(meta, 'Result', nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
-		appendMeta(meta, 'Started', formatDateTime(lifecycle.processing_started_at || lifecycle.started_at || cloudRun.started_at));
-		appendMeta(meta, 'Finished', formatDateTime(lifecycle.processing_finished_at || lifecycle.completed_at || lifecycle.terminal_at || cloudRun.completed_at));
-		appendMeta(meta, 'Failure code', firstNightlyCloudText(lifecycle, ['error_code', 'failure_code', 'reason_code']) || firstNightlyCloudText(cloudRun, ['error_code', 'failure_code', 'reason_code']));
-		appendMeta(meta, 'Retryable', nightlyCloudRetryable(payload) ? 'Yes' : '');
+		appendMeta(meta, t('Run state'), nightlyCloudOutcomeLabel(payload));
+		appendMeta(meta, t('Worker phase'), formatLabel(nightlyCloudRunPhase(payload)));
+		appendMeta(meta, t('Result'), nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
+		appendMeta(meta, t('Started'), formatDateTime(lifecycle.processing_started_at || lifecycle.started_at || cloudRun.started_at));
+		appendMeta(meta, t('Finished'), formatDateTime(lifecycle.processing_finished_at || lifecycle.completed_at || lifecycle.terminal_at || cloudRun.completed_at));
+		appendMeta(meta, t('Failure code'), firstNightlyCloudText(lifecycle, ['error_code', 'failure_code', 'reason_code']) || firstNightlyCloudText(cloudRun, ['error_code', 'failure_code', 'reason_code']));
+		appendMeta(meta, t('Retryable'), nightlyCloudRetryable(payload) ? t('Yes') : '');
 		appendPositiveMeta(meta, 'Snapshot items', requestSummary.item_count);
-		appendMeta(meta, 'Retention', requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
-		appendMeta(meta, 'Cloud role', requestSummary.cloud_role ? formatLabel(requestSummary.cloud_role) : '');
+		appendMeta(meta, t('Retention'), requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
+		appendMeta(meta, t('Cloud role'), requestSummary.cloud_role ? formatLabel(requestSummary.cloud_role) : '');
 		if (meta.childNodes.length) {
 			section.appendChild(meta);
 		}
@@ -6273,9 +6306,9 @@
 		}
 		if (nightlyCloudRetryable(payload)) {
 			const retryMeta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(retryMeta, 'Retry owner', retryGuidance.retry_owner ? formatLabel(retryGuidance.retry_owner) : 'Cloud Runtime');
-			appendMeta(retryMeta, 'Retry action', retryGuidance.operator_next_action ? formatLabel(retryGuidance.operator_next_action) : 'Retry run');
-			appendMeta(retryMeta, 'Failed actions', Array.isArray(retryGuidance.failed_action_ids) ? retryGuidance.failed_action_ids.join(', ') : '');
+			appendMeta(retryMeta, t('Retry owner'), retryGuidance.retry_owner ? formatLabel(retryGuidance.retry_owner) : 'Cloud Runtime');
+			appendMeta(retryMeta, t('Retry action'), retryGuidance.operator_next_action ? formatLabel(retryGuidance.operator_next_action) : 'Retry run');
+			appendMeta(retryMeta, t('Failed actions'), Array.isArray(retryGuidance.failed_action_ids) ? retryGuidance.failed_action_ids.join(', ') : '');
 			if (retryMeta.childNodes.length) {
 				section.appendChild(retryMeta);
 			}
@@ -6375,14 +6408,14 @@
 		const requestSummary = payload && payload.cloud_request_summary && typeof payload.cloud_request_summary === 'object' ? payload.cloud_request_summary : {};
 		const patch = payload && payload.morning_brief_patch && typeof payload.morning_brief_patch === 'object' ? payload.morning_brief_patch : {};
 		const merged = payload && payload.merged_morning_brief && typeof payload.merged_morning_brief === 'object' ? payload.merged_morning_brief : {};
-		appendMeta(meta, 'Run', nightlyCloudRunIdFromPayload(payload));
-		appendMeta(meta, 'Status', payload && payload.status ? formatLabel(payload.status) : (cloudRun.status ? formatLabel(cloudRun.status) : ''));
-		appendMeta(meta, 'Result', nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
+		appendMeta(meta, t('Run'), nightlyCloudRunIdFromPayload(payload));
+		appendMeta(meta, t('Status'), payload && payload.status ? formatLabel(payload.status) : (cloudRun.status ? formatLabel(cloudRun.status) : ''));
+		appendMeta(meta, t('Result'), nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
 		appendPositiveMeta(meta, 'Snapshot items', requestSummary.item_count);
-		appendMeta(meta, 'Payload', requestSummary.payload_mode ? formatLabel(requestSummary.payload_mode) : '');
-		appendMeta(meta, 'Retention', requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
-		appendMeta(meta, 'Patch actions', patch.action_count);
-		appendMeta(meta, 'Merged priorities', merged.cloud_runtime && merged.cloud_runtime.merged_priority_count);
+		appendMeta(meta, t('Payload'), requestSummary.payload_mode ? formatLabel(requestSummary.payload_mode) : '');
+		appendMeta(meta, t('Retention'), requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
+		appendMeta(meta, t('Patch actions'), patch.action_count);
+		appendMeta(meta, t('Merged priorities'), merged.cloud_runtime && merged.cloud_runtime.merged_priority_count);
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
 		}
@@ -6627,7 +6660,7 @@
 
 	async function submitMediaReferenceRepairProposal(form) {
 		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
+			throw { message: t('Npcink Adapter REST URL is unavailable.') };
 		}
 
 		const input = referenceRepairInput(form);
@@ -6673,7 +6706,7 @@
 
 	async function submitMediaSettingsReferenceRepairProposal(form) {
 		if (!config.adapterRestUrl) {
-			throw { message: 'Npcink Adapter REST URL is unavailable.' };
+			throw { message: t('Npcink Adapter REST URL is unavailable.') };
 		}
 
 		const input = settingsReferenceRepairInput(form);
@@ -7292,7 +7325,16 @@
 		});
 	}
 
+	function contextFormHasContent(form) {
+		return Array.from(form.querySelectorAll('textarea')).some((field) => String(field.value || '').trim() !== '')
+			|| Array.from(form.querySelectorAll('input[type="checkbox"]')).some((field) => field.checked);
+	}
+
 	function clearContextForm(form) {
+		if (!window.confirm(t('Clear all site profile fields? This cannot be undone.'))) {
+			return;
+		}
+
 		form.querySelectorAll('textarea').forEach((field) => {
 			field.value = '';
 		});
@@ -7303,7 +7345,17 @@
 	}
 
 	function initContextDrafts() {
+		window.addEventListener('beforeunload', (event) => {
+			if (!document.querySelector('[data-toolbox-context-form][data-dirty="1"]')) {
+				return;
+			}
+			event.preventDefault();
+			event.returnValue = '';
+		});
 		document.querySelectorAll('[data-toolbox-context-form]').forEach((form) => {
+			form.addEventListener('input', () => form.setAttribute('data-dirty', '1'));
+			form.addEventListener('change', () => form.setAttribute('data-dirty', '1'));
+			form.addEventListener('submit', () => form.removeAttribute('data-dirty'));
 			form.addEventListener('click', (event) => {
 				if (!(event.target instanceof Element)) {
 					return;
@@ -7312,6 +7364,9 @@
 				const draftButton = event.target.closest('[data-toolbox-context-draft]');
 				if (draftButton && form.contains(draftButton)) {
 					const draftKey = draftButton.getAttribute('data-toolbox-context-draft');
+					if (contextFormHasContent(form) && !window.confirm(t('Fill the form with this template? Your current field values will be replaced.'))) {
+						return;
+					}
 					applyContextDraft(form, config.contextDrafts && config.contextDrafts[draftKey]);
 					return;
 				}
@@ -7808,6 +7863,13 @@
 	}
 
 	function initMediaDerivativeControls() {
+		window.addEventListener('beforeunload', (event) => {
+			if (!document.querySelector('[data-toolbox-media-batch-running="1"]')) {
+				return;
+			}
+			event.preventDefault();
+			event.returnValue = '';
+		});
 		document.querySelectorAll('[data-toolbox-media-derivative]').forEach((form) => {
 			let lightbox = form.querySelector('[data-toolbox-image-lightbox]');
 			if (!lightbox) {
@@ -7914,7 +7976,7 @@
 				if (resolveButton && form.contains(resolveButton)) {
 					event.preventDefault();
 					resolveMediaAttachmentUrl(form).catch((error) => {
-						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : 'Request failed.'), 'error');
+						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : t('Request failed.')), 'error');
 					});
 					return;
 				}
@@ -7944,7 +8006,7 @@
 				if (batchPlanButton && form.contains(batchPlanButton)) {
 					event.preventDefault();
 					buildMediaDerivativeBatchPlan(form).catch((error) => {
-						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : 'Request failed.'), 'error');
+						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : t('Request failed.')), 'error');
 					});
 					return;
 					}
@@ -7987,7 +8049,7 @@
 				if (batchProposalButton && form.contains(batchProposalButton)) {
 					event.preventDefault();
 					submitMediaDerivativeBatchProposals(form).catch((error) => {
-						renderMediaDerivativeFailure(form, error, 'proposal');
+						renderMediaDerivativeFailure(form, error, 'media-batch');
 					});
 					return;
 				}
@@ -8031,7 +8093,7 @@
 				if (repairButton && form.contains(repairButton)) {
 					event.preventDefault();
 					submitMediaReferenceRepairProposal(form).catch((error) => {
-						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : 'Request failed.'), 'error');
+						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : t('Request failed.')), 'error');
 					});
 					return;
 				}
@@ -8040,7 +8102,7 @@
 				if (settingsRepairButton && form.contains(settingsRepairButton)) {
 					event.preventDefault();
 					submitMediaSettingsReferenceRepairProposal(form).catch((error) => {
-						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : 'Request failed.'), 'error');
+						renderTextResult(form, error && error.message ? error.message : (config.labels && config.labels.error ? config.labels.error : t('Request failed.')), 'error');
 					});
 				}
 			});
@@ -8055,6 +8117,41 @@
 		}
 	});
 
+	function initCopyJsonButtons() {
+		document.addEventListener('click', (event) => {
+			if (!(event.target instanceof Element)) {
+				return;
+			}
+			const button = event.target.closest('[data-toolbox-copy-json]');
+			if (!button) {
+				return;
+			}
+			const container = button.closest('details');
+			const source = container ? container.querySelector('[data-toolbox-copy-json-source]') : null;
+			if (!(source instanceof HTMLTextAreaElement)) {
+				return;
+			}
+			const text = source.value || '';
+			const restore = () => {
+				button.textContent = t('Copy JSON to clipboard');
+				button.disabled = false;
+			};
+			const finish = (copied) => {
+				button.textContent = copied ? t('Copied') : t('Copy failed; select the JSON text manually.');
+				window.setTimeout(restore, 2000);
+			};
+			button.disabled = true;
+			if (window.navigator && window.navigator.clipboard && window.navigator.clipboard.writeText) {
+				window.navigator.clipboard.writeText(text).then(() => finish(true), () => finish(false));
+				return;
+			}
+			source.focus();
+			source.select();
+			finish(Boolean(document.execCommand && document.execCommand('copy')));
+		});
+	}
+
+	initCopyJsonButtons();
 	initTopTabs();
 	initToolSwitcher();
 	initSettingsFormReturnUrls();
@@ -8082,7 +8179,7 @@
 				return;
 			}
 
-			renderErrorResult(form, error, config.labels && config.labels.error ? config.labels.error : 'Request failed.');
+			renderErrorResult(form, error, config.labels && config.labels.error ? config.labels.error : t('Request failed.'));
 		});
 	});
 }());

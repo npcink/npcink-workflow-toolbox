@@ -156,11 +156,14 @@
 			const timeout = window.setTimeout(() => controller.abort(), 35000);
 			// Any content or article change during the request invalidates this response,
 			// including edits that the author subsequently undoes back to the same text.
+			// Snapshotting on every store change would re-serialize the whole article on
+			// each keystroke while waiting, so poll at a bounded interval instead.
 			let stale = false;
-			const unsubscribe = wp.data.subscribe(() => {
+			const stopStaleWatch = () => { if (staleWatcher) { window.clearInterval(staleWatcher); staleWatcher = null; } };
+			let staleWatcher = window.setInterval(() => {
 				const current = snapshot();
 				if (current.postId !== source.postId || current.content !== source.content || current.identity !== source.identity) stale = true;
-			});
+			}, 500);
 			try {
 				const config = window.NpcinkToolboxEditorSupport;
 				const result = await wp.apiFetch({
@@ -171,7 +174,7 @@
 				if (active.current !== controller) return;
 				if (stale || result.post_id !== source.postId) throw new Error(t('The article changed while waiting. This result was not applied.'));
 				const updates = prepare(source.blocks, source.content, result);
-				unsubscribe();
+				stopStaleWatch();
 				if (updates.length) {
 					apply(updates, 'after');
 					setUndo({ postId: source.postId, content: snapshot().content, identity: snapshot().identity, updates });
@@ -184,7 +187,7 @@
 			} catch (error) {
 				if (active.current === controller) setNotice({ status: 'warning', text: error.name === 'AbortError' ? t('The formatting request timed out. The original text is unchanged.') : (error.message || t('Formatting failed. The original text is unchanged.')) });
 			} finally {
-				unsubscribe();
+				stopStaleWatch();
 				window.clearTimeout(timeout);
 				if (active.current === controller) { active.current = null; setBusy(false); }
 			}
