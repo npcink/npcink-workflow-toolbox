@@ -22,12 +22,23 @@ The local `check:wporg` guard blocks recurring review problems:
 - a WordPress.org-facing `readme.txt` Contributors line that omits the
   submitting account `muze233`.
 
-The Plugin Check gate must run with the workstation WP-CLI path that actually
-exists:
+The Plugin Check gate must run with a working wp-cli and a booted WordPress
+site. On this workstation the `wp plugin check` subcommand is registered by the
+WordPress Plugin Check plugin active in the magick-ai Local site, and the
+Homebrew PHP curl CA path is broken (`@@HOMEBREW_PREFIX@@` placeholder), so use
+the official wp-cli.phar plus the Local MySQL socket:
 
 ```sh
-WP_CLI_BIN=/opt/homebrew/bin/wp composer plugin-check:release
+SOCK="$HOME/Library/Application Support/Local/run/s63K4c8XP/mysql/mysqld.sock"
+WP_CLI=/tmp/wp-cli.phar WP_CLI_PHP=/opt/homebrew/bin/php \
+WP_PATH="/Users/muze/Local Sites/magick-ai/app/public" \
+WP_DB_SOCKET="$SOCK" composer plugin-check:release
 ```
+
+When `/tmp/wp-cli.phar` is missing, fetch it over git (raw downloads may be
+unreachable): `git clone --depth 1 -b gh-pages https://github.com/wp-cli/builds`
+and copy `phar/wp-cli.phar`. Full environment notes are recorded in the
+[0.3.0 publication closeout](archive/2026-10/wordpress-org-publication-0-3-0-closeout-2026-10-02.md).
 
 The command builds an isolated distribution directory using `.distignore` and
 runs Plugin Check in update mode with strict JSON output. It does not inspect
