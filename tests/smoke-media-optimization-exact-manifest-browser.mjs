@@ -124,6 +124,9 @@ $id=0; $path=''; try {
 	await context.route('**/wp-json/npcink-toolbox/v1/media-derivative-local-review/*', (route) => route.fulfill({ status: 200, contentType: 'image/png', body: sourceBytes }));
 
 	page = await context.newPage();
+	// Browser smokes stand in for a present, confirmed operator, so accept the
+	// reviewed window.confirm dialogs the hardened flows now require.
+	page.on('dialog', (dialog) => dialog.accept());
 	page.on('request', (request) => {
 		if (request.url().includes('/wp-json/')) requests.push({ url: request.url(), method: request.method(), body: request.postData() || '' });
 	});

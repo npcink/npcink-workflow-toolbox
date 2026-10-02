@@ -171,6 +171,9 @@ try {
 	browser = await chromium.launch(browserOptions);
 	const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1440, height: 1800 } });
 	page = await context.newPage();
+	// Browser smokes stand in for a present, confirmed operator, so accept the
+	// reviewed window.confirm dialogs the hardened flows now require.
+	page.on('dialog', (dialog) => dialog.accept());
 	const requests = [];
 	const contextualResponses = [];
 	const feedbackPayloads = [];

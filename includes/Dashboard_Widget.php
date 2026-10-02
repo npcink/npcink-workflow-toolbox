@@ -107,11 +107,11 @@ final class Dashboard_Widget {
 	}
 
 	private function render_refresh_notice(): void {
-		if ( ! isset( $_GET['npcink_toolbox_hot_topic_refresh'] ) ) {
+		$status = sanitize_key( (string) filter_input( INPUT_GET, 'npcink_toolbox_hot_topic_refresh' ) );
+		if ( '' === $status ) {
 			return;
 		}
 
-		$status = sanitize_key( wp_unslash( $_GET['npcink_toolbox_hot_topic_refresh'] ) );
 		if ( 'ready' === $status ) {
 			$message = __( '热榜已刷新。', 'npcink-workflow-toolbox' );
 			$color   = '#00a32a';

@@ -133,6 +133,9 @@ $id=0; $path=''; try {
 		await route.fulfill({ status: 200, contentType: 'image/png', body: sourceBytes });
 	});
 	page = await context.newPage();
+	// Browser smokes stand in for a present, confirmed operator, so accept the
+	// reviewed window.confirm dialogs the hardened flows now require.
+	page.on('dialog', (dialog) => dialog.accept());
 	page.on('request', (request) => requests.push({ url: request.url(), method: request.method(), postData: request.postData() || '' }));
 	await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools&toolbox_tool=media-batch-optimize`, { waitUntil: 'domcontentloaded', timeout: 45000 });
 	assert(!page.url().includes('wp-login.php'), 'Browser opened the Toolbox admin surface as an administrator.');

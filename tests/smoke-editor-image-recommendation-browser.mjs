@@ -307,6 +307,9 @@ try {
 	});
 
 	page = await context.newPage();
+	// Browser smokes stand in for a present, confirmed operator, so accept the
+	// reviewed window.confirm dialogs the hardened flows now require.
+	page.on('dialog', (dialog) => dialog.accept());
 	page.on('request', (request) => {
 		const url = request.url();
 		if (!url.includes('/wp-json/') || /npcink-toolbox\/v1\/(image-candidates|ai\/image-generation|agent-feedback)/.test(url)) {
