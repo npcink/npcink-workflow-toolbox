@@ -61,7 +61,10 @@ npcink_fixed_button_check(
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => 'workflow_projection_proven' === ( $button['adapter_parity_status'] ?? '' ) ) ), 'Only the currently proven media workflow claims full projection parity' );
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => true === ( $button['direct_wordpress_write'] ?? false ) ) ), 'Only Media Library Optimization declares the bounded direct-write exception' );
 
-$editor_source = file_get_contents( $root . '/assets/editor-content-support.js' );
+$editor_source = (string) file_get_contents( $root . '/assets/editor-content-support.js' );
+foreach ( glob( $root . '/assets/editor-content-support/*.js' ) ?: array() as $editor_source_part ) {
+	$editor_source .= "\n" . (string) file_get_contents( $editor_source_part );
+}
 $editor_block  = false !== $editor_source && preg_match( '/const flows = \[(.*?)\n\t\];\n\n\tconst flowGroups/s', $editor_source, $editor_match ) ? $editor_match[1] : '';
 preg_match_all( "/\n\s*intent:\s*'([^']+)'/", $editor_block, $editor_intents );
 $editor_table_count = count( array_filter( $buttons, static fn( array $button ): bool => 'editor_content_support' === ( $button['surface'] ?? '' ) ) );

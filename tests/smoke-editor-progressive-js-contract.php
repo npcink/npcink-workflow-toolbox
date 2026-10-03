@@ -6,7 +6,10 @@
  */
 
 $root      = dirname( __DIR__ );
-$editor_js = file_get_contents( $root . '/assets/editor-content-support.js' );
+$editor_js = (string) file_get_contents( $root . '/assets/editor-content-support.js' );
+foreach ( glob( $root . '/assets/editor-content-support/*.js' ) ?: array() as $editor_js_part ) {
+	$editor_js .= "\n" . (string) file_get_contents( $editor_js_part );
+}
 
 function toolbox_editor_progressive_js_pass( string $message ): void {
 	echo "PASS: {$message}\n";

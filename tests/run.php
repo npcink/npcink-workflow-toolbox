@@ -102,6 +102,20 @@ function toolbox_assert( bool $condition, string $message ): void {
 	}
 }
 
+/**
+ * Editor content-support assertion source: the main bundle plus every split
+ * part under assets/editor-content-support/, parts appended after the main
+ * file so span contracts that close inside the main bundle stay intact.
+ */
+function toolbox_read_editor_content_support_assets( string $root ): string {
+	$source = (string) file_get_contents( $root . '/assets/editor-content-support.js' );
+	foreach ( glob( $root . '/assets/editor-content-support/*.js' ) ?: array() as $part_path ) {
+		$source .= "\n" . (string) file_get_contents( $part_path );
+	}
+
+	return $source;
+}
+
 $main = file_get_contents( $root . '/npcink-workflow-toolbox.php' );
 $site_ops_insight_builder = file_get_contents( $root . '/includes/Site_Ops_Insight_Builder.php' );
 toolbox_assert( false !== $main && str_contains( $main, 'Plugin Name: Npcink Workflow Toolbox' ), 'Plugin header is present.' );
@@ -1013,7 +1027,8 @@ $editor_support = file_get_contents( $root . '/includes/Editor_Content_Support.p
 $editor_rest_source = file_get_contents( $root . '/includes/Rest_Controller.php' );
 toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ), 'Post editor content support enqueues its editor assets.' );
 toolbox_assert( false !== strpos( $editor_support, "'wp-block-editor'" ) && false !== strpos( $editor_support, "'wp-rich-text'" ), 'Post editor content support loads the native rich-text dependency for reviewed visible-state internal-link application.' );
-toolbox_assert( false !== strpos( file_get_contents( $root . '/assets/editor-content-support.js' ), 'internal_link_rejected' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-support.js' ), 'internal_link_undone' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-support.js' ), 'undo_conflict' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-support.js' ), 'candidate_not_adopted' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-support.js' ), "sourceObjectType: 'internal_link_candidate'" ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-support.js' ), "redaction_status: 'metadata_only'" ), 'Internal-link feedback remains anonymous metadata and records apply, reject, ignore, undo, and bounded reason labels.' );
+$editor_support_assets = toolbox_read_editor_content_support_assets( $root );
+toolbox_assert( false !== strpos( $editor_support_assets, 'internal_link_rejected' ) && false !== strpos( $editor_support_assets, 'internal_link_undone' ) && false !== strpos( $editor_support_assets, 'undo_conflict' ) && false !== strpos( $editor_support_assets, 'candidate_not_adopted' ) && false !== strpos( $editor_support_assets, "sourceObjectType: 'internal_link_candidate'" ) && false !== strpos( $editor_support_assets, "redaction_status: 'metadata_only'" ), 'Internal-link feedback remains anonymous metadata and records apply, reject, ignore, undo, and bounded reason labels.' );
 toolbox_assert( false !== strpos( $composer, 'test:internal-link-editor-js' ) && false !== strpos( $composer, 'tests/internal-link-editor-behavior.mjs' ), 'Composer exposes focused internal-link editor behavior coverage.' );
 toolbox_assert( false !== strpos( $composer, 'eval:internal-link-batch:export' ) && false !== strpos( $composer, 'eval:internal-link-batch:verify' ) && false !== strpos( $composer, 'tests/export-internal-link-batch-adversarial.mjs' ) && false !== strpos( $composer, 'task=link_recommendation_adversarial' ), 'Composer exposes the Toolbox-owned internal-link batch preflight artifact and eval-lab verifier.' );
 toolbox_assert( false !== strpos( $editor_support, "'wp-hooks'" ), 'Post editor content support declares the hooks dependency for BlockEdit toolbar registration.' );
@@ -1164,7 +1179,7 @@ toolbox_assert( false === strpos( $auto_sync, 'request_site_knowledge_sync' ) &&
 toolbox_assert( false === strpos( $auto_sync, 'MAX_RETRY_ATTEMPTS' ) && false === strpos( $auto_sync, 'retry_or_drop_queue' ) && false === strpos( $auto_sync, 'queue_recent_public_content' ) && false === strpos( $auto_sync, 'npcink_toolbox_site_knowledge_post_types' ), 'Site Knowledge legacy retry, reconciliation, and post-type allow-list ownership has exited Toolbox.' );
 toolbox_assert( false !== strpos( $auto_sync, 'health_snapshot' ) && false !== strpos( $auto_sync, 'DISABLE_WP_CRON' ) && false !== strpos( $auto_sync, 'cron_command' ), 'Site Knowledge status exposes Cloud Addon bridge health with server cron guidance.' );
 
-$editor_js = file_get_contents( $root . '/assets/editor-content-support.js' );
+$editor_js = toolbox_read_editor_content_support_assets( $root );
 toolbox_assert( false !== strpos( $editor_js, "'aria-pressed': imageSearchMode === 'library' ? 'true' : 'false',\n\t\t\t\t\t\tdisabled: Boolean(imageRunning),\n\t\t\t\t\t\tonClick: () => switchImageSearchMode('library')" ) && false !== strpos( $editor_js, "'aria-pressed': imageSearchMode === 'source' ? 'true' : 'false',\n\t\t\t\t\t\tdisabled: Boolean(imageRunning),\n\t\t\t\t\t\tonClick: () => switchImageSearchMode('source')" ) && false !== strpos( $editor_js, "'aria-pressed': imageSearchMode === 'generate' ? 'true' : 'false',\n\t\t\t\t\t\tdisabled: Boolean(imageRunning),\n\t\t\t\t\t\tonClick: () => switchImageSearchMode('generate')" ), 'Image-source mode tabs remain available but are disabled while a recommendation request is running.' );
 $client_source_files = glob( $root . '/includes/*.php' );
 $client              = '';
@@ -2508,7 +2523,7 @@ $editor_review_smoke = file_get_contents( $root . '/tests/smoke-editor-review-ar
 toolbox_assert( false !== $editor_review_smoke && false !== strpos( $editor_review_smoke, '/npcink-toolbox/v1/editor/content-support' ) && false !== strpos( $editor_review_smoke, "'internal_links'" ) && false !== strpos( $editor_review_smoke, "'publish_preflight'" ), 'Editor review artifacts smoke calls the editor content-support route for internal links and publish preflight.' );
 toolbox_assert( false !== strpos( $editor_review_smoke, 'npcink_toolbox_site_knowledge_cloud_request' ) && false !== strpos( $editor_review_smoke, 'internal_link_candidates.v1' ) && false === strpos( $editor_review_smoke, 'related_article_candidates.v1' ) && false !== strpos( $editor_review_smoke, 'pre_publish_review.v1' ), 'Editor review artifacts smoke verifies unified Site Knowledge citation candidates and preflight artifacts without a duplicate related-article flow.' );
 toolbox_assert( false !== strpos( $rest_controller, 'editor_internal_link_source_passages' ) && false !== strpos( $provider_client, "'source_passages'" ) && false !== strpos( $rest_controller, "\$item['anchor_or_context'] ?? ( \$item['suggested_anchor_text'] ?? '' )" ), 'Internal-link requests send bounded source passages and preserve Cloud anchor evidence without deriving anchors from target titles.' );
-$editor_content_support_js = file_get_contents( $root . '/assets/editor-content-support.js' );
+$editor_content_support_js = toolbox_read_editor_content_support_assets( $root );
 toolbox_assert( false !== strpos( $rest_controller, "'cloud_vector' === \$source_status && 'cloud_vector_evidence' === \$retrieval_status" ) && false !== strpos( $rest_controller, '$cloud_evidence_available &&' ) && false !== strpos( $editor_content_support_js, "candidateSource === 'cloud_vector' && retrievalStatus === 'cloud_vector_evidence'" ), 'Internal-link Apply eligibility is exposed only when the section has explicit Cloud vector evidence.' );
 toolbox_assert( false !== strpos( $editor_review_smoke, 'captured_internal_link_source_passages' ) && false !== strpos( $editor_review_smoke, "'anchor_or_context'" ) && false !== strpos( $editor_review_smoke, "'文章内容'" ), 'Editor review smoke proves a natural Cloud anchor can match visible content and a generic Cloud anchor is rejected.' );
 toolbox_assert( false !== strpos( $editor_review_smoke, 'seo_meta_handoff_preview.v1' ) && false !== strpos( $editor_review_smoke, 'npcink-abilities-toolkit/set-post-seo-meta' ) && false !== strpos( $editor_review_smoke, '/npcink-openclaw-adapter/v1/proposals' ) && false !== strpos( $editor_review_smoke, 'field_patch' ) && false !== strpos( $editor_review_smoke, 'no_seo_meta_write_in_toolbox' ), 'Editor review artifacts smoke verifies SEO handoff preview and creates one pending Core proposal without Toolbox SEO writes.' );
