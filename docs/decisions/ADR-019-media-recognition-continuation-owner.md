@@ -1,8 +1,13 @@
-# ADR-016: Toolbox Owns Local Media Recognition Continuation
+# ADR-019: Toolbox Owns Local Media Recognition Continuation
 
 ## Status
 
 Accepted for the 0.2.0 cross-repository closeout.
+
+Renumbered from a colliding draft ADR-016 slot on 2026-10-03: the media
+backup cleanup boundary (added one day earlier and already cited as
+`ADR-016` by `docs/route-boundary-table.json` and `tests/run.php`) keeps
+number 016.
 
 ## Decision
 

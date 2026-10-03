@@ -34,6 +34,31 @@ function npcink_contract_skip( string $message ): void {
 	echo "SKIP: {$message}\n";
 }
 
+/**
+ * Collapse whitespace runs so markers match the contract values, not the
+ * alignment of the sibling repository's source formatting.
+ */
+function npcink_contract_contains( string $content, string $needle ): bool {
+	$normalized_content = (string) preg_replace( '/\s+/', ' ', $content );
+	$normalized_needle  = (string) preg_replace( '/\s+/', ' ', $needle );
+
+	return false !== strpos( $normalized_content, $normalized_needle );
+}
+
+/**
+ * A marker passes only when one whole source file contains it, so matches
+ * cannot span file boundaries of an aggregated sibling tree.
+ */
+function npcink_contract_any_source_contains( array $sources, string $needle ): bool {
+	foreach ( $sources as $source ) {
+		if ( npcink_contract_contains( (string) $source, $needle ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 function npcink_contract_file_contains( string $path, array $needles, string $label ): void {
 	$content = is_file( $path ) ? file_get_contents( $path ) : false;
 	npcink_contract_check( false !== $content, "{$label} exists" );
@@ -42,7 +67,7 @@ function npcink_contract_file_contains( string $path, array $needles, string $la
 	}
 
 	foreach ( $needles as $needle ) {
-		npcink_contract_check( false !== strpos( $content, $needle ), "{$label} preserves {$needle}" );
+		npcink_contract_check( npcink_contract_contains( $content, (string) $needle ), "{$label} preserves {$needle}" );
 	}
 }
 
@@ -65,7 +90,7 @@ npcink_contract_file_contains(
 $quality_matrix = file_get_contents( $root . '/scripts/cross-repo-quality-matrix.php' );
 npcink_contract_check( false !== $quality_matrix && false === strpos( $quality_matrix, 'wp-magick-toolbox' ), 'Npcink quality matrix excludes wp-magick-toolbox' );
 foreach ( array( 'npcink-governance-core', 'npcink-abilities-toolkit', 'npcink-ai-client-adapter', 'npcink-workflow-toolbox', 'npcink-cloud-addon', 'npcink-eval-lab', 'npcink-ai-cloud' ) as $repo_name ) {
-	npcink_contract_check( false !== $quality_matrix && false !== strpos( $quality_matrix, "'name'       => '{$repo_name}'" ), "Npcink quality matrix includes {$repo_name}" );
+	npcink_contract_check( false !== $quality_matrix && npcink_contract_contains( (string) $quality_matrix, "'name' => '{$repo_name}'" ), "Npcink quality matrix includes {$repo_name}" );
 }
 
 $legacy_markers = array(
@@ -173,7 +198,7 @@ $toolbox_projection_source       = '';
 foreach ( $toolbox_projection_source_files as $toolbox_projection_source_file ) {
 	$toolbox_projection_source .= "\n" . (string) file_get_contents( $toolbox_projection_source_file );
 }
-npcink_contract_check( false !== $toolbox_projection_source && false !== strpos( $toolbox_projection_source, "'definition_owner'            => 'npcink-abilities-toolkit'" ), 'Toolbox media optimization is a Toolkit-owned fixed-button projection' );
+npcink_contract_check( false !== $toolbox_projection_source && npcink_contract_contains( $toolbox_projection_source, "'definition_owner' => 'npcink-abilities-toolkit'" ), 'Toolbox media optimization is a Toolkit-owned fixed-button projection' );
 foreach ( array( 'recipe_id', 'contract_version', 'entrypoint_ability_id', 'required_scope', 'failure_policy' ) as $field ) {
 	$value = (string) ( $media_workflow[ $field ] ?? '' );
 	npcink_contract_check( '' !== $value && false !== strpos( $toolbox_projection_source, "'{$field}'" ) && false !== strpos( $toolbox_projection_source, "'{$value}'" ), "Toolbox projection preserves Toolkit {$field}" );
@@ -181,20 +206,29 @@ foreach ( array( 'recipe_id', 'contract_version', 'entrypoint_ability_id', 'requ
 foreach ( (array) ( $media_workflow['required_inputs'] ?? array() ) as $required_input ) {
 	npcink_contract_check( false !== strpos( $toolbox_projection_source, "'{$required_input}'" ), "Toolbox projection preserves required input {$required_input}" );
 }
-npcink_contract_check( false !== strpos( $toolbox_projection_source, "'handoff_kind'                 => 'approval_request'" ), 'Toolbox projection preserves governed handoff kind' );
-npcink_contract_check( false !== strpos( $toolbox_projection_source, "'host_governed_write_boundary' => true" ), 'Toolbox projection preserves host-governed write boundary' );
-npcink_contract_check( false !== strpos( $toolbox_projection_source, "'canonical_definition_storage' => false" ), 'Toolbox projection does not store a canonical workflow definition' );
+npcink_contract_check( npcink_contract_contains( $toolbox_projection_source, "'handoff_kind' => 'approval_request'" ), 'Toolbox projection preserves governed handoff kind' );
+npcink_contract_check( npcink_contract_contains( $toolbox_projection_source, "'host_governed_write_boundary' => true" ), 'Toolbox projection preserves host-governed write boundary' );
+npcink_contract_check( npcink_contract_contains( $toolbox_projection_source, "'canonical_definition_storage' => false" ), 'Toolbox projection does not store a canonical workflow definition' );
 
-$adapter_controller_path = $family_root . '/npcink-ai-client-adapter/includes/Rest/Controller.php';
-$adapter_controller      = is_file( $adapter_controller_path ) ? file_get_contents( $adapter_controller_path ) : false;
-if ( false === $adapter_controller ) {
+$adapter_source_dir = $family_root . '/npcink-ai-client-adapter/includes';
+$adapter_sources    = false;
+if ( is_dir( $adapter_source_dir ) ) {
+	$adapter_sources = array();
+	$iterator        = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $adapter_source_dir, FilesystemIterator::SKIP_DOTS ) );
+	foreach ( $iterator as $file ) {
+		if ( $file->isFile() && 'php' === $file->getExtension() ) {
+			$adapter_sources[] = (string) file_get_contents( $file->getPathname() );
+		}
+	}
+}
+if ( false === $adapter_sources ) {
 	npcink_contract_skip( 'Adapter workflow projection sibling checkout is unavailable' );
 } else {
-	foreach ( array( "const ADAPTER_CONTRACT_VERSION    = '4'", "'client_contract'                      => 'generic_ai_client'", "'priority_channel'                     => 'openclaw'", 'npcink_ai_client_workflow_projection.v1', "'definition_owner'              => 'npcink-abilities-toolkit'", "'version_mismatch_policy'       => 'fail_closed'", "'canonical_definition_storage'  => false", "'runtime_state_storage'         => false" ) as $adapter_marker ) {
-		npcink_contract_check( false !== strpos( $adapter_controller, $adapter_marker ), "Adapter workflow projection preserves {$adapter_marker}" );
+	foreach ( array( "const ADAPTER_CONTRACT_VERSION = '4'", "'client_contract' => 'generic_ai_client'", "'priority_channel' => 'openclaw'", 'npcink_ai_client_workflow_projection.v1', "'definition_owner' => 'npcink-abilities-toolkit'", "'version_mismatch_policy' => 'fail_closed'", "'canonical_definition_storage' => false", "'runtime_state_storage' => false" ) as $adapter_marker ) {
+		npcink_contract_check( npcink_contract_any_source_contains( $adapter_sources, $adapter_marker ), "Adapter workflow projection preserves {$adapter_marker}" );
 	}
 	foreach ( array( 'recipe_id', 'contract_version', 'entrypoint_ability_id', 'required_scope', 'required_inputs', 'handoff', 'failure_policy', 'host_governed_write_boundary' ) as $parity_field ) {
-		npcink_contract_check( false !== strpos( $adapter_controller, "'{$parity_field}'" ), "Adapter workflow projection requires parity field {$parity_field}" );
+		npcink_contract_check( npcink_contract_any_source_contains( $adapter_sources, "'{$parity_field}'" ), "Adapter workflow projection requires parity field {$parity_field}" );
 	}
 }
 
@@ -203,9 +237,9 @@ $core_contract_controller      = is_file( $core_contract_controller_path ) ? fil
 if ( false === $core_contract_controller ) {
 	npcink_contract_skip( 'Core contract controller sibling checkout is unavailable' );
 } else {
-	npcink_contract_check( false !== strpos( $core_contract_controller, "'pre_classification_exclusions'" ), 'Core exposes pre-classification exclusions to consumers' );
-	npcink_contract_check( false !== strpos( $core_contract_controller, "'native_editor_commit_is_core_classification' => false" ), 'Core does not make native editor commit a fifth classification' );
-	npcink_contract_check( false !== strpos( $core_contract_controller, "'native_editor_commit_core_record_required' => false" ), 'Core requires no record for native editor commit' );
+	npcink_contract_check( npcink_contract_contains( $core_contract_controller, "'pre_classification_exclusions'" ), 'Core exposes pre-classification exclusions to consumers' );
+	npcink_contract_check( npcink_contract_contains( $core_contract_controller, "'native_editor_commit_is_core_classification' => false" ), 'Core does not make native editor commit a fifth classification' );
+	npcink_contract_check( npcink_contract_contains( $core_contract_controller, "'native_editor_commit_core_record_required' => false" ), 'Core requires no record for native editor commit' );
 }
 
 foreach ( array( $root . '/includes', $family_root . '/npcink-ai-client-adapter/includes' ) as $consumer_source_dir ) {

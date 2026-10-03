@@ -5,6 +5,7 @@ Start from the active documents below before changing code.
 
 ## Core Contracts
 
+- [Known Issues](known-issues.md)
 - [Platform Governance Index](platform/README.md)
 - [Cross-Repo Platform Governance History](platform/cross-repo-platform-governance-history-2026-07-08.md)
 - [Product Positioning](product-positioning.md)
@@ -41,7 +42,11 @@ Start from the active documents below before changing code.
 - [Development Workflow](development-workflow.md)
 - [AI Development Quality Workflow](ai-development-quality-workflow.md)
 - [AI Change Envelope Template](ai-change-envelope-template.md)
+- [AI Code Review Standard v1](platform/ai-code-review-standard-v1.md)
+- [AI Code Review Workflow](platform/ai-code-review-workflow.yml)
+- [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
 - [Pull Request Publishing Standard v1](platform/pr-publishing-standard-v1.md)
+- [PR Publishing Repositories](platform/pr-publishing-repositories.json)
 - [GitHub Publishing Runbook](github-publishing-runbook.md)
 - [Security And Performance Release Gate](security-performance-release-gate.md)
 - [Cloud Addon Transport Release Gate](cloud-addon-transport-release-gate.md)
@@ -54,6 +59,8 @@ Start from the active documents below before changing code.
 - [WordPress.org 0.3.0 Publication Closeout](archive/2026-10/wordpress-org-publication-0-3-0-closeout-2026-10-02.md)
 - [Translation Source Language Policy](translation-source-language-policy.md)
 - [Operator Terminology Standard v1](platform/operator-terminology-standard-v1.md)
+- [MCP Governance Surface Decision](platform/mcp-governance-surface-decision.md)
+- [WordPress MCP Approval Hook Proposal Draft](platform/wordpress-mcp-approval-hook-proposal-draft.md)
 - [UX Hardening Operator Trial 2026-10](ux-hardening-operator-trial-2026-10.md)
 - [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md)
 
@@ -73,9 +80,12 @@ Start from the active documents below before changing code.
 - [Editor Progressive Recommendations Trial](editor-progressive-recommendations-trial.md)
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
+- [Editor Content Format V1](editor-content-format-v1.md)
+- [Editor Content Support Recommendation Review](editor-content-support-recommendation-review.md)
 - [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)
 - [编辑器推荐、图片与运行环境验证规范 v1](editor-recommendation-image-and-runtime-validation-standard-v1.md)
 - [Editor Summary Generation Performance](editor-summary-generation-performance.md)
+- [Site Media Recommendation Editor Lessons v1](site-media-recommendation-editor-lessons-v1.md)
 
 ## Ability And Workflow Contracts
 
@@ -99,12 +109,17 @@ Start from the active documents below before changing code.
 - [Historical Single-Image Media Workbench Standard v1](single-image-media-workbench-standard-v1.md)
 - [Historical ADR-011: Single-Image Local Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
 - [ADR-012: Bounded Media Backup Retention Setting](decisions/ADR-012-media-backup-retention-setting.md)
+- [ADR-016: Media Backup Cleanup Boundary](decisions/ADR-016-media-backup-cleanup-boundary.md)
 - [Media Optimization Release Checklist](media-optimization-release-checklist.md)
 - [Media ALT/Caption Review Set](media-alt-caption-review-set.md)
 - [Media ALT/Caption Toolkit Validation Plan](media-alt-caption-toolkit-validation-plan.md)
 - [Media ALT Governed Workflow Closeout](media-alt-governed-workflow-closeout-2026-07-11.md)
 - [Media ALT/Caption Toolkit Validation Reentry](archive/2026-07/media-alt-caption-toolkit-validation-reentry-2026-07-06.md)
 - [Media ALT/Caption Migration Closeout](archive/2026-07/media-alt-caption-migration-closeout-2026-07-06.md)
+- [Media Recognition Continuation](media-recognition-continuation.md)
+- [Media Recognition Continuation Standard v1](media-recognition-continuation-standard-v1.md)
+- [Media ALT Governed Write Implementation Gate](media-alt-governed-write-implementation-gate.md)
+- [Media Governance Development Lessons 2026-09](platform/media-governance-development-lessons-2026-09.md)
 - [Site Check Operator Loop](full-site-insights-operator-loop.md)
 - [Site Check Decision Entry Closeout](site-check-decision-entry-closeout-2026-06-30.md)
 - [Site Check Visibility Reassessment](site-check-visibility-reassessment-2026-07-10.md)
@@ -123,6 +138,7 @@ Start from the active documents below before changing code.
 
 - [Article Assistant Workbench](article-assistant-workbench.md)
 - [Adversarial Boundary Review](adversarial-boundary-review.md)
+- [Adversarial Boundary Findings Triage](adversarial-boundary-findings-triage.md)
 - [Boundary Exceptions Registry](boundary-exceptions.md)
 - [Cloud Diagnostics Transition Summary](cloud-diagnostics-transition-summary.md)
 - [Site Knowledge UI Migration Closeout](archive/2026-06/site-knowledge-ui-migration-closeout-2026-06-30.md)
@@ -149,18 +165,28 @@ Start from the active documents below before changing code.
 - [ADR-009: Separate Cloud Source CI From M4 Runtime Acceptance](decisions/ADR-009-cloud-ci-and-m4-quality-authority.md)
 - [Historical ADR-010: Allow Strong Local Confirmation For Single-Article Image Adoption](decisions/ADR-010-single-article-strong-local-image-adoption.md)
 - [Historical ADR-011: Allow Single-Image Local Media Replacement](decisions/ADR-011-single-image-local-media-replacement.md)
-- [ADR-017: Retire Single-Image Local Write Exceptions](decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 - [ADR-012: Bound Media Backup Retention](decisions/ADR-012-media-backup-retention-setting.md)
 - [ADR-013: WordPress-First Content And Recommendation Contracts](decisions/ADR-013-wordpress-first-content-and-recommendation-contracts.md)
 - [ADR-014: Current-Article Multi-Link Editor Transaction](decisions/ADR-014-current-article-multi-link-editor-transaction.md)
+- [ADR-015: Exact-Manifest Local Media Optimization](decisions/ADR-015-exact-manifest-local-media-optimization.md)
+- [ADR-016: Media Backup Cleanup Boundary](decisions/ADR-016-media-backup-cleanup-boundary.md)
+- [ADR-017: Retire Single-Image Local Write Exceptions](decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 - [ADR-018: Scoped Editor Permissions For The Content-Support Sidebar](decisions/ADR-018-editor-scoped-permissions.md)
+- [ADR-019: Toolbox Owns Local Media Recognition Continuation](decisions/ADR-019-media-recognition-continuation-owner.md)
 
 ## Archived Closeouts
 
 Historical stage records live under [archive/2026-06](archive/2026-06/),
-[archive/2026-07](archive/2026-07/), and [archive/2026-08](archive/2026-08/).
+[archive/2026-07](archive/2026-07/), [archive/2026-08](archive/2026-08/),
+and [archive/2026-10](archive/2026-10/).
 They remain useful evidence, but they are not the first place to look for
 current product contracts.
+
+Archive policy: move a dated closeout record into `archive/YYYY-MM` once
+its release has shipped and no session has needed it as an active
+contract for a full month. Before archiving, move every unresolved item
+from it into [Known Issues](known-issues.md) and update inbound links;
+afterwards an archived record is edited only to fix link targets.
 
 - [Cloud Vector Recommendation Funnel Closeout - 2026-08-24](archive/2026-08/cloud-vector-recommendation-funnel-closeout-2026-08-24.md) records local and M4 candidate evidence for exact anchors, reviewed batch Apply, native-save confirmation, metadata-only rollups, and the real-user observation stop point; it is not merge, production, or recommendation-quality authority.
 - [Recommendation Quality MVP Closeout - 2026-08-30](archive/2026-08/recommendation-quality-mvp-closeout-2026-08-30.md) records the Cloud ranking fixes, separate image-prompt work, Toolbox action telemetry, Eval Lab GPT/Grok evidence, ownership boundary, and staged small-feature lessons.

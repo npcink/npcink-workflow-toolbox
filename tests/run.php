@@ -2650,6 +2650,19 @@ toolbox_assert( false !== strpos( $quality_workflow_doc, 'Do not run `git reset 
 $reference_plugin_checklist = file_get_contents( $root . '/docs/reference-plugin-evaluation-checklist.md' );
 $readme_doc = file_get_contents( $root . '/README.md' );
 $docs_index_doc = file_get_contents( $root . '/docs/README.md' );
+$docs_index_expected = array();
+foreach ( array( 'docs/*.md', 'docs/*.json', 'docs/decisions/*', 'docs/platform/*' ) as $docs_index_glob ) {
+	foreach ( glob( $root . '/' . $docs_index_glob ) ?: array() as $docs_index_entry ) {
+		if ( ! is_file( $docs_index_entry ) ) {
+			continue;
+		}
+		$docs_index_expected[ str_replace( $root . '/docs/', '', $docs_index_entry ) ] = true;
+	}
+}
+unset( $docs_index_expected['README.md'] );
+foreach ( array_keys( $docs_index_expected ) as $docs_index_expected_path ) {
+	toolbox_assert( false !== $docs_index_doc && false !== strpos( $docs_index_doc, '](' . $docs_index_expected_path . ')' ), "Documentation index keeps {$docs_index_expected_path} discoverable; archive internals and migrated-pointer sub-records stay exempt under their parent indexes." );
+}
 $recommendation_standard_doc = file_get_contents( $root . '/docs/related-article-and-internal-link-recommendation-standard-v1.md' );
 $recommendation_eval_doc = file_get_contents( $root . '/docs/recommendation-eval.md' );
 $recommendation_quality_closeout_doc = file_get_contents( $root . '/docs/archive/2026-08/recommendation-quality-mvp-closeout-2026-08-30.md' );

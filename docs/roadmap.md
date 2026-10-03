@@ -1,6 +1,50 @@
 # Roadmap
 
-Status: planning baseline.
+Status: planning baseline with release anchors.
+
+## Release Anchors
+
+Shipped versions keep their scope facts here so the stage lists below stay
+target language rather than implied status. Stage 0 is complete; the
+stages remain the forward-looking contract list. Open debt lives in
+[Known Issues](known-issues.md), not here.
+
+- **0.1.x (2026-06)** — Stage 0 plus the first Stage 1/2 surfaces:
+  status, image-source, site-knowledge, and content-context surfaces, the
+  editor sidebar in early form, the Zhihu hot-topics widget, and the
+  historical attachment-scoped single-image replace/restore lane with
+  bounded backup retention (ADR-012; those local write exceptions were
+  later retired by ADR-017).
+- **0.2.0 (2026-09)** — bounded editor content formatting, the ADR-015
+  exact-manifest Media Library optimization flow with restore, Toolbox-
+  owned bounded media recognition continuation (ADR-019), the Addon
+  facade for Cloud media artifact transport, missing-only contextual ALT
+  pagination, full uninstall cleanup, and same-origin cookie+nonce
+  restrictions for the remaining local write exceptions.
+- **0.3.0 (2026-10, first WordPress.org release)** — scoped editor
+  permissions for the content-support sidebar (ADR-018), the comment
+  moderation and flagged media review sets (review-set order items 4 and
+  5), retirement of the vector/knowledge-search and article-brief/
+  article-assistant compatibility routes plus legacy admin URL aliases,
+  the provider client split into cluster services behind the facade, and
+  full zh_CN catalog coverage.
+
+### 0.4.0 Candidates (undecided)
+
+Collected from the 2026-09/10 closeouts and the 2026-10-03 systematic
+review; none of this is committed scope until a session picks it up with
+its own boundary check:
+
+- taxonomy/tag and internal-link review sets (review-set order items 2
+  and 3);
+- the sixteen non-default editor intent convergence decision;
+- a full guided fresh-install onboarding tour;
+- Site Knowledge status owner-matrix rows and the author/admin error
+  audience split;
+- staged structure splits for `editor-content-support.js`,
+  `Rest_Controller.php`, `admin.js`, and `Admin_Page.php` under the
+  Provider Split Refactor Standard;
+- a `rest_route_scope()` full-coverage static contract.
 
 ## Completed Priority - Platform Contract Convergence
 
