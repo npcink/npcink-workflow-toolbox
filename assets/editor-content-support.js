@@ -2,6 +2,7 @@
 	'use strict';
 
 	const config = window.NpcinkToolboxEditorSupport || {};
+	const { normalizeText, plainTextFromHtml, truncateText } = (typeof window !== 'undefined' && window.NpcinkToolboxTextHelpers) || {};
 	const element = wp.element || {};
 	const components = wp.components || {};
 	const data = wp.data || {};
@@ -845,26 +846,6 @@
 				renderFlowTrustMeta(flow)
 			)
 		);
-	}
-
-	function normalizeText(value) {
-		if (value && typeof value === 'object' && value.raw !== undefined) {
-			return String(value.raw || '');
-		}
-		return String(value || '');
-	}
-
-	function plainTextFromHtml(value) {
-		const source = String(value || '');
-		if (!source) {
-			return '';
-		}
-		if (typeof window !== 'undefined' && window.document) {
-			const container = window.document.createElement('div');
-			container.innerHTML = source;
-			return String(container.textContent || container.innerText || '').replace(/\s+/g, ' ').trim();
-		}
-		return source.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 	}
 
 	function editorContentIntegritySnapshot(value, postId) {
@@ -2397,14 +2378,6 @@
 					delete imageResultCache[key];
 				});
 		}
-	}
-
-	function truncateText(value, maxLength) {
-		const text = String(value || '').trim();
-		if (!text || text.length <= maxLength) {
-			return text;
-		}
-		return text.slice(0, maxLength - 1).trim() + '...';
 	}
 
 	function filenameExtensionFromUrl(url) {

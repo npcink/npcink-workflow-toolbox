@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import vm from 'node:vm';
 
-const source = fs.readFileSync(new URL('../assets/editor-content-support.js', import.meta.url), 'utf8');
+import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
+
+const source = readEditorContentSupportBundle();
 const windowObject = {
 	location: { href: 'https://example.test/wp-admin/post.php' },
 	wp: {},
