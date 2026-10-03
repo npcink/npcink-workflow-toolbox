@@ -55,6 +55,7 @@ Start from the active documents below before changing code.
 - [Translation Source Language Policy](translation-source-language-policy.md)
 - [Operator Terminology Standard v1](platform/operator-terminology-standard-v1.md)
 - [UX Hardening Operator Trial 2026-10](ux-hardening-operator-trial-2026-10.md)
+- [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md)
 
 ## Product Surfaces
 
