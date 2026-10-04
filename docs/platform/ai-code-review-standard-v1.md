@@ -126,6 +126,14 @@ Also recorded: the `actions/upload-artifact` Node.js 20 deprecation warning
 comes from inside `alibaba/open-code-review@v1.12.10` and is not fixable in
 this template; bump the action pin when upstream ships the fix.
 
+Follow-up (same day): the pilot re-sync pull request
+(`npcink-abilities-toolkit` #188) was itself reviewed by OpenCodeReview,
+which caught that posting the marker comment requires `issues: write` —
+the template originally granted only `pull-requests: write`, so the
+notification step itself would have failed with 403 exactly when needed.
+The template now grants `issues: write` and updates a single tagged marker
+comment per pull request instead of adding one comment per failed attempt.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
