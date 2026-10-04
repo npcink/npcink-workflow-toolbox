@@ -8,7 +8,7 @@ const mainPath = fileURLToPath(new URL('../assets/editor-content-support.js', im
 // Dependency order, mirroring the wp_enqueue_script dependency chain in
 // includes/Editor_Content_Support.php. A part file on disk that is not
 // listed here fails loudly instead of loading in a wrong order.
-const PART_ORDER = [
+export const PART_ORDER = [
 	'text-utils.js',
 	'internal-links.js',
 ];

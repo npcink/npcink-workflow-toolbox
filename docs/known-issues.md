@@ -67,6 +67,18 @@ with the closing commit or PR for one release cycle, then prune.
   qualify for archival under the archive policy in
   [the documentation index](README.md); move them only together with the
   links that reference them.
+- **No live-site browser smoke has run against the split editor bundle**
+  (PR #179): the documented Local site no longer exists on this
+  workstation. The compensating static control is the
+  `test:editor-js-undefined` audit gate (added 2026-10-04, probe-validated
+  against the exact `internalLinkBlockContent` defect class); a live
+  Playwright pass over the editor sidebar remains owed before the next
+  split session stacks more clusters.
+- **Toolbox is not yet enrolled in the PHPStan/PHPCS
+  [Static Analysis Standard v1](platform/static-analysis-standard-v1.md)**
+  (the enrollment table lists the adapter as required and the other
+  siblings as pending; this repository is absent). Enrolling advisory-first
+  is the recommended preparation for the `Rest_Controller.php` split.
 
 ## Recently Closed
 
