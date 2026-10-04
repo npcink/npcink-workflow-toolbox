@@ -452,6 +452,7 @@
 	if (typeof window !== 'undefined') {
 		window.NpcinkToolboxInternalLinkHelpers = Object.freeze({
 			canonicalInternalLinkUrl,
+			internalLinkBlockContent,
 			internalLinkUrlIsSafe,
 			internalLinkAnchorIsSpecific,
 			internalLinkRangesOverlap,

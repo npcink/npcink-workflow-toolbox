@@ -37,6 +37,14 @@ with the closing commit or PR for one release cycle, then prune.
 - **Legacy Chinese-source msgids migrate file-by-file** under the
   [Translation Source Language Policy](translation-source-language-policy.md);
   bulk regeneration of the JED catalogs is forbidden by the same policy.
+- **`plainTextFromHtml` parses with `innerHTML` on a detached div**, which
+  is not inert: inline error handlers and resource fetches inside block
+  HTML can execute when the helper runs. The exposure is bounded by the
+  fact that the Gutenberg editor already renders the same block HTML, and
+  the helper predates the text-utils split (moved verbatim). Hardening
+  (DOMParser-based extraction or attribute stripping) is deferred to a
+  dedicated behavior-change session; flagged by the 2026-10 split-session
+  advisory review.
 - **Structure: staged splits are partially landed.** The first
   editor-content-support session extracted the pure `text-utils.js` and
   `internal-links.js` part files behind frozen namespaces (main bundle

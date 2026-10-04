@@ -5,6 +5,7 @@
 	const { normalizeText, plainTextFromHtml, truncateText } = (typeof window !== 'undefined' && window.NpcinkToolboxTextHelpers) || {};
 	const {
 		canonicalInternalLinkUrl,
+		internalLinkBlockContent,
 		internalLinkUrlIsSafe,
 		internalLinkAnchorIsSpecific,
 		internalLinkRangesOverlap,
