@@ -137,6 +137,13 @@ function toolbox_read_editor_content_support_parts( string $root ): string {
  * part, parts appended after the main file so span contracts that close
  * inside the main bundle stay intact.
  */
+function toolbox_read_editor_content_support_assets( string $root ): string {
+	$main = file_get_contents( $root . '/assets/editor-content-support.js' );
+	toolbox_assert( false !== $main, 'The editor content-support main bundle is readable.' );
+
+	return (string) $main . toolbox_read_editor_content_support_parts( $root );
+}
+
 /**
  * REST controller assertion source: the facade plus every cluster service
  * it splits into, as an explicit list in bootstrap load order. Route
@@ -147,18 +154,14 @@ function toolbox_read_rest_controller_sources( string $root ): string {
 	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php' );
 	$source                = '';
 	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
-		$source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );
+		$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );
+		toolbox_assert( false !== $rest_controller_file_contents, "The REST controller source file {$rest_controller_file} is readable." );
+		$source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) $rest_controller_file_contents;
 	}
 
 	return $source;
 }
 
-function toolbox_read_editor_content_support_assets( string $root ): string {
-	$main = file_get_contents( $root . '/assets/editor-content-support.js' );
-	toolbox_assert( false !== $main, 'The editor content-support main bundle is readable.' );
-
-	return (string) $main . toolbox_read_editor_content_support_parts( $root );
-}
 
 $main = file_get_contents( $root . '/npcink-workflow-toolbox.php' );
 $site_ops_insight_builder = file_get_contents( $root . '/includes/Site_Ops_Insight_Builder.php' );
@@ -2369,6 +2372,8 @@ toolbox_assert( is_file( $root . '/includes/Rest_Nightly_Inspection_Bridges.php'
 foreach ( array( 'nightly_inspection_cloud_batch', 'nightly_inspection_cloud_batch_status', 'nightly_inspection_cloud_batch_recent', 'nightly_inspection_cloud_runtime_entitlement', 'nightly_inspection_cloud_batch_result', 'nightly_inspection_cloud_batch_retry' ) as $nightly_bridge_delegate ) {
 	toolbox_assert( false !== strpos( $rest_controller, "return \$this->nightly_bridges->{$nightly_bridge_delegate}" ), "REST facade delegates {$nightly_bridge_delegate} to the nightly bridge cluster." );
 }
+$nightly_bridges_source = (string) file_get_contents( $root . '/includes/Rest_Nightly_Inspection_Bridges.php' );
+toolbox_assert( false === strpos( $nightly_bridges_source, '$this->post(' ) && false === strpos( $nightly_bridges_source, '$this->get(' ) && false === strpos( $nightly_bridges_source, 'register_rest_route' ), 'The nightly bridge cluster service never registers routes itself; registration and permission scoping stay in the facade.' );
 toolbox_assert( false !== strpos( $rest, "\$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' )" ) && false !== strpos( $rest, 'build_nightly_inspection_review_plan' ), 'REST exposes a local Nightly Inspection Core review-plan builder without creating proposals directly.' );
 toolbox_assert( false !== strpos( $rest, "'payload_mode'    =>" ) && false !== strpos( $rest, "'retention_ttl'   =>" ) && false !== strpos( $rest, "'polling_registered'     => true" ), 'REST passes Pro Cloud Batch privacy, retention, and polling metadata.' );
 toolbox_assert( false !== strpos( $rest, 'site_knowledge_sync' ) && false !== strpos( $rest, 'site_knowledge_status' ) && false !== strpos( $rest, 'site_knowledge_search' ) && false !== strpos( $rest, 'article_index_statuses' ) && false !== strpos( $rest, 'public_site_knowledge_post_ids' ) && false !== strpos( $rest, "'indexed_post_ids_requested'" ) && false !== strpos( $rest, "'orderby'                => 'modified'" ), 'REST routes expose Cloud-managed site knowledge operations and require complete Cloud evidence for the most recently modified local article coverage.' );

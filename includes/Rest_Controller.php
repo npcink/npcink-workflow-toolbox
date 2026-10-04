@@ -7,7 +7,6 @@
 
 namespace Npcink_Toolbox;
 
-use Npcink\LocalAutomationRuntime\NightlyInspection\Snapshot_Collector;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -665,6 +664,7 @@ final class Rest_Controller {
 	public function nightly_inspection_cloud_batch_retry( WP_REST_Request $request ) {
 		return $this->nightly_bridges->nightly_inspection_cloud_batch_retry( $request );
 	}
+
 	public function agent_feedback( WP_REST_Request $request ) {
 		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
 		if ( ! is_array( $params ) ) {

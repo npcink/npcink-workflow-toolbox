@@ -36,7 +36,9 @@ foreach ( $client_source_files as $client_source_file ) {
 $rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php' );
 $rest     = '';
 foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
-	$rest .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );
+	$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );
+	npcink_toolbox_sk_review_smoke_assert( false !== $rest_controller_file_contents, 'Site Knowledge review smoke can read ' . $rest_controller_file . '.' );
+	$rest .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) $rest_controller_file_contents;
 }
 $abilities = file_get_contents( $root . '/includes/Abilities.php' );
 
