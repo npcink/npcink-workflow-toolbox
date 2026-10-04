@@ -103,17 +103,45 @@ function toolbox_assert( bool $condition, string $message ): void {
 }
 
 /**
- * Editor content-support assertion source: the main bundle plus every split
- * part under assets/editor-content-support/, parts appended after the main
- * file so span contracts that close inside the main bundle stay intact.
+ * Editor content-support part registration: derived from the enqueue paths
+ * in includes/Editor_Content_Support.php so contract scanning tracks what
+ * actually ships, in enqueue order. A part file on disk that is not
+ * registered (or a registered part missing on disk) fails the gate.
  */
-function toolbox_read_editor_content_support_assets( string $root ): string {
-	$source = (string) file_get_contents( $root . '/assets/editor-content-support.js' );
-	foreach ( glob( $root . '/assets/editor-content-support/*.js' ) ?: array() as $part_path ) {
-		$source .= "\n" . (string) file_get_contents( $part_path );
+function toolbox_editor_content_support_part_names( string $root ): array {
+	$editor_support_php = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
+	$registered         = array();
+	if ( is_string( $editor_support_php ) && preg_match_all( '#assets/editor-content-support/([\w.-]+\.js)#', $editor_support_php, $matches ) ) {
+		$registered = array_values( array_unique( $matches[1] ) );
+	}
+	$on_disk = array_map( 'basename', glob( $root . '/assets/editor-content-support/*.js' ) ?: array() );
+	sort( $on_disk );
+	$sorted_registered = $registered;
+	sort( $sorted_registered );
+	toolbox_assert( ! empty( $on_disk ) && $on_disk === $sorted_registered, 'Every editor content-support part on disk is registered in the enqueue chain, and every registered part exists on disk.' );
+
+	return $registered;
+}
+
+function toolbox_read_editor_content_support_parts( string $root ): string {
+	$source = '';
+	foreach ( toolbox_editor_content_support_part_names( $root ) as $part_name ) {
+		$source .= "\n" . (string) file_get_contents( $root . '/assets/editor-content-support/' . $part_name );
 	}
 
 	return $source;
+}
+
+/**
+ * Editor content-support assertion source: the main bundle plus every split
+ * part, parts appended after the main file so span contracts that close
+ * inside the main bundle stay intact.
+ */
+function toolbox_read_editor_content_support_assets( string $root ): string {
+	$main = file_get_contents( $root . '/assets/editor-content-support.js' );
+	toolbox_assert( false !== $main, 'The editor content-support main bundle is readable.' );
+
+	return (string) $main . toolbox_read_editor_content_support_parts( $root );
 }
 
 $main = file_get_contents( $root . '/npcink-workflow-toolbox.php' );
@@ -1027,11 +1055,52 @@ $editor_support = file_get_contents( $root . '/includes/Editor_Content_Support.p
 $editor_rest_source = file_get_contents( $root . '/includes/Rest_Controller.php' );
 toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ) && false !== strpos( $editor_support, 'assets/editor-content-support/text-utils.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support/internal-links.js' ), 'Post editor content support enqueues its editor assets.' );
 toolbox_assert( false !== strpos( $editor_support, "array( 'npcink-toolbox-editor-content-support-text-utils' )" ) && false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-internal-links', 'wp-api-fetch'" ), 'Editor content-support parts load before the main bundle through the enqueue dependency chain.' );
-$editor_support_part_sources = '';
-foreach ( glob( $root . '/assets/editor-content-support/*.js' ) ?: array() as $editor_support_part_path ) {
-	$editor_support_part_sources .= "\n" . (string) file_get_contents( $editor_support_part_path );
-}
+$editor_support_part_sources = toolbox_read_editor_content_support_parts( $root );
 toolbox_assert( '' !== $editor_support_part_sources && false === strpos( $editor_support_part_sources, '__(' ) && false === strpos( $editor_support_part_sources, 'apiFetch' ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-text-utils'" ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-internal-links'" ), 'Editor content-support parts stay pure: no translations, no requests, and no per-part script translations.' );
+$editor_main_js_source = (string) file_get_contents( $root . '/assets/editor-content-support.js' );
+$internal_links_part_source   = (string) file_get_contents( $root . '/assets/editor-content-support/internal-links.js' );
+$internal_links_exported      = array();
+if ( preg_match( '/window\.NpcinkToolboxInternalLinkHelpers = Object\.freeze\(\{(.*?)\n\t\t\}\);/s', $internal_links_part_source, $internal_links_export_match ) ) {
+	preg_match_all( '/\n\t\t\t([\w$]+),/', $internal_links_export_match[1], $internal_links_export_names );
+	$internal_links_exported = $internal_links_export_names[1];
+}
+$internal_links_destructured = array();
+if ( preg_match( '/const \{(.*?)\n\t\} = \(typeof window [^\n]*window\.NpcinkToolboxInternalLinkHelpers\)/s', $editor_main_js_source, $internal_links_destructure_match ) ) {
+	preg_match_all( '/\n\t\t([\w$]+),/', $internal_links_destructure_match[1], $internal_links_destructure_names );
+	$internal_links_destructured = $internal_links_destructure_names[1];
+}
+$internal_links_expected = array(
+	'canonicalInternalLinkUrl', 'internalLinkBlockContent', 'internalLinkUrlIsSafe',
+	'internalLinkAnchorIsSpecific', 'internalLinkRangesOverlap', 'internalLinkBatchPreflight',
+	'internalLinkMatchRange', 'internalLinkRangeHasLink', 'internalLinkBlocksContainUrl',
+	'internalLinkCount', 'internalLinkEditorPolicy', 'dedupeInternalLinkCandidates',
+	'prepareInternalLinkApplication', 'prepareInternalLinkBatchApplication',
+	'internalLinkSelectedText', 'canUndoInternalLink', 'canUndoInternalLinkBatch',
+	'internalLinkContractValue', 'recommendationCountBucket', 'internalLinkTelemetrySnapshots',
+	'internalLinkSavedStateChanged', 'internalLinkSourcePreview',
+);
+$internal_links_exported_sorted      = $internal_links_exported;
+$internal_links_destructured_sorted  = $internal_links_destructured;
+$internal_links_expected_sorted      = $internal_links_expected;
+sort( $internal_links_exported_sorted );
+sort( $internal_links_destructured_sorted );
+sort( $internal_links_expected_sorted );
+toolbox_assert( $internal_links_expected_sorted === $internal_links_exported_sorted && $internal_links_expected_sorted === $internal_links_destructured_sorted, 'The main bundle destructures exactly the frozen internal-links namespace export list, including every helper the main bundle still calls.' );
+$text_utils_part_source = (string) file_get_contents( $root . '/assets/editor-content-support/text-utils.js' );
+$text_utils_exported    = array();
+if ( preg_match( '/window\.NpcinkToolboxTextHelpers = Object\.freeze\(\{(.*?)\n\t\t\}\);/s', $text_utils_part_source, $text_utils_export_match ) ) {
+	preg_match_all( '/\n\t\t\t([\w$]+),/', $text_utils_export_match[1], $text_utils_export_names );
+	$text_utils_exported = $text_utils_export_names[1];
+}
+$text_utils_destructured = array();
+if ( preg_match( '/const \{ ([\w, ]+) \} = \(typeof window [^\n]*window\.NpcinkToolboxTextHelpers\)/', $editor_main_js_source, $text_utils_destructure_match ) ) {
+	$text_utils_destructured = array_map( 'trim', explode( ',', $text_utils_destructure_match[1] ) );
+}
+$text_utils_expected = array( 'normalizeText', 'plainTextFromHtml', 'truncateText' );
+sort( $text_utils_exported );
+sort( $text_utils_destructured );
+sort( $text_utils_expected );
+toolbox_assert( $text_utils_expected === $text_utils_exported && $text_utils_expected === $text_utils_destructured, 'The main bundle destructures exactly the frozen text-utils namespace export list.' );
 toolbox_assert( false !== strpos( $editor_support, "'wp-block-editor'" ) && false !== strpos( $editor_support, "'wp-rich-text'" ), 'Post editor content support loads the native rich-text dependency for reviewed visible-state internal-link application.' );
 $editor_support_assets = toolbox_read_editor_content_support_assets( $root );
 toolbox_assert( false !== strpos( $editor_support_assets, 'internal_link_rejected' ) && false !== strpos( $editor_support_assets, 'internal_link_undone' ) && false !== strpos( $editor_support_assets, 'undo_conflict' ) && false !== strpos( $editor_support_assets, 'candidate_not_adopted' ) && false !== strpos( $editor_support_assets, "sourceObjectType: 'internal_link_candidate'" ) && false !== strpos( $editor_support_assets, "redaction_status: 'metadata_only'" ), 'Internal-link feedback remains anonymous metadata and records apply, reject, ignore, undo, and bounded reason labels.' );
