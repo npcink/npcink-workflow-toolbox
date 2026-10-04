@@ -57,9 +57,17 @@ final class Editor_Content_Support {
 		);
 
 		wp_enqueue_script(
+			'npcink-toolbox-editor-content-support-internal-links',
+			NPCINK_TOOLBOX_URL . 'assets/editor-content-support/internal-links.js',
+			array( 'npcink-toolbox-editor-content-support-text-utils' ),
+			$this->asset_version( 'assets/editor-content-support/internal-links.js' ),
+			true
+		);
+
+		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support',
 			NPCINK_TOOLBOX_URL . 'assets/editor-content-support.js',
-			array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-text-utils', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
+			array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
 			$script_version,
 			true
 		);

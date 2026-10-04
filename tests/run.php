@@ -1025,7 +1025,13 @@ toolbox_assert( false !== strpos( $development_workflow, 'accepted_fix' ) && fal
 
 $editor_support = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
 $editor_rest_source = file_get_contents( $root . '/includes/Rest_Controller.php' );
-toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ), 'Post editor content support enqueues its editor assets.' );
+toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ) && false !== strpos( $editor_support, 'assets/editor-content-support/text-utils.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support/internal-links.js' ), 'Post editor content support enqueues its editor assets.' );
+toolbox_assert( false !== strpos( $editor_support, "array( 'npcink-toolbox-editor-content-support-text-utils' )" ) && false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-internal-links', 'wp-api-fetch'" ), 'Editor content-support parts load before the main bundle through the enqueue dependency chain.' );
+$editor_support_part_sources = '';
+foreach ( glob( $root . '/assets/editor-content-support/*.js' ) ?: array() as $editor_support_part_path ) {
+	$editor_support_part_sources .= "\n" . (string) file_get_contents( $editor_support_part_path );
+}
+toolbox_assert( '' !== $editor_support_part_sources && false === strpos( $editor_support_part_sources, '__(' ) && false === strpos( $editor_support_part_sources, 'apiFetch' ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-text-utils'" ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-internal-links'" ), 'Editor content-support parts stay pure: no translations, no requests, and no per-part script translations.' );
 toolbox_assert( false !== strpos( $editor_support, "'wp-block-editor'" ) && false !== strpos( $editor_support, "'wp-rich-text'" ), 'Post editor content support loads the native rich-text dependency for reviewed visible-state internal-link application.' );
 $editor_support_assets = toolbox_read_editor_content_support_assets( $root );
 toolbox_assert( false !== strpos( $editor_support_assets, 'internal_link_rejected' ) && false !== strpos( $editor_support_assets, 'internal_link_undone' ) && false !== strpos( $editor_support_assets, 'undo_conflict' ) && false !== strpos( $editor_support_assets, 'candidate_not_adopted' ) && false !== strpos( $editor_support_assets, "sourceObjectType: 'internal_link_candidate'" ) && false !== strpos( $editor_support_assets, "redaction_status: 'metadata_only'" ), 'Internal-link feedback remains anonymous metadata and records apply, reject, ignore, undo, and bounded reason labels.' );

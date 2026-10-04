@@ -5,12 +5,23 @@ import { fileURLToPath } from 'node:url';
 const partDir = fileURLToPath(new URL('../assets/editor-content-support/', import.meta.url));
 const mainPath = fileURLToPath(new URL('../assets/editor-content-support.js', import.meta.url));
 
-// Part filenames must sort in dependency order before the main bundle loads.
+// Dependency order, mirroring the wp_enqueue_script dependency chain in
+// includes/Editor_Content_Support.php. A part file on disk that is not
+// listed here fails loudly instead of loading in a wrong order.
+const PART_ORDER = [
+	'text-utils.js',
+	'internal-links.js',
+];
+
 export function readEditorContentSupportSources() {
 	const partNames = fs.existsSync(partDir)
-		? fs.readdirSync(partDir).filter((name) => name.endsWith('.js')).sort()
+		? fs.readdirSync(partDir).filter((name) => name.endsWith('.js'))
 		: [];
-	return [...partNames.map((name) => path.join(partDir, name)), mainPath]
+	const unregistered = partNames.filter((name) => !PART_ORDER.includes(name));
+	if (unregistered.length) {
+		throw new Error(`Unregistered editor content-support parts: ${unregistered.join(', ')}`);
+	}
+	return [...PART_ORDER, ''].map((name) => (name ? path.join(partDir, name) : mainPath))
 		.map((filePath) => fs.readFileSync(filePath, 'utf8'));
 }
 
