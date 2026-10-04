@@ -3,13 +3,15 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
+import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(process.argv.slice(2).filter((arg) => arg.includes('=')).map((arg) => arg.split(/=(.*)/s, 2)));
 const evalLab = process.env.NPCINK_EVAL_LAB_PATH || path.resolve(root, '../npcink-eval-lab');
 const fixturePath = path.resolve(root, args.fixture || path.join(evalLab, 'link-recommendation/fixtures/batch-adversarial.v1.json'));
 const outputPath = path.resolve(root, args.output || 'build/eval/link-batch-adversarial-results.json');
 
-const source = fs.readFileSync(path.join(root, 'assets/editor-content-support.js'), 'utf8');
+const source = readEditorContentSupportBundle();
 const windowObject = { location: { href: 'https://example.test/wp-admin/post.php' }, wp: {} };
 windowObject.window = windowObject;
 vm.runInNewContext(source, { window: windowObject, URL, Object, Array, String, Number, Boolean, Set }, { filename: 'editor-content-support.js' });

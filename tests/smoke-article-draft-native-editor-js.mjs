@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import vm from 'node:vm';
 
-const sourcePath = new URL('../assets/editor-content-support.js', import.meta.url);
-const source = fs.readFileSync(sourcePath, 'utf8');
+import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
+
+const source = readEditorContentSupportBundle();
 const expose = `
 	window.__NpcinkArticleDraftTest = {
 		articleDraftPreviewBlocks,
