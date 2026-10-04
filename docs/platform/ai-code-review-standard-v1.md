@@ -134,6 +134,69 @@ notification step itself would have failed with 403 exactly when needed.
 The template now grants `issues: write` and updates a single tagged marker
 comment per pull request instead of adding one comment per failed attempt.
 
+## Sync And Revalidation Round - 2026-10-04
+
+Enrolled-copy re-sync to the updated template (same-day round):
+
+| Repository | Pull request | Status |
+| --- | --- | --- |
+| `npcink-abilities-toolkit` | #188 | merged |
+| `npcink-governance-core` | #86 | merged |
+| `npcink-ai-client-adapter` | #65 | merged |
+| `npcink-cloud-addon` | #210 | merged |
+| `npcink-eval-lab` | #102 | merged |
+| `npcink-ai-cloud` | #1060 | open: pre-existing `backend-targeted (contract-3)` failure on master since 2026-10-02's last green full CI (diagnosis in the pull request; unrelated to the one-file workflow diff) |
+| `npcink-device-inventory` | #7 | open: `npm audit --audit-level=high` turned red on the unchanged dependency tree after a new advisory (green at enrollment #6 on 2026-09-29; diagnosis in the pull request) |
+
+Every delivered review round was triaged - fixed, or declined with the
+rationale recorded in the thread. Declines that will recur on future
+rounds, recorded once here so they can be cited:
+
+- **Workflow-level `issues: write` (least privilege).** GitHub Actions has
+  no per-step permissions; splitting the notification steps into their own
+  job is the only complete fix and was declined as doubling the workflow
+  surface for a marginal delta: the pinned action already holds
+  `pull-requests: write`, which by itself allows posting pull-request
+  review comments. Declined on `npcink-governance-core` #86; the same
+  finding recurred on `npcink-ai-client-adapter` #65,
+  `npcink-cloud-addon` #210, and the pilot canary #189 and was declined
+  there. The split-job hardening remains a valid future option.
+- **Marker on `cancelled()` runs.** A cancelled run is always superseded
+  by a newer run in the same per-PR concurrency group, which either
+  delivers the review or posts the marker itself. Declined on the pilot
+  #188 (round 3) and `npcink-cloud-addon` #210.
+- **Hardcoded `github-actions[bot]` match.** The template posts with the
+  default GITHUB_TOKEN, so the identity is fixed by construction;
+  relaxing the match to any Bot would let other bots' echoes of the
+  marker string be selected. Declined on `npcink-cloud-addon` #210.
+- **Canary round nits** (concurrency group, docs-only preflight,
+  `pr_number`-versus-refs precedence): declined on the pilot #190 with
+  per-finding rationale in the threads.
+
+Action pin style: the review action receives the LLM auth token, and the
+tag pin was flagged twice in this round (`npcink-ai-client-adapter` #65,
+low; pilot canary #189, high). Decision: the template adopts the
+commit-SHA pin (`v1.12.10` resolves to tag object `b465046`, commit
+`579b931` — matching this standard's verification record) together with
+the next template revision, which is the planned runner-image bump; the
+pilot's runner canary already pins the SHA and proves it works. Enrolled
+copies move to the SHA pin in the same re-sync.
+
+Ubuntu 26.04 revalidation (evidence, not projection): the `ubuntu-26.04`
+label is selectable as of 2026-10-04 (GA image `20260927.149`,
+Ubuntu 26.04.1 LTS; runner-images#14748 schedules the `ubuntu-latest`
+flip for 2026-10-19 through 2026-11-19). Pilot canary runs
+`37206797217` and `37222950038` show the SHA-pinned action downloading
+and executing end-to-end on that image, including the
+`workflow_dispatch` pr-number requirement, the range resolver, and the
+review engine's zero-selection path (`files_reviewed: 0`, 0 tokens); the
+second run failed only at its comment-upsert step for want of
+`issues: write` in the canary itself (fixed by pilot #191). The canary
+workflow (`.github/workflows/ocr-runner-canary.yml` in the pilot,
+merged via #189/#190) is the standing tool for revalidating any runner
+image before the template's `runs-on` pin is bumped: dispatch it with
+the number of a freshly merged docs-only pull request.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
