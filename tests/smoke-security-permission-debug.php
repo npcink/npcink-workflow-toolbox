@@ -281,7 +281,11 @@ $provider_source       = '';
 foreach ( $provider_source_files as $provider_source_file ) {
 	$provider_source .= "\n" . (string) file_get_contents( $provider_source_file );
 }
-$rest_source     = (string) file_get_contents( $root . '/includes/Rest_Controller.php' );
+$rest_controller_files = array( 'Rest_Controller.php' );
+$rest_source     = '';
+foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
+	$rest_source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );
+}
 $assert( false === strpos( $provider_source, "settings->get( 'include_raw_responses' )" ), 'Provider normalizers cannot bypass the centralized raw-response policy.' );
 $assert( false !== strpos( $rest_source, 'wp_http_validate_url' ) && false !== strpos( $rest_source, '$safe_port' ) && false !== strpos( $rest_source, '100.64.0.0/10' ) && false !== strpos( $rest_source, '2001:db8::/32' ) && false !== strpos( $rest_source, 'Cloud Addon owns fetch-time DNS and redirect validation' ), 'External source URLs reject literal special-purpose addresses and non-standard ports while Cloud Addon owns fetch-time DNS validation.' );
 

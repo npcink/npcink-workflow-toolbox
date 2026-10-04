@@ -137,6 +137,22 @@ function toolbox_read_editor_content_support_parts( string $root ): string {
  * part, parts appended after the main file so span contracts that close
  * inside the main bundle stay intact.
  */
+/**
+ * REST controller assertion source: the facade plus every cluster service
+ * it splits into, as an explicit list in bootstrap load order. Route
+ * registration, permission scoping, and the scope map stay in the facade,
+ * so a listed cluster service must never register routes itself.
+ */
+function toolbox_read_rest_controller_sources( string $root ): string {
+	$rest_controller_files = array( 'Rest_Controller.php' );
+	$source                = '';
+	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
+		$source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );
+	}
+
+	return $source;
+}
+
 function toolbox_read_editor_content_support_assets( string $root ): string {
 	$main = file_get_contents( $root . '/assets/editor-content-support.js' );
 	toolbox_assert( false !== $main, 'The editor content-support main bundle is readable.' );
@@ -172,7 +188,7 @@ foreach ( array( 'npcink_toolbox_weekly_media_fingerprint_scan', '`npcink_toolbo
 }
 $artifact_transport = file_get_contents( $root . '/includes/Cloud_Image_Artifact_Transport.php' );
 toolbox_assert( false !== strpos( $artifact_transport, 'npcink_cloud_addon_pull_media_artifact' ) && false !== strpos( $artifact_transport, 'npcink_cloud_addon_acknowledge_media_artifact_delivery' ) && false === strpos( $artifact_transport, 'npcink_cloud_addon_verified_runtime_client' ), 'Cloud image artifact transport uses only the artifact-specific Addon facade.' );
-$media_recognition_rest = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$media_recognition_rest = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== strpos( $media_recognition_rest, 'npcink_toolbox_media_recognition_start' ) && false !== strpos( $media_recognition_rest, 'npcink_toolbox_media_recognition_unavailable' ), 'The existing site-media index endpoint starts the single Toolbox-owned recognition continuation.' );
 toolbox_assert( false !== strpos( $main, 'modules/local-automation-runtime/src/NightlyInspection/Snapshot_Collector.php' ) && false !== strpos( $main, 'modules/local-automation-runtime/src/NightlyInspection/Manual_Dry_Run_Planner.php' ), 'Plugin bootstrap loads the Nightly Inspection manual preview classes.' );
 toolbox_assert( false !== strpos( $main, 'modules/local-automation-runtime/src/NightlyInspection/Basic_WP_Cron_Dry_Run.php' ), 'Plugin bootstrap loads the Nightly Inspection Basic WP-Cron dry-run class.' );
@@ -538,7 +554,7 @@ toolbox_assert( false !== strpos( $ai_plugin_overlap_doc, 'Ability_Surface_Metad
 toolbox_assert( false !== $ai_plugin_overlap_closeout_doc && false !== strpos( $ai_plugin_overlap_closeout_doc, 'PR #33' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'Admin Surface Follow-Up' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'Setup, Diagnostics, Review, and Planning/Handoff' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'Connection Diagnostics' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'toolbox_tab=cloud-checks' ), 'AI plugin overlap closeout records the merged overlap decision and grouped admin follow-up.' );
 toolbox_assert( false !== strpos( $ai_plugin_overlap_closeout_doc, 'authenticated WordPress admin render checks for Overview' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'https://magick-ai.local' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'synchronized to this worktree' ), 'AI plugin overlap closeout records the local admin render verification context.' );
 
-$rest_controller = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$rest_controller = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== $rest_controller && false !== strpos( $rest_controller, 'REQUIRED_TEXT_MAX_CHARS = 500' ) && false !== strpos( $rest_controller, 'mb_substr( $value, 0, $max_chars )' ), 'REST controller bounds common text inputs before Cloud calls.' );
 toolbox_assert( false !== strpos( $rest_controller, "get_param( 'managed_source' )" ) && false !== strpos( $rest_controller, "'managed_source'      => sanitize_key" ), 'REST Cloud web search test forwards the managed_source lane for Zhihu capability checks.' );
 toolbox_assert( false !== strpos( $rest_controller, 'EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000' ) && false !== strpos( $rest_controller, 'EDITOR_SELECTED_TEXT_MAX_CHARS = 2000' ) && false !== strpos( $rest_controller, "'content_full_text'" ) && false !== strpos( $rest_controller, "'selected_text_full'" ) && false !== strpos( $rest_controller, "\$context['content_full_text'] ?? \$context['content_text']" ), 'REST editor summary generation and paragraph review use bounded full text sources while other editor actions keep short context.' );
@@ -1056,7 +1072,7 @@ toolbox_assert( false !== strpos( $development_workflow, 'docs/platform/README.m
 toolbox_assert( false !== strpos( $development_workflow, 'accepted_fix' ) && false !== strpos( $development_workflow, 'accepted_exception' ) && false !== strpos( $development_workflow, 'rejected_finding' ) && false !== strpos( $development_workflow, 'Accepted exceptions must point to' ), 'Development workflow requires adversarial findings to be triaged before implementation work.' );
 
 $editor_support = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
-$editor_rest_source = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$editor_rest_source = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ) && false !== strpos( $editor_support, 'assets/editor-content-support/text-utils.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support/internal-links.js' ), 'Post editor content support enqueues its editor assets.' );
 toolbox_assert( false !== strpos( $editor_support, "array( 'npcink-toolbox-editor-content-support-text-utils' )" ) && false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-internal-links', 'wp-api-fetch'" ), 'Editor content-support parts load before the main bundle through the enqueue dependency chain.' );
 $editor_support_part_sources = toolbox_read_editor_content_support_parts( $root );
@@ -1675,7 +1691,7 @@ toolbox_assert( false !== strpos( $dashboard_widget, '本地备份，数据可�
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-tab-target="topic-pool"' ) && false === strpos( $admin_page, 'render_hot_topic_pool_panel' ), 'Toolbox admin no longer hosts the Zhihu hot topic pool tab.' );
 toolbox_assert( false === file_exists( $root . '/includes/Hot_Topics_Page.php' ) && false === strpos( $hot_topic_pool, 'npcink-hot-topics' ) && false === strpos( $admin_css, 'npcink-toolbox__topic-pool-row' ), 'Redundant Today Topics page, stale URL helper, and page-only topic-pool styles are removed.' );
 
-$rest = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$rest = toolbox_read_rest_controller_sources( $root );
 $publish_preflight_service = file_get_contents( $root . '/includes/Publish_Preflight_Service.php' );
 $route_boundary_table = json_decode( (string) file_get_contents( $root . '/docs/route-boundary-table.json' ), true );
 toolbox_assert( is_array( $route_boundary_table ) && 'route_boundary_table.v1' === (string) ( $route_boundary_table['schema_version'] ?? '' ), 'Route boundary table exposes the v1 schema.' );
