@@ -99,6 +99,33 @@ Local machine verification completed before this standard was written:
   roughly 1.4M input tokens (mostly cached) and 8-10 minutes wall clock, so
   CI rollout keeps PR-event-only triggering and the docs-only auto-skip.
 
+## Template Update - 2026-10-04
+
+Incident: on `npcink-abilities-toolkit` PR #185 the OpenCodeReview run failed
+provider-side and the failure was silent - no comments reached the pull
+request, the workflow is advisory and never required, and the pull request
+merged with no AI review delivered at all. The gap was only noticed during a
+2026-10-04 usage audit. The run artifact (`ocr-review-result-*`) recorded
+`status: failed`, `comments: 0`, and "all 3 file review(s) failed - check
+your LLM configuration and API key": nothing was computed and lost, the LLM
+calls themselves failed. Runs before and after the same window succeeded, so
+the failure class is transient provider error, not configuration drift.
+
+Template changes in this update (enrolled repositories re-sync their
+`.github/workflows/ocr-review.yml` copies from the template):
+
+- A failure-notification step (`if: failure()`) now posts one marker comment
+  on the pull request when the review run fails, stating that no AI review
+  was delivered and how to retry. Bot comments cannot re-trigger the
+  workflow, so the step cannot loop.
+- The runner is pinned to `ubuntu-24.04` ahead of the 2026-10-19
+  `ubuntu-latest` -> Ubuntu 26 migration (actions/runner-images#14748);
+  bump deliberately after revalidating the review action there.
+
+Also recorded: the `actions/upload-artifact` Node.js 20 deprecation warning
+comes from inside `alibaba/open-code-review@v1.12.10` and is not fixable in
+this template; bump the action pin when upstream ships the fix.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
@@ -174,6 +201,12 @@ adoption decision record.
   grants no workflow runtime, scheduling, approval, audit, prompt, or provider
   routing authority to any Npcink repository, and does not create a second
   registry of any kind.
+- Delivery confirmation. Advisory means a failed run blocks nothing, and a
+  silent failure equals no review at all. Every merged pull request must have
+  had at least one delivered review round (posted review comments, not merely
+  a green or missing check). A failed run leaves a marker comment; retry with
+  a `/open-code-review` comment or record in the pull request why the change
+  merges unreviewed.
 - Rollback. Remove the repository's workflow file and delete its secrets; the
   local CLI is independent (`npm uninstall -g @alibaba-group/open-code-review`).
 
