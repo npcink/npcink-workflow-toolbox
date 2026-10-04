@@ -67,7 +67,9 @@ Status: MVP architecture.
 | `modules/local-automation-runtime/` | Isolated bundled module for the future `npcink-local-automation-runtime` owner; supports Phase 1A Manual Read-Only Preview plus one Phase 2 disabled-by-default Basic WP-Cron dry-run hook for the Local Fallback Preview. It is not Toolbox runtime lifecycle ownership, scheduler truth, queue ownership, retry policy, lease storage, or run recovery. |
 | `assets/admin.js` | Vanilla JS for fixed tool form submission and summary-first result rendering. |
 | `assets/admin.css` | Admin layout, summary/detail result panels, and tool result styling. |
-| `assets/editor-content-support.js` | Block editor sidebar panel for article checkup, publish preflight, taxonomy/tag, internal-link, image-candidate, outline, summary support flows, and selected-block paragraph review. |
+| `assets/editor-content-support.js` | Block editor sidebar panel for article checkup, publish preflight, taxonomy/tag, internal-link, image-candidate, outline, summary support flows, and selected-block paragraph review. Pure helper clusters are split into `assets/editor-content-support/*.js` part files that load before the main bundle through the enqueue dependency chain and communicate only through frozen `window.NpcinkToolbox*` namespaces. |
+| `assets/editor-content-support/text-utils.js` | Pure text helpers (`normalizeText`, `plainTextFromHtml`, `truncateText`) behind `window.NpcinkToolboxTextHelpers`; no translations, requests, or editor state. |
+| `assets/editor-content-support/internal-links.js` | Pure internal-link cluster (canonical URLs, batch preflight, editor policy, transaction preparation, undo checks, telemetry snapshots, dedupe, source previews) behind `window.NpcinkToolboxInternalLinkHelpers`; rich-text APIs arrive as parameters. |
 | `assets/editor-content-support.css` | Compact editor-side layout for the content-support panel. |
 
 `Site_Knowledge_Auto_Sync` is a compatibility projection only; it must never

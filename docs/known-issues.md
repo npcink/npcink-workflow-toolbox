@@ -37,12 +37,17 @@ with the closing commit or PR for one release cycle, then prune.
 - **Legacy Chinese-source msgids migrate file-by-file** under the
   [Translation Source Language Policy](translation-source-language-policy.md);
   bulk regeneration of the JED catalogs is forbidden by the same policy.
-- **Structure: staged splits are still owed** for
-  `assets/editor-content-support.js` (~11k lines), `includes/Rest_Controller.php`
-  (~8.5k), `assets/admin.js` (~8k), and `includes/Admin_Page.php` (~4.5k),
-  following [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
-  (behavior tests first, string contracts untouched). Source: the
-  2026-10-03 systematic review.
+- **Structure: staged splits are partially landed.** The first
+  editor-content-support session extracted the pure `text-utils.js` and
+  `internal-links.js` part files behind frozen namespaces (main bundle
+  11,191 -> 10,724 lines). Still owed: the remaining
+  `editor-content-support.js` clusters (image candidates, audio,
+  preflight, progressive, draft flows), `includes/Rest_Controller.php`
+  (~8.5k), `assets/admin.js` (~8k), and `includes/Admin_Page.php`
+  (~4.5k), following [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
+  (portable assertion sources first; part files must carry no
+  translations unless a per-handle JED contract is added). Sources: the
+  2026-10-03 systematic review and the first split session.
 - **`Rest_Controller::rest_route_scope()` coverage is asserted one-way**:
   a route registered but missing from the scope map silently degrades to
   coarse `manage_options` instead of failing the gate. A static contract
