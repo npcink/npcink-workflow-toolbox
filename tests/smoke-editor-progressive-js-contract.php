@@ -5,8 +5,24 @@
  * @package Npcink_Toolbox
  */
 
-$root      = dirname( __DIR__ );
-$editor_js = file_get_contents( $root . '/assets/editor-content-support.js' );
+$root               = dirname( __DIR__ );
+$editor_main_source = file_get_contents( $root . '/assets/editor-content-support.js' );
+$editor_js          = '';
+if ( false !== $editor_main_source ) {
+	$editor_js = (string) $editor_main_source;
+}
+$editor_support_php = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
+$editor_registered_parts = is_string( $editor_support_php ) && preg_match_all( '#assets/editor-content-support/([\w.-]+\.js)#', $editor_support_php, $editor_part_matches )
+	? array_values( array_unique( $editor_part_matches[1] ) )
+	: array();
+$editor_disk_parts = array_map( 'basename', glob( $root . '/assets/editor-content-support/*.js' ) ?: array() );
+sort( $editor_disk_parts );
+$editor_sorted_registered_parts = $editor_registered_parts;
+sort( $editor_sorted_registered_parts );
+toolbox_editor_progressive_js_assert( ! empty( $editor_registered_parts ) && $editor_disk_parts === $editor_sorted_registered_parts, 'Every editor content-support part on disk is registered in the enqueue chain, and every registered part exists on disk.' );
+foreach ( $editor_registered_parts as $editor_registered_part ) {
+	$editor_js .= "\n" . (string) file_get_contents( $root . '/assets/editor-content-support/' . $editor_registered_part );
+}
 
 function toolbox_editor_progressive_js_pass( string $message ): void {
 	echo "PASS: {$message}\n";
@@ -33,7 +49,7 @@ function toolbox_editor_progressive_js_block( string $source, string $pattern, s
 	return (string) $matches[0];
 }
 
-toolbox_editor_progressive_js_assert( false !== $editor_js, 'Editor Content Support JavaScript is readable.' );
+toolbox_editor_progressive_js_assert( false !== $editor_main_source && '' !== $editor_js, 'Editor Content Support JavaScript is readable.' );
 
 $payload_block = toolbox_editor_progressive_js_block(
 	$editor_js,

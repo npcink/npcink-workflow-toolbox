@@ -61,8 +61,22 @@ npcink_fixed_button_check(
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => 'workflow_projection_proven' === ( $button['adapter_parity_status'] ?? '' ) ) ), 'Only the currently proven media workflow claims full projection parity' );
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => true === ( $button['direct_wordpress_write'] ?? false ) ) ), 'Only Media Library Optimization declares the bounded direct-write exception' );
 
-$editor_source = file_get_contents( $root . '/assets/editor-content-support.js' );
-$editor_block  = false !== $editor_source && preg_match( '/const flows = \[(.*?)\n\t\];\n\n\tconst flowGroups/s', $editor_source, $editor_match ) ? $editor_match[1] : '';
+$editor_source_raw = file_get_contents( $root . '/assets/editor-content-support.js' );
+npcink_fixed_button_check( false !== $editor_source_raw, 'Editor content-support main bundle is readable' );
+$editor_source = false !== $editor_source_raw ? (string) $editor_source_raw : '';
+$editor_support_php = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
+$editor_registered_parts = is_string( $editor_support_php ) && preg_match_all( '#assets/editor-content-support/([\w.-]+\.js)#', $editor_support_php, $editor_part_matches )
+	? array_values( array_unique( $editor_part_matches[1] ) )
+	: array();
+$editor_disk_parts = array_map( 'basename', glob( $root . '/assets/editor-content-support/*.js' ) ?: array() );
+sort( $editor_disk_parts );
+$editor_sorted_registered_parts = $editor_registered_parts;
+sort( $editor_sorted_registered_parts );
+npcink_fixed_button_check( ! empty( $editor_registered_parts ) && $editor_disk_parts === $editor_sorted_registered_parts, 'Every editor content-support part on disk is registered in the enqueue chain, and every registered part exists on disk' );
+foreach ( $editor_registered_parts as $editor_registered_part ) {
+	$editor_source .= "\n" . (string) file_get_contents( $root . '/assets/editor-content-support/' . $editor_registered_part );
+}
+$editor_block  = preg_match( '/const flows = \[(.*?)\n\t\];\n\n\tconst flowGroups/s', $editor_source, $editor_match ) ? $editor_match[1] : '';
 preg_match_all( "/\n\s*intent:\s*'([^']+)'/", $editor_block, $editor_intents );
 $editor_table_count = count( array_filter( $buttons, static fn( array $button ): bool => 'editor_content_support' === ( $button['surface'] ?? '' ) ) );
 npcink_fixed_button_check( $editor_table_count === count( array_unique( $editor_intents[1] ?? array() ) ), 'Every committed editor flow has one fixed-button contract row' );
