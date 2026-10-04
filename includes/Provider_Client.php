@@ -543,9 +543,8 @@ final class Provider_Client extends Provider_Client_Support {
 		return $this->flagged_media->local_flagged_media_review_response( $runtime_payload, $review_set, $cloud_status );
 	}
 	/**
-	 * @return array{path:string,filename:string,mime_type:string,media_fingerprint:string}|array{}
+	 * @return array<int|string,mixed>|WP_Error Envelope or item shapes for the bounded continuation, or a transport error.
 	 */
-
 	public function refresh_site_media_index_batch( array $input ) {
 		$page = max( 1, absint( $input['page'] ?? 1 ) );
 		$per_page = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );

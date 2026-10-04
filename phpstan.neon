@@ -1,0 +1,13 @@
+parameters:
+	level: 5
+	treatPhpDocTypesAsCertain: false
+	paths:
+		- includes
+		- npcink-workflow-toolbox.php
+		- uninstall.php
+		- modules/local-automation-runtime/src
+	scanFiles:
+		- npcink-workflow-toolbox.php
+	bootstrapFiles:
+		- phpstan/stubs.php
+		- vendor/php-stubs/wordpress-stubs/wordpress-stubs.php

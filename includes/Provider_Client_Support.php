@@ -455,9 +455,9 @@ abstract class Provider_Client_Support {
 	}
 
 
-	protected function sanitize_string_list( $value ): array {
+	protected function sanitize_string_list( $value, int $max_items = 0 ): array {
 		$items = is_array( $value ) ? $value : array_filter( array_map( 'trim', explode( "\n", (string) $value ) ) );
-		return array_values(
+		$list = array_values(
 			array_filter(
 				array_map(
 					static fn( $item ): string => sanitize_textarea_field( (string) $item ),
@@ -466,6 +466,7 @@ abstract class Provider_Client_Support {
 				static fn( string $item ): bool => '' !== $item
 			)
 		);
+		return $max_items > 0 ? array_slice( $list, 0, $max_items ) : $list;
 	}
 
 

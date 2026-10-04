@@ -12,6 +12,8 @@
 
 namespace Npcink_Toolbox;
 
+use WP_Error;
+
 defined( 'ABSPATH' ) || exit;
 
 final class Provider_Discoverability_Service extends Provider_Client_Support {

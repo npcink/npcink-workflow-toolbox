@@ -74,14 +74,26 @@ with the closing commit or PR for one release cycle, then prune.
   against the exact `internalLinkBlockContent` defect class); a live
   Playwright pass over the editor sidebar remains owed before the next
   split session stacks more clusters.
-- **Toolbox is not yet enrolled in the PHPStan/PHPCS
-  [Static Analysis Standard v1](platform/static-analysis-standard-v1.md)**
-  (the enrollment table lists the adapter as required and the other
-  siblings as pending; this repository is absent). Enrolling advisory-first
-  is the recommended preparation for the `Rest_Controller.php` split.
+- **PHPStan/PHPCS ratchet debt after enrollment (2026-10-04).**
+  `composer analyse:php` still reports 133 level-5 findings (dominated by
+  defensive re-checks: `is_array()` on already-narrowed types, `??` on
+  stub-typed non-nullable `WP_Post` properties and proven-present offsets)
+  and 16 unused methods (mostly `Admin_Page` media-derivative render
+  helpers that look like ADR-017 cleanup leftovers); `composer
+  lint:standards` reports 505 errors + 3,375 warnings across 38 files,
+  3,801 of them auto-fixable alignment noise. Both gates run advisory in
+  CI. Promotion requires: delete the dead methods in a dedicated cleanup
+  (each deletion must be checked against pinned needles), ratchet the
+  defensive findings into narrow commented `ignoreErrors` or code fixes,
+  and hold `phpcbf` until the needle-pinned sources are portable (the
+  Rest_Controller split does this for its own file).
 
 ## Recently Closed
 
+- **Toolbox enrolled in Static Analysis Standard v1** — 2026-10-04,
+  advisory-first per the promotion rule: dev dependencies, PHPStan level 5
+  with WordPress stubs, PHPCS with the 8.0 floor, an advisory CI job on
+  PHP 8.4, and five real first-run defects fixed in the introducing PR.
 - **Roadmap had no release anchors** — resolved 2026-10-03 by the Release
   Anchors section in [roadmap.md](roadmap.md).
 - **ADR number collision (two ADR-016 drafts)** — resolved 2026-10-03:

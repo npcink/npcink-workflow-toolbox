@@ -6,3 +6,6 @@
 !.env.*.example
 build/
 tests/artifacts/
+
+# Composer static-analysis tooling (composer.lock is committed; vendor is not)
+vendor/
