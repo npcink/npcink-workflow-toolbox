@@ -144,6 +144,25 @@ function toolbox_read_editor_content_support_assets( string $root ): string {
 	return (string) $main . toolbox_read_editor_content_support_parts( $root );
 }
 
+/**
+ * REST controller assertion source: the facade plus every cluster service
+ * it splits into, as an explicit list in bootstrap load order. Route
+ * registration, permission scoping, and the scope map stay in the facade,
+ * so a listed cluster service must never register routes itself.
+ */
+function toolbox_read_rest_controller_sources( string $root ): string {
+	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php' );
+	$source                = '';
+	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
+		$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );
+		toolbox_assert( false !== $rest_controller_file_contents, "The REST controller source file {$rest_controller_file} is readable." );
+		$source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) $rest_controller_file_contents;
+	}
+
+	return $source;
+}
+
+
 $main = file_get_contents( $root . '/npcink-workflow-toolbox.php' );
 $site_ops_insight_builder = file_get_contents( $root . '/includes/Site_Ops_Insight_Builder.php' );
 toolbox_assert( false !== $main && str_contains( $main, 'Plugin Name: Npcink Workflow Toolbox' ), 'Plugin header is present.' );
@@ -172,7 +191,7 @@ foreach ( array( 'npcink_toolbox_weekly_media_fingerprint_scan', '`npcink_toolbo
 }
 $artifact_transport = file_get_contents( $root . '/includes/Cloud_Image_Artifact_Transport.php' );
 toolbox_assert( false !== strpos( $artifact_transport, 'npcink_cloud_addon_pull_media_artifact' ) && false !== strpos( $artifact_transport, 'npcink_cloud_addon_acknowledge_media_artifact_delivery' ) && false === strpos( $artifact_transport, 'npcink_cloud_addon_verified_runtime_client' ), 'Cloud image artifact transport uses only the artifact-specific Addon facade.' );
-$media_recognition_rest = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$media_recognition_rest = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== strpos( $media_recognition_rest, 'npcink_toolbox_media_recognition_start' ) && false !== strpos( $media_recognition_rest, 'npcink_toolbox_media_recognition_unavailable' ), 'The existing site-media index endpoint starts the single Toolbox-owned recognition continuation.' );
 toolbox_assert( false !== strpos( $main, 'modules/local-automation-runtime/src/NightlyInspection/Snapshot_Collector.php' ) && false !== strpos( $main, 'modules/local-automation-runtime/src/NightlyInspection/Manual_Dry_Run_Planner.php' ), 'Plugin bootstrap loads the Nightly Inspection manual preview classes.' );
 toolbox_assert( false !== strpos( $main, 'modules/local-automation-runtime/src/NightlyInspection/Basic_WP_Cron_Dry_Run.php' ), 'Plugin bootstrap loads the Nightly Inspection Basic WP-Cron dry-run class.' );
@@ -538,7 +557,7 @@ toolbox_assert( false !== strpos( $ai_plugin_overlap_doc, 'Ability_Surface_Metad
 toolbox_assert( false !== $ai_plugin_overlap_closeout_doc && false !== strpos( $ai_plugin_overlap_closeout_doc, 'PR #33' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'Admin Surface Follow-Up' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'Setup, Diagnostics, Review, and Planning/Handoff' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'Connection Diagnostics' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'toolbox_tab=cloud-checks' ), 'AI plugin overlap closeout records the merged overlap decision and grouped admin follow-up.' );
 toolbox_assert( false !== strpos( $ai_plugin_overlap_closeout_doc, 'authenticated WordPress admin render checks for Overview' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'https://magick-ai.local' ) && false !== strpos( $ai_plugin_overlap_closeout_doc, 'synchronized to this worktree' ), 'AI plugin overlap closeout records the local admin render verification context.' );
 
-$rest_controller = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$rest_controller = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== $rest_controller && false !== strpos( $rest_controller, 'REQUIRED_TEXT_MAX_CHARS = 500' ) && false !== strpos( $rest_controller, 'mb_substr( $value, 0, $max_chars )' ), 'REST controller bounds common text inputs before Cloud calls.' );
 toolbox_assert( false !== strpos( $rest_controller, "get_param( 'managed_source' )" ) && false !== strpos( $rest_controller, "'managed_source'      => sanitize_key" ), 'REST Cloud web search test forwards the managed_source lane for Zhihu capability checks.' );
 toolbox_assert( false !== strpos( $rest_controller, 'EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000' ) && false !== strpos( $rest_controller, 'EDITOR_SELECTED_TEXT_MAX_CHARS = 2000' ) && false !== strpos( $rest_controller, "'content_full_text'" ) && false !== strpos( $rest_controller, "'selected_text_full'" ) && false !== strpos( $rest_controller, "\$context['content_full_text'] ?? \$context['content_text']" ), 'REST editor summary generation and paragraph review use bounded full text sources while other editor actions keep short context.' );
@@ -1056,7 +1075,7 @@ toolbox_assert( false !== strpos( $development_workflow, 'docs/platform/README.m
 toolbox_assert( false !== strpos( $development_workflow, 'accepted_fix' ) && false !== strpos( $development_workflow, 'accepted_exception' ) && false !== strpos( $development_workflow, 'rejected_finding' ) && false !== strpos( $development_workflow, 'Accepted exceptions must point to' ), 'Development workflow requires adversarial findings to be triaged before implementation work.' );
 
 $editor_support = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
-$editor_rest_source = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$editor_rest_source = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ) && false !== strpos( $editor_support, 'assets/editor-content-support/text-utils.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support/internal-links.js' ), 'Post editor content support enqueues its editor assets.' );
 toolbox_assert( false !== strpos( $editor_support, "array( 'npcink-toolbox-editor-content-support-text-utils' )" ) && false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-internal-links', 'wp-api-fetch'" ), 'Editor content-support parts load before the main bundle through the enqueue dependency chain.' );
 $editor_support_part_sources = toolbox_read_editor_content_support_parts( $root );
@@ -1675,7 +1694,7 @@ toolbox_assert( false !== strpos( $dashboard_widget, '本地备份，数据可�
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-tab-target="topic-pool"' ) && false === strpos( $admin_page, 'render_hot_topic_pool_panel' ), 'Toolbox admin no longer hosts the Zhihu hot topic pool tab.' );
 toolbox_assert( false === file_exists( $root . '/includes/Hot_Topics_Page.php' ) && false === strpos( $hot_topic_pool, 'npcink-hot-topics' ) && false === strpos( $admin_css, 'npcink-toolbox__topic-pool-row' ), 'Redundant Today Topics page, stale URL helper, and page-only topic-pool styles are removed.' );
 
-$rest = file_get_contents( $root . '/includes/Rest_Controller.php' );
+$rest = toolbox_read_rest_controller_sources( $root );
 $publish_preflight_service = file_get_contents( $root . '/includes/Publish_Preflight_Service.php' );
 $route_boundary_table = json_decode( (string) file_get_contents( $root . '/docs/route-boundary-table.json' ), true );
 toolbox_assert( is_array( $route_boundary_table ) && 'route_boundary_table.v1' === (string) ( $route_boundary_table['schema_version'] ?? '' ), 'Route boundary table exposes the v1 schema.' );
@@ -2349,6 +2368,12 @@ toolbox_assert( false !== strpos( $rest, "\$this->post( '/ai/image-generation', 
 toolbox_assert( false !== strpos( $rest, "\$this->post( '/nightly-inspection/cloud-batch', 'nightly_inspection_cloud_batch' )" ) && false !== strpos( $rest, 'Snapshot_Collector' ) && false !== strpos( $rest, 'submit_nightly_inspection_cloud_batch' ), 'REST exposes a narrow Pro Nightly Inspection Cloud batch bridge backed by a local snapshot.' );
 toolbox_assert( false !== strpos( $rest, "\$this->get( '/nightly-inspection/cloud-runtime-entitlement', 'nightly_inspection_cloud_runtime_entitlement' )" ) && false !== strpos( $rest, 'get_nightly_inspection_cloud_runtime_entitlement' ) && false !== strpos( $rest, "'entitlement_route'      => '/nightly-inspection/cloud-runtime-entitlement'" ), 'REST exposes read-only Pro Cloud Runtime entitlement detail for Toolbox display.' );
 toolbox_assert( false !== strpos( $rest, "\$this->get( '/nightly-inspection/cloud-batch/recent', 'nightly_inspection_cloud_batch_recent' )" ) && false !== strpos( $rest, "\$this->get( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)', 'nightly_inspection_cloud_batch_status' )" ) && false !== strpos( $rest, "\$this->get( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/result', 'nightly_inspection_cloud_batch_result' )" ) && false !== strpos( $rest, "\$this->post( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/retry', 'nightly_inspection_cloud_batch_retry' )" ) && false !== strpos( $rest, 'get_nightly_inspection_cloud_batch_result' ) && false !== strpos( $rest, 'retry_nightly_inspection_cloud_batch' ), 'REST exposes Pro Cloud Batch recent/status/result/retry reads and Cloud-owned retry requests without creating a local queue.' );
+toolbox_assert( is_file( $root . '/includes/Rest_Nightly_Inspection_Bridges.php' ) && false !== strpos( $main, "includes/Rest_Nightly_Inspection_Bridges.php" ) && false === strpos( (string) file_get_contents( $root . '/includes/Plugin.php' ), 'Rest_Nightly_Inspection_Bridges' ), 'The nightly bridge cluster service file exists and loads through the plugin bootstrap only.' );
+foreach ( array( 'nightly_inspection_cloud_batch', 'nightly_inspection_cloud_batch_status', 'nightly_inspection_cloud_batch_recent', 'nightly_inspection_cloud_runtime_entitlement', 'nightly_inspection_cloud_batch_result', 'nightly_inspection_cloud_batch_retry' ) as $nightly_bridge_delegate ) {
+	toolbox_assert( false !== strpos( $rest_controller, "return \$this->nightly_bridges->{$nightly_bridge_delegate}" ), "REST facade delegates {$nightly_bridge_delegate} to the nightly bridge cluster." );
+}
+$nightly_bridges_source = (string) file_get_contents( $root . '/includes/Rest_Nightly_Inspection_Bridges.php' );
+toolbox_assert( false === strpos( $nightly_bridges_source, '$this->post(' ) && false === strpos( $nightly_bridges_source, '$this->get(' ) && false === strpos( $nightly_bridges_source, 'register_rest_route' ), 'The nightly bridge cluster service never registers routes itself; registration and permission scoping stay in the facade.' );
 toolbox_assert( false !== strpos( $rest, "\$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' )" ) && false !== strpos( $rest, 'build_nightly_inspection_review_plan' ), 'REST exposes a local Nightly Inspection Core review-plan builder without creating proposals directly.' );
 toolbox_assert( false !== strpos( $rest, "'payload_mode'    =>" ) && false !== strpos( $rest, "'retention_ttl'   =>" ) && false !== strpos( $rest, "'polling_registered'     => true" ), 'REST passes Pro Cloud Batch privacy, retention, and polling metadata.' );
 toolbox_assert( false !== strpos( $rest, 'site_knowledge_sync' ) && false !== strpos( $rest, 'site_knowledge_status' ) && false !== strpos( $rest, 'site_knowledge_search' ) && false !== strpos( $rest, 'article_index_statuses' ) && false !== strpos( $rest, 'public_site_knowledge_post_ids' ) && false !== strpos( $rest, "'indexed_post_ids_requested'" ) && false !== strpos( $rest, "'orderby'                => 'modified'" ), 'REST routes expose Cloud-managed site knowledge operations and require complete Cloud evidence for the most recently modified local article coverage.' );
