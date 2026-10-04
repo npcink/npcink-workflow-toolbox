@@ -74,6 +74,12 @@ with the closing commit or PR for one release cycle, then prune.
   against the exact `internalLinkBlockContent` defect class); a live
   Playwright pass over the editor sidebar remains owed before the next
   split session stacks more clusters.
+- **The standalone site-knowledge review UI smoke is red on master**
+  (`composer` script exists but is not in the default gate): it still pins
+  Admin_Page copy ("Review handoff", "Evidence first", "Core review only",
+  "No direct write") that a prior admin-surface cleanup removed. Update the
+  smoke to the current surface or retire it; found during the 2026-10-04
+  REST controller split portability pass.
 - **PHPStan/PHPCS ratchet debt after enrollment (2026-10-04).**
   `composer analyse:php` still reports 133 level-5 findings (dominated by
   defensive re-checks: `is_array()` on already-narrowed types, `??` on

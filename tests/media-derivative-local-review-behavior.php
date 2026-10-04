@@ -141,6 +141,7 @@ function npcink_toolbox_local_review_assert( bool $condition, string $message ):
 }
 
 eval( 'namespace Npcink_Toolbox; class Plugin { public const REST_NAMESPACE = "npcink-toolbox/v1"; }' );
+require_once dirname( __DIR__ ) . '/includes/Rest_Nightly_Inspection_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
 
 $controller  = ( new ReflectionClass( \Npcink_Toolbox\Rest_Controller::class ) )->newInstanceWithoutConstructor();

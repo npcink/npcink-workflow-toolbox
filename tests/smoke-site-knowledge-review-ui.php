@@ -33,7 +33,7 @@ $client              = '';
 foreach ( $client_source_files as $client_source_file ) {
 	$client .= "\n" . (string) file_get_contents( $client_source_file );
 }
-$rest_controller_files = array( 'Rest_Controller.php' );
+$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php' );
 $rest     = '';
 foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 	$rest .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );

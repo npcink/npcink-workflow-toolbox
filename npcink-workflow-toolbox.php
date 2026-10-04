@@ -51,6 +51,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Site_Ops_Insight_Builder.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Site_Ops_Cloud_Request_Builder.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Ability_Surface_Metadata.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Publish_Preflight_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Nightly_Inspection_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Content_Format.php';
 require_once NPCINK_TOOLBOX_DIR . 'modules/local-automation-runtime/src/Contract/Replay_Validator.php';
