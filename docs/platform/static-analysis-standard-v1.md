@@ -97,6 +97,7 @@ in code and keep the code fixes in the introducing PR:
 | Repository | Status |
 | --- | --- |
 | `npcink-ai-client-adapter` | required since 2026-10-04 (PR #56, #62) |
+| `npcink-workflow-toolbox` | advisory since 2026-10-04 (this file's reference setup; `analyse:php` uses `--memory-limit=4G` because the analysed tree is ~50k lines and 1G crashes the worker) |
 | `npcink-governance-core` | pending |
 | `npcink-abilities-toolkit` | pending |
 | `npcink-cloud-addon` | pending |

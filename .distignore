@@ -16,3 +16,6 @@ vendor
 node_modules
 build
 wporg-assets
+phpstan
+phpstan.neon
+phpcs.xml

@@ -17,13 +17,16 @@ jobs:
   php-contracts:
     name: PHP contracts
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+        # Pinned to the v2 tag commit to keep the mutable tag out of the
+        # supply chain.
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.0'
           coverage: none
@@ -31,6 +34,12 @@ jobs:
 
       - name: Validate Composer metadata
         run: composer validate --no-check-publish
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-php8.0-${{ hashFiles('composer.lock') }}
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
@@ -40,3 +49,46 @@ jobs:
 
       - name: Run WordPress.org review guard
         run: composer check:wporg
+
+  static-analysis:
+    name: Static analysis (advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        # Pinned to the v2 tag commit to keep the mutable tag out of the
+        # supply chain.
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      # Static Analysis Standard v1, advisory since 2026-10-04: the gate
+      # findings stay visible but never block. Promote to required by
+      # deleting continue-on-error once every PR since introduction has
+      # run both gates clean on master. PHPStan findings render as PR
+      # annotations; PHPCS findings appear in this job's log.
+      - name: Run PHPStan (level 5)
+        run: composer analyse:php -- --error-format=github
+        continue-on-error: true
+
+      - name: Run PHPCS
+        run: composer lint:standards
+        continue-on-error: true
+
+      - name: Run static contracts on PHP 8.4
+        run: composer test:all
