@@ -77,6 +77,24 @@ in code and keep the code fixes in the introducing PR:
   replay the needles against the reformatted source or apply the
   Provider Split Refactor Standard's portable-assertion-source step first.
 
+## Completion-Marker Guard (mandatory)
+
+A test harness that fails to execute is indistinguishable from a passing
+one when both exit 0. Any repo adopting the portable-assertion pattern —
+or any harness edit that touches a file opener — must gate on a
+completion artifact, not just the exit code: the run script prints a
+final marker (for example `Static contracts: ok`) and the composer task
+fails unless the marker appears:
+
+```json
+"test": "@php tests/run.php 2>&1 | tee /dev/stderr | grep -q 'Static contracts: ok'"
+```
+
+Recorded after the 2026-10-05 adapter incident: a portability edit split
+the `<?php` opener of the contracts file, PHP echoed the source as text
+with exit 0, and four merged extractions reported vacuous green runs
+until direct execution revealed it.
+
 ## Operational Lessons
 
 - **The generated stubs have gaps.** `ARRAY_A` and guarded bootstrap
