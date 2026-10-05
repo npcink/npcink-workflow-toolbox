@@ -48,5 +48,24 @@ abstract class Rest_Controller_Support {
 
 		return $value;
 	}
-}
 
+	protected function csv_list( string $value ): array {
+		$items = array_filter( array_map( 'trim', explode( ',', $value ) ) );
+		return array_values(
+			array_filter(
+				array_map( 'sanitize_text_field', $items ),
+				static fn( string $item ): bool => '' !== $item
+			)
+		);
+	}
+
+	protected function csv_absint_list( string $value ): array {
+		$items = array_filter( array_map( 'trim', explode( ',', $value ) ) );
+		return array_values(
+			array_filter(
+				array_map( 'absint', $items ),
+				static fn( int $item ): bool => 0 < $item
+			)
+		);
+	}
+}
