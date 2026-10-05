@@ -151,7 +151,7 @@ function toolbox_read_editor_content_support_assets( string $root ): string {
  * so a listed cluster service must never register routes itself.
  */
 function toolbox_read_rest_controller_sources( string $root ): string {
-	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php' );
+	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php' );
 	$source                = '';
 	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 		$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );
@@ -2377,7 +2377,12 @@ foreach ( array( 'web_search_test', 'web_search_diagnostics' ) as $web_search_de
 	toolbox_assert( false !== strpos( $rest_controller, "return \$this->web_search_bridges->{$web_search_delegate}( \$request );" ), "REST facade delegates {$web_search_delegate} to the web-search bridge cluster." );
 }
 toolbox_assert( false !== strpos( $rest_controller, 'extends Rest_Controller_Support' ) && false === strpos( $rest_controller, 'private function required_text' ), 'The shared required_text validator moves to the Rest_Controller_Support base that the facade and cluster services extend.' );
-foreach ( array( 'Rest_Controller_Support.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Web_Search_Bridges.php' ) as $rest_cluster_service_file ) {
+toolbox_assert( is_file( $root . '/includes/Rest_Site_Knowledge_Bridges.php' ) && false !== strpos( $main, "includes/Rest_Site_Knowledge_Bridges.php" ) && false === strpos( (string) file_get_contents( $root . '/includes/Plugin.php' ), 'Rest_Site_Knowledge_Bridges' ), 'The site-knowledge cluster service file exists and loads through the plugin bootstrap only.' );
+foreach ( array( 'site_knowledge_status', 'site_knowledge_sync', 'site_knowledge_search', 'site_knowledge_review_plan' ) as $site_knowledge_delegate ) {
+	toolbox_assert( false !== strpos( $rest_controller, "return \$this->site_knowledge_bridges->{$site_knowledge_delegate}( \$request );" ), "REST facade delegates {$site_knowledge_delegate} to the site-knowledge bridge cluster." );
+}
+toolbox_assert( false === strpos( $rest_controller, 'private function csv_list' ) && false === strpos( $rest_controller, 'private function csv_absint_list' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Rest_Controller_Support.php' ), 'protected function csv_list' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Rest_Controller_Support.php' ), 'protected function csv_absint_list' ), 'The shared csv list validators used by multiple clusters live in the Rest_Controller_Support base.' );
+foreach ( array( 'Rest_Controller_Support.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php' ) as $rest_cluster_service_file ) {
 	$rest_cluster_service_source = (string) file_get_contents( $root . '/includes/' . $rest_cluster_service_file );
 	toolbox_assert( false === strpos( $rest_cluster_service_source, '$this->post(' ) && false === strpos( $rest_cluster_service_source, '$this->get(' ) && false === strpos( $rest_cluster_service_source, 'register_rest_route' ), "The cluster service {$rest_cluster_service_file} never registers routes itself; registration and permission scoping stay in the facade." );
 }

@@ -453,6 +453,7 @@ require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Site_Knowledge_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Web_Search_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Nightly_Inspection_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
