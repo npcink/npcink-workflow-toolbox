@@ -19,6 +19,11 @@ weaken them.
 
 ### 1. Make assertion sources portable before moving anything
 
+The portability step itself must ship with a completion-marker guard on
+the harness (see Static Analysis Standard v1): editing a test file's
+header region is exactly when a split opener turns the whole suite into
+vacuously-green plain text.
+
 The first commit replaces every
 `file_get_contents( 'includes/<Class>.php' )` assertion source with a
 deterministic aggregation of the whole directory (sorted `glob`), keeping the
