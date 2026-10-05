@@ -68,4 +68,45 @@ abstract class Rest_Controller_Support {
 			)
 		);
 	}
+
+
+	protected function sanitize_image_visual_context( array $context ): array {
+		$mode = sanitize_key( (string) ( $context['image_mode'] ?? $context['image_use'] ?? '' ) );
+		if ( ! in_array( $mode, array( 'featured', 'featured_image', 'paragraph', 'paragraph_image', 'inline', 'inline_image', 'setting', 'setting_image' ), true ) ) {
+			$mode = 'featured_image';
+		}
+		if ( 'featured' === $mode ) {
+			$mode = 'featured_image';
+		}
+		if ( 'paragraph' === $mode ) {
+			$mode = 'paragraph_image';
+		}
+		if ( 'inline' === $mode ) {
+			$mode = 'inline_image';
+		}
+		if ( 'setting' === $mode ) {
+			$mode = 'setting_image';
+		}
+
+		return array(
+			'image_mode'          => $mode,
+			'manual_query'        => sanitize_text_field( (string) ( $context['manual_query'] ?? '' ) ),
+			'fallback_query'      => sanitize_text_field( (string) ( $context['fallback_query'] ?? '' ) ),
+			'post_id'             => max( 0, absint( $context['post_id'] ?? 0 ) ),
+			'title'               => wp_trim_words( sanitize_text_field( (string) ( $context['title'] ?? '' ) ), 18, '' ),
+			'excerpt'             => wp_trim_words( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ), 36, '' ),
+			'content_summary'     => wp_trim_words( sanitize_textarea_field( (string) ( $context['content_summary'] ?? $context['content_text'] ?? $context['content'] ?? '' ) ), 80, '' ),
+			'selected_text'       => wp_trim_words( sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ), 80, '' ),
+			'selected_block_text' => wp_trim_words( sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ), 80, '' ),
+			'selected_block_name' => sanitize_key( (string) ( $context['selected_block_name'] ?? '' ) ),
+			'avoid_brand_logos'   => ! empty( $context['avoid_brand_logos'] ),
+			'latency_mode'        => sanitize_key( (string) ( $context['latency_mode'] ?? '' ) ),
+			'refresh_variant'     => sanitize_text_field( (string) ( $context['refresh_variant'] ?? '' ) ),
+			'query_intent'        => array(
+				'rewrite_abstract_terms'       => ! empty( $context['query_intent']['rewrite_abstract_terms'] ),
+				'prefer_concrete_visual_scene' => ! empty( $context['query_intent']['prefer_concrete_visual_scene'] ),
+				'return_alternate_queries'     => ! empty( $context['query_intent']['return_alternate_queries'] ),
+			),
+		);
+	}
 }

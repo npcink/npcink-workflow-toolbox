@@ -151,7 +151,7 @@ function toolbox_read_editor_content_support_assets( string $root ): string {
  * so a listed cluster service must never register routes itself.
  */
 function toolbox_read_rest_controller_sources( string $root ): string {
-	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php' );
+	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php' );
 	$source                = '';
 	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 		$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );
@@ -2392,11 +2392,17 @@ toolbox_assert( is_file( $root . '/includes/Rest_Media_Optimization_Bridges.php'
 foreach ( array( 'media_optimization_health', 'media_optimization_batch_create', 'media_optimization_manifest', 'media_optimization_batches', 'media_optimization_batch_current', 'media_optimization_batch_confirm', 'media_optimization_batch_complete_item', 'media_optimization_batch_restore_item', 'media_backup_cleanup_preview', 'media_backup_cleanup_confirm' ) as $media_optimization_delegate ) {
 	toolbox_assert( false !== strpos( $rest_controller, "return \$this->media_optimization_bridges->{$media_optimization_delegate}" ), "REST facade delegates {$media_optimization_delegate} to the media optimization bridge cluster." );
 }
+$surface_and_consent_plugin_source = (string) file_get_contents( $root . '/includes/Plugin.php' );
+toolbox_assert( is_file( $root . '/includes/Rest_Surface_Bridges.php' ) && is_file( $root . '/includes/Rest_Local_Admin_Consent.php' ) && false !== strpos( $main, "includes/Rest_Surface_Bridges.php" ) && false !== strpos( $main, "includes/Rest_Local_Admin_Consent.php" ) && false === strpos( $surface_and_consent_plugin_source, 'Rest_Surface_Bridges' ) && false === strpos( $surface_and_consent_plugin_source, 'Rest_Local_Admin_Consent' ), 'The surface bridge and ADR-003 consent service files exist and load through the plugin bootstrap only.' );
+foreach ( array( 'status', 'image_candidates', 'site_media_index_batch', 'agent_feedback', 'agent_feedback_summary' ) as $surface_delegate ) {
+	toolbox_assert( false !== strpos( $rest_controller, "return \$this->surface_bridges->{$surface_delegate}" ), "REST facade delegates {$surface_delegate} to the surface bridge cluster." );
+}
+toolbox_assert( false !== strpos( $rest_controller, 'return $this->local_admin_consent->local_admin_consent_featured_image( $request );' ) && false === strpos( (string) file_get_contents( $root . '/includes/Rest_Controller.php' ), 'private function local_featured_image_audit_metadata' ) && false === strpos( (string) file_get_contents( $root . '/includes/Rest_Controller.php' ), 'private function record_core_local_admin_consent_audit' ), 'The ADR-003 consent handler and its audit helpers move together to Rest_Local_Admin_Consent.' );
 toolbox_assert( is_file( $root . '/includes/Rest_Flow_Plan_Bridges.php' ) && false !== strpos( $main, "includes/Rest_Flow_Plan_Bridges.php" ) && false === strpos( (string) file_get_contents( $root . '/includes/Plugin.php' ), 'Rest_Flow_Plan_Bridges' ), 'The flows/plan bridge cluster service file exists and loads through the plugin bootstrap only.' );
 foreach ( array( 'article_plan', 'image_candidate_adoption_plan', 'article_audio_adoption_plan', 'nightly_inspection_review_plan', 'content_metadata_apply_plan', 'media_alt_caption_review_plan' ) as $flow_plan_delegate ) {
 	toolbox_assert( false !== strpos( $rest_controller, "return \$this->flow_plan_bridges->{$flow_plan_delegate}( \$request );" ), "REST facade delegates {$flow_plan_delegate} to the flows/plan bridge cluster." );
 }
-foreach ( array( 'Rest_Controller_Support.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php' ) as $rest_cluster_service_file ) {
+foreach ( array( 'Rest_Controller_Support.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php' ) as $rest_cluster_service_file ) {
 	$rest_cluster_service_source = (string) file_get_contents( $root . '/includes/' . $rest_cluster_service_file );
 	toolbox_assert( false === strpos( $rest_cluster_service_source, '$this->post(' ) && false === strpos( $rest_cluster_service_source, '$this->get(' ) && false === strpos( $rest_cluster_service_source, 'register_rest_route' ), "The cluster service {$rest_cluster_service_file} never registers routes itself; registration and permission scoping stay in the facade." );
 }
