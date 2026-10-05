@@ -13,8 +13,7 @@ use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
-final class Rest_Controller {
-	private const REQUIRED_TEXT_MAX_CHARS = 500;
+final class Rest_Controller extends Rest_Controller_Support {
 	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000;
 	private const EDITOR_AUDIO_TEXT_MAX_CHARS = 5000;
 	private const EDITOR_SELECTED_TEXT_MAX_CHARS = 2000;
@@ -27,6 +26,7 @@ final class Rest_Controller {
 	private Provider_Client $client;
 	private Publish_Preflight_Service $publish_preflight;
 	private Rest_Nightly_Inspection_Bridges $nightly_bridges;
+	private Rest_Web_Search_Bridges $web_search_bridges;
 
 	/** ADR-018 scoped default capabilities; every unlisted scope and the fallback stay manage_options. */
 	private const SCOPED_DEFAULT_CAPABILITIES = array(
@@ -40,6 +40,7 @@ final class Rest_Controller {
 		$this->client            = $client;
 		$this->publish_preflight = $publish_preflight;
 		$this->nightly_bridges   = new Rest_Nightly_Inspection_Bridges( $settings, $client );
+		$this->web_search_bridges = new Rest_Web_Search_Bridges( $client );
 	}
 
 	public function register_routes(): void {
@@ -545,43 +546,11 @@ final class Rest_Controller {
 	}
 
 	public function web_search_test( WP_REST_Request $request ) {
-		$query = $this->required_text( $request, 'query' );
-		if ( is_wp_error( $query ) ) {
-			return $query;
-		}
-		$intent            = sanitize_key( (string) ( $request->get_param( 'intent' ) ?: 'news' ) );
-		$recency_param     = $request->get_param( 'recency_days' );
-		$default_recency   = in_array( $intent, array( 'pricing_snapshot', 'product_comparison' ), true ) ? 0 : ( 'news' === $intent ? 7 : 30 );
-		$recency_days      = null === $recency_param || '' === $recency_param ? $default_recency : (int) $recency_param;
-
-		return rest_ensure_response(
-			$this->client->test_cloud_web_search(
-				array(
-					'query'               => $query,
-					'intent'              => $intent,
-					'managed_source'      => sanitize_key( (string) $request->get_param( 'managed_source' ) ),
-					'max_results'         => max( 1, min( 5, (int) ( $request->get_param( 'max_results' ) ?: 3 ) ) ),
-					'recency_days'        => max( 0, min( 30, $recency_days ) ),
-				)
-			)
-		);
+		return $this->web_search_bridges->web_search_test( $request );
 	}
 
 	public function web_search_diagnostics( WP_REST_Request $request ) {
-		$topic = $this->required_text( $request, 'topic' );
-		if ( is_wp_error( $topic ) ) {
-			return $topic;
-		}
-
-		return rest_ensure_response(
-			$this->client->diagnose_automatic_web_search(
-				array(
-					'topic'    => $topic,
-					'title'    => sanitize_text_field( (string) ( $request->get_param( 'title' ) ?: $topic ) ),
-					'scenario' => sanitize_key( (string) ( $request->get_param( 'scenario' ) ?: 'discoverability' ) ),
-				)
-			)
-		);
+		return $this->web_search_bridges->web_search_diagnostics( $request );
 	}
 
 	public function site_knowledge_sync( WP_REST_Request $request ) {
@@ -1527,34 +1496,6 @@ final class Rest_Controller {
 		);
 	}
 
-	private function required_text( WP_REST_Request $request, string $key, int $max_chars = self::REQUIRED_TEXT_MAX_CHARS ) {
-		$value = trim( sanitize_textarea_field( (string) $request->get_param( $key ) ) );
-		if ( '' === $value ) {
-			return new WP_Error(
-				'npcink_toolbox_missing_' . sanitize_key( $key ),
-				sprintf(
-					/* translators: %s: field name. */
-					__( '%s is required.', 'npcink-workflow-toolbox' ),
-					$key
-				),
-				array( 'status' => 400 )
-			);
-		}
-
-		$max_chars = max( 1, $max_chars );
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			if ( mb_strlen( $value ) > $max_chars ) {
-				return mb_substr( $value, 0, $max_chars );
-			}
-			return $value;
-		}
-
-		if ( strlen( $value ) > $max_chars ) {
-			return substr( $value, 0, $max_chars );
-		}
-
-		return $value;
-	}
 
 	private function editor_post_context( WP_REST_Request $request ): array {
 		$content_raw         = (string) $request->get_param( 'content' );

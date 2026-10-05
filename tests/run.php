@@ -151,7 +151,7 @@ function toolbox_read_editor_content_support_assets( string $root ): string {
  * so a listed cluster service must never register routes itself.
  */
 function toolbox_read_rest_controller_sources( string $root ): string {
-	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php' );
+	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php' );
 	$source                = '';
 	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 		$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );
@@ -2372,8 +2372,15 @@ toolbox_assert( is_file( $root . '/includes/Rest_Nightly_Inspection_Bridges.php'
 foreach ( array( 'nightly_inspection_cloud_batch', 'nightly_inspection_cloud_batch_status', 'nightly_inspection_cloud_batch_recent', 'nightly_inspection_cloud_runtime_entitlement', 'nightly_inspection_cloud_batch_result', 'nightly_inspection_cloud_batch_retry' ) as $nightly_bridge_delegate ) {
 	toolbox_assert( false !== strpos( $rest_controller, "return \$this->nightly_bridges->{$nightly_bridge_delegate}" ), "REST facade delegates {$nightly_bridge_delegate} to the nightly bridge cluster." );
 }
-$nightly_bridges_source = (string) file_get_contents( $root . '/includes/Rest_Nightly_Inspection_Bridges.php' );
-toolbox_assert( false === strpos( $nightly_bridges_source, '$this->post(' ) && false === strpos( $nightly_bridges_source, '$this->get(' ) && false === strpos( $nightly_bridges_source, 'register_rest_route' ), 'The nightly bridge cluster service never registers routes itself; registration and permission scoping stay in the facade.' );
+toolbox_assert( is_file( $root . '/includes/Rest_Controller_Support.php' ) && is_file( $root . '/includes/Rest_Web_Search_Bridges.php' ) && false !== strpos( $main, "includes/Rest_Controller_Support.php" ) && false !== strpos( $main, "includes/Rest_Web_Search_Bridges.php" ) && false === strpos( (string) file_get_contents( $root . '/includes/Plugin.php' ), 'Rest_Web_Search_Bridges' ), 'The web-search cluster and shared REST support files exist and load through the plugin bootstrap only.' );
+foreach ( array( 'web_search_test', 'web_search_diagnostics' ) as $web_search_delegate ) {
+	toolbox_assert( false !== strpos( $rest_controller, "return \$this->web_search_bridges->{$web_search_delegate}( \$request );" ), "REST facade delegates {$web_search_delegate} to the web-search bridge cluster." );
+}
+toolbox_assert( false !== strpos( $rest_controller, 'extends Rest_Controller_Support' ) && false === strpos( $rest_controller, 'private function required_text' ), 'The shared required_text validator moves to the Rest_Controller_Support base that the facade and cluster services extend.' );
+foreach ( array( 'Rest_Controller_Support.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Web_Search_Bridges.php' ) as $rest_cluster_service_file ) {
+	$rest_cluster_service_source = (string) file_get_contents( $root . '/includes/' . $rest_cluster_service_file );
+	toolbox_assert( false === strpos( $rest_cluster_service_source, '$this->post(' ) && false === strpos( $rest_cluster_service_source, '$this->get(' ) && false === strpos( $rest_cluster_service_source, 'register_rest_route' ), "The cluster service {$rest_cluster_service_file} never registers routes itself; registration and permission scoping stay in the facade." );
+}
 toolbox_assert( false !== strpos( $rest, "\$this->post( '/flows/nightly-inspection-review-plan', 'nightly_inspection_review_plan' )" ) && false !== strpos( $rest, 'build_nightly_inspection_review_plan' ), 'REST exposes a local Nightly Inspection Core review-plan builder without creating proposals directly.' );
 toolbox_assert( false !== strpos( $rest, "'payload_mode'    =>" ) && false !== strpos( $rest, "'retention_ttl'   =>" ) && false !== strpos( $rest, "'polling_registered'     => true" ), 'REST passes Pro Cloud Batch privacy, retention, and polling metadata.' );
 toolbox_assert( false !== strpos( $rest, 'site_knowledge_sync' ) && false !== strpos( $rest, 'site_knowledge_status' ) && false !== strpos( $rest, 'site_knowledge_search' ) && false !== strpos( $rest, 'article_index_statuses' ) && false !== strpos( $rest, 'public_site_knowledge_post_ids' ) && false !== strpos( $rest, "'indexed_post_ids_requested'" ) && false !== strpos( $rest, "'orderby'                => 'modified'" ), 'REST routes expose Cloud-managed site knowledge operations and require complete Cloud evidence for the most recently modified local article coverage.' );
