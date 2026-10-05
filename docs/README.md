@@ -43,6 +43,7 @@ Start from the active documents below before changing code.
 - [AI Development Quality Workflow](ai-development-quality-workflow.md)
 - [AI Change Envelope Template](ai-change-envelope-template.md)
 - [AI Code Review Standard v1](platform/ai-code-review-standard-v1.md)
+- [Git Transport Fallback Playbook v1](platform/git-transport-fallback-playbook-v1.md)
 - [Static Analysis Standard v1](platform/static-analysis-standard-v1.md)
 - [AI Code Review Workflow](platform/ai-code-review-workflow.yml)
 - [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
