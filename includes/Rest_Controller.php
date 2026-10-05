@@ -30,6 +30,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	private Rest_Site_Knowledge_Bridges $site_knowledge_bridges;
 	private Rest_Media_Derivative_Previews $media_derivative_previews;
 	private Rest_Flow_Plan_Bridges $flow_plan_bridges;
+	private Rest_Media_Optimization_Bridges $media_optimization_bridges;
 
 	/** ADR-018 scoped default capabilities; every unlisted scope and the fallback stay manage_options. */
 	private const SCOPED_DEFAULT_CAPABILITIES = array(
@@ -47,6 +48,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->site_knowledge_bridges = new Rest_Site_Knowledge_Bridges( $client );
 		$this->media_derivative_previews = new Rest_Media_Derivative_Previews( $client );
 		$this->flow_plan_bridges = new Rest_Flow_Plan_Bridges( $client );
+		$this->media_optimization_bridges = new Rest_Media_Optimization_Bridges();
 	}
 
 	public function register_routes(): void {
@@ -317,34 +319,9 @@ final class Rest_Controller extends Rest_Controller_Support {
 	 * @return WP_REST_Response
 	 */
 	public function media_optimization_health(): WP_REST_Response {
-		if ( ! function_exists( 'npcink_cloud_addon_get_manual_readiness_result' ) ) {
-			return rest_ensure_response(
-				array(
-					'ready'             => false,
-					'status'            => 'unavailable',
-					'blocked_reason'    => 'cloud_addon_not_installed',
-					'next_action'       => 'check_cloud_connection',
-					'write_posture'     => 'read_only',
-					'contract_version'  => 'toolbox_media_optimization_health.v1',
-				)
-			);
-		}
-
-		$readiness = npcink_cloud_addon_get_manual_readiness_result();
-		$readiness = is_array( $readiness ) ? $readiness : array();
-		$status    = sanitize_key( (string) ( $readiness['status'] ?? 'unavailable' ) );
-
-		return rest_ensure_response(
-			array(
-				'ready'            => 'ready' === $status,
-				'status'           => '' !== $status ? $status : 'unavailable',
-				'blocked_reason'   => sanitize_text_field( (string) ( $readiness['blocked_reason'] ?? '' ) ),
-				'next_action'      => sanitize_key( (string) ( $readiness['next_safe_action'] ?? 'check_cloud_connection' ) ),
-				'write_posture'    => 'read_only',
-				'contract_version' => 'toolbox_media_optimization_health.v1',
-			)
-		);
+		return $this->media_optimization_bridges->media_optimization_health();
 	}
+
 
 	private function content_operations_projection( bool $cloud_ready ): array {
 		return array(
@@ -698,61 +675,49 @@ final class Rest_Controller extends Rest_Controller_Support {
 	}
 
 	public function media_optimization_batch_create( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		$result = ( new Media_Optimization_Batches() )->create( is_array( $params ) ? $params : array() );
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_optimization_batch_create( $request );
 	}
+
 
 	public function media_optimization_manifest( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		$result = ( new Media_Optimization_Batches() )->build_manifest( is_array( $params ) ? $params : array() );
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_optimization_manifest( $request );
 	}
+
 
 	public function media_optimization_batches() {
-		return rest_ensure_response( ( new Media_Optimization_Batches() )->all() );
+		return $this->media_optimization_bridges->media_optimization_batches();
 	}
+
 
 	public function media_optimization_batch_current() {
-		$result = ( new Media_Optimization_Batches() )->current();
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_optimization_batch_current();
 	}
+
 
 	public function media_optimization_batch_confirm( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		$result = ( new Media_Optimization_Batches() )->confirm( sanitize_text_field( (string) $request->get_param( 'batch_id' ) ), is_array( $params ) ? $params : array() );
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_optimization_batch_confirm( $request );
 	}
+
 
 	public function media_optimization_batch_complete_item( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		$result = ( new Media_Optimization_Batches() )->complete_item(
-			sanitize_text_field( (string) $request->get_param( 'batch_id' ) ),
-			absint( $request->get_param( 'attachment_id' ) ),
-			is_array( $params ) ? $params : array()
-		);
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_optimization_batch_complete_item( $request );
 	}
+
 
 	public function media_optimization_batch_restore_item( WP_REST_Request $request ) {
-		$result = ( new Media_Optimization_Batches() )->restore_item(
-			sanitize_text_field( (string) $request->get_param( 'batch_id' ) ),
-			absint( $request->get_param( 'attachment_id' ) )
-		);
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_optimization_batch_restore_item( $request );
 	}
+
 
 	public function media_backup_cleanup_preview() {
-		$result = ( new Media_Optimization_Batches() )->preview_backup_cleanup();
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_backup_cleanup_preview();
 	}
 
+
 	public function media_backup_cleanup_confirm( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		$params = is_array( $params ) ? $params : array();
-		$result = ( new Media_Optimization_Batches() )->cleanup_backups( $params );
-		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+		return $this->media_optimization_bridges->media_backup_cleanup_confirm( $request );
 	}
+
 
 	public function site_knowledge_review_plan( WP_REST_Request $request ) {
 		return $this->site_knowledge_bridges->site_knowledge_review_plan( $request );
