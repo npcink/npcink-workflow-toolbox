@@ -197,6 +197,19 @@ merged via #189/#190) is the standing tool for revalidating any runner
 image before the template's `runs-on` pin is bumped: dispatch it with
 the number of a freshly merged docs-only pull request.
 
+## Template Update - 2026-10-05
+
+Adopted per the recorded plan, one revision after 2026-10-04: the
+template's runner pin moves from `ubuntu-24.04` to `ubuntu-26.04`
+(closed green by pilot canary run `37258146682`), and the action pin
+moves from the `v1.12.10` tag to its exact commit
+`579b9319151aa734f2d25df6e59efa59eec5a577` (tag object `b465046`),
+closing the supply-chain finding raised twice on 2026-10-04. Enrolled
+repositories re-sync their `.github/workflows/ocr-review.yml` copies
+the same day. Future action bumps record the new tag-to-commit pair in
+the template comment and re-run the runner canary when the image
+changes.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
