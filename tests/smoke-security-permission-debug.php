@@ -115,6 +115,8 @@ require_once $root . '/includes/Plugin.php';
 require_once $root . '/includes/Settings.php';
 require_once $root . '/tests/load-provider-client.php';
 require_once $root . '/includes/Rest_Controller_Support.php';
+require_once $root . '/includes/Rest_Flow_Plan_Bridges.php';
+require_once $root . '/includes/Rest_Media_Derivative_Previews.php';
 require_once $root . '/includes/Rest_Site_Knowledge_Bridges.php';
 require_once $root . '/includes/Rest_Web_Search_Bridges.php';
 require_once $root . '/includes/Rest_Nightly_Inspection_Bridges.php';
@@ -285,7 +287,7 @@ $provider_source       = '';
 foreach ( $provider_source_files as $provider_source_file ) {
 	$provider_source .= "\n" . (string) file_get_contents( $provider_source_file );
 }
-$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php' );
+$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php' );
 $rest_source     = '';
 foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 	$rest_source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );

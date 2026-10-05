@@ -142,12 +142,15 @@ function npcink_toolbox_local_review_assert( bool $condition, string $message ):
 
 eval( 'namespace Npcink_Toolbox; class Plugin { public const REST_NAMESPACE = "npcink-toolbox/v1"; }' );
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Flow_Plan_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Media_Derivative_Previews.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Site_Knowledge_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Web_Search_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Nightly_Inspection_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
 
 $controller  = ( new ReflectionClass( \Npcink_Toolbox\Rest_Controller::class ) )->newInstanceWithoutConstructor();
+$previews   = ( new ReflectionClass( \Npcink_Toolbox\Rest_Media_Derivative_Previews::class ) )->newInstanceWithoutConstructor();
 $artifact_id = 'art_' . str_repeat( 'a', 32 );
 $base_artifact = array(
 	'artifact_id'         => $artifact_id,
@@ -198,10 +201,10 @@ npcink_toolbox_local_review_assert(
 	'Nested filename_basis keeps its exact required-property list.'
 );
 
-$assert_args_rejected = static function ( WP_REST_Request $request, string $message ) use ( $controller ): void {
+$assert_args_rejected = static function ( WP_REST_Request $request, string $message ) use ( $previews ): void {
 	global $npcink_toolbox_local_review_receive_calls;
 	$before = $npcink_toolbox_local_review_receive_calls;
-	$result = $controller->serve_media_derivative_local_review( $request );
+	$result = $previews->serve_media_derivative_local_review( $request );
 	npcink_toolbox_local_review_assert( $result instanceof WP_Error && 'npcink_toolbox_media_derivative_local_review_args_invalid' === $result->get_error_code(), $message );
 	npcink_toolbox_local_review_assert( $before === $npcink_toolbox_local_review_receive_calls, $message . ' Rejection occurs before Cloud Addon.' );
 };
@@ -212,18 +215,18 @@ $assert_args_rejected( $request_for( $base_artifact, array( 'processing_warnings
 $assert_args_rejected( $request_for( $base_artifact, array(), null, array() ), 'A missing whole artifact body is rejected.' );
 $assert_args_rejected( $request_for( $base_artifact, array(), null, array( 'artifact' => $base_artifact, 'extra' => true ) ), 'An extra top-level JSON field is rejected.' );
 
-$assert_descriptor_rejected = static function ( array $artifact, string $message, ?string $path_artifact_id = null ) use ( $controller, $request_for ): void {
+$assert_descriptor_rejected = static function ( array $artifact, string $message, ?string $path_artifact_id = null ) use ( $previews, $request_for ): void {
 	global $npcink_toolbox_local_review_receive_calls;
 	$before = $npcink_toolbox_local_review_receive_calls;
-	$result = $controller->serve_media_derivative_local_review( $request_for( $artifact, array(), $path_artifact_id ) );
+	$result = $previews->serve_media_derivative_local_review( $request_for( $artifact, array(), $path_artifact_id ) );
 	npcink_toolbox_local_review_assert( $result instanceof WP_Error && 'npcink_toolbox_media_derivative_local_review_descriptor_invalid' === $result->get_error_code(), $message );
 	npcink_toolbox_local_review_assert( $before === $npcink_toolbox_local_review_receive_calls, $message . ' Rejection occurs before Cloud Addon.' );
 };
 
-$assert_descriptor_forwarded = static function ( array $artifact, string $message ) use ( $controller, $request_for ): void {
+$assert_descriptor_forwarded = static function ( array $artifact, string $message ) use ( $previews, $request_for ): void {
 	global $npcink_toolbox_local_review_receive_calls;
 	$before = $npcink_toolbox_local_review_receive_calls;
-	$result = $controller->serve_media_derivative_local_review( $request_for( $artifact ) );
+	$result = $previews->serve_media_derivative_local_review( $request_for( $artifact ) );
 	npcink_toolbox_local_review_assert( $result instanceof WP_Error && 'behavior_receive_sentinel' === $result->get_error_code(), $message );
 	npcink_toolbox_local_review_assert( $before + 1 === $npcink_toolbox_local_review_receive_calls, $message . ' Cloud Addon is called exactly once.' );
 };
@@ -236,7 +239,7 @@ $artifact_with_reference['artifact_reference'] = array( 'artifact_id' => $artifa
 $assert_descriptor_rejected( $artifact_with_reference, 'Extra artifact_reference body field is rejected.' );
 $assert_descriptor_rejected( $base_artifact, 'Path and body artifact ids must match.', 'art_' . str_repeat( 'c', 32 ) );
 
-$valid_result = $controller->serve_media_derivative_local_review( $request_for( $base_artifact ) );
+$valid_result = $previews->serve_media_derivative_local_review( $request_for( $base_artifact ) );
 npcink_toolbox_local_review_assert( $valid_result instanceof WP_Error && 'behavior_receive_sentinel' === $valid_result->get_error_code(), 'Canonical Z UTC JSON artifact reaches the Addon receiver.' );
 npcink_toolbox_local_review_assert( 1 === $npcink_toolbox_local_review_receive_calls, 'Addon receiver is called exactly once for the canonical Z descriptor.' );
 npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys( $npcink_toolbox_local_review_received_artifact ), 'Addon receiver receives the exact canonical local12 artifact contract.' );
@@ -278,9 +281,9 @@ $cloud_artifact = array(
 		'qualified'            => true,
 	),
 );
-$projection_method = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'media_derivative_local_review_projection' );
+$projection_method = new ReflectionMethod( \Npcink_Toolbox\Rest_Media_Derivative_Previews::class, 'media_derivative_local_review_projection' );
 $projection_method->setAccessible( true );
-$local_review = $projection_method->invoke( $controller, array( 'artifact' => array_reverse( $cloud_artifact, true ) ) );
+$local_review = $projection_method->invoke( $previews, array( 'artifact' => array_reverse( $cloud_artifact, true ) ) );
 npcink_toolbox_local_review_assert( array( 'endpoint', 'method', 'artifact' ) === array_keys( $local_review ), 'Projection emits only endpoint, method, and artifact.' );
 npcink_toolbox_local_review_assert( 'POST' === ( $local_review['method'] ?? null ), 'Projection requires POST.' );
 npcink_toolbox_local_review_assert( false === strpos( (string) ( $local_review['endpoint'] ?? '' ), '?' ), 'Projection endpoint is queryless.' );
@@ -288,6 +291,6 @@ npcink_toolbox_local_review_assert( array_keys( $base_artifact ) === array_keys(
 npcink_toolbox_local_review_assert( ! isset( $local_review['artifact']['checksum'], $local_review['artifact']['artifact_reference'] ), 'Projection strips Cloud-only checksum and artifact_reference fields.' );
 $invalid_cloud_artifact = $cloud_artifact;
 $invalid_cloud_artifact['transform_facts'] = array();
-npcink_toolbox_local_review_assert( array() === $projection_method->invoke( $controller, array( 'artifact' => $invalid_cloud_artifact ) ), 'Projection rejects a v3 artifact without structured transform facts.' );
+npcink_toolbox_local_review_assert( array() === $projection_method->invoke( $previews, array( 'artifact' => $invalid_cloud_artifact ) ), 'Projection rejects a v3 artifact without structured transform facts.' );
 
 echo "Media derivative local review behavior checks passed.\n";
