@@ -31,6 +31,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 	private Rest_Media_Derivative_Previews $media_derivative_previews;
 	private Rest_Flow_Plan_Bridges $flow_plan_bridges;
 	private Rest_Media_Optimization_Bridges $media_optimization_bridges;
+	private Rest_Surface_Bridges $surface_bridges;
+	private Rest_Local_Admin_Consent $local_admin_consent;
 
 	/** ADR-018 scoped default capabilities; every unlisted scope and the fallback stay manage_options. */
 	private const SCOPED_DEFAULT_CAPABILITIES = array(
@@ -49,6 +51,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->media_derivative_previews = new Rest_Media_Derivative_Previews( $client );
 		$this->flow_plan_bridges = new Rest_Flow_Plan_Bridges( $client );
 		$this->media_optimization_bridges = new Rest_Media_Optimization_Bridges();
+		$this->surface_bridges     = new Rest_Surface_Bridges( $settings, $client );
+		$this->local_admin_consent = new Rest_Local_Admin_Consent();
 	}
 
 	public function register_routes(): void {
@@ -258,190 +262,19 @@ final class Rest_Controller extends Rest_Controller_Support {
 	}
 
 	public function status(): WP_REST_Response {
-		$cloud_runtime = $this->settings->cloud_runtime_status();
-		$cloud_ready   = (bool) $cloud_runtime['available'];
-
-		return rest_ensure_response(
-			array(
-				'image_provider'           => 'cloud_image_sources',
-				'image_source_providers'   => $this->settings->configured_image_source_providers(),
-				'vector_provider'          => 'cloud_site_knowledge',
-				'web_search_owner'         => 'cloud_runtime',
-				'cloud_image_sources_configured' => $this->settings->has_image_source_provider(),
-				'raw_responses_enabled'    => $this->settings->raw_responses_enabled(),
-				'image_source_enabled'     => (bool) $this->settings->get( 'enable_image_source' ),
-				'image_source_available'   => $cloud_ready && (bool) $this->settings->get( 'enable_image_source' ),
-				'vector_search_registered' => true,
-				'vector_search_enabled'    => $cloud_ready,
-				'web_search_registered'    => true,
-				'web_search_enabled'       => $cloud_ready,
-				'image_source_owner'       => 'cloud_runtime',
-				'ai_image_generation'      => array(
-					'registered'              => true,
-					'available'               => $cloud_ready,
-					'hosted_profile'          => 'grok-imagine-image-quality',
-					'entry_surface'           => 'image_source_ai_generation_handoff',
-					'posture'                 => 'candidate_only_core_approval_required',
-					'direct_wordpress_write'  => false,
-				),
-				'vector_owner'             => 'cloud_runtime',
-				'cloud_runtime'            => $cloud_runtime,
-				'hosted_ai'               => array(
-					'entry_surface'           => 'toolbox_content_support',
-					'hosted_profile'          => 'text.ai',
-					'registered'              => true,
-					'site_helpers_registered' => true,
-					'available'               => $cloud_ready,
-					'posture'                 => 'suggestion_only_core_approval_required',
-				),
-				'content_operations'      => $this->content_operations_projection( $cloud_ready ),
-				'pro_nightly_inspection'  => array(
-					'registered'             => true,
-					'available'              => $cloud_ready,
-					'entry_surface'          => 'nightly_inspection_cloud_batch',
-					'runtime_owner'          => 'npcink-local-automation-runtime',
-					'cloud_role'             => 'runtime_detail',
-					'posture'                => 'review_only_core_proposal_required',
-					'direct_wordpress_write' => false,
-					'polling_registered'     => true,
-					'entitlement_route'      => '/nightly-inspection/cloud-runtime-entitlement',
-					'recent_route'           => '/nightly-inspection/cloud-batch/recent',
-					'retry_registered'       => true,
-				),
-				'boundary'                 => 'Toolbox returns Cloud-managed image-source and Cloud-managed site-knowledge suggestions only. Cloud owns web search execution and provider configuration. WordPress writes should be handed to Abilities/Core governance.',
-			)
-		);
+		return $this->surface_bridges->status();
 	}
 
-	/**
-	 * Performs a live, read-only Cloud readiness check before media processing.
-	 *
-	 * @return WP_REST_Response
-	 */
 	public function media_optimization_health(): WP_REST_Response {
 		return $this->media_optimization_bridges->media_optimization_health();
 	}
 
-
-	private function content_operations_projection( bool $cloud_ready ): array {
-		return array(
-			'contract_version'      => 'toolbox_content_operations_projection.v1',
-			'registered'            => true,
-			'available'             => $cloud_ready,
-			'write_posture'         => 'suggestion_only',
-			'final_write_path'      => 'core_proposal_required',
-			'approval_truth'        => 'wordpress_local',
-			'final_write_truth'     => 'wordpress_local',
-			'direct_wordpress_write' => false,
-			'projection_role'       => 'single_toolbox_status_projection',
-			'surfaces'              => array(
-				'editor_content_support' => array(
-					'route'          => '/editor/content-support',
-					'artifact_type'  => 'editor_content_support_flow',
-					'source_layers'  => array( 'local_editor_context', 'cloud_site_knowledge', 'cloud_web_search', 'hosted_ai' ),
-					'intents'        => array( 'progressive_recommendations', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ),
-					'feedback_scope' => 'editor_content_support',
-				),
-				'nightly_inspection'     => array(
-					'route'          => '/nightly-inspection/cloud-batch',
-					'contracts'      => array( 'nightly_site_inspection_morning_brief.v2', 'nightly_site_inspection_core_intake_package.v1' ),
-					'source_layers'  => array( 'local_site_snapshot', 'cloud_batch_runtime' ),
-					'feedback_scope' => 'nightly_site_inspection',
-				),
-				'site_knowledge'         => array(
-					'route'          => '/site-knowledge/search',
-					'intents'        => array( 'site_search', 'related_content', 'writing_context', 'internal_links', 'refresh_suggestions', 'image_context', 'faq_candidates', 'content_gap_analysis', 'duplicate_check', 'writing_support_plan' ),
-					'source_layers'  => array( 'cloud_site_knowledge' ),
-					'feedback_scope' => 'site_knowledge',
-				),
-				'media_site_helpers'     => array(
-					'route'          => '/ai/site-helpers',
-					'contracts'      => array( 'media_alt_caption_review_set.v1', 'current_article_image_alt_suggestions.v1' ),
-					'source_layers'  => array( 'media_library_metadata_only_no_pixel_vision', 'hosted_ai' ),
-					'feedback_scope' => 'media_alt_caption',
-				),
-			),
-			'gap_contracts'         => array(
-				'seo_metadata_suggestion.v1'       => array(
-					'state'                => 'covered_by_existing_projection',
-					'current_artifacts'    => array( 'seo_meta_handoff_preview.v1', 'content_metadata_delta' ),
-					'route'                => '/editor/content-support',
-					'final_write_path'     => 'core_proposal_required',
-					'target_ability_id'    => 'npcink-abilities-toolkit/set-post-seo-meta',
-					'direct_wordpress_write' => false,
-					'feedback_scope'       => 'seo_metadata',
-				),
-				'media_alt_caption_suggestion.v1'  => array(
-					'state'                => 'covered_by_existing_projection',
-					'current_artifacts'    => array( 'media_alt_caption_review_set.v1', 'current_article_image_alt_suggestions.v1' ),
-					'route'                => '/ai/site-helpers',
-					'evidence_policy'      => 'media_library_metadata_only_no_pixel_vision',
-					'direct_wordpress_write' => false,
-					'feedback_scope'       => 'media_alt_caption',
-				),
-				'comment_reply_suggestion.v1'      => array(
-					'state'                => 'covered_by_existing_projection',
-					'current_artifacts'    => array( 'comment_reply_suggestion.v1' ),
-					'route'                => '/editor/content-support',
-					'final_write_path'     => 'core_proposal_required',
-					'direct_wordpress_write' => false,
-					'feedback_scope'       => 'comment_reply',
-				),
-			),
-			'feedback'              => array(
-				'route'              => '/agent-feedback',
-				'summary_route'      => '/agent-feedback/summary',
-				'contract_version'   => 'cloud_agent_feedback.v1',
-				'quality_owner'      => 'cloud_eval_only',
-				'mutation_scope'     => 'none',
-				'source_runtimes'    => array( 'editor_content_support', 'image_candidates', 'nightly_site_inspection', 'site_knowledge', 'seo_metadata', 'media_alt_caption', 'comment_reply' ),
-				'direct_wordpress_write' => false,
-			),
-		);
-	}
-
 	public function image_candidates( WP_REST_Request $request ) {
-		if ( ! $this->settings->get( 'enable_image_source' ) ) {
-			return $this->disabled_error( 'image source search' );
-		}
-
-		$query = $this->required_text( $request, 'query' );
-		if ( is_wp_error( $query ) ) {
-			return $query;
-		}
-
-		return rest_ensure_response(
-			$this->client->image_candidates(
-				$query,
-				array(
-					'orientation' => sanitize_key( (string) $request->get_param( 'orientation' ) ),
-					'color'       => sanitize_key( (string) $request->get_param( 'color' ) ),
-					'provider'    => sanitize_key( (string) $request->get_param( 'provider' ) ),
-					'per_page'    => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
-					'latency_mode' => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
-					'include_ai_generated' => ! empty( $request->get_param( 'include_ai_generated' ) ),
-					'generation_prompt'     => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
-					'generated_image_url'   => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
-					'model'                 => sanitize_text_field( (string) $request->get_param( 'model' ) ),
-					'manual_query'          => $query,
-					'refresh_variant'       => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
-					'visual_context'        => $this->image_visual_context_from_request( $request, $query ),
-				)
-			)
-		);
+		return $this->surface_bridges->image_candidates( $request );
 	}
 
 	public function site_media_index_batch( WP_REST_Request $request ) {
-		$continuation = apply_filters(
-			'npcink_toolbox_media_recognition_start',
-			array(),
-			array( 'per_page' => max( 1, min( 10, (int) ( $request->get_param( 'per_page' ) ?: 10 ) ) ) )
-		);
-		if ( is_array( $continuation ) && '' !== (string) ( $continuation['plan_id'] ?? '' ) ) {
-			return rest_ensure_response( $continuation );
-		}
-
-		return new WP_Error( 'npcink_toolbox_media_recognition_unavailable', __( 'Media recognition continuation is unavailable.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );
+		return $this->surface_bridges->site_media_index_batch( $request );
 	}
 
 	public function site_knowledge_status( WP_REST_Request $request ) {
@@ -504,22 +337,13 @@ final class Rest_Controller extends Rest_Controller_Support {
 	}
 
 	public function agent_feedback( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		if ( ! is_array( $params ) ) {
-			$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-		}
-
-		return rest_ensure_response( $this->client->submit_agent_feedback( is_array( $params ) ? $params : array() ) );
+		return $this->surface_bridges->agent_feedback( $request );
 	}
 
 	public function agent_feedback_summary( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		if ( ! is_array( $params ) ) {
-			$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-		}
-
-		return rest_ensure_response( $this->client->get_agent_feedback_summary( is_array( $params ) ? $params : array() ) );
+		return $this->surface_bridges->agent_feedback_summary( $request );
 	}
+
 	public function article_plan( WP_REST_Request $request ) {
 		return $this->flow_plan_bridges->article_plan( $request );
 	}
@@ -532,192 +356,45 @@ final class Rest_Controller extends Rest_Controller_Support {
 		return $this->flow_plan_bridges->article_audio_adoption_plan( $request );
 	}
 
-
 	public function local_admin_consent_featured_image( WP_REST_Request $request ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_admin_required',
-				__( 'Local admin consent requires an administrator session.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		$post_id       = absint( $request->get_param( 'post_id' ) );
-		$attachment_id = absint( $request->get_param( 'attachment_id' ) );
-		if ( $post_id <= 0 || $attachment_id <= 0 ) {
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_target_required',
-				__( 'A post_id and existing attachment_id are required.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$post = get_post( $post_id );
-		$attachment = get_post( $attachment_id );
-		if ( ! $post || ! $attachment || 'attachment' !== get_post_type( $attachment ) ) {
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_target_not_found',
-				__( 'The target post or media attachment was not found.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		if ( ! current_user_can( 'edit_post', $post_id ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_permission_denied',
-				__( 'You do not have permission to update this featured image.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		if ( function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) {
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_attachment_not_image',
-				__( 'Local admin consent can set only existing image attachments as featured images.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$classification = ( new Operation_Classifier() )->classify(
-			array(
-				'request_source'          => Operation_Classifier::SOURCE_WP_ADMIN_UI,
-				'actor_presence'         => Operation_Classifier::ACTOR_PRESENT_CLICK,
-				'preview_completeness'    => Operation_Classifier::PREVIEW_EXACT_FINAL,
-				'scope'                   => Operation_Classifier::SCOPE_ONE_OBJECT,
-				'reversibility'           => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
-				'operation_kind'          => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
-				'writes_wordpress_state'  => true,
-			)
-		);
-		if ( Operation_Classifier::LOCAL_ADMIN_CONSENT !== (string) ( $classification['classification'] ?? '' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_classification_rejected',
-				__( 'This featured image action is not eligible for local admin consent.', 'npcink-workflow-toolbox' ),
-				array(
-					'status'         => 422,
-					'classification' => $classification,
-				)
-			);
-		}
-
-		$before_attachment_id = absint( get_post_thumbnail_id( $post_id ) );
-		$audit_base           = $this->local_featured_image_audit_metadata( $request, $post_id, $attachment_id, $before_attachment_id, $classification );
-		$requested_audit      = $this->record_core_local_admin_consent_audit( 'local_admin_consent.requested', $audit_base );
-		if ( is_wp_error( $requested_audit ) ) {
-			return $requested_audit;
-		}
-
-		$set_result = set_post_thumbnail( $post_id, $attachment_id );
-		$after_attachment_id = absint( get_post_thumbnail_id( $post_id ) );
-		if ( $after_attachment_id !== $attachment_id || ( false === $set_result && $before_attachment_id !== $attachment_id ) ) {
-			$this->record_core_local_admin_consent_audit(
-				'local_admin_consent.failed',
-				array_merge(
-					$audit_base,
-					array(
-						'failure_code'        => 'set_post_thumbnail_failed',
-						'after_attachment_id' => $after_attachment_id,
-					)
-				)
-			);
-
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_write_failed',
-				__( 'WordPress did not accept the featured image update.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		$completed_audit = $this->record_core_local_admin_consent_audit(
-			'local_admin_consent.completed',
-			array_merge(
-				$audit_base,
-				array(
-					'after_attachment_id' => $after_attachment_id,
-				)
-			)
-		);
-		if ( is_wp_error( $completed_audit ) ) {
-			if ( $before_attachment_id > 0 ) {
-				set_post_thumbnail( $post_id, $before_attachment_id );
-			} else {
-				delete_post_thumbnail( $post_id );
-			}
-
-			return new WP_Error(
-				'npcink_toolbox_local_featured_image_completion_audit_failed',
-				__( 'The featured image update could not be fully audited and was rolled back.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		return rest_ensure_response(
-			array(
-				'artifact_type'          => 'local_admin_consent_featured_image_result',
-				'status'                 => 'completed',
-				'operation_kind'         => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
-				'classification'         => $classification,
-				'post_id'                => $post_id,
-				'attachment_id'          => $attachment_id,
-				'featured_media'         => $attachment_id,
-				'previous_attachment_id' => $before_attachment_id,
-				'proposal_created'       => false,
-				'core_proposal_required' => false,
-				'direct_wordpress_write' => true,
-				'write_owner'            => 'toolbox_local_admin_consent',
-				'audit_owner'            => 'npcink-governance-core',
-				'audit'                  => array(
-					'requested' => $requested_audit,
-					'completed' => $completed_audit,
-				),
-			)
-		);
+		return $this->local_admin_consent->local_admin_consent_featured_image( $request );
 	}
 
 	public function media_optimization_batch_create( WP_REST_Request $request ) {
 		return $this->media_optimization_bridges->media_optimization_batch_create( $request );
 	}
 
-
 	public function media_optimization_manifest( WP_REST_Request $request ) {
 		return $this->media_optimization_bridges->media_optimization_manifest( $request );
 	}
-
 
 	public function media_optimization_batches() {
 		return $this->media_optimization_bridges->media_optimization_batches();
 	}
 
-
 	public function media_optimization_batch_current() {
 		return $this->media_optimization_bridges->media_optimization_batch_current();
 	}
-
 
 	public function media_optimization_batch_confirm( WP_REST_Request $request ) {
 		return $this->media_optimization_bridges->media_optimization_batch_confirm( $request );
 	}
 
-
 	public function media_optimization_batch_complete_item( WP_REST_Request $request ) {
 		return $this->media_optimization_bridges->media_optimization_batch_complete_item( $request );
 	}
-
 
 	public function media_optimization_batch_restore_item( WP_REST_Request $request ) {
 		return $this->media_optimization_bridges->media_optimization_batch_restore_item( $request );
 	}
 
-
 	public function media_backup_cleanup_preview() {
 		return $this->media_optimization_bridges->media_backup_cleanup_preview();
 	}
 
-
 	public function media_backup_cleanup_confirm( WP_REST_Request $request ) {
 		return $this->media_optimization_bridges->media_backup_cleanup_confirm( $request );
 	}
-
 
 	public function site_knowledge_review_plan( WP_REST_Request $request ) {
 		return $this->site_knowledge_bridges->site_knowledge_review_plan( $request );
@@ -733,7 +410,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 	public function media_alt_caption_review_plan( WP_REST_Request $request ) {
 		return $this->flow_plan_bridges->media_alt_caption_review_plan( $request );
 	}
-
 
 		public function media_brief( WP_REST_Request $request ) {
 		$post_id = absint( $request->get_param( 'post_id' ) );
@@ -1021,7 +697,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 		return rest_ensure_response( $result );
 	}
 
-
 	public function media_derivative_handoff( WP_REST_Request $request ) {
 		return $this->media_derivative_previews->media_derivative_handoff( $request );
 	}
@@ -1044,71 +719,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function serve_media_derivative_local_review( WP_REST_Request $request ) {
 		return $this->media_derivative_previews->serve_media_derivative_local_review( $request );
-	}
-
-	/**
-	 * @param WP_REST_Request    $request Request.
-	 * @param int                $post_id Post id.
-	 * @param int                 $attachment_id Attachment id.
-	 * @param int                 $before_attachment_id Previous thumbnail id.
-	 * @param array<string,mixed> $classification Classification result.
-	 * @return array<string,mixed>
-	 */
-	private function local_featured_image_audit_metadata( WP_REST_Request $request, int $post_id, int $attachment_id, int $before_attachment_id, array $classification ): array {
-		$candidate = $request->get_param( 'candidate' );
-		$candidate = is_array( $candidate ) ? $candidate : array();
-		$title     = sanitize_text_field( (string) ( $candidate['title'] ?? ( $candidate['name'] ?? get_the_title( $attachment_id ) ) ) );
-		$source    = sanitize_text_field( (string) ( $candidate['source'] ?? ( $candidate['provider'] ?? 'media_library' ) ) );
-		$image_url = esc_url_raw( (string) ( $candidate['url'] ?? ( $candidate['image_url'] ?? wp_get_attachment_url( $attachment_id ) ) ) );
-
-		return array(
-			'source_module'          => 'npcink-toolbox',
-			'surface'                => 'editor_image_source_modal',
-			'operation_kind'         => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
-			'classification'         => sanitize_key( (string) ( $classification['classification'] ?? '' ) ),
-			'policy_version'         => sanitize_text_field( (string) ( $classification['policy_version'] ?? Operation_Classifier::POLICY_VERSION ) ),
-			'reasons'                => array_values( array_map( 'sanitize_key', (array) ( $classification['reasons'] ?? array() ) ) ),
-			'required_evidence'      => array_values( array_map( 'sanitize_key', (array) ( $classification['required_evidence'] ?? array() ) ) ),
-			'operation_classification' => $classification,
-			'actor_user_id'          => get_current_user_id(),
-			'target_object_type'     => 'post',
-			'target_object_id'       => $post_id,
-			'post_id'                => $post_id,
-			'attachment_id'          => $attachment_id,
-			'before_attachment_id'   => $before_attachment_id,
-			'ai_suggestion_summary'  => '' !== $title ? $title : __( 'Set one reviewed existing media image as the featured image.', 'npcink-workflow-toolbox' ),
-			'image_source'           => $source,
-			'image_url'              => $image_url,
-			'preview_completeness'   => Operation_Classifier::PREVIEW_EXACT_FINAL,
-			'actor_presence'         => Operation_Classifier::ACTOR_PRESENT_CLICK,
-			'reversibility'          => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
-			'core_proposal_created'  => false,
-			'request_or_correlation_id' => sanitize_text_field( (string) ( $request->get_header( 'x-request-id' ) ?: wp_generate_uuid4() ) ),
-		);
-	}
-
-	/**
-	 * Records a local-admin-consent event through Governance Core.
-	 *
-	 * @param string              $event_name Event name.
-	 * @param array<string,mixed> $metadata Event metadata.
-	 * @return array<string,mixed>|WP_Error
-	 */
-	private function record_core_local_admin_consent_audit( string $event_name, array $metadata ) {
-		$result = apply_filters( 'npcink_governance_core_record_local_admin_consent', null, $event_name, $metadata );
-		if ( null === $result ) {
-			return new WP_Error(
-				'npcink_toolbox_local_consent_core_audit_unavailable',
-				__( 'Governance Core local consent audit is unavailable.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return is_array( $result ) ? $result : array( 'event_id' => sanitize_text_field( (string) $result ) );
 	}
 
 	private function post( string $route, string $method, array $args = array() ): void {
@@ -1135,7 +745,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 			)
 		);
 	}
-
 
 	private function editor_post_context( WP_REST_Request $request ): array {
 		$content_raw         = (string) $request->get_param( 'content' );
@@ -1868,32 +1477,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 		return $candidates;
 	}
 
-	private function image_visual_context_from_request( WP_REST_Request $request, string $query ): array {
-		$context = $request->get_param( 'visual_context' );
-		if ( is_array( $context ) ) {
-			$context['manual_query'] = $context['manual_query'] ?? $query;
-			$context['latency_mode'] = $context['latency_mode'] ?? (string) $request->get_param( 'latency_mode' );
-			$context['refresh_variant'] = $context['refresh_variant'] ?? (string) $request->get_param( 'refresh_variant' );
-			return $this->sanitize_image_visual_context( $context );
-		}
-
-		$content = trim( wp_strip_all_tags( (string) $request->get_param( 'content' ) ) );
-		return $this->sanitize_image_visual_context(
-			array(
-				'manual_query'        => $query,
-				'title'               => (string) $request->get_param( 'title' ),
-				'excerpt'             => (string) $request->get_param( 'excerpt' ),
-				'content_summary'     => wp_trim_words( $content, 80, '' ),
-				'selected_text'       => (string) $request->get_param( 'selected_text' ),
-				'selected_block_text' => (string) $request->get_param( 'selected_block_text' ),
-				'selected_block_name' => (string) $request->get_param( 'selected_block_name' ),
-				'image_mode'          => (string) $request->get_param( 'image_mode' ),
-				'latency_mode'        => (string) $request->get_param( 'latency_mode' ),
-				'refresh_variant'     => (string) $request->get_param( 'refresh_variant' ),
-			)
-		);
-	}
-
 	private function editor_image_visual_context( array $context, string $query ): array {
 		return $this->sanitize_image_visual_context(
 			array(
@@ -1908,46 +1491,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 				'image_mode'          => (string) ( $context['image_mode'] ?? '' ),
 				'latency_mode'        => (string) ( $context['latency_mode'] ?? '' ),
 			)
-		);
-	}
-
-	private function sanitize_image_visual_context( array $context ): array {
-		$mode = sanitize_key( (string) ( $context['image_mode'] ?? $context['image_use'] ?? '' ) );
-		if ( ! in_array( $mode, array( 'featured', 'featured_image', 'paragraph', 'paragraph_image', 'inline', 'inline_image', 'setting', 'setting_image' ), true ) ) {
-			$mode = 'featured_image';
-		}
-		if ( 'featured' === $mode ) {
-			$mode = 'featured_image';
-		}
-		if ( 'paragraph' === $mode ) {
-			$mode = 'paragraph_image';
-		}
-		if ( 'inline' === $mode ) {
-			$mode = 'inline_image';
-		}
-		if ( 'setting' === $mode ) {
-			$mode = 'setting_image';
-		}
-
-		return array(
-			'image_mode'          => $mode,
-			'manual_query'        => sanitize_text_field( (string) ( $context['manual_query'] ?? '' ) ),
-			'fallback_query'      => sanitize_text_field( (string) ( $context['fallback_query'] ?? '' ) ),
-			'post_id'             => max( 0, absint( $context['post_id'] ?? 0 ) ),
-			'title'               => wp_trim_words( sanitize_text_field( (string) ( $context['title'] ?? '' ) ), 18, '' ),
-			'excerpt'             => wp_trim_words( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ), 36, '' ),
-			'content_summary'     => wp_trim_words( sanitize_textarea_field( (string) ( $context['content_summary'] ?? $context['content_text'] ?? $context['content'] ?? '' ) ), 80, '' ),
-			'selected_text'       => wp_trim_words( sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ), 80, '' ),
-			'selected_block_text' => wp_trim_words( sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ), 80, '' ),
-			'selected_block_name' => sanitize_key( (string) ( $context['selected_block_name'] ?? '' ) ),
-			'avoid_brand_logos'   => ! empty( $context['avoid_brand_logos'] ),
-			'latency_mode'        => sanitize_key( (string) ( $context['latency_mode'] ?? '' ) ),
-			'refresh_variant'     => sanitize_text_field( (string) ( $context['refresh_variant'] ?? '' ) ),
-			'query_intent'        => array(
-				'rewrite_abstract_terms'       => ! empty( $context['query_intent']['rewrite_abstract_terms'] ),
-				'prefer_concrete_visual_scene' => ! empty( $context['query_intent']['prefer_concrete_visual_scene'] ),
-				'return_alternate_queries'     => ! empty( $context['query_intent']['return_alternate_queries'] ),
-			),
 		);
 	}
 
@@ -2128,7 +1671,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 		return wp_trim_words( wp_strip_all_tags( (string) ( $context['content_text'] ?? '' ) ), 12, '' );
 	}
-
 
 	/**
 	 * Builds the request-scoped writing-pack context from typed input modes.
@@ -7510,15 +7052,4 @@ final class Rest_Controller extends Rest_Controller_Support {
 		);
 	}
 
-	private function disabled_error( string $label ): WP_Error {
-		return new WP_Error(
-			'npcink_toolbox_disabled',
-			sprintf(
-				/* translators: %s: feature label. */
-				__( 'Enable %s in Npcink Workflow Toolbox settings before running this tool.', 'npcink-workflow-toolbox' ),
-				$label
-			),
-			array( 'status' => 403 )
-		);
-	}
 }

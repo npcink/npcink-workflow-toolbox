@@ -58,6 +58,8 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Site_Knowledge_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Media_Derivative_Previews.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Flow_Plan_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Media_Optimization_Bridges.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Surface_Bridges.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Local_Admin_Consent.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Content_Format.php';
 require_once NPCINK_TOOLBOX_DIR . 'modules/local-automation-runtime/src/Contract/Replay_Validator.php';
