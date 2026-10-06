@@ -30,24 +30,24 @@ final class Provider_Flagged_Media_Service extends Provider_Client_Support {
 
 		return $this->with_output_contract(
 			array(
-				'provider'                      => 'local_media_metadata_review',
-				'cloud_runtime'                 => 'required',
-				'cloud_enrichment_status'       => sanitize_key( $cloud_status ),
-				'cloud_ability'                 => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-toolbox/ai-site-helper' ) ),
-				'contract_version'              => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'hosted_ai_site_helper.v1' ) ),
-				'intent'                        => 'flagged_media_suggestions',
-				'status'                        => 'cloud_required',
-				'output_text'                   => '',
-				'result'                        => array(),
-				'quality_contract'              => $this->sanitize_payload( $quality_contract ),
-				'output_shape'                  => $this->sanitize_payload( $quality_contract['output_shape'] ?? array() ),
-				'review_checklist'              => $this->sanitize_string_list( $quality_contract['review_checklist'] ?? array() ),
-				'reject_if'                     => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
-				'flagged_media_review_set'      => $this->sanitize_payload( $review_set ),
-				'write_posture'                 => 'suggestion_only',
-				'final_write_path'              => 'core_proposal_required',
-				'direct_wordpress_write'        => false,
-				'handoff'                       => array(
+				'provider'                 => 'local_media_metadata_review',
+				'cloud_runtime'            => 'required',
+				'cloud_enrichment_status'  => sanitize_key( $cloud_status ),
+				'cloud_ability'            => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-toolbox/ai-site-helper' ) ),
+				'contract_version'         => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'hosted_ai_site_helper.v1' ) ),
+				'intent'                   => 'flagged_media_suggestions',
+				'status'                   => 'cloud_required',
+				'output_text'              => '',
+				'result'                   => array(),
+				'quality_contract'         => $this->sanitize_payload( $quality_contract ),
+				'output_shape'             => $this->sanitize_payload( $quality_contract['output_shape'] ?? array() ),
+				'review_checklist'         => $this->sanitize_string_list( $quality_contract['review_checklist'] ?? array() ),
+				'reject_if'                => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
+				'flagged_media_review_set' => $this->sanitize_payload( $review_set ),
+				'write_posture'            => 'suggestion_only',
+				'final_write_path'         => 'core_proposal_required',
+				'direct_wordpress_write'   => false,
+				'handoff'                  => array(
 					'final_writes'           => 'core_proposal_required',
 					'direct_wordpress_write' => false,
 				),
@@ -108,29 +108,29 @@ final class Provider_Flagged_Media_Service extends Provider_Client_Support {
 		}
 
 		return array(
-			'contract_version'        => 'flagged_media_review_set.v1',
-			'write_posture'           => 'suggestion_only',
-			'media_unchanged'         => true,
-			'direct_wordpress_write'  => false,
-			'proposal_created'        => false,
-			'execution_created'       => false,
-			'data_classification'     => 'pii',
-			'cloud_status'            => $cloud_ready ? 'ready' : 'cloud_required',
-			'snapshot_policy'         => 'recent_media_metadata_only_no_pixels',
-			'eligibility_summary'     => array(
+			'contract_version'       => 'flagged_media_review_set.v1',
+			'write_posture'          => 'suggestion_only',
+			'media_unchanged'        => true,
+			'direct_wordpress_write' => false,
+			'proposal_created'       => false,
+			'execution_created'      => false,
+			'data_classification'    => 'pii',
+			'cloud_status'           => $cloud_ready ? 'ready' : 'cloud_required',
+			'snapshot_policy'        => 'recent_media_metadata_only_no_pixels',
+			'eligibility_summary'    => array(
 				'sampled_count'  => count( $items ),
 				'selected_count' => count( $selected ),
 				'blocked_count'  => count( $blocked ),
 				'safe_count'     => $safe_count,
 				'sample_limit'   => max( 1, min( 50, absint( $sample['limit'] ?? 50 ) ) ),
 			),
-			'selected_items'          => $selected,
-			'blocked_items'           => $blocked,
-			'operator_next_action'    => $cloud_ready
+			'selected_items'         => $selected,
+			'blocked_items'          => $blocked,
+			'operator_next_action'   => $cloud_ready
 				? 'Review each flagged attachment, then handle it in WordPress. Deletion is not part of this stage.'
 				: 'Connect the Cloud runtime, then rerun the flagged media review.',
-			'retryable'               => ! $cloud_ready,
-			'retry_guidance'          => $cloud_ready
+			'retryable'              => ! $cloud_ready,
+			'retry_guidance'         => $cloud_ready
 				? 'Rerun the review after handling flagged items to refresh the sample.'
 				: 'Cloud safety status is required; no local fallback assessment exists. Retry after the Cloud Addon runtime is available.',
 		);

@@ -34,13 +34,13 @@ final class Snapshot_Collector {
 	private function collect_posts( int $limit ): array {
 		$posts = get_posts(
 			array(
-				'post_type'      => array( 'post', 'page' ),
-				'post_status'    => 'publish',
-				'numberposts'    => max( 1, min( 50, $limit ) ),
-				'orderby'        => 'modified',
-				'order'          => 'ASC',
-				'no_found_rows'  => true,
-				'cache_results'  => true,
+				'post_type'     => array( 'post', 'page' ),
+				'post_status'   => 'publish',
+				'numberposts'   => max( 1, min( 50, $limit ) ),
+				'orderby'       => 'modified',
+				'order'         => 'ASC',
+				'no_found_rows' => true,
+				'cache_results' => true,
 			)
 		);
 
@@ -49,8 +49,8 @@ final class Snapshot_Collector {
 			if ( ! $post instanceof \WP_Post ) {
 				continue;
 			}
-			$post_id = (int) $post->ID;
-			$content = (string) $post->post_content;
+			$post_id    = (int) $post->ID;
+			$content    = (string) $post->post_content;
 			$snapshot[] = array(
 				'object_type'            => (string) $post->post_type,
 				'object_id'              => $post_id,
@@ -92,7 +92,7 @@ final class Snapshot_Collector {
 				continue;
 			}
 			$attachment_id = (int) $attachment->ID;
-			$snapshot[] = array(
+			$snapshot[]    = array(
 				'object_type' => 'attachment',
 				'object_id'   => $attachment_id,
 				'title'       => (string) $attachment->post_title,
@@ -146,7 +146,7 @@ final class Snapshot_Collector {
 	}
 
 	private function missing_alt_count( int $post_id, string $content ): int {
-		$missing = 0;
+		$missing     = 0;
 		$featured_id = (int) get_post_thumbnail_id( $post_id );
 		if ( $featured_id > 0 && '' === trim( (string) get_post_meta( $featured_id, '_wp_attachment_image_alt', true ) ) ) {
 			++$missing;
@@ -210,7 +210,7 @@ final class Snapshot_Collector {
 	}
 
 	private function current_gmt_timestamp(): int {
-		$timestamp = current_time( 'timestamp', true );
+		$timestamp = time();
 		if ( is_numeric( $timestamp ) ) {
 			return (int) $timestamp;
 		}

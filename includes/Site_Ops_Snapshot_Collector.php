@@ -51,13 +51,13 @@ final class Site_Ops_Snapshot_Collector {
 	private function collect_posts( int $limit ): array {
 		$posts = get_posts(
 			array(
-				'post_type'      => array( 'post', 'page' ),
-				'post_status'    => 'publish',
-				'numberposts'    => max( 1, min( 50, $limit ) ),
-				'orderby'        => 'modified',
-				'order'          => 'ASC',
-				'no_found_rows'  => true,
-				'cache_results'  => true,
+				'post_type'     => array( 'post', 'page' ),
+				'post_status'   => 'publish',
+				'numberposts'   => max( 1, min( 50, $limit ) ),
+				'orderby'       => 'modified',
+				'order'         => 'ASC',
+				'no_found_rows' => true,
+				'cache_results' => true,
 			)
 		);
 
@@ -66,23 +66,23 @@ final class Site_Ops_Snapshot_Collector {
 			if ( ! $post instanceof \WP_Post ) {
 				continue;
 			}
-			$post_id = (int) $post->ID;
-			$content = (string) $post->post_content;
+			$post_id    = (int) $post->ID;
+			$content    = (string) $post->post_content;
 			$snapshot[] = array(
-				'object_type'            => (string) $post->post_type,
-				'object_id'              => $post_id,
-				'title'                  => wp_strip_all_tags( (string) $post->post_title ),
-				'published_at'           => $this->post_date_gmt( $post ),
-				'modified_at'            => $this->post_modified_gmt( $post ),
-				'word_count'             => $this->word_count( $content ),
-				'internal_link_count'    => $this->internal_link_count( $content ),
-				'categories'             => $this->term_names( $post_id, 'category' ),
-				'tags'                   => $this->term_names( $post_id, 'post_tag' ),
-				'featured_image_present' => (int) get_post_thumbnail_id( $post_id ) > 0,
-				'missing_alt_count'      => $this->missing_alt_count( $post_id, $content ),
+				'object_type'              => (string) $post->post_type,
+				'object_id'                => $post_id,
+				'title'                    => wp_strip_all_tags( (string) $post->post_title ),
+				'published_at'             => $this->post_date_gmt( $post ),
+				'modified_at'              => $this->post_modified_gmt( $post ),
+				'word_count'               => $this->word_count( $content ),
+				'internal_link_count'      => $this->internal_link_count( $content ),
+				'categories'               => $this->term_names( $post_id, 'category' ),
+				'tags'                     => $this->term_names( $post_id, 'post_tag' ),
+				'featured_image_present'   => (int) get_post_thumbnail_id( $post_id ) > 0,
+				'missing_alt_count'        => $this->missing_alt_count( $post_id, $content ),
 				'meta_description_present' => '' !== $this->meta_description( $post_id ),
-				'excerpt_present'        => '' !== trim( (string) $post->post_excerpt ),
-				'approved_comment_count' => (int) get_comments_number( $post_id ),
+				'excerpt_present'          => '' !== trim( (string) $post->post_excerpt ),
+				'approved_comment_count'   => (int) get_comments_number( $post_id ),
 			);
 		}
 
@@ -112,14 +112,14 @@ final class Site_Ops_Snapshot_Collector {
 				continue;
 			}
 			$attachment_id = (int) $attachment->ID;
-			$snapshot[] = array(
-				'object_type'     => 'attachment',
-				'object_id'       => $attachment_id,
-				'title'           => wp_strip_all_tags( (string) $attachment->post_title ),
+			$snapshot[]    = array(
+				'object_type'      => 'attachment',
+				'object_id'        => $attachment_id,
+				'title'            => wp_strip_all_tags( (string) $attachment->post_title ),
 				'filename_present' => '' !== basename( (string) get_attached_file( $attachment_id ) ),
-				'alt_present'     => '' !== trim( (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ),
-				'caption_present' => '' !== trim( (string) $attachment->post_excerpt ),
-				'parent_post_id'  => (int) $attachment->post_parent,
+				'alt_present'      => '' !== trim( (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ),
+				'caption_present'  => '' !== trim( (string) $attachment->post_excerpt ),
+				'parent_post_id'   => (int) $attachment->post_parent,
 			);
 		}
 
@@ -139,14 +139,14 @@ final class Site_Ops_Snapshot_Collector {
 				'type'    => 'comment',
 			)
 		);
-		$approved_total = get_comments(
+		$approved_total  = get_comments(
 			array(
 				'status' => 'approve',
 				'type'   => 'comment',
 				'count'  => true,
 			)
 		);
-		$pending_total = get_comments(
+		$pending_total   = get_comments(
 			array(
 				'status' => 'hold',
 				'type'   => 'comment',
@@ -351,7 +351,7 @@ final class Site_Ops_Snapshot_Collector {
 
 	private function current_gmt_timestamp(): int {
 		if ( function_exists( 'current_time' ) ) {
-			return (int) current_time( 'timestamp', true );
+			return (int) time();
 		}
 
 		return time();

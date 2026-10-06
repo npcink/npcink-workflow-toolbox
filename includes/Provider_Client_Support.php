@@ -17,17 +17,17 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 abstract class Provider_Client_Support {
-	protected const PAYLOAD_MAX_DEPTH = 8;
-	protected const PAYLOAD_MAX_ITEMS = 80;
-	protected const PAYLOAD_MAX_STRING_CHARS = 4000;
-	protected const DEBUG_PAYLOAD_MAX_DEPTH = 6;
-	protected const DEBUG_PAYLOAD_MAX_ITEMS = 40;
-	protected const DEBUG_PAYLOAD_MAX_STRING_CHARS = 2000;
-	protected const HTTP_CONNECT_TIMEOUT = 5;
-	protected const SITE_KNOWLEDGE_CONTENT_CHARS = 30000;
-	protected const SITE_KNOWLEDGE_SYNC_MAX_BYTES = 750000;
-	protected const ARTICLE_PLAN_CONTENT_CHARS = 60000;
-	protected const ARTICLE_PLAN_NOTES_CHARS = 12000;
+	protected const PAYLOAD_MAX_DEPTH                  = 8;
+	protected const PAYLOAD_MAX_ITEMS                  = 80;
+	protected const PAYLOAD_MAX_STRING_CHARS           = 4000;
+	protected const DEBUG_PAYLOAD_MAX_DEPTH            = 6;
+	protected const DEBUG_PAYLOAD_MAX_ITEMS            = 40;
+	protected const DEBUG_PAYLOAD_MAX_STRING_CHARS     = 2000;
+	protected const HTTP_CONNECT_TIMEOUT               = 5;
+	protected const SITE_KNOWLEDGE_CONTENT_CHARS       = 30000;
+	protected const SITE_KNOWLEDGE_SYNC_MAX_BYTES      = 750000;
+	protected const ARTICLE_PLAN_CONTENT_CHARS         = 60000;
+	protected const ARTICLE_PLAN_NOTES_CHARS           = 12000;
 	protected const SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES = 262144;
 
 	protected const AUDIO_GENERATION_TEXT_CHARS = 5000;
@@ -59,9 +59,9 @@ abstract class Provider_Client_Support {
 
 
 	protected function runtime_payload_with_data_classification( array $runtime_payload, string $default, array $source_input = array() ): array {
-		$runtime_input  = is_array( $runtime_payload['input'] ?? null ) ? $runtime_payload['input'] : array();
-		$current        = sanitize_key( (string) ( $runtime_payload['data_classification'] ?? $default ) );
-		$classification = $this->runtime_payload_data_classification( $runtime_input, '' !== $current ? $current : $default, $source_input );
+		$runtime_input                          = is_array( $runtime_payload['input'] ?? null ) ? $runtime_payload['input'] : array();
+		$current                                = sanitize_key( (string) ( $runtime_payload['data_classification'] ?? $default ) );
+		$classification                         = $this->runtime_payload_data_classification( $runtime_input, '' !== $current ? $current : $default, $source_input );
 		$runtime_payload['data_classification'] = $classification;
 		$runtime_payload['storage_mode']        = $this->runtime_payload_storage_mode(
 			$classification,
@@ -457,7 +457,7 @@ abstract class Provider_Client_Support {
 
 	protected function sanitize_string_list( $value, int $max_items = 0 ): array {
 		$items = is_array( $value ) ? $value : array_filter( array_map( 'trim', explode( "\n", (string) $value ) ) );
-		$list = array_values(
+		$list  = array_values(
 			array_filter(
 				array_map(
 					static fn( $item ): string => sanitize_textarea_field( (string) $item ),
@@ -666,8 +666,8 @@ abstract class Provider_Client_Support {
 		}
 		$source_path = $real_path;
 		if ( $file_size > self::SITE_MEDIA_VISUAL_MAX_UPLOAD_BYTES && function_exists( 'wp_get_attachment_metadata' ) ) {
-			$metadata = wp_get_attachment_metadata( $attachment_id );
-			$sizes    = is_array( $metadata ) && is_array( $metadata['sizes'] ?? null ) ? $metadata['sizes'] : array();
+			$metadata   = wp_get_attachment_metadata( $attachment_id );
+			$sizes      = is_array( $metadata ) && is_array( $metadata['sizes'] ?? null ) ? $metadata['sizes'] : array();
 			$candidates = array();
 			foreach ( $sizes as $size ) {
 				if ( ! is_array( $size ) || empty( $size['file'] ) ) {
@@ -760,5 +760,4 @@ abstract class Provider_Client_Support {
 
 		return $matches[1] . ( is_string( $suffix ) ? $suffix : '' );
 	}
-
 }

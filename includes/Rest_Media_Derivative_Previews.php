@@ -49,7 +49,7 @@ final class Rest_Media_Derivative_Previews {
 			return $this->media_derivative_cloud_addon_unavailable();
 		}
 
-		$watermark_id = absint( $preview_input['watermark_attachment_id'] ?? 0 );
+		$watermark_id  = absint( $preview_input['watermark_attachment_id'] ?? 0 );
 		$ability_input = $preview_input;
 		unset( $ability_input['watermark_attachment_id'] );
 
@@ -88,14 +88,14 @@ final class Rest_Media_Derivative_Previews {
 
 		return new WP_REST_Response(
 			array(
-				'contract_version' => 'toolbox_media_derivative_preview.v2',
-				'status'           => 'submitted',
-				'run_id'           => sanitize_text_field( (string) $run_id ),
-				'cloud_run'        => $cloud_run,
-				'ability_response' => $ability_response,
-				'write_posture'    => 'preview_only',
+				'contract_version'       => 'toolbox_media_derivative_preview.v2',
+				'status'                 => 'submitted',
+				'run_id'                 => sanitize_text_field( (string) $run_id ),
+				'cloud_run'              => $cloud_run,
+				'ability_response'       => $ability_response,
+				'write_posture'          => 'preview_only',
 				'direct_wordpress_write' => false,
-				'core_proposal_created'   => false,
+				'core_proposal_created'  => false,
 			),
 			202
 		);
@@ -116,9 +116,9 @@ final class Rest_Media_Derivative_Previews {
 
 		return rest_ensure_response(
 			array(
-				'contract_version' => 'toolbox_media_derivative_preview_status.v2',
-				'cloud_run'        => is_array( $result ) ? $result : array(),
-				'local_review'     => $this->media_derivative_local_review_projection( is_array( $result ) ? $result : array() ),
+				'contract_version'       => 'toolbox_media_derivative_preview_status.v2',
+				'cloud_run'              => is_array( $result ) ? $result : array(),
+				'local_review'           => $this->media_derivative_local_review_projection( is_array( $result ) ? $result : array() ),
 				'direct_wordpress_write' => false,
 			)
 		);
@@ -143,10 +143,10 @@ final class Rest_Media_Derivative_Previews {
 		if ( 'skipped' === (string) ( $optimization['status'] ?? '' ) ) {
 			return rest_ensure_response(
 				array(
-					'contract_version' => 'toolbox_media_derivative_preview_result.v3',
-					'cloud_result' => $cloud_result,
-					'local_review' => array(),
-					'optimization' => $optimization,
+					'contract_version'       => 'toolbox_media_derivative_preview_result.v3',
+					'cloud_result'           => $cloud_result,
+					'local_review'           => array(),
+					'optimization'           => $optimization,
 					'direct_wordpress_write' => false,
 				)
 			);
@@ -161,9 +161,9 @@ final class Rest_Media_Derivative_Previews {
 
 		return rest_ensure_response(
 			array(
-				'contract_version' => 'toolbox_media_derivative_preview_result.v2',
-				'cloud_result'     => $cloud_result,
-				'local_review'     => $local_review,
+				'contract_version'       => 'toolbox_media_derivative_preview_result.v2',
+				'cloud_result'           => $cloud_result,
+				'local_review'           => $local_review,
 				'direct_wordpress_write' => false,
 			)
 		);
@@ -201,7 +201,10 @@ final class Rest_Media_Derivative_Previews {
 			return new WP_Error(
 				'npcink_toolbox_media_derivative_local_review_args_invalid',
 				__( 'Media derivative local review requires one exact JSON artifact body and no query parameters.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400, 'unsupported_fields' => array_values( $unknown_params ) )
+				array(
+					'status'             => 400,
+					'unsupported_fields' => array_values( $unknown_params ),
+				)
 			);
 		}
 
@@ -209,7 +212,7 @@ final class Rest_Media_Derivative_Previews {
 		if ( is_wp_error( $artifact ) ) {
 			return $artifact;
 		}
-		$artifact_id = (string) $artifact['artifact_id'];
+		$artifact_id                  = (string) $artifact['artifact_id'];
 		$expected_local_artifact_keys = array(
 			'artifact_id',
 			'expires_at',
@@ -279,7 +282,10 @@ final class Rest_Media_Derivative_Previews {
 				return new WP_Error(
 					'npcink_toolbox_media_derivative_preview_legacy_field',
 					__( 'The media derivative preview input contains a removed legacy field.', 'npcink-workflow-toolbox' ),
-					array( 'status' => 400, 'field' => $legacy_field )
+					array(
+						'status' => 400,
+						'field'  => $legacy_field,
+					)
 				);
 			}
 		}
@@ -303,7 +309,10 @@ final class Rest_Media_Derivative_Previews {
 				return new WP_Error(
 					'npcink_toolbox_media_derivative_preview_unknown_field',
 					__( 'The media derivative preview input contains an unknown field.', 'npcink-workflow-toolbox' ),
-					array( 'status' => 400, 'field' => sanitize_key( (string) $field ) )
+					array(
+						'status' => 400,
+						'field'  => sanitize_key( (string) $field ),
+					)
 				);
 			}
 		}
@@ -320,7 +329,10 @@ final class Rest_Media_Derivative_Previews {
 				return new WP_Error(
 					'npcink_toolbox_media_derivative_preview_invalid_field',
 					__( 'The media derivative preview input contains an invalid field value.', 'npcink-workflow-toolbox' ),
-					array( 'status' => 400, 'field' => $parent )
+					array(
+						'status' => 400,
+						'field'  => $parent,
+					)
 				);
 			}
 			foreach ( array_keys( $input[ $parent ] ) as $nested_field ) {
@@ -328,7 +340,10 @@ final class Rest_Media_Derivative_Previews {
 					return new WP_Error(
 						'npcink_toolbox_media_derivative_preview_unknown_field',
 						__( 'The media derivative preview input contains an unknown field.', 'npcink-workflow-toolbox' ),
-						array( 'status' => 400, 'field' => $parent . '.' . sanitize_key( (string) $nested_field ) )
+						array(
+							'status' => 400,
+							'field'  => $parent . '.' . sanitize_key( (string) $nested_field ),
+						)
 					);
 				}
 			}
@@ -341,18 +356,24 @@ final class Rest_Media_Derivative_Previews {
 			return new WP_Error(
 				'npcink_toolbox_media_derivative_preview_watermark_attachment_required',
 				__( 'Image watermark previews require a configured local watermark attachment.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400, 'field' => 'watermark_attachment_id' )
+				array(
+					'status' => 400,
+					'field'  => 'watermark_attachment_id',
+				)
 			);
 		}
 		if ( $watermark_attachment_id > 0 && 'image' !== $watermark_type ) {
 			return new WP_Error(
 				'npcink_toolbox_media_derivative_preview_watermark_attachment_unexpected',
 				__( 'A local watermark attachment is allowed only for an image watermark preview.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400, 'field' => 'watermark_attachment_id' )
+				array(
+					'status' => 400,
+					'field'  => 'watermark_attachment_id',
+				)
 			);
 		}
 
-		$input = map_deep( $input, 'sanitize_text_field' );
+		$input                  = map_deep( $input, 'sanitize_text_field' );
 		$input['attachment_id'] = absint( $input['attachment_id'] ?? 0 );
 		if ( isset( $input['watermark_attachment_id'] ) ) {
 			$input['watermark_attachment_id'] = absint( $input['watermark_attachment_id'] );
@@ -419,7 +440,10 @@ final class Rest_Media_Derivative_Previews {
 			return new WP_Error(
 				'npcink_toolbox_media_derivative_file_unreadable',
 				__( 'The selected attachment file is not readable for the preview upload.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400, 'attachment_id' => $attachment_id )
+				array(
+					'status'        => 400,
+					'attachment_id' => $attachment_id,
+				)
 			);
 		}
 
@@ -434,7 +458,10 @@ final class Rest_Media_Derivative_Previews {
 		return new WP_Error(
 			'npcink_toolbox_media_derivative_cloud_addon_unavailable',
 			__( 'Npcink Cloud Addon is required for media derivative preview transport.', 'npcink-workflow-toolbox' ),
-			array( 'status' => 503, 'required_plugin' => 'npcink-cloud-addon' )
+			array(
+				'status'          => 503,
+				'required_plugin' => 'npcink-cloud-addon',
+			)
 		);
 	}
 
@@ -444,7 +471,7 @@ final class Rest_Media_Derivative_Previews {
 	}
 
 	private function media_derivative_local_review_projection( array $cloud_projection ): array {
-		$artifact = is_array( $cloud_projection['artifact'] ?? null ) ? $cloud_projection['artifact'] : array();
+		$artifact      = is_array( $cloud_projection['artifact'] ?? null ) ? $cloud_projection['artifact'] : array();
 		$expected_keys = array(
 			'artifact_id',
 			'artifact_reference',
@@ -464,12 +491,12 @@ final class Rest_Media_Derivative_Previews {
 			return array();
 		}
 
-		$artifact_id = (string) $artifact['artifact_id'];
-		$expires_at  = (string) $artifact['expires_at'];
-		$expires_ts  = self::media_derivative_strict_timestamp( $expires_at );
-		$format      = (string) $artifact['format'];
-		$mime_type   = (string) $artifact['mime_type'];
-		$mime_by_format = array(
+		$artifact_id        = (string) $artifact['artifact_id'];
+		$expires_at         = (string) $artifact['expires_at'];
+		$expires_ts         = self::media_derivative_strict_timestamp( $expires_at );
+		$format             = (string) $artifact['format'];
+		$mime_type          = (string) $artifact['mime_type'];
+		$mime_by_format     = array(
 			'avif' => 'image/avif',
 			'jpeg' => 'image/jpeg',
 			'png'  => 'image/png',
@@ -556,7 +583,7 @@ final class Rest_Media_Derivative_Previews {
 	 * @return int|false
 	 */
 	private static function media_derivative_strict_timestamp( string $value ) {
-		$utc = new \DateTimeZone( 'UTC' );
+		$utc     = new \DateTimeZone( 'UTC' );
 		$formats = array(
 			'!Y-m-d\TH:i:s\Z'   => 'Y-m-d\TH:i:s\Z',
 			'!Y-m-d\TH:i:sP'    => 'Y-m-d\TH:i:sP',
@@ -589,10 +616,10 @@ final class Rest_Media_Derivative_Previews {
 	 * @return array<string,mixed>|WP_Error
 	 */
 	private function media_derivative_local_review_artifact_from_request( WP_REST_Request $request ) {
-		$path_artifact_id   = $request->get_param( 'artifact_id' );
-		$json_params        = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
-		$artifact           = is_array( $json_params['artifact'] ?? null ) ? $json_params['artifact'] : array();
-		$expected_keys      = array(
+		$path_artifact_id = $request->get_param( 'artifact_id' );
+		$json_params      = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : array();
+		$artifact         = is_array( $json_params['artifact'] ?? null ) ? $json_params['artifact'] : array();
+		$expected_keys    = array(
 			'artifact_id',
 			'expires_at',
 			'mime_type',
@@ -614,20 +641,20 @@ final class Rest_Media_Derivative_Previews {
 			return $this->media_derivative_local_review_descriptor_invalid();
 		}
 
-		$artifact_id        = $artifact['artifact_id'];
-		$expires_at         = $artifact['expires_at'];
-		$mime_type          = $artifact['mime_type'];
-		$format             = $artifact['format'];
-		$width              = self::media_derivative_local_review_positive_integer( $artifact['width'] );
-		$height             = self::media_derivative_local_review_positive_integer( $artifact['height'] );
-		$filesize_bytes     = self::media_derivative_local_review_positive_integer( $artifact['filesize_bytes'] );
-		$sha256             = $artifact['sha256'];
-		$suggested_filename = $artifact['suggested_filename'];
-		$filename_basis     = $artifact['filename_basis'];
+		$artifact_id         = $artifact['artifact_id'];
+		$expires_at          = $artifact['expires_at'];
+		$mime_type           = $artifact['mime_type'];
+		$format              = $artifact['format'];
+		$width               = self::media_derivative_local_review_positive_integer( $artifact['width'] );
+		$height              = self::media_derivative_local_review_positive_integer( $artifact['height'] );
+		$filesize_bytes      = self::media_derivative_local_review_positive_integer( $artifact['filesize_bytes'] );
+		$sha256              = $artifact['sha256'];
+		$suggested_filename  = $artifact['suggested_filename'];
+		$filename_basis      = $artifact['filename_basis'];
 		$processing_warnings = $artifact['processing_warnings'];
 		$transform_facts     = $artifact['transform_facts'];
-		$expires_timestamp  = is_string( $expires_at ) ? self::media_derivative_strict_timestamp( $expires_at ) : false;
-		$mime_by_format     = array(
+		$expires_timestamp   = is_string( $expires_at ) ? self::media_derivative_strict_timestamp( $expires_at ) : false;
+		$mime_by_format      = array(
 			'avif' => 'image/avif',
 			'jpeg' => 'image/jpeg',
 			'png'  => 'image/png',
@@ -720,5 +747,4 @@ final class Rest_Media_Derivative_Previews {
 			array( 'status' => 400 )
 		);
 	}
-
 }

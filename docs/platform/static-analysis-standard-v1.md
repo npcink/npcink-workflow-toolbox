@@ -115,7 +115,7 @@ until direct execution revealed it.
 | Repository | Status |
 | --- | --- |
 | `npcink-ai-client-adapter` | required since 2026-10-04 (PR #56, #62) |
-| `npcink-workflow-toolbox` | advisory since 2026-10-04 (this file's reference setup; `analyse:php` uses `--memory-limit=4G` because the analysed tree is ~50k lines and 1G crashes the worker) |
+| `npcink-workflow-toolbox` | required since 2026-10-06 (advisory since 2026-10-04; phpcbf-formatted with a needle realignment pass, baseline-tracked PHPStan, and four mechanical sniffs severity-zeroed) |
 | `npcink-governance-core` | pending |
 | `npcink-abilities-toolkit` | pending |
 | `npcink-cloud-addon` | pending |

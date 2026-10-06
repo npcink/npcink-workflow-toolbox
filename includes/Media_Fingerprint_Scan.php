@@ -78,14 +78,14 @@ final class Media_Fingerprint_Scan {
 
 	/** @return array<string,mixed> */
 	public function status(): array {
-		$enabled = $this->enabled();
+		$enabled  = $this->enabled();
 		$next_run = $enabled ? wp_next_scheduled( self::HOOK ) : false;
-		$overdue = is_int( $next_run ) && $next_run > 0 && $next_run < time() - DAY_IN_SECONDS;
+		$overdue  = is_int( $next_run ) && $next_run > 0 && $next_run < time() - DAY_IN_SECONDS;
 		return array(
-			'enabled' => $enabled,
+			'enabled'  => $enabled,
 			'next_run' => is_int( $next_run ) ? $next_run : 0,
-			'overdue' => $overdue,
-			'status' => ! $enabled ? 'disabled' : ( $overdue ? 'overdue' : ( $next_run ? 'scheduled' : 'not_scheduled' ) ),
+			'overdue'  => $overdue,
+			'status'   => ! $enabled ? 'disabled' : ( $overdue ? 'overdue' : ( $next_run ? 'scheduled' : 'not_scheduled' ) ),
 		);
 	}
 

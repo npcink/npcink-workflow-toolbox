@@ -52,19 +52,19 @@ final class Media_Conversion_Review_Set_Normalizer {
 		$retryable = is_bool( $data['retryable'] ?? null ) ? (bool) $data['retryable'] : false;
 
 		return array(
-			'contract_version'    => self::CONTRACT_VERSION,
-			'runtime_owner'       => self::RUNTIME_OWNER,
-			'operation_family'    => 'media_conversion',
-			'mode'                => 'governed_review_set',
-			'trigger'             => 'operator_manual_review',
-			'scope'               => array(
+			'contract_version'     => self::CONTRACT_VERSION,
+			'runtime_owner'        => self::RUNTIME_OWNER,
+			'operation_family'     => 'media_conversion',
+			'mode'                 => 'governed_review_set',
+			'trigger'              => 'operator_manual_review',
+			'scope'                => array(
 				'object_type'             => 'attachment',
 				'source'                  => 'media_library',
 				'target_format'           => $target_format,
 				'max_items'               => (int) ( $filters['max_items'] ?? count( $candidates ) ),
 				'selected_attachment_ids' => $this->attachment_ids_from_items( array_merge( $selected_items, $normalized_blocked_items ) ),
 			),
-			'eligibility_summary' => array(
+			'eligibility_summary'  => array(
 				'items_total'        => (int) ( $summary['total_count'] ?? $summary['items_total'] ?? count( $selected_items ) + count( $normalized_blocked_items ) ),
 				'eligible_count'     => (int) ( $summary['eligible_count'] ?? count( $selected_items ) ),
 				'selected_count'     => count( $selected_items ),
@@ -73,8 +73,8 @@ final class Media_Conversion_Review_Set_Normalizer {
 				'risk_level'         => 'medium',
 				'target_ability_ids' => array( self::TARGET_ABILITY ),
 			),
-			'selected_items'      => $selected_items,
-			'blocked_items'       => $normalized_blocked_items,
+			'selected_items'       => $selected_items,
+			'blocked_items'        => $normalized_blocked_items,
 			'operator_next_action' => $this->first_non_empty_string(
 				array(
 					$data['operator_next_action'] ?? '',
@@ -82,8 +82,8 @@ final class Media_Conversion_Review_Set_Normalizer {
 				),
 				'adjust_selection_or_filters'
 			),
-			'retryable'           => $retryable,
-			'retry_guidance'      => array(
+			'retryable'            => $retryable,
+			'retry_guidance'       => array(
 				'retryable'            => $retryable,
 				'reason'               => $retryable ? 'review_set_can_be_rebuilt' : 'review_set_not_execution_state',
 				'operator_next_action' => $this->first_non_empty_string(
@@ -94,7 +94,7 @@ final class Media_Conversion_Review_Set_Normalizer {
 					'adjust_selection_or_generate_selected_previews'
 				),
 			),
-			'safety'              => $this->safety_flags(),
+			'safety'               => $this->safety_flags(),
 		);
 	}
 
@@ -124,11 +124,11 @@ final class Media_Conversion_Review_Set_Normalizer {
 	 */
 	private function normalize_blocked_item( array $blocked_item ): array {
 		return array(
-			'attachment_id'         => (int) ( $blocked_item['attachment_id'] ?? $blocked_item['id'] ?? 0 ),
-			'source_mime_type'      => $this->first_non_empty_string( array( $blocked_item['mime_type'] ?? '', $blocked_item['source_mime_type'] ?? '' ), 'image/unknown' ),
-			'blocked_reason'        => $this->first_non_empty_string( array( $blocked_item['blocked_reason'] ?? '', $blocked_item['reason'] ?? '' ), 'blocked' ),
-			'operator_next_action'  => $this->first_non_empty_string( array( $blocked_item['operator_next_action'] ?? '' ), 'adjust_filters_or_skip' ),
-			'retryable'             => false,
+			'attachment_id'        => (int) ( $blocked_item['attachment_id'] ?? $blocked_item['id'] ?? 0 ),
+			'source_mime_type'     => $this->first_non_empty_string( array( $blocked_item['mime_type'] ?? '', $blocked_item['source_mime_type'] ?? '' ), 'image/unknown' ),
+			'blocked_reason'       => $this->first_non_empty_string( array( $blocked_item['blocked_reason'] ?? '', $blocked_item['reason'] ?? '' ), 'blocked' ),
+			'operator_next_action' => $this->first_non_empty_string( array( $blocked_item['operator_next_action'] ?? '' ), 'adjust_filters_or_skip' ),
+			'retryable'            => false,
 		);
 	}
 

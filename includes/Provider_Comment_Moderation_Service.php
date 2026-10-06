@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 final class Provider_Comment_Moderation_Service extends Provider_Client_Support {
 	private Provider_Client $client;
 
-	private const CLASSIFICATION_VALUES  = array( 'spam', 'legitimate', 'uncertain' );
+	private const CLASSIFICATION_VALUES   = array( 'spam', 'legitimate', 'uncertain' );
 	private const SUGGESTED_ACTION_VALUES = array( 'open_in_wordpress_moderation_queue', 'review_manually' );
 
 	public function __construct( Settings $settings, Provider_Client $client ) {
@@ -32,24 +32,24 @@ final class Provider_Comment_Moderation_Service extends Provider_Client_Support 
 
 		return $this->with_output_contract(
 			array(
-				'provider'                       => 'local_pending_sample_review',
-				'cloud_runtime'                  => 'required',
-				'cloud_enrichment_status'        => sanitize_key( $cloud_status ),
-				'cloud_ability'                  => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-toolbox/ai-site-helper' ) ),
-				'contract_version'               => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'hosted_ai_site_helper.v1' ) ),
-				'intent'                         => 'comment_moderation_suggestions',
-				'status'                         => 'cloud_required',
-				'output_text'                    => '',
-				'result'                         => array(),
-				'quality_contract'               => $this->sanitize_payload( $quality_contract ),
-				'output_shape'                   => $this->sanitize_payload( $quality_contract['output_shape'] ?? array() ),
-				'review_checklist'               => $this->sanitize_string_list( $quality_contract['review_checklist'] ?? array() ),
-				'reject_if'                      => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
-				'comment_moderation_review_set'  => $this->sanitize_payload( $review_set ),
-				'write_posture'                  => 'suggestion_only',
-				'final_write_path'               => 'core_proposal_required',
-				'direct_wordpress_write'         => false,
-				'handoff'                        => array(
+				'provider'                      => 'local_pending_sample_review',
+				'cloud_runtime'                 => 'required',
+				'cloud_enrichment_status'       => sanitize_key( $cloud_status ),
+				'cloud_ability'                 => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-toolbox/ai-site-helper' ) ),
+				'contract_version'              => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'hosted_ai_site_helper.v1' ) ),
+				'intent'                        => 'comment_moderation_suggestions',
+				'status'                        => 'cloud_required',
+				'output_text'                   => '',
+				'result'                        => array(),
+				'quality_contract'              => $this->sanitize_payload( $quality_contract ),
+				'output_shape'                  => $this->sanitize_payload( $quality_contract['output_shape'] ?? array() ),
+				'review_checklist'              => $this->sanitize_string_list( $quality_contract['review_checklist'] ?? array() ),
+				'reject_if'                     => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
+				'comment_moderation_review_set' => $this->sanitize_payload( $review_set ),
+				'write_posture'                 => 'suggestion_only',
+				'final_write_path'              => 'core_proposal_required',
+				'direct_wordpress_write'        => false,
+				'handoff'                       => array(
 					'final_writes'           => 'core_proposal_required',
 					'direct_wordpress_write' => false,
 				),
@@ -60,11 +60,11 @@ final class Provider_Comment_Moderation_Service extends Provider_Client_Support 
 	}
 
 	public function build_comment_moderation_review_set( array $sample, array $classifications = array(), string $cloud_status = 'cloud_required' ): array {
-		$items            = is_array( $sample['items'] ?? null ) ? $sample['items'] : array();
-		$cloud_ready      = 'ready' === sanitize_key( $cloud_status );
-		$indexed          = $cloud_ready ? $this->index_comment_classifications( $classifications ) : array();
-		$selected         = array();
-		$blocked          = array();
+		$items       = is_array( $sample['items'] ?? null ) ? $sample['items'] : array();
+		$cloud_ready = 'ready' === sanitize_key( $cloud_status );
+		$indexed     = $cloud_ready ? $this->index_comment_classifications( $classifications ) : array();
+		$selected    = array();
+		$blocked     = array();
 
 		foreach ( $items as $item ) {
 			$comment_id = absint( $item['comment_id'] ?? 0 );

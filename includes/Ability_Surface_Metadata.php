@@ -14,8 +14,8 @@ final class Ability_Surface_Metadata {
 		return array(
 			'source_adaptation_review' => self::definition( __( 'Draft from source materials', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'cloud_reader_site_knowledge_and_hosted_ai_via_addon', 'native_editor_or_article_plan_core_handoff', 'npcink_owned_default' ),
 			'publish_preflight'        => self::definition( __( 'Publish Preflight', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolbox_local_optional_cloud', 'seo_meta_core_handoff_preview', 'npcink_owned_default' ),
-			'category_suggestions'      => self::definition( __( 'Category suggestions', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_owned_default' ),
-			'tag_suggestions'           => self::definition( __( 'Tag suggestions', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_owned_default' ),
+			'category_suggestions'     => self::definition( __( 'Category suggestions', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_owned_default' ),
+			'tag_suggestions'          => self::definition( __( 'Tag suggestions', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_owned_default' ),
 			'internal_link_candidates' => self::definition( __( 'Internal Link Candidates', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_with_optional_site_knowledge', 'manual_editor_review', 'npcink_owned_default' ),
 			'image_candidates'         => self::definition( __( 'Image Candidates', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'cloud_runtime_via_addon', 'image_candidate_adoption_plan', 'npcink_owned_default' ),
 			'article_audio_candidates' => self::definition( __( 'Article Audio Candidates', 'npcink-workflow-toolbox' ), 'editor_hidden_compatibility', false, 'cloud_runtime_via_addon', 'article_audio_adoption_plan', 'npcink_supporting_surface' ),

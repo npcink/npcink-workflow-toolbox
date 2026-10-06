@@ -16,11 +16,11 @@ final class Cloud_Batch_Result_Merger {
 	 * @return array<string,mixed>
 	 */
 	public function merge( array $morning_brief, array $cloud_result ): array {
-		$actions_by_key = $this->actions_by_key( $cloud_result );
-		$merged         = $morning_brief;
-		$merged_count   = 0;
-		$operational    = $this->operational_detail( $cloud_result, count( $actions_by_key ) );
-		$priority_queue = $this->priority_queue( $cloud_result, $actions_by_key );
+		$actions_by_key      = $this->actions_by_key( $cloud_result );
+		$merged              = $morning_brief;
+		$merged_count        = 0;
+		$operational         = $this->operational_detail( $cloud_result, count( $actions_by_key ) );
+		$priority_queue      = $this->priority_queue( $cloud_result, $actions_by_key );
 		$core_intake_package = $this->core_intake_package( $cloud_result );
 
 		if ( isset( $merged['priorities'] ) && is_array( $merged['priorities'] ) ) {
@@ -39,28 +39,28 @@ final class Cloud_Batch_Result_Merger {
 		}
 
 		$merged['cloud_runtime'] = array(
-			'contract_version'       => self::CONTRACT_VERSION,
-			'provider'               => 'npcink_cloud',
-			'composition_role'       => 'morning_brief_cloud_runtime_detail',
-			'source_run_id'          => $this->text_value( $cloud_result, array( 'run_id', 'cloud_run_id', 'source_run_id' ) ),
-			'status'                 => $this->text_value( $cloud_result, array( 'status' ), 'merged' ),
-			'worker_phase'           => $operational['worker_phase'],
-			'execution_kind'         => $operational['execution_kind'],
-			'eligibility_summary'    => $operational['eligibility_summary'],
-			'blocked_items'          => $operational['blocked_items'],
-			'operator_next_action'   => $operational['operator_next_action'],
-			'retryable'              => $operational['retryable'],
-			'retry_guidance'         => $operational['retry_guidance'],
-			'action_count'           => count( $actions_by_key ),
-			'merged_priority_count'  => $merged_count,
-			'priority_queue_count'   => count( $priority_queue ),
+			'contract_version'              => self::CONTRACT_VERSION,
+			'provider'                      => 'npcink_cloud',
+			'composition_role'              => 'morning_brief_cloud_runtime_detail',
+			'source_run_id'                 => $this->text_value( $cloud_result, array( 'run_id', 'cloud_run_id', 'source_run_id' ) ),
+			'status'                        => $this->text_value( $cloud_result, array( 'status' ), 'merged' ),
+			'worker_phase'                  => $operational['worker_phase'],
+			'execution_kind'                => $operational['execution_kind'],
+			'eligibility_summary'           => $operational['eligibility_summary'],
+			'blocked_items'                 => $operational['blocked_items'],
+			'operator_next_action'          => $operational['operator_next_action'],
+			'retryable'                     => $operational['retryable'],
+			'retry_guidance'                => $operational['retry_guidance'],
+			'action_count'                  => count( $actions_by_key ),
+			'merged_priority_count'         => $merged_count,
+			'priority_queue_count'          => count( $priority_queue ),
 			'core_intake_package_available' => array() !== $core_intake_package,
 			'core_intake_package_contract'  => (string) ( $core_intake_package['contract_version'] ?? '' ),
 			'core_intake_target_route'      => (string) ( $core_intake_package['target_route'] ?? '' ),
 			'core_intake_receipt_owner'     => (string) ( $core_intake_package['receipt_expectation']['receipt_owner'] ?? '' ),
-			'direct_wordpress_write' => false,
-			'final_write_path'       => 'core_proposal_required',
-			'requires_local_review'  => true,
+			'direct_wordpress_write'        => false,
+			'final_write_path'              => 'core_proposal_required',
+			'requires_local_review'         => true,
 		);
 
 		if ( array() !== $core_intake_package ) {
@@ -77,13 +77,13 @@ final class Cloud_Batch_Result_Merger {
 		);
 
 		if ( isset( $merged['safety'] ) && is_array( $merged['safety'] ) ) {
-			$merged['safety']['cloud_called']             = true;
-			$merged['safety']['direct_wordpress_write']   = false;
-			$merged['safety']['cloud_scheduler_truth']    = false;
-			$merged['safety']['requires_local_review']    = true;
-			$merged['safety']['action_scheduler_used']    = false;
-			$merged['safety']['custom_tables_created']    = false;
-			$merged['safety']['core_proposal_created']    = false;
+			$merged['safety']['cloud_called']           = true;
+			$merged['safety']['direct_wordpress_write'] = false;
+			$merged['safety']['cloud_scheduler_truth']  = false;
+			$merged['safety']['requires_local_review']  = true;
+			$merged['safety']['action_scheduler_used']  = false;
+			$merged['safety']['custom_tables_created']  = false;
+			$merged['safety']['core_proposal_created']  = false;
 		}
 
 		return $merged;
@@ -94,38 +94,38 @@ final class Cloud_Batch_Result_Merger {
 	 * @return array<string,mixed>
 	 */
 	public function patch( array $cloud_result ): array {
-		$actions_by_key   = $this->actions_by_key( $cloud_result );
-		$actions          = array_values( $actions_by_key );
-		$operational      = $this->operational_detail( $cloud_result, count( $actions ) );
-		$action_summaries = array_map( array( $this, 'cloud_action_summary' ), $actions );
-		$priority_queue   = $this->priority_queue( $cloud_result, $actions_by_key );
+		$actions_by_key      = $this->actions_by_key( $cloud_result );
+		$actions             = array_values( $actions_by_key );
+		$operational         = $this->operational_detail( $cloud_result, count( $actions ) );
+		$action_summaries    = array_map( array( $this, 'cloud_action_summary' ), $actions );
+		$priority_queue      = $this->priority_queue( $cloud_result, $actions_by_key );
 		$core_intake_package = $this->core_intake_package( $cloud_result );
 
 		$patch = array(
-			'contract_version'       => self::CONTRACT_VERSION,
-			'provider'               => 'npcink_cloud',
-			'composition_role'       => 'morning_brief_cloud_runtime_patch',
-			'source_run_id'          => $this->text_value( $cloud_result, array( 'run_id', 'cloud_run_id', 'source_run_id' ) ),
-			'status'                 => $this->text_value( $cloud_result, array( 'status' ), 'available' ),
-			'worker_phase'           => $operational['worker_phase'],
-			'execution_kind'         => $operational['execution_kind'],
-			'eligibility_summary'    => $operational['eligibility_summary'],
-			'blocked_items'          => $operational['blocked_items'],
-			'review_items'           => $action_summaries,
-			'operator_next_action'   => $operational['operator_next_action'],
-			'retryable'              => $operational['retryable'],
-			'retry_guidance'         => $operational['retry_guidance'],
-			'actions'                => $action_summaries,
-			'action_count'           => count( $actions ),
-			'priority_queue'         => $priority_queue,
-			'priority_queue_count'   => count( $priority_queue ),
+			'contract_version'              => self::CONTRACT_VERSION,
+			'provider'                      => 'npcink_cloud',
+			'composition_role'              => 'morning_brief_cloud_runtime_patch',
+			'source_run_id'                 => $this->text_value( $cloud_result, array( 'run_id', 'cloud_run_id', 'source_run_id' ) ),
+			'status'                        => $this->text_value( $cloud_result, array( 'status' ), 'available' ),
+			'worker_phase'                  => $operational['worker_phase'],
+			'execution_kind'                => $operational['execution_kind'],
+			'eligibility_summary'           => $operational['eligibility_summary'],
+			'blocked_items'                 => $operational['blocked_items'],
+			'review_items'                  => $action_summaries,
+			'operator_next_action'          => $operational['operator_next_action'],
+			'retryable'                     => $operational['retryable'],
+			'retry_guidance'                => $operational['retry_guidance'],
+			'actions'                       => $action_summaries,
+			'action_count'                  => count( $actions ),
+			'priority_queue'                => $priority_queue,
+			'priority_queue_count'          => count( $priority_queue ),
 			'core_intake_package_available' => array() !== $core_intake_package,
 			'core_intake_package_contract'  => (string) ( $core_intake_package['contract_version'] ?? '' ),
 			'core_intake_target_route'      => (string) ( $core_intake_package['target_route'] ?? '' ),
 			'core_intake_receipt_owner'     => (string) ( $core_intake_package['receipt_expectation']['receipt_owner'] ?? '' ),
-			'direct_wordpress_write' => false,
-			'final_write_path'       => 'core_proposal_required',
-			'requires_local_review'  => true,
+			'direct_wordpress_write'        => false,
+			'final_write_path'              => 'core_proposal_required',
+			'requires_local_review'         => true,
 		);
 
 		if ( array() !== $core_intake_package ) {
@@ -159,10 +159,10 @@ final class Cloud_Batch_Result_Merger {
 		$summary = is_array( $summary ) ? $summary : array();
 		return array(
 			'items_total'      => max( 0, (int) ( $summary['items_total'] ?? $summary['total_count'] ?? 0 ) ),
-			'eligible_count'  => max( 0, (int) ( $summary['eligible_count'] ?? 0 ) ),
-			'blocked_count'   => max( 0, (int) ( $summary['blocked_count'] ?? 0 ) ),
+			'eligible_count'   => max( 0, (int) ( $summary['eligible_count'] ?? 0 ) ),
+			'blocked_count'    => max( 0, (int) ( $summary['blocked_count'] ?? 0 ) ),
 			'reviewable_count' => max( 0, (int) ( $summary['reviewable_count'] ?? $review_item_count ) ),
-			'selected_count'  => max( 0, (int) ( $summary['selected_count'] ?? $review_item_count ) ),
+			'selected_count'   => max( 0, (int) ( $summary['selected_count'] ?? $review_item_count ) ),
 		);
 	}
 
@@ -309,24 +309,24 @@ final class Cloud_Batch_Result_Merger {
 	 * @return array<string,mixed>
 	 */
 	private function priority_queue_item( array $item, array $actions_by_key ): array {
-		$key = $this->object_key( $item );
-		$action = '' !== $key && isset( $actions_by_key[ $key ] ) ? $actions_by_key[ $key ] : array();
+		$key          = $this->object_key( $item );
+		$action       = '' !== $key && isset( $actions_by_key[ $key ] ) ? $actions_by_key[ $key ] : array();
 		$reason_codes = $this->string_list( $item['reason_codes'] ?? ( $action['reason_codes'] ?? array() ), 12 );
 
 		return array(
-			'action_id'              => $this->bounded_text( (string) ( $item['action_id'] ?? $action['action_id'] ?? '' ), 120 ),
-			'object_type'            => $this->sanitize_key( (string) ( $item['object_type'] ?? $action['object_type'] ?? $item['type'] ?? $action['type'] ?? '' ) ),
-			'object_id'              => max( 0, (int) ( $item['object_id'] ?? $action['object_id'] ?? $item['post_id'] ?? $action['post_id'] ?? $item['attachment_id'] ?? $action['attachment_id'] ?? 0 ) ),
-			'quality_score'          => max( 0, min( 100, (int) ( $item['score'] ?? $item['quality_score'] ?? $action['score'] ?? $action['quality_score'] ?? 0 ) ) ),
-			'severity'               => $this->sanitize_key( (string) ( $item['severity'] ?? $action['severity'] ?? 'notice' ) ),
-			'priority_reason'        => $this->bounded_text( (string) ( $item['priority_reason'] ?? $action['priority_reason'] ?? '' ), 500 ),
-			'reason_codes'           => $reason_codes,
-			'group_ids'              => $this->string_list( $item['group_ids'] ?? ( $action['group_ids'] ?? array() ), 8 ),
-			'evidence_summary'       => $this->bounded_text( (string) ( $item['evidence_summary'] ?? $action['evidence_summary'] ?? '' ), 500 ),
+			'action_id'               => $this->bounded_text( (string) ( $item['action_id'] ?? $action['action_id'] ?? '' ), 120 ),
+			'object_type'             => $this->sanitize_key( (string) ( $item['object_type'] ?? $action['object_type'] ?? $item['type'] ?? $action['type'] ?? '' ) ),
+			'object_id'               => max( 0, (int) ( $item['object_id'] ?? $action['object_id'] ?? $item['post_id'] ?? $action['post_id'] ?? $item['attachment_id'] ?? $action['attachment_id'] ?? 0 ) ),
+			'quality_score'           => max( 0, min( 100, (int) ( $item['score'] ?? $item['quality_score'] ?? $action['score'] ?? $action['quality_score'] ?? 0 ) ) ),
+			'severity'                => $this->sanitize_key( (string) ( $item['severity'] ?? $action['severity'] ?? 'notice' ) ),
+			'priority_reason'         => $this->bounded_text( (string) ( $item['priority_reason'] ?? $action['priority_reason'] ?? '' ), 500 ),
+			'reason_codes'            => $reason_codes,
+			'group_ids'               => $this->string_list( $item['group_ids'] ?? ( $action['group_ids'] ?? array() ), 8 ),
+			'evidence_summary'        => $this->bounded_text( (string) ( $item['evidence_summary'] ?? $action['evidence_summary'] ?? '' ), 500 ),
 			'recommended_next_action' => $this->sanitize_key( (string) ( $item['recommended_next_action'] ?? $action['recommended_next_action'] ?? 'review_item' ) ),
-			'direct_wordpress_write' => false,
-			'final_write_path'       => 'core_proposal_required',
-			'requires_local_review'  => true,
+			'direct_wordpress_write'  => false,
+			'final_write_path'        => 'core_proposal_required',
+			'requires_local_review'   => true,
 		);
 	}
 
@@ -343,21 +343,21 @@ final class Cloud_Batch_Result_Merger {
 		$receipt = is_array( $package['receipt_expectation'] ?? null ) ? $package['receipt_expectation'] : array();
 
 		return array(
-			'contract_version'                    => $this->bounded_text( (string) ( $package['contract_version'] ?? '' ), 120 ),
-			'selected_review_item_ids'            => $this->text_list( $package['selected_review_item_ids'] ?? array(), 10, 160 ),
-			'selected_review_items'               => $this->core_intake_selected_items( $package['selected_review_items'] ?? array() ),
-			'target_route'                        => $this->bounded_text( (string) ( $package['target_route'] ?? '' ), 160 ),
-			'target_plan_ability_id'              => $this->bounded_text( (string) ( $package['target_plan_ability_id'] ?? '' ), 160 ),
-			'target_plan_contract'                => $this->bounded_text( (string) ( $package['target_plan_contract'] ?? '' ), 160 ),
-			'core_review_plan_idempotency_key'    => $this->bounded_text( (string) ( $package['core_review_plan_idempotency_key'] ?? '' ), 191 ),
-			'proposal_created'                    => false,
-			'proposal_state_owner'                => $this->sanitize_key( (string) ( $package['proposal_state_owner'] ?? 'npcink-governance-core' ) ),
-			'approval_truth'                      => $this->sanitize_key( (string) ( $package['approval_truth'] ?? 'wordpress_local' ) ),
-			'final_write_truth'                   => $this->sanitize_key( (string) ( $package['final_write_truth'] ?? 'wordpress_local' ) ),
-			'cloud_role'                          => $this->sanitize_key( (string) ( $package['cloud_role'] ?? 'runtime_detail' ) ),
-			'cloud_scheduler_truth'               => false,
-			'direct_wordpress_write'              => false,
-			'receipt_expectation'                 => array(
+			'contract_version'                 => $this->bounded_text( (string) ( $package['contract_version'] ?? '' ), 120 ),
+			'selected_review_item_ids'         => $this->text_list( $package['selected_review_item_ids'] ?? array(), 10, 160 ),
+			'selected_review_items'            => $this->core_intake_selected_items( $package['selected_review_items'] ?? array() ),
+			'target_route'                     => $this->bounded_text( (string) ( $package['target_route'] ?? '' ), 160 ),
+			'target_plan_ability_id'           => $this->bounded_text( (string) ( $package['target_plan_ability_id'] ?? '' ), 160 ),
+			'target_plan_contract'             => $this->bounded_text( (string) ( $package['target_plan_contract'] ?? '' ), 160 ),
+			'core_review_plan_idempotency_key' => $this->bounded_text( (string) ( $package['core_review_plan_idempotency_key'] ?? '' ), 191 ),
+			'proposal_created'                 => false,
+			'proposal_state_owner'             => $this->sanitize_key( (string) ( $package['proposal_state_owner'] ?? 'npcink-governance-core' ) ),
+			'approval_truth'                   => $this->sanitize_key( (string) ( $package['approval_truth'] ?? 'wordpress_local' ) ),
+			'final_write_truth'                => $this->sanitize_key( (string) ( $package['final_write_truth'] ?? 'wordpress_local' ) ),
+			'cloud_role'                       => $this->sanitize_key( (string) ( $package['cloud_role'] ?? 'runtime_detail' ) ),
+			'cloud_scheduler_truth'            => false,
+			'direct_wordpress_write'           => false,
+			'receipt_expectation'              => array(
 				'expected_local_receipt' => $this->bounded_text( (string) ( $receipt['expected_local_receipt'] ?? 'core_proposal_id' ), 120 ),
 				'receipt_owner'          => $this->sanitize_key( (string) ( $receipt['receipt_owner'] ?? 'wordpress_toolbox_local' ) ),
 				'cloud_receipt_storage'  => $this->sanitize_key( (string) ( $receipt['cloud_receipt_storage'] ?? 'not_canonical' ) ),
@@ -435,16 +435,16 @@ final class Cloud_Batch_Result_Merger {
 	 */
 	private function cloud_action_summary( array $action ): array {
 		return array(
-			'object_type'           => $this->sanitize_key( (string) ( $action['object_type'] ?? $action['type'] ?? '' ) ),
-			'object_id'             => max( 0, (int) ( $action['object_id'] ?? $action['post_id'] ?? $action['attachment_id'] ?? 0 ) ),
-			'quality_score'         => max( 0, min( 100, (int) ( $action['quality_score'] ?? $action['score'] ?? 0 ) ) ),
-			'severity'              => $this->sanitize_key( (string) ( $action['severity'] ?? 'notice' ) ),
-			'recommendation'        => $this->bounded_text( (string) ( $action['recommendation'] ?? $action['recommended_next_action'] ?? $action['summary'] ?? '' ), 500 ),
-			'reason_codes'          => $this->string_list( $action['reason_codes'] ?? $action['codes'] ?? array(), 12 ),
-			'evidence_refs'         => $this->sanitize_evidence_refs( $action['evidence_refs'] ?? array() ),
+			'object_type'            => $this->sanitize_key( (string) ( $action['object_type'] ?? $action['type'] ?? '' ) ),
+			'object_id'              => max( 0, (int) ( $action['object_id'] ?? $action['post_id'] ?? $action['attachment_id'] ?? 0 ) ),
+			'quality_score'          => max( 0, min( 100, (int) ( $action['quality_score'] ?? $action['score'] ?? 0 ) ) ),
+			'severity'               => $this->sanitize_key( (string) ( $action['severity'] ?? 'notice' ) ),
+			'recommendation'         => $this->bounded_text( (string) ( $action['recommendation'] ?? $action['recommended_next_action'] ?? $action['summary'] ?? '' ), 500 ),
+			'reason_codes'           => $this->string_list( $action['reason_codes'] ?? $action['codes'] ?? array(), 12 ),
+			'evidence_refs'          => $this->sanitize_evidence_refs( $action['evidence_refs'] ?? array() ),
 			'direct_wordpress_write' => false,
-			'final_write_path'      => 'core_proposal_required',
-			'requires_local_review' => true,
+			'final_write_path'       => 'core_proposal_required',
+			'requires_local_review'  => true,
 		);
 	}
 
@@ -493,9 +493,9 @@ final class Cloud_Batch_Result_Merger {
 				continue;
 			}
 			$result[] = array(
-				'id'      => $id,
-				'label'   => $this->bounded_text( (string) ( $ref['label'] ?? $ref['title'] ?? '' ), 200 ),
-				'source'  => $this->sanitize_key( (string) ( $ref['source'] ?? $ref['source_type'] ?? 'cloud_runtime' ) ),
+				'id'     => $id,
+				'label'  => $this->bounded_text( (string) ( $ref['label'] ?? $ref['title'] ?? '' ), 200 ),
+				'source' => $this->sanitize_key( (string) ( $ref['source'] ?? $ref['source_type'] ?? 'cloud_runtime' ) ),
 			);
 			if ( count( $result ) >= 12 ) {
 				break;

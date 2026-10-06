@@ -10,10 +10,10 @@ namespace Npcink_Toolbox;
 defined( 'ABSPATH' ) || exit;
 
 final class Hot_Topic_Pool {
-	private const CACHE_KEY = 'npcink_toolbox_zhihu_hot_topic_pool_v2';
+	private const CACHE_KEY     = 'npcink_toolbox_zhihu_hot_topic_pool_v2';
 	private const BACKUP_OPTION = 'npcink_toolbox_zhihu_hot_topic_pool_backup_v1';
-	private const CACHE_TTL = 1800;
-	private const MAX_ITEMS = 20;
+	private const CACHE_TTL     = 1800;
+	private const MAX_ITEMS     = 20;
 
 	private Provider_Client $client;
 

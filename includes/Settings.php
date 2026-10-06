@@ -56,20 +56,20 @@ final class Settings {
 
 	public function defaults(): array {
 		return array(
-			'include_raw_responses'             => false,
-			'enable_image_source'               => true,
-			'nightly_inspection_enabled'        => false,
-			'nightly_inspection_time'           => '03:00',
-			'nightly_inspection_post_limit'     => 12,
-			'nightly_inspection_media_limit'    => 8,
-			'nightly_inspection_pro_enabled'    => false,
-			'nightly_inspection_cloud_payload_mode' => 'metadata_only',
+			'include_raw_responses'                   => false,
+			'enable_image_source'                     => true,
+			'nightly_inspection_enabled'              => false,
+			'nightly_inspection_time'                 => '03:00',
+			'nightly_inspection_post_limit'           => 12,
+			'nightly_inspection_media_limit'          => 8,
+			'nightly_inspection_pro_enabled'          => false,
+			'nightly_inspection_cloud_payload_mode'   => 'metadata_only',
 			'nightly_inspection_cloud_retention_days' => 7,
 		);
 	}
 
 	public function get_all(): array {
-		$value = get_option( Plugin::OPTION_NAME, array() );
+		$value    = get_option( Plugin::OPTION_NAME, array() );
 		$defaults = $this->defaults();
 		$value    = is_array( $value ) ? array_intersect_key( $value, $defaults ) : array();
 		return array_merge( $defaults, $value );
@@ -106,17 +106,17 @@ final class Settings {
 	}
 
 	public function media_optimization_policy_summary(): array {
-		$settings = $this->get_media_optimization_settings();
+		$settings          = $this->get_media_optimization_settings();
 		$template_settings = $this->get_watermark_template_settings();
 
 		return array_merge(
 			$settings,
 			array(
-				'watermark_configured' => $this->media_watermark_configured( $settings ),
-				'watermark_templates'  => $this->media_watermark_templates(),
+				'watermark_configured'       => $this->media_watermark_configured( $settings ),
+				'watermark_templates'        => $this->media_watermark_templates(),
 				'default_watermark_template' => $template_settings['default_template'],
-				'policy_owner'         => 'npcink_toolbox',
-				'final_write_owner'    => 'local_wordpress_host',
+				'policy_owner'               => 'npcink_toolbox',
+				'final_write_owner'          => 'local_wordpress_host',
 			)
 		);
 	}
@@ -128,18 +128,55 @@ final class Settings {
 	 */
 	public function media_watermark_templates(): array {
 		$templates = array(
-			array( 'id' => 'none', 'label' => __( 'No watermark', 'npcink-workflow-toolbox' ) ),
-			array( 'id' => 'toolbox_default', 'label' => __( 'Toolbox default', 'npcink-workflow-toolbox' ) ),
-			array( 'id' => 'subtle_text', 'label' => __( 'Subtle text', 'npcink-workflow-toolbox' ), 'type' => 'text', 'position' => 'bottom_right', 'opacity' => 55, 'font_size' => 28, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.25)', 'margin' => 18 ),
-			array( 'id' => 'prominent_text', 'label' => __( 'Prominent text', 'npcink-workflow-toolbox' ), 'type' => 'text', 'position' => 'bottom_right', 'opacity' => 88, 'font_size' => 48, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.55)', 'margin' => 24 ),
-			array( 'id' => 'logo_corner', 'label' => __( 'Corner logo', 'npcink-workflow-toolbox' ), 'type' => 'image', 'position' => 'bottom_right', 'opacity' => 80, 'scale' => 18, 'margin' => 24 ),
+			array(
+				'id'    => 'none',
+				'label' => __( 'No watermark', 'npcink-workflow-toolbox' ),
+			),
+			array(
+				'id'    => 'toolbox_default',
+				'label' => __( 'Toolbox default', 'npcink-workflow-toolbox' ),
+			),
+			array(
+				'id'         => 'subtle_text',
+				'label'      => __( 'Subtle text', 'npcink-workflow-toolbox' ),
+				'type'       => 'text',
+				'position'   => 'bottom_right',
+				'opacity'    => 55,
+				'font_size'  => 28,
+				'color'      => '#FFFFFF',
+				'background' => 'rgba(0,0,0,0.25)',
+				'margin'     => 18,
+			),
+			array(
+				'id'         => 'prominent_text',
+				'label'      => __( 'Prominent text', 'npcink-workflow-toolbox' ),
+				'type'       => 'text',
+				'position'   => 'bottom_right',
+				'opacity'    => 88,
+				'font_size'  => 48,
+				'color'      => '#FFFFFF',
+				'background' => 'rgba(0,0,0,0.55)',
+				'margin'     => 24,
+			),
+			array(
+				'id'       => 'logo_corner',
+				'label'    => __( 'Corner logo', 'npcink-workflow-toolbox' ),
+				'type'     => 'image',
+				'position' => 'bottom_right',
+				'opacity'  => 80,
+				'scale'    => 18,
+				'margin'   => 24,
+			),
 		);
 
 		foreach ( $this->get_watermark_template_settings()['custom_templates'] as $template ) {
 			$templates[] = array_merge( $template, array( 'user_defined' => true ) );
 		}
 
-		$templates[] = array( 'id' => 'custom', 'label' => __( 'Custom for this run', 'npcink-workflow-toolbox' ) );
+		$templates[] = array(
+			'id'    => 'custom',
+			'label' => __( 'Custom for this run', 'npcink-workflow-toolbox' ),
+		);
 
 		return $templates;
 	}
@@ -202,11 +239,11 @@ final class Settings {
 
 			$background = $template['background'] ?? 'rgba(0,0,0,0.35)';
 			if ( isset( $template['background_color'] ) ) {
-				$background_hex = $this->sanitize_media_derivative_watermark_color( $template['background_color'], '#000000' );
-				$background_hex = 7 === strlen( $background_hex ) ? $background_hex : '#000000';
-				$background_rgb = sscanf( substr( $background_hex, 1 ), '%02x%02x%02x' );
+				$background_hex   = $this->sanitize_media_derivative_watermark_color( $template['background_color'], '#000000' );
+				$background_hex   = 7 === strlen( $background_hex ) ? $background_hex : '#000000';
+				$background_rgb   = sscanf( substr( $background_hex, 1 ), '%02x%02x%02x' );
 				$background_alpha = max( 0, min( 100, absint( $template['background_opacity'] ?? 35 ) ) ) / 100;
-				$background = sprintf( 'rgba(%d,%d,%d,%.2F)', (int) $background_rgb[0], (int) $background_rgb[1], (int) $background_rgb[2], $background_alpha );
+				$background       = sprintf( 'rgba(%d,%d,%d,%.2F)', (int) $background_rgb[0], (int) $background_rgb[1], (int) $background_rgb[2], $background_alpha );
 			}
 			$attachment_id = absint( $template['attachment_id'] ?? 0 );
 			if ( $attachment_id > 0 && function_exists( 'wp_attachment_is_image' ) && ! wp_attachment_is_image( $attachment_id ) ) {
@@ -305,26 +342,26 @@ final class Settings {
 
 	public function content_context_defaults(): array {
 		return array(
-			'site_positioning'                 => '',
-			'target_audience'                  => array(),
-			'brand_voice'                      => '',
-			'primary_keywords'                 => array(),
-			'long_tail_keywords'               => array(),
-			'entity_keywords'                  => array(),
-			'allowed_claims'                   => array(),
-			'forbidden_claims'                 => array(),
-			'disallowed_topics'                => array(),
-			'cautious_topics'                  => array(),
-			'no_structured_output_topics'      => array(),
-			'human_confirmation_required'      => array(),
-			'seo_rules'                        => '',
-			'aeo_rules'                        => '',
-			'geo_rules'                        => '',
-			'allow_faq_generation'             => true,
-			'allow_aeo_summary'                => true,
-			'allow_geo_summary'                => true,
+			'site_positioning'                  => '',
+			'target_audience'                   => array(),
+			'brand_voice'                       => '',
+			'primary_keywords'                  => array(),
+			'long_tail_keywords'                => array(),
+			'entity_keywords'                   => array(),
+			'allowed_claims'                    => array(),
+			'forbidden_claims'                  => array(),
+			'disallowed_topics'                 => array(),
+			'cautious_topics'                   => array(),
+			'no_structured_output_topics'       => array(),
+			'human_confirmation_required'       => array(),
+			'seo_rules'                         => '',
+			'aeo_rules'                         => '',
+			'geo_rules'                         => '',
+			'allow_faq_generation'              => true,
+			'allow_aeo_summary'                 => true,
+			'allow_geo_summary'                 => true,
 			'allow_structured_data_suggestions' => true,
-			'proposal_allowed_fields'          => array(
+			'proposal_allowed_fields'           => array(
 				'seo_title',
 				'seo_description',
 				'slug',
@@ -345,31 +382,31 @@ final class Settings {
 		$context = $this->get_content_context();
 
 		return array(
-			'context_type'                    => 'content_discoverability',
-			'composition_role'                => 'site_context',
-			'version'                         => 1,
-			'write_posture'                   => 'suggestion_only',
-			'final_write_path'                => 'core_proposal_required',
-			'direct_wordpress_write'          => false,
-			'site_positioning'                => $context['site_positioning'],
-			'target_audience'                 => $context['target_audience'],
-			'brand_voice'                     => $context['brand_voice'],
-			'keywords'                        => array(
+			'context_type'            => 'content_discoverability',
+			'composition_role'        => 'site_context',
+			'version'                 => 1,
+			'write_posture'           => 'suggestion_only',
+			'final_write_path'        => 'core_proposal_required',
+			'direct_wordpress_write'  => false,
+			'site_positioning'        => $context['site_positioning'],
+			'target_audience'         => $context['target_audience'],
+			'brand_voice'             => $context['brand_voice'],
+			'keywords'                => array(
 				'primary'   => $context['primary_keywords'],
 				'long_tail' => $context['long_tail_keywords'],
 				'entities'  => $context['entity_keywords'],
 			),
-			'claims'                          => array(
+			'claims'                  => array(
 				'allowed'   => $context['allowed_claims'],
 				'forbidden' => $context['forbidden_claims'],
 			),
-			'exceptions'                      => array(
+			'exceptions'              => array(
 				'disallowed_topics'           => $context['disallowed_topics'],
 				'cautious_topics'             => $context['cautious_topics'],
 				'no_structured_output_topics' => $context['no_structured_output_topics'],
 				'human_confirmation_required' => $context['human_confirmation_required'],
 			),
-			'rules'                           => array(
+			'rules'                   => array(
 				'seo'                               => $context['seo_rules'],
 				'aeo'                               => $context['aeo_rules'],
 				'geo'                               => $context['geo_rules'],
@@ -378,8 +415,8 @@ final class Settings {
 				'allow_geo_summary'                 => (bool) $context['allow_geo_summary'],
 				'allow_structured_data_suggestions' => (bool) $context['allow_structured_data_suggestions'],
 			),
-			'proposal_allowed_fields'         => $context['proposal_allowed_fields'],
-			'handoff'                         => array(
+			'proposal_allowed_fields' => $context['proposal_allowed_fields'],
+			'handoff'                 => array(
 				'consumer'               => 'abilities_or_agent_gateway',
 				'final_writes'           => 'core_proposal_required',
 				'direct_wordpress_write' => false,
@@ -422,7 +459,7 @@ final class Settings {
 			'missing_required'       => $missing_required,
 			'missing_recommended'    => $missing_recommended,
 			'context_summary'        => array(
-				'has_site_positioning' => '' !== trim( (string) $context['site_positioning'] ),
+				'has_site_positioning'  => '' !== trim( (string) $context['site_positioning'] ),
 				'target_audience_count' => count( (array) $context['target_audience'] ),
 				'primary_keyword_count' => count( (array) $context['keywords']['primary'] ),
 				'proposal_field_count'  => count( (array) $context['proposal_allowed_fields'] ),
@@ -461,14 +498,14 @@ final class Settings {
 		$settings = $this->get_all();
 
 		return array(
-			'enabled'     => ! empty( $settings['nightly_inspection_enabled'] ),
-			'time'        => (string) $settings['nightly_inspection_time'],
-			'post_limit'  => (int) $settings['nightly_inspection_post_limit'],
-			'media_limit' => (int) $settings['nightly_inspection_media_limit'],
-			'pro_enabled' => ! empty( $settings['nightly_inspection_pro_enabled'] ),
-			'cloud_payload_mode' => (string) $settings['nightly_inspection_cloud_payload_mode'],
+			'enabled'              => ! empty( $settings['nightly_inspection_enabled'] ),
+			'time'                 => (string) $settings['nightly_inspection_time'],
+			'post_limit'           => (int) $settings['nightly_inspection_post_limit'],
+			'media_limit'          => (int) $settings['nightly_inspection_media_limit'],
+			'pro_enabled'          => ! empty( $settings['nightly_inspection_pro_enabled'] ),
+			'cloud_payload_mode'   => (string) $settings['nightly_inspection_cloud_payload_mode'],
 			'cloud_retention_days' => (int) $settings['nightly_inspection_cloud_retention_days'],
-			'cloud_retention_ttl' => (int) $settings['nightly_inspection_cloud_retention_days'] * ( defined( 'DAY_IN_SECONDS' ) ? DAY_IN_SECONDS : 86400 ),
+			'cloud_retention_ttl'  => (int) $settings['nightly_inspection_cloud_retention_days'] * ( defined( 'DAY_IN_SECONDS' ) ? DAY_IN_SECONDS : 86400 ),
 		);
 	}
 
@@ -515,11 +552,11 @@ final class Settings {
 		$available = $this->cloud_runtime_available();
 
 		return array(
-			'registered'           => true,
-			'cloud_required'       => true,
-			'available'            => $available,
-			'unavailable_reason'   => $available ? '' : $this->cloud_runtime_unavailable_reason(),
-			'connection_owner'     => 'cloud_addon',
+			'registered'            => true,
+			'cloud_required'        => true,
+			'available'             => $available,
+			'unavailable_reason'    => $available ? '' : $this->cloud_runtime_unavailable_reason(),
+			'connection_owner'      => 'cloud_addon',
 			'provider_detail_owner' => 'cloud_service',
 		);
 	}
@@ -528,14 +565,14 @@ final class Settings {
 		$input = is_array( $input ) ? $input : array();
 
 		$sanitized = array(
-			'include_raw_responses'             => ! empty( $input['include_raw_responses'] ),
-			'enable_image_source'               => ! empty( $input['enable_image_source'] ),
-			'nightly_inspection_enabled'        => ! empty( $input['nightly_inspection_enabled'] ),
-			'nightly_inspection_time'           => $this->sanitize_nightly_inspection_time( $input['nightly_inspection_time'] ?? '03:00' ),
-			'nightly_inspection_post_limit'     => max( 1, min( 50, absint( $input['nightly_inspection_post_limit'] ?? 12 ) ) ),
-			'nightly_inspection_media_limit'    => max( 1, min( 50, absint( $input['nightly_inspection_media_limit'] ?? 8 ) ) ),
-			'nightly_inspection_pro_enabled'    => ! empty( $input['nightly_inspection_pro_enabled'] ),
-			'nightly_inspection_cloud_payload_mode' => $this->sanitize_nightly_inspection_cloud_payload_mode( $input['nightly_inspection_cloud_payload_mode'] ?? 'metadata_only' ),
+			'include_raw_responses'                   => ! empty( $input['include_raw_responses'] ),
+			'enable_image_source'                     => ! empty( $input['enable_image_source'] ),
+			'nightly_inspection_enabled'              => ! empty( $input['nightly_inspection_enabled'] ),
+			'nightly_inspection_time'                 => $this->sanitize_nightly_inspection_time( $input['nightly_inspection_time'] ?? '03:00' ),
+			'nightly_inspection_post_limit'           => max( 1, min( 50, absint( $input['nightly_inspection_post_limit'] ?? 12 ) ) ),
+			'nightly_inspection_media_limit'          => max( 1, min( 50, absint( $input['nightly_inspection_media_limit'] ?? 8 ) ) ),
+			'nightly_inspection_pro_enabled'          => ! empty( $input['nightly_inspection_pro_enabled'] ),
+			'nightly_inspection_cloud_payload_mode'   => $this->sanitize_nightly_inspection_cloud_payload_mode( $input['nightly_inspection_cloud_payload_mode'] ?? 'metadata_only' ),
 			'nightly_inspection_cloud_retention_days' => max( 1, min( 90, absint( $input['nightly_inspection_cloud_retention_days'] ?? 7 ) ) ),
 		);
 
@@ -657,7 +694,7 @@ final class Settings {
 			$position = 'bottom_right';
 		}
 
-		$opacity = is_numeric( $watermark['opacity'] ?? null )
+		$opacity   = is_numeric( $watermark['opacity'] ?? null )
 			? (float) $watermark['opacity']
 			: ( (int) ( $settings['watermark_opacity'] ?? 80 ) / 100 );
 		$opacity   = round( max( 0, min( 1, $opacity ) ), 3 );
@@ -766,31 +803,31 @@ final class Settings {
 			'geo_summary',
 			'structured_data_hints',
 		);
-		$proposal_fields = isset( $input['proposal_allowed_fields'] ) && is_array( $input['proposal_allowed_fields'] )
+		$proposal_fields         = isset( $input['proposal_allowed_fields'] ) && is_array( $input['proposal_allowed_fields'] )
 			? array_values( array_intersect( $allowed_proposal_fields, array_map( 'sanitize_key', $input['proposal_allowed_fields'] ) ) )
 			: array();
 
 		return array(
-			'site_positioning'                 => sanitize_textarea_field( (string) ( $input['site_positioning'] ?? '' ) ),
-			'target_audience'                  => $this->sanitize_context_list( $input['target_audience'] ?? array() ),
-			'brand_voice'                      => sanitize_textarea_field( (string) ( $input['brand_voice'] ?? '' ) ),
-			'primary_keywords'                 => $this->sanitize_context_list( $input['primary_keywords'] ?? array() ),
-			'long_tail_keywords'               => $this->sanitize_context_list( $input['long_tail_keywords'] ?? array() ),
-			'entity_keywords'                  => $this->sanitize_context_list( $input['entity_keywords'] ?? array() ),
-			'allowed_claims'                   => $this->sanitize_context_list( $input['allowed_claims'] ?? array() ),
-			'forbidden_claims'                 => $this->sanitize_context_list( $input['forbidden_claims'] ?? array() ),
-			'disallowed_topics'                => $this->sanitize_context_list( $input['disallowed_topics'] ?? array() ),
-			'cautious_topics'                  => $this->sanitize_context_list( $input['cautious_topics'] ?? array() ),
-			'no_structured_output_topics'      => $this->sanitize_context_list( $input['no_structured_output_topics'] ?? array() ),
-			'human_confirmation_required'      => $this->sanitize_context_list( $input['human_confirmation_required'] ?? array() ),
-			'seo_rules'                        => sanitize_textarea_field( (string) ( $input['seo_rules'] ?? '' ) ),
-			'aeo_rules'                        => sanitize_textarea_field( (string) ( $input['aeo_rules'] ?? '' ) ),
-			'geo_rules'                        => sanitize_textarea_field( (string) ( $input['geo_rules'] ?? '' ) ),
-			'allow_faq_generation'             => ! empty( $input['allow_faq_generation'] ),
-			'allow_aeo_summary'                => ! empty( $input['allow_aeo_summary'] ),
-			'allow_geo_summary'                => ! empty( $input['allow_geo_summary'] ),
+			'site_positioning'                  => sanitize_textarea_field( (string) ( $input['site_positioning'] ?? '' ) ),
+			'target_audience'                   => $this->sanitize_context_list( $input['target_audience'] ?? array() ),
+			'brand_voice'                       => sanitize_textarea_field( (string) ( $input['brand_voice'] ?? '' ) ),
+			'primary_keywords'                  => $this->sanitize_context_list( $input['primary_keywords'] ?? array() ),
+			'long_tail_keywords'                => $this->sanitize_context_list( $input['long_tail_keywords'] ?? array() ),
+			'entity_keywords'                   => $this->sanitize_context_list( $input['entity_keywords'] ?? array() ),
+			'allowed_claims'                    => $this->sanitize_context_list( $input['allowed_claims'] ?? array() ),
+			'forbidden_claims'                  => $this->sanitize_context_list( $input['forbidden_claims'] ?? array() ),
+			'disallowed_topics'                 => $this->sanitize_context_list( $input['disallowed_topics'] ?? array() ),
+			'cautious_topics'                   => $this->sanitize_context_list( $input['cautious_topics'] ?? array() ),
+			'no_structured_output_topics'       => $this->sanitize_context_list( $input['no_structured_output_topics'] ?? array() ),
+			'human_confirmation_required'       => $this->sanitize_context_list( $input['human_confirmation_required'] ?? array() ),
+			'seo_rules'                         => sanitize_textarea_field( (string) ( $input['seo_rules'] ?? '' ) ),
+			'aeo_rules'                         => sanitize_textarea_field( (string) ( $input['aeo_rules'] ?? '' ) ),
+			'geo_rules'                         => sanitize_textarea_field( (string) ( $input['geo_rules'] ?? '' ) ),
+			'allow_faq_generation'              => ! empty( $input['allow_faq_generation'] ),
+			'allow_aeo_summary'                 => ! empty( $input['allow_aeo_summary'] ),
+			'allow_geo_summary'                 => ! empty( $input['allow_geo_summary'] ),
 			'allow_structured_data_suggestions' => ! empty( $input['allow_structured_data_suggestions'] ),
-			'proposal_allowed_fields'          => $proposal_fields,
+			'proposal_allowed_fields'           => $proposal_fields,
 		);
 	}
 

@@ -93,8 +93,8 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 					continue;
 				}
 
-				$content = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
-				$excerpt = function_exists( 'get_the_excerpt' ) ? wp_strip_all_tags( (string) get_the_excerpt( $post ) ) : '';
+				$content                 = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
+				$excerpt                 = function_exists( 'get_the_excerpt' ) ? wp_strip_all_tags( (string) get_the_excerpt( $post ) ) : '';
 				$items_by_id[ $post_id ] = array(
 					'post_id'            => $post_id,
 					'post_type'          => function_exists( 'get_post_type' ) ? sanitize_key( (string) get_post_type( $post_id ) ) : sanitize_key( (string) ( $post->post_type ?? '' ) ),
@@ -170,7 +170,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			);
 		}
 
-		$items = array_values( $items_by_id );
+		$items          = array_values( $items_by_id );
 		$items_in_group = static function ( array $sample_items, string $group ): array {
 			return array_values(
 				array_filter(
@@ -185,7 +185,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 		$counts = array();
 		if ( function_exists( 'wp_count_posts' ) ) {
 			foreach ( array( 'post', 'page' ) as $post_type ) {
-				$count = wp_count_posts( $post_type );
+				$count                = wp_count_posts( $post_type );
 				$counts[ $post_type ] = array(
 					'publish' => absint( $count->publish ?? 0 ),
 					'draft'   => absint( $count->draft ?? 0 ),
@@ -217,23 +217,23 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 		}
 
 		return array(
-			'site_name'       => function_exists( 'get_bloginfo' ) ? sanitize_text_field( (string) get_bloginfo( 'name' ) ) : '',
-			'tagline'         => function_exists( 'get_bloginfo' ) ? sanitize_text_field( (string) get_bloginfo( 'description' ) ) : '',
-			'home_url'        => function_exists( 'home_url' ) ? esc_url_raw( (string) home_url( '/' ) ) : '',
-			'post_counts'     => $counts,
-			'top_terms'       => $terms,
-			'content_samples' => $items,
-			'recent_content'  => $items_in_group( $items, 'recently_updated' ),
-			'older_content'   => $items_in_group( $items, 'older_content' ),
+			'site_name'                      => function_exists( 'get_bloginfo' ) ? sanitize_text_field( (string) get_bloginfo( 'name' ) ) : '',
+			'tagline'                        => function_exists( 'get_bloginfo' ) ? sanitize_text_field( (string) get_bloginfo( 'description' ) ) : '',
+			'home_url'                       => function_exists( 'home_url' ) ? esc_url_raw( (string) home_url( '/' ) ) : '',
+			'post_counts'                    => $counts,
+			'top_terms'                      => $terms,
+			'content_samples'                => $items,
+			'recent_content'                 => $items_in_group( $items, 'recently_updated' ),
+			'older_content'                  => $items_in_group( $items, 'older_content' ),
 			'missing_featured_image_content' => $items_in_group( $items, 'missing_featured_image' ),
-			'sample_summary'  => array(
-				'total_unique_content_items'       => count( $items ),
-				'recent_content_count'             => count( $items_in_group( $items, 'recently_updated' ) ),
-				'older_content_count'              => count( $items_in_group( $items, 'older_content' ) ),
-				'missing_featured_image_count'     => count( $items_in_group( $items, 'missing_featured_image' ) ),
-				'top_term_count'                   => count( $terms ),
+			'sample_summary'                 => array(
+				'total_unique_content_items'   => count( $items ),
+				'recent_content_count'         => count( $items_in_group( $items, 'recently_updated' ) ),
+				'older_content_count'          => count( $items_in_group( $items, 'older_content' ) ),
+				'missing_featured_image_count' => count( $items_in_group( $items, 'missing_featured_image' ) ),
+				'top_term_count'               => count( $terms ),
 			),
-			'snapshot_policy' => 'bounded_public_content_opportunity_sample_only',
+			'snapshot_policy'                => 'bounded_public_content_opportunity_sample_only',
 		);
 	}
 
@@ -429,7 +429,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			return array();
 		}
 
-		$documents = array();
+		$documents        = array();
 		$indexed_post_ids = array();
 		$remaining_bytes  = self::SITE_KNOWLEDGE_SYNC_MAX_BYTES;
 		foreach ( $posts as $post ) {
@@ -443,9 +443,9 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			}
 
 			$indexed_post_ids[] = $post_id;
-			$content = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
-			$excerpt = function_exists( 'get_the_excerpt' ) ? wp_strip_all_tags( get_the_excerpt( $post ) ) : '';
-			$document = array(
+			$content            = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
+			$excerpt            = function_exists( 'get_the_excerpt' ) ? wp_strip_all_tags( get_the_excerpt( $post ) ) : '';
+			$document           = array(
 				'post_id'         => $post_id,
 				'post_type'       => function_exists( 'get_post_type' ) ? sanitize_key( (string) get_post_type( $post ) ) : '',
 				'post_status'     => function_exists( 'get_post_status' ) ? sanitize_key( (string) get_post_status( $post ) ) : 'publish',
@@ -483,7 +483,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			return false;
 		}
 
-		$documents[] = $document;
+		$documents[]      = $document;
 		$remaining_bytes -= $bytes;
 		return true;
 	}

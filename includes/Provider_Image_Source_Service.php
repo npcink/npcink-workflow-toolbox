@@ -39,7 +39,12 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 				array(
 					'provider'       => 'ai_generated',
 					'provider_mode'  => 'ai_generated',
-					'active_sources' => array( array( 'provider' => 'ai_generated', 'count' => count( (array) ( $result['images'] ?? array() ) ) ) ),
+					'active_sources' => array(
+						array(
+							'provider' => 'ai_generated',
+							'count'    => count( (array) ( $result['images'] ?? array() ) ),
+						),
+					),
 					'images'         => is_array( $result['images'] ?? null ) ? $result['images'] : array(),
 					'raw'            => is_array( $result['raw'] ?? null ) ? $result['raw'] : array(),
 				),
@@ -52,21 +57,21 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 	}
 
 	private function execute_image_source_cloud_request( string $query, array $options, string $provider ) {
-		$per_page     = max( 1, min( 30, (int) ( $options['per_page'] ?? 9 ) ) );
-		$latency_mode = $this->image_source_latency_mode( $options );
-		$fast_first   = 'fast_first' === $latency_mode;
-		$input        = array(
-			'query'              => $query,
-			'provider'           => $provider,
-			'provider_origin'    => 'cloud',
-			'per_page'           => $per_page,
-			'latency_mode'       => $latency_mode,
+		$per_page        = max( 1, min( 30, (int) ( $options['per_page'] ?? 9 ) ) );
+		$latency_mode    = $this->image_source_latency_mode( $options );
+		$fast_first      = 'fast_first' === $latency_mode;
+		$input           = array(
+			'query'                  => $query,
+			'provider'               => $provider,
+			'provider_origin'        => 'cloud',
+			'per_page'               => $per_page,
+			'latency_mode'           => $latency_mode,
 			'latency_budget_seconds' => $fast_first ? 5 : 60,
-			'enhancement_mode'   => $fast_first ? 'deferred' : 'inline',
-			'orientation'        => sanitize_key( (string) ( $options['orientation'] ?? '' ) ),
-			'color'              => sanitize_key( (string) ( $options['color'] ?? '' ) ),
-			'purpose'            => sanitize_key( (string) ( $options['purpose'] ?? 'image_reference_candidate' ) ),
-			'candidate_contract' => 'image_candidate.v1',
+			'enhancement_mode'       => $fast_first ? 'deferred' : 'inline',
+			'orientation'            => sanitize_key( (string) ( $options['orientation'] ?? '' ) ),
+			'color'                  => sanitize_key( (string) ( $options['color'] ?? '' ) ),
+			'purpose'                => sanitize_key( (string) ( $options['purpose'] ?? 'image_reference_candidate' ) ),
+			'candidate_contract'     => 'image_candidate.v1',
 		);
 		$refresh_variant = sanitize_text_field( (string) ( $options['refresh_variant'] ?? '' ) );
 		if ( '' !== $refresh_variant ) {
@@ -84,21 +89,21 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 			$input['visual_context'] = $visual_context;
 		}
 		$data_classification = $this->runtime_payload_data_classification( $input, 'public_reference_media', $options );
-		$runtime_payload = array(
-			'ability_name'        => 'npcink-toolbox/search-image-source',
-			'contract_version'    => 'image_source_cloud_request.v1',
-			'execution_pattern'   => 'inline',
-			'execution_kind'      => 'image_source',
-			'profile_id'          => 'image-source.managed',
-			'input'               => $this->sanitize_payload( $input ),
-			'data_classification' => $data_classification,
-			'storage_mode'        => $this->runtime_payload_storage_mode( $data_classification ),
-			'retention_ttl'       => 3600,
-			'timeout_seconds'     => $fast_first ? 5 : 60,
-			'http_timeout_seconds' => $fast_first ? 5 : 60,
+		$runtime_payload     = array(
+			'ability_name'            => 'npcink-toolbox/search-image-source',
+			'contract_version'        => 'image_source_cloud_request.v1',
+			'execution_pattern'       => 'inline',
+			'execution_kind'          => 'image_source',
+			'profile_id'              => 'image-source.managed',
+			'input'                   => $this->sanitize_payload( $input ),
+			'data_classification'     => $data_classification,
+			'storage_mode'            => $this->runtime_payload_storage_mode( $data_classification ),
+			'retention_ttl'           => 3600,
+			'timeout_seconds'         => $fast_first ? 5 : 60,
+			'http_timeout_seconds'    => $fast_first ? 5 : 60,
 			'connect_timeout_seconds' => self::HTTP_CONNECT_TIMEOUT,
-			'retry_max'           => 0,
-			'policy'              => array(
+			'retry_max'               => 0,
+			'policy'                  => array(
 				'allow_fallback' => true,
 			),
 		);
@@ -183,33 +188,33 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 		}
 
 		$visual_context = array(
-			'contract_version'       => 'image_visual_brief_request.v1',
-			'locale'                 => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
-			'image_use'              => $mode,
-			'latency_mode'           => $latency_mode,
-			'latency_budget_seconds' => $fast_first ? 5 : 60,
-			'manual_query'           => sanitize_text_field( (string) ( $context['manual_query'] ?? $options['manual_query'] ?? '' ) ),
-			'fallback_query'         => sanitize_text_field( $query ),
-			'refresh_variant'        => sanitize_text_field( (string) ( $context['refresh_variant'] ?? $options['refresh_variant'] ?? '' ) ),
-			'post_id'                => $post_id,
-			'title'                  => wp_trim_words( $title, 18, '' ),
-			'excerpt'                => wp_trim_words( $excerpt, 36, '' ),
-			'selected_text'          => wp_trim_words( $selection, 80, '' ),
-			'content_summary'        => wp_trim_words( $content, 80, '' ),
-			'selected_block_name'    => sanitize_key( (string) ( $context['selected_block_name'] ?? '' ) ),
-			'query_intent'           => array(
+			'contract_version'        => 'image_visual_brief_request.v1',
+			'locale'                  => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
+			'image_use'               => $mode,
+			'latency_mode'            => $latency_mode,
+			'latency_budget_seconds'  => $fast_first ? 5 : 60,
+			'manual_query'            => sanitize_text_field( (string) ( $context['manual_query'] ?? $options['manual_query'] ?? '' ) ),
+			'fallback_query'          => sanitize_text_field( $query ),
+			'refresh_variant'         => sanitize_text_field( (string) ( $context['refresh_variant'] ?? $options['refresh_variant'] ?? '' ) ),
+			'post_id'                 => $post_id,
+			'title'                   => wp_trim_words( $title, 18, '' ),
+			'excerpt'                 => wp_trim_words( $excerpt, 36, '' ),
+			'selected_text'           => wp_trim_words( $selection, 80, '' ),
+			'content_summary'         => wp_trim_words( $content, 80, '' ),
+			'selected_block_name'     => sanitize_key( (string) ( $context['selected_block_name'] ?? '' ) ),
+			'query_intent'            => array(
 				'rewrite_abstract_terms'       => ! empty( $context['query_intent']['rewrite_abstract_terms'] ),
 				'prefer_concrete_visual_scene' => ! empty( $context['query_intent']['prefer_concrete_visual_scene'] ),
 				'return_alternate_queries'     => ! empty( $context['query_intent']['return_alternate_queries'] ),
 				'direction_count'              => max( 1, min( 4, absint( $context['query_intent']['direction_count'] ?? $options['direction_count'] ?? 3 ) ) ),
 				'prompt_candidate_count'       => max( 1, min( 4, absint( $context['query_intent']['prompt_candidate_count'] ?? $options['prompt_candidate_count'] ?? 3 ) ) ),
 			),
-			'constraints'            => array(
+			'constraints'             => array(
 				'avoid_brand_logos'     => ! empty( $context['avoid_brand_logos'] ),
 				'prefer_editorial_safe' => true,
 				'write_posture'         => 'suggestion_only',
 			),
-			'cloud_ai_steps'         => $fast_first
+			'cloud_ai_steps'          => $fast_first
 				? array( 'visual_brief' )
 				: array(
 					'visual_brief',
@@ -224,37 +229,37 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 					'media_seo_suggestions',
 				)
 				: array(),
-			'quality_filters'        => array(
+			'quality_filters'         => array(
 				'dedupe_similar_images'       => true,
-				'avoid_visible_watermarks'     => true,
-				'avoid_brand_logos'            => ! empty( $context['avoid_brand_logos'] ),
-				'minimum_width'                => 1200,
-				'minimum_height'               => 675,
-				'prefer_editorial_over_stock'  => true,
+				'avoid_visible_watermarks'    => true,
+				'avoid_brand_logos'           => ! empty( $context['avoid_brand_logos'] ),
+				'minimum_width'               => 1200,
+				'minimum_height'              => 675,
+				'prefer_editorial_over_stock' => true,
 			),
-			'rights_requirements'    => array(
+			'rights_requirements'     => array(
 				'preserve_attribution'         => true,
 				'preserve_source_url'          => true,
 				'preserve_download_location'   => true,
 				'return_license_review_status' => true,
 			),
-			'ui_contract'            => array(
-				'return_match_reason'           => ! $fast_first,
-				'return_quality_tags'           => true,
-				'return_risk_flags'             => true,
+			'ui_contract'             => array(
+				'return_match_reason'            => ! $fast_first,
+				'return_quality_tags'            => true,
+				'return_risk_flags'              => true,
 				'return_empty_query_suggestions' => true,
 			),
-			'candidate_limits'       => array(
+			'candidate_limits'        => array(
 				'returned_candidates'      => $per_page,
 				'max_source_candidates'    => $fast_first ? max( $per_page, min( 12, max( 8, $per_page * 2 ) ) ) : max( $per_page, min( 30, max( 20, $per_page * 3 ) ) ),
 				'max_site_context_results' => $fast_first ? 0 : 4,
 			),
-			'fallback_policy'        => array(
+			'fallback_policy'         => array(
 				'plain_image_search' => true,
 				'defer_rerank'       => $fast_first,
 				'keep_candidate_order_when_rerank_unavailable' => true,
 			),
-			'data_minimization'      => array(
+			'data_minimization'       => array(
 				'full_post_content_sent' => false,
 				'content_truncated'      => true,
 			),
@@ -279,8 +284,8 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 
 		$primary_query = sanitize_text_field( (string) ( $brief['primary_query'] ?? $result['primary_query'] ?? $result['optimized_query'] ?? $input['query'] ?? '' ) );
 		$visual_intent = sanitize_textarea_field( (string) ( $brief['visual_intent'] ?? $result['visual_intent'] ?? '' ) );
-		$style = sanitize_text_field( (string) ( $brief['style'] ?? $result['style'] ?? '' ) );
-		$orientation = sanitize_key( (string) ( $brief['preferred_orientation'] ?? $input['orientation'] ?? '' ) );
+		$style         = sanitize_text_field( (string) ( $brief['style'] ?? $result['style'] ?? '' ) );
+		$orientation   = sanitize_key( (string) ( $brief['preferred_orientation'] ?? $input['orientation'] ?? '' ) );
 
 		return array(
 			'status'                => sanitize_key( (string) ( $result['visual_brief_status'] ?? $result['brief_status'] ?? ( array() !== $brief ? 'ready' : 'fallback' ) ) ),
@@ -349,13 +354,13 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 		if ( '' === $resolved_provider && is_array( $active_sources[0] ?? null ) ) {
 			$resolved_provider = sanitize_key( (string) ( $active_sources[0]['provider'] ?? '' ) );
 		}
-		$visual_brief = $this->normalize_image_visual_brief( $result, $runtime_payload );
-		$prompt_candidates = is_array( $result['prompt_candidates'] ?? null ) ? $this->sanitize_payload( $result['prompt_candidates'] ) : array();
+		$visual_brief          = $this->normalize_image_visual_brief( $result, $runtime_payload );
+		$prompt_candidates     = is_array( $result['prompt_candidates'] ?? null ) ? $this->sanitize_payload( $result['prompt_candidates'] ) : array();
 		$ai_generation_handoff = is_array( $result['ai_generation_handoff'] ?? null ) ? $this->sanitize_payload( $result['ai_generation_handoff'] ) : array();
 		$result_handoff        = is_array( $result['handoff'] ?? null ) ? $this->sanitize_payload( $result['handoff'] ) : array();
 		if ( array() !== $ai_generation_handoff ) {
 			$result_handoff['ai_generation_handoff'] = $ai_generation_handoff;
-			$actions = is_array( $result_handoff['available_actions'] ?? null ) ? $result_handoff['available_actions'] : array();
+			$actions                                 = is_array( $result_handoff['available_actions'] ?? null ) ? $result_handoff['available_actions'] : array();
 			if ( ! in_array( 'ai_generation_handoff', $actions, true ) ) {
 				$actions[] = 'ai_generation_handoff';
 			}
@@ -378,18 +383,18 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 				'candidate_source_count'     => count( $images ),
 				'result_count'               => count( $contract_images ),
 				'active_sources'             => $active_sources,
-					'provider_errors'            => is_array( $result['provider_errors'] ?? null ) ? $this->sanitize_payload( $result['provider_errors'] ) : array(),
-					'query'                      => $query,
-					'visual_brief'               => $visual_brief,
-					'prompt_candidates'          => $prompt_candidates,
-					'optimized_query'            => sanitize_text_field( (string) ( $result['optimized_query'] ?? $visual_brief['primary_query'] ?? $query ) ),
-					'query_suggestions'          => $visual_brief['query_suggestions'],
-					'rerank_status'              => $visual_brief['rerank_status'],
-					'site_context_status'        => $visual_brief['site_context_status'],
+				'provider_errors'            => is_array( $result['provider_errors'] ?? null ) ? $this->sanitize_payload( $result['provider_errors'] ) : array(),
+				'query'                      => $query,
+				'visual_brief'               => $visual_brief,
+				'prompt_candidates'          => $prompt_candidates,
+				'optimized_query'            => sanitize_text_field( (string) ( $result['optimized_query'] ?? $visual_brief['primary_query'] ?? $query ) ),
+				'query_suggestions'          => $visual_brief['query_suggestions'],
+				'rerank_status'              => $visual_brief['rerank_status'],
+				'site_context_status'        => $visual_brief['site_context_status'],
 				'images'                     => $contract_images,
 				'handoff'                    => array(
-					'candidate_contract'    => 'image_candidate.v1',
-					'final_writes'          => 'core_proposal_required',
+					'candidate_contract'     => 'image_candidate.v1',
+					'final_writes'           => 'core_proposal_required',
 					'direct_wordpress_write' => false,
 				) + $result_handoff,
 				'ai_generation_handoff'      => $ai_generation_handoff,
@@ -468,8 +473,8 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 				'max_results'        => max( 1, min( 10, absint( $options['per_page'] ?? 9 ) ) ),
 				'result_granularity' => 'document',
 				'filters'            => array(
-					'post_types'  => array( 'attachment' ),
-					'status'      => array( 'publish' ),
+					'post_types'   => array( 'attachment' ),
+					'status'       => array( 'publish' ),
 					'source_types' => array( 'media' ),
 				),
 			)
@@ -477,10 +482,10 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 		if ( is_wp_error( $knowledge ) ) {
 			return $knowledge;
 		}
-		$results = is_array( $knowledge['results'] ?? null ) ? $knowledge['results'] : array();
-		$status = sanitize_key( (string) ( $knowledge['status'] ?? 'ready' ) );
+		$results             = is_array( $knowledge['results'] ?? null ) ? $knowledge['results'] : array();
+		$status              = sanitize_key( (string) ( $knowledge['status'] ?? 'ready' ) );
 		$retrieval_readiness = is_array( $knowledge['retrieval_readiness'] ?? null ) ? $knowledge['retrieval_readiness'] : array();
-		$message = '';
+		$message             = '';
 		if (
 			'not_ready' === $status
 			&& 'semantic_embedding_required' === sanitize_key( (string) ( $retrieval_readiness['status'] ?? '' ) )
@@ -497,7 +502,7 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 				)
 			)
 		);
-		$inventory = $this->client->toolkit_media_inventory(
+		$inventory      = $this->client->toolkit_media_inventory(
 			array(
 				'mime_type'      => 'image',
 				'attachment_ids' => array_slice( $attachment_ids, 0, 20 ),
@@ -531,10 +536,10 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 					continue;
 				}
 				$evidence_by_attachment_id[ $evidence_attachment_id ] = array(
-					'media_fingerprint' => sanitize_text_field( (string) ( $evidence_item['media_fingerprint'] ?? '' ) ),
-					'alt_text_basis'    => sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) ),
-					'visual_summary'    => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
-					'evidence_reuse'    => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? 'site_knowledge_projection' ) ),
+					'media_fingerprint'   => sanitize_text_field( (string) ( $evidence_item['media_fingerprint'] ?? '' ) ),
+					'alt_text_basis'      => sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) ),
+					'visual_summary'      => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
+					'evidence_reuse'      => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? 'site_knowledge_projection' ) ),
 					'visual_reuse_policy' => sanitize_key( (string) ( $visual_evidence['visual_reuse_policy'] ?? '' ) ),
 				);
 			}
@@ -542,60 +547,65 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 		$images = array();
 		foreach ( $results as $result ) {
 			$attachment_id = absint( is_array( $result ) ? ( $result['source_id'] ?? $result['post_id'] ?? 0 ) : 0 );
-			$item = is_array( $rows[ $attachment_id ] ?? null ) ? $rows[ $attachment_id ] : array();
+			$item          = is_array( $rows[ $attachment_id ] ?? null ) ? $rows[ $attachment_id ] : array();
 			if ( $attachment_id <= 0 || empty( $item['url'] ) ) {
 				continue;
 			}
-			$format            = is_array( $item['format_inspection'] ?? null ) ? $item['format_inspection'] : array();
-			$media_fingerprint = sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) );
-			$visual_evidence   = is_array( $evidence_by_attachment_id[ $attachment_id ] ?? null ) ? $evidence_by_attachment_id[ $attachment_id ] : array();
+			$format              = is_array( $item['format_inspection'] ?? null ) ? $item['format_inspection'] : array();
+			$media_fingerprint   = sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) );
+			$visual_evidence     = is_array( $evidence_by_attachment_id[ $attachment_id ] ?? null ) ? $evidence_by_attachment_id[ $attachment_id ] : array();
 			$visual_reuse_policy = $this->client->media_visual_evidence_reuse_policy( $attachment_id, $media_fingerprint, (string) ( $visual_evidence['media_fingerprint'] ?? '' ), $visual_evidence );
 			if (
 				'' === $visual_reuse_policy
 			) {
-				$visual_evidence = array();
+				$visual_evidence     = array();
 				$visual_reuse_policy = '';
 			}
 			$suggested_alt = sanitize_text_field( (string) ( $visual_evidence['alt_text_basis'] ?? '' ) );
-			$images[] = array(
-				'id'                 => 'site-media-' . $attachment_id,
-				'attachment_id'      => $attachment_id,
-				'candidate_contract' => 'image_candidate.v1',
-				'provider'           => 'site_media',
-				'source'             => 'site_media_library',
-				'source_type'        => 'owned',
-				'provider_origin'    => 'wordpress_local',
-				'title'              => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-				'description'        => sanitize_textarea_field( (string) ( $result['chunk'] ?? $item['description'] ?? '' ) ),
-				'alt_description'    => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
-				'url'                => esc_url_raw( (string) $item['url'] ),
-				'preview_url'        => esc_url_raw( (string) $item['url'] ),
-				'download_url'       => esc_url_raw( (string) $item['url'] ),
-				'mime_type'          => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
-				'width'              => absint( $format['width'] ?? 0 ),
-				'height'             => absint( $format['height'] ?? 0 ),
-				'match_score'        => (float) ( $result['score'] ?? 0 ),
-				'match_reason'       => sanitize_text_field( (string) ( $result['reason'] ?? '' ) ),
-				'media_fingerprint'  => $media_fingerprint,
-				'suggested_alt'      => $suggested_alt,
-				'visual_summary'     => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
-				'evidence_reuse'     => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? '' ) ),
-				'visual_reuse_policy' => $visual_reuse_policy,
+			$images[]      = array(
+				'id'                       => 'site-media-' . $attachment_id,
+				'attachment_id'            => $attachment_id,
+				'candidate_contract'       => 'image_candidate.v1',
+				'provider'                 => 'site_media',
+				'source'                   => 'site_media_library',
+				'source_type'              => 'owned',
+				'provider_origin'          => 'wordpress_local',
+				'title'                    => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'description'              => sanitize_textarea_field( (string) ( $result['chunk'] ?? $item['description'] ?? '' ) ),
+				'alt_description'          => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
+				'url'                      => esc_url_raw( (string) $item['url'] ),
+				'preview_url'              => esc_url_raw( (string) $item['url'] ),
+				'download_url'             => esc_url_raw( (string) $item['url'] ),
+				'mime_type'                => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'width'                    => absint( $format['width'] ?? 0 ),
+				'height'                   => absint( $format['height'] ?? 0 ),
+				'match_score'              => (float) ( $result['score'] ?? 0 ),
+				'match_reason'             => sanitize_text_field( (string) ( $result['reason'] ?? '' ) ),
+				'media_fingerprint'        => $media_fingerprint,
+				'suggested_alt'            => $suggested_alt,
+				'visual_summary'           => sanitize_textarea_field( (string) ( $visual_evidence['visual_summary'] ?? '' ) ),
+				'evidence_reuse'           => sanitize_key( (string) ( $visual_evidence['evidence_reuse'] ?? '' ) ),
+				'visual_reuse_policy'      => $visual_reuse_policy,
 				'needs_human_visual_check' => 'reuse_with_human_check' === $visual_reuse_policy,
-				'seo_suggestions'    => '' !== $suggested_alt ? array( 'alt' => $suggested_alt ) : array(),
-				'requires_local_review' => true,
-				'direct_wordpress_write' => false,
+				'seo_suggestions'          => '' !== $suggested_alt ? array( 'alt' => $suggested_alt ) : array(),
+				'requires_local_review'    => true,
+				'direct_wordpress_write'   => false,
 			);
 		}
 
 		return $this->normalize_image_source_candidates_response(
 			array(
-				'provider'       => 'site_media',
-				'provider_mode'  => 'site_media',
-				'active_sources' => array( array( 'provider' => 'site_media', 'count' => count( $images ) ) ),
-				'images'         => $images,
-				'status'         => $status,
-				'message'        => $message,
+				'provider'            => 'site_media',
+				'provider_mode'       => 'site_media',
+				'active_sources'      => array(
+					array(
+						'provider' => 'site_media',
+						'count'    => count( $images ),
+					),
+				),
+				'images'              => $images,
+				'status'              => $status,
+				'message'             => $message,
 				'retrieval_readiness' => $this->sanitize_payload( $retrieval_readiness ),
 			),
 			$query,

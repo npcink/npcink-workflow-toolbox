@@ -38,7 +38,7 @@ final class Rest_Local_Admin_Consent {
 			);
 		}
 
-		$post = get_post( $post_id );
+		$post       = get_post( $post_id );
 		$attachment = get_post( $attachment_id );
 		if ( ! $post || ! $attachment || 'attachment' !== get_post_type( $attachment ) ) {
 			return new WP_Error(
@@ -66,13 +66,13 @@ final class Rest_Local_Admin_Consent {
 
 		$classification = ( new Operation_Classifier() )->classify(
 			array(
-				'request_source'          => Operation_Classifier::SOURCE_WP_ADMIN_UI,
+				'request_source'         => Operation_Classifier::SOURCE_WP_ADMIN_UI,
 				'actor_presence'         => Operation_Classifier::ACTOR_PRESENT_CLICK,
-				'preview_completeness'    => Operation_Classifier::PREVIEW_EXACT_FINAL,
-				'scope'                   => Operation_Classifier::SCOPE_ONE_OBJECT,
-				'reversibility'           => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
-				'operation_kind'          => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
-				'writes_wordpress_state'  => true,
+				'preview_completeness'   => Operation_Classifier::PREVIEW_EXACT_FINAL,
+				'scope'                  => Operation_Classifier::SCOPE_ONE_OBJECT,
+				'reversibility'          => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
+				'operation_kind'         => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
+				'writes_wordpress_state' => true,
 			)
 		);
 		if ( Operation_Classifier::LOCAL_ADMIN_CONSENT !== (string) ( $classification['classification'] ?? '' ) ) {
@@ -93,7 +93,7 @@ final class Rest_Local_Admin_Consent {
 			return $requested_audit;
 		}
 
-		$set_result = set_post_thumbnail( $post_id, $attachment_id );
+		$set_result          = set_post_thumbnail( $post_id, $attachment_id );
 		$after_attachment_id = absint( get_post_thumbnail_id( $post_id ) );
 		if ( $after_attachment_id !== $attachment_id || ( false === $set_result && $before_attachment_id !== $attachment_id ) ) {
 			$this->record_core_local_admin_consent_audit(
@@ -177,27 +177,27 @@ final class Rest_Local_Admin_Consent {
 		$image_url = esc_url_raw( (string) ( $candidate['url'] ?? ( $candidate['image_url'] ?? wp_get_attachment_url( $attachment_id ) ) ) );
 
 		return array(
-			'source_module'          => 'npcink-toolbox',
-			'surface'                => 'editor_image_source_modal',
-			'operation_kind'         => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
-			'classification'         => sanitize_key( (string) ( $classification['classification'] ?? '' ) ),
-			'policy_version'         => sanitize_text_field( (string) ( $classification['policy_version'] ?? Operation_Classifier::POLICY_VERSION ) ),
-			'reasons'                => array_values( array_map( 'sanitize_key', (array) ( $classification['reasons'] ?? array() ) ) ),
-			'required_evidence'      => array_values( array_map( 'sanitize_key', (array) ( $classification['required_evidence'] ?? array() ) ) ),
-			'operation_classification' => $classification,
-			'actor_user_id'          => get_current_user_id(),
-			'target_object_type'     => 'post',
-			'target_object_id'       => $post_id,
-			'post_id'                => $post_id,
-			'attachment_id'          => $attachment_id,
-			'before_attachment_id'   => $before_attachment_id,
-			'ai_suggestion_summary'  => '' !== $title ? $title : __( 'Set one reviewed existing media image as the featured image.', 'npcink-workflow-toolbox' ),
-			'image_source'           => $source,
-			'image_url'              => $image_url,
-			'preview_completeness'   => Operation_Classifier::PREVIEW_EXACT_FINAL,
-			'actor_presence'         => Operation_Classifier::ACTOR_PRESENT_CLICK,
-			'reversibility'          => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
-			'core_proposal_created'  => false,
+			'source_module'             => 'npcink-toolbox',
+			'surface'                   => 'editor_image_source_modal',
+			'operation_kind'            => Operation_Classifier::KIND_SET_FEATURED_IMAGE,
+			'classification'            => sanitize_key( (string) ( $classification['classification'] ?? '' ) ),
+			'policy_version'            => sanitize_text_field( (string) ( $classification['policy_version'] ?? Operation_Classifier::POLICY_VERSION ) ),
+			'reasons'                   => array_values( array_map( 'sanitize_key', (array) ( $classification['reasons'] ?? array() ) ) ),
+			'required_evidence'         => array_values( array_map( 'sanitize_key', (array) ( $classification['required_evidence'] ?? array() ) ) ),
+			'operation_classification'  => $classification,
+			'actor_user_id'             => get_current_user_id(),
+			'target_object_type'        => 'post',
+			'target_object_id'          => $post_id,
+			'post_id'                   => $post_id,
+			'attachment_id'             => $attachment_id,
+			'before_attachment_id'      => $before_attachment_id,
+			'ai_suggestion_summary'     => '' !== $title ? $title : __( 'Set one reviewed existing media image as the featured image.', 'npcink-workflow-toolbox' ),
+			'image_source'              => $source,
+			'image_url'                 => $image_url,
+			'preview_completeness'      => Operation_Classifier::PREVIEW_EXACT_FINAL,
+			'actor_presence'            => Operation_Classifier::ACTOR_PRESENT_CLICK,
+			'reversibility'             => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
+			'core_proposal_created'     => false,
 			'request_or_correlation_id' => sanitize_text_field( (string) ( $request->get_header( 'x-request-id' ) ?: wp_generate_uuid4() ) ),
 		);
 	}
@@ -226,5 +226,4 @@ final class Rest_Local_Admin_Consent {
 
 		return is_array( $result ) ? $result : array( 'event_id' => sanitize_text_field( (string) $result ) );
 	}
-
 }

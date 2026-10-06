@@ -90,7 +90,7 @@ final class Abilities {
 
 	private function definitions(): array {
 		return array(
-			'npcink-toolbox/search-image-source'                => $this->definition(
+			'npcink-toolbox/search-image-source'           => $this->definition(
 				__( 'Search Image Source', 'npcink-workflow-toolbox' ),
 				__( 'Search configured image source candidates without importing media.', 'npcink-workflow-toolbox' ),
 				array( 'query' ),
@@ -99,20 +99,20 @@ final class Abilities {
 				array(
 					'composition_role' => 'image_source_candidates',
 				)
-				),
-				'npcink-toolbox/generate-image'                     => $this->definition(
-					__( 'Request Hosted Image Candidate', 'npcink-workflow-toolbox' ),
-					__( 'Request a Cloud-hosted generated image candidate after operator prompt review, without importing media or owning the generation runtime.', 'npcink-workflow-toolbox' ),
-					array( 'prompt' ),
-					array( $this, 'generate_image_candidate' ),
-					'cap.toolbox.image_source',
+			),
+			'npcink-toolbox/generate-image'                => $this->definition(
+				__( 'Request Hosted Image Candidate', 'npcink-workflow-toolbox' ),
+				__( 'Request a Cloud-hosted generated image candidate after operator prompt review, without importing media or owning the generation runtime.', 'npcink-workflow-toolbox' ),
+				array( 'prompt' ),
+				array( $this, 'generate_image_candidate' ),
+				'cap.toolbox.image_source',
 				array(
-					'composition_role'  => 'image_source_candidates',
+					'composition_role'   => 'image_source_candidates',
 					'provider_execution' => 'cloud_runtime_via_addon',
-					'write_posture'     => 'candidate_only_core_approval_required',
+					'write_posture'      => 'candidate_only_core_approval_required',
 				)
 			),
-			'npcink-toolbox/search-site-knowledge'              => $this->definition(
+			'npcink-toolbox/search-site-knowledge'         => $this->definition(
 				__( 'Search Site Knowledge', 'npcink-workflow-toolbox' ),
 				__( 'Search Cloud-managed site knowledge for semantic search, related content, writing context, internal links, or refresh suggestions without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'query' ),
@@ -125,7 +125,7 @@ final class Abilities {
 					'cloud_contract'      => 'site_knowledge_search.v1',
 				)
 			),
-			'npcink-toolbox/cloud-web-search'                  => $this->definition(
+			'npcink-toolbox/cloud-web-search'              => $this->definition(
 				__( 'Cloud Web Search', 'npcink-workflow-toolbox' ),
 				__( 'Run Cloud-managed web search or Zhihu hot-topic atoms for external evidence and topic selection without exposing local provider keys or writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'query' ),
@@ -140,11 +140,11 @@ final class Abilities {
 					'provider_secret_source' => 'cloud_managed',
 				),
 				array(
-					'query'        => array(
+					'query'          => array(
 						'type'        => 'string',
 						'description' => __( 'Search query or research question.', 'npcink-workflow-toolbox' ),
 					),
-					'intent'       => array(
+					'intent'         => array(
 						'type'        => 'string',
 						'description' => __( 'Search intent hint such as article_background, fact_check, competitor_research, pricing_snapshot, product_comparison, or general_research.', 'npcink-workflow-toolbox' ),
 					),
@@ -152,13 +152,13 @@ final class Abilities {
 						'type'        => 'string',
 						'description' => __( 'Optional Cloud-managed source lane such as zhihu_hot_topics for a cached topic pool, zhihu_research, zhihu_global_search, zhida_simple, zhida_deep, or zhida_deepsearch.', 'npcink-workflow-toolbox' ),
 					),
-					'max_results'  => array(
+					'max_results'    => array(
 						'type'        => 'integer',
 						'minimum'     => 1,
 						'maximum'     => 8,
 						'description' => __( 'Maximum result count requested from Cloud.', 'npcink-workflow-toolbox' ),
 					),
-					'recency_days' => array(
+					'recency_days'   => array(
 						'type'        => 'integer',
 						'minimum'     => 0,
 						'maximum'     => 3650,
@@ -166,7 +166,7 @@ final class Abilities {
 					),
 				)
 			),
-			'npcink-toolbox/get-site-knowledge-status'          => $this->definition(
+			'npcink-toolbox/get-site-knowledge-status'     => $this->definition(
 				__( 'Get Site Knowledge Status', 'npcink-workflow-toolbox' ),
 				__( 'Read Cloud-managed site knowledge coverage and sync status without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array(),
@@ -179,7 +179,7 @@ final class Abilities {
 					'cloud_contract'      => 'site_knowledge_status.v1',
 				)
 			),
-			'npcink-toolbox/request-site-knowledge-sync'        => $this->definition(
+			'npcink-toolbox/request-site-knowledge-sync'   => $this->definition(
 				__( 'Request Site Knowledge Sync', 'npcink-workflow-toolbox' ),
 				__( 'Request a Cloud-managed public Site Knowledge refresh from bounded public WordPress content without writing WordPress content or managing index lifecycle.', 'npcink-workflow-toolbox' ),
 				array(),
@@ -192,7 +192,7 @@ final class Abilities {
 					'cloud_contract'      => 'site_knowledge_sync.v1',
 				)
 			),
-			'npcink-toolbox/build-article-write-plan'           => $this->definition(
+			'npcink-toolbox/build-article-write-plan'      => $this->definition(
 				__( 'Build Article Write Plan', 'npcink-workflow-toolbox' ),
 				__( 'Build a Core-ready article_write_plan for a reviewed draft without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'title', 'content_markdown' ),
@@ -207,7 +207,7 @@ final class Abilities {
 					'write_posture'       => 'core_proposal_handoff',
 				)
 			),
-			'npcink-toolbox/build-article-batch-write-plan'     => $this->definition(
+			'npcink-toolbox/build-article-batch-write-plan' => $this->definition(
 				__( 'Build Article Batch Write Plan', 'npcink-workflow-toolbox' ),
 				__( 'Build a Core-ready article_batch_write_plan for 2 to 5 reviewed drafts without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'articles' ),
@@ -267,7 +267,7 @@ final class Abilities {
 					'write_posture'       => 'core_proposal_handoff',
 				)
 			),
-			'npcink-toolbox/build-media-derivative-handoff'     => $this->definition(
+			'npcink-toolbox/build-media-derivative-handoff' => $this->definition(
 				__( 'Build Media Derivative Handoff', 'npcink-workflow-toolbox' ),
 				__( 'Build a one-run Core/Abilities media derivative handoff from Toolbox defaults without writing WordPress media.', 'npcink-workflow-toolbox' ),
 				array( 'attachment_id' ),
@@ -347,7 +347,7 @@ final class Abilities {
 			'provider_execution'       => 'server_side_toolbox',
 			'provider_secret_exposure' => 'none',
 		);
-		$properties = array();
+		$properties   = array();
 		foreach ( $required as $key ) {
 			$properties[ $key ] = array(
 				'type' => 'string',
@@ -356,23 +356,23 @@ final class Abilities {
 		$properties = array_merge( $properties, $input_properties );
 
 		return array(
-			'label'               => $label,
-			'description'         => $description,
-			'category'            => 'npcink-toolbox',
-			'capability'          => 'manage_options',
-			'required_scope'      => $required_scope,
-			'input_schema'        => array(
+			'label'                     => $label,
+			'description'               => $description,
+			'category'                  => 'npcink-toolbox',
+			'capability'                => 'manage_options',
+			'required_scope'            => $required_scope,
+			'input_schema'              => array(
 				'type'                 => 'object',
 				'properties'           => $properties,
 				'required'             => $required,
 				'additionalProperties' => true,
 			),
-			'output_schema'       => array(
+			'output_schema'             => array(
 				'type'                 => 'object',
 				'additionalProperties' => true,
 			),
-			'execute_callback'    => $callback,
-			'meta'                => array_merge( $default_meta, $meta ),
+			'execute_callback'          => $callback,
+			'meta'                      => array_merge( $default_meta, $meta ),
 			'project_to_npcink_catalog' => true,
 		);
 	}
@@ -382,14 +382,14 @@ final class Abilities {
 		return $this->client->image_candidates(
 			sanitize_textarea_field( (string) ( $input['query'] ?? '' ) ),
 			array(
-				'orientation' => sanitize_key( (string) ( $input['orientation'] ?? '' ) ),
-				'color'       => sanitize_key( (string) ( $input['color'] ?? '' ) ),
-				'provider'    => sanitize_key( (string) ( $input['provider'] ?? '' ) ),
-				'per_page'    => (int) ( $input['per_page'] ?? 8 ),
+				'orientation'          => sanitize_key( (string) ( $input['orientation'] ?? '' ) ),
+				'color'                => sanitize_key( (string) ( $input['color'] ?? '' ) ),
+				'provider'             => sanitize_key( (string) ( $input['provider'] ?? '' ) ),
+				'per_page'             => (int) ( $input['per_page'] ?? 8 ),
 				'include_ai_generated' => ! empty( $input['include_ai_generated'] ),
-				'generation_prompt'     => sanitize_textarea_field( (string) ( $input['generation_prompt'] ?? '' ) ),
-				'generated_image_url'   => esc_url_raw( (string) ( $input['generated_image_url'] ?? '' ) ),
-				'model'                 => sanitize_text_field( (string) ( $input['model'] ?? '' ) ),
+				'generation_prompt'    => sanitize_textarea_field( (string) ( $input['generation_prompt'] ?? '' ) ),
+				'generated_image_url'  => esc_url_raw( (string) ( $input['generated_image_url'] ?? '' ) ),
+				'model'                => sanitize_text_field( (string) ( $input['model'] ?? '' ) ),
 			)
 		);
 	}
@@ -406,11 +406,11 @@ final class Abilities {
 		$input = is_array( $input ) ? $input : array();
 		return $this->client->test_cloud_web_search(
 			array(
-				'query'        => sanitize_textarea_field( (string) ( $input['query'] ?? '' ) ),
-				'intent'       => sanitize_key( (string) ( $input['intent'] ?? 'general_research' ) ),
+				'query'          => sanitize_textarea_field( (string) ( $input['query'] ?? '' ) ),
+				'intent'         => sanitize_key( (string) ( $input['intent'] ?? 'general_research' ) ),
 				'managed_source' => sanitize_key( (string) ( $input['managed_source'] ?? '' ) ),
-				'max_results'  => (int) ( $input['max_results'] ?? 3 ),
-				'recency_days' => (int) ( $input['recency_days'] ?? 7 ),
+				'max_results'    => (int) ( $input['max_results'] ?? 3 ),
+				'recency_days'   => (int) ( $input['recency_days'] ?? 7 ),
 			)
 		);
 	}

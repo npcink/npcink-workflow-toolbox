@@ -18,12 +18,12 @@ final class Site_Ops_Insight_Builder {
 	 * @return array<string,mixed>
 	 */
 	public function build( array $snapshot, array $context = array() ): array {
-		$posts      = $this->array_value( $snapshot, 'posts' );
-		$media      = $this->array_value( $snapshot, 'media' );
-		$comments   = is_array( $snapshot['comments'] ?? null ) ? $snapshot['comments'] : array();
-		$taxonomies = is_array( $snapshot['taxonomies'] ?? null ) ? $snapshot['taxonomies'] : array();
+		$posts               = $this->array_value( $snapshot, 'posts' );
+		$media               = $this->array_value( $snapshot, 'media' );
+		$comments            = is_array( $snapshot['comments'] ?? null ) ? $snapshot['comments'] : array();
+		$taxonomies          = is_array( $snapshot['taxonomies'] ?? null ) ? $snapshot['taxonomies'] : array();
 		$internal_link_graph = is_array( $context['internal_link_graph_health'] ?? null ) ? $context['internal_link_graph_health'] : array();
-		$findings   = array();
+		$findings            = array();
 
 		$this->add_content_freshness_finding( $posts, $snapshot, $findings );
 		$this->add_content_quality_finding( $posts, $findings );
@@ -459,14 +459,14 @@ final class Site_Ops_Insight_Builder {
 		$link_issue_counts = is_array( $link_data['issue_counts'] ?? null ) ? $link_data['issue_counts'] : array();
 
 		return array(
-			'scanned_posts'          => count( $posts ),
-			'scanned_media'          => count( $media ),
-			'approved_comments'      => (int) ( $comments['approved_total'] ?? 0 ),
-			'recent_comment_sample'  => (int) ( $comments['recent_sample_count'] ?? 0 ),
-			'category_terms'         => (int) ( $taxonomies['category']['total'] ?? 0 ),
-			'tag_terms'              => (int) ( $taxonomies['post_tag']['total'] ?? 0 ),
-			'top_finding_count'      => count( $findings ),
-			'high_priority_findings' => $high,
+			'scanned_posts'                     => count( $posts ),
+			'scanned_media'                     => count( $media ),
+			'approved_comments'                 => (int) ( $comments['approved_total'] ?? 0 ),
+			'recent_comment_sample'             => (int) ( $comments['recent_sample_count'] ?? 0 ),
+			'category_terms'                    => (int) ( $taxonomies['category']['total'] ?? 0 ),
+			'tag_terms'                         => (int) ( $taxonomies['post_tag']['total'] ?? 0 ),
+			'top_finding_count'                 => count( $findings ),
+			'high_priority_findings'            => $high,
 			'internal_link_graph_scanned_posts' => max( 0, (int) ( $link_summary['scanned_count'] ?? 0 ) ),
 			'internal_link_graph_issue_count'   => max( 0, (int) ( $link_issue_counts['orphan_post'] ?? 0 ) ) + max( 0, (int) ( $link_issue_counts['low_outbound_links'] ?? 0 ) ) + max( 0, (int) ( $link_issue_counts['excessive_outbound_links'] ?? 0 ) ),
 		);
@@ -487,13 +487,37 @@ final class Site_Ops_Insight_Builder {
 		$link_issues  = max( 0, (int) ( $link_counts['orphan_post'] ?? 0 ) ) + max( 0, (int) ( $link_counts['low_outbound_links'] ?? 0 ) ) + max( 0, (int) ( $link_counts['excessive_outbound_links'] ?? 0 ) );
 
 		return array(
-			'posts'          => array( 'available' => count( $posts ) > 0, 'count' => count( $posts ), 'source' => 'local_public_wordpress' ),
-			'comments'       => array( 'available' => (int) ( $comments['recent_sample_count'] ?? 0 ) > 0, 'count' => (int) ( $comments['recent_sample_count'] ?? 0 ), 'privacy' => is_array( $comments['privacy'] ?? null ) ? $comments['privacy'] : array() ),
-			'media'          => array( 'available' => count( $media ) > 0, 'count' => count( $media ), 'source' => 'local_media_metadata' ),
-			'taxonomies'     => array( 'available' => ! empty( $taxonomies ), 'source' => 'local_taxonomy_summary' ),
-			'site_context'   => array( 'available' => ! empty( $context['content_context_ready'] ), 'source' => 'npcink_toolbox_content_context' ),
-			'site_knowledge' => array( 'available' => ! empty( $context['cloud_ready'] ), 'source' => 'cloud_managed_site_knowledge' ),
-			'cloud_runtime'  => array( 'available' => ! empty( $context['cloud_ready'] ), 'used_in_p0' => false ),
+			'posts'                      => array(
+				'available' => count( $posts ) > 0,
+				'count'     => count( $posts ),
+				'source'    => 'local_public_wordpress',
+			),
+			'comments'                   => array(
+				'available' => (int) ( $comments['recent_sample_count'] ?? 0 ) > 0,
+				'count'     => (int) ( $comments['recent_sample_count'] ?? 0 ),
+				'privacy'   => is_array( $comments['privacy'] ?? null ) ? $comments['privacy'] : array(),
+			),
+			'media'                      => array(
+				'available' => count( $media ) > 0,
+				'count'     => count( $media ),
+				'source'    => 'local_media_metadata',
+			),
+			'taxonomies'                 => array(
+				'available' => ! empty( $taxonomies ),
+				'source'    => 'local_taxonomy_summary',
+			),
+			'site_context'               => array(
+				'available' => ! empty( $context['content_context_ready'] ),
+				'source'    => 'npcink_toolbox_content_context',
+			),
+			'site_knowledge'             => array(
+				'available' => ! empty( $context['cloud_ready'] ),
+				'source'    => 'cloud_managed_site_knowledge',
+			),
+			'cloud_runtime'              => array(
+				'available'  => ! empty( $context['cloud_ready'] ),
+				'used_in_p0' => false,
+			),
 			'internal_link_graph_health' => array(
 				'available'     => ! empty( $internal_link_graph['available'] ),
 				'scanned_count' => max( 0, (int) ( $link_summary['scanned_count'] ?? 0 ) ),

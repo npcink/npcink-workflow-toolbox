@@ -22,7 +22,7 @@ final class Publish_Preflight_Service {
 	 * @return array<string,mixed>
 	 */
 	public function build_sections( array $context, array $discoverability, array $duplicate_check ): array {
-		$sections = array(
+		$sections                       = array(
 			'checks'          => $this->local_checks( $context ),
 			'duplicate_check' => $duplicate_check,
 			'seo_handoff'     => $this->seo_handoff_preview( $context, $discoverability ),
@@ -82,9 +82,9 @@ final class Publish_Preflight_Service {
 	 * @return array<string,mixed>
 	 */
 	public function seo_handoff_preview( array $context, array $discoverability ): array {
-		$suggestions     = is_array( $discoverability['candidate_suggestions'] ?? null ) ? $discoverability['candidate_suggestions'] : array();
-		$fallback_title  = sanitize_text_field( (string) ( $context['title'] ?? '' ) );
-		$fallback_desc   = trim( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ) );
+		$suggestions    = is_array( $discoverability['candidate_suggestions'] ?? null ) ? $discoverability['candidate_suggestions'] : array();
+		$fallback_title = sanitize_text_field( (string) ( $context['title'] ?? '' ) );
+		$fallback_desc  = trim( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ) );
 		if ( '' === $fallback_desc ) {
 			$fallback_desc = sanitize_text_field( wp_trim_words( wp_strip_all_tags( (string) ( $context['content_text'] ?? '' ) ), 28, '' ) );
 		}
@@ -93,15 +93,15 @@ final class Publish_Preflight_Service {
 		$post_id         = absint( $context['post_id'] ?? 0 );
 
 		return array(
-			'artifact_type'          => 'seo_meta_handoff_preview.v1',
-			'candidate_type'         => 'seo_meta_single_post_handoff',
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'core_proposal_required',
-			'direct_wordpress_write' => false,
-			'proposal_ready'         => 0 < $post_id && '' !== $seo_title && '' !== $seo_description,
-			'target_ability_id'      => 'npcink-abilities-toolkit/set-post-seo-meta',
-			'core_route'             => '/wp-json/npcink-governance-core/v1/proposals',
-			'adapter_route'          => '/wp-json/npcink-openclaw-adapter/v1/proposals',
+			'artifact_type'             => 'seo_meta_handoff_preview.v1',
+			'candidate_type'            => 'seo_meta_single_post_handoff',
+			'write_posture'             => 'suggestion_only',
+			'final_write_path'          => 'core_proposal_required',
+			'direct_wordpress_write'    => false,
+			'proposal_ready'            => 0 < $post_id && '' !== $seo_title && '' !== $seo_description,
+			'target_ability_id'         => 'npcink-abilities-toolkit/set-post-seo-meta',
+			'core_route'                => '/wp-json/npcink-governance-core/v1/proposals',
+			'adapter_route'             => '/wp-json/npcink-openclaw-adapter/v1/proposals',
 			'proposal_payload_template' => array(
 				'ability_id' => 'npcink-abilities-toolkit/set-post-seo-meta',
 				'title'      => __( 'Review SEO meta for the current post', 'npcink-workflow-toolbox' ),
@@ -131,7 +131,7 @@ final class Publish_Preflight_Service {
 					'commit_execution' => false,
 				),
 			),
-			'items'                  => array(
+			'items'                     => array(
 				array(
 					'name'   => __( 'SEO title candidate', 'npcink-workflow-toolbox' ),
 					'value'  => $seo_title,
@@ -148,12 +148,12 @@ final class Publish_Preflight_Service {
 					'status' => 'core_proposal_required',
 				),
 			),
-			'required_review'        => array(
+			'required_review'           => array(
 				'editor_confirms_single_post_scope',
 				'editor_confirms_no_unsupported_claims',
 				'editor_confirms_plugin_field_mapping_before_commit',
 			),
-			'blocked_actions'        => array(
+			'blocked_actions'           => array(
 				'no_seo_meta_write_in_toolbox',
 				'no_batch_seo_apply',
 				'no_geo_schema_write_from_toolbox',

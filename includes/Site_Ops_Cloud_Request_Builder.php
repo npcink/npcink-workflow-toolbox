@@ -23,47 +23,47 @@ final class Site_Ops_Cloud_Request_Builder {
 	 */
 	public function build( array $snapshot, array $insight_pack, array $context = array() ): array {
 		return array(
-			'artifact_type'              => 'site_ops_cloud_analysis_request',
-			'contract_version'           => self::CONTRACT_VERSION,
-			'version'                    => 1,
-			'request_id'                 => $this->request_id( $snapshot ),
-			'site_id'                    => $this->string_value( $snapshot, 'site_id', 'local-site' ),
-			'generated_at'               => $this->string_value( $snapshot, 'generated_at' ),
-			'source_pack_contract'       => $this->string_value( $insight_pack, 'contract_version', Site_Ops_Insight_Builder::CONTRACT_VERSION ),
-			'expected_result_contract'   => self::RESULT_CONTRACT_VERSION,
-			'cloud_role'                => 'runtime_detail',
-			'execution_pattern'          => 'whole_run_offload',
-			'data_classification'        => 'public_site_aggregate',
-			'storage_mode'               => 'cloud_runtime_policy',
-			'write_posture'              => 'suggestion_only',
-			'direct_wordpress_write'     => false,
-			'core_proposal_created'      => false,
-			'local_runtime_created'      => false,
-			'local_scheduler_created'    => false,
-			'input'                      => array(
-				'site'              => $this->site_summary( $snapshot ),
-				'local_summary'     => is_array( $insight_pack['summary'] ?? null ) ? $insight_pack['summary'] : array(),
-				'sample_summaries'  => $this->sample_summaries( $snapshot ),
-				'local_findings'    => $this->local_findings( $insight_pack ),
-				'blocked_items'     => $this->blocked_items( $insight_pack ),
-				'analysis_tasks'    => $this->analysis_tasks(),
-				'operator_context'  => $this->operator_context( $context ),
+			'artifact_type'            => 'site_ops_cloud_analysis_request',
+			'contract_version'         => self::CONTRACT_VERSION,
+			'version'                  => 1,
+			'request_id'               => $this->request_id( $snapshot ),
+			'site_id'                  => $this->string_value( $snapshot, 'site_id', 'local-site' ),
+			'generated_at'             => $this->string_value( $snapshot, 'generated_at' ),
+			'source_pack_contract'     => $this->string_value( $insight_pack, 'contract_version', Site_Ops_Insight_Builder::CONTRACT_VERSION ),
+			'expected_result_contract' => self::RESULT_CONTRACT_VERSION,
+			'cloud_role'               => 'runtime_detail',
+			'execution_pattern'        => 'whole_run_offload',
+			'data_classification'      => 'public_site_aggregate',
+			'storage_mode'             => 'cloud_runtime_policy',
+			'write_posture'            => 'suggestion_only',
+			'direct_wordpress_write'   => false,
+			'core_proposal_created'    => false,
+			'local_runtime_created'    => false,
+			'local_scheduler_created'  => false,
+			'input'                    => array(
+				'site'             => $this->site_summary( $snapshot ),
+				'local_summary'    => is_array( $insight_pack['summary'] ?? null ) ? $insight_pack['summary'] : array(),
+				'sample_summaries' => $this->sample_summaries( $snapshot ),
+				'local_findings'   => $this->local_findings( $insight_pack ),
+				'blocked_items'    => $this->blocked_items( $insight_pack ),
+				'analysis_tasks'   => $this->analysis_tasks(),
+				'operator_context' => $this->operator_context( $context ),
 			),
-			'expected_result_shape'      => $this->expected_result_shape(),
-			'safety'                    => array(
-				'cloud_request_prepared'         => true,
-				'cloud_called'                   => false,
-				'cloud_is_runtime_detail_only'   => true,
-				'operator_review_required'       => true,
-				'direct_wordpress_write'         => false,
-				'automatic_core_proposal'        => false,
-				'local_queue_created'            => false,
-				'local_scheduler_created'        => false,
-				'custom_tables_created'          => false,
-				'comment_text_returned'          => false,
-				'comment_author_email_returned'  => false,
-				'comment_ip_returned'            => false,
-				'comment_user_agent_returned'    => false,
+			'expected_result_shape'    => $this->expected_result_shape(),
+			'safety'                   => array(
+				'cloud_request_prepared'        => true,
+				'cloud_called'                  => false,
+				'cloud_is_runtime_detail_only'  => true,
+				'operator_review_required'      => true,
+				'direct_wordpress_write'        => false,
+				'automatic_core_proposal'       => false,
+				'local_queue_created'           => false,
+				'local_scheduler_created'       => false,
+				'custom_tables_created'         => false,
+				'comment_text_returned'         => false,
+				'comment_author_email_returned' => false,
+				'comment_ip_returned'           => false,
+				'comment_user_agent_returned'   => false,
 			),
 		);
 	}
@@ -139,14 +139,14 @@ final class Site_Ops_Cloud_Request_Builder {
 		}
 
 		return array(
-			'sampled_count'           => count( $posts ),
-			'stale_180d_count'        => $stale,
-			'short_content_count'     => $short,
-			'no_internal_link_count'  => $no_links,
-			'missing_meta_count'      => $missing_meta,
-			'missing_terms_count'     => $missing_terms,
-			'commented_item_count'    => $commented,
-			'missing_alt_ref_count'   => $missing_alt_refs,
+			'sampled_count'          => count( $posts ),
+			'stale_180d_count'       => $stale,
+			'short_content_count'    => $short,
+			'no_internal_link_count' => $no_links,
+			'missing_meta_count'     => $missing_meta,
+			'missing_terms_count'    => $missing_terms,
+			'commented_item_count'   => $commented,
+			'missing_alt_ref_count'  => $missing_alt_refs,
 		);
 	}
 
@@ -156,9 +156,9 @@ final class Site_Ops_Cloud_Request_Builder {
 	 * @return array<string,int>
 	 */
 	private function media_sample_summary( array $media, array $posts ): array {
-		$missing_alt      = 0;
-		$missing_caption  = 0;
-		$referenced_gaps  = 0;
+		$missing_alt     = 0;
+		$missing_caption = 0;
+		$referenced_gaps = 0;
 
 		foreach ( $media as $item ) {
 			if ( ! is_array( $item ) ) {
@@ -214,7 +214,7 @@ final class Site_Ops_Cloud_Request_Builder {
 	private function taxonomy_summary( array $taxonomies ): array {
 		$summary = array();
 		foreach ( array( 'category', 'post_tag' ) as $taxonomy ) {
-			$source = is_array( $taxonomies[ $taxonomy ] ?? null ) ? $taxonomies[ $taxonomy ] : array();
+			$source               = is_array( $taxonomies[ $taxonomy ] ?? null ) ? $taxonomies[ $taxonomy ] : array();
 			$summary[ $taxonomy ] = array(
 				'total'       => (int) ( $source['total'] ?? 0 ),
 				'empty_count' => (int) ( $source['empty_count'] ?? 0 ),
@@ -324,8 +324,8 @@ final class Site_Ops_Cloud_Request_Builder {
 	 */
 	private function expected_result_shape(): array {
 		return array(
-			'contract_version'      => self::RESULT_CONTRACT_VERSION,
-			'allowed_outputs'       => array(
+			'contract_version'   => self::RESULT_CONTRACT_VERSION,
+			'allowed_outputs'    => array(
 				'priority_queue',
 				'trend_notes',
 				'confidence',
@@ -334,13 +334,13 @@ final class Site_Ops_Cloud_Request_Builder {
 				'core_handoff_candidates',
 				'operator_next_actions',
 			),
-			'required_safety'       => array(
+			'required_safety'    => array(
 				'write_posture'          => 'suggestion_only',
 				'direct_wordpress_write' => false,
 				'core_proposal_created'  => false,
 				'cloud_scheduler_truth'  => false,
 			),
-			'disallowed_outputs'    => array(
+			'disallowed_outputs' => array(
 				'full_comment_text',
 				'private_comment_author_contact',
 				'private_comment_network_metadata',

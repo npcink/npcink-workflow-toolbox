@@ -174,21 +174,21 @@ final class Admin_Page {
 			'npcink-toolbox-admin',
 			'NpcinkToolbox',
 			array(
-				'restUrl'       => esc_url_raw( rest_url( Plugin::REST_NAMESPACE ) ),
+				'restUrl'        => esc_url_raw( rest_url( Plugin::REST_NAMESPACE ) ),
 				'adapterRestUrl' => esc_url_raw( rest_url( 'npcink-openclaw-adapter/v1' ) ),
 				'coreRestUrl'    => esc_url_raw( rest_url( 'npcink-governance-core/v1' ) ),
-				'coreAdminUrl'  => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
-				'nonce'         => wp_create_nonce( 'wp_rest' ),
-				'dateTime'      => $this->datetime_display_config(),
-				'contextOption' => Plugin::CONTEXT_OPTION_NAME,
-				'contextDrafts' => array(
+				'coreAdminUrl'   => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
+				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				'dateTime'       => $this->datetime_display_config(),
+				'contextOption'  => Plugin::CONTEXT_OPTION_NAME,
+				'contextDrafts'  => array(
 					'aiBlog' => $this->get_ai_blog_context_template(),
 					'site'   => $this->get_site_content_context_suggestion(),
 				),
-				'labels'        => array(
+				'labels'         => array(
 					'running' => __( 'Running...', 'npcink-workflow-toolbox' ),
 					'error'   => __( 'Request failed.', 'npcink-workflow-toolbox' ),
-				)
+				),
 			)
 		);
 	}
@@ -221,7 +221,7 @@ final class Admin_Page {
 	}
 
 	private function image_batch_tool_url( string $tool, array $attachment_ids = array() ): string {
-		$args = array(
+		$args           = array(
 			'toolbox_tab'  => 'tools',
 			'toolbox_tool' => $tool,
 		);
@@ -443,7 +443,7 @@ final class Admin_Page {
 			}
 		}
 
-		$terms = get_terms(
+		$terms      = get_terms(
 			array(
 				'taxonomy'   => array( 'category', 'post_tag' ),
 				'hide_empty' => true,
@@ -548,13 +548,13 @@ final class Admin_Page {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'npcink-workflow-toolbox' ) );
 		}
 
-		$settings        = $this->settings->get_all();
-		$content_context = $this->settings->get_content_context();
-		$cloud_ready     = $this->settings->cloud_runtime_available();
-		$active_tab      = $this->requested_toolbox_tab();
+		$settings              = $this->settings->get_all();
+		$content_context       = $this->settings->get_content_context();
+		$cloud_ready           = $this->settings->cloud_runtime_available();
+		$active_tab            = $this->requested_toolbox_tab();
 		$active_site_check_tab = $this->requested_site_check_tab();
-		$nightly_preview = 'operations-insights' === $active_tab ? $this->nightly_inspection_preview_from_request() : null;
-		$site_ops_preview = 'operations-insights' === $active_tab ? $this->site_ops_insights_preview_from_request( $content_context, $cloud_ready ) : null;
+		$nightly_preview       = 'operations-insights' === $active_tab ? $this->nightly_inspection_preview_from_request() : null;
+		$site_ops_preview      = 'operations-insights' === $active_tab ? $this->site_ops_insights_preview_from_request( $content_context, $cloud_ready ) : null;
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
@@ -621,9 +621,9 @@ final class Admin_Page {
 		$requested = sanitize_key( $this->query_text_param( 'toolbox_tool' ) );
 
 		$allowed = array(
-			'media-batch-optimize'    => true,
+			'media-batch-optimize'     => true,
 			'media-alt-caption-review' => true,
-			'image-settings'          => true,
+			'image-settings'           => true,
 		);
 		return isset( $allowed[ $requested ] ) ? $requested : 'media-batch-optimize';
 	}
@@ -653,32 +653,44 @@ final class Admin_Page {
 	private function render_getting_started_steps( array $content_context ): void {
 		$addon_installed = $this->is_suite_submenu_registered( 'npcink-cloud-addon' );
 		$profile_ready   = $this->content_context_ready( $content_context );
-		$steps = array(
+		$steps           = array(
 			array(
-				'done' => false,
+				'done'   => false,
 				/* translators: %d: getting-started step number. */
-				'title' => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 1 ),
-				'label' => __( 'Connect Npcink Cloud', 'npcink-workflow-toolbox' ),
-				'help' => __( 'Install and verify the Cloud Addon so hosted search, images, and checks can run.', 'npcink-workflow-toolbox' ),
-				'url' => $addon_installed ? $this->cloud_addon_details_url() : admin_url( 'plugins.php' ),
+				'title'  => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 1 ),
+				'label'  => __( 'Connect Npcink Cloud', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Install and verify the Cloud Addon so hosted search, images, and checks can run.', 'npcink-workflow-toolbox' ),
+				'url'    => $addon_installed ? $this->cloud_addon_details_url() : admin_url( 'plugins.php' ),
 				'action' => $addon_installed ? __( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ) : __( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ),
 			),
 			array(
-				'done' => $profile_ready,
+				'done'   => $profile_ready,
 				/* translators: %d: getting-started step number. */
-				'title' => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 2 ),
-				'label' => __( 'Fill the site profile', 'npcink-workflow-toolbox' ),
-				'help' => __( 'A short site brief makes AI suggestions match your audience. This works even before Cloud is connected.', 'npcink-workflow-toolbox' ),
-				'url' => add_query_arg( array( 'page' => self::MENU_SLUG, 'toolbox_tab' => 'context' ), admin_url( 'admin.php' ) ),
+				'title'  => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 2 ),
+				'label'  => __( 'Fill the site profile', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'A short site brief makes AI suggestions match your audience. This works even before Cloud is connected.', 'npcink-workflow-toolbox' ),
+				'url'    => add_query_arg(
+					array(
+						'page'        => self::MENU_SLUG,
+						'toolbox_tab' => 'context',
+					),
+					admin_url( 'admin.php' )
+				),
 				'action' => __( 'Open site profile', 'npcink-workflow-toolbox' ),
 			),
 			array(
-				'done' => false,
+				'done'   => false,
 				/* translators: %d: getting-started step number. */
-				'title' => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 3 ),
-				'label' => __( 'Try your first image task', 'npcink-workflow-toolbox' ),
-				'help' => __( 'Check optimizable Media Library images and review Cloud-qualified previews before anything changes.', 'npcink-workflow-toolbox' ),
-				'url' => add_query_arg( array( 'page' => self::MENU_SLUG, 'toolbox_tab' => 'tools' ), admin_url( 'admin.php' ) ),
+				'title'  => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 3 ),
+				'label'  => __( 'Try your first image task', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Check optimizable Media Library images and review Cloud-qualified previews before anything changes.', 'npcink-workflow-toolbox' ),
+				'url'    => add_query_arg(
+					array(
+						'page'        => self::MENU_SLUG,
+						'toolbox_tab' => 'tools',
+					),
+					admin_url( 'admin.php' )
+				),
 				'action' => __( 'Open image handling', 'npcink-workflow-toolbox' ),
 			),
 		);
@@ -778,11 +790,11 @@ final class Admin_Page {
 		return wp_nonce_url(
 			add_query_arg(
 				array(
-					'page'                       => self::MENU_SLUG,
-					'toolbox_tab'                => 'operations-insights',
-					'site_check_tab'             => 'current-check',
-					'site_ops_insights_preview'  => '1',
-					'site_ops_cloud_analysis'    => '1',
+					'page'                      => self::MENU_SLUG,
+					'toolbox_tab'               => 'operations-insights',
+					'site_check_tab'            => 'current-check',
+					'site_ops_insights_preview' => '1',
+					'site_ops_cloud_analysis'   => '1',
 				),
 				admin_url( 'admin.php' )
 			),
@@ -808,27 +820,27 @@ final class Admin_Page {
 		}
 
 		try {
-			$collector        = new Site_Ops_Snapshot_Collector();
-			$builder          = new Site_Ops_Insight_Builder();
-			$request_builder  = new Site_Ops_Cloud_Request_Builder();
-			$snapshot         = $collector->collect();
+			$collector                  = new Site_Ops_Snapshot_Collector();
+			$builder                    = new Site_Ops_Insight_Builder();
+			$request_builder            = new Site_Ops_Cloud_Request_Builder();
+			$snapshot                   = $collector->collect();
 			$internal_link_graph_health = $this->site_ops_internal_link_graph_health();
-			$runtime_context  = array(
-				'content_context_ready' => $this->content_context_ready( $content_context ),
-				'cloud_ready'           => $cloud_ready,
+			$runtime_context            = array(
+				'content_context_ready'      => $this->content_context_ready( $content_context ),
+				'cloud_ready'                => $cloud_ready,
 				'internal_link_graph_health' => $internal_link_graph_health,
 			);
-			$pack             = $builder->build(
+			$pack                       = $builder->build(
 				$snapshot,
 				$runtime_context
 			);
-			$cloud_request    = $request_builder->build(
+			$cloud_request              = $request_builder->build(
 				$snapshot,
 				$pack,
 				$runtime_context
 			);
-			$cloud_analysis   = null;
-			$cloud_requested  = $this->query_text_param( 'site_ops_cloud_analysis' );
+			$cloud_analysis             = null;
+			$cloud_requested            = $this->query_text_param( 'site_ops_cloud_analysis' );
 			if ( '1' === $cloud_requested ) {
 				if ( ! $cloud_ready ) {
 					$cloud_analysis = new \WP_Error(
@@ -843,9 +855,9 @@ final class Admin_Page {
 			}
 
 			return array(
-				'snapshot'      => $snapshot,
-				'pack'          => $pack,
-				'cloud_request' => $cloud_request,
+				'snapshot'       => $snapshot,
+				'pack'           => $pack,
+				'cloud_request'  => $cloud_request,
 				'cloud_analysis' => $cloud_analysis,
 			);
 		} catch ( \Throwable $throwable ) {
@@ -864,14 +876,20 @@ final class Admin_Page {
 	private function site_ops_internal_link_graph_health(): array {
 		$ability_id = 'npcink-abilities-toolkit/get-internal-link-graph-health';
 		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) || ! current_user_can( 'edit_posts' ) ) {
-			return array( 'available' => false, 'source_ability_id' => $ability_id );
+			return array(
+				'available'         => false,
+				'source_ability_id' => $ability_id,
+			);
 		}
 
 		$registered = npcink_abilities_toolkit_get_registered();
 		$definition = is_array( $registered[ $ability_id ] ?? null ) ? $registered[ $ability_id ] : array();
 		$callback   = $definition['execute_callback'] ?? null;
 		if ( ! is_callable( $callback ) ) {
-			return array( 'available' => false, 'source_ability_id' => $ability_id );
+			return array(
+				'available'         => false,
+				'source_ability_id' => $ability_id,
+			);
 		}
 
 		$result = call_user_func(
@@ -886,7 +904,10 @@ final class Admin_Page {
 			)
 		);
 		if ( is_wp_error( $result ) || ! is_array( $result ) || empty( $result['success'] ) || ! is_array( $result['data'] ?? null ) ) {
-			return array( 'available' => false, 'source_ability_id' => $ability_id );
+			return array(
+				'available'         => false,
+				'source_ability_id' => $ability_id,
+			);
 		}
 
 		return array(
@@ -902,18 +923,30 @@ final class Admin_Page {
 	 * @param array<string,mixed>      $settings Settings.
 	 */
 	private function render_operations_insights_panel( ?array $preview, array $content_context, bool $cloud_ready, array $settings, ?array $nightly_preview, string $active_site_check_tab ): void {
-		$context_ready = $this->content_context_ready( $content_context );
-		$pack          = isset( $preview['pack'] ) && is_array( $preview['pack'] ) ? $preview['pack'] : array();
-		$cloud_request = isset( $preview['cloud_request'] ) && is_array( $preview['cloud_request'] ) ? $preview['cloud_request'] : array();
-		$cloud_analysis = $preview['cloud_analysis'] ?? null;
-		$summary       = isset( $pack['summary'] ) && is_array( $pack['summary'] ) ? $pack['summary'] : array();
-		$findings      = isset( $pack['top_findings'] ) && is_array( $pack['top_findings'] ) ? array_slice( $pack['top_findings'], 0, 8 ) : array();
-		$finding_count = count( $findings );
+		$context_ready      = $this->content_context_ready( $content_context );
+		$pack               = isset( $preview['pack'] ) && is_array( $preview['pack'] ) ? $preview['pack'] : array();
+		$cloud_request      = isset( $preview['cloud_request'] ) && is_array( $preview['cloud_request'] ) ? $preview['cloud_request'] : array();
+		$cloud_analysis     = $preview['cloud_analysis'] ?? null;
+		$summary            = isset( $pack['summary'] ) && is_array( $pack['summary'] ) ? $pack['summary'] : array();
+		$findings           = isset( $pack['top_findings'] ) && is_array( $pack['top_findings'] ) ? array_slice( $pack['top_findings'], 0, 8 ) : array();
+		$finding_count      = count( $findings );
 		$has_cloud_analysis = null !== $cloud_analysis;
 		?>
 		<div class="npcink-toolbox__panel-header">
 			<p style="margin:0 0 6px;">
-				<a class="button" href="<?php echo esc_url( add_query_arg( array( 'page' => self::MENU_SLUG, 'toolbox_tab' => 'start' ), admin_url( 'admin.php' ) ) ); ?>">
+				<a class="button" href="
+				<?php
+				echo esc_url(
+					add_query_arg(
+						array(
+							'page'        => self::MENU_SLUG,
+							'toolbox_tab' => 'start',
+						),
+						admin_url( 'admin.php' )
+					)
+				);
+				?>
+										">
 					&larr; <?php esc_html_e( 'Back to Overview', 'npcink-workflow-toolbox' ); ?>
 				</a>
 			</p>
@@ -1113,19 +1146,19 @@ final class Admin_Page {
 				break;
 			}
 		}
-		$review_count = $this->count_site_ops_findings_by_boundary( $findings, 'core_handoff_candidate' );
-		$manual_count = $this->count_site_ops_findings_by_boundary( $findings, 'manual_review_only' );
-		$cloud_result = is_array( $cloud_analysis['result'] ?? null ) ? $cloud_analysis['result'] : array();
-		$executive_summary = is_array( $cloud_result['executive_summary'] ?? null ) ? $cloud_result['executive_summary'] : array();
-		$cloud_headline = trim( (string) ( $executive_summary['headline'] ?? '' ) );
-		$cloud_summary = trim( (string) ( $executive_summary['summary'] ?? '' ) );
-		$cloud_priority_queue = is_array( $cloud_result['priority_queue'] ?? null ) ? array_slice( $cloud_result['priority_queue'], 0, 3 ) : array();
+		$review_count             = $this->count_site_ops_findings_by_boundary( $findings, 'core_handoff_candidate' );
+		$manual_count             = $this->count_site_ops_findings_by_boundary( $findings, 'manual_review_only' );
+		$cloud_result             = is_array( $cloud_analysis['result'] ?? null ) ? $cloud_analysis['result'] : array();
+		$executive_summary        = is_array( $cloud_result['executive_summary'] ?? null ) ? $cloud_result['executive_summary'] : array();
+		$cloud_headline           = trim( (string) ( $executive_summary['headline'] ?? '' ) );
+		$cloud_summary            = trim( (string) ( $executive_summary['summary'] ?? '' ) );
+		$cloud_priority_queue     = is_array( $cloud_result['priority_queue'] ?? null ) ? array_slice( $cloud_result['priority_queue'], 0, 3 ) : array();
 		$semantic_ranked_findings = is_array( $cloud_result['semantic_ranked_findings'] ?? null ) ? array_slice( $cloud_result['semantic_ranked_findings'], 0, 3 ) : array();
-		$cloud_next_actions = is_array( $cloud_result['operator_next_actions'] ?? null ) ? array_slice( $cloud_result['operator_next_actions'], 0, 3 ) : array();
-		$analysis_closure = is_array( $cloud_result['analysis_closure'] ?? null ) ? $cloud_result['analysis_closure'] : array();
-		$confidence = is_array( $cloud_result['confidence'] ?? null ) ? $cloud_result['confidence'] : array();
-		$cloud_has_detail = null !== $cloud_analysis;
-		$cloud_queue = array();
+		$cloud_next_actions       = is_array( $cloud_result['operator_next_actions'] ?? null ) ? array_slice( $cloud_result['operator_next_actions'], 0, 3 ) : array();
+		$analysis_closure         = is_array( $cloud_result['analysis_closure'] ?? null ) ? $cloud_result['analysis_closure'] : array();
+		$confidence               = is_array( $cloud_result['confidence'] ?? null ) ? $cloud_result['confidence'] : array();
+		$cloud_has_detail         = null !== $cloud_analysis;
+		$cloud_queue              = array();
 		foreach ( array_merge( $cloud_priority_queue, $semantic_ranked_findings ) as $finding ) {
 			if ( is_array( $finding ) ) {
 				$cloud_queue[] = $finding;
@@ -1134,15 +1167,15 @@ final class Admin_Page {
 				break;
 			}
 		}
-		$brief_queue = $cloud_has_detail && array() !== $cloud_queue ? $cloud_queue : $queue;
-		$primary = is_array( $brief_queue[0] ?? null ) ? $brief_queue[0] : array();
-		$primary_title = array() !== $primary ? $this->site_ops_finding_title( $primary ) : __( 'No urgent site issue found', 'npcink-workflow-toolbox' );
+		$brief_queue    = $cloud_has_detail && array() !== $cloud_queue ? $cloud_queue : $queue;
+		$primary        = is_array( $brief_queue[0] ?? null ) ? $brief_queue[0] : array();
+		$primary_title  = array() !== $primary ? $this->site_ops_finding_title( $primary ) : __( 'No urgent site issue found', 'npcink-workflow-toolbox' );
 		$ai_next_action = '';
 		if ( is_array( $cloud_next_actions[0] ?? null ) ) {
-			$first_next = $cloud_next_actions[0];
+			$first_next     = $cloud_next_actions[0];
 			$ai_next_action = $this->site_ops_dynamic_label( (string) ( $first_next['label'] ?? $first_next['target'] ?? $first_next['id'] ?? '' ) );
 		}
-		$closure_next = $this->site_ops_dynamic_label( (string) ( $analysis_closure['next_step'] ?? $analysis_closure['loop_status'] ?? '' ) );
+		$closure_next     = $this->site_ops_dynamic_label( (string) ( $analysis_closure['next_step'] ?? $analysis_closure['loop_status'] ?? '' ) );
 		$confidence_level = $this->site_ops_dynamic_label( (string) ( $confidence['level'] ?? '' ) );
 		?>
 		<section class="npcink-toolbox__ops-operator-brief" aria-label="<?php esc_attr_e( 'Site action brief', 'npcink-workflow-toolbox' ); ?>">
@@ -1364,12 +1397,12 @@ final class Admin_Page {
 	 * @param array<int,mixed>    $findings Findings.
 	 */
 	private function render_site_ops_local_analysis_summary( array $summary, array $findings ): void {
-		$finding_count  = count( $findings );
-		$high_count     = (int) ( $summary['high_priority_findings'] ?? $this->count_site_ops_findings_by_priority( $findings, 90, 101 ) );
-		$taxonomy_terms = (int) ( $summary['category_terms'] ?? 0 ) + (int) ( $summary['tag_terms'] ?? 0 );
+		$finding_count      = count( $findings );
+		$high_count         = (int) ( $summary['high_priority_findings'] ?? $this->count_site_ops_findings_by_priority( $findings, 90, 101 ) );
+		$taxonomy_terms     = (int) ( $summary['category_terms'] ?? 0 ) + (int) ( $summary['tag_terms'] ?? 0 );
 		$link_graph_scanned = (int) ( $summary['internal_link_graph_scanned_posts'] ?? 0 );
 		$link_graph_issues  = (int) ( $summary['internal_link_graph_issue_count'] ?? 0 );
-		$dimension_counts = array(
+		$dimension_counts   = array(
 			__( 'Content coverage', 'npcink-workflow-toolbox' )   => count( $this->site_ops_findings_by_category( $findings, array( 'content_freshness', 'content_quality', 'internal_link_health', 'metadata' ) ) ),
 			__( 'Media coverage', 'npcink-workflow-toolbox' )     => count( $this->site_ops_findings_by_category( $findings, array( 'media' ) ) ),
 			__( 'Comment coverage', 'npcink-workflow-toolbox' )   => count( $this->site_ops_findings_by_category( $findings, array( 'comments' ) ) ),
@@ -1442,10 +1475,10 @@ final class Admin_Page {
 			<div class="npcink-toolbox__ops-decision-list">
 				<?php foreach ( $queue as $index => $finding ) : ?>
 					<?php
-					$boundary = (string) ( $finding['write_boundary'] ?? 'suggestion_only' );
+					$boundary  = (string) ( $finding['write_boundary'] ?? 'suggestion_only' );
 					$follow_up = $this->site_ops_follow_up_path_detail( $finding );
-					$score = (int) ( $finding['priority_score'] ?? 0 );
-					$owner = $this->site_ops_owner_label( (string) ( $finding['owner_label'] ?? '' ) );
+					$score     = (int) ( $finding['priority_score'] ?? 0 );
+					$owner     = $this->site_ops_owner_label( (string) ( $finding['owner_label'] ?? '' ) );
 					?>
 					<article class="npcink-toolbox__ops-decision-card">
 						<div class="npcink-toolbox__ops-decision-rank">
@@ -1521,7 +1554,10 @@ final class Admin_Page {
 						<strong><?php esc_html_e( 'Candidate objects', 'npcink-workflow-toolbox' ); ?></strong>
 						<ul class="npcink-toolbox__ops-handoff-candidates">
 							<?php foreach ( $source_refs as $ref ) : ?>
-								<?php if ( ! is_array( $ref ) ) { continue; } ?>
+								<?php
+								if ( ! is_array( $ref ) ) {
+									continue; }
+								?>
 								<?php
 								$object_id   = (int) ( $ref['object_id'] ?? 0 );
 								$object_type = sanitize_key( (string) ( $ref['object_type'] ?? 'post' ) );
@@ -1573,7 +1609,10 @@ final class Admin_Page {
 		<span class="npcink-toolbox__ops-evidence-summary"><?php echo esc_html( $this->site_ops_finding_evidence_summary( $finding ) ); ?></span>
 		<ul class="npcink-toolbox__ops-affected-list">
 			<?php foreach ( $source_refs as $ref ) : ?>
-				<?php if ( ! is_array( $ref ) ) { continue; } ?>
+				<?php
+				if ( ! is_array( $ref ) ) {
+					continue; }
+				?>
 				<?php
 				$object_id   = (int) ( $ref['object_id'] ?? 0 );
 				$object_type = sanitize_key( (string) ( $ref['object_type'] ?? 'post' ) );
@@ -1643,25 +1682,25 @@ final class Admin_Page {
 	 * @param array<int,mixed>    $findings Findings.
 	 */
 	private function render_site_ops_visual_summary( array $summary, array $findings ): void {
-		$priority_counts = array(
+		$priority_counts  = array(
 			'high'   => $this->count_site_ops_findings_by_priority( $findings, 90, 101 ),
 			'medium' => $this->count_site_ops_findings_by_priority( $findings, 75, 90 ),
 			'review' => $this->count_site_ops_findings_by_priority( $findings, 0, 75 ),
 		);
-		$priority_max = max( 1, $priority_counts['high'], $priority_counts['medium'], $priority_counts['review'] );
-		$core_count = $this->count_site_ops_findings_by_boundary( $findings, 'core_handoff_candidate' );
-		$manual_count = $this->count_site_ops_findings_by_boundary( $findings, 'manual_review_only' );
+		$priority_max     = max( 1, $priority_counts['high'], $priority_counts['medium'], $priority_counts['review'] );
+		$core_count       = $this->count_site_ops_findings_by_boundary( $findings, 'core_handoff_candidate' );
+		$manual_count     = $this->count_site_ops_findings_by_boundary( $findings, 'manual_review_only' );
 		$suggestion_count = max( 0, count( $findings ) - $core_count - $manual_count );
-		$boundary_total = max( 1, $core_count + $manual_count + $suggestion_count );
-		$core_degrees = (int) round( 360 * $core_count / $boundary_total );
-		$manual_degrees = (int) round( 360 * ( $core_count + $manual_count ) / $boundary_total );
-		$scope_counts = array(
+		$boundary_total   = max( 1, $core_count + $manual_count + $suggestion_count );
+		$core_degrees     = (int) round( 360 * $core_count / $boundary_total );
+		$manual_degrees   = (int) round( 360 * ( $core_count + $manual_count ) / $boundary_total );
+		$scope_counts     = array(
 			__( 'Posts/pages', 'npcink-workflow-toolbox' ) => (int) ( $summary['scanned_posts'] ?? 0 ),
 			__( 'Media', 'npcink-workflow-toolbox' )       => (int) ( $summary['scanned_media'] ?? 0 ),
 			__( 'Comments', 'npcink-workflow-toolbox' )    => (int) ( $summary['recent_comment_sample'] ?? 0 ),
 			__( 'Findings', 'npcink-workflow-toolbox' )    => (int) ( $summary['top_finding_count'] ?? count( $findings ) ),
 		);
-		$scope_max = max( 1, ...array_values( $scope_counts ) );
+		$scope_max        = max( 1, ...array_values( $scope_counts ) );
 		?>
 		<div class="npcink-toolbox__ops-chart-grid" aria-label="<?php esc_attr_e( 'Site Check charts', 'npcink-workflow-toolbox' ); ?>">
 			<section class="npcink-toolbox__ops-chart">
@@ -1785,11 +1824,11 @@ final class Admin_Page {
 		if ( ! is_array( $finding ) ) {
 			return;
 		}
-		$title   = $this->site_ops_finding_title( $finding );
-		$summary = $this->site_ops_finding_evidence_summary( $finding );
-		$action  = $this->site_ops_finding_recommended_action( $finding );
-		$score   = (int) ( $finding['priority_score'] ?? 0 );
-		$owner   = $this->site_ops_owner_label( (string) ( $finding['owner_label'] ?? '' ) );
+		$title    = $this->site_ops_finding_title( $finding );
+		$summary  = $this->site_ops_finding_evidence_summary( $finding );
+		$action   = $this->site_ops_finding_recommended_action( $finding );
+		$score    = (int) ( $finding['priority_score'] ?? 0 );
+		$owner    = $this->site_ops_owner_label( (string) ( $finding['owner_label'] ?? '' ) );
 		$boundary = (string) ( $finding['write_boundary'] ?? 'suggestion_only' );
 		?>
 		<article class="npcink-toolbox__ops-priority-row">
@@ -1910,15 +1949,15 @@ final class Admin_Page {
 	 */
 	private function site_ops_fallback_action_for_issue_type( string $issue_type ): ?array {
 		$actions = array(
-			'comments'          => array( __( 'Open comments', 'npcink-workflow-toolbox' ), admin_url( 'edit-comments.php' ) ),
-			'media'             => array( __( 'Open media library', 'npcink-workflow-toolbox' ), admin_url( 'upload.php' ) ),
-			'taxonomy'          => array( __( 'Review categories', 'npcink-workflow-toolbox' ), admin_url( 'edit-tags.php?taxonomy=category' ) ),
-			'site_context'      => array( __( 'Open site profile', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=context' ) ),
-			'site_knowledge'    => array( __( 'Open Site Knowledge in Cloud Addon', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
-			'content_freshness' => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
-			'content_quality'   => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
+			'comments'             => array( __( 'Open comments', 'npcink-workflow-toolbox' ), admin_url( 'edit-comments.php' ) ),
+			'media'                => array( __( 'Open media library', 'npcink-workflow-toolbox' ), admin_url( 'upload.php' ) ),
+			'taxonomy'             => array( __( 'Review categories', 'npcink-workflow-toolbox' ), admin_url( 'edit-tags.php?taxonomy=category' ) ),
+			'site_context'         => array( __( 'Open site profile', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=context' ) ),
+			'site_knowledge'       => array( __( 'Open Site Knowledge in Cloud Addon', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
+			'content_freshness'    => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
+			'content_quality'      => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
 			'internal_link_health' => array( __( 'Open posts for link review', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
-			'metadata'          => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
+			'metadata'             => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
 		);
 		if ( ! isset( $actions[ $issue_type ] ) ) {
 			return null;
@@ -1953,7 +1992,10 @@ final class Admin_Page {
 				<?php if ( array() !== $source_refs ) : ?>
 					<ul class="npcink-toolbox__usage-list">
 						<?php foreach ( $source_refs as $ref ) : ?>
-							<?php if ( ! is_array( $ref ) ) { continue; } ?>
+							<?php
+							if ( ! is_array( $ref ) ) {
+								continue; }
+							?>
 							<li>
 								<strong><?php echo esc_html( (string) ( $ref['title'] ?? __( 'Untitled item', 'npcink-workflow-toolbox' ) ) ); ?></strong>
 								<span><?php echo esc_html( (string) ( $ref['object_type'] ?? 'post' ) . ' #' . (string) (int) ( $ref['object_id'] ?? 0 ) ); ?></span>
@@ -2137,15 +2179,15 @@ final class Admin_Page {
 	private function site_ops_finding_title( array $finding, string $fallback = '' ): string {
 		$id     = $this->site_ops_finding_id( $finding );
 		$titles = array(
-			'stale_content_backlog'             => __( 'Old content refresh backlog', 'npcink-workflow-toolbox' ),
-			'content_depth_and_linking_gap'     => __( 'Content depth and internal-link gaps', 'npcink-workflow-toolbox' ),
-			'internal_link_health'              => __( 'Internal-link health needs review', 'npcink-workflow-toolbox' ),
-			'metadata_review_backlog'           => __( 'Post metadata review backlog', 'npcink-workflow-toolbox' ),
-			'comment_signal_review'             => __( 'Comment signal review', 'npcink-workflow-toolbox' ),
-			'media_metadata_debt'               => __( 'Media metadata review backlog', 'npcink-workflow-toolbox' ),
-			'taxonomy_structure_drift'          => __( 'Taxonomy structure review', 'npcink-workflow-toolbox' ),
-			'site_context_incomplete'           => __( 'Site Context brief is incomplete', 'npcink-workflow-toolbox' ),
-			'site_knowledge_cloud_unavailable'  => __( 'Cloud Site Knowledge unavailable', 'npcink-workflow-toolbox' ),
+			'stale_content_backlog'            => __( 'Old content refresh backlog', 'npcink-workflow-toolbox' ),
+			'content_depth_and_linking_gap'    => __( 'Content depth and internal-link gaps', 'npcink-workflow-toolbox' ),
+			'internal_link_health'             => __( 'Internal-link health needs review', 'npcink-workflow-toolbox' ),
+			'metadata_review_backlog'          => __( 'Post metadata review backlog', 'npcink-workflow-toolbox' ),
+			'comment_signal_review'            => __( 'Comment signal review', 'npcink-workflow-toolbox' ),
+			'media_metadata_debt'              => __( 'Media metadata review backlog', 'npcink-workflow-toolbox' ),
+			'taxonomy_structure_drift'         => __( 'Taxonomy structure review', 'npcink-workflow-toolbox' ),
+			'site_context_incomplete'          => __( 'Site Context brief is incomplete', 'npcink-workflow-toolbox' ),
+			'site_knowledge_cloud_unavailable' => __( 'Cloud Site Knowledge unavailable', 'npcink-workflow-toolbox' ),
 		);
 		if ( isset( $titles[ $id ] ) ) {
 			return $titles[ $id ];
@@ -2227,17 +2269,17 @@ final class Admin_Page {
 	 * @param array<string,mixed> $finding Finding payload.
 	 */
 	private function site_ops_finding_impact( array $finding ): string {
-		$id       = $this->site_ops_finding_id( $finding );
-		$impacts  = array(
-			'stale_content_backlog'             => __( 'Older but still active content can reduce reader trust and search freshness.', 'npcink-workflow-toolbox' ),
-			'content_depth_and_linking_gap'     => __( 'Thin pages and missing internal paths make it harder for readers and AI systems to understand the site map.', 'npcink-workflow-toolbox' ),
-			'internal_link_health'              => __( 'Weak internal paths can make related content harder for readers and editors to discover.', 'npcink-workflow-toolbox' ),
-			'metadata_review_backlog'           => __( 'Weak metadata reduces snippet quality and makes suggestion workflows less grounded.', 'npcink-workflow-toolbox' ),
-			'comment_signal_review'             => __( 'Comment patterns can reveal missing FAQ, troubleshooting, or follow-up content needs.', 'npcink-workflow-toolbox' ),
-			'media_metadata_debt'               => __( 'Image metadata affects accessibility, editorial reuse, and media search quality.', 'npcink-workflow-toolbox' ),
-			'taxonomy_structure_drift'          => __( 'Sparse vocabulary can fragment content discovery and weaken recommendation quality.', 'npcink-workflow-toolbox' ),
-			'site_context_incomplete'           => __( 'Weak site context makes downstream SEO/AEO/GEO and content support suggestions less consistent.', 'npcink-workflow-toolbox' ),
-			'site_knowledge_cloud_unavailable'  => __( 'Without Cloud, recommendations stay local and cannot use semantic related-content evidence.', 'npcink-workflow-toolbox' ),
+		$id      = $this->site_ops_finding_id( $finding );
+		$impacts = array(
+			'stale_content_backlog'            => __( 'Older but still active content can reduce reader trust and search freshness.', 'npcink-workflow-toolbox' ),
+			'content_depth_and_linking_gap'    => __( 'Thin pages and missing internal paths make it harder for readers and AI systems to understand the site map.', 'npcink-workflow-toolbox' ),
+			'internal_link_health'             => __( 'Weak internal paths can make related content harder for readers and editors to discover.', 'npcink-workflow-toolbox' ),
+			'metadata_review_backlog'          => __( 'Weak metadata reduces snippet quality and makes suggestion workflows less grounded.', 'npcink-workflow-toolbox' ),
+			'comment_signal_review'            => __( 'Comment patterns can reveal missing FAQ, troubleshooting, or follow-up content needs.', 'npcink-workflow-toolbox' ),
+			'media_metadata_debt'              => __( 'Image metadata affects accessibility, editorial reuse, and media search quality.', 'npcink-workflow-toolbox' ),
+			'taxonomy_structure_drift'         => __( 'Sparse vocabulary can fragment content discovery and weaken recommendation quality.', 'npcink-workflow-toolbox' ),
+			'site_context_incomplete'          => __( 'Weak site context makes downstream SEO/AEO/GEO and content support suggestions less consistent.', 'npcink-workflow-toolbox' ),
+			'site_knowledge_cloud_unavailable' => __( 'Without Cloud, recommendations stay local and cannot use semantic related-content evidence.', 'npcink-workflow-toolbox' ),
 		);
 		if ( isset( $impacts[ $id ] ) ) {
 			return $impacts[ $id ];
@@ -2252,15 +2294,15 @@ final class Admin_Page {
 	private function site_ops_finding_recommended_action( array $finding ): string {
 		$id      = $this->site_ops_finding_id( $finding );
 		$actions = array(
-			'stale_content_backlog'             => __( 'Open the oldest active items first, then write refresh notes before choosing any review workflow.', 'npcink-workflow-toolbox' ),
-			'content_depth_and_linking_gap'     => __( 'Prioritize internal-link review and content-depth review before creating new articles on the same topics.', 'npcink-workflow-toolbox' ),
-			'internal_link_health'              => __( 'Open an affected post, review internal-link candidates, and place only contextually useful links manually.', 'npcink-workflow-toolbox' ),
-			'metadata_review_backlog'           => __( 'Review one post at a time in the editor, then send accepted values through the review workflow.', 'npcink-workflow-toolbox' ),
-			'comment_signal_review'             => __( 'Review high-signal public comments manually; convert repeated needs into FAQ or article-refresh notes.', 'npcink-workflow-toolbox' ),
-			'media_metadata_debt'               => __( 'Start with a media ALT/caption review set; do not update media metadata until a governed path is selected.', 'npcink-workflow-toolbox' ),
-			'taxonomy_structure_drift'          => __( 'Review taxonomy consolidation separately; do not create, merge, or assign terms from this panel.', 'npcink-workflow-toolbox' ),
-			'site_context_incomplete'           => __( 'Fill the Site Context brief before relying on repeated AI recommendations.', 'npcink-workflow-toolbox' ),
-			'site_knowledge_cloud_unavailable'  => __( 'Connect or verify Cloud Addon before expecting deeper semantic analysis.', 'npcink-workflow-toolbox' ),
+			'stale_content_backlog'            => __( 'Open the oldest active items first, then write refresh notes before choosing any review workflow.', 'npcink-workflow-toolbox' ),
+			'content_depth_and_linking_gap'    => __( 'Prioritize internal-link review and content-depth review before creating new articles on the same topics.', 'npcink-workflow-toolbox' ),
+			'internal_link_health'             => __( 'Open an affected post, review internal-link candidates, and place only contextually useful links manually.', 'npcink-workflow-toolbox' ),
+			'metadata_review_backlog'          => __( 'Review one post at a time in the editor, then send accepted values through the review workflow.', 'npcink-workflow-toolbox' ),
+			'comment_signal_review'            => __( 'Review high-signal public comments manually; convert repeated needs into FAQ or article-refresh notes.', 'npcink-workflow-toolbox' ),
+			'media_metadata_debt'              => __( 'Start with a media ALT/caption review set; do not update media metadata until a governed path is selected.', 'npcink-workflow-toolbox' ),
+			'taxonomy_structure_drift'         => __( 'Review taxonomy consolidation separately; do not create, merge, or assign terms from this panel.', 'npcink-workflow-toolbox' ),
+			'site_context_incomplete'          => __( 'Fill the Site Context brief before relying on repeated AI recommendations.', 'npcink-workflow-toolbox' ),
+			'site_knowledge_cloud_unavailable' => __( 'Connect or verify Cloud Addon before expecting deeper semantic analysis.', 'npcink-workflow-toolbox' ),
 		);
 		if ( isset( $actions[ $id ] ) ) {
 			return $actions[ $id ];
@@ -2306,75 +2348,75 @@ final class Admin_Page {
 		}
 
 		$labels = array(
-			'stale_content_backlog'                                                                                 => __( 'Old content refresh backlog', 'npcink-workflow-toolbox' ),
-			'content_depth_and_linking_gap'                                                                         => __( 'Content depth and internal-link gaps', 'npcink-workflow-toolbox' ),
-			'metadata_review_backlog'                                                                               => __( 'Post metadata review backlog', 'npcink-workflow-toolbox' ),
-			'comment_signal_review'                                                                                 => __( 'Comment signal review', 'npcink-workflow-toolbox' ),
-			'media_metadata_debt'                                                                                   => __( 'Media metadata review backlog', 'npcink-workflow-toolbox' ),
-			'taxonomy_structure_drift'                                                                              => __( 'Taxonomy structure review', 'npcink-workflow-toolbox' ),
-			'site_context_incomplete'                                                                               => __( 'Site Context brief is incomplete', 'npcink-workflow-toolbox' ),
-			'site_knowledge_cloud_unavailable'                                                                      => __( 'Cloud Site Knowledge unavailable', 'npcink-workflow-toolbox' ),
-			'cloud_semantic_analysis'                                                                               => __( 'Cloud semantic analysis', 'npcink-workflow-toolbox' ),
-			'cloud_runtime_unavailable'                                                                             => __( 'Cloud runtime is unavailable', 'npcink-workflow-toolbox' ),
-			'connect_or_verify_cloud_addon'                                                                         => __( 'Connect or verify Cloud Addon', 'npcink-workflow-toolbox' ),
-			'content'                                                                                               => __( 'Content', 'npcink-workflow-toolbox' ),
-			'media'                                                                                                 => __( 'Media', 'npcink-workflow-toolbox' ),
-			'comments'                                                                                              => __( 'Comments', 'npcink-workflow-toolbox' ),
-			'structure'                                                                                             => __( 'Structure', 'npcink-workflow-toolbox' ),
-			'high'                                                                                                  => __( 'High', 'npcink-workflow-toolbox' ),
-			'medium'                                                                                                => __( 'Medium', 'npcink-workflow-toolbox' ),
-			'low'                                                                                                   => __( 'Low', 'npcink-workflow-toolbox' ),
-			'review'                                                                                                => __( 'Review', 'npcink-workflow-toolbox' ),
-			'runtime_detail'                                                                                        => __( 'Runtime/detail', 'npcink-workflow-toolbox' ),
-			'collect_stronger_site_context'                                                                         => __( 'Collect stronger Site Context', 'npcink-workflow-toolbox' ),
-			'blocked_until_operator_review'                                                                         => __( 'Blocked until operator review', 'npcink-workflow-toolbox' ),
-			'ready_for_operator_prioritization'                                                                     => __( 'Ready for operator prioritization', 'npcink-workflow-toolbox' ),
-			'no_priority_findings'                                                                                  => __( 'No priority findings', 'npcink-workflow-toolbox' ),
-			'clear_blocked_items_then_repeat_cloud_analysis'                                                        => __( 'Clear blocked items, then repeat Cloud detail', 'npcink-workflow-toolbox' ),
-			'review_top_ranked_finding_then_choose_manual_or_core_handoff'                                          => __( 'Review the top ranked finding, then choose manual review or Core handoff', 'npcink-workflow-toolbox' ),
-			'keep_as_current_snapshot_or_refresh_after_site_changes'                                                => __( 'Keep this as the current snapshot, or refresh after site changes', 'npcink-workflow-toolbox' ),
-			'content_quality_and_discoverability'                                                                   => __( 'Content quality and discoverability', 'npcink-workflow-toolbox' ),
-			'media_accessibility_and_reuse'                                                                         => __( 'Media accessibility and reuse', 'npcink-workflow-toolbox' ),
-			'audience_demand_signal'                                                                                => __( 'Audience demand signal', 'npcink-workflow-toolbox' ),
-			'site_structure_and_context'                                                                            => __( 'Site structure and context', 'npcink-workflow-toolbox' ),
-			'general_site_review'                                                                                   => __( 'General site review', 'npcink-workflow-toolbox' ),
-			'content_refresh_trend'                                                                                 => __( 'Content refresh trend', 'npcink-workflow-toolbox' ),
-			'comment_question_trend'                                                                                => __( 'Comment question trend', 'npcink-workflow-toolbox' ),
-			'media_metadata_trend'                                                                                  => __( 'Media metadata trend', 'npcink-workflow-toolbox' ),
-			'taxonomy_drift_trend'                                                                                  => __( 'Taxonomy drift trend', 'npcink-workflow-toolbox' ),
-			'insufficient_signal'                                                                                   => __( 'Insufficient signal', 'npcink-workflow-toolbox' ),
-			'compare_stale_items_with_recent_comment_activity'                                                      => __( 'Compare stale items with recent comment activity', 'npcink-workflow-toolbox' ),
-			'group_repeated_comment_questions_without_raw_text'                                                     => __( 'Group repeated comment questions without raw text', 'npcink-workflow-toolbox' ),
-			'sample_media_alt_and_caption_review_set'                                                               => __( 'Sample a media ALT and caption review set', 'npcink-workflow-toolbox' ),
-			'review_empty_and_low_use_terms'                                                                        => __( 'Review empty and low-use terms', 'npcink-workflow-toolbox' ),
-			'complete_site_context_and_repeat_local_preview'                                                        => __( 'Complete Site Context and repeat the local preview', 'npcink-workflow-toolbox' ),
-			'repeat_cloud_detail_after_next_local_scan'                                                             => __( 'Repeat Cloud detail after the next local scan', 'npcink-workflow-toolbox' ),
-			'Old content needs a refresh queue'                                                                     => __( 'Old content refresh backlog', 'npcink-workflow-toolbox' ),
-			'Some content lacks depth or internal paths'                                                            => __( 'Content depth and internal-link gaps', 'npcink-workflow-toolbox' ),
-			'Metadata review backlog is visible'                                                                    => __( 'Post metadata review backlog', 'npcink-workflow-toolbox' ),
-			'Comments contain support and follow-up signals'                                                        => __( 'Comment signal review', 'npcink-workflow-toolbox' ),
-			'Media metadata needs review'                                                                           => __( 'Media metadata review backlog', 'npcink-workflow-toolbox' ),
-			'Taxonomy structure may need cleanup'                                                                   => __( 'Taxonomy structure review', 'npcink-workflow-toolbox' ),
-			'Site Context needs a stronger brief'                                                                   => __( 'Site Context brief is incomplete', 'npcink-workflow-toolbox' ),
-			'Cloud Site Knowledge is not available'                                                                 => __( 'Cloud Site Knowledge unavailable', 'npcink-workflow-toolbox' ),
-			'Review blockers before turning findings into an action plan.'                                          => __( 'Review blockers before turning findings into an action plan.', 'npcink-workflow-toolbox' ),
-			'Prioritize the strongest full-site signals before creating new work.'                                  => __( 'Use the strongest site check signals to choose the next fixed workflow.', 'npcink-workflow-toolbox' ),
-			'No priority full-site findings were detected in the current aggregate sample.'                         => __( 'No priority site check findings were detected in the current aggregate sample.', 'npcink-workflow-toolbox' ),
-			'The analysis found prerequisites that should be cleared before repeated review.'                       => __( 'The analysis found prerequisites that should be cleared before repeated review.', 'npcink-workflow-toolbox' ),
-			'The current aggregate sample is reviewable, but it did not produce a priority queue.'                  => __( 'The current aggregate sample is reviewable, but it did not produce a priority queue.', 'npcink-workflow-toolbox' ),
-			'Media metadata affects accessibility, reuse, and evidence quality.'                                    => __( 'Media metadata affects accessibility, reuse, and evidence quality.', 'npcink-workflow-toolbox' ),
-			'Approved comment signals can reveal unanswered audience needs.'                                        => __( 'Approved comment signals can reveal unanswered audience needs.', 'npcink-workflow-toolbox' ),
-			'Older active content should be refreshed before expanding similar work.'                               => __( 'Older active content should be refreshed before expanding similar work.', 'npcink-workflow-toolbox' ),
-			'This finding is ranked from aggregate local evidence and operator review value.'                       => __( 'This finding is ranked from aggregate local evidence and operator review value.', 'npcink-workflow-toolbox' ),
-			'Refresh planning should start with active stale pages.'                                                => __( 'Refresh planning should start with active stale pages.', 'npcink-workflow-toolbox' ),
-			'Repeated questions can become FAQ or article-refresh work.'                                            => __( 'Repeated questions can become FAQ or article-refresh work.', 'npcink-workflow-toolbox' ),
-			'Accessibility and media search quality may be weaker.'                                                 => __( 'Accessibility and media search quality may be weaker.', 'npcink-workflow-toolbox' ),
-			'Sparse vocabulary can fragment discovery and recommendations.'                                         => __( 'Sparse vocabulary can fragment discovery and recommendations.', 'npcink-workflow-toolbox' ),
-			'Review the aggregate signal before creating new work.'                                                 => __( 'Review the aggregate signal before creating new work.', 'npcink-workflow-toolbox' ),
-			'No aggregate signal was strong enough for trend explanation.'                                          => __( 'No aggregate signal was strong enough for trend explanation.', 'npcink-workflow-toolbox' ),
-			'Run the local scan after more public content evidence is available.'                                   => __( 'Run the local scan after more public content evidence is available.', 'npcink-workflow-toolbox' ),
-			'Review the oldest active items first, then prepare refresh notes or a Core-governed update plan.'       => __( 'Review the oldest active items first, then prepare refresh notes or a Core-governed update plan.', 'npcink-workflow-toolbox' ),
-			'Start with a media ALT/caption review and make metadata visible before broader adoption.'              => __( 'Start with a media ALT/caption review set; do not update media metadata until a governed path is selected.', 'npcink-workflow-toolbox' ),
+			'stale_content_backlog'                      => __( 'Old content refresh backlog', 'npcink-workflow-toolbox' ),
+			'content_depth_and_linking_gap'              => __( 'Content depth and internal-link gaps', 'npcink-workflow-toolbox' ),
+			'metadata_review_backlog'                    => __( 'Post metadata review backlog', 'npcink-workflow-toolbox' ),
+			'comment_signal_review'                      => __( 'Comment signal review', 'npcink-workflow-toolbox' ),
+			'media_metadata_debt'                        => __( 'Media metadata review backlog', 'npcink-workflow-toolbox' ),
+			'taxonomy_structure_drift'                   => __( 'Taxonomy structure review', 'npcink-workflow-toolbox' ),
+			'site_context_incomplete'                    => __( 'Site Context brief is incomplete', 'npcink-workflow-toolbox' ),
+			'site_knowledge_cloud_unavailable'           => __( 'Cloud Site Knowledge unavailable', 'npcink-workflow-toolbox' ),
+			'cloud_semantic_analysis'                    => __( 'Cloud semantic analysis', 'npcink-workflow-toolbox' ),
+			'cloud_runtime_unavailable'                  => __( 'Cloud runtime is unavailable', 'npcink-workflow-toolbox' ),
+			'connect_or_verify_cloud_addon'              => __( 'Connect or verify Cloud Addon', 'npcink-workflow-toolbox' ),
+			'content'                                    => __( 'Content', 'npcink-workflow-toolbox' ),
+			'media'                                      => __( 'Media', 'npcink-workflow-toolbox' ),
+			'comments'                                   => __( 'Comments', 'npcink-workflow-toolbox' ),
+			'structure'                                  => __( 'Structure', 'npcink-workflow-toolbox' ),
+			'high'                                       => __( 'High', 'npcink-workflow-toolbox' ),
+			'medium'                                     => __( 'Medium', 'npcink-workflow-toolbox' ),
+			'low'                                        => __( 'Low', 'npcink-workflow-toolbox' ),
+			'review'                                     => __( 'Review', 'npcink-workflow-toolbox' ),
+			'runtime_detail'                             => __( 'Runtime/detail', 'npcink-workflow-toolbox' ),
+			'collect_stronger_site_context'              => __( 'Collect stronger Site Context', 'npcink-workflow-toolbox' ),
+			'blocked_until_operator_review'              => __( 'Blocked until operator review', 'npcink-workflow-toolbox' ),
+			'ready_for_operator_prioritization'          => __( 'Ready for operator prioritization', 'npcink-workflow-toolbox' ),
+			'no_priority_findings'                       => __( 'No priority findings', 'npcink-workflow-toolbox' ),
+			'clear_blocked_items_then_repeat_cloud_analysis' => __( 'Clear blocked items, then repeat Cloud detail', 'npcink-workflow-toolbox' ),
+			'review_top_ranked_finding_then_choose_manual_or_core_handoff' => __( 'Review the top ranked finding, then choose manual review or Core handoff', 'npcink-workflow-toolbox' ),
+			'keep_as_current_snapshot_or_refresh_after_site_changes' => __( 'Keep this as the current snapshot, or refresh after site changes', 'npcink-workflow-toolbox' ),
+			'content_quality_and_discoverability'        => __( 'Content quality and discoverability', 'npcink-workflow-toolbox' ),
+			'media_accessibility_and_reuse'              => __( 'Media accessibility and reuse', 'npcink-workflow-toolbox' ),
+			'audience_demand_signal'                     => __( 'Audience demand signal', 'npcink-workflow-toolbox' ),
+			'site_structure_and_context'                 => __( 'Site structure and context', 'npcink-workflow-toolbox' ),
+			'general_site_review'                        => __( 'General site review', 'npcink-workflow-toolbox' ),
+			'content_refresh_trend'                      => __( 'Content refresh trend', 'npcink-workflow-toolbox' ),
+			'comment_question_trend'                     => __( 'Comment question trend', 'npcink-workflow-toolbox' ),
+			'media_metadata_trend'                       => __( 'Media metadata trend', 'npcink-workflow-toolbox' ),
+			'taxonomy_drift_trend'                       => __( 'Taxonomy drift trend', 'npcink-workflow-toolbox' ),
+			'insufficient_signal'                        => __( 'Insufficient signal', 'npcink-workflow-toolbox' ),
+			'compare_stale_items_with_recent_comment_activity' => __( 'Compare stale items with recent comment activity', 'npcink-workflow-toolbox' ),
+			'group_repeated_comment_questions_without_raw_text' => __( 'Group repeated comment questions without raw text', 'npcink-workflow-toolbox' ),
+			'sample_media_alt_and_caption_review_set'    => __( 'Sample a media ALT and caption review set', 'npcink-workflow-toolbox' ),
+			'review_empty_and_low_use_terms'             => __( 'Review empty and low-use terms', 'npcink-workflow-toolbox' ),
+			'complete_site_context_and_repeat_local_preview' => __( 'Complete Site Context and repeat the local preview', 'npcink-workflow-toolbox' ),
+			'repeat_cloud_detail_after_next_local_scan'  => __( 'Repeat Cloud detail after the next local scan', 'npcink-workflow-toolbox' ),
+			'Old content needs a refresh queue'          => __( 'Old content refresh backlog', 'npcink-workflow-toolbox' ),
+			'Some content lacks depth or internal paths' => __( 'Content depth and internal-link gaps', 'npcink-workflow-toolbox' ),
+			'Metadata review backlog is visible'         => __( 'Post metadata review backlog', 'npcink-workflow-toolbox' ),
+			'Comments contain support and follow-up signals' => __( 'Comment signal review', 'npcink-workflow-toolbox' ),
+			'Media metadata needs review'                => __( 'Media metadata review backlog', 'npcink-workflow-toolbox' ),
+			'Taxonomy structure may need cleanup'        => __( 'Taxonomy structure review', 'npcink-workflow-toolbox' ),
+			'Site Context needs a stronger brief'        => __( 'Site Context brief is incomplete', 'npcink-workflow-toolbox' ),
+			'Cloud Site Knowledge is not available'      => __( 'Cloud Site Knowledge unavailable', 'npcink-workflow-toolbox' ),
+			'Review blockers before turning findings into an action plan.' => __( 'Review blockers before turning findings into an action plan.', 'npcink-workflow-toolbox' ),
+			'Prioritize the strongest full-site signals before creating new work.' => __( 'Use the strongest site check signals to choose the next fixed workflow.', 'npcink-workflow-toolbox' ),
+			'No priority full-site findings were detected in the current aggregate sample.' => __( 'No priority site check findings were detected in the current aggregate sample.', 'npcink-workflow-toolbox' ),
+			'The analysis found prerequisites that should be cleared before repeated review.' => __( 'The analysis found prerequisites that should be cleared before repeated review.', 'npcink-workflow-toolbox' ),
+			'The current aggregate sample is reviewable, but it did not produce a priority queue.' => __( 'The current aggregate sample is reviewable, but it did not produce a priority queue.', 'npcink-workflow-toolbox' ),
+			'Media metadata affects accessibility, reuse, and evidence quality.' => __( 'Media metadata affects accessibility, reuse, and evidence quality.', 'npcink-workflow-toolbox' ),
+			'Approved comment signals can reveal unanswered audience needs.' => __( 'Approved comment signals can reveal unanswered audience needs.', 'npcink-workflow-toolbox' ),
+			'Older active content should be refreshed before expanding similar work.' => __( 'Older active content should be refreshed before expanding similar work.', 'npcink-workflow-toolbox' ),
+			'This finding is ranked from aggregate local evidence and operator review value.' => __( 'This finding is ranked from aggregate local evidence and operator review value.', 'npcink-workflow-toolbox' ),
+			'Refresh planning should start with active stale pages.' => __( 'Refresh planning should start with active stale pages.', 'npcink-workflow-toolbox' ),
+			'Repeated questions can become FAQ or article-refresh work.' => __( 'Repeated questions can become FAQ or article-refresh work.', 'npcink-workflow-toolbox' ),
+			'Accessibility and media search quality may be weaker.' => __( 'Accessibility and media search quality may be weaker.', 'npcink-workflow-toolbox' ),
+			'Sparse vocabulary can fragment discovery and recommendations.' => __( 'Sparse vocabulary can fragment discovery and recommendations.', 'npcink-workflow-toolbox' ),
+			'Review the aggregate signal before creating new work.' => __( 'Review the aggregate signal before creating new work.', 'npcink-workflow-toolbox' ),
+			'No aggregate signal was strong enough for trend explanation.' => __( 'No aggregate signal was strong enough for trend explanation.', 'npcink-workflow-toolbox' ),
+			'Run the local scan after more public content evidence is available.' => __( 'Run the local scan after more public content evidence is available.', 'npcink-workflow-toolbox' ),
+			'Review the oldest active items first, then prepare refresh notes or a Core-governed update plan.' => __( 'Review the oldest active items first, then prepare refresh notes or a Core-governed update plan.', 'npcink-workflow-toolbox' ),
+			'Start with a media ALT/caption review and make metadata visible before broader adoption.' => __( 'Start with a media ALT/caption review set; do not update media metadata until a governed path is selected.', 'npcink-workflow-toolbox' ),
 		);
 		if ( isset( $labels[ $value ] ) ) {
 			return $labels[ $value ];
@@ -2417,26 +2459,26 @@ final class Admin_Page {
 			return;
 		}
 
-		$result             = is_array( $cloud_analysis['result'] ?? null ) ? $cloud_analysis['result'] : array();
-		$executive_summary  = is_array( $result['executive_summary'] ?? null ) ? $result['executive_summary'] : array();
-		$priority_queue     = is_array( $result['priority_queue'] ?? null ) ? array_slice( $result['priority_queue'], 0, 5 ) : array();
-		$dimension_summaries = is_array( $result['dimension_summaries'] ?? null ) ? array_slice( $result['dimension_summaries'], 0, 4 ) : array();
+		$result                   = is_array( $cloud_analysis['result'] ?? null ) ? $cloud_analysis['result'] : array();
+		$executive_summary        = is_array( $result['executive_summary'] ?? null ) ? $result['executive_summary'] : array();
+		$priority_queue           = is_array( $result['priority_queue'] ?? null ) ? array_slice( $result['priority_queue'], 0, 5 ) : array();
+		$dimension_summaries      = is_array( $result['dimension_summaries'] ?? null ) ? array_slice( $result['dimension_summaries'], 0, 4 ) : array();
 		$semantic_ranked_findings = is_array( $result['semantic_ranked_findings'] ?? null ) ? array_slice( $result['semantic_ranked_findings'], 0, 5 ) : array();
-		$trend_notes        = is_array( $result['trend_notes'] ?? null ) ? array_slice( $result['trend_notes'], 0, 5 ) : array();
-		$trend_explanations = is_array( $result['trend_explanations'] ?? null ) ? array_slice( $result['trend_explanations'], 0, 5 ) : array();
-		$analysis_closure   = is_array( $result['analysis_closure'] ?? null ) ? $result['analysis_closure'] : array();
-		$blocked_items      = is_array( $result['blocked_items'] ?? null ) ? array_slice( $result['blocked_items'], 0, 5 ) : array();
-		$next_actions       = is_array( $result['operator_next_actions'] ?? null ) ? array_slice( $result['operator_next_actions'], 0, 5 ) : array();
-		$handoff_candidates = is_array( $result['core_handoff_candidates'] ?? null ) ? array_slice( $result['core_handoff_candidates'], 0, 5 ) : array();
-		$confidence         = is_array( $result['confidence'] ?? null ) ? $result['confidence'] : array();
-		$cloud_run          = is_array( $cloud_analysis['cloud_run'] ?? null ) ? $cloud_analysis['cloud_run'] : array();
-		$cloud_error        = is_array( $cloud_analysis['cloud_error'] ?? null ) ? $cloud_analysis['cloud_error'] : array();
-		$status             = sanitize_key( (string) ( $cloud_run['status'] ?? $cloud_analysis['status'] ?? 'submitted' ) );
-		$error_code         = sanitize_key( (string) ( $cloud_error['error_code'] ?? '' ) );
-		$error_message      = (string) ( $cloud_error['error_message'] ?? '' );
-		$confidence_level   = sanitize_key( (string) ( $confidence['level'] ?? '' ) );
-		$is_failed          = in_array( $status, array( 'failed', 'error' ), true ) || '' !== $error_code;
-		$cloud_focus        = array();
+		$trend_notes              = is_array( $result['trend_notes'] ?? null ) ? array_slice( $result['trend_notes'], 0, 5 ) : array();
+		$trend_explanations       = is_array( $result['trend_explanations'] ?? null ) ? array_slice( $result['trend_explanations'], 0, 5 ) : array();
+		$analysis_closure         = is_array( $result['analysis_closure'] ?? null ) ? $result['analysis_closure'] : array();
+		$blocked_items            = is_array( $result['blocked_items'] ?? null ) ? array_slice( $result['blocked_items'], 0, 5 ) : array();
+		$next_actions             = is_array( $result['operator_next_actions'] ?? null ) ? array_slice( $result['operator_next_actions'], 0, 5 ) : array();
+		$handoff_candidates       = is_array( $result['core_handoff_candidates'] ?? null ) ? array_slice( $result['core_handoff_candidates'], 0, 5 ) : array();
+		$confidence               = is_array( $result['confidence'] ?? null ) ? $result['confidence'] : array();
+		$cloud_run                = is_array( $cloud_analysis['cloud_run'] ?? null ) ? $cloud_analysis['cloud_run'] : array();
+		$cloud_error              = is_array( $cloud_analysis['cloud_error'] ?? null ) ? $cloud_analysis['cloud_error'] : array();
+		$status                   = sanitize_key( (string) ( $cloud_run['status'] ?? $cloud_analysis['status'] ?? 'submitted' ) );
+		$error_code               = sanitize_key( (string) ( $cloud_error['error_code'] ?? '' ) );
+		$error_message            = (string) ( $cloud_error['error_message'] ?? '' );
+		$confidence_level         = sanitize_key( (string) ( $confidence['level'] ?? '' ) );
+		$is_failed                = in_array( $status, array( 'failed', 'error' ), true ) || '' !== $error_code;
+		$cloud_focus              = array();
 		foreach ( $priority_queue as $item ) {
 			if ( ! is_array( $item ) ) {
 				continue;
@@ -2498,7 +2540,10 @@ final class Admin_Page {
 			<?php if ( array() !== $dimension_summaries ) : ?>
 				<div class="npcink-toolbox__ops-detail-grid" aria-label="<?php esc_attr_e( 'Cloud dimension summaries', 'npcink-workflow-toolbox' ); ?>">
 					<?php foreach ( $dimension_summaries as $dimension ) : ?>
-						<?php if ( ! is_array( $dimension ) ) { continue; } ?>
+						<?php
+						if ( ! is_array( $dimension ) ) {
+							continue; }
+						?>
 						<div>
 							<strong><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $dimension['dimension'] ?? __( 'Analysis area', 'npcink-workflow-toolbox' ) ) ) ); ?></strong>
 							<?php /* translators: 1: Cloud-reported priority label, 2: number of findings in this analysis dimension. */ ?>
@@ -2583,7 +2628,10 @@ final class Admin_Page {
 			<?php if ( array() !== $priority_queue ) : ?>
 				<div class="npcink-toolbox__ops-priority-list">
 					<?php foreach ( $priority_queue as $item ) : ?>
-						<?php if ( ! is_array( $item ) ) { continue; } ?>
+						<?php
+						if ( ! is_array( $item ) ) {
+							continue; }
+						?>
 						<?php
 						$title   = $this->site_ops_finding_title( $item, __( 'Cloud priority', 'npcink-workflow-toolbox' ) );
 						$summary = $this->site_ops_finding_evidence_summary( $item );
@@ -2613,7 +2661,10 @@ final class Admin_Page {
 					<summary><?php esc_html_e( 'Semantic ranking detail', 'npcink-workflow-toolbox' ); ?></summary>
 					<ul class="npcink-toolbox__usage-list">
 						<?php foreach ( $semantic_ranked_findings as $item ) : ?>
-							<?php if ( ! is_array( $item ) ) { continue; } ?>
+							<?php
+							if ( ! is_array( $item ) ) {
+								continue; }
+							?>
 							<li>
 								<strong><?php echo esc_html( $this->site_ops_finding_title( $item, __( 'Semantic finding', 'npcink-workflow-toolbox' ) ) ); ?></strong>
 								<span><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $item['semantic_cluster'] ?? '' ) ) ); ?></span>
@@ -2628,7 +2679,10 @@ final class Admin_Page {
 					<summary><?php esc_html_e( 'Trend explanations', 'npcink-workflow-toolbox' ); ?></summary>
 					<ul class="npcink-toolbox__usage-list">
 							<?php foreach ( $trend_explanations as $item ) : ?>
-								<?php if ( ! is_array( $item ) ) { continue; } ?>
+								<?php
+								if ( ! is_array( $item ) ) {
+									continue; }
+								?>
 								<li>
 									<strong><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $item['id'] ?? __( 'Trend explanation', 'npcink-workflow-toolbox' ) ) ) ); ?></strong>
 									<span><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $item['operator_impact'] ?? $item['summary'] ?? '' ) ) ); ?></span>
@@ -2646,7 +2700,10 @@ final class Admin_Page {
 					<summary><?php esc_html_e( 'Trend notes', 'npcink-workflow-toolbox' ); ?></summary>
 					<ul class="npcink-toolbox__usage-list">
 						<?php foreach ( $trend_notes as $note ) : ?>
-							<?php if ( ! is_array( $note ) ) { continue; } ?>
+							<?php
+							if ( ! is_array( $note ) ) {
+								continue; }
+							?>
 							<li>
 								<strong><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $note['id'] ?? __( 'Trend note', 'npcink-workflow-toolbox' ) ) ) ); ?></strong>
 								<span><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $note['summary'] ?? '' ) ) ); ?></span>
@@ -2664,7 +2721,10 @@ final class Admin_Page {
 								<strong><?php esc_html_e( 'Blocked items', 'npcink-workflow-toolbox' ); ?></strong>
 								<ul class="npcink-toolbox__usage-list">
 									<?php foreach ( $blocked_items as $item ) : ?>
-										<?php if ( ! is_array( $item ) ) { continue; } ?>
+										<?php
+										if ( ! is_array( $item ) ) {
+											continue; }
+										?>
 										<li>
 											<strong><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $item['id'] ?? __( 'Blocked item', 'npcink-workflow-toolbox' ) ) ) ); ?></strong>
 											<span>
@@ -2684,7 +2744,10 @@ final class Admin_Page {
 								<strong><?php esc_html_e( 'Operator next actions', 'npcink-workflow-toolbox' ); ?></strong>
 								<ul class="npcink-toolbox__usage-list">
 									<?php foreach ( $next_actions as $action ) : ?>
-										<?php if ( ! is_array( $action ) ) { continue; } ?>
+										<?php
+										if ( ! is_array( $action ) ) {
+											continue; }
+										?>
 										<li>
 											<strong><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $action['id'] ?? __( 'Review action', 'npcink-workflow-toolbox' ) ) ) ); ?></strong>
 											<span><?php echo esc_html( $this->site_ops_dynamic_label( (string) ( $action['label'] ?? $action['target'] ?? '' ) ) ); ?></span>
@@ -2698,7 +2761,10 @@ final class Admin_Page {
 								<strong><?php esc_html_e( 'Core handoff candidates', 'npcink-workflow-toolbox' ); ?></strong>
 								<ul class="npcink-toolbox__usage-list">
 									<?php foreach ( $handoff_candidates as $candidate ) : ?>
-										<?php if ( ! is_array( $candidate ) ) { continue; } ?>
+										<?php
+										if ( ! is_array( $candidate ) ) {
+											continue; }
+										?>
 										<li>
 											<strong><?php echo esc_html( $this->site_ops_finding_title( $candidate, __( 'Handoff candidate', 'npcink-workflow-toolbox' ) ) ); ?></strong>
 											<span><?php esc_html_e( 'Planning hint only; proposal_ready=false and Core still owns review.', 'npcink-workflow-toolbox' ); ?></span>
@@ -2851,10 +2917,10 @@ final class Admin_Page {
 			return;
 		}
 
-		$replay   = isset( $preview['replay'] ) && is_array( $preview['replay'] ) ? $preview['replay'] : array();
-		$download = $this->scheduled_review_dry_run_download_url();
-		$brief    = isset( $replay['preview']['morning_brief'] ) && is_array( $replay['preview']['morning_brief'] ) ? $replay['preview']['morning_brief'] : array();
-		$summary  = isset( $brief['summary'] ) && is_array( $brief['summary'] ) ? $brief['summary'] : array();
+		$replay            = isset( $preview['replay'] ) && is_array( $preview['replay'] ) ? $preview['replay'] : array();
+		$download          = $this->scheduled_review_dry_run_download_url();
+		$brief             = isset( $replay['preview']['morning_brief'] ) && is_array( $replay['preview']['morning_brief'] ) ? $replay['preview']['morning_brief'] : array();
+		$summary           = isset( $brief['summary'] ) && is_array( $brief['summary'] ) ? $brief['summary'] : array();
 		$review_item_count = (int) ( $summary['actions_total'] ?? 0 );
 		?>
 		<section class="npcink-toolbox__card" data-toolbox-nightly-inspection-preview>
@@ -3082,7 +3148,7 @@ final class Admin_Page {
 			'geo_summary'           => __( 'GEO summary', 'npcink-workflow-toolbox' ),
 			'structured_data_hints' => __( 'Structured data hints', 'npcink-workflow-toolbox' ),
 		);
-		$preview = wp_json_encode( $this->settings->get_content_context_for_ability(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		$preview         = wp_json_encode( $this->settings->get_content_context_for_ability(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		?>
 		<div class="npcink-toolbox__panel-header">
 			<h2><?php esc_html_e( 'Site Profile', 'npcink-workflow-toolbox' ); ?></h2>
@@ -3380,7 +3446,7 @@ final class Admin_Page {
 			),
 		);
 
-		$tools = array_values(
+		$tools          = array_values(
 			array_filter(
 				$tools,
 				static function ( array $tool ) use ( $surface ): bool {
@@ -3407,12 +3473,12 @@ final class Admin_Page {
 			}
 		}
 
-		$tool_groups = array(
-			'media'             => array(
+		$tool_groups  = array(
+			'media'                => array(
 				'title'       => __( 'Media Library Optimization', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Choose a range, check the expected results, then confirm once to optimize. Restore from history when needed.', 'npcink-workflow-toolbox' ),
 			),
-			'image-text-review' => array(
+			'image-text-review'    => array(
 				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media.', 'npcink-workflow-toolbox' ),
 			),
@@ -3420,7 +3486,7 @@ final class Admin_Page {
 				'title'       => __( 'Flagged Media', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Review Cloud content-safety flags for recent images. Read-only.', 'npcink-workflow-toolbox' ),
 			),
-			'image-settings' => array(
+			'image-settings'       => array(
 				'title'       => __( 'Settings', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Watermark templates and backup retention.', 'npcink-workflow-toolbox' ),
 			),
@@ -3511,61 +3577,61 @@ final class Admin_Page {
 			<div class="npcink-toolbox__tool-panels">
 				<?php
 				foreach ( $tools as $index => $tool ) {
-						if ( 'content_support_flow' === (string) ( $tool['custom'] ?? '' ) ) {
-							$this->render_content_support_flow_tool(
-								(string) $tool['endpoint'],
-								(string) $tool['title'],
-								(string) $tool['description'],
-								(string) $tool['id'],
-								(string) $tool['intent'],
-								(string) $tool['button'],
-								'hosted_ai' === (string) ( $tool['powered_by'] ?? '' ),
-								$active_tool_id === (string) $tool['id'],
-								$cloud_ready
-							);
-							continue;
-						}
-						if ( 'media_alt_caption_review' === (string) ( $tool['custom'] ?? '' ) ) {
-							$this->render_media_alt_caption_review_tool(
-								(string) $tool['endpoint'],
-								(string) $tool['title'],
-								(string) $tool['description'],
-								(string) $tool['id'],
-								(string) $tool['button'],
-								$active_tool_id === (string) $tool['id'],
-								$cloud_ready
-							);
-							continue;
-						}
-						if ( 'flagged_media_review' === (string) ( $tool['custom'] ?? '' ) ) {
-							$this->render_flagged_media_review_tool(
-								(string) $tool['endpoint'],
-								(string) $tool['title'],
-								(string) $tool['description'],
-								(string) $tool['id'],
-								(string) $tool['button'],
-								$active_tool_id === (string) $tool['id']
-							);
-							continue;
-						}
-						if ( 'media_derivative_batch' === (string) ( $tool['custom'] ?? '' ) ) {
-							$this->render_media_derivative_batch_tool(
-								(string) $tool['endpoint'],
-								(string) $tool['title'],
-								(string) $tool['description'],
-								(string) $tool['id'],
-								$active_tool_id === (string) $tool['id']
-							);
-							continue;
-						}
-						if ( 'watermark_template_library' === (string) ( $tool['custom'] ?? '' ) ) {
-							$this->render_watermark_template_library( (string) $tool['id'], $active_tool_id === (string) $tool['id'] );
-							continue;
-						}
-						if ( 'image_settings' === (string) ( $tool['custom'] ?? '' ) ) {
-							$this->render_image_settings_panel( (string) $tool['id'], $active_tool_id === (string) $tool['id'] );
-							continue;
-						}
+					if ( 'content_support_flow' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_content_support_flow_tool(
+							(string) $tool['endpoint'],
+							(string) $tool['title'],
+							(string) $tool['description'],
+							(string) $tool['id'],
+							(string) $tool['intent'],
+							(string) $tool['button'],
+							'hosted_ai' === (string) ( $tool['powered_by'] ?? '' ),
+							$active_tool_id === (string) $tool['id'],
+							$cloud_ready
+						);
+						continue;
+					}
+					if ( 'media_alt_caption_review' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_media_alt_caption_review_tool(
+							(string) $tool['endpoint'],
+							(string) $tool['title'],
+							(string) $tool['description'],
+							(string) $tool['id'],
+							(string) $tool['button'],
+							$active_tool_id === (string) $tool['id'],
+							$cloud_ready
+						);
+						continue;
+					}
+					if ( 'flagged_media_review' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_flagged_media_review_tool(
+							(string) $tool['endpoint'],
+							(string) $tool['title'],
+							(string) $tool['description'],
+							(string) $tool['id'],
+							(string) $tool['button'],
+							$active_tool_id === (string) $tool['id']
+						);
+						continue;
+					}
+					if ( 'media_derivative_batch' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_media_derivative_batch_tool(
+							(string) $tool['endpoint'],
+							(string) $tool['title'],
+							(string) $tool['description'],
+							(string) $tool['id'],
+							$active_tool_id === (string) $tool['id']
+						);
+						continue;
+					}
+					if ( 'watermark_template_library' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_watermark_template_library( (string) $tool['id'], $active_tool_id === (string) $tool['id'] );
+						continue;
+					}
+					if ( 'image_settings' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_image_settings_panel( (string) $tool['id'], $active_tool_id === (string) $tool['id'] );
+						continue;
+					}
 					$this->render_text_tool(
 						(string) $tool['endpoint'],
 						(string) $tool['title'],
@@ -3659,7 +3725,7 @@ final class Admin_Page {
 			);
 		} else {
 			$definition['watermark']['scale_percent'] = (int) ( $template['scale'] ?? 20 );
-			$attachment_id = absint( $template['attachment_id'] ?? $fallback_attachment_id );
+			$attachment_id                            = absint( $template['attachment_id'] ?? $fallback_attachment_id );
 			if ( $attachment_id > 0 ) {
 				$definition['watermark_attachment_id'] = $attachment_id;
 			}
@@ -3787,8 +3853,21 @@ final class Admin_Page {
 	}
 
 	private function render_watermark_template_editor( array $template, int $index ): void {
-		$template = array_merge(
-			array( 'id' => '', 'label' => '', 'type' => 'text', 'text' => 'AI', 'attachment_id' => 0, 'position' => 'bottom_right', 'opacity' => 80, 'scale' => 20, 'font_size' => 48, 'color' => '#FFFFFF', 'background' => 'rgba(0,0,0,0.35)', 'margin' => 24 ),
+		$template           = array_merge(
+			array(
+				'id'            => '',
+				'label'         => '',
+				'type'          => 'text',
+				'text'          => 'AI',
+				'attachment_id' => 0,
+				'position'      => 'bottom_right',
+				'opacity'       => 80,
+				'scale'         => 20,
+				'font_size'     => 48,
+				'color'         => '#FFFFFF',
+				'background'    => 'rgba(0,0,0,0.35)',
+				'margin'        => 24,
+			),
 			$template
 		);
 		$base               = Plugin::WATERMARK_OPTION_NAME . '[custom_templates][' . $index . ']';
@@ -3814,7 +3893,11 @@ final class Admin_Page {
 					<p class="description npcink-toolbox__field-warning" data-template-logo-warning <?php echo $logo_url ? 'hidden' : ''; ?>><?php esc_html_e( 'Select a local Media Library image before using this logo template.', 'npcink-workflow-toolbox' ); ?></p>
 					<label><span><?php esc_html_e( 'Logo size', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="1" max="100" name="<?php echo esc_attr( $base . '[scale]' ); ?>" value="<?php echo esc_attr( (string) $template['scale'] ); ?>" data-template-field="scale" /><output><?php echo esc_html( (string) $template['scale'] ); ?>%</output></label>
 				</div>
-				<label><span><?php esc_html_e( 'Position', 'npcink-workflow-toolbox' ); ?></span><select name="<?php echo esc_attr( $base . '[position]' ); ?>" data-template-field="position"><?php foreach ( array( 'top_left', 'top_right', 'center', 'bottom_left', 'bottom_right' ) as $position ) : ?><option value="<?php echo esc_attr( $position ); ?>" <?php selected( $position, (string) $template['position'] ); ?>><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option><?php endforeach; ?></select></label>
+				<label><span><?php esc_html_e( 'Position', 'npcink-workflow-toolbox' ); ?></span><select name="<?php echo esc_attr( $base . '[position]' ); ?>" data-template-field="position">
+				<?php
+				foreach ( array( 'top_left', 'top_right', 'center', 'bottom_left', 'bottom_right' ) as $position ) :
+					?>
+					<option value="<?php echo esc_attr( $position ); ?>" <?php selected( $position, (string) $template['position'] ); ?>><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option><?php endforeach; ?></select></label>
 				<div class="npcink-toolbox__split"><label><span><?php esc_html_e( 'Opacity', 'npcink-workflow-toolbox' ); ?></span><input type="range" min="0" max="100" name="<?php echo esc_attr( $base . '[opacity]' ); ?>" value="<?php echo esc_attr( (string) $template['opacity'] ); ?>" data-template-field="opacity" /><output><?php echo esc_html( (string) $template['opacity'] ); ?>%</output></label><label><span><?php esc_html_e( 'Margin', 'npcink-workflow-toolbox' ); ?></span><input type="number" min="0" max="1000" name="<?php echo esc_attr( $base . '[margin]' ); ?>" value="<?php echo esc_attr( (string) $template['margin'] ); ?>" data-template-field="margin" /></label></div>
 				<button type="button" class="button-link-delete" data-toolbox-delete-watermark-template><?php esc_html_e( 'Delete template', 'npcink-workflow-toolbox' ); ?></button>
 			</div>

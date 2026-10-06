@@ -103,9 +103,9 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 			$source = $this->local_media_visual_source( $attachment_id );
 			if ( ! empty( $source ) ) {
 				$local_sources[ $attachment_id ] = $source;
-				$item['filename']          = $source['filename'];
-				$item['mime_type']         = $source['mime_type'];
-				$item['media_fingerprint'] = $source['media_fingerprint'];
+				$item['filename']                = $source['filename'];
+				$item['mime_type']               = $source['mime_type'];
+				$item['media_fingerprint']       = $source['media_fingerprint'];
 			} else {
 				$local_path = function_exists( 'get_attached_file' ) ? get_attached_file( $attachment_id ) : '';
 				if ( is_string( $local_path ) && is_file( $local_path ) && is_readable( $local_path ) ) {
@@ -131,11 +131,11 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 				if ( ! is_array( $cached_item ) ) {
 					continue;
 				}
-				$attachment_id = absint( $cached_item['attachment_id'] ?? 0 );
-				$visual        = is_array( $cached_item['visual_evidence'] ?? null ) ? $cached_item['visual_evidence'] : array();
-				$current_fingerprint = (string) ( $fingerprints[ $attachment_id ] ?? '' );
+				$attachment_id        = absint( $cached_item['attachment_id'] ?? 0 );
+				$visual               = is_array( $cached_item['visual_evidence'] ?? null ) ? $cached_item['visual_evidence'] : array();
+				$current_fingerprint  = (string) ( $fingerprints[ $attachment_id ] ?? '' );
 				$evidence_fingerprint = sanitize_text_field( (string) ( $cached_item['media_fingerprint'] ?? '' ) );
-				$visual_reuse_policy = $this->media_visual_evidence_reuse_policy( $attachment_id, $current_fingerprint, $evidence_fingerprint, $visual );
+				$visual_reuse_policy  = $this->media_visual_evidence_reuse_policy( $attachment_id, $current_fingerprint, $evidence_fingerprint, $visual );
 				if (
 					0 >= $attachment_id
 					|| 'ready' !== sanitize_key( (string) ( $visual['status'] ?? '' ) )
@@ -147,11 +147,11 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 					$visual,
 					array(
 						'attachment_id'          => $attachment_id,
-						'media_fingerprint'       => $fingerprints[ $attachment_id ],
-						'evidence_reuse'          => 'site_knowledge_projection',
-						'visual_reuse_policy'     => $visual_reuse_policy,
-						'write_posture'           => 'suggestion_only',
-						'direct_wordpress_write'  => false,
+						'media_fingerprint'      => $fingerprints[ $attachment_id ],
+						'evidence_reuse'         => 'site_knowledge_projection',
+						'visual_reuse_policy'    => $visual_reuse_policy,
+						'write_posture'          => 'suggestion_only',
+						'direct_wordpress_write' => false,
 					)
 				);
 			}
@@ -181,20 +181,20 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 			$miss_items[] = $item;
 		}
 
-		$fresh_by_id = array();
+		$fresh_by_id  = array();
 		$fresh_run_id = '';
 		$fresh_status = '';
 		if ( $allow_recognition && ! empty( $miss_items ) ) {
-			$miss_request                    = $request;
-			$miss_request['items']           = $miss_items;
-			$miss_request['requested_count'] = count( $miss_items );
+			$miss_request                      = $request;
+			$miss_request['items']             = $miss_items;
+			$miss_request['requested_count']   = count( $miss_items );
 			$miss_request['idempotency_scope'] = 'site_media_semantic_index';
-			$fresh                           = $this->request_image_context_evidence( $miss_request );
+			$fresh                             = $this->request_image_context_evidence( $miss_request );
 			if ( is_wp_error( $fresh ) ) {
 				return $fresh;
 			}
-			$fresh_run_id                    = sanitize_text_field( (string) ( $fresh['run_id'] ?? '' ) );
-			$fresh_status                    = sanitize_key( (string) ( $fresh['status'] ?? '' ) );
+			$fresh_run_id = sanitize_text_field( (string) ( $fresh['run_id'] ?? '' ) );
+			$fresh_status = sanitize_key( (string) ( $fresh['status'] ?? '' ) );
 			foreach ( (array) ( $fresh['items'] ?? array() ) as $fresh_item ) {
 				if ( ! is_array( $fresh_item ) ) {
 					continue;
@@ -224,16 +224,16 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 		}
 
 		$result = array(
-			'contract_version'       => 'image_context_evidence.v1',
-			'items'                  => $this->sanitize_payload( $resolved_items ),
-			'requested_count'        => count( $prepared_items ),
-			'submitted_count'        => $allow_recognition ? count( $miss_items ) : 0,
-			'reused_count'           => count( $cached_by_id ),
-			'recognized_count'       => count( $fresh_by_id ),
+			'contract_version'                    => 'image_context_evidence.v1',
+			'items'                               => $this->sanitize_payload( $resolved_items ),
+			'requested_count'                     => count( $prepared_items ),
+			'submitted_count'                     => $allow_recognition ? count( $miss_items ) : 0,
+			'reused_count'                        => count( $cached_by_id ),
+			'recognized_count'                    => count( $fresh_by_id ),
 			'recognition_required_attachment_ids' => array_values( array_map( 'absint', array_keys( array_diff_key( $prepared_items, $cached_by_id, $fresh_by_id ) ) ) ),
-			'projection_queued'      => $projection_queued,
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
+			'projection_queued'                   => $projection_queued,
+			'write_posture'                       => 'suggestion_only',
+			'direct_wordpress_write'              => false,
 		);
 		if ( '' !== $fresh_run_id ) {
 			$result['run_id'] = $fresh_run_id;
@@ -244,9 +244,9 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 	}
 
 	public function media_visual_evidence_reuse_policy( int $attachment_id, string $current_fingerprint, string $evidence_fingerprint, array $visual ): string {
-		$current_fingerprint = $this->runtime_safe_media_fingerprint( $current_fingerprint );
+		$current_fingerprint  = $this->runtime_safe_media_fingerprint( $current_fingerprint );
 		$evidence_fingerprint = $this->runtime_safe_media_fingerprint( $evidence_fingerprint );
-		$evidence_policy = sanitize_key( (string) ( $visual['visual_reuse_policy'] ?? '' ) );
+		$evidence_policy      = sanitize_key( (string) ( $visual['visual_reuse_policy'] ?? '' ) );
 		if ( '' === $current_fingerprint || '' === $evidence_fingerprint || 'requires_reidentification' === $evidence_policy ) {
 			return '';
 		}
@@ -269,7 +269,7 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 			return '';
 		}
 		$policy = sanitize_key( (string) ( $latest['visual_reuse_policy'] ?? '' ) );
-		$facts = is_array( $latest['transform_facts'] ?? null ) ? $latest['transform_facts'] : array();
+		$facts  = is_array( $latest['transform_facts'] ?? null ) ? $latest['transform_facts'] : array();
 		return in_array( $policy, array( 'reuse', 'reuse_with_human_check' ), true ) && ! empty( $facts ) ? $policy : '';
 	}
 
@@ -300,8 +300,8 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 			return array();
 		}
 		$upload_revision = hash( 'sha256', $contents );
-		$upload_nonce = '' !== $upload_scope ? $upload_scope : wp_generate_uuid4();
-		$result = npcink_cloud_addon_upload_toolbox_site_media_visual_source(
+		$upload_nonce    = '' !== $upload_scope ? $upload_scope : wp_generate_uuid4();
+		$result          = npcink_cloud_addon_upload_toolbox_site_media_visual_source(
 			array(
 				'contents'  => $contents,
 				'filename'  => $source['filename'],
@@ -332,21 +332,21 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 				continue;
 			}
 			$media_items[] = array(
-				'attachment_id'          => $attachment_id,
-				'mime_type'              => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
-				'title'                  => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-				'url'                    => $url,
-				'media_fingerprint'      => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
-				'visual_summary'         => sanitize_textarea_field( (string) ( $visual['visual_summary'] ?? '' ) ),
-				'visible_text'           => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
-				'subject_tags'           => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
-				'alt_text_basis'         => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
+				'attachment_id'           => $attachment_id,
+				'mime_type'               => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'title'                   => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'url'                     => $url,
+				'media_fingerprint'       => sanitize_text_field( (string) ( $item['media_fingerprint'] ?? '' ) ),
+				'visual_summary'          => sanitize_textarea_field( (string) ( $visual['visual_summary'] ?? '' ) ),
+				'visible_text'            => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
+				'subject_tags'            => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
+				'alt_text_basis'          => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
 				'vision_contract_version' => sanitize_text_field( (string) ( $visual['contract_version'] ?? '' ) ),
-				'vision_source'          => sanitize_key( (string) ( $visual['source'] ?? '' ) ),
-				'vision_model_id'        => sanitize_text_field( (string) ( $visual['model_id'] ?? '' ) ),
-				'vision_run_id'          => sanitize_text_field( (string) ( $visual['run_id'] ?? '' ) ),
-				'confidence'             => (float) ( $visual['confidence'] ?? 0 ),
-				'uncertainty_flags'      => $this->sanitize_string_list( $visual['uncertainty_flags'] ?? array() ),
+				'vision_source'           => sanitize_key( (string) ( $visual['source'] ?? '' ) ),
+				'vision_model_id'         => sanitize_text_field( (string) ( $visual['model_id'] ?? '' ) ),
+				'vision_run_id'           => sanitize_text_field( (string) ( $visual['run_id'] ?? '' ) ),
+				'confidence'              => (float) ( $visual['confidence'] ?? 0 ),
+				'uncertainty_flags'       => $this->sanitize_string_list( $visual['uncertainty_flags'] ?? array() ),
 			);
 		}
 		if ( empty( $media_items ) ) {

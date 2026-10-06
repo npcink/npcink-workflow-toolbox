@@ -1,0 +1,565 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Npcink_Toolbox\\Abilities\:\:sanitize_string_list\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Abilities.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:media_library_url\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_checkbox\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_crop_controls\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_format_controls\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_output_controls\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_picker_controls\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_toolbox_defaults\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_watermark_controls\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Offset ''finding'' on array\{key\: ''manual''\|''review''\|''watch'', label\: mixed, count\: mixed, finding\: array, summary\: mixed, next_step\: mixed, empty_text\: mixed\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Offset ''secondary'' on array\{title\: mixed, description\: mixed\} in empty\(\) does not exist\.$#'
+			identifier: empty.offset
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Offset ''surface'' on array\{surface\: ''image'', group\: mixed, group_id\: ''image\-flagged\-review'', id\: ''flagged\-media\-review'', endpoint\: ''ai/site\-helpers'', title\: mixed, description\: mixed, intent\: ''flagged_media…'', \.\.\.\}\|array\{surface\: ''image'', group\: mixed, group_id\: ''image\-settings'', id\: ''image\-settings'', endpoint\: '''', title\: mixed, description\: mixed, custom\: ''image_settings''\}\|array\{surface\: ''image'', group\: mixed, group_id\: ''image\-text\-review'', id\: ''media\-alt\-caption…'', endpoint\: ''ai/site\-helpers'', title\: mixed, description\: mixed, intent\: ''media_alt…'', \.\.\.\}\|array\{surface\: ''image'', group\: mixed, group_id\: ''media'', id\: ''media\-batch\-optimize'', endpoint\: ''media\-derivative…'', title\: mixed, description\: mixed, custom\: ''media_derivative…''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Admin_Page.php
+
+		-
+			message: '#^Offset ''mime'' on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Cloud_Image_Artifact_Transport.php
+
+		-
+			message: '#^Offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Cloud_Image_Artifact_Transport.php
+
+		-
+			message: '#^Offset 1 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Cloud_Image_Artifact_Transport.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Media_Fingerprint_Scan.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with array will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/Media_Recognition_Continuation.php
+
+		-
+			message: '#^Property Npcink_Toolbox\\Provider_Agent_Feedback_Service\:\:\$client is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: includes/Provider_Agent_Feedback_Service.php
+
+		-
+			message: '#^Variable \$post_title on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: includes/Provider_Ai_Image_Service.php
+
+		-
+			message: '#^Property Npcink_Toolbox\\Provider_Article_Audio_Service\:\:\$client is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: includes/Provider_Article_Audio_Service.php
+
+		-
+			message: '#^Access to an undefined property Npcink_Toolbox\\Provider_Client\:\:\$agent_feedback_service\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/Provider_Client.php
+
+		-
+			message: '#^Access to an undefined property Npcink_Toolbox\\Provider_Client\:\:\$article_audio_service\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/Provider_Client.php
+
+		-
+			message: '#^Access to an undefined property Npcink_Toolbox\\Provider_Client\:\:\$image_source_service\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/Provider_Client.php
+
+		-
+			message: '#^Access to an undefined property Npcink_Toolbox\\Provider_Client\:\:\$media_recognition_service\.$#'
+			identifier: property.notFound
+			count: 4
+			path: includes/Provider_Client.php
+
+		-
+			message: '#^Access to an undefined property Npcink_Toolbox\\Provider_Client\:\:\$site_ops_cloud_service\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/Provider_Client.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: includes/Provider_Client_Support.php
+
+		-
+			message: '#^Property WP_Comment\:\:\$comment_ID \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Comment\:\:\$comment_author \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Comment\:\:\$comment_author_url \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Comment\:\:\$comment_content \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Comment\:\:\$comment_date_gmt \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Comment\:\:\$comment_post_ID \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 3
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_content \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_modified_gmt \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_status \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_title \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_type \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Term\:\:\$count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Term\:\:\$name \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Property WP_Term\:\:\$taxonomy \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Content_Collector_Service.php
+
+		-
+			message: '#^Parameter \#1 \$array \(non\-empty\-list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
+			identifier: arrayFilter.same
+			count: 1
+			path: includes/Provider_Hosted_AI_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_content \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Hosted_AI_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_excerpt \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 2
+			path: includes/Provider_Hosted_AI_Service.php
+
+		-
+			message: '#^Property WP_Post\:\:\$post_title \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Provider_Hosted_AI_Service.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Provider_Media_Alt_Caption_Service\:\:media_alt_caption_alt_candidates\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Provider_Media_Alt_Caption_Service.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Provider_Media_Alt_Caption_Service\:\:media_alt_caption_candidate_basis\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Provider_Media_Alt_Caption_Service.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Provider_Media_Alt_Caption_Service\:\:media_alt_caption_caption_candidate\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Provider_Media_Alt_Caption_Service.php
+
+		-
+			message: '#^Offset ''blocked_reason'' on array\{attachment_id\: 0, status\: ''blocked'', blocked_reason\: ''missing_attachment…'', operator_next_action\: ''skip_or_adjust…''\}\|array\{attachment_id\: mixed, status\: ''blocked'', blocked_reason\: ''candidate_quality…'', current_alt_status\: mixed, current_caption_status\: mixed, review_reasons\: mixed, title\: mixed, filename\: mixed, \.\.\.\}\|array\{attachment_id\: mixed, status\: ''blocked'', blocked_reason\: ''metadata_complete…'', current_alt_status\: mixed, current_caption_status\: mixed, operator_next_action\: ''skip_or_adjust…''\}\|array\{attachment_id\: mixed, status\: ''blocked'', blocked_reason\: ''selection_limit…'', current_alt_status\: mixed, current_caption_status\: mixed, operator_next_action\: ''review_current…''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Provider_Media_Alt_Caption_Service.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Provider_Media_Recognition_Service.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Provider_Nightly_Inspection_Service.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<mixed, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: includes/Provider_Nightly_Inspection_Service.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Provider_Site_Knowledge_Service.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Provider_Site_Ops_Cloud_Service.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between '''' and non\-empty\-string will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: includes/Provider_Workflow_Plans_Service.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 3
+			path: includes/Rest_Controller.php
+
+		-
+			message: '#^Property Npcink_Toolbox\\Rest_Controller\:\:\$publish_preflight is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: includes/Rest_Controller.php
+
+		-
+			message: '#^Property Npcink_Toolbox\\Rest_Controller\:\:\$settings is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: includes/Rest_Controller.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 4
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\<int, array\<string, string\>\|int\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\>\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_metadata_suggestion_section\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Offset ''detail'' on array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Offset ''type'' on array\{id\: non\-falsy\-string, type\: ''external_source…''\|''target_post'', label\: mixed\}\|array\{id\: non\-falsy\-string, type\: ''related_content'', label\: mixed, score\: float\|null\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Parameter \#1 \$array \(list\<array\{term_id\: mixed, taxonomy\: mixed, name\: mixed\}\>\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Property WP_Term\:\:\$count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Property WP_Term\:\:\$name \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Property WP_Term\:\:\$term_id \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''recognition_required'' and ''recognition_required'' will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Ternary operator condition is always false\.$#'
+			identifier: ternary.alwaysFalse
+			count: 2
+			path: includes/Rest_Editor_Content_Support.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 6
+			path: includes/Rest_Flow_Plan_Bridges.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_json_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: includes/Rest_Media_Derivative_Previews.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Rest_Media_Derivative_Previews.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_query_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Rest_Media_Derivative_Previews.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_json_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 5
+			path: includes/Rest_Media_Optimization_Bridges.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_json_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: includes/Rest_Nightly_Inspection_Bridges.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Rest_Site_Knowledge_Bridges.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_json_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: includes/Rest_Surface_Bridges.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: includes/Rest_Surface_Bridges.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Rest_Surface_Bridges\:\:image_candidates\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
+			count: 2
+			path: includes/Rest_Surface_Bridges.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Settings\:\:get_secret\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Settings.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Settings\:\:sanitize_secret_input\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: includes/Settings.php
+
+		-
+			message: '#^Offset ''type'' on array\{id\: mixed, label\: non\-empty\-string, type\: ''image''\|''text'', text\: non\-empty\-string, attachment_id\: mixed, position\: mixed, opacity\: mixed, scale\: mixed, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Settings.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between '''' and non\-empty\-string will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: includes/Settings.php
+
+		-
+			message: '#^Offset 2 on array\{non\-falsy\-string, non\-empty\-string, string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Site_Ops_Snapshot_Collector.php
+
+		-
+			message: '#^Property WP_Term\:\:\$count \(int\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: includes/Site_Ops_Snapshot_Collector.php
+
+		-
+			message: '#^Call to function is_numeric\(\) with int\<1, max\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: modules/local-automation-runtime/src/NightlyInspection/Basic_WP_Cron_Dry_Run.php
+
+		-
+			message: '#^Call to function is_numeric\(\) with int\<1, max\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: modules/local-automation-runtime/src/NightlyInspection/Snapshot_Collector.php
+
+		-
+			message: '#^Offset 2 on array\{non\-falsy\-string, non\-empty\-string, string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: modules/local-automation-runtime/src/NightlyInspection/Snapshot_Collector.php

@@ -25,12 +25,12 @@ defined( 'ABSPATH' ) || exit;
 final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000;
-	private const EDITOR_AUDIO_TEXT_MAX_CHARS = 5000;
-	private const EDITOR_SELECTED_TEXT_MAX_CHARS = 2000;
-	private const EDITOR_COMMENT_TEXT_MAX_CHARS = 1200;
-	private const EDITOR_FLOW_CACHE_TTL = 300;
-	private const EDITOR_PROGRESSIVE_TARGET_MS = 2500;
-	private const EDITOR_PROGRESSIVE_CANDIDATE_LIMIT = 8;
+	private const EDITOR_AUDIO_TEXT_MAX_CHARS           = 5000;
+	private const EDITOR_SELECTED_TEXT_MAX_CHARS        = 2000;
+	private const EDITOR_COMMENT_TEXT_MAX_CHARS         = 1200;
+	private const EDITOR_FLOW_CACHE_TTL                 = 300;
+	private const EDITOR_PROGRESSIVE_TARGET_MS          = 2500;
+	private const EDITOR_PROGRESSIVE_CANDIDATE_LIMIT    = 8;
 
 	private Provider_Client $client;
 	private Publish_Preflight_Service $publish_preflight;
@@ -61,23 +61,23 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			}
 			$context = $writing_pack_context;
 		}
-			if ( 'title_suggestions' === $intent ) {
-				$context['context_scope']        = 'full_article';
-				$context['selected_text']        = '';
-				$context['selected_block_text']  = '';
-				$context['selected_block_name']  = '';
+		if ( 'title_suggestions' === $intent ) {
+			$context['context_scope']       = 'full_article';
+			$context['selected_text']       = '';
+			$context['selected_block_text'] = '';
+			$context['selected_block_name'] = '';
+		}
+		if ( 'polish_notes' === $intent ) {
+			if ( '' === $this->editor_polish_notes_selected_text( $context ) ) {
+				return new WP_Error(
+					'npcink_toolbox_missing_editor_selection',
+					__( 'Select paragraph text before running paragraph review.', 'npcink-workflow-toolbox' ),
+					array( 'status' => 400 )
+				);
 			}
-			if ( 'polish_notes' === $intent ) {
-				if ( '' === $this->editor_polish_notes_selected_text( $context ) ) {
-					return new WP_Error(
-						'npcink_toolbox_missing_editor_selection',
-						__( 'Select paragraph text before running paragraph review.', 'npcink-workflow-toolbox' ),
-						array( 'status' => 400 )
-					);
-				}
-				$context['context_scope'] = 'selected_text';
-			}
-			$query   = 'source_adaptation_review' === $intent
+			$context['context_scope'] = 'selected_text';
+		}
+			$query = 'source_adaptation_review' === $intent
 				? $this->editor_writing_pack_query( $context )
 				: $this->editor_support_query( $context );
 		if ( 'image_candidates' === $intent ) {
@@ -92,16 +92,16 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		$result = array(
-			'artifact_type'          => 'editor_content_support_flow',
-			'composition_role'       => 'editor_content_support',
-			'intent'                 => $intent,
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'core_proposal_required',
-			'direct_wordpress_write' => false,
-			'post_context'           => $context,
-			'content_context'        => $this->editor_content_context( $context ),
-			'query'                  => $query,
-			'sections'               => array(),
+			'artifact_type'           => 'editor_content_support_flow',
+			'composition_role'        => 'editor_content_support',
+			'intent'                  => $intent,
+			'write_posture'           => 'suggestion_only',
+			'final_write_path'        => 'core_proposal_required',
+			'direct_wordpress_write'  => false,
+			'post_context'            => $context,
+			'content_context'         => $this->editor_content_context( $context ),
+			'query'                   => $query,
+			'sections'                => array(),
 			'remote_execution_policy' => array(
 				'cache_ttl_seconds'     => self::EDITOR_FLOW_CACHE_TTL,
 				'cache_scope'           => 'site_transient_by_intent_query_and_post_context',
@@ -109,7 +109,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'direct_async_queue'    => false,
 				'progressive_target_ms' => self::EDITOR_PROGRESSIVE_TARGET_MS,
 			),
-			'handoff'                => array(
+			'handoff'                 => array(
 				'surface'                => 'post_editor_sidebar',
 				'final_writes'           => 'core_proposal_required',
 				'direct_wordpress_write' => false,
@@ -118,8 +118,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 		if ( 'progressive_recommendations' === $intent ) {
 			$result['sections']['progressive_recommendations'] = $this->editor_progressive_recommendations( $context, $query );
-			$result['recommendation_set']                     = $this->editor_recommendation_set( $context, $intent, $result['sections'] );
-			$result['content_fingerprint']                    = $result['recommendation_set']['content_fingerprint'];
+			$result['recommendation_set']                      = $this->editor_recommendation_set( $context, $intent, $result['sections'] );
+			$result['content_fingerprint']                     = $result['recommendation_set']['content_fingerprint'];
 			return rest_ensure_response( $result );
 		}
 
@@ -127,53 +127,53 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return $this->editor_writing_pack_flow( $request, $context, $result, $intent );
 		}
 
-			if ( 'writing_support' === $intent ) {
-				$result['sections']['writing_support'] = $this->editor_support_section(
-					$this->editor_cached_site_knowledge(
-						array(
+		if ( 'writing_support' === $intent ) {
+			$result['sections']['writing_support'] = $this->editor_support_section(
+				$this->editor_cached_site_knowledge(
+					array(
 						'query'           => $query,
 						'intent'          => 'writing_support_plan',
 						'current_post_id' => absint( $context['post_id'] ?? 0 ),
 						'max_results'     => 6,
 					)
 				)
-				);
-			}
+			);
+		}
 
-			if ( 'zhihu_research' === $intent ) {
-				$result['sections']['zhihu_research'] = $this->editor_support_section(
-					$this->editor_cached_cloud_web_search(
-						array(
-							'query'          => $query,
-							'intent'         => 'zhihu_research',
-							'managed_source' => 'zhihu_research',
-							'max_results'    => 5,
-							'recency_days'   => 30,
-						)
+		if ( 'zhihu_research' === $intent ) {
+			$result['sections']['zhihu_research'] = $this->editor_support_section(
+				$this->editor_cached_cloud_web_search(
+					array(
+						'query'          => $query,
+						'intent'         => 'zhihu_research',
+						'managed_source' => 'zhihu_research',
+						'max_results'    => 5,
+						'recency_days'   => 30,
 					)
-				);
-			}
+				)
+			);
+		}
 
-			if ( 'zhihu_hot_topics' === $intent ) {
-				$result['sections']['zhihu_hot_topics'] = $this->editor_support_section(
-					$this->editor_cached_cloud_web_search(
-						array(
-							'query'          => '知乎热榜',
-							'intent'         => 'zhihu_hot_topics',
-							'managed_source' => 'zhihu_hot_topics',
-							'max_results'    => 5,
-							'recency_days'   => 1,
-						)
+		if ( 'zhihu_hot_topics' === $intent ) {
+			$result['sections']['zhihu_hot_topics'] = $this->editor_support_section(
+				$this->editor_cached_cloud_web_search(
+					array(
+						'query'          => '知乎热榜',
+						'intent'         => 'zhihu_hot_topics',
+						'managed_source' => 'zhihu_hot_topics',
+						'max_results'    => 5,
+						'recency_days'   => 1,
 					)
-				);
-			}
+				)
+			);
+		}
 
-			if ( 'article_checkup' === $intent ) {
-				$result['sections']['article_checkup'] = $this->editor_article_checkup_section( $context );
-			}
+		if ( 'article_checkup' === $intent ) {
+			$result['sections']['article_checkup'] = $this->editor_article_checkup_section( $context );
+		}
 
-			if ( 'taxonomy_tags' === $intent ) {
-				$result['sections']['taxonomy_terms'] = $this->editor_taxonomy_term_candidates( $context, $query );
+		if ( 'taxonomy_tags' === $intent ) {
+			$result['sections']['taxonomy_terms'] = $this->editor_taxonomy_term_candidates( $context, $query );
 		}
 
 		if ( 'title_suggestions' === $intent ) {
@@ -245,12 +245,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$result['sections']['discoverability'] = $this->editor_support_section(
 				$this->editor_cached_content_discoverability(
 					array(
-						'post_id' => absint( $context['post_id'] ?? 0 ),
-						'title'   => (string) ( $context['title'] ?? '' ),
-						'topic'   => $query,
-						'excerpt' => (string) ( $context['excerpt'] ?? '' ),
-						'content' => (string) ( $context['content_text'] ?? '' ),
-						'external_search_intent' => 'publish_preflight' === $intent ? 'fact_check' : 'writing_context',
+						'post_id'                 => absint( $context['post_id'] ?? 0 ),
+						'title'                   => (string) ( $context['title'] ?? '' ),
+						'topic'                   => $query,
+						'excerpt'                 => (string) ( $context['excerpt'] ?? '' ),
+						'content'                 => (string) ( $context['content_text'] ?? '' ),
+						'external_search_intent'  => 'publish_preflight' === $intent ? 'fact_check' : 'writing_context',
 						'include_external_search' => true,
 					)
 				)
@@ -262,7 +262,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		if ( 'publish_preflight' === $intent ) {
-			$duplicate_check = $this->editor_support_section(
+			$duplicate_check    = $this->editor_support_section(
 				$this->editor_cached_site_knowledge(
 					array(
 						'query'           => $query,
@@ -301,37 +301,37 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return array(
-			'post_id'             => absint( $request->get_param( 'post_id' ) ),
-			'post_type'           => sanitize_key( (string) ( $request->get_param( 'post_type' ) ?: 'post' ) ),
-			'post_status'         => sanitize_key( (string) $request->get_param( 'post_status' ) ),
-			'context_scope'       => $context_scope,
-			'title'               => sanitize_text_field( (string) $request->get_param( 'title' ) ),
-			'excerpt'             => sanitize_textarea_field( (string) $request->get_param( 'excerpt' ) ),
-			'content_text'        => wp_trim_words( $content, 220, '' ),
-			'content_full_text'   => sanitize_textarea_field( $this->editor_trim_chars( $content, self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS ) ),
-			'content_audio_text'  => sanitize_textarea_field( $this->editor_trim_chars( $this->editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), self::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
-			'selected_text'       => wp_trim_words( sanitize_textarea_field( $selected_text ), 110, '' ),
-			'selected_block_text' => wp_trim_words( sanitize_textarea_field( $selected_block_text ), 110, '' ),
-			'selected_text_full'       => sanitize_textarea_field( $this->editor_trim_chars( $selected_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
-			'selected_block_text_full' => sanitize_textarea_field( $this->editor_trim_chars( $selected_block_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
-			'selected_block_name' => sanitize_text_field( (string) $request->get_param( 'selected_block_name' ) ),
-			'user_instruction'    => wp_trim_words( sanitize_textarea_field( $user_instruction ), 60, '' ),
-			'audio_preferences'   => $audio_preferences,
-			'generation_variant'  => sanitize_text_field( (string) $request->get_param( 'generation_variant' ) ),
-			'force_regenerate'    => (bool) $request->get_param( 'force_regenerate' ),
-			'summary_generation_mode' => $summary_mode,
-			'image_mode'          => sanitize_key( (string) $request->get_param( 'image_mode' ) ),
-			'category_ids'        => $this->csv_absint_list( (string) $request->get_param( 'category_ids' ) ),
-			'tag_ids'             => $this->csv_absint_list( (string) $request->get_param( 'tag_ids' ) ),
-			'featured_media'      => absint( $request->get_param( 'featured_media' ) ),
-			'media_items'         => $this->editor_media_items_from_request( $request ),
-			'occurrence_offset'   => max( 0, absint( $request->get_param( 'occurrence_offset' ) ) ),
-			'total_occurrence_count' => max( 0, absint( $request->get_param( 'total_occurrence_count' ) ) ),
+			'post_id'                    => absint( $request->get_param( 'post_id' ) ),
+			'post_type'                  => sanitize_key( (string) ( $request->get_param( 'post_type' ) ?: 'post' ) ),
+			'post_status'                => sanitize_key( (string) $request->get_param( 'post_status' ) ),
+			'context_scope'              => $context_scope,
+			'title'                      => sanitize_text_field( (string) $request->get_param( 'title' ) ),
+			'excerpt'                    => sanitize_textarea_field( (string) $request->get_param( 'excerpt' ) ),
+			'content_text'               => wp_trim_words( $content, 220, '' ),
+			'content_full_text'          => sanitize_textarea_field( $this->editor_trim_chars( $content, self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS ) ),
+			'content_audio_text'         => sanitize_textarea_field( $this->editor_trim_chars( $this->editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), self::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
+			'selected_text'              => wp_trim_words( sanitize_textarea_field( $selected_text ), 110, '' ),
+			'selected_block_text'        => wp_trim_words( sanitize_textarea_field( $selected_block_text ), 110, '' ),
+			'selected_text_full'         => sanitize_textarea_field( $this->editor_trim_chars( $selected_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
+			'selected_block_text_full'   => sanitize_textarea_field( $this->editor_trim_chars( $selected_block_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
+			'selected_block_name'        => sanitize_text_field( (string) $request->get_param( 'selected_block_name' ) ),
+			'user_instruction'           => wp_trim_words( sanitize_textarea_field( $user_instruction ), 60, '' ),
+			'audio_preferences'          => $audio_preferences,
+			'generation_variant'         => sanitize_text_field( (string) $request->get_param( 'generation_variant' ) ),
+			'force_regenerate'           => (bool) $request->get_param( 'force_regenerate' ),
+			'summary_generation_mode'    => $summary_mode,
+			'image_mode'                 => sanitize_key( (string) $request->get_param( 'image_mode' ) ),
+			'category_ids'               => $this->csv_absint_list( (string) $request->get_param( 'category_ids' ) ),
+			'tag_ids'                    => $this->csv_absint_list( (string) $request->get_param( 'tag_ids' ) ),
+			'featured_media'             => absint( $request->get_param( 'featured_media' ) ),
+			'media_items'                => $this->editor_media_items_from_request( $request ),
+			'occurrence_offset'          => max( 0, absint( $request->get_param( 'occurrence_offset' ) ) ),
+			'total_occurrence_count'     => max( 0, absint( $request->get_param( 'total_occurrence_count' ) ) ),
 			'visual_recognition_consent' => (bool) $request->get_param( 'visual_recognition_consent' ),
-			'content_blocks'      => $this->editor_content_blocks_from_request( $request ),
-			'comment_id'          => absint( $request->get_param( 'comment_id' ) ),
-			'comment_author'      => sanitize_text_field( (string) $request->get_param( 'comment_author' ) ),
-			'comment_text'        => sanitize_textarea_field( $this->editor_trim_chars( trim( wp_strip_all_tags( (string) $request->get_param( 'comment_text' ) ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) ),
+			'content_blocks'             => $this->editor_content_blocks_from_request( $request ),
+			'comment_id'                 => absint( $request->get_param( 'comment_id' ) ),
+			'comment_author'             => sanitize_text_field( (string) $request->get_param( 'comment_author' ) ),
+			'comment_text'               => sanitize_textarea_field( $this->editor_trim_chars( trim( wp_strip_all_tags( (string) $request->get_param( 'comment_text' ) ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) ),
 		);
 	}
 
@@ -341,13 +341,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$raw = array();
 		}
 
-		$defaults = array(
+		$defaults    = array(
 			'tone'     => 'calm',
 			'pace'     => 'normal',
 			'handling' => 'skip_code',
 			'focus'    => 'product_names',
 		);
-		$allowed = array(
+		$allowed     = array(
 			'tone'     => array( 'calm', 'formal', 'casual', 'expressive' ),
 			'pace'     => array( 'normal', 'slow', 'fast' ),
 			'handling' => array( 'skip_code', 'read_code', 'skip_tables' ),
@@ -355,7 +355,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		);
 		$preferences = array();
 		foreach ( $defaults as $key => $default ) {
-			$value = sanitize_key( (string) ( $raw[ $key ] ?? $default ) );
+			$value               = sanitize_key( (string) ( $raw[ $key ] ?? $default ) );
 			$preferences[ $key ] = in_array( $value, $allowed[ $key ], true ) ? $value : $default;
 		}
 		return $preferences;
@@ -372,9 +372,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				continue;
 			}
 			$client_id = sanitize_text_field( (string) ( $block['client_id'] ?? '' ) );
-			$text = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1600 ) );
+			$text      = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1600 ) );
 			if ( '' !== $client_id && '' !== $text ) {
-				$items[] = array( 'client_id' => $client_id, 'block_name' => sanitize_text_field( (string) ( $block['block_name'] ?? '' ) ), 'text' => $text );
+				$items[] = array(
+					'client_id'  => $client_id,
+					'block_name' => sanitize_text_field( (string) ( $block['block_name'] ?? '' ) ),
+					'text'       => $text,
+				);
 			}
 		}
 		return $items;
@@ -406,8 +410,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_media_items_from_request( WP_REST_Request $request ): array {
-		$items = array();
-		$seen  = array();
+		$items  = array();
+		$seen   = array();
 		$intent = sanitize_key( (string) $request->get_param( 'intent' ) );
 
 		$featured_media = absint( $request->get_param( 'featured_media' ) );
@@ -421,7 +425,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 		$request_items = $request->get_param( 'media_items' );
 		if ( is_string( $request_items ) && '' !== trim( $request_items ) ) {
-			$decoded = json_decode( $request_items, true );
+			$decoded       = json_decode( $request_items, true );
 			$request_items = is_array( $decoded ) ? $decoded : array();
 		}
 
@@ -476,8 +480,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_article_image_alt_suggestions( array $context ): array {
-		$items = is_array( $context['media_items'] ?? null ) ? $context['media_items'] : array();
-		$items = array_values(
+		$items       = is_array( $context['media_items'] ?? null ) ? $context['media_items'] : array();
+		$items       = array_values(
 			array_filter(
 				$items,
 				static fn( $item ): bool => is_array( $item ) && '' !== trim( (string) ( $item['occurrence_id'] ?? '' ) )
@@ -488,37 +492,37 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$total_items = max( count( $items ), absint( $context['total_occurrence_count'] ?? 0 ) );
 		if ( empty( $items ) ) {
 			return array(
-				'artifact_type'          => 'current_article_image_alt_suggestions.v1',
-				'contract_version'       => 'current_article_image_alt_context_review.v1',
-				'status'                 => 'empty',
-				'message'                => __( 'No image blocks were found in the current article. Add an image block before previewing contextual ALT.', 'npcink-workflow-toolbox' ),
-				'write_posture'          => 'suggestion_only',
-				'final_write_path'       => 'core_proposal_required',
-				'direct_wordpress_write' => false,
-				'items'                  => array(),
-				'occurrence_offset'      => $offset,
-				'per_page'               => $per_page,
-				'total_occurrence_count' => $total_items,
-				'has_previous_page'      => $offset > 0,
-				'has_next_page'          => false,
+				'artifact_type'                     => 'current_article_image_alt_suggestions.v1',
+				'contract_version'                  => 'current_article_image_alt_context_review.v1',
+				'status'                            => 'empty',
+				'message'                           => __( 'No image blocks were found in the current article. Add an image block before previewing contextual ALT.', 'npcink-workflow-toolbox' ),
+				'write_posture'                     => 'suggestion_only',
+				'final_write_path'                  => 'core_proposal_required',
+				'direct_wordpress_write'            => false,
+				'items'                             => array(),
+				'occurrence_offset'                 => $offset,
+				'per_page'                          => $per_page,
+				'total_occurrence_count'            => $total_items,
+				'has_previous_page'                 => $offset > 0,
+				'has_next_page'                     => false,
 				'visual_recognition_required_count' => 0,
 			);
 		}
 
-		$visual_evidence = $this->editor_article_image_visual_evidence( $items, ! empty( $context['visual_recognition_consent'] ) );
-		$review_items    = array();
-		$visual_evidence_used_count = 0;
+		$visual_evidence                   = $this->editor_article_image_visual_evidence( $items, ! empty( $context['visual_recognition_consent'] ) );
+		$review_items                      = array();
+		$visual_evidence_used_count        = 0;
 		$visual_recognition_required_count = 0;
 		foreach ( array_slice( $items, 0, $per_page ) as $index => $item ) {
 			if ( ! is_array( $item ) ) {
 				continue;
 			}
-			$current_alt    = sanitize_text_field( (string) ( $item['alt'] ?? '' ) );
-			$attachment_id  = absint( $item['attachment_id'] ?? 0 );
-			$item_visual_evidence = $visual_evidence['items'][ $attachment_id ] ?? array();
+			$current_alt           = sanitize_text_field( (string) ( $item['alt'] ?? '' ) );
+			$attachment_id         = absint( $item['attachment_id'] ?? 0 );
+			$item_visual_evidence  = $visual_evidence['items'][ $attachment_id ] ?? array();
 			$needs_visual_evidence = $this->editor_article_image_needs_visual_evidence( $item );
-			$suggested_alt  = $this->editor_contextual_image_alt_draft( $item, $context, $item_visual_evidence );
-			$visual_evidence_used = ! empty( $item_visual_evidence ) && $needs_visual_evidence;
+			$suggested_alt         = $this->editor_contextual_image_alt_draft( $item, $context, $item_visual_evidence );
+			$visual_evidence_used  = ! empty( $item_visual_evidence ) && $needs_visual_evidence;
 			if ( $visual_evidence_used ) {
 				++$visual_evidence_used_count;
 			}
@@ -529,11 +533,11 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 					++$visual_recognition_required_count;
 				}
 			}
-			$context_data = array(
-				'heading' => sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) ),
-				'before'  => sanitize_textarea_field( (string) ( $item['context_before'] ?? '' ) ),
-				'after'   => sanitize_textarea_field( (string) ( $item['context_after'] ?? '' ) ),
-				'caption' => sanitize_textarea_field( (string) ( $item['context_caption'] ?? '' ) ),
+			$context_data   = array(
+				'heading'         => sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) ),
+				'before'          => sanitize_textarea_field( (string) ( $item['context_before'] ?? '' ) ),
+				'after'           => sanitize_textarea_field( (string) ( $item['context_after'] ?? '' ) ),
+				'caption'         => sanitize_textarea_field( (string) ( $item['context_caption'] ?? '' ) ),
 				'visual_evidence' => $visual_evidence_used ? $this->editor_article_image_visual_summary( $item_visual_evidence ) : '',
 			);
 			$review_items[] = array(
@@ -541,7 +545,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'occurrence_index'         => absint( $item['occurrence_index'] ?? ( $index + 1 ) ),
 				'block_client_id'          => sanitize_text_field( (string) ( $item['block_client_id'] ?? '' ) ),
 				'block_name'               => sanitize_text_field( (string) ( $item['block_name'] ?? '' ) ),
-				'apply_supported'           => 'core/image' === (string) ( $item['block_name'] ?? '' ),
+				'apply_supported'          => 'core/image' === (string) ( $item['block_name'] ?? '' ),
 				'attachment_id'            => $attachment_id,
 				'thumbnail_url'            => esc_url_raw( (string) ( $item['thumbnail_url'] ?? ( $item['url'] ?? '' ) ) ),
 				'current_alt'              => $current_alt,
@@ -552,45 +556,45 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'context_fingerprint'      => hash( 'sha256', wp_json_encode( $context_data ) ?: '' ),
 				'target_scope'             => 'post_block_alt',
 				'needs_human_visual_check' => false,
-				'visual_evidence_status'    => $visual_evidence_status,
-				'visual_evidence_used'      => $visual_evidence_used,
-				'visual_evidence_source'    => $visual_evidence_used ? sanitize_key( (string) ( $item_visual_evidence['source'] ?? 'cloud_or_host_runtime' ) ) : '',
-				'decorative'                => ! empty( $item['decorative'] ),
+				'visual_evidence_status'   => $visual_evidence_status,
+				'visual_evidence_used'     => $visual_evidence_used,
+				'visual_evidence_source'   => $visual_evidence_used ? sanitize_key( (string) ( $item_visual_evidence['source'] ?? 'cloud_or_host_runtime' ) ) : '',
+				'decorative'               => ! empty( $item['decorative'] ),
 				'decorative_option'        => 'operator_may_choose_empty_alt',
 				'write_status'             => 'preview_only_not_submitted',
 			);
 		}
 
 		return array(
-			'artifact_type'          => 'current_article_image_alt_suggestions.v1',
-			'contract_version'      => 'current_article_image_alt_context_review.v1',
-			'composition_role'      => 'current_article_contextual_alt_review',
-			'status'                => 'ready',
-			'runtime_owner'         => 'npcink-workflow-toolbox',
-			'provider_execution'    => ! empty( $context['visual_recognition_consent'] ) && $visual_evidence_used_count > 0 ? 'explicit_visual_recognition' : 'none',
-			'source_policy'         => 'article_context_then_current_fingerprint_cache_then_explicit_recognition',
-			'target_scope'          => 'post_block_alt',
-			'post_id'               => absint( $context['post_id'] ?? 0 ),
-			'post_title'            => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
-			'image_occurrence_count' => $total_items,
-			'page_occurrence_count'  => count( $review_items ),
-			'missing_alt_count'     => count( array_filter( $review_items, static fn( array $item ): bool => '' === (string) ( $item['current_alt'] ?? '' ) ) ),
-			'visual_evidence_used_count' => $visual_evidence_used_count,
+			'artifact_type'                     => 'current_article_image_alt_suggestions.v1',
+			'contract_version'                  => 'current_article_image_alt_context_review.v1',
+			'composition_role'                  => 'current_article_contextual_alt_review',
+			'status'                            => 'ready',
+			'runtime_owner'                     => 'npcink-workflow-toolbox',
+			'provider_execution'                => ! empty( $context['visual_recognition_consent'] ) && $visual_evidence_used_count > 0 ? 'explicit_visual_recognition' : 'none',
+			'source_policy'                     => 'article_context_then_current_fingerprint_cache_then_explicit_recognition',
+			'target_scope'                      => 'post_block_alt',
+			'post_id'                           => absint( $context['post_id'] ?? 0 ),
+			'post_title'                        => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+			'image_occurrence_count'            => $total_items,
+			'page_occurrence_count'             => count( $review_items ),
+			'missing_alt_count'                 => count( array_filter( $review_items, static fn( array $item ): bool => '' === (string) ( $item['current_alt'] ?? '' ) ) ),
+			'visual_evidence_used_count'        => $visual_evidence_used_count,
 			'visual_recognition_required_count' => $visual_recognition_required_count,
-			'visual_confirmation_policy' => 'explicit_operator_action_before_provider_call',
-			'items'                 => $review_items,
-			'occurrence_offset'     => $offset,
-			'per_page'              => $per_page,
-			'total_occurrence_count' => $total_items,
-			'has_previous_page'     => $offset > 0,
-			'has_next_page'         => ( $offset + count( $review_items ) ) < $total_items,
-			'write_posture'         => 'suggestion_only',
-			'editor_apply_path'      => 'local_admin_consent_audit_then_editor_state',
-			'final_write_path'      => 'wordpress_editor_save_after_confirmation',
-			'proposal_ready'        => false,
-			'proposal_created'      => false,
-			'direct_wordpress_write' => false,
-			'guardrails'            => array(
+			'visual_confirmation_policy'        => 'explicit_operator_action_before_provider_call',
+			'items'                             => $review_items,
+			'occurrence_offset'                 => $offset,
+			'per_page'                          => $per_page,
+			'total_occurrence_count'            => $total_items,
+			'has_previous_page'                 => $offset > 0,
+			'has_next_page'                     => ( $offset + count( $review_items ) ) < $total_items,
+			'write_posture'                     => 'suggestion_only',
+			'editor_apply_path'                 => 'local_admin_consent_audit_then_editor_state',
+			'final_write_path'                  => 'wordpress_editor_save_after_confirmation',
+			'proposal_ready'                    => false,
+			'proposal_created'                  => false,
+			'direct_wordpress_write'            => false,
+			'guardrails'                        => array(
 				'context_decides_image_purpose',
 				'visual_facts_are_used_only_when_article_context_is_insufficient',
 				'provider_calls_require_explicit_operator_consent',
@@ -604,9 +608,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_contextual_image_alt_draft( array $item, array $context, array $visual_evidence = array() ): string {
 		$current_alt = sanitize_text_field( (string) ( $item['alt'] ?? '' ) );
-		$caption = sanitize_text_field( (string) ( $item['context_caption'] ?? ( $item['caption'] ?? '' ) ) );
-		$heading = sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) );
-		$nearby  = sanitize_text_field( (string) ( $item['context_before'] ?? '' ) );
+		$caption     = sanitize_text_field( (string) ( $item['context_caption'] ?? ( $item['caption'] ?? '' ) ) );
+		$heading     = sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) );
+		$nearby      = sanitize_text_field( (string) ( $item['context_before'] ?? '' ) );
 		if ( '' === $nearby ) {
 			$nearby = sanitize_text_field( (string) ( $item['context_after'] ?? '' ) );
 		}
@@ -666,16 +670,16 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				continue;
 			}
 			$requested_ids[ $attachment_id ] = true;
-			$request_items[] = array(
-				'attachment_id'          => $attachment_id,
-				'title'                  => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-				'filename'               => sanitize_file_name( wp_basename( (string) wp_parse_url( (string) ( $item['url'] ?? '' ), PHP_URL_PATH ) ) ),
-				'thumbnail_url'          => esc_url_raw( (string) ( $item['thumbnail_url'] ?? '' ) ),
-				'url'                    => esc_url_raw( (string) ( $item['url'] ?? '' ) ),
-				'mime_type'              => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
-				'current_alt_status'     => 'missing',
-				'current_caption_status' => '' === trim( (string) ( $item['caption'] ?? '' ) ) ? 'missing' : 'present',
-				'candidate_quality_flags' => array( 'article_context_insufficient' ),
+			$request_items[]                 = array(
+				'attachment_id'            => $attachment_id,
+				'title'                    => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'filename'                 => sanitize_file_name( wp_basename( (string) wp_parse_url( (string) ( $item['url'] ?? '' ), PHP_URL_PATH ) ) ),
+				'thumbnail_url'            => esc_url_raw( (string) ( $item['thumbnail_url'] ?? '' ) ),
+				'url'                      => esc_url_raw( (string) ( $item['url'] ?? '' ) ),
+				'mime_type'                => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'current_alt_status'       => 'missing',
+				'current_caption_status'   => '' === trim( (string) ( $item['caption'] ?? '' ) ) ? 'missing' : 'present',
+				'candidate_quality_flags'  => array( 'article_context_insufficient' ),
 				'filtered_candidate_notes' => array(),
 			);
 			if ( count( $request_items ) >= 10 ) {
@@ -689,21 +693,21 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 		$evidence = $this->client->resolve_media_image_context_evidence(
 			array(
-				'contract_version'          => 'image_context_evidence_request.v1',
-				'artifact_type'             => 'image_context_evidence_request',
-				'runtime_owner'             => 'cloud_or_host_runtime',
-				'write_posture'             => 'suggestion_only',
-				'direct_wordpress_write'    => false,
-				'proposal_created'          => false,
-				'execution_created'         => false,
-				'no_local_model'            => true,
-				'no_media_write'            => true,
-				'source_policy'             => 'local_attachment_current_fingerprint_only',
+				'contract_version'           => 'image_context_evidence_request.v1',
+				'artifact_type'              => 'image_context_evidence_request',
+				'runtime_owner'              => 'cloud_or_host_runtime',
+				'write_posture'              => 'suggestion_only',
+				'direct_wordpress_write'     => false,
+				'proposal_created'           => false,
+				'execution_created'          => false,
+				'no_local_model'             => true,
+				'no_media_write'             => true,
+				'source_policy'              => 'local_attachment_current_fingerprint_only',
 				'expected_response_contract' => 'image_context_evidence.v1',
-				'requested_count'           => count( $request_items ),
-				'max_items'                 => count( $request_items ),
-				'items'                     => $request_items,
-				'operator_next_action'      => $allow_recognition ? 'explicit_visual_recognition_confirmed' : 'review_recognition_required',
+				'requested_count'            => count( $request_items ),
+				'max_items'                  => count( $request_items ),
+				'items'                      => $request_items,
+				'operator_next_action'       => $allow_recognition ? 'explicit_visual_recognition_confirmed' : 'review_recognition_required',
 			),
 			$allow_recognition,
 			$allow_recognition ? 'article_alt_review' : '',
@@ -733,7 +737,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return array(
-			'items' => $indexed,
+			'items'                               => $indexed,
 			'recognition_required_attachment_ids' => array_values( array_map( 'absint', (array) ( $evidence['recognition_required_attachment_ids'] ?? array() ) ) ),
 		);
 	}
@@ -763,21 +767,21 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$post_summary    = '' !== $post_excerpt ? $post_excerpt : sanitize_textarea_field( wp_trim_words( (string) ( $context['content_text'] ?? '' ), 36, '' ) );
 
 		$base = array(
-			'artifact_type'             => 'comment_reply_suggestion.v1',
-			'candidate_type'            => 'comment_reply_candidates',
-			'write_posture'             => 'suggestion_only',
-			'final_write_path'          => 'core_proposal_required',
-			'direct_wordpress_write'    => false,
+			'artifact_type'              => 'comment_reply_suggestion.v1',
+			'candidate_type'             => 'comment_reply_candidates',
+			'write_posture'              => 'suggestion_only',
+			'final_write_path'           => 'core_proposal_required',
+			'direct_wordpress_write'     => false,
 			'comment_publication_policy' => 'operator_review_only_no_comment_publish',
-			'comment_status_unchanged'  => true,
-			'provider_execution'        => 'toolkit_comment_reply_suggestion',
-			'source_policy'             => 'current_article_and_operator_supplied_comment_only',
-			'post_context'              => array(
+			'comment_status_unchanged'   => true,
+			'provider_execution'         => 'toolkit_comment_reply_suggestion',
+			'source_policy'              => 'current_article_and_operator_supplied_comment_only',
+			'post_context'               => array(
 				'post_id' => absint( $context['post_id'] ?? 0 ),
 				'title'   => $post_title,
 				'excerpt' => $post_summary,
 			),
-			'comment_context'           => $comment_context,
+			'comment_context'            => $comment_context,
 		);
 
 		if ( '' === $comment_text ) {
@@ -823,10 +827,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return array_merge(
 			$base,
 			array(
-				'status'                   => 'ready',
-				'source_ability_id'        => 'npcink-abilities-toolkit/build-comment-mention-reply-suggest',
-				'toolkit_artifact'         => $data,
-				'items'                    => $items,
+				'status'                    => 'ready',
+				'source_ability_id'         => 'npcink-abilities-toolkit/build-comment-mention-reply-suggest',
+				'toolkit_artifact'          => $data,
+				'items'                     => $items,
 				'recommendation_candidates' => $this->editor_comment_reply_recommendation_candidates( $items ),
 			)
 		);
@@ -985,9 +989,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_support_query( array $context ): string {
-		$scope     = sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) );
-		$instruction = trim( (string) ( $context['user_instruction'] ?? '' ) );
-		$selection = trim(
+		$scope               = sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) );
+		$instruction         = trim( (string) ( $context['user_instruction'] ?? '' ) );
+		$selection           = trim(
 			implode(
 				' ',
 				array_filter(
@@ -1087,7 +1091,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_image_support_query( array $context ): string {
 		$instruction = trim( sanitize_textarea_field( (string) ( $context['user_instruction'] ?? '' ) ) );
-		$selection = trim(
+		$selection   = trim(
 			implode(
 				' ',
 				array_filter(
@@ -1098,7 +1102,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				)
 			)
 		);
-		$seed = trim(
+		$seed        = trim(
 			implode(
 				' ',
 				array_filter(
@@ -1126,13 +1130,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'ai'        => 'artificial intelligence',
 			'wordpress' => 'wordpress publishing',
 			'content'   => 'content strategy',
-			'上下文'        => 'editorial context',
-			'文章'         => 'editorial content',
-			'段落'         => 'editorial paragraph',
-			'事实'         => 'evidence documentation',
-			'表达'         => 'clear communication',
-			'创作'         => 'creative writing workspace',
-			'读者'         => 'reader research',
+			'上下文'       => 'editorial context',
+			'文章'        => 'editorial content',
+			'段落'        => 'editorial paragraph',
+			'事实'        => 'evidence documentation',
+			'表达'        => 'clear communication',
+			'创作'        => 'creative writing workspace',
+			'读者'        => 'reader research',
 		);
 		foreach ( $term_map as $needle => $visual_term ) {
 			$pattern = preg_match( '/^[a-z0-9]+$/', $needle ) ? '/(?<![a-z0-9])' . preg_quote( $needle, '/' ) . '(?![a-z0-9])/' : '/' . preg_quote( $needle, '/' ) . '/u';
@@ -1180,25 +1184,25 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 		$default_stage = 'manual_brief' === $input_mode ? 'research_plan' : 'extract';
-		$source_stage = sanitize_key( (string) ( $request->get_param( 'source_stage' ) ?: $default_stage ) );
-		$source_url = '';
+		$source_stage  = sanitize_key( (string) ( $request->get_param( 'source_stage' ) ?: $default_stage ) );
+		$source_url    = '';
 		if ( 'draft' !== $source_stage && in_array( $input_mode, array( 'url_reference', 'mixed' ), true ) ) {
 			$source_url = $this->editor_source_adaptation_url( (string) $request->get_param( 'source_url' ) );
 			if ( is_wp_error( $source_url ) ) {
 				return $source_url;
 			}
 		}
-		$context['source_url'] = $source_url;
-		$context['source_stage'] = in_array( $source_stage, array( 'extract', 'adapt', 'research_plan', 'draft' ), true ) ? $source_stage : $default_stage;
-		$context['source_stage_requested'] = $context['source_stage'];
-		$context['input_mode']   = $input_mode;
-		$context['editorial_brief'] = $this->editor_writing_pack_request_brief( $request->get_param( 'editorial_brief' ) );
-		$context['reviewed_writing_pack'] = $request->get_param( 'reviewed_writing_pack' );
+		$context['source_url']                = $source_url;
+		$context['source_stage']              = in_array( $source_stage, array( 'extract', 'adapt', 'research_plan', 'draft' ), true ) ? $source_stage : $default_stage;
+		$context['source_stage_requested']    = $context['source_stage'];
+		$context['input_mode']                = $input_mode;
+		$context['editorial_brief']           = $this->editor_writing_pack_request_brief( $request->get_param( 'editorial_brief' ) );
+		$context['reviewed_writing_pack']     = $request->get_param( 'reviewed_writing_pack' );
 		$context['writing_pack_confirmation'] = $request->get_param( 'writing_pack_confirmation' );
-		$context['draft_review_feedback'] = 'draft' === $context['source_stage']
+		$context['draft_review_feedback']     = 'draft' === $context['source_stage']
 			? $this->editor_draft_review_feedback_request( $request->get_param( 'draft_review_feedback' ) )
 			: array();
-		$context['user_instruction'] = (string) ( $context['editorial_brief']['operator_instruction'] ?? '' );
+		$context['user_instruction']          = (string) ( $context['editorial_brief']['operator_instruction'] ?? '' );
 
 		return $context;
 	}
@@ -1227,8 +1231,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	 */
 
 	private function editor_writing_pack_flow( WP_REST_Request $request, array $context, array $result, string $intent ) {
-		$source_url   = (string) ( $context['source_url'] ?? '' );
-		$source_stage = (string) ( $context['source_stage'] ?? 'extract' );
+		$source_url           = (string) ( $context['source_url'] ?? '' );
+		$source_stage         = (string) ( $context['source_stage'] ?? 'extract' );
 		$force_source_refresh = 'extract' === $source_stage && rest_sanitize_boolean( $request->get_param( 'force_refresh' ) );
 		if ( 'adapt' === $source_stage ) {
 			$source_stage = 'research_plan';
@@ -1239,7 +1243,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		if ( 'manual_brief' === (string) ( $context['input_mode'] ?? '' ) ) {
 			return $this->editor_manual_writing_pack_response( $context, $result );
 		}
-		$external_raw  = $this->editor_cached_cloud_web_search(
+		$external_raw                         = $this->editor_cached_cloud_web_search(
 			array(
 				'query'        => $source_url,
 				'source_url'   => $source_url,
@@ -1249,30 +1253,30 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			),
 			$force_source_refresh
 		);
-		$external       = $this->editor_support_section( $external_raw );
-		$source_item    = ! is_wp_error( $external_raw ) && is_array( $external_raw['results'][0] ?? null ) ? $external_raw['results'][0] : array();
-		$source_text    = trim( (string) ( $source_item['reader_excerpt'] ?? $source_item['snippet'] ?? '' ) );
-		$source_title   = sanitize_text_field( (string) ( $external['title'] ?? $source_item['title'] ?? '' ) );
-		$source_body_text = $this->editor_source_article_body_text( $source_title, $source_text );
-		$source_resolved_url = esc_url_raw( (string) ( $external['resolved_url'] ?? $source_item['url'] ?? '' ) );
-		$cloud_url_match = sanitize_key( (string) ( $external['url_match'] ?? '' ) );
-		$source_url_matches = 'matched' === $cloud_url_match && $this->editor_source_adaptation_url_matches( $source_url, $source_resolved_url );
+		$external                             = $this->editor_support_section( $external_raw );
+		$source_item                          = ! is_wp_error( $external_raw ) && is_array( $external_raw['results'][0] ?? null ) ? $external_raw['results'][0] : array();
+		$source_text                          = trim( (string) ( $source_item['reader_excerpt'] ?? $source_item['snippet'] ?? '' ) );
+		$source_title                         = sanitize_text_field( (string) ( $external['title'] ?? $source_item['title'] ?? '' ) );
+		$source_body_text                     = $this->editor_source_article_body_text( $source_title, $source_text );
+		$source_resolved_url                  = esc_url_raw( (string) ( $external['resolved_url'] ?? $source_item['url'] ?? '' ) );
+		$cloud_url_match                      = sanitize_key( (string) ( $external['url_match'] ?? '' ) );
+		$source_url_matches                   = 'matched' === $cloud_url_match && $this->editor_source_adaptation_url_matches( $source_url, $source_resolved_url );
 		$result['sections']['source_article'] = $external;
-		$result['sections']['source_article']['requested_url'] = esc_url_raw( (string) ( $external['requested_url'] ?? $source_url ) );
-		$result['sections']['source_article']['resolved_url']  = $source_resolved_url;
-		$result['sections']['source_article']['url_match']     = $source_url_matches ? 'matched' : ( $cloud_url_match ?: 'unavailable' );
-		$source_body_ready = $source_url_matches && $this->editor_source_body_is_draftable( $source_body_text );
-		$result['sections']['source_article']['body_ready'] = $source_body_ready;
+		$result['sections']['source_article']['requested_url']  = esc_url_raw( (string) ( $external['requested_url'] ?? $source_url ) );
+		$result['sections']['source_article']['resolved_url']   = $source_resolved_url;
+		$result['sections']['source_article']['url_match']      = $source_url_matches ? 'matched' : ( $cloud_url_match ?: 'unavailable' );
+		$source_body_ready                                      = $source_url_matches && $this->editor_source_body_is_draftable( $source_body_text );
+		$result['sections']['source_article']['body_ready']     = $source_body_ready;
 		$result['sections']['source_article']['body_readiness'] = $source_body_ready ? 'ready' : 'insufficient';
-		$result['artifact_type']              = 'source_extraction_preview.v1';
-		$result['contract_version']           = 'source_extraction_preview.v1';
-		$result['input_mode']                 = (string) ( $context['input_mode'] ?? 'url_reference' );
-		$result['composition_role']           = 'external_source_extraction_review';
-		$result['final_write_path']            = 'operator_review_only_no_insert';
-		$result['handoff']['final_writes']     = 'operator_review_only_no_insert';
-		$result['handoff']['source_runtime']   = 'cloud_exact_url_reader';
-		$result['handoff']['body_generation']  = false;
-		$result['handoff']['body_replacement'] = false;
+		$result['artifact_type']                                = 'source_extraction_preview.v1';
+		$result['contract_version']                             = 'source_extraction_preview.v1';
+		$result['input_mode']                                   = (string) ( $context['input_mode'] ?? 'url_reference' );
+		$result['composition_role']                             = 'external_source_extraction_review';
+		$result['final_write_path']                             = 'operator_review_only_no_insert';
+		$result['handoff']['final_writes']                      = 'operator_review_only_no_insert';
+		$result['handoff']['source_runtime']                    = 'cloud_exact_url_reader';
+		$result['handoff']['body_generation']                   = false;
+		$result['handoff']['body_replacement']                  = false;
 
 		if ( 'extract' === $source_stage ) {
 			$result['recommendation_set']  = $this->editor_recommendation_set( $context, $intent, $result['sections'] );
@@ -1288,17 +1292,17 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'direct_wordpress_write' => false,
 			);
 		} elseif ( $source_body_ready ) {
-			$site_query = trim( $source_title . ' ' . wp_trim_words( wp_strip_all_tags( $source_body_text ), 80, '' ) );
-			$knowledge_raw = $this->editor_cached_site_knowledge(
+			$site_query                                     = trim( $source_title . ' ' . wp_trim_words( wp_strip_all_tags( $source_body_text ), 80, '' ) );
+			$knowledge_raw                                  = $this->editor_cached_site_knowledge(
 				array(
-					'query'           => $site_query,
-					'intent'          => 'writing_support_plan',
+					'query'              => $site_query,
+					'intent'             => 'writing_support_plan',
 					'result_granularity' => 'document',
-					'current_post_id' => absint( $context['post_id'] ?? 0 ),
-					'max_results'     => 6,
+					'current_post_id'    => absint( $context['post_id'] ?? 0 ),
+					'max_results'        => 6,
 				)
 			);
-			$result['sections']['source_site_context'] = $this->editor_support_section( $knowledge_raw );
+			$result['sections']['source_site_context']      = $this->editor_support_section( $knowledge_raw );
 			$result['sections']['source_adaptation_review'] = $this->editor_hosted_source_adaptation_review(
 				$context,
 				array(
@@ -1318,31 +1322,30 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 
-		$result['sections']['article_writing_pack'] = $this->editor_article_writing_pack(
+		$result['sections']['article_writing_pack']     = $this->editor_article_writing_pack(
 			$context,
 			$result['sections']['source_article'],
 			$result['sections']['source_site_context'] ?? array(),
 			$result['sections']['source_adaptation_review'] ?? array(),
 			$source_body_text
 		);
-		$legacy_adapt_stage = 'adapt' === (string) ( $context['source_stage_requested'] ?? '' );
-		$result['artifact_type']              = $legacy_adapt_stage ? 'source_adaptation_review.v1' : 'article_writing_pack.v1';
-		$result['contract_version']           = $legacy_adapt_stage ? 'source_adaptation_review.v1' : 'article_writing_pack.v1';
-		$result['primary_artifact_type']      = 'article_writing_pack.v1';
-		$result['input_mode']                 = (string) ( $context['input_mode'] ?? 'url_reference' );
-		$result['composition_role']           = 'source_grounded_article_planning';
-		$result['final_write_path']            = 'operator_review_only_no_insert';
-		$result['handoff']['final_writes']     = 'operator_review_only_no_insert';
-		$result['handoff']['source_runtime']   = 'cloud_exact_url_reader';
-		$result['handoff']['style_runtime']    = 'cloud_site_knowledge';
-		$result['handoff']['required_input_contract'] = 'article_writing_pack.v1';
+		$legacy_adapt_stage                             = 'adapt' === (string) ( $context['source_stage_requested'] ?? '' );
+		$result['artifact_type']                        = $legacy_adapt_stage ? 'source_adaptation_review.v1' : 'article_writing_pack.v1';
+		$result['contract_version']                     = $legacy_adapt_stage ? 'source_adaptation_review.v1' : 'article_writing_pack.v1';
+		$result['primary_artifact_type']                = 'article_writing_pack.v1';
+		$result['input_mode']                           = (string) ( $context['input_mode'] ?? 'url_reference' );
+		$result['composition_role']                     = 'source_grounded_article_planning';
+		$result['final_write_path']                     = 'operator_review_only_no_insert';
+		$result['handoff']['final_writes']              = 'operator_review_only_no_insert';
+		$result['handoff']['source_runtime']            = 'cloud_exact_url_reader';
+		$result['handoff']['style_runtime']             = 'cloud_site_knowledge';
+		$result['handoff']['required_input_contract']   = 'article_writing_pack.v1';
 		$result['handoff']['article_generation_status'] = 'not_admitted_current_stage';
-		$result['handoff']['body_generation']  = false;
-		$result['handoff']['body_replacement'] = false;
-		$result['recommendation_set']          = $this->editor_recommendation_set( $context, $intent, $result['sections'] );
-		$result['content_fingerprint']         = $result['recommendation_set']['content_fingerprint'];
+		$result['handoff']['body_generation']           = false;
+		$result['handoff']['body_replacement']          = false;
+		$result['recommendation_set']                   = $this->editor_recommendation_set( $context, $intent, $result['sections'] );
+		$result['content_fingerprint']                  = $result['recommendation_set']['content_fingerprint'];
 		return rest_ensure_response( $result );
-	
 	}
 
 	private function editor_support_section( $value ): array {
@@ -1360,64 +1363,64 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_progressive_recommendations( array $context, string $query ): array {
-		$taxonomy_terms     = '' !== $query ? $this->editor_taxonomy_term_candidates( $context, $query ) : $this->editor_local_taxonomy_profile( $context );
-		$taxonomy_items     = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
-		$category_items     = array_values(
+		$taxonomy_terms           = '' !== $query ? $this->editor_taxonomy_term_candidates( $context, $query ) : $this->editor_local_taxonomy_profile( $context );
+		$taxonomy_items           = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
+		$category_items           = array_values(
 			array_filter(
 				$taxonomy_items,
 				static fn( array $item ): bool => 'category' === (string) ( $item['taxonomy'] ?? '' )
 			)
 		);
-		$tag_items          = array_values(
+		$tag_items                = array_values(
 			array_filter(
 				$taxonomy_items,
 				static fn( array $item ): bool => 'post_tag' === (string) ( $item['taxonomy'] ?? '' )
 			)
 		);
-		$media_items        = $this->editor_media_library_candidates( $context, $query );
-		$preflight_checks   = $this->publish_preflight->local_checks( $context );
-		$preflight_candidates = $this->editor_preflight_recommendation_candidates( $preflight_checks );
+		$media_items              = $this->editor_media_library_candidates( $context, $query );
+		$preflight_checks         = $this->publish_preflight->local_checks( $context );
+		$preflight_candidates     = $this->editor_preflight_recommendation_candidates( $preflight_checks );
 		$taxonomy_recommendations = '' !== trim( $query )
 			? array_merge(
 				$this->editor_taxonomy_recommendation_candidates( 'category_suggestions', $category_items, array(), $this->empty_proposed_new_terms_review() ),
 				$this->editor_taxonomy_recommendation_candidates( 'tag_suggestions', array(), $tag_items, $this->empty_proposed_new_terms_review() )
 			)
 			: array();
-		$recommendations    = array_merge(
+		$recommendations          = array_merge(
 			$this->editor_filter_high_confidence_taxonomy_recommendations( $taxonomy_recommendations ),
 			$this->editor_media_library_recommendation_candidates( $media_items ),
 			$preflight_candidates
 		);
 
 		return array(
-			'artifact_type'              => 'editor_progressive_recommendations.v1',
-			'composition_role'           => 'local_progressive_prefetch',
-			'candidate_type'             => 'progressive_recommendations',
-			'candidate_contract'         => 'recommendation_candidate.v1',
-			'latency_profile'            => 'local_300ms',
-			'target_latency_ms'          => 300,
-			'write_posture'              => 'suggestion_only',
-			'final_write_path'           => 'core_proposal_required',
-			'direct_wordpress_write'     => false,
-			'content_fingerprint'        => $this->editor_content_fingerprint( $context ),
-			'available_context'          => array(
-				'post_id'                 => absint( $context['post_id'] ?? 0 ),
-				'post_type'               => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
-				'has_title'               => '' !== trim( (string) ( $context['title'] ?? '' ) ),
-				'has_excerpt'             => '' !== trim( (string) ( $context['excerpt'] ?? '' ) ),
-				'content_words'           => str_word_count( (string) ( $context['content_text'] ?? '' ) ),
-				'category_count'          => count( $category_items ),
-				'tag_count'               => count( $tag_items ),
-				'media_library_count'     => count( $media_items ),
-				'context_source'          => '' !== $query ? 'current_draft_and_local_wordpress' : 'local_wordpress_prefetch',
+			'artifact_type'             => 'editor_progressive_recommendations.v1',
+			'composition_role'          => 'local_progressive_prefetch',
+			'candidate_type'            => 'progressive_recommendations',
+			'candidate_contract'        => 'recommendation_candidate.v1',
+			'latency_profile'           => 'local_300ms',
+			'target_latency_ms'         => 300,
+			'write_posture'             => 'suggestion_only',
+			'final_write_path'          => 'core_proposal_required',
+			'direct_wordpress_write'    => false,
+			'content_fingerprint'       => $this->editor_content_fingerprint( $context ),
+			'available_context'         => array(
+				'post_id'             => absint( $context['post_id'] ?? 0 ),
+				'post_type'           => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+				'has_title'           => '' !== trim( (string) ( $context['title'] ?? '' ) ),
+				'has_excerpt'         => '' !== trim( (string) ( $context['excerpt'] ?? '' ) ),
+				'content_words'       => str_word_count( (string) ( $context['content_text'] ?? '' ) ),
+				'category_count'      => count( $category_items ),
+				'tag_count'           => count( $tag_items ),
+				'media_library_count' => count( $media_items ),
+				'context_source'      => '' !== $query ? 'current_draft_and_local_wordpress' : 'local_wordpress_prefetch',
 			),
-			'category_candidates'        => array_slice( $category_items, 0, 2 ),
-			'tag_candidates'             => array_slice( $tag_items, 0, 8 ),
-			'media_library_candidates'   => $media_items,
-			'preflight_candidates'       => $preflight_candidates,
-			'recommendation_candidates'  => array_slice( $recommendations, 0, self::EDITOR_PROGRESSIVE_CANDIDATE_LIMIT ),
-			'preflight_checks'           => $preflight_checks,
-			'next_fast_intents'          => array_values(
+			'category_candidates'       => array_slice( $category_items, 0, 2 ),
+			'tag_candidates'            => array_slice( $tag_items, 0, 8 ),
+			'media_library_candidates'  => $media_items,
+			'preflight_candidates'      => $preflight_candidates,
+			'recommendation_candidates' => array_slice( $recommendations, 0, self::EDITOR_PROGRESSIVE_CANDIDATE_LIMIT ),
+			'preflight_checks'          => $preflight_checks,
+			'next_fast_intents'         => array_values(
 				array_filter(
 					array(
 						'' !== trim( (string) ( $context['title'] ?? '' ) ) ? 'title_suggestions' : '',
@@ -1428,14 +1431,14 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 					)
 				)
 			),
-			'deferred_enhancements'      => array(
+			'deferred_enhancements'     => array(
 				'cloud_title_generation',
 				'hosted_summary_generation',
 				'cloud_image_source_search',
 				'site_knowledge_internal_links',
 				'publish_preflight_duplicate_check',
 			),
-			'remote_execution_policy'    => array(
+			'remote_execution_policy'   => array(
 				'cloud_calls'             => false,
 				'workflow_runtime'        => false,
 				'direct_async_queue'      => false,
@@ -1459,29 +1462,29 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$proposal_targets    = $this->editor_recommendation_set_proposal_targets( $sections );
 
 		return array(
-			'recommendation_set_id' => 'rec_' . substr( hash( 'sha256', $content_fingerprint . '|' . $intent . '|' . wp_json_encode( $artifact_counts ) ), 0, 20 ),
-			'contract_version'      => 'editor_recommendation_set.v1',
-			'canonical_contract'    => 'recommendation_set.v1',
+			'recommendation_set_id'  => 'rec_' . substr( hash( 'sha256', $content_fingerprint . '|' . $intent . '|' . wp_json_encode( $artifact_counts ) ), 0, 20 ),
+			'contract_version'       => 'editor_recommendation_set.v1',
+			'canonical_contract'     => 'recommendation_set.v1',
 			'compatibility_contract' => 'editor_recommendation_set.v1',
-			'generated_at'          => gmdate( 'c' ),
-			'source_layer'          => $this->editor_recommendation_set_source_layer( $sections ),
-			'latency_profile'       => 'progressive_recommendations' === $intent ? 'local_300ms' : 'focused_intent',
-			'content_fingerprint'   => $content_fingerprint,
-			'content_context'       => $this->editor_content_context( $context ),
-			'intent'                => sanitize_key( $intent ),
-			'artifacts'             => $artifact_counts,
-			'artifact_counts'       => $artifact_counts,
-			'candidates'            => $this->editor_recommendation_set_candidate_refs( $sections ),
-			'retrieval_sources'     => $retrieval_sources,
-			'proposal_targets'      => $proposal_targets,
-			'no_write'              => true,
-			'governance'            => array(
-				'dry_run_available'     => true,
-				'requires_proposal'     => $this->editor_recommendation_set_required_proposals( $sections ),
-				'write_posture'         => 'suggestion_only',
+			'generated_at'           => gmdate( 'c' ),
+			'source_layer'           => $this->editor_recommendation_set_source_layer( $sections ),
+			'latency_profile'        => 'progressive_recommendations' === $intent ? 'local_300ms' : 'focused_intent',
+			'content_fingerprint'    => $content_fingerprint,
+			'content_context'        => $this->editor_content_context( $context ),
+			'intent'                 => sanitize_key( $intent ),
+			'artifacts'              => $artifact_counts,
+			'artifact_counts'        => $artifact_counts,
+			'candidates'             => $this->editor_recommendation_set_candidate_refs( $sections ),
+			'retrieval_sources'      => $retrieval_sources,
+			'proposal_targets'       => $proposal_targets,
+			'no_write'               => true,
+			'governance'             => array(
+				'dry_run_available'      => true,
+				'requires_proposal'      => $this->editor_recommendation_set_required_proposals( $sections ),
+				'write_posture'          => 'suggestion_only',
 				'direct_wordpress_write' => false,
 			),
-			'debug'                 => array(
+			'debug'                  => array(
 				'retrieval_sources'     => $retrieval_sources,
 				'cache_ttl_seconds'     => self::EDITOR_FLOW_CACHE_TTL,
 				'progressive_target_ms' => self::EDITOR_PROGRESSIVE_TARGET_MS,
@@ -1508,24 +1511,24 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_content_context( array $context ): array {
 		$post_id = absint( $context['post_id'] ?? 0 );
 		return array(
-			'contract_version'    => 'content_context.v1',
-			'platform'            => 'wordpress',
-			'site_id'             => function_exists( 'get_current_blog_id' ) ? absint( get_current_blog_id() ) : 0,
-			'post_id'             => $post_id,
-			'post_type'           => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
-			'post_status'         => sanitize_key( (string) ( $context['post_status'] ?? '' ) ),
-			'canonical_url'       => $post_id > 0 && function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post_id ) ) : '',
-			'language'            => function_exists( 'determine_locale' ) ? sanitize_text_field( determine_locale() ) : sanitize_text_field( (string) get_locale() ),
-			'context_scope'       => sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) ),
-			'title'               => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
-			'excerpt'             => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
-			'content_text'        => sanitize_textarea_field( (string) ( $context['content_text'] ?? '' ) ),
-			'selected_text'       => sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ),
-			'selected_block_text' => sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ),
-			'category_ids'        => array_values( array_map( 'absint', is_array( $context['category_ids'] ?? null ) ? $context['category_ids'] : array() ) ),
-			'tag_ids'             => array_values( array_map( 'absint', is_array( $context['tag_ids'] ?? null ) ? $context['tag_ids'] : array() ) ),
-			'content_fingerprint' => $this->editor_content_fingerprint( $context ),
-			'write_owner'         => 'wordpress_local',
+			'contract_version'       => 'content_context.v1',
+			'platform'               => 'wordpress',
+			'site_id'                => function_exists( 'get_current_blog_id' ) ? absint( get_current_blog_id() ) : 0,
+			'post_id'                => $post_id,
+			'post_type'              => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+			'post_status'            => sanitize_key( (string) ( $context['post_status'] ?? '' ) ),
+			'canonical_url'          => $post_id > 0 && function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post_id ) ) : '',
+			'language'               => function_exists( 'determine_locale' ) ? sanitize_text_field( determine_locale() ) : sanitize_text_field( (string) get_locale() ),
+			'context_scope'          => sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) ),
+			'title'                  => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+			'excerpt'                => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
+			'content_text'           => sanitize_textarea_field( (string) ( $context['content_text'] ?? '' ) ),
+			'selected_text'          => sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ),
+			'selected_block_text'    => sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ),
+			'category_ids'           => array_values( array_map( 'absint', is_array( $context['category_ids'] ?? null ) ? $context['category_ids'] : array() ) ),
+			'tag_ids'                => array_values( array_map( 'absint', is_array( $context['tag_ids'] ?? null ) ? $context['tag_ids'] : array() ) ),
+			'content_fingerprint'    => $this->editor_content_fingerprint( $context ),
+			'write_owner'            => 'wordpress_local',
 			'direct_wordpress_write' => false,
 		);
 	}
@@ -1608,10 +1611,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				if ( '' === $candidate_id ) {
 					continue;
 				}
-				$kind          = sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) );
-				$target_field  = sanitize_key( (string) ( $candidate['target_field'] ?? $kind ) );
-				$ability_id    = $this->editor_recommendation_target_ability_id( $target_field, $kind );
-				$dedupe_key    = $candidate_id . '|' . $target_field . '|' . $ability_id;
+				$kind         = sanitize_key( (string) ( $candidate['kind'] ?? 'generic' ) );
+				$target_field = sanitize_key( (string) ( $candidate['target_field'] ?? $kind ) );
+				$ability_id   = $this->editor_recommendation_target_ability_id( $target_field, $kind );
+				$dedupe_key   = $candidate_id . '|' . $target_field . '|' . $ability_id;
 				if ( isset( $seen[ $dedupe_key ] ) ) {
 					continue;
 				}
@@ -1770,13 +1773,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			if ( empty( $item ) ) {
 				continue;
 			}
-			$score         = $this->editor_contextual_match_score( implode( ' ', array( $item['title'] ?? '', $item['alt'] ?? '', $item['caption'] ?? '', $item['description'] ?? '' ) ), $context, $query );
-			$item['score'] = $score;
+			$score                = $this->editor_contextual_match_score( implode( ' ', array( $item['title'] ?? '', $item['alt'] ?? '', $item['caption'] ?? '', $item['description'] ?? '' ) ), $context, $query );
+			$item['score']        = $score;
 			$item['recency_rank'] = count( $items );
-			$item['reason'] = $score > 0
+			$item['reason']       = $score > 0
 				? __( 'Existing media matched weighted title, excerpt, selected text, or draft terms.', 'npcink-workflow-toolbox' )
 				: __( 'Recent existing media candidate from the local library. Review visual fit before adoption.', 'npcink-workflow-toolbox' );
-			$items[]       = $item;
+			$items[]              = $item;
 		}
 		usort(
 			$items,
@@ -1880,9 +1883,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			if ( ! is_array( $item ) || 'ok' === (string) ( $item['status'] ?? '' ) ) {
 				continue;
 			}
-			$id     = sanitize_key( (string) ( $item['id'] ?? 'preflight' ) );
-			$status = sanitize_key( (string) ( $item['status'] ?? 'warning' ) );
-			$score  = 'error' === $status ? 35 : 55;
+			$id           = sanitize_key( (string) ( $item['id'] ?? 'preflight' ) );
+			$status       = sanitize_key( (string) ( $item['status'] ?? 'warning' ) );
+			$score        = 'error' === $status ? 35 : 55;
 			$candidates[] = $this->editor_recommendation_candidate(
 				array(
 					'id'             => 'preflight_' . $id,
@@ -2000,7 +2003,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$result = $callback();
 		if ( ! is_wp_error( $result ) && is_array( $result ) ) {
 			$result['cache_status'] = $force_refresh ? 'bypass' : 'miss';
-			$cacheable = null === $should_cache || $should_cache( $result );
+			$cacheable              = null === $should_cache || $should_cache( $result );
 			if ( $cacheable && ( ! $force_refresh || $replace_cache_on_force ) ) {
 				set_transient( $cache_key, $result, self::EDITOR_FLOW_CACHE_TTL );
 			} elseif ( $force_refresh && $replace_cache_on_force ) {
@@ -2049,11 +2052,11 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 
-		$scheme = strtolower( (string) ( $parts['scheme'] ?? '' ) );
-		$host   = strtolower( trim( (string) ( $parts['host'] ?? '' ), '[]' ) );
-		$port   = isset( $parts['port'] ) ? (int) $parts['port'] : ( 'https' === $scheme ? 443 : 80 );
+		$scheme          = strtolower( (string) ( $parts['scheme'] ?? '' ) );
+		$host            = strtolower( trim( (string) ( $parts['host'] ?? '' ), '[]' ) );
+		$port            = isset( $parts['port'] ) ? (int) $parts['port'] : ( 'https' === $scheme ? 443 : 80 );
 		$has_credentials = '' !== (string) ( $parts['user'] ?? '' ) || '' !== (string) ( $parts['pass'] ?? '' );
-		$blocked_host = '' === $host
+		$blocked_host    = '' === $host
 			|| 'localhost' === $host
 			|| str_ends_with( $host, '.localhost' )
 			|| str_ends_with( $host, '.local' )
@@ -2066,7 +2069,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$blocked_host = false === filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 		}
 
-		$safe_port = ( 'http' === $scheme && 80 === $port ) || ( 'https' === $scheme && 443 === $port );
+		$safe_port          = ( 'http' === $scheme && 80 === $port ) || ( 'https' === $scheme && 443 === $port );
 		$wordpress_safe_url = function_exists( 'wp_http_validate_url' ) ? wp_http_validate_url( $url ) : $url;
 		$public_host        = $this->editor_source_adaptation_host_is_public( $host );
 
@@ -2205,7 +2208,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_source_article_body_text( string $source_title, string $source_text ): string {
-		$text = trim( $source_text );
+		$text  = trim( $source_text );
 		$title = trim( $source_title );
 		if ( '' === $text || '' === $title ) {
 			return '';
@@ -2235,8 +2238,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		if ( '' === $text ) {
 			return false;
 		}
-		$char_count = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
-		$prose = preg_replace( '#https?://\S+#iu', '', $text );
+		$char_count     = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
+		$prose          = preg_replace( '#https?://\S+#iu', '', $text );
 		$sentence_count = preg_match_all( '/[.!?。！？]/u', is_string( $prose ) ? $prose : '' );
 
 		return $char_count >= 600 && is_int( $sentence_count ) && $sentence_count >= 3;
@@ -2245,9 +2248,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_writing_pack_request_brief( $raw ): array {
 		if ( is_string( $raw ) && '' !== trim( $raw ) ) {
 			$decoded = json_decode( $raw, true );
-			$raw = is_array( $decoded ) ? $decoded : array();
+			$raw     = is_array( $decoded ) ? $decoded : array();
 		}
-		$raw = is_array( $raw ) ? $raw : array();
+		$raw    = is_array( $raw ) ? $raw : array();
 		$result = array();
 		foreach ( array( 'audience', 'article_goal', 'reader_problem', 'unique_angle', 'reader_promise', 'content_type', 'operator_instruction' ) as $field ) {
 			$result[ $field ] = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $raw[ $field ] ?? '' ) ) ), 120, '' );
@@ -2266,15 +2269,15 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_draft_review_feedback_request( $raw ): array {
 		if ( is_string( $raw ) && '' !== trim( $raw ) ) {
 			$decoded = json_decode( $raw, true );
-			$raw = is_array( $decoded ) ? $decoded : array();
+			$raw     = is_array( $decoded ) ? $decoded : array();
 		}
-		$raw = is_array( $raw ) ? $raw : array();
+		$raw    = is_array( $raw ) ? $raw : array();
 		$status = sanitize_key( (string) ( $raw['status'] ?? '' ) );
 		if ( ! in_array( $status, array( 'usable', 'usable_after_changes', 'not_usable' ), true ) ) {
 			$status = '';
 		}
 		$allowed_issues = array( 'fact_accuracy', 'site_tone', 'structure', 'source_similarity', 'rights_attribution' );
-		$issue_codes = array();
+		$issue_codes    = array();
 		foreach ( is_array( $raw['issue_codes'] ?? null ) ? $raw['issue_codes'] : array() as $issue_code ) {
 			$issue_code = sanitize_key( (string) $issue_code );
 			if ( in_array( $issue_code, $allowed_issues, true ) && ! in_array( $issue_code, $issue_codes, true ) ) {
@@ -2287,14 +2290,14 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return array(
-			'artifact_type'              => 'article_draft_review_feedback.v1',
-			'contract_version'           => 'article_draft_review_feedback.v1',
-			'status'                     => $status,
-			'issue_codes'                => $issue_codes,
-			'notes'                      => $notes,
-			'authorization_scope'        => 'single_draft_regeneration_request',
-			'durable_review_state'       => false,
-			'direct_wordpress_write'     => false,
+			'artifact_type'          => 'article_draft_review_feedback.v1',
+			'contract_version'       => 'article_draft_review_feedback.v1',
+			'status'                 => $status,
+			'issue_codes'            => $issue_codes,
+			'notes'                  => $notes,
+			'authorization_scope'    => 'single_draft_regeneration_request',
+			'durable_review_state'   => false,
+			'direct_wordpress_write' => false,
 		);
 	}
 
@@ -2305,7 +2308,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 		$reviewed_pack = $context['reviewed_writing_pack'] ?? array();
 		if ( is_string( $reviewed_pack ) ) {
-			$decoded = json_decode( $reviewed_pack, true );
+			$decoded       = json_decode( $reviewed_pack, true );
 			$reviewed_pack = is_array( $decoded ) ? $decoded : array();
 		}
 		if ( is_array( $reviewed_pack ) ) {
@@ -2327,7 +2330,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_manual_writing_pack_response( array $context, array $result ) {
-		$brief = is_array( $context['editorial_brief'] ?? null ) ? $context['editorial_brief'] : array();
+		$brief   = is_array( $context['editorial_brief'] ?? null ) ? $context['editorial_brief'] : array();
 		$missing = array();
 		foreach ( array( 'audience', 'article_goal' ) as $field ) {
 			if ( '' === trim( (string) ( $brief[ $field ] ?? '' ) ) ) {
@@ -2341,55 +2344,58 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return new WP_Error(
 				'npcink_toolbox_writing_pack_manual_brief_incomplete',
 				__( 'Manual writing packs require an audience, article goal, and at least one focus point.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400, 'missing_required_fields' => $missing )
+				array(
+					'status'                  => 400,
+					'missing_required_fields' => $missing,
+				)
 			);
 		}
 
-		$query = $this->editor_writing_pack_query( $context );
-		$knowledge_raw = $this->editor_cached_site_knowledge(
+		$query                                     = $this->editor_writing_pack_query( $context );
+		$knowledge_raw                             = $this->editor_cached_site_knowledge(
 			array(
-				'query'           => $query,
-				'intent'          => 'writing_support_plan',
+				'query'              => $query,
+				'intent'             => 'writing_support_plan',
 				'result_granularity' => 'document',
-				'current_post_id' => absint( $context['post_id'] ?? 0 ),
-				'max_results'     => 6,
+				'current_post_id'    => absint( $context['post_id'] ?? 0 ),
+				'max_results'        => 6,
 			)
 		);
-		$source = array(
+		$source                                    = array(
 			'status'        => 'not_required',
 			'url_match'     => 'not_applicable',
 			'content_trust' => 'operator_supplied_brief',
 			'coverage'      => array( 'mode' => 'manual_brief' ),
 		);
-		$review = $this->editor_hosted_source_adaptation_review(
+		$review                                    = $this->editor_hosted_source_adaptation_review(
 			$context,
 			array( 'reader_status' => 'not_applicable' ),
 			is_wp_error( $knowledge_raw ) ? array() : $knowledge_raw
 		);
-		$result['sections']['source_article'] = $source;
+		$result['sections']['source_article']      = $source;
 		$result['sections']['source_site_context'] = $this->editor_support_section( $knowledge_raw );
 		$result['sections']['source_adaptation_review'] = $review;
-		$result['sections']['article_writing_pack'] = $this->editor_article_writing_pack(
+		$result['sections']['article_writing_pack']     = $this->editor_article_writing_pack(
 			$context,
 			$source,
 			$result['sections']['source_site_context'],
 			$review,
 			''
 		);
-		$result['artifact_type'] = 'article_writing_pack.v1';
-		$result['contract_version'] = 'article_writing_pack.v1';
-		$result['primary_artifact_type'] = 'article_writing_pack.v1';
-		$result['input_mode'] = 'manual_brief';
-		$result['composition_role'] = 'operator_brief_article_planning';
-		$result['final_write_path'] = 'operator_review_only_no_insert';
-		$result['handoff']['final_writes'] = 'operator_review_only_no_insert';
-		$result['handoff']['style_runtime'] = 'cloud_site_knowledge';
-		$result['handoff']['required_input_contract'] = 'article_writing_pack.v1';
+		$result['artifact_type']                        = 'article_writing_pack.v1';
+		$result['contract_version']                     = 'article_writing_pack.v1';
+		$result['primary_artifact_type']                = 'article_writing_pack.v1';
+		$result['input_mode']                           = 'manual_brief';
+		$result['composition_role']                     = 'operator_brief_article_planning';
+		$result['final_write_path']                     = 'operator_review_only_no_insert';
+		$result['handoff']['final_writes']              = 'operator_review_only_no_insert';
+		$result['handoff']['style_runtime']             = 'cloud_site_knowledge';
+		$result['handoff']['required_input_contract']   = 'article_writing_pack.v1';
 		$result['handoff']['article_generation_status'] = 'awaiting_operator_confirmation';
-		$result['handoff']['body_generation'] = false;
-		$result['handoff']['body_replacement'] = false;
-		$result['recommendation_set'] = $this->editor_recommendation_set( $context, 'source_adaptation_review', $result['sections'] );
-		$result['content_fingerprint'] = $result['recommendation_set']['content_fingerprint'];
+		$result['handoff']['body_generation']           = false;
+		$result['handoff']['body_replacement']          = false;
+		$result['recommendation_set']                   = $this->editor_recommendation_set( $context, 'source_adaptation_review', $result['sections'] );
+		$result['content_fingerprint']                  = $result['recommendation_set']['content_fingerprint'];
 
 		return rest_ensure_response( $result );
 	}
@@ -2401,61 +2407,61 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 		$pack                  = $review['reviewed_writing_pack'];
 		$draft_review_feedback = is_array( $context['draft_review_feedback'] ?? null ) ? $context['draft_review_feedback'] : array();
-		$public_review = $review;
+		$public_review         = $review;
 		unset( $public_review['reviewed_writing_pack'] );
-		$raw = $this->editor_support_section(
+		$raw   = $this->editor_support_section(
 			$this->editor_cached_hosted_ai_content_support(
 				array(
-					'intent'              => 'article_draft_from_writing_pack',
-					'post_id'             => absint( $context['post_id'] ?? 0 ),
-					'input_mode'          => (string) ( $pack['input_mode'] ?? 'manual_brief' ),
-					'writing_pack'        => $pack,
-					'writing_pack_review' => $public_review,
+					'intent'                => 'article_draft_from_writing_pack',
+					'post_id'               => absint( $context['post_id'] ?? 0 ),
+					'input_mode'            => (string) ( $pack['input_mode'] ?? 'manual_brief' ),
+					'writing_pack'          => $pack,
+					'writing_pack_review'   => $public_review,
 					'draft_review_feedback' => $draft_review_feedback,
-					'generation_variant'  => (string) ( $context['generation_variant'] ?? '' ),
+					'generation_variant'    => (string) ( $context['generation_variant'] ?? '' ),
 				),
 				! empty( $context['force_regenerate'] )
 			)
 		);
 		$draft = $this->editor_article_draft_preview( $pack, $public_review, $raw );
 		unset( $context['reviewed_writing_pack'], $context['writing_pack_confirmation'], $context['draft_review_feedback'] );
-		$result['post_context'] = $context;
-		$result['artifact_type'] = 'article_draft_preview.v1';
-		$result['contract_version'] = 'article_draft_preview.v1';
-		$result['primary_artifact_type'] = 'article_draft_preview.v1';
-		$result['input_mode'] = (string) ( $pack['input_mode'] ?? 'manual_brief' );
-		$result['composition_role'] = 'confirmed_writing_pack_draft_preview';
-		$result['sections']['article_writing_pack'] = $pack;
-		$result['sections']['writing_pack_review'] = $public_review;
+		$result['post_context']                      = $context;
+		$result['artifact_type']                     = 'article_draft_preview.v1';
+		$result['contract_version']                  = 'article_draft_preview.v1';
+		$result['primary_artifact_type']             = 'article_draft_preview.v1';
+		$result['input_mode']                        = (string) ( $pack['input_mode'] ?? 'manual_brief' );
+		$result['composition_role']                  = 'confirmed_writing_pack_draft_preview';
+		$result['sections']['article_writing_pack']  = $pack;
+		$result['sections']['writing_pack_review']   = $public_review;
 		$result['sections']['article_draft_preview'] = $draft;
 		if ( ! empty( $draft_review_feedback ) ) {
 			$result['sections']['draft_review_feedback'] = $draft_review_feedback;
 		}
-		$result['write_posture'] = 'suggestion_only';
-		$result['final_write_path'] = 'operator_review_only_no_insert';
-		$result['direct_wordpress_write'] = false;
-		$result['handoff']['final_writes'] = 'operator_review_only_no_insert';
-		$result['handoff']['body_generation'] = true;
-		$result['handoff']['body_insertion'] = false;
-		$result['handoff']['body_replacement'] = false;
+		$result['write_posture']                        = 'suggestion_only';
+		$result['final_write_path']                     = 'operator_review_only_no_insert';
+		$result['direct_wordpress_write']               = false;
+		$result['handoff']['final_writes']              = 'operator_review_only_no_insert';
+		$result['handoff']['body_generation']           = true;
+		$result['handoff']['body_insertion']            = false;
+		$result['handoff']['body_replacement']          = false;
 		$result['handoff']['article_generation_status'] = 'draft_preview_generated_from_confirmed_pack';
-		$result['content_fingerprint'] = (string) $review['review_fingerprint'];
+		$result['content_fingerprint']                  = (string) $review['review_fingerprint'];
 
 		return rest_ensure_response( $result );
 	}
 
 	private function editor_confirmed_writing_pack_review( array $context ) {
-		$raw_pack = $context['reviewed_writing_pack'] ?? array();
+		$raw_pack         = $context['reviewed_writing_pack'] ?? array();
 		$raw_confirmation = $context['writing_pack_confirmation'] ?? array();
 		if ( is_string( $raw_pack ) ) {
-			$decoded = json_decode( $raw_pack, true );
+			$decoded  = json_decode( $raw_pack, true );
 			$raw_pack = is_array( $decoded ) ? $decoded : array();
 		}
 		if ( is_string( $raw_confirmation ) ) {
-			$decoded = json_decode( $raw_confirmation, true );
+			$decoded          = json_decode( $raw_confirmation, true );
 			$raw_confirmation = is_array( $decoded ) ? $decoded : array();
 		}
-		$pack = $this->editor_writing_pack_payload_value( is_array( $raw_pack ) ? $raw_pack : array() );
+		$pack         = $this->editor_writing_pack_payload_value( is_array( $raw_pack ) ? $raw_pack : array() );
 		$confirmation = $this->editor_writing_pack_payload_value( is_array( $raw_confirmation ) ? $raw_confirmation : array() );
 		if ( ! is_array( $pack ) || 'article_writing_pack.v1' !== (string) ( $pack['artifact_type'] ?? '' ) ) {
 			return new WP_Error(
@@ -2479,7 +2485,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				array( 'status' => 409 )
 			);
 		}
-		$base_fingerprint = sanitize_text_field( (string) ( $pack['content_fingerprint'] ?? '' ) );
+		$base_fingerprint      = sanitize_text_field( (string) ( $pack['content_fingerprint'] ?? '' ) );
 		$confirmed_fingerprint = sanitize_text_field( (string) ( $confirmation['base_content_fingerprint'] ?? '' ) );
 		if ( empty( $confirmation['confirmed'] ) || 'confirmed_by_operator' !== sanitize_key( (string) ( $confirmation['status'] ?? '' ) ) ) {
 			return new WP_Error(
@@ -2511,7 +2517,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return new WP_Error(
 				'npcink_toolbox_writing_pack_review_incomplete',
 				__( 'The reviewed writing pack is missing fields required for draft generation.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 400, 'missing_required_fields' => $missing )
+				array(
+					'status'                  => 400,
+					'missing_required_fields' => $missing,
+				)
 			);
 		}
 		$fingerprint_basis = $pack;
@@ -2534,15 +2543,15 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_writing_pack_required_fields( array $pack ): array {
 		$required = array(
-			'inputs.editorial_brief.audience' => $pack['inputs']['editorial_brief']['audience']['value'] ?? '',
+			'inputs.editorial_brief.audience'     => $pack['inputs']['editorial_brief']['audience']['value'] ?? '',
 			'inputs.editorial_brief.article_goal' => $pack['inputs']['editorial_brief']['article_goal']['value'] ?? '',
 			'inputs.editorial_brief.focus_points' => $pack['inputs']['editorial_brief']['focus_points']['value'] ?? array(),
-			'site_adaptation.unique_angle' => $pack['site_adaptation']['unique_angle']['value'] ?? '',
-			'writing_plan.outline' => $pack['writing_plan']['outline'] ?? array(),
+			'site_adaptation.unique_angle'        => $pack['site_adaptation']['unique_angle']['value'] ?? '',
+			'writing_plan.outline'                => $pack['writing_plan']['outline'] ?? array(),
 		);
 		if ( in_array( (string) ( $pack['input_mode'] ?? '' ), array( 'url_reference', 'mixed' ), true ) ) {
 			$required['research_basis.fact_ledger'] = $pack['research_basis']['fact_ledger'] ?? array();
-			$required['inputs.source_materials'] = $pack['inputs']['source_materials'] ?? array();
+			$required['inputs.source_materials']    = $pack['inputs']['source_materials'] ?? array();
 		}
 		$missing = array();
 		foreach ( $required as $path => $value ) {
@@ -2571,13 +2580,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_article_draft_preview( array $pack, array $review, array $raw ): array {
-		$output = $this->editor_writing_pack_hosted_output( $raw );
+		$output   = $this->editor_writing_pack_hosted_output( $raw );
 		$sections = array();
 		foreach ( array_slice( is_array( $output['sections'] ?? null ) ? $output['sections'] : array(), 0, 20 ) as $index => $section ) {
 			$section = is_array( $section ) ? $section : array( 'body' => $section );
 			/* translators: %d: One-based section number. */
 			$heading = sanitize_text_field( (string) ( $section['heading'] ?? $section['title'] ?? sprintf( __( 'Section %d', 'npcink-workflow-toolbox' ), $index + 1 ) ) );
-			$body = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $section['body'] ?? $section['content'] ?? '' ) ) ), 700, '' );
+			$body    = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $section['body'] ?? $section['content'] ?? '' ) ) ), 700, '' );
 			if ( '' !== $heading || '' !== $body ) {
 				$sections[] = array(
 					'heading'              => $heading,
@@ -2589,27 +2598,27 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$status = ! empty( $sections ) ? 'ready' : 'blocked';
 
 		return array(
-			'artifact_type'              => 'article_draft_preview.v1',
-			'contract_version'           => 'article_draft_preview.v1',
-			'status'                     => $status,
-			'title'                      => sanitize_text_field( (string) ( $output['title'] ?? '' ) ),
-			'excerpt'                    => wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $output['excerpt'] ?? '' ) ) ), 120, '' ),
-			'sections'                   => $sections,
-			'verification_notes'         => $this->editor_writing_pack_list( $output['verification_notes'] ?? array(), 20 ),
-			'source_attribution_notes'   => $this->editor_writing_pack_list( $output['source_attribution_notes'] ?? array(), 12 ),
-			'writing_pack_id'            => sanitize_text_field( (string) ( $pack['writing_pack_id'] ?? '' ) ),
+			'artifact_type'                   => 'article_draft_preview.v1',
+			'contract_version'                => 'article_draft_preview.v1',
+			'status'                          => $status,
+			'title'                           => sanitize_text_field( (string) ( $output['title'] ?? '' ) ),
+			'excerpt'                         => wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $output['excerpt'] ?? '' ) ) ), 120, '' ),
+			'sections'                        => $sections,
+			'verification_notes'              => $this->editor_writing_pack_list( $output['verification_notes'] ?? array(), 20 ),
+			'source_attribution_notes'        => $this->editor_writing_pack_list( $output['source_attribution_notes'] ?? array(), 12 ),
+			'writing_pack_id'                 => sanitize_text_field( (string) ( $pack['writing_pack_id'] ?? '' ) ),
 			'writing_pack_review_fingerprint' => sanitize_text_field( (string) ( $review['review_fingerprint'] ?? '' ) ),
-			'write_posture'              => 'suggestion_only',
-			'operator_review_required'   => true,
-			'direct_wordpress_write'     => false,
-			'body_insertion'             => false,
-			'body_replacement'           => false,
-			'message'                    => 'ready' === $status ? '' : __( 'The hosted runtime did not return a structured draft preview.', 'npcink-workflow-toolbox' ),
+			'write_posture'                   => 'suggestion_only',
+			'operator_review_required'        => true,
+			'direct_wordpress_write'          => false,
+			'body_insertion'                  => false,
+			'body_replacement'                => false,
+			'message'                         => 'ready' === $status ? '' : __( 'The hosted runtime did not return a structured draft preview.', 'npcink-workflow-toolbox' ),
 		);
 	}
 
 	private function editor_hosted_source_adaptation_review( array $context, array $source, array $knowledge ): array {
-		$section = $this->editor_support_section(
+		$section                           = $this->editor_support_section(
 			$this->editor_cached_hosted_ai_content_support(
 				array(
 					'intent'                  => 'source_adaptation_review',
@@ -2641,18 +2650,18 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_article_writing_pack( array $context, array $source, array $knowledge, array $review, string $source_text ): array {
-		$output = $this->editor_writing_pack_hosted_output( $review );
-		$editorial = is_array( $output['editorial_direction'] ?? null ) ? $output['editorial_direction'] : $output;
-		$research  = is_array( $output['research_basis'] ?? null ) ? $output['research_basis'] : $output;
-		$adaptation = is_array( $output['site_adaptation'] ?? null ) ? $output['site_adaptation'] : $output;
-		$plan      = is_array( $output['writing_plan'] ?? null ) ? $output['writing_plan'] : $output;
-		$risk      = is_array( $output['risk_review'] ?? null ) ? $output['risk_review'] : $output;
-		$input_mode = sanitize_key( (string) ( $context['input_mode'] ?? 'url_reference' ) );
-		$manual_only = 'manual_brief' === $input_mode;
-		$source_ready = $manual_only || ( 'ready' === sanitize_key( (string) ( $source['status'] ?? '' ) )
+		$output           = $this->editor_writing_pack_hosted_output( $review );
+		$editorial        = is_array( $output['editorial_direction'] ?? null ) ? $output['editorial_direction'] : $output;
+		$research         = is_array( $output['research_basis'] ?? null ) ? $output['research_basis'] : $output;
+		$adaptation       = is_array( $output['site_adaptation'] ?? null ) ? $output['site_adaptation'] : $output;
+		$plan             = is_array( $output['writing_plan'] ?? null ) ? $output['writing_plan'] : $output;
+		$risk             = is_array( $output['risk_review'] ?? null ) ? $output['risk_review'] : $output;
+		$input_mode       = sanitize_key( (string) ( $context['input_mode'] ?? 'url_reference' ) );
+		$manual_only      = 'manual_brief' === $input_mode;
+		$source_ready     = $manual_only || ( 'ready' === sanitize_key( (string) ( $source['status'] ?? '' ) )
 			&& 'matched' === sanitize_key( (string) ( $source['url_match'] ?? '' ) )
 			&& $this->editor_source_body_is_draftable( $source_text ) );
-		$review_ready = ! empty( $output ) && ! in_array( sanitize_key( (string) ( $review['status'] ?? '' ) ), array( 'blocked', 'error', 'failed' ), true );
+		$review_ready     = ! empty( $output ) && ! in_array( sanitize_key( (string) ( $review['status'] ?? '' ) ), array( 'blocked', 'error', 'failed' ), true );
 		$blocking_reasons = array();
 		if ( ! $source_ready ) {
 			$blocking_reasons[] = 'source_body_evidence_insufficient';
@@ -2661,71 +2670,71 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$blocking_reasons[] = 'writing_pack_output_not_ready';
 		}
 
-		$brief = is_array( $context['editorial_brief'] ?? null ) ? $context['editorial_brief'] : array();
-		$operator_instruction = trim( sanitize_textarea_field( (string) ( $brief['operator_instruction'] ?? $context['user_instruction'] ?? '' ) ) );
-		$source_materials = $manual_only ? array() : array(
+		$brief                   = is_array( $context['editorial_brief'] ?? null ) ? $context['editorial_brief'] : array();
+		$operator_instruction    = trim( sanitize_textarea_field( (string) ( $brief['operator_instruction'] ?? $context['user_instruction'] ?? '' ) ) );
+		$source_materials        = $manual_only ? array() : array(
 			array(
-				'material_type'       => 'public_url',
-				'requested_url'       => esc_url_raw( (string) ( $source['requested_url'] ?? $context['source_url'] ?? '' ) ),
-				'resolved_url'        => esc_url_raw( (string) ( $source['resolved_url'] ?? '' ) ),
-				'title'               => sanitize_text_field( (string) ( $source['title'] ?? '' ) ),
-				'content_hash'        => sanitize_text_field( (string) ( $source['content_hash'] ?? '' ) ),
-				'coverage'            => $this->editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
-				'content_trust'       => sanitize_key( (string) ( $source['content_trust'] ?? 'untrusted_external_source' ) ),
-				'url_match'           => sanitize_key( (string) ( $source['url_match'] ?? '' ) ),
+				'material_type'          => 'public_url',
+				'requested_url'          => esc_url_raw( (string) ( $source['requested_url'] ?? $context['source_url'] ?? '' ) ),
+				'resolved_url'           => esc_url_raw( (string) ( $source['resolved_url'] ?? '' ) ),
+				'title'                  => sanitize_text_field( (string) ( $source['title'] ?? '' ) ),
+				'content_hash'           => sanitize_text_field( (string) ( $source['content_hash'] ?? '' ) ),
+				'coverage'               => $this->editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
+				'content_trust'          => sanitize_key( (string) ( $source['content_trust'] ?? 'untrusted_external_source' ) ),
+				'url_match'              => sanitize_key( (string) ( $source['url_match'] ?? '' ) ),
 				'continuation_requested' => true,
 				'operator_confirmed'     => false,
 			),
 		);
-		$pack = array(
+		$pack                    = array(
 			'artifact_type'          => 'article_writing_pack.v1',
 			'contract_version'       => 'article_writing_pack.v1',
 			'composition_role'       => 'source_grounded_article_planning',
 			'input_mode'             => $input_mode,
 			'inputs'                 => array(
-				'source_materials'   => $source_materials,
-				'editorial_brief'    => array(
+				'source_materials'    => $source_materials,
+				'editorial_brief'     => array(
 					'audience'             => $this->editor_writing_pack_resolved_field( $brief['audience'] ?? '', $editorial['audience'] ?? $editorial['inferred_audience'] ?? '' ),
-					'article_goal'          => $this->editor_writing_pack_resolved_field( $brief['article_goal'] ?? '', $editorial['article_goal'] ?? '' ),
-					'reader_problem'        => $this->editor_writing_pack_resolved_field( $brief['reader_problem'] ?? '', $editorial['reader_problem'] ?? '' ),
-					'focus_points'          => $this->editor_writing_pack_resolved_field( $brief['focus_points'] ?? array(), $this->editor_writing_pack_list( $editorial['focus_points'] ?? $output['adaptation_directions'] ?? array(), 8 ) ),
-					'operator_instruction'  => array(
+					'article_goal'         => $this->editor_writing_pack_resolved_field( $brief['article_goal'] ?? '', $editorial['article_goal'] ?? '' ),
+					'reader_problem'       => $this->editor_writing_pack_resolved_field( $brief['reader_problem'] ?? '', $editorial['reader_problem'] ?? '' ),
+					'focus_points'         => $this->editor_writing_pack_resolved_field( $brief['focus_points'] ?? array(), $this->editor_writing_pack_list( $editorial['focus_points'] ?? $output['adaptation_directions'] ?? array(), 8 ) ),
+					'operator_instruction' => array(
 						'value'              => $operator_instruction,
 						'source'             => '' !== $operator_instruction ? 'operator' : 'not_supplied',
 						'operator_confirmed' => '' !== $operator_instruction,
 					),
 				),
 				'site_context_policy' => array(
-					'role'                   => 'overlap_tone_terminology_and_internal_reference_only',
+					'role'                               => 'overlap_tone_terminology_and_internal_reference_only',
 					'factual_source_for_external_claims' => false,
-					'index_lifecycle_owner'  => 'npcink_ai_cloud',
+					'index_lifecycle_owner'              => 'npcink_ai_cloud',
 				),
 			),
-			'research_basis'        => array(
+			'research_basis'         => array(
 				'source_summary'     => $manual_only ? array() : $this->editor_writing_pack_list( $research['source_summary'] ?? $research['source_summary_zh'] ?? $output['source_summary_zh'] ?? array(), 6 ),
 				'fact_ledger'        => $manual_only ? array() : $this->editor_writing_pack_list( $research['fact_ledger'] ?? array(), 16 ),
 				'source_coverage'    => $this->editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
 				'verification_items' => $this->editor_writing_pack_list( $research['verification_items'] ?? $output['facts_to_verify'] ?? array(), 12 ),
 			),
-			'site_adaptation'       => array(
+			'site_adaptation'        => array(
 				'related_articles'   => $this->editor_writing_pack_related_articles( $knowledge ),
 				'overlap_map'        => $this->editor_writing_pack_list( $adaptation['overlap_map'] ?? array(), 10 ),
 				'site_style_signals' => $this->editor_writing_pack_list( $adaptation['site_style_signals'] ?? $output['site_style_signals'] ?? array(), 8 ),
 				'unique_angle'       => $this->editor_writing_pack_resolved_field( $brief['unique_angle'] ?? '', $adaptation['unique_angle'] ?? $output['unique_angle'] ?? '' ),
 			),
-			'writing_plan'          => array(
+			'writing_plan'           => array(
 				'title_directions' => $this->editor_writing_pack_list( ! empty( $brief['title_directions'] ) ? $brief['title_directions'] : ( $plan['title_directions'] ?? array() ), 6 ),
 				'reader_promise'   => $this->editor_writing_pack_resolved_field( $brief['reader_promise'] ?? '', $plan['reader_promise'] ?? '' ),
 				'content_type'     => $this->editor_writing_pack_resolved_field( $brief['content_type'] ?? '', $plan['content_type'] ?? '' ),
 				'outline'          => $this->editor_writing_pack_list( ! empty( $brief['outline'] ) ? $brief['outline'] : ( $plan['outline'] ?? $output['suggested_outline'] ?? array() ), 12 ),
 				'cta_direction'    => $this->editor_writing_pack_inferred_field( $plan['cta_direction'] ?? '' ),
 			),
-			'risk_review'           => array(
+			'risk_review'            => array(
 				'fact_risks'       => $this->editor_writing_pack_list( $risk['fact_risks'] ?? $output['facts_to_verify'] ?? array(), 12 ),
 				'rights_risks'     => $this->editor_writing_pack_list( $risk['rights_risks'] ?? $output['copyright_and_attribution'] ?? array(), 12 ),
 				'similarity_risks' => $this->editor_writing_pack_list( $risk['similarity_risks'] ?? array(), 10 ),
 			),
-			'generation_admission' => array(
+			'generation_admission'   => array(
 				'status'                     => empty( $blocking_reasons ) ? 'needs_review' : 'blocked',
 				'blocking_reasons'           => $blocking_reasons,
 				'review_requirements'        => array(
@@ -2737,7 +2746,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'article_generation_allowed' => false,
 				'next_gate'                  => 'review_and_confirm_article_writing_pack_before_future_draft_generation',
 			),
-			'provenance'            => array(
+			'provenance'             => array(
 				'source_facts'        => $manual_only ? 'operator_brief_no_external_fact_source' : 'cloud_exact_source_extraction',
 				'site_context'        => 'cloud_site_knowledge',
 				'editorial_direction' => 'hosted_ai_inference_not_operator_confirmed',
@@ -2769,12 +2778,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$missing_required_fields[] = 'writing_plan.outline';
 		}
 		if ( ! empty( $missing_required_fields ) ) {
-			$pack['generation_admission']['status'] = 'blocked';
-			$pack['generation_admission']['blocking_reasons'][] = 'writing_pack_required_fields_missing';
+			$pack['generation_admission']['status']                  = 'blocked';
+			$pack['generation_admission']['blocking_reasons'][]      = 'writing_pack_required_fields_missing';
 			$pack['generation_admission']['missing_required_fields'] = $missing_required_fields;
 		}
-		$fingerprint_basis = $pack;
-		$fingerprint = 'sha256:' . hash( 'sha256', (string) wp_json_encode( $fingerprint_basis ) );
+		$fingerprint_basis           = $pack;
+		$fingerprint                 = 'sha256:' . hash( 'sha256', (string) wp_json_encode( $fingerprint_basis ) );
 		$pack['writing_pack_id']     = 'awp_' . substr( hash( 'sha256', $fingerprint ), 0, 20 );
 		$pack['content_fingerprint'] = $fingerprint;
 		$pack['generated_at']        = gmdate( 'c' );
@@ -2820,8 +2829,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_writing_pack_list( $value, int $limit ): array {
 		$is_list = is_array( $value ) && ( array() === $value || array_keys( $value ) === range( 0, count( $value ) - 1 ) );
-		$items = $is_list ? $value : ( null === $value || '' === $value ? array() : array( $value ) );
-		$result = array();
+		$items   = $is_list ? $value : ( null === $value || '' === $value ? array() : array( $value ) );
+		$result  = array();
 		foreach ( array_slice( $items, 0, max( 1, min( 20, $limit ) ) ) as $item ) {
 			$sanitized = $this->editor_writing_pack_payload_value( $item );
 			if ( null !== $sanitized && '' !== $sanitized && array() !== $sanitized ) {
@@ -2862,7 +2871,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_writing_pack_related_articles( array $knowledge ): array {
-		$items = $this->editor_related_content_items( $knowledge );
+		$items  = $this->editor_related_content_items( $knowledge );
 		$result = array();
 		foreach ( array_slice( $items, 0, 6 ) as $index => $item ) {
 			$result[] = array(
@@ -2878,9 +2887,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_image_recommendation_section( array $section ): array {
-		$items = $this->editor_image_candidate_items( $section );
+		$items        = $this->editor_image_candidate_items( $section );
 		$target_field = 'paragraph_image' === sanitize_key( (string) ( $section['image_mode'] ?? $section['recommended_use'] ?? '' ) ) ? 'paragraph_image' : 'featured_image';
-		$result = $this->editor_toolkit_image_candidate_review_artifact(
+		$result       = $this->editor_toolkit_image_candidate_review_artifact(
 			array(
 				'image_candidates' => array_slice( $items, 0, 12 ),
 				'target_field'     => $target_field,
@@ -2890,7 +2899,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		if ( is_wp_error( $result ) ) {
 			$review_artifact = $this->empty_toolkit_image_candidate_review_artifact( $result );
 		} else {
-			$data = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
+			$data            = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
 			$review_artifact = is_array( $data ) ? $data : $this->empty_toolkit_image_candidate_review_artifact(
 				new WP_Error(
 					'npcink_toolbox_image_candidate_review_toolkit_invalid_artifact',
@@ -2900,11 +2909,11 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 
-		$section['image_candidate_review']     = $review_artifact;
-		$section['image_candidate_contract']   = 'image_candidate.v1';
-		$section['candidate_contract']         = 'recommendation_candidate.v1';
-		$section['source_ability_id']          = 'npcink-abilities-toolkit/build-image-candidate-review-artifact';
-		$section['recommendation_candidates']  = is_array( $review_artifact['recommendation_candidates'] ?? null ) ? $review_artifact['recommendation_candidates'] : array();
+		$section['image_candidate_review']    = $review_artifact;
+		$section['image_candidate_contract']  = 'image_candidate.v1';
+		$section['candidate_contract']        = 'recommendation_candidate.v1';
+		$section['source_ability_id']         = 'npcink-abilities-toolkit/build-image-candidate-review-artifact';
+		$section['recommendation_candidates'] = is_array( $review_artifact['recommendation_candidates'] ?? null ) ? $review_artifact['recommendation_candidates'] : array();
 
 		return $section;
 	}
@@ -2967,7 +2976,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			)
 		);
 		$taxonomy_terms  = $this->editor_taxonomy_term_candidates( $context, $query, $related_content );
-		$summary_ai     = $this->editor_support_section(
+		$summary_ai      = $this->editor_support_section(
 			$this->editor_cached_hosted_ai_content_support(
 				array(
 					'intent'                  => 'summary_terms_optimization',
@@ -2993,14 +3002,14 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			)
 		);
 
-		$items      = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
-		$categories = array_values(
+		$items              = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
+		$categories         = array_values(
 			array_filter(
 				$items,
 				static fn( array $item ): bool => 'category' === (string) ( $item['taxonomy'] ?? '' )
 			)
 		);
-		$tags       = array_values(
+		$tags               = array_values(
 			array_filter(
 				$items,
 				static fn( array $item ): bool => 'post_tag' === (string) ( $item['taxonomy'] ?? '' )
@@ -3053,13 +3062,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$excerpt_item  = $summary_items[0] ?? array();
 		$authorization = ( new Operation_Classifier() )->classify(
 			array(
-				'request_source'          => Operation_Classifier::SOURCE_WP_ADMIN_UI,
+				'request_source'         => Operation_Classifier::SOURCE_WP_ADMIN_UI,
 				'actor_presence'         => Operation_Classifier::ACTOR_PRESENT_CLICK,
-				'preview_completeness'    => Operation_Classifier::PREVIEW_SUFFICIENT,
-				'scope'                   => Operation_Classifier::SCOPE_ONE_OBJECT,
-				'reversibility'           => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
-				'operation_kind'          => Operation_Classifier::KIND_SUGGEST,
-				'writes_wordpress_state'  => false,
+				'preview_completeness'   => Operation_Classifier::PREVIEW_SUFFICIENT,
+				'scope'                  => Operation_Classifier::SCOPE_ONE_OBJECT,
+				'reversibility'          => Operation_Classifier::REVERSIBILITY_EASY_UNDO,
+				'operation_kind'         => Operation_Classifier::KIND_SUGGEST,
+				'writes_wordpress_state' => false,
 			)
 		);
 
@@ -3071,17 +3080,17 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'final_write_path'       => 'core_proposal_required',
 			'direct_wordpress_write' => false,
 			'issue_record'           => array(
-				'user_expression'    => '' !== trim( $query ) ? $query : __( 'Improve summary, category, and tag discoverability for the current draft.', 'npcink-workflow-toolbox' ),
-				'target_post'        => array(
-					'id'             => absint( $context['post_id'] ?? 0 ),
-					'type'           => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
-					'status'         => sanitize_key( (string) ( $context['post_status'] ?? '' ) ),
-					'title'          => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
-					'category_ids'   => array_values( array_map( 'absint', is_array( $context['category_ids'] ?? null ) ? $context['category_ids'] : array() ) ),
-					'tag_ids'        => array_values( array_map( 'absint', is_array( $context['tag_ids'] ?? null ) ? $context['tag_ids'] : array() ) ),
+				'user_expression'  => '' !== trim( $query ) ? $query : __( 'Improve summary, category, and tag discoverability for the current draft.', 'npcink-workflow-toolbox' ),
+				'target_post'      => array(
+					'id'           => absint( $context['post_id'] ?? 0 ),
+					'type'         => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+					'status'       => sanitize_key( (string) ( $context['post_status'] ?? '' ) ),
+					'title'        => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+					'category_ids' => array_values( array_map( 'absint', is_array( $context['category_ids'] ?? null ) ? $context['category_ids'] : array() ) ),
+					'tag_ids'      => array_values( array_map( 'absint', is_array( $context['tag_ids'] ?? null ) ? $context['tag_ids'] : array() ) ),
 				),
-				'observed_signals'  => $this->editor_content_metadata_observed_signals( $context, $categories, $tags, $proposed_new_terms ),
-				'context_refs'      => $evidence_refs,
+				'observed_signals' => $this->editor_content_metadata_observed_signals( $context, $categories, $tags, $proposed_new_terms ),
+				'context_refs'     => $evidence_refs,
 			),
 			'diagnosis'              => array(
 				'summary_quality'   => $this->editor_summary_quality( $context ),
@@ -3109,10 +3118,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'new_term_candidates' => $this->editor_content_metadata_new_term_delta_items( $proposed_new_terms ),
 			),
 			'authorization'          => array(
-				'classification'          => sanitize_key( (string) ( $authorization['classification'] ?? Operation_Classifier::SUGGESTION_ONLY ) ),
-				'reason'                  => __( 'This Content Metadata Delta only recommends excerpt and existing-term changes. Accepted writes must use the Core handoff preview and reusable WordPress abilities.', 'npcink-workflow-toolbox' ),
-				'reasons'                 => array_values( array_map( 'sanitize_key', (array) ( $authorization['reasons'] ?? array() ) ) ),
-				'required_evidence'       => array_values(
+				'classification'           => sanitize_key( (string) ( $authorization['classification'] ?? Operation_Classifier::SUGGESTION_ONLY ) ),
+				'reason'                   => __( 'This Content Metadata Delta only recommends excerpt and existing-term changes. Accepted writes must use the Core handoff preview and reusable WordPress abilities.', 'npcink-workflow-toolbox' ),
+				'reasons'                  => array_values( array_map( 'sanitize_key', (array) ( $authorization['reasons'] ?? array() ) ) ),
+				'required_evidence'        => array_values(
 					array_unique(
 						array_merge(
 							array_map( 'sanitize_key', (array) ( $authorization['required_evidence'] ?? array() ) ),
@@ -3124,7 +3133,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 						)
 					)
 				),
-				'policy_version'          => sanitize_text_field( (string) ( $authorization['policy_version'] ?? 'operation-classification-v1' ) ),
+				'policy_version'           => sanitize_text_field( (string) ( $authorization['policy_version'] ?? 'operation-classification-v1' ) ),
 				'local_admin_consent_note' => __( 'A later local-admin-consent path requires a present administrator, one post, exact preview, and activity evidence before any direct local apply can be considered.', 'npcink-workflow-toolbox' ),
 				'handoff_preview_ref'      => sanitize_text_field( (string) ( $handoff_preview['artifact_type'] ?? 'summary_terms_handoff_preview.v1' ) ),
 			),
@@ -3216,9 +3225,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$titles       = array();
 
 		foreach ( array_slice( $items, 0, 6 ) as $index => $item ) {
-			$ref_id = (string) ( $item['post_id'] ?? ( $item['id'] ?? $index ) );
+			$ref_id         = (string) ( $item['post_id'] ?? ( $item['id'] ?? $index ) );
 			$evidence_ids[] = 'site_knowledge:' . sanitize_key( $ref_id );
-			$title = sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) );
+			$title          = sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) );
 			if ( '' !== $title ) {
 				$titles[] = $title;
 			}
@@ -3234,17 +3243,17 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_related_content_context_for_ai( array $related_content ): array {
-		$items = $this->editor_related_content_items( $related_content );
+		$items         = $this->editor_related_content_items( $related_content );
 		$context_items = array();
 
 		foreach ( array_slice( $items, 0, 6 ) as $item ) {
-			$post_id = absint( $item['post_id'] ?? 0 );
+			$post_id         = absint( $item['post_id'] ?? 0 );
 			$context_items[] = array(
-				'post_id'         => $post_id,
-				'title'           => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
-				'score'           => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
-				'excerpt'         => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
-				'existing_terms'  => $this->editor_related_post_terms_for_context( $post_id ),
+				'post_id'        => $post_id,
+				'title'          => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
+				'score'          => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
+				'excerpt'        => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
+				'existing_terms' => $this->editor_related_post_terms_for_context( $post_id ),
 			);
 		}
 
@@ -3255,12 +3264,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_summary_vector_context_for_ai( array $summary_context ): array {
-		$items = $this->editor_related_content_items( $summary_context );
+		$items         = $this->editor_related_content_items( $summary_context );
 		$context_items = array();
 
 		foreach ( array_slice( $items, 0, 5 ) as $index => $item ) {
-			$post_id = absint( $item['post_id'] ?? 0 );
-			$ref_id  = sanitize_key( (string) ( $item['post_id'] ?? ( $item['id'] ?? $index ) ) );
+			$post_id         = absint( $item['post_id'] ?? 0 );
+			$ref_id          = sanitize_key( (string) ( $item['post_id'] ?? ( $item['id'] ?? $index ) ) );
 			$context_items[] = array(
 				'evidence_ref' => 'site_knowledge:' . $ref_id,
 				'post_id'      => $post_id,
@@ -3277,8 +3286,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_internal_link_candidates( array $context, string $query ): array {
-		$source_passages = $this->editor_internal_link_source_passages( $context );
-		$source_knowledge = $this->editor_support_section(
+		$source_passages          = $this->editor_internal_link_source_passages( $context );
+		$source_knowledge         = $this->editor_support_section(
 			$this->editor_cached_site_knowledge(
 				array(
 					'query'           => $query,
@@ -3293,9 +3302,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$this->editor_internal_link_related_content_evidence( $source_knowledge ),
 			absint( $context['post_id'] ?? 0 )
 		);
-		$cloud_status     = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
-		$retrieval_status = 'cloud_vector_evidence';
-		$source_status    = 'cloud_vector';
+		$cloud_status             = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
+		$retrieval_status         = 'cloud_vector_evidence';
+		$source_status            = 'cloud_vector';
 		if ( in_array( $cloud_status, array( 'error', 'failed' ), true ) ) {
 			$retrieval_status = 'cloud_unavailable';
 			$source_status    = 'cloud_unavailable';
@@ -3317,7 +3326,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'max_targets'              => 6,
 			'related_content_evidence' => $related_content_evidence,
 			'candidate_source'         => $source_status,
-			'content_blocks'            => is_array( $context['content_blocks'] ?? null ) ? $context['content_blocks'] : array(),
+			'content_blocks'           => is_array( $context['content_blocks'] ?? null ) ? $context['content_blocks'] : array(),
 		);
 		if ( 0 >= (int) $input['current_post_id'] ) {
 			unset( $input['current_post_id'] );
@@ -3331,7 +3340,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return $this->empty_toolkit_internal_link_candidates( $result, $source_knowledge );
 		}
 
-		$data = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
+		$data     = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
 		$artifact = is_array( $data['internal_link_candidates'] ?? null ) ? $data['internal_link_candidates'] : array();
 		if ( 'internal_link_candidates' !== (string) ( $artifact['candidate_type'] ?? '' ) ) {
 			return $this->empty_toolkit_internal_link_candidates(
@@ -3344,27 +3353,27 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 
-		$items = is_array( $artifact['items'] ?? null ) ? $artifact['items'] : array();
-		$items = $this->editor_internal_link_merge_cloud_relevance( $items, $related_content_evidence );
-		$artifact['input_scope'] = $this->editor_input_scope( $context );
-		$artifact['source_ability_id'] = 'npcink-abilities-toolkit/resolve-internal-link-targets';
-		$artifact['source_knowledge'] = $source_knowledge;
-		$artifact['candidate_source'] = $source_status;
-		$artifact['source_status'] = $retrieval_status;
-		$artifact['retrieval_status'] = $retrieval_status;
-		$artifact['cloud_result_count'] = count( $related_content_evidence );
-		$artifact['fallback_used'] = 'local_fallback' === $source_status;
-		$artifact['toolkit_artifact'] = $data;
+		$items                                 = is_array( $artifact['items'] ?? null ) ? $artifact['items'] : array();
+		$items                                 = $this->editor_internal_link_merge_cloud_relevance( $items, $related_content_evidence );
+		$artifact['input_scope']               = $this->editor_input_scope( $context );
+		$artifact['source_ability_id']         = 'npcink-abilities-toolkit/resolve-internal-link-targets';
+		$artifact['source_knowledge']          = $source_knowledge;
+		$artifact['candidate_source']          = $source_status;
+		$artifact['source_status']             = $retrieval_status;
+		$artifact['retrieval_status']          = $retrieval_status;
+		$artifact['cloud_result_count']        = count( $related_content_evidence );
+		$artifact['fallback_used']             = 'local_fallback' === $source_status;
+		$artifact['toolkit_artifact']          = $data;
 		$artifact['recommendation_candidates'] = $this->editor_internal_link_recommendation_candidates(
 			$items,
 			'cloud_vector' === $source_status && 'cloud_vector_evidence' === $retrieval_status
 		);
-		$artifact['final_write_path'] = 'native_editor_commit';
-		$artifact['direct_wordpress_write'] = false;
-		$artifact['owner_label'] = 'human_editor';
-		$artifact['next_safe_action'] = 'review_and_apply_to_visible_editor';
-		$artifact['action_policy'] = 'operator_confirmed_visible_editor_apply';
-		$artifact['editor_transaction'] = array(
+		$artifact['final_write_path']          = 'native_editor_commit';
+		$artifact['direct_wordpress_write']    = false;
+		$artifact['owner_label']               = 'human_editor';
+		$artifact['next_safe_action']          = 'review_and_apply_to_visible_editor';
+		$artifact['action_policy']             = 'operator_confirmed_visible_editor_apply';
+		$artifact['editor_transaction']        = array(
 			'schema'                 => 'current_article_multi_link_result.v1',
 			'max_selected'           => 8,
 			'write_posture'          => 'native_editor_commit',
@@ -3373,7 +3382,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'partial_results'        => true,
 			'undo_scope'             => 'request_scoped_editor_state',
 		);
-		$artifact['review_policy'] = array_merge(
+		$artifact['review_policy']             = array_merge(
 			is_array( $artifact['review_policy'] ?? null ) ? $artifact['review_policy'] : array(),
 			array(
 				'link_insertion_owner'       => 'human_editor',
@@ -3382,11 +3391,11 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'current_post_excluded'      => true,
 			)
 		);
-		$handoff = is_array( $artifact['handoff'] ?? null ) ? $artifact['handoff'] : array();
-		$blocked_actions = is_array( $handoff['blocked_actions'] ?? null ) ? $handoff['blocked_actions'] : array();
-		$handoff['final_writes'] = 'native_editor_commit';
-		$handoff['direct_wordpress_write'] = false;
-		$handoff['blocked_actions'] = array_values(
+		$handoff                               = is_array( $artifact['handoff'] ?? null ) ? $artifact['handoff'] : array();
+		$blocked_actions                       = is_array( $handoff['blocked_actions'] ?? null ) ? $handoff['blocked_actions'] : array();
+		$handoff['final_writes']               = 'native_editor_commit';
+		$handoff['direct_wordpress_write']     = false;
+		$handoff['blocked_actions']            = array_values(
 			array_unique(
 				array_merge(
 					$blocked_actions,
@@ -3398,7 +3407,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				)
 			)
 		);
-		$artifact['handoff'] = $handoff;
+		$artifact['handoff']                   = $handoff;
 
 		return $artifact;
 	}
@@ -3438,19 +3447,19 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_internal_link_related_content_evidence( array $source_knowledge ): array {
 		$evidence = array();
 		foreach ( array_slice( $this->editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
-			$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
+			$post_id             = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
 			$candidate_relevance = sanitize_key( (string) ( $item['candidate_relevance'] ?? '' ) );
 			if ( ! in_array( $candidate_relevance, array( 'strong', 'review', 'weak' ), true ) ) {
 				$candidate_relevance = '';
 			}
 			$evidence[] = array(
-				'post_id'           => $post_id,
-				'title'             => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
-				'url'               => esc_url_raw( (string) ( $item['url'] ?? ( $item['permalink'] ?? ( $item['link'] ?? ( $item['source_url'] ?? '' ) ) ) ) ),
-				'anchor_or_context' => sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) ),
-				'excerpt'           => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
-				'score'             => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
-				'evidence_ref'      => 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: $index ) ),
+				'post_id'             => $post_id,
+				'title'               => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
+				'url'                 => esc_url_raw( (string) ( $item['url'] ?? ( $item['permalink'] ?? ( $item['link'] ?? ( $item['source_url'] ?? '' ) ) ) ) ),
+				'anchor_or_context'   => sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) ),
+				'excerpt'             => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
+				'score'               => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
+				'evidence_ref'        => 'site_knowledge:' . sanitize_key( (string) ( $post_id ?: $index ) ),
 				'candidate_relevance' => $candidate_relevance,
 			);
 		}
@@ -3479,7 +3488,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			if ( $total_chars + $text_length > 12000 ) {
 				break;
 			}
-			$passages[] = $text;
+			$passages[]   = $text;
 			$total_chars += $text_length;
 		}
 
@@ -3530,12 +3539,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		foreach ( $evidence as &$item ) {
-			$post_id = absint( $item['post_id'] ?? 0 );
-			$row     = is_array( $rows[ $post_id ] ?? null ) ? $rows[ $post_id ] : array();
-			$pair    = is_array( $pairs[ $post_id ] ?? null ) ? $pairs[ $post_id ] : array();
-			$item['incoming_count'] = absint( $row['incoming_count'] ?? 0 );
-			$item['link_graph_issues'] = array_values( array_filter( array_map( 'sanitize_key', is_array( $row['issues'] ?? null ) ? $row['issues'] : array() ) ) );
-			$item['shared_terms'] = array_slice( array_values( array_filter( array_map( 'sanitize_text_field', is_array( $pair['shared_terms'] ?? null ) ? $pair['shared_terms'] : array() ) ) ), 0, 3 );
+			$post_id                          = absint( $item['post_id'] ?? 0 );
+			$row                              = is_array( $rows[ $post_id ] ?? null ) ? $rows[ $post_id ] : array();
+			$pair                             = is_array( $pairs[ $post_id ] ?? null ) ? $pairs[ $post_id ] : array();
+			$item['incoming_count']           = absint( $row['incoming_count'] ?? 0 );
+			$item['link_graph_issues']        = array_values( array_filter( array_map( 'sanitize_key', is_array( $row['issues'] ?? null ) ? $row['issues'] : array() ) ) );
+			$item['shared_terms']             = array_slice( array_values( array_filter( array_map( 'sanitize_text_field', is_array( $pair['shared_terms'] ?? null ) ? $pair['shared_terms'] : array() ) ) ), 0, 3 );
 			$item['graph_evidence_available'] = ! empty( $row );
 		}
 		unset( $item );
@@ -3582,20 +3591,20 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_internal_link_recommendation_candidates( array $items, bool $cloud_evidence_available ): array {
 		$candidates = array();
 		foreach ( array_slice( $items, 0, 8 ) as $index => $item ) {
-			$title  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
-			$anchor = sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) );
-			$url    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
-			$target_post_id = absint( $item['target_post_id'] ?? 0 );
-			$target_status  = $target_post_id > 0 ? sanitize_key( (string) get_post_status( $target_post_id ) ) : '';
-			$target_type    = $target_post_id > 0 ? sanitize_key( (string) get_post_type( $target_post_id ) ) : '';
-			$verified_url   = $target_post_id > 0 ? esc_url_raw( (string) get_permalink( $target_post_id ) ) : '';
+			$title                  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
+			$anchor                 = sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) );
+			$url                    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
+			$target_post_id         = absint( $item['target_post_id'] ?? 0 );
+			$target_status          = $target_post_id > 0 ? sanitize_key( (string) get_post_status( $target_post_id ) ) : '';
+			$target_type            = $target_post_id > 0 ? sanitize_key( (string) get_post_type( $target_post_id ) ) : '';
+			$verified_url           = $target_post_id > 0 ? esc_url_raw( (string) get_permalink( $target_post_id ) ) : '';
 			$target_is_public_local = 'publish' === $target_status && in_array( $target_type, array( 'post', 'page' ), true ) && '' !== $verified_url;
 			if ( $target_is_public_local ) {
 				$url = $verified_url;
 			}
-			$reason       = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
-			$source_match = is_array( $item['source_match'] ?? null ) ? $item['source_match'] : array();
-			$matched_anchor = $this->editor_internal_link_safe_matched_anchor( $anchor, $source_match );
+			$reason              = sanitize_text_field( (string) ( $item['reason'] ?? '' ) );
+			$source_match        = is_array( $item['source_match'] ?? null ) ? $item['source_match'] : array();
+			$matched_anchor      = $this->editor_internal_link_safe_matched_anchor( $anchor, $source_match );
 			$candidate_relevance = sanitize_key( (string) ( $item['candidate_relevance'] ?? '' ) );
 			if ( ! in_array( $candidate_relevance, array( 'strong', 'review', 'weak' ), true ) ) {
 				$candidate_relevance = '';
@@ -3616,53 +3625,53 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			}
 			$quality_issues = array( __( '人工确认目标文章与当前段落或全文语义相关后再插入。', 'npcink-workflow-toolbox' ) );
 			if ( '' === $url ) {
-				$quality_score   = min( $quality_score, 55 );
+				$quality_score    = min( $quality_score, 55 );
 				$quality_issues[] = __( '缺少目标 URL，插入前需要人工补充或确认。', 'npcink-workflow-toolbox' );
 			}
 			if ( '' === $matched_anchor ) {
-				$quality_score   = min( $quality_score, 55 );
+				$quality_score    = min( $quality_score, 55 );
 				$quality_issues[] = __( '没有安全、具体且可匹配的正文锚文本；只能复制链接或打开目标文章。', 'npcink-workflow-toolbox' );
 			}
 			if ( ! $target_is_public_local ) {
-				$quality_score   = min( $quality_score, 55 );
+				$quality_score    = min( $quality_score, 55 );
 				$quality_issues[] = __( '目标必须是本站已发布的文章或页面；当前候选只能复制或打开检查。', 'npcink-workflow-toolbox' );
 			}
 
 			$candidates[] = $this->editor_recommendation_candidate(
 				array(
-					'id'                   => 'internal_link_' . ( $index + 1 ),
-					'kind'                 => 'internal_link',
-					'label'                => '' !== $title ? $title : __( 'Internal link candidate', 'npcink-workflow-toolbox' ),
-					'value'                => $matched_anchor,
-					'reason'               => $reason,
-					'confidence'           => $has_score && $score > 0 && $score <= 1 ? $score : null,
-					'target_field'         => 'post_content',
-					'action_policy'        => $can_apply_to_editor ? 'operator_confirmed_visible_editor_apply' : 'operator_review_copy_or_open_only',
-					'target_ref'           => array(
-						'post_id' => $target_post_id,
-						'title'   => $title,
-						'url'     => $url,
-						'status'  => $target_status,
+					'id'                    => 'internal_link_' . ( $index + 1 ),
+					'kind'                  => 'internal_link',
+					'label'                 => '' !== $title ? $title : __( 'Internal link candidate', 'npcink-workflow-toolbox' ),
+					'value'                 => $matched_anchor,
+					'reason'                => $reason,
+					'confidence'            => $has_score && $score > 0 && $score <= 1 ? $score : null,
+					'target_field'          => 'post_content',
+					'action_policy'         => $can_apply_to_editor ? 'operator_confirmed_visible_editor_apply' : 'operator_review_copy_or_open_only',
+					'target_ref'            => array(
+						'post_id'   => $target_post_id,
+						'title'     => $title,
+						'url'       => $url,
+						'status'    => $target_status,
 						'post_type' => $target_type,
 					),
-					'anchor_or_context'    => $matched_anchor,
+					'anchor_or_context'     => $matched_anchor,
 					'anchor_quality_status' => '' !== $matched_anchor ? 'safe_exact_source_match' : 'rejected_no_safe_exact_match',
-					'can_apply_to_editor'  => $can_apply_to_editor,
-					'evidence_note'        => '' !== $reason ? $reason : __( 'Related content candidate for manual internal-link review.', 'npcink-workflow-toolbox' ),
-					'owner_label'          => 'human_editor',
-					'next_safe_action'     => $can_apply_to_editor ? 'review_and_apply_to_visible_editor' : 'copy_or_open_target_only',
-					'quality_status'       => '' !== $candidate_relevance ? $candidate_relevance : ( $quality_score >= 60 && $can_apply_to_editor ? 'review' : 'weak' ),
-					'quality_score'        => $quality_score,
-					'quality_issues'       => $quality_issues,
-						'evidence_refs'        => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
-					'source_match'         => $can_apply_to_editor ? $source_match : array(),
-					'candidate_source'     => sanitize_key( (string) ( $item['candidate_source'] ?? '' ) ),
-					'candidate_relevance'  => $candidate_relevance,
-					'priority_reason'      => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
-						'link_graph_issues'    => is_array( $item['link_graph_issues'] ?? null ) ? $item['link_graph_issues'] : array(),
-						'shared_terms'         => is_array( $item['shared_terms'] ?? null ) ? $item['shared_terms'] : array(),
-						'incoming_count'       => absint( $item['incoming_count'] ?? 0 ),
-					'source_candidate_ref' => '' !== $url ? $url : 'internal_link_item_' . ( $index + 1 ),
+					'can_apply_to_editor'   => $can_apply_to_editor,
+					'evidence_note'         => '' !== $reason ? $reason : __( 'Related content candidate for manual internal-link review.', 'npcink-workflow-toolbox' ),
+					'owner_label'           => 'human_editor',
+					'next_safe_action'      => $can_apply_to_editor ? 'review_and_apply_to_visible_editor' : 'copy_or_open_target_only',
+					'quality_status'        => '' !== $candidate_relevance ? $candidate_relevance : ( $quality_score >= 60 && $can_apply_to_editor ? 'review' : 'weak' ),
+					'quality_score'         => $quality_score,
+					'quality_issues'        => $quality_issues,
+					'evidence_refs'         => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
+					'source_match'          => $can_apply_to_editor ? $source_match : array(),
+					'candidate_source'      => sanitize_key( (string) ( $item['candidate_source'] ?? '' ) ),
+					'candidate_relevance'   => $candidate_relevance,
+					'priority_reason'       => sanitize_text_field( (string) ( $item['priority_reason'] ?? '' ) ),
+					'link_graph_issues'     => is_array( $item['link_graph_issues'] ?? null ) ? $item['link_graph_issues'] : array(),
+					'shared_terms'          => is_array( $item['shared_terms'] ?? null ) ? $item['shared_terms'] : array(),
+					'incoming_count'        => absint( $item['incoming_count'] ?? 0 ),
+					'source_candidate_ref'  => '' !== $url ? $url : 'internal_link_item_' . ( $index + 1 ),
 				)
 			);
 		}
@@ -3680,7 +3689,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return '';
 		}
 
-		$normalize = static function ( string $value ): string {
+		$normalize          = static function ( string $value ): string {
 			$value = trim( preg_replace( '/[\p{P}\p{Z}\s]+/u', '', $value ) ?? '' );
 			return function_exists( 'mb_strtolower' ) ? mb_strtolower( $value ) : strtolower( $value );
 		};
@@ -3705,18 +3714,18 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$summary_mode           = in_array( (string) ( $context['summary_generation_mode'] ?? 'fast_brief' ), array( 'fast_brief', 'full_context' ), true ) ? (string) $context['summary_generation_mode'] : 'fast_brief';
 		$summary_vector_context = array();
 		$timing                 = array(
-			'summary_generation_mode'        => $summary_mode,
-			'site_knowledge_ms'              => 0,
-			'site_knowledge_cache_status'    => 'skipped',
-			'site_knowledge_blocking'        => false,
-			'hosted_ai_ms'                   => 0,
-			'hosted_ai_cache_status'         => 'unknown',
-			'fast_brief_target_seconds'      => '3_5',
-			'vector_context_included'        => false,
+			'summary_generation_mode'     => $summary_mode,
+			'site_knowledge_ms'           => 0,
+			'site_knowledge_cache_status' => 'skipped',
+			'site_knowledge_blocking'     => false,
+			'hosted_ai_ms'                => 0,
+			'hosted_ai_cache_status'      => 'unknown',
+			'fast_brief_target_seconds'   => '3_5',
+			'vector_context_included'     => false,
 		);
 		if ( 'fast_brief' === $summary_mode ) {
-			$site_knowledge_started = microtime( true );
-			$summary_vector_context = $this->editor_support_section(
+			$site_knowledge_started                = microtime( true );
+			$summary_vector_context                = $this->editor_support_section(
 				$this->editor_cached_site_knowledge_hit(
 					array(
 						'query'           => $query,
@@ -3730,28 +3739,28 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$timing['site_knowledge_cache_status'] = sanitize_key( (string) ( $summary_vector_context['cache_status'] ?? 'miss' ) );
 		}
 
-		$summary_vector_context_for_ai       = $this->editor_summary_vector_context_for_ai( $summary_vector_context );
-		$timing['vector_context_included']   = ! empty( $summary_vector_context_for_ai['items'] );
-		$force_regenerate                    = ! empty( $context['force_regenerate'] );
-		$hosted_ai_started                   = microtime( true );
-		$summary_ai = $this->editor_support_section(
+		$summary_vector_context_for_ai     = $this->editor_summary_vector_context_for_ai( $summary_vector_context );
+		$timing['vector_context_included'] = ! empty( $summary_vector_context_for_ai['items'] );
+		$force_regenerate                  = ! empty( $context['force_regenerate'] );
+		$hosted_ai_started                 = microtime( true );
+		$summary_ai                        = $this->editor_support_section(
 			$this->editor_cached_hosted_ai_content_support(
 				array(
-					'intent'             => 'summary_suggestions',
-					'post_id'            => absint( $context['post_id'] ?? 0 ),
-					'title'              => (string) ( $context['title'] ?? '' ),
-					'excerpt'            => (string) ( $context['excerpt'] ?? '' ),
-					'content'            => (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ),
-					'user_instruction'   => (string) ( $context['user_instruction'] ?? '' ),
-					'generation_variant' => (string) ( $context['generation_variant'] ?? '' ),
+					'intent'                  => 'summary_suggestions',
+					'post_id'                 => absint( $context['post_id'] ?? 0 ),
+					'title'                   => (string) ( $context['title'] ?? '' ),
+					'excerpt'                 => (string) ( $context['excerpt'] ?? '' ),
+					'content'                 => (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ),
+					'user_instruction'        => (string) ( $context['user_instruction'] ?? '' ),
+					'generation_variant'      => (string) ( $context['generation_variant'] ?? '' ),
 					'summary_generation_mode' => $summary_mode,
 					'summary_vector_context'  => $summary_vector_context_for_ai,
 				),
 				$force_regenerate
 			)
 		);
-		$timing['hosted_ai_ms']           = (int) round( ( microtime( true ) - $hosted_ai_started ) * 1000 );
-		$timing['hosted_ai_cache_status'] = sanitize_key( (string) ( $summary_ai['cache_status'] ?? 'unknown' ) );
+		$timing['hosted_ai_ms']            = (int) round( ( microtime( true ) - $hosted_ai_started ) * 1000 );
+		$timing['hosted_ai_cache_status']  = sanitize_key( (string) ( $summary_ai['cache_status'] ?? 'unknown' ) );
 
 		return $this->editor_summary_only_suggestion_section( $summary_ai, $context, $timing );
 	}
@@ -3760,30 +3769,30 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$summary_layers = $this->editor_ai_summary_layer_candidates( $summary_ai, $context );
 
 		return array(
-			'artifact_type'          => 'article_summary_suggestions.v1',
-			'composition_role'       => 'summary_candidates_only',
-			'candidate_type'         => 'summary_suggestions',
-			'candidate_contract'     => 'recommendation_candidate.v1',
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'editor_apply_preview_save_required',
-			'direct_wordpress_write' => false,
-			'summary_layers'         => $summary_layers,
-			'summary_candidates'     => $summary_ai,
-			'provider_execution'     => 'hosted_ai',
-			'generation_mode'        => 'ai_summary',
+			'artifact_type'           => 'article_summary_suggestions.v1',
+			'composition_role'        => 'summary_candidates_only',
+			'candidate_type'          => 'summary_suggestions',
+			'candidate_contract'      => 'recommendation_candidate.v1',
+			'write_posture'           => 'suggestion_only',
+			'final_write_path'        => 'editor_apply_preview_save_required',
+			'direct_wordpress_write'  => false,
+			'summary_layers'          => $summary_layers,
+			'summary_candidates'      => $summary_ai,
+			'provider_execution'      => 'hosted_ai',
+			'generation_mode'         => 'ai_summary',
 			'summary_generation_mode' => in_array( (string) ( $context['summary_generation_mode'] ?? 'fast_brief' ), array( 'fast_brief', 'full_context' ), true ) ? (string) $context['summary_generation_mode'] : 'fast_brief',
-			'generation_variant'     => sanitize_text_field( (string) ( $context['generation_variant'] ?? '' ) ),
-			'timing'                 => $timing,
-			'quality_contract'       => is_array( $summary_ai['quality_contract'] ?? null ) ? $summary_ai['quality_contract'] : array(),
-			'review_checklist'       => is_array( $summary_ai['review_checklist'] ?? null ) ? $summary_ai['review_checklist'] : array(),
+			'generation_variant'      => sanitize_text_field( (string) ( $context['generation_variant'] ?? '' ) ),
+			'timing'                  => $timing,
+			'quality_contract'        => is_array( $summary_ai['quality_contract'] ?? null ) ? $summary_ai['quality_contract'] : array(),
+			'review_checklist'        => is_array( $summary_ai['review_checklist'] ?? null ) ? $summary_ai['review_checklist'] : array(),
 		);
 	}
 
 	private function editor_article_audio_generation( array $context, string $intent ): array {
 		$source_text       = trim( (string) ( $context['content_audio_text'] ?? $context['content_full_text'] ?? $context['content_text'] ?? '' ) );
-		$force_regenerate = ! empty( $context['force_regenerate'] );
+		$force_regenerate  = ! empty( $context['force_regenerate'] );
 		$audio_preferences = is_array( $context['audio_preferences'] ?? null ) ? $context['audio_preferences'] : array();
-		$script_source    = array(
+		$script_source     = array(
 			'artifact_type'          => 'article_audio_script_source.v1',
 			'intent'                 => $intent,
 			'audio_preferences'      => $audio_preferences,
@@ -3792,46 +3801,46 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		);
 
 		if ( 'article_audio_summary' === $intent ) {
-			$summary_ai = $this->editor_support_section(
+			$summary_ai                      = $this->editor_support_section(
 				$this->editor_cached_hosted_ai_content_support(
 					array(
-						'intent'             => 'audio_summary_script',
-						'post_id'            => absint( $context['post_id'] ?? 0 ),
-						'title'              => (string) ( $context['title'] ?? '' ),
-						'excerpt'            => (string) ( $context['excerpt'] ?? '' ),
-						'content'            => (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ),
-						'user_instruction'   => (string) ( $context['user_instruction'] ?? '' ),
-						'generation_variant' => (string) ( $context['generation_variant'] ?? '' ),
+						'intent'                  => 'audio_summary_script',
+						'post_id'                 => absint( $context['post_id'] ?? 0 ),
+						'title'                   => (string) ( $context['title'] ?? '' ),
+						'excerpt'                 => (string) ( $context['excerpt'] ?? '' ),
+						'content'                 => (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ),
+						'user_instruction'        => (string) ( $context['user_instruction'] ?? '' ),
+						'generation_variant'      => (string) ( $context['generation_variant'] ?? '' ),
 						'summary_generation_mode' => 'fast_brief',
 					),
 					$force_regenerate
 				)
 			);
-			$script = $this->editor_audio_summary_script_text( $summary_ai );
+			$script                          = $this->editor_audio_summary_script_text( $summary_ai );
 			$script_source['summary_script'] = $summary_ai;
 		} else {
-			$script = $this->editor_audio_source_text( $source_text );
+			$script                       = $this->editor_audio_source_text( $source_text );
 			$script_source['source_mode'] = 'article_text';
 		}
 
 		$audio = $this->editor_support_section(
 			$this->editor_cached_audio_generation(
 				array(
-					'intent'    => $intent,
-					'text'      => $script,
-					'script'    => $script,
-					'user_instruction' => (string) ( $context['user_instruction'] ?? '' ),
+					'intent'            => $intent,
+					'text'              => $script,
+					'script'            => $script,
+					'user_instruction'  => (string) ( $context['user_instruction'] ?? '' ),
 					'audio_preferences' => $audio_preferences,
-					'format'    => 'mp3',
-					'context'   => array(
-						'post_id'          => absint( $context['post_id'] ?? 0 ),
-						'post_type'        => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
-						'title'            => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
-						'excerpt'          => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
-						'source_text_hash' => md5( $source_text ),
-						'user_instruction' => sanitize_textarea_field( (string) ( $context['user_instruction'] ?? '' ) ),
+					'format'            => 'mp3',
+					'context'           => array(
+						'post_id'           => absint( $context['post_id'] ?? 0 ),
+						'post_type'         => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+						'title'             => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+						'excerpt'           => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
+						'source_text_hash'  => md5( $source_text ),
+						'user_instruction'  => sanitize_textarea_field( (string) ( $context['user_instruction'] ?? '' ) ),
 						'audio_preferences' => $audio_preferences,
-						'surface'          => 'editor_content_support',
+						'surface'           => 'editor_content_support',
 					),
 				),
 				$force_regenerate
@@ -3918,8 +3927,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$items      = array();
 
 		foreach ( $paragraphs as $index => $paragraph ) {
-			$length          = $this->editor_text_length( $paragraph );
-			$sentence_parts  = preg_split( '/[。！？!?；;]+/u', $paragraph );
+			$length           = $this->editor_text_length( $paragraph );
+			$sentence_parts   = preg_split( '/[。！？!?；;]+/u', $paragraph );
 			$longest_sentence = 0;
 			foreach ( is_array( $sentence_parts ) ? $sentence_parts : array() as $sentence ) {
 				$longest_sentence = max( $longest_sentence, $this->editor_text_length( trim( (string) $sentence ) ) );
@@ -3983,7 +3992,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			}
 		}
 
-		$word_count = str_word_count( $text );
+		$word_count  = str_word_count( $text );
 		$text_length = $this->editor_text_length( $text );
 		if ( '' === $title ) {
 			$items[] = $this->editor_article_checkup_issue(
@@ -4019,8 +4028,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 
-		$format_consistency   = $this->editor_article_checkup_format_consistency( $paragraphs );
-		$format_items         = is_array( $format_consistency['items'] ?? null ) ? $format_consistency['items'] : array();
+		$format_consistency = $this->editor_article_checkup_format_consistency( $paragraphs );
+		$format_items       = is_array( $format_consistency['items'] ?? null ) ? $format_consistency['items'] : array();
 		foreach ( $format_items as $format_item ) {
 			$items[] = $format_item;
 		}
@@ -4056,12 +4065,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'semantic_consistency'   => $semantic_consistency,
 			'items'                  => array_slice( $items, 0, 12 ),
 			'summary'                => array(
-				'paragraph_count'          => count( $paragraphs ),
-				'issue_count'              => count( $items ),
-				'format_consistency_count' => count( $format_items ),
+				'paragraph_count'            => count( $paragraphs ),
+				'issue_count'                => count( $items ),
+				'format_consistency_count'   => count( $format_items ),
 				'semantic_consistency_count' => count( $semantic_items ),
-				'cloud_calls'              => false,
-				'no_rewrite'               => true,
+				'cloud_calls'                => false,
+				'no_rewrite'                 => true,
 			),
 		);
 	}
@@ -4395,20 +4404,20 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			}
 		}
 
-		$section = $this->editor_support_section(
-				$this->editor_cached_hosted_ai_content_support(
-					array(
-						'intent'             => $provider_intent,
-						'post_id'            => absint( $context['post_id'] ?? 0 ),
+		$section                       = $this->editor_support_section(
+			$this->editor_cached_hosted_ai_content_support(
+				array(
+					'intent'             => $provider_intent,
+					'post_id'            => absint( $context['post_id'] ?? 0 ),
 					'title'              => (string) ( $context['title'] ?? '' ),
 					'excerpt'            => (string) ( $context['excerpt'] ?? '' ),
 					'content'            => $content,
-						'user_instruction'   => (string) ( $context['user_instruction'] ?? '' ),
-						'generation_variant' => (string) ( $context['generation_variant'] ?? '' ),
-					),
-					! empty( $context['force_regenerate'] )
-				)
-			);
+					'user_instruction'   => (string) ( $context['user_instruction'] ?? '' ),
+					'generation_variant' => (string) ( $context['generation_variant'] ?? '' ),
+				),
+				! empty( $context['force_regenerate'] )
+			)
+		);
 		$section['provider_execution'] = 'hosted_ai';
 		$section['provider_intent']    = $provider_intent;
 		$section['write_posture']      = 'suggestion_only';
@@ -4452,16 +4461,16 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$output = $this->editor_paragraph_check_local_output( $selected_text );
 		$status = sanitize_key( (string) ( $section['status'] ?? 'unknown' ) );
 
-		$section['provider_execution']     = 'hosted_ai_with_local_empty_fallback';
-		$section['hosted_ai_status']       = $status;
-		$section['fallback_reason']        = 'local_paragraph_check_after_hosted_ai_empty';
-		$section['fallback_source']        = 'current_selected_paragraph_only';
-		$section['fallback_write_posture'] = 'suggestion_only_no_replacement_text';
+		$section['provider_execution']      = 'hosted_ai_with_local_empty_fallback';
+		$section['hosted_ai_status']        = $status;
+		$section['fallback_reason']         = 'local_paragraph_check_after_hosted_ai_empty';
+		$section['fallback_source']         = 'current_selected_paragraph_only';
+		$section['fallback_write_posture']  = 'suggestion_only_no_replacement_text';
 		$section['fallback_signal_profile'] = is_array( $output['signal_profile'] ?? null )
 			? array_map( 'boolval', $output['signal_profile'] )
 			: array();
-		$section['output_json']            = $output;
-		$section['items']                  = array(
+		$section['output_json']             = $output;
+		$section['items']                   = array(
 			array(
 				'name'          => __( 'Clarity check', 'npcink-workflow-toolbox' ),
 				'detail'        => $output['clarity_check'],
@@ -4492,27 +4501,27 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_paragraph_check_local_overlay_section( array $section, string $selected_text ): array {
-		$output = $this->editor_paragraph_check_local_output( $selected_text, false );
+		$output  = $this->editor_paragraph_check_local_output( $selected_text, false );
 		$overlay = array(
-			'artifact_type'  => 'paragraph_local_review_overlay.v1',
-			'source'         => 'current_selected_paragraph_only',
-			'write_posture'  => 'suggestion_only_no_replacement_text',
-			'action_policy'  => 'operator_review_only_no_insert',
-			'status'         => 'ready',
+			'artifact_type'      => 'paragraph_local_review_overlay.v1',
+			'source'             => 'current_selected_paragraph_only',
+			'write_posture'      => 'suggestion_only_no_replacement_text',
+			'action_policy'      => 'operator_review_only_no_insert',
+			'status'             => 'ready',
 			'provider_execution' => 'local_signal_overlay_after_hosted_ai_output',
-			'signal_profile' => is_array( $output['signal_profile'] ?? null )
+			'signal_profile'     => is_array( $output['signal_profile'] ?? null )
 				? array_map( 'boolval', $output['signal_profile'] )
 				: array(),
-			'output_json'    => $output,
-			'items'          => $this->editor_paragraph_check_local_overlay_items( $output ),
+			'output_json'        => $output,
+			'items'              => $this->editor_paragraph_check_local_overlay_items( $output ),
 		);
 
 		$section['local_review_overlay'] = $overlay;
 		$section['local_signal_profile'] = $overlay['signal_profile'];
 
-		$output_json = is_array( $section['output_json'] ?? null ) ? $section['output_json'] : array();
+		$output_json                         = is_array( $section['output_json'] ?? null ) ? $section['output_json'] : array();
 		$output_json['local_review_overlay'] = $overlay;
-		$section['output_json'] = $output_json;
+		$section['output_json']              = $output_json;
 
 		return $section;
 	}
@@ -4577,7 +4586,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$has_causal_transition = 1 === preg_match( '/(因此|所以|由于|因为|从而|导致)/u', $text );
 
 		return array(
-			'long_or_dense'          => $length > 150 || $punctuation_count >= 3,
+			'long_or_dense'         => $length > 150 || $punctuation_count >= 3,
 			'has_performance_claim' => $has_performance_claim,
 			'has_metric_claim'      => $has_metric_claim,
 			'has_scope_claim'       => $has_scope_claim,
@@ -4588,10 +4597,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_paragraph_check_local_output( string $selected_text, bool $hosted_ai_empty = true ): array {
-		$text     = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $selected_text ) ) ?: '' );
-		$length   = function_exists( 'mb_strlen' ) ? mb_strlen( $text, 'UTF-8' ) : strlen( $text );
+		$text              = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $selected_text ) ) ?: '' );
+		$length            = function_exists( 'mb_strlen' ) ? mb_strlen( $text, 'UTF-8' ) : strlen( $text );
 		$punctuation_count = preg_match_all( '/[。！？!?；;]/u', $text );
-		$signals = $this->editor_paragraph_check_signal_profile( $text, $length, (int) $punctuation_count );
+		$signals           = $this->editor_paragraph_check_signal_profile( $text, $length, (int) $punctuation_count );
 
 		if ( $signals['has_structural_glue'] ) {
 			$clarity = __( '选中段落疑似存在标题词、选项标签或短语串与正文黏连的问题，建议先检查分隔、标点、列表或小标题结构。', 'npcink-workflow-toolbox' );
@@ -4639,14 +4648,14 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$editing = implode( '', $editing_parts );
 
 		return array(
-			'clarity_check'       => $clarity,
-			'fact_gaps'           => $fact_gaps,
-			'tone_consistency'    => $tone,
-			'editing_suggestions' => $editing,
+			'clarity_check'         => $clarity,
+			'fact_gaps'             => $fact_gaps,
+			'tone_consistency'      => $tone,
+			'editing_suggestions'   => $editing,
 			'assumptions_to_verify' => $hosted_ai_empty
 				? __( '托管 AI 本次未返回建议，以上为本地兜底检查；仍以人工编辑和原始测试记录为准。', 'npcink-workflow-toolbox' )
 				: __( '本地复核只检查结构、事实口径和语气风险；托管 AI 建议仍需人工审阅。', 'npcink-workflow-toolbox' ),
-			'signal_profile'      => $signals,
+			'signal_profile'        => $signals,
 		);
 	}
 
@@ -4797,10 +4806,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_title_candidate_quality( string $title, array $context ): array {
-		$score  = 100;
-		$issues = array();
-		$value  = trim( $title );
-		$length = function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : strlen( $value );
+		$score         = 100;
+		$issues        = array();
+		$value         = trim( $title );
+		$length        = function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : strlen( $value );
 		$current_title = trim( sanitize_text_field( (string) ( $context['title'] ?? '' ) ) );
 
 		if ( $length < 6 ) {
@@ -4876,12 +4885,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$candidate['candidate_relevance'] = (string) $args['candidate_relevance'];
 		}
 		if ( is_array( $args['target_ref'] ?? null ) ) {
-			$target_ref = $args['target_ref'];
+			$target_ref              = $args['target_ref'];
 			$candidate['target_ref'] = array(
-				'post_id' => absint( $target_ref['post_id'] ?? 0 ),
-				'title'   => sanitize_text_field( (string) ( $target_ref['title'] ?? '' ) ),
-				'url'     => esc_url_raw( (string) ( $target_ref['url'] ?? '' ) ),
-				'status'  => sanitize_key( (string) ( $target_ref['status'] ?? '' ) ),
+				'post_id'   => absint( $target_ref['post_id'] ?? 0 ),
+				'title'     => sanitize_text_field( (string) ( $target_ref['title'] ?? '' ) ),
+				'url'       => esc_url_raw( (string) ( $target_ref['url'] ?? '' ) ),
+				'status'    => sanitize_key( (string) ( $target_ref['status'] ?? '' ) ),
 				'post_type' => sanitize_key( (string) ( $target_ref['post_type'] ?? '' ) ),
 			);
 		}
@@ -4904,9 +4913,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$candidate['next_safe_action'] = sanitize_key( (string) $args['next_safe_action'] );
 		}
 		if ( is_array( $args['source_match'] ?? null ) ) {
-			$source_match = $args['source_match'];
-			$client_id    = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
-			$matched_text = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
+			$source_match  = $args['source_match'];
+			$client_id     = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
+			$matched_text  = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
 			$expected_text = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $source_match['expected_text'] ?? '' ) ), 1600 ) );
 			if ( '' !== $client_id && '' !== $matched_text && '' !== $expected_text ) {
 				$candidate['source_match'] = array(
@@ -4936,7 +4945,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_recommendation_quality_notes( array $items ): array {
 		$notes = array();
 		foreach ( $items as $item ) {
-			$issues = is_array( $item['quality_issues'] ?? null ) ? $item['quality_issues'] : array();
+			$issues  = is_array( $item['quality_issues'] ?? null ) ? $item['quality_issues'] : array();
 			$notes[] = array(
 				'name'   => (string) ( $item['label'] ?? __( 'Recommendation candidate', 'npcink-workflow-toolbox' ) ),
 				'status' => sanitize_key( (string) ( $item['quality_status'] ?? 'review' ) ),
@@ -4973,9 +4982,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_fast_tag_suggestions( array $context, string $query ): array {
-		$taxonomy_terms = $this->editor_taxonomy_term_candidates( $context, $query );
-		$items          = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
-		$tags           = array_values(
+		$taxonomy_terms     = $this->editor_taxonomy_term_candidates( $context, $query );
+		$items              = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
+		$tags               = array_values(
 			array_filter(
 				$items,
 				static fn( array $item ): bool => 'post_tag' === (string) ( $item['taxonomy'] ?? '' )
@@ -4995,29 +5004,29 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_taxonomy_only_suggestion_section( string $candidate_type, array $categories, array $tags, array $proposed_new_terms, array $taxonomy_terms, array $context ): array {
 		return array(
-			'artifact_type'              => 'article_taxonomy_suggestions.v1',
-			'composition_role'           => 'taxonomy_candidates_only',
-			'candidate_type'             => sanitize_key( $candidate_type ),
-			'candidate_contract'         => 'recommendation_candidate.v1',
-			'write_posture'              => 'suggestion_only',
-			'final_write_path'           => 'core_proposal_required',
-			'direct_wordpress_write'     => false,
-			'input_scope'                => $this->editor_input_scope( $context ),
-			'category_candidates'        => array_slice( $categories, 0, 5 ),
-			'tag_candidates'             => array_slice( $tags, 0, 8 ),
-			'proposed_new_terms'         => $proposed_new_terms,
-			'taxonomy_terms'             => $taxonomy_terms,
-			'recommendation_candidates'  => $this->editor_taxonomy_recommendation_candidates( $candidate_type, $categories, $tags, $proposed_new_terms ),
-			'quality_gate'               => array(
+			'artifact_type'             => 'article_taxonomy_suggestions.v1',
+			'composition_role'          => 'taxonomy_candidates_only',
+			'candidate_type'            => sanitize_key( $candidate_type ),
+			'candidate_contract'        => 'recommendation_candidate.v1',
+			'write_posture'             => 'suggestion_only',
+			'final_write_path'          => 'core_proposal_required',
+			'direct_wordpress_write'    => false,
+			'input_scope'               => $this->editor_input_scope( $context ),
+			'category_candidates'       => array_slice( $categories, 0, 5 ),
+			'tag_candidates'            => array_slice( $tags, 0, 8 ),
+			'proposed_new_terms'        => $proposed_new_terms,
+			'taxonomy_terms'            => $taxonomy_terms,
+			'recommendation_candidates' => $this->editor_taxonomy_recommendation_candidates( $candidate_type, $categories, $tags, $proposed_new_terms ),
+			'quality_gate'              => array(
 				'name'           => 'runtime_taxonomy_candidate_rerank',
 				'policy'         => 'existing_terms_first_current_draft_match_then_related_history',
 				'candidate_sort' => 'score_desc_then_existing_term_order',
 			),
-			'selection_policy'           => array(
-				'prefer_existing_terms'      => true,
-				'new_terms_deferred'         => true,
-				'no_toolbox_term_creation'   => true,
-				'accepted_write_path'        => 'core_proposal_required',
+			'selection_policy'          => array(
+				'prefer_existing_terms'    => true,
+				'new_terms_deferred'       => true,
+				'no_toolbox_term_creation' => true,
+				'accepted_write_path'      => 'core_proposal_required',
 			),
 		);
 	}
@@ -5055,11 +5064,11 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_taxonomy_candidate_quality( array $item ): array {
-		$score            = is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : 0.0;
-		$match_signals    = is_array( $item['match_signals'] ?? null ) ? $item['match_signals'] : array();
-		$related_context  = is_array( $item['related_context'] ?? null ) ? $item['related_context'] : array();
-		$quality_score    = max( 0, min( 100, 45 + (int) round( $score * 10 ) ) );
-		$quality_issues   = array();
+		$score           = is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : 0.0;
+		$match_signals   = is_array( $item['match_signals'] ?? null ) ? $item['match_signals'] : array();
+		$related_context = is_array( $item['related_context'] ?? null ) ? $item['related_context'] : array();
+		$quality_score   = max( 0, min( 100, 45 + (int) round( $score * 10 ) ) );
+		$quality_issues  = array();
 		if ( in_array( 'current_draft_match', $match_signals, true ) ) {
 			$quality_issues[] = __( '匹配当前草稿中的标题、摘要或正文词。', 'npcink-workflow-toolbox' );
 		}
@@ -5073,18 +5082,18 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$quality_issues[] = __( '历史相关文章使用过该词汇，可作为站内词库证据。', 'npcink-workflow-toolbox' );
 		}
 		if ( in_array( 'description_only_match', $match_signals, true ) ) {
-			$quality_score -= 20;
+			$quality_score   -= 20;
 			$quality_issues[] = __( '仅描述字段匹配，避免把弱说明文字当作强分类依据。', 'npcink-workflow-toolbox' );
 		}
 		if ( in_array( 'low_specificity_match', $match_signals, true ) ) {
-			$quality_score -= 15;
+			$quality_score   -= 15;
 			$quality_issues[] = __( '只有一个较弱 token 匹配，需人工确认是否为标题党或泛化词。', 'npcink-workflow-toolbox' );
 		}
 		if ( empty( $quality_issues ) ) {
 			$quality_issues[] = __( '仅作为现有 WordPress 词条候选，采用人工审查。', 'npcink-workflow-toolbox' );
 		}
 		if ( 0 === absint( $related_context['source_count'] ?? 0 ) && ! in_array( 'current_draft_match', $match_signals, true ) ) {
-			$quality_score -= 15;
+			$quality_score   -= 15;
 			$quality_issues[] = __( '缺少当前草稿或历史文章的强匹配证据。', 'npcink-workflow-toolbox' );
 		}
 
@@ -5177,18 +5186,18 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				$key = $taxonomy . ':' . $term_id;
 				if ( ! isset( $evidence[ $key ] ) ) {
 					$evidence[ $key ] = array(
-						'term_id'          => $term_id,
-						'taxonomy'         => $taxonomy,
-						'name'             => sanitize_text_field( (string) ( $term['name'] ?? '' ) ),
-						'source_count'     => 0,
-						'source_post_ids'  => array(),
-						'source_titles'    => array(),
-						'source_refs'      => array(),
-						'max_similarity'   => 0.0,
+						'term_id'         => $term_id,
+						'taxonomy'        => $taxonomy,
+						'name'            => sanitize_text_field( (string) ( $term['name'] ?? '' ) ),
+						'source_count'    => 0,
+						'source_post_ids' => array(),
+						'source_titles'   => array(),
+						'source_refs'     => array(),
+						'max_similarity'  => 0.0,
 					);
 				}
 
-				$evidence[ $key ]['source_count']++;
+				++$evidence[ $key ]['source_count'];
 				$evidence[ $key ]['source_post_ids'][] = $post_id;
 				$evidence[ $key ]['source_refs'][]     = $source_ref;
 				if ( '' !== $title ) {
@@ -5273,15 +5282,15 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 						)
 					) : array();
 					return array(
-						'term_id'       => absint( $item['term_id'] ?? 0 ),
-						'name'          => sanitize_text_field( (string) ( $item['name'] ?? '' ) ),
-						'taxonomy'      => sanitize_key( (string) ( $item['taxonomy'] ?? '' ) ),
-						'confidence'    => max( 0.0, min( 1.0, $score / 5 ) ),
-						'reason'        => sanitize_text_field( (string) ( $item['reason'] ?? '' ) ),
-						'evidence_refs' => array() !== $item_evidence_refs ? $item_evidence_refs : $evidence_ids,
-						'match_signals' => is_array( $item['match_signals'] ?? null ) ? array_values( array_map( 'sanitize_key', $item['match_signals'] ) ) : array(),
+						'term_id'         => absint( $item['term_id'] ?? 0 ),
+						'name'            => sanitize_text_field( (string) ( $item['name'] ?? '' ) ),
+						'taxonomy'        => sanitize_key( (string) ( $item['taxonomy'] ?? '' ) ),
+						'confidence'      => max( 0.0, min( 1.0, $score / 5 ) ),
+						'reason'          => sanitize_text_field( (string) ( $item['reason'] ?? '' ) ),
+						'evidence_refs'   => array() !== $item_evidence_refs ? $item_evidence_refs : $evidence_ids,
+						'match_signals'   => is_array( $item['match_signals'] ?? null ) ? array_values( array_map( 'sanitize_key', $item['match_signals'] ) ) : array(),
 						'related_context' => is_array( $item['related_context'] ?? null ) ? $item['related_context'] : array(),
-						'status'        => 'existing_wordpress_term',
+						'status'          => 'existing_wordpress_term',
 					);
 				},
 				$items
@@ -5421,13 +5430,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'existing_categories' => $core_handoff_candidates[2]['available_fields'],
 				'existing_tags'       => $core_handoff_candidates[1]['available_fields'],
 			),
-			'blocked_actions'        => array(
+			'blocked_actions'           => array(
 				'no_excerpt_update_in_toolbox',
 				'no_term_assignment_in_toolbox',
 				'no_new_term_creation_in_toolbox',
 				'no_seo_meta_write_in_toolbox',
 			),
-			'next_steps'             => array(
+			'next_steps'                => array(
 				__( 'Use Generate and apply summary when Core policy can auto-approve the selected summary layer.', 'npcink-workflow-toolbox' ),
 				__( 'Use Recommend and apply tags for existing tag ids returned by Toolbox.', 'npcink-workflow-toolbox' ),
 				__( 'Use Recommend categories as review-first guidance unless Core explicitly allows category auto-assignment.', 'npcink-workflow-toolbox' ),
@@ -5436,17 +5445,17 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_summary_layer_candidates( array $context, array $related_content = array() ): array {
-		$title   = trim( sanitize_text_field( (string) ( $context['title'] ?? '' ) ) );
-		$excerpt = trim( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ) );
-		$content = trim( wp_strip_all_tags( (string) ( $context['content_text'] ?? '' ) ) );
+		$title                 = trim( sanitize_text_field( (string) ( $context['title'] ?? '' ) ) );
+		$excerpt               = trim( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ) );
+		$content               = trim( wp_strip_all_tags( (string) ( $context['content_text'] ?? '' ) ) );
 		$base                  = '' !== $excerpt ? $excerpt : ( '' !== $content ? $content : $title );
 		$related_summary       = $this->editor_related_content_summary( $related_content );
 		$summary_evidence_refs = is_array( $related_summary['evidence_refs'] ?? null ) ? $related_summary['evidence_refs'] : array();
 
 		return array(
-			'candidate_type'         => 'summary_layer_candidates',
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
+			'candidate_type'          => 'summary_layer_candidates',
+			'write_posture'           => 'suggestion_only',
+			'direct_wordpress_write'  => false,
 			'related_context_summary' => $related_summary,
 			'items'                   => array(
 				array(
@@ -5536,10 +5545,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$seen[ $key ] = true;
 			$quality      = $this->editor_ai_summary_candidate_quality( $value, $coverage, $context );
 			$candidates[] = array(
-				'value'     => $value,
-				'order'     => absint( $raw_item['order'] ?? 0 ),
-				'reason'    => sanitize_text_field( (string) ( $raw_item['reason'] ?? '' ) ),
-				'quality'   => $quality,
+				'value'   => $value,
+				'order'   => absint( $raw_item['order'] ?? 0 ),
+				'reason'  => sanitize_text_field( (string) ( $raw_item['reason'] ?? '' ) ),
+				'quality' => $quality,
 			);
 		}
 
@@ -5559,7 +5568,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				'id'             => $is_first ? 'ai_recommended_excerpt' : ( 1 === $index ? 'ai_alternate_excerpt' : 'ai_third_excerpt' ),
 				'kind'           => 'excerpt',
 				'label'          => $is_first ? __( 'AI recommended excerpt', 'npcink-workflow-toolbox' ) : __( 'AI alternate excerpt', 'npcink-workflow-toolbox' ),
-				'limit'         => '50_160_zh_chars',
+				'limit'          => '50_160_zh_chars',
 				'value'          => sanitize_text_field( (string) ( $candidate['value'] ?? '' ) ),
 				'reason'         => '' !== (string) ( $candidate['reason'] ?? '' ) ? (string) $candidate['reason'] : __( 'Generated by hosted AI from the current title, excerpt, and draft body. Review before applying.', 'npcink-workflow-toolbox' ),
 				'context_use'    => 'draft_grounded_ai_summary',
@@ -5573,7 +5582,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return array(
-			'candidate_contract'     => 'recommendation_candidate.v1',
+			'candidate_contract'      => 'recommendation_candidate.v1',
 			'candidate_type'          => 'ai_summary_layer_candidates',
 			'write_posture'           => 'suggestion_only',
 			'direct_wordpress_write'  => false,
@@ -5634,7 +5643,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			if ( empty( $terms ) ) {
 				continue;
 			}
-			$source_mentions = false;
+			$source_mentions  = false;
 			$excerpt_mentions = false;
 			foreach ( $terms as $term ) {
 				if ( $this->editor_ai_summary_text_contains( $source, $term ) ) {
@@ -5653,7 +5662,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$issues[] = __( '可能遗漏一个或多个必须覆盖点。', 'npcink-workflow-toolbox' );
 		}
 
-		$term_segments          = $this->editor_ai_summary_source_named_term_segments( $source );
+		$term_segments           = $this->editor_ai_summary_source_named_term_segments( $source );
 		$available_term_segments = 0;
 		$covered_term_segments   = 0;
 		$all_named_terms         = array();
@@ -5714,7 +5723,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_ai_summary_quality_notes( array $items ): array {
 		$notes = array();
 		foreach ( $items as $item ) {
-			$issues = is_array( $item['quality_issues'] ?? null ) ? $item['quality_issues'] : array();
+			$issues  = is_array( $item['quality_issues'] ?? null ) ? $item['quality_issues'] : array();
 			$notes[] = array(
 				'name'   => (string) ( $item['label'] ?? __( 'Summary candidate', 'npcink-workflow-toolbox' ) ),
 				'status' => sanitize_key( (string) ( $item['quality_status'] ?? 'review' ) ),
@@ -5817,7 +5826,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return false;
 		}
 
-		$source_mentions = false;
+		$source_mentions  = false;
 		$excerpt_mentions = false;
 		foreach ( $terms as $term ) {
 			if ( $this->editor_ai_summary_text_contains( $source, $term ) ) {
@@ -5844,7 +5853,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_ai_summary_source_named_term_segments( string $source ): array {
-		$plain = trim( wp_strip_all_tags( $source ) );
+		$plain    = trim( wp_strip_all_tags( $source ) );
 		$segments = array(
 			'lead'   => array(),
 			'middle' => array(),
@@ -6071,20 +6080,20 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_taxonomy_term_candidates( array $context, string $query, array $related_content = array() ): array {
 		$input = array(
-			'post_id'         => absint( $context['post_id'] ?? 0 ),
-			'post_type'       => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
-			'taxonomy'        => 'both',
-			'query'           => sanitize_textarea_field( $query ),
-			'title'           => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
-			'excerpt'         => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
-			'content_text'    => sanitize_textarea_field( (string) ( $context['content_text'] ?? '' ) ),
-			'selected_text'   => sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ),
+			'post_id'             => absint( $context['post_id'] ?? 0 ),
+			'post_type'           => sanitize_key( (string) ( $context['post_type'] ?? 'post' ) ),
+			'taxonomy'            => 'both',
+			'query'               => sanitize_textarea_field( $query ),
+			'title'               => sanitize_text_field( (string) ( $context['title'] ?? '' ) ),
+			'excerpt'             => sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ),
+			'content_text'        => sanitize_textarea_field( (string) ( $context['content_text'] ?? '' ) ),
+			'selected_text'       => sanitize_textarea_field( (string) ( $context['selected_text'] ?? '' ) ),
 			'selected_block_text' => sanitize_textarea_field( (string) ( $context['selected_block_text'] ?? '' ) ),
-			'user_instruction' => sanitize_textarea_field( (string) ( $context['user_instruction'] ?? '' ) ),
-			'category_limit'  => 5,
-			'tag_limit'       => 8,
-			'candidate_limit' => 10,
-			'review_set_limit' => 8,
+			'user_instruction'    => sanitize_textarea_field( (string) ( $context['user_instruction'] ?? '' ) ),
+			'category_limit'      => 5,
+			'tag_limit'           => 8,
+			'candidate_limit'     => 10,
+			'review_set_limit'    => 8,
 		);
 		if ( 0 >= (int) $input['post_id'] ) {
 			unset( $input['post_id'] );
@@ -6100,7 +6109,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return $this->empty_toolkit_taxonomy_term_candidates( $result, $related_term_evidence );
 		}
 
-		$data = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
+		$data           = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
 		$taxonomy_terms = is_array( $data['taxonomy_terms'] ?? null ) ? $data['taxonomy_terms'] : array();
 		if ( empty( $taxonomy_terms['candidate_type'] ) || 'taxonomy_tag_candidates' !== (string) $taxonomy_terms['candidate_type'] ) {
 			return $this->empty_toolkit_taxonomy_term_candidates(
@@ -6113,13 +6122,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 		}
 
-		$taxonomy_terms['source_ability_id'] = 'npcink-abilities-toolkit/suggest-post-taxonomy-terms';
+		$taxonomy_terms['source_ability_id']                      = 'npcink-abilities-toolkit/suggest-post-taxonomy-terms';
 		$taxonomy_terms['ranking_context']['related_term_policy'] = 'ranking_evidence_only_no_term_creation_or_assignment';
-		$review_set_result = $this->editor_toolkit_taxonomy_review_set( $input );
+		$review_set_result                                        = $this->editor_toolkit_taxonomy_review_set( $input );
 		if ( is_wp_error( $review_set_result ) ) {
 			$taxonomy_terms['taxonomy_tag_review_set'] = $this->editor_taxonomy_review_set_from_suggestions( $taxonomy_terms, $review_set_result );
 		} else {
-			$review_set_data = is_array( $review_set_result['data'] ?? null ) ? $review_set_result['data'] : $review_set_result;
+			$review_set_data                           = is_array( $review_set_result['data'] ?? null ) ? $review_set_result['data'] : $review_set_result;
 			$taxonomy_terms['taxonomy_tag_review_set'] = is_array( $review_set_data ) && 'taxonomy_tag_review_set' === (string) ( $review_set_data['artifact_type'] ?? '' )
 				? $review_set_data
 				: $this->editor_taxonomy_review_set_from_suggestions(
@@ -6234,21 +6243,21 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			);
 			if ( '' === $row['name'] || 0 >= $row['term_id'] ) {
 				$row['blocked_reason'] = 'invalid_existing_term_candidate';
-				$blocked[] = $row;
+				$blocked[]             = $row;
 				continue;
 			}
 			if ( 'weak' === (string) $quality['status'] ) {
 				$row['blocked_reason'] = 'weak_taxonomy_evidence';
-				$blocked[] = $row;
+				$blocked[]             = $row;
 				continue;
 			}
 			if ( count( $selected ) >= $review_set_limit ) {
 				$row['blocked_reason'] = 'review_set_limit_reached';
-				$blocked[] = $row;
+				$blocked[]             = $row;
 				continue;
 			}
 			$row['review_status'] = 'good' === (string) $quality['status'] ? 'ready_for_review' : 'review_recommended';
-			$selected[] = $row;
+			$selected[]           = $row;
 		}
 
 		return array(
@@ -6292,7 +6301,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_contextual_match_score( string $candidate_text, array $context, string $query ): int {
-		$weighted_score = 0;
+		$weighted_score  = 0;
 		$weighted_fields = array(
 			'title'               => 4,
 			'excerpt'             => 3,
@@ -6317,7 +6326,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return max( 0, min( 30, $weighted_score ) );
 	}
 
-		public function media_brief( WP_REST_Request $request ) {
+	public function media_brief( WP_REST_Request $request ) {
 		$post_id = absint( $request->get_param( 'post_id' ) );
 		if ( 0 === $post_id ) {
 			return new WP_Error(
@@ -6360,27 +6369,27 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function sanitize_editor_media_item( array $item ): array {
-		$attachment_id = absint( $item['attachment_id'] ?? ( $item['id'] ?? 0 ) );
-		$occurrence_id = sanitize_text_field( (string) ( $item['occurrence_id'] ?? '' ) );
+		$attachment_id     = absint( $item['attachment_id'] ?? ( $item['id'] ?? 0 ) );
+		$occurrence_id     = sanitize_text_field( (string) ( $item['occurrence_id'] ?? '' ) );
 		$occurrence_fields = array(
-			'occurrence_id'   => $occurrence_id,
-			'block_client_id' => sanitize_text_field( (string) ( $item['block_client_id'] ?? '' ) ),
-			'block_name'      => sanitize_text_field( (string) ( $item['block_name'] ?? '' ) ),
+			'occurrence_id'    => $occurrence_id,
+			'block_client_id'  => sanitize_text_field( (string) ( $item['block_client_id'] ?? '' ) ),
+			'block_name'       => sanitize_text_field( (string) ( $item['block_name'] ?? '' ) ),
 			'occurrence_index' => absint( $item['occurrence_index'] ?? 0 ),
-			'context_heading' => sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) ),
-			'context_before'  => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_before'] ?? '' ), 240 ) ),
-			'context_after'   => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_after'] ?? '' ), 240 ) ),
-			'context_caption' => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_caption'] ?? '' ), 220 ) ),
-			'context_summary' => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_summary'] ?? '' ), 360 ) ),
-			'decorative'      => ! empty( $item['decorative'] ),
-			'target_scope'    => 'post_block_alt',
+			'context_heading'  => sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) ),
+			'context_before'   => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_before'] ?? '' ), 240 ) ),
+			'context_after'    => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_after'] ?? '' ), 240 ) ),
+			'context_caption'  => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_caption'] ?? '' ), 220 ) ),
+			'context_summary'  => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_summary'] ?? '' ), 360 ) ),
+			'decorative'       => ! empty( $item['decorative'] ),
+			'target_scope'     => 'post_block_alt',
 		);
 		if ( $attachment_id > 0 ) {
 			$attachment_item = $this->editor_attachment_media_item( $attachment_id, sanitize_key( (string) ( $item['source'] ?? 'content_image' ) ) );
 			if ( ! empty( $attachment_item ) ) {
-				$attachment_item['url']     = '' !== (string) ( $attachment_item['url'] ?? '' ) ? $attachment_item['url'] : esc_url_raw( (string) ( $item['url'] ?? '' ) );
-				$attachment_item['alt']     = '' !== $occurrence_id ? sanitize_text_field( (string) ( $item['alt'] ?? '' ) ) : ( '' !== (string) ( $attachment_item['alt'] ?? '' ) ? $attachment_item['alt'] : sanitize_text_field( (string) ( $item['alt'] ?? '' ) ) );
-				$attachment_item['caption'] = '' !== (string) ( $attachment_item['caption'] ?? '' ) ? $attachment_item['caption'] : sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) );
+				$attachment_item['url']         = '' !== (string) ( $attachment_item['url'] ?? '' ) ? $attachment_item['url'] : esc_url_raw( (string) ( $item['url'] ?? '' ) );
+				$attachment_item['alt']         = '' !== $occurrence_id ? sanitize_text_field( (string) ( $item['alt'] ?? '' ) ) : ( '' !== (string) ( $attachment_item['alt'] ?? '' ) ? $attachment_item['alt'] : sanitize_text_field( (string) ( $item['alt'] ?? '' ) ) );
+				$attachment_item['caption']     = '' !== (string) ( $attachment_item['caption'] ?? '' ) ? $attachment_item['caption'] : sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) );
 				$attachment_item['missing_alt'] = '' === trim( (string) $attachment_item['alt'] );
 				return array_merge( $attachment_item, $occurrence_fields );
 			}
@@ -6394,16 +6403,16 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$alt = sanitize_text_field( (string) ( $item['alt'] ?? '' ) );
 		return array_merge(
 			array(
-			'source'        => sanitize_key( (string) ( $item['source'] ?? 'content_image' ) ),
-			'attachment_id' => 0,
-			'title'         => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-			'caption'       => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
-			'description'   => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
-			'mime_type'     => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
-			'alt'           => $alt,
-			'missing_alt'   => '' === trim( $alt ),
-			'thumbnail_url' => $url,
-			'url'           => $url,
+				'source'        => sanitize_key( (string) ( $item['source'] ?? 'content_image' ) ),
+				'attachment_id' => 0,
+				'title'         => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'caption'       => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
+				'description'   => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
+				'mime_type'     => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'alt'           => $alt,
+				'missing_alt'   => '' === trim( $alt ),
+				'thumbnail_url' => $url,
+				'url'           => $url,
 			),
 			$occurrence_fields
 		);
@@ -6411,19 +6420,19 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function empty_proposed_new_terms_review(): array {
 		return array(
-			'candidate_type'         => 'proposed_new_terms_review',
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
-			'creation_policy'        => 'deferred_taxonomy_governance',
-			'strong_review_required' => true,
+			'candidate_type'            => 'proposed_new_terms_review',
+			'write_posture'             => 'suggestion_only',
+			'direct_wordpress_write'    => false,
+			'creation_policy'           => 'deferred_taxonomy_governance',
+			'strong_review_required'    => true,
 			'duplicate_review_required' => true,
-			'blocked_actions'        => array(
+			'blocked_actions'           => array(
 				'no_direct_term_creation_in_toolbox',
 				'no_auto_approval_request_for_new_terms',
 				'no_term_assignment_without_core_policy_review',
 			),
-			'items'                  => array(),
-			'empty_message'          => __( 'New taxonomy creation is deferred. Use existing categories and tags in this stage.', 'npcink-workflow-toolbox' ),
+			'items'                     => array(),
+			'empty_message'             => __( 'New taxonomy creation is deferred. Use existing categories and tags in this stage.', 'npcink-workflow-toolbox' ),
 		);
 	}
 
@@ -6451,34 +6460,34 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$retrieval_status = in_array( $cloud_status, array( 'error', 'failed' ), true ) ? 'cloud_unavailable' : 'no_cloud_evidence';
 		$candidate_source = 'cloud_unavailable' === $retrieval_status ? 'cloud_unavailable' : 'local_fallback';
 		return array(
-			'artifact_type'          => 'internal_link_candidates.v1',
-			'candidate_type'         => 'internal_link_candidates',
-			'candidate_contract'     => 'recommendation_candidate.v1',
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'native_editor_commit',
-			'direct_wordpress_write' => false,
-			'source_ability_id'      => 'npcink-abilities-toolkit/resolve-internal-link-targets',
-			'candidate_source'       => $candidate_source,
-			'source_status'          => $retrieval_status,
-			'retrieval_status'       => $retrieval_status,
-			'cloud_result_count'     => 0,
-			'fallback_used'          => 'local_fallback' === $candidate_source,
-			'toolkit_required'       => true,
-			'error_code'             => sanitize_key( $error->get_error_code() ),
-			'error_message'          => sanitize_text_field( $error->get_error_message() ),
-			'items'                  => array(),
+			'artifact_type'             => 'internal_link_candidates.v1',
+			'candidate_type'            => 'internal_link_candidates',
+			'candidate_contract'        => 'recommendation_candidate.v1',
+			'write_posture'             => 'suggestion_only',
+			'final_write_path'          => 'native_editor_commit',
+			'direct_wordpress_write'    => false,
+			'source_ability_id'         => 'npcink-abilities-toolkit/resolve-internal-link-targets',
+			'candidate_source'          => $candidate_source,
+			'source_status'             => $retrieval_status,
+			'retrieval_status'          => $retrieval_status,
+			'cloud_result_count'        => 0,
+			'fallback_used'             => 'local_fallback' === $candidate_source,
+			'toolkit_required'          => true,
+			'error_code'                => sanitize_key( $error->get_error_code() ),
+			'error_message'             => sanitize_text_field( $error->get_error_message() ),
+			'items'                     => array(),
 			'recommendation_candidates' => array(),
-			'owner_label'            => 'human_editor',
-			'next_safe_action'       => 'fix_toolkit_or_retry_later',
-			'action_policy'          => 'operator_confirmed_visible_editor_apply',
-			'source_knowledge'       => $source_knowledge,
-			'review_policy'          => array(
+			'owner_label'               => 'human_editor',
+			'next_safe_action'          => 'fix_toolkit_or_retry_later',
+			'action_policy'             => 'operator_confirmed_visible_editor_apply',
+			'source_knowledge'          => $source_knowledge,
+			'review_policy'             => array(
 				'link_insertion_owner'       => 'human_editor',
 				'automatic_anchor_insert'    => false,
 				'post_content_patch_handoff' => false,
 				'current_post_excluded'      => true,
 			),
-			'handoff'                => array(
+			'handoff'                   => array(
 				'final_writes'           => 'native_editor_commit',
 				'direct_wordpress_write' => false,
 				'blocked_actions'        => array(
@@ -6500,8 +6509,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'error_code'             => sanitize_key( $error->get_error_code() ),
 			'error_message'          => sanitize_text_field( $error->get_error_message() ),
 			'ranking_context'        => array(
-				'draft_query_overlap'          => true,
-				'related_content_terms'        => array() !== $related_term_evidence,
+				'draft_query_overlap'         => true,
+				'related_content_terms'       => array() !== $related_term_evidence,
 				'related_term_evidence_count' => count( $related_term_evidence ),
 				'related_term_policy'         => 'ranking_evidence_only_no_term_creation_or_assignment',
 			),
@@ -6529,29 +6538,29 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return array();
 		}
 		$stopwords = array(
-			'a' => true,
-			'an' => true,
-			'and' => true,
-			'are' => true,
-			'as' => true,
-			'at' => true,
-			'be' => true,
-			'by' => true,
-			'for' => true,
+			'a'    => true,
+			'an'   => true,
+			'and'  => true,
+			'are'  => true,
+			'as'   => true,
+			'at'   => true,
+			'be'   => true,
+			'by'   => true,
+			'for'  => true,
 			'from' => true,
-			'has' => true,
+			'has'  => true,
 			'have' => true,
-			'in' => true,
+			'in'   => true,
 			'into' => true,
-			'is' => true,
-			'it' => true,
-			'of' => true,
-			'on' => true,
-			'or' => true,
+			'is'   => true,
+			'it'   => true,
+			'of'   => true,
+			'on'   => true,
+			'or'   => true,
 			'that' => true,
-			'the' => true,
+			'the'  => true,
 			'this' => true,
-			'to' => true,
+			'to'   => true,
 			'with' => true,
 		);
 
@@ -6566,6 +6575,4 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			)
 		);
 	}
-
-
 }

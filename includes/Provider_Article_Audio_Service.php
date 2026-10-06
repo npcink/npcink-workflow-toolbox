@@ -48,46 +48,46 @@ final class Provider_Article_Audio_Service extends Provider_Client_Support {
 			);
 		}
 
-		$voice_id = sanitize_text_field( (string) ( $input['voice_id'] ?? '' ) );
-		$format   = sanitize_key( (string) ( $input['format'] ?? 'mp3' ) );
-		$user_instruction = sanitize_textarea_field( (string) ( $input['user_instruction'] ?? '' ) );
+		$voice_id          = sanitize_text_field( (string) ( $input['voice_id'] ?? '' ) );
+		$format            = sanitize_key( (string) ( $input['format'] ?? 'mp3' ) );
+		$user_instruction  = sanitize_textarea_field( (string) ( $input['user_instruction'] ?? '' ) );
 		$audio_preferences = is_array( $input['audio_preferences'] ?? null ) ? $this->sanitize_payload( $input['audio_preferences'] ) : array();
 		if ( ! in_array( $format, array( 'mp3', 'wav', 'pcm' ), true ) ) {
 			$format = 'mp3';
 		}
 
 		$runtime_payload = array(
-			'ability_name'        => 'npcink-toolbox/generate-audio',
-			'contract_version'    => 'audio_generation_request.v1',
-			'execution_pattern'   => 'inline',
-			'execution_kind'      => 'audio_generation',
-			'profile_id'          => sanitize_text_field( (string) ( $input['profile_id'] ?? 'audio.narration.default' ) ),
-			'input'               => array(
-				'intent'          => $intent,
-				'text'            => $text,
-				'summary_text'    => 'article_audio_summary' === $intent ? $text : '',
-				'script'          => $text,
-				'voice_id'        => $voice_id,
-				'format'          => $format,
-				'response_format' => 'url',
-				'purpose'         => 'article_audio_summary' === $intent ? 'longform_audio_summary' : 'article_narration',
-				'user_instruction' => $user_instruction,
+			'ability_name'            => 'npcink-toolbox/generate-audio',
+			'contract_version'        => 'audio_generation_request.v1',
+			'execution_pattern'       => 'inline',
+			'execution_kind'          => 'audio_generation',
+			'profile_id'              => sanitize_text_field( (string) ( $input['profile_id'] ?? 'audio.narration.default' ) ),
+			'input'                   => array(
+				'intent'            => $intent,
+				'text'              => $text,
+				'summary_text'      => 'article_audio_summary' === $intent ? $text : '',
+				'script'            => $text,
+				'voice_id'          => $voice_id,
+				'format'            => $format,
+				'response_format'   => 'url',
+				'purpose'           => 'article_audio_summary' === $intent ? 'longform_audio_summary' : 'article_narration',
+				'user_instruction'  => $user_instruction,
 				'audio_preferences' => $audio_preferences,
-				'context'         => is_array( $input['context'] ?? null ) ? $this->sanitize_payload( $input['context'] ) : array(),
-				'review'          => array(
+				'context'           => is_array( $input['context'] ?? null ) ? $this->sanitize_payload( $input['context'] ) : array(),
+				'review'            => array(
 					'script_review_required' => true,
 					'write_posture'          => 'candidate_only',
 					'direct_wordpress_write' => false,
 				),
 			),
-			'data_classification' => 'public_site_content',
-			'storage_mode'        => 'result_only',
-			'retention_ttl'       => 3600,
-			'timeout_seconds'     => 60,
-			'http_timeout_seconds' => 60,
+			'data_classification'     => 'public_site_content',
+			'storage_mode'            => 'result_only',
+			'retention_ttl'           => 3600,
+			'timeout_seconds'         => 60,
+			'http_timeout_seconds'    => 60,
 			'connect_timeout_seconds' => self::HTTP_CONNECT_TIMEOUT,
-			'retry_max'           => 0,
-			'policy'              => array(
+			'retry_max'               => 0,
+			'policy'                  => array(
 				'allow_fallback' => false,
 			),
 		);

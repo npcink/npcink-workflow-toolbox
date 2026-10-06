@@ -12,11 +12,11 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 final class Cloud_Image_Artifact_Transport {
-	private const MAX_FILE_BYTES  = 10485760;
-	private const MAX_IMAGE_PIXELS = 40000000;
+	private const MAX_FILE_BYTES      = 10485760;
+	private const MAX_IMAGE_PIXELS    = 40000000;
 	private const ARTIFACT_ID_PATTERN = '/^art_[0-9a-f]{32}$/';
 	private const DELIVERY_ID_PATTERN = '/^mdl_[0-9a-f]{32}$/';
-	private const ARTIFACT_KEYS = array( 'artifact_id', 'artifact_reference', 'status', 'media_kind', 'operation', 'content_type', 'format', 'width', 'height', 'filesize_bytes', 'checksum', 'expires_at' );
+	private const ARTIFACT_KEYS       = array( 'artifact_id', 'artifact_reference', 'status', 'media_kind', 'operation', 'content_type', 'format', 'width', 'height', 'filesize_bytes', 'checksum', 'expires_at' );
 
 	/**
 	 * Pulls, verifies, and acknowledges one short-lived Cloud image artifact.
@@ -30,7 +30,7 @@ final class Cloud_Image_Artifact_Transport {
 			return $validated;
 		}
 
-		$client = apply_filters( 'npcink_toolbox_cloud_image_artifact_client', null, $artifact );
+		$client     = apply_filters( 'npcink_toolbox_cloud_image_artifact_client', null, $artifact );
 		$use_facade = ! is_object( $client ) && function_exists( 'npcink_cloud_addon_pull_media_artifact' ) && function_exists( 'npcink_cloud_addon_acknowledge_media_artifact_delivery' );
 		if ( ! $use_facade && ( ! is_object( $client ) || ! method_exists( $client, 'pull_media_artifact' ) || ! method_exists( $client, 'acknowledge_media_artifact_delivery' ) ) ) {
 			return new WP_Error(
@@ -87,7 +87,7 @@ final class Cloud_Image_Artifact_Transport {
 			'received_byte_size' => strlen( $contents ),
 			'received_checksum'  => $actual_checksum,
 		);
-		$ack = $use_facade ? npcink_cloud_addon_acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) ) : $client->acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) );
+		$ack         = $use_facade ? npcink_cloud_addon_acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) ) : $client->acknowledge_media_artifact_delivery( $artifact_id, $ack_payload, sanitize_text_field( $trace_id ) );
 		if ( is_wp_error( $ack ) ) {
 			return $ack;
 		}
@@ -138,8 +138,8 @@ final class Cloud_Image_Artifact_Transport {
 			}
 			unset( $contract['purged_at'] );
 		}
-		$artifact_id = sanitize_text_field( (string) ( $artifact['artifact_id'] ?? '' ) );
-		$reference   = is_array( $artifact['artifact_reference'] ?? null ) ? $artifact['artifact_reference'] : array();
+		$artifact_id  = sanitize_text_field( (string) ( $artifact['artifact_id'] ?? '' ) );
+		$reference    = is_array( $artifact['artifact_reference'] ?? null ) ? $artifact['artifact_reference'] : array();
 		$content_type = $this->normalize_mime( (string) ( $artifact['content_type'] ?? '' ) );
 		$width        = $artifact['width'] ?? null;
 		$height       = $artifact['height'] ?? null;
@@ -175,14 +175,14 @@ final class Cloud_Image_Artifact_Transport {
 		}
 
 		return array(
-			'artifact_id'     => $artifact_id,
-			'content_type'    => $content_type,
-			'format'          => $format,
-			'width'           => $width,
-			'height'          => $height,
-			'filesize_bytes'  => $byte_size,
-			'checksum'        => $checksum,
-			'expires_at'      => $expires_at,
+			'artifact_id'    => $artifact_id,
+			'content_type'   => $content_type,
+			'format'         => $format,
+			'width'          => $width,
+			'height'         => $height,
+			'filesize_bytes' => $byte_size,
+			'checksum'       => $checksum,
+			'expires_at'     => $expires_at,
 		);
 	}
 
@@ -193,7 +193,11 @@ final class Cloud_Image_Artifact_Transport {
 	}
 
 	private function format_for_mime( string $mime ): string {
-		return array( 'image/jpeg' => 'jpeg', 'image/png' => 'png', 'image/webp' => 'webp' )[ $mime ] ?? '';
+		return array(
+			'image/jpeg' => 'jpeg',
+			'image/png'  => 'png',
+			'image/webp' => 'webp',
+		)[ $mime ] ?? '';
 	}
 
 	/**

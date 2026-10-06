@@ -46,13 +46,13 @@ final class Rest_Flow_Plan_Bridges {
 		return rest_ensure_response( $this->client->build_nightly_inspection_review_plan( is_array( $params ) ? $params : array() ) );
 	}
 
-		public function content_metadata_apply_plan( WP_REST_Request $request ) {
-			$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-			return rest_ensure_response( $this->client->build_content_metadata_apply_plan( is_array( $params ) ? $params : array() ) );
-		}
+	public function content_metadata_apply_plan( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
+		return rest_ensure_response( $this->client->build_content_metadata_apply_plan( is_array( $params ) ? $params : array() ) );
+	}
 
-		public function media_alt_caption_review_plan( WP_REST_Request $request ) {
-			$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-			return rest_ensure_response( $this->client->build_media_alt_caption_review_plan( is_array( $params ) ? $params : array() ) );
-		}
+	public function media_alt_caption_review_plan( WP_REST_Request $request ) {
+		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
+		return rest_ensure_response( $this->client->build_media_alt_caption_review_plan( is_array( $params ) ? $params : array() ) );
+	}
 }

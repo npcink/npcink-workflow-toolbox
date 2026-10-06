@@ -19,20 +19,20 @@ final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 
 	public function run_site_ops_cloud_analysis( array $cloud_request ) {
 		$runtime_payload = array(
-			'ability_name'        => 'npcink-toolbox/analyze-site-ops',
-			'contract_version'    => 'site_ops_cloud_analysis_request.v1',
-			'execution_pattern'   => 'whole_run_offload',
-			'execution_kind'      => 'site_ops_cloud_analysis',
-			'profile_id'          => 'site-ops-analysis.managed',
-			'input'               => $this->sanitize_payload( $cloud_request ),
-			'data_classification' => 'public_site_aggregate',
-			'storage_mode'        => 'result_only',
-			'retention_ttl'       => 3600,
-			'timeout_seconds'     => 60,
-			'http_timeout_seconds' => 60,
+			'ability_name'            => 'npcink-toolbox/analyze-site-ops',
+			'contract_version'        => 'site_ops_cloud_analysis_request.v1',
+			'execution_pattern'       => 'whole_run_offload',
+			'execution_kind'          => 'site_ops_cloud_analysis',
+			'profile_id'              => 'site-ops-analysis.managed',
+			'input'                   => $this->sanitize_payload( $cloud_request ),
+			'data_classification'     => 'public_site_aggregate',
+			'storage_mode'            => 'result_only',
+			'retention_ttl'           => 3600,
+			'timeout_seconds'         => 60,
+			'http_timeout_seconds'    => 60,
 			'connect_timeout_seconds' => self::HTTP_CONNECT_TIMEOUT,
-			'retry_max'           => 0,
-			'policy'              => array(
+			'retry_max'               => 0,
+			'policy'                  => array(
 				'allow_fallback' => false,
 			),
 		);
@@ -41,7 +41,7 @@ final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 		if ( ! is_array( $runtime_payload ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_site_ops_cloud_analysis_runtime_payload',
-					__( 'The Site Check Cloud runtime payload was not valid.', 'npcink-workflow-toolbox' ),
+				__( 'The Site Check Cloud runtime payload was not valid.', 'npcink-workflow-toolbox' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -81,7 +81,7 @@ final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 				'artifact_type'            => 'site_ops_cloud_analysis_request',
 				'contract_version'         => 'site_ops_cloud_analysis_request.v1',
 				'expected_result_contract' => 'site_ops_cloud_analysis_result.v1',
-				'cloud_role'              => 'runtime_detail',
+				'cloud_role'               => 'runtime_detail',
 				'execution_pattern'        => 'whole_run_offload',
 				'write_posture'            => 'suggestion_only',
 				'direct_wordpress_write'   => false,
@@ -90,13 +90,13 @@ final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 			);
 		}
 
-		$input['profile_id']        = sanitize_text_field( (string) ( $runtime_payload['profile_id'] ?? 'site-ops-analysis.managed' ) );
-		$input['timeout_seconds']   = absint( $runtime_payload['timeout_seconds'] ?? 60 );
-		$input['retention_ttl']     = absint( $runtime_payload['retention_ttl'] ?? 3600 );
-		$input['storage_mode']      = 'result_only';
-		$input['write_posture']     = 'suggestion_only';
-		$input['cloud_role']        = 'runtime_detail';
-		$input['execution_pattern'] = 'whole_run_offload';
+		$input['profile_id']             = sanitize_text_field( (string) ( $runtime_payload['profile_id'] ?? 'site-ops-analysis.managed' ) );
+		$input['timeout_seconds']        = absint( $runtime_payload['timeout_seconds'] ?? 60 );
+		$input['retention_ttl']          = absint( $runtime_payload['retention_ttl'] ?? 3600 );
+		$input['storage_mode']           = 'result_only';
+		$input['write_posture']          = 'suggestion_only';
+		$input['cloud_role']             = 'runtime_detail';
+		$input['execution_pattern']      = 'whole_run_offload';
 		$input['direct_wordpress_write'] = false;
 		$input['core_proposal_created']  = false;
 
@@ -111,9 +111,9 @@ final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 	}
 
 	private function normalize_site_ops_cloud_analysis_response( array $response, array $runtime_payload = array() ): array {
-		$data   = is_array( $response['data'] ?? null ) ? $response['data'] : array();
-		$result = $this->extract_cloud_runtime_result( $response );
-		$status = sanitize_key( (string) ( $data['status'] ?? $response['status'] ?? 'submitted' ) );
+		$data    = is_array( $response['data'] ?? null ) ? $response['data'] : array();
+		$result  = $this->extract_cloud_runtime_result( $response );
+		$status  = sanitize_key( (string) ( $data['status'] ?? $response['status'] ?? 'submitted' ) );
 		$payload = $this->with_output_contract(
 			array(
 				'provider'              => 'npcink_cloud',

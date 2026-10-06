@@ -34,30 +34,30 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 
 		return rest_ensure_response(
 			array(
-				'image_provider'           => 'cloud_image_sources',
-				'image_source_providers'   => $this->settings->configured_image_source_providers(),
-				'vector_provider'          => 'cloud_site_knowledge',
-				'web_search_owner'         => 'cloud_runtime',
+				'image_provider'                 => 'cloud_image_sources',
+				'image_source_providers'         => $this->settings->configured_image_source_providers(),
+				'vector_provider'                => 'cloud_site_knowledge',
+				'web_search_owner'               => 'cloud_runtime',
 				'cloud_image_sources_configured' => $this->settings->has_image_source_provider(),
-				'raw_responses_enabled'    => $this->settings->raw_responses_enabled(),
-				'image_source_enabled'     => (bool) $this->settings->get( 'enable_image_source' ),
-				'image_source_available'   => $cloud_ready && (bool) $this->settings->get( 'enable_image_source' ),
-				'vector_search_registered' => true,
-				'vector_search_enabled'    => $cloud_ready,
-				'web_search_registered'    => true,
-				'web_search_enabled'       => $cloud_ready,
-				'image_source_owner'       => 'cloud_runtime',
-				'ai_image_generation'      => array(
-					'registered'              => true,
-					'available'               => $cloud_ready,
-					'hosted_profile'          => 'grok-imagine-image-quality',
-					'entry_surface'           => 'image_source_ai_generation_handoff',
-					'posture'                 => 'candidate_only_core_approval_required',
-					'direct_wordpress_write'  => false,
+				'raw_responses_enabled'          => $this->settings->raw_responses_enabled(),
+				'image_source_enabled'           => (bool) $this->settings->get( 'enable_image_source' ),
+				'image_source_available'         => $cloud_ready && (bool) $this->settings->get( 'enable_image_source' ),
+				'vector_search_registered'       => true,
+				'vector_search_enabled'          => $cloud_ready,
+				'web_search_registered'          => true,
+				'web_search_enabled'             => $cloud_ready,
+				'image_source_owner'             => 'cloud_runtime',
+				'ai_image_generation'            => array(
+					'registered'             => true,
+					'available'              => $cloud_ready,
+					'hosted_profile'         => 'grok-imagine-image-quality',
+					'entry_surface'          => 'image_source_ai_generation_handoff',
+					'posture'                => 'candidate_only_core_approval_required',
+					'direct_wordpress_write' => false,
 				),
-				'vector_owner'             => 'cloud_runtime',
-				'cloud_runtime'            => $cloud_runtime,
-				'hosted_ai'               => array(
+				'vector_owner'                   => 'cloud_runtime',
+				'cloud_runtime'                  => $cloud_runtime,
+				'hosted_ai'                      => array(
 					'entry_surface'           => 'toolbox_content_support',
 					'hosted_profile'          => 'text.ai',
 					'registered'              => true,
@@ -65,8 +65,8 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 					'available'               => $cloud_ready,
 					'posture'                 => 'suggestion_only_core_approval_required',
 				),
-				'content_operations'      => $this->content_operations_projection( $cloud_ready ),
-				'pro_nightly_inspection'  => array(
+				'content_operations'             => $this->content_operations_projection( $cloud_ready ),
+				'pro_nightly_inspection'         => array(
 					'registered'             => true,
 					'available'              => $cloud_ready,
 					'entry_surface'          => 'nightly_inspection_cloud_batch',
@@ -79,7 +79,7 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 					'recent_route'           => '/nightly-inspection/cloud-batch/recent',
 					'retry_registered'       => true,
 				),
-				'boundary'                 => 'Toolbox returns Cloud-managed image-source and Cloud-managed site-knowledge suggestions only. Cloud owns web search execution and provider configuration. WordPress writes should be handed to Abilities/Core governance.',
+				'boundary'                       => 'Toolbox returns Cloud-managed image-source and Cloud-managed site-knowledge suggestions only. Cloud owns web search execution and provider configuration. WordPress writes should be handed to Abilities/Core governance.',
 			)
 		);
 	}
@@ -104,18 +104,18 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 			$this->client->image_candidates(
 				$query,
 				array(
-					'orientation' => sanitize_key( (string) $request->get_param( 'orientation' ) ),
-					'color'       => sanitize_key( (string) $request->get_param( 'color' ) ),
-					'provider'    => sanitize_key( (string) $request->get_param( 'provider' ) ),
-					'per_page'    => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
-					'latency_mode' => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
+					'orientation'          => sanitize_key( (string) $request->get_param( 'orientation' ) ),
+					'color'                => sanitize_key( (string) $request->get_param( 'color' ) ),
+					'provider'             => sanitize_key( (string) $request->get_param( 'provider' ) ),
+					'per_page'             => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
+					'latency_mode'         => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
 					'include_ai_generated' => ! empty( $request->get_param( 'include_ai_generated' ) ),
-					'generation_prompt'     => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
-					'generated_image_url'   => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
-					'model'                 => sanitize_text_field( (string) $request->get_param( 'model' ) ),
-					'manual_query'          => $query,
-					'refresh_variant'       => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
-					'visual_context'        => $this->image_visual_context_from_request( $request, $query ),
+					'generation_prompt'    => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
+					'generated_image_url'  => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
+					'model'                => sanitize_text_field( (string) $request->get_param( 'model' ) ),
+					'manual_query'         => $query,
+					'refresh_variant'      => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
+					'visual_context'       => $this->image_visual_context_from_request( $request, $query ),
 				)
 			)
 		);
@@ -154,16 +154,16 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 
 	private function content_operations_projection( bool $cloud_ready ): array {
 		return array(
-			'contract_version'      => 'toolbox_content_operations_projection.v1',
-			'registered'            => true,
-			'available'             => $cloud_ready,
-			'write_posture'         => 'suggestion_only',
-			'final_write_path'      => 'core_proposal_required',
-			'approval_truth'        => 'wordpress_local',
-			'final_write_truth'     => 'wordpress_local',
+			'contract_version'       => 'toolbox_content_operations_projection.v1',
+			'registered'             => true,
+			'available'              => $cloud_ready,
+			'write_posture'          => 'suggestion_only',
+			'final_write_path'       => 'core_proposal_required',
+			'approval_truth'         => 'wordpress_local',
+			'final_write_truth'      => 'wordpress_local',
 			'direct_wordpress_write' => false,
-			'projection_role'       => 'single_toolbox_status_projection',
-			'surfaces'              => array(
+			'projection_role'        => 'single_toolbox_status_projection',
+			'surfaces'               => array(
 				'editor_content_support' => array(
 					'route'          => '/editor/content-support',
 					'artifact_type'  => 'editor_content_support_flow',
@@ -190,40 +190,40 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 					'feedback_scope' => 'media_alt_caption',
 				),
 			),
-			'gap_contracts'         => array(
-				'seo_metadata_suggestion.v1'       => array(
-					'state'                => 'covered_by_existing_projection',
-					'current_artifacts'    => array( 'seo_meta_handoff_preview.v1', 'content_metadata_delta' ),
-					'route'                => '/editor/content-support',
-					'final_write_path'     => 'core_proposal_required',
-					'target_ability_id'    => 'npcink-abilities-toolkit/set-post-seo-meta',
+			'gap_contracts'          => array(
+				'seo_metadata_suggestion.v1'      => array(
+					'state'                  => 'covered_by_existing_projection',
+					'current_artifacts'      => array( 'seo_meta_handoff_preview.v1', 'content_metadata_delta' ),
+					'route'                  => '/editor/content-support',
+					'final_write_path'       => 'core_proposal_required',
+					'target_ability_id'      => 'npcink-abilities-toolkit/set-post-seo-meta',
 					'direct_wordpress_write' => false,
-					'feedback_scope'       => 'seo_metadata',
+					'feedback_scope'         => 'seo_metadata',
 				),
-				'media_alt_caption_suggestion.v1'  => array(
-					'state'                => 'covered_by_existing_projection',
-					'current_artifacts'    => array( 'media_alt_caption_review_set.v1', 'current_article_image_alt_suggestions.v1' ),
-					'route'                => '/ai/site-helpers',
-					'evidence_policy'      => 'media_library_metadata_only_no_pixel_vision',
+				'media_alt_caption_suggestion.v1' => array(
+					'state'                  => 'covered_by_existing_projection',
+					'current_artifacts'      => array( 'media_alt_caption_review_set.v1', 'current_article_image_alt_suggestions.v1' ),
+					'route'                  => '/ai/site-helpers',
+					'evidence_policy'        => 'media_library_metadata_only_no_pixel_vision',
 					'direct_wordpress_write' => false,
-					'feedback_scope'       => 'media_alt_caption',
+					'feedback_scope'         => 'media_alt_caption',
 				),
-				'comment_reply_suggestion.v1'      => array(
-					'state'                => 'covered_by_existing_projection',
-					'current_artifacts'    => array( 'comment_reply_suggestion.v1' ),
-					'route'                => '/editor/content-support',
-					'final_write_path'     => 'core_proposal_required',
+				'comment_reply_suggestion.v1'     => array(
+					'state'                  => 'covered_by_existing_projection',
+					'current_artifacts'      => array( 'comment_reply_suggestion.v1' ),
+					'route'                  => '/editor/content-support',
+					'final_write_path'       => 'core_proposal_required',
 					'direct_wordpress_write' => false,
-					'feedback_scope'       => 'comment_reply',
+					'feedback_scope'         => 'comment_reply',
 				),
 			),
-			'feedback'              => array(
-				'route'              => '/agent-feedback',
-				'summary_route'      => '/agent-feedback/summary',
-				'contract_version'   => 'cloud_agent_feedback.v1',
-				'quality_owner'      => 'cloud_eval_only',
-				'mutation_scope'     => 'none',
-				'source_runtimes'    => array( 'editor_content_support', 'image_candidates', 'nightly_site_inspection', 'site_knowledge', 'seo_metadata', 'media_alt_caption', 'comment_reply' ),
+			'feedback'               => array(
+				'route'                  => '/agent-feedback',
+				'summary_route'          => '/agent-feedback/summary',
+				'contract_version'       => 'cloud_agent_feedback.v1',
+				'quality_owner'          => 'cloud_eval_only',
+				'mutation_scope'         => 'none',
+				'source_runtimes'        => array( 'editor_content_support', 'image_candidates', 'nightly_site_inspection', 'site_knowledge', 'seo_metadata', 'media_alt_caption', 'comment_reply' ),
 				'direct_wordpress_write' => false,
 			),
 		);
@@ -232,8 +232,8 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 	private function image_visual_context_from_request( WP_REST_Request $request, string $query ): array {
 		$context = $request->get_param( 'visual_context' );
 		if ( is_array( $context ) ) {
-			$context['manual_query'] = $context['manual_query'] ?? $query;
-			$context['latency_mode'] = $context['latency_mode'] ?? (string) $request->get_param( 'latency_mode' );
+			$context['manual_query']    = $context['manual_query'] ?? $query;
+			$context['latency_mode']    = $context['latency_mode'] ?? (string) $request->get_param( 'latency_mode' );
 			$context['refresh_variant'] = $context['refresh_variant'] ?? (string) $request->get_param( 'refresh_variant' );
 			return $this->sanitize_image_visual_context( $context );
 		}
@@ -266,5 +266,4 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 			array( 'status' => 403 )
 		);
 	}
-
 }

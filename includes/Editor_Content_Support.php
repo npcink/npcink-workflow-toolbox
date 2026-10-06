@@ -94,15 +94,15 @@ final class Editor_Content_Support {
 			'npcink-toolbox-editor-content-support',
 			'NpcinkToolboxEditorSupport',
 			array(
-				'restUrl'        => esc_url_raw( rest_url( Plugin::REST_NAMESPACE ) ),
-				'coreRestUrl'    => esc_url_raw( rest_url( 'npcink-governance-core/v1' ) ),
-				'adapterRestUrl' => esc_url_raw( rest_url( 'npcink-openclaw-adapter/v1' ) ),
-				'nonce'          => wp_create_nonce( 'wp_rest' ),
-				'adminUrl'       => esc_url_raw( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=tools' ) ),
+				'restUrl'                    => esc_url_raw( rest_url( Plugin::REST_NAMESPACE ) ),
+				'coreRestUrl'                => esc_url_raw( rest_url( 'npcink-governance-core/v1' ) ),
+				'adapterRestUrl'             => esc_url_raw( rest_url( 'npcink-openclaw-adapter/v1' ) ),
+				'nonce'                      => wp_create_nonce( 'wp_rest' ),
+				'adminUrl'                   => esc_url_raw( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=tools' ) ),
 				'cloudAddonSiteKnowledgeUrl' => esc_url_raw( admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
-				'coreAdminUrl'   => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
-				'showRuntimeDiagnostics' => $this->show_runtime_diagnostics(),
-				'locale'              => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
+				'coreAdminUrl'               => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
+				'showRuntimeDiagnostics'     => $this->show_runtime_diagnostics(),
+				'locale'                     => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
 			)
 		);
 	}

@@ -12,15 +12,15 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 final class Media_Optimization_Batches {
-	public const CONTRACT_VERSION = 'toolbox_media_optimization_batch.v1';
-	private const OPTION_NAME = 'npcink_toolbox_media_optimization_batches';
+	public const CONTRACT_VERSION     = 'toolbox_media_optimization_batch.v1';
+	private const OPTION_NAME         = 'npcink_toolbox_media_optimization_batches';
 	private const MANIFEST_ABILITY_ID = 'npcink-abilities-toolkit/build-media-derivative-batch-plan';
-	private const ABILITY_ID = 'npcink-abilities-toolkit/adopt-cloud-media-derivative';
-	private const RESTORE_ABILITY_ID = 'npcink-abilities-toolkit/restore-media-backup';
-	private const CLEANUP_ABILITY_ID = 'npcink-abilities-toolkit/cleanup-media-backups';
-	private const MAX_BATCHES = 20;
-	private const MAX_ITEMS = 1000;
-	private const CHUNK_SIZE = 10;
+	private const ABILITY_ID          = 'npcink-abilities-toolkit/adopt-cloud-media-derivative';
+	private const RESTORE_ABILITY_ID  = 'npcink-abilities-toolkit/restore-media-backup';
+	private const CLEANUP_ABILITY_ID  = 'npcink-abilities-toolkit/cleanup-media-backups';
+	private const MAX_BATCHES         = 20;
+	private const MAX_ITEMS           = 1000;
+	private const CHUNK_SIZE          = 10;
 
 	/** @return array<string,mixed>|WP_Error */
 	public function build_manifest( array $input ) {
@@ -29,7 +29,7 @@ final class Media_Optimization_Batches {
 
 	/** @return array<string,mixed>|WP_Error */
 	public function create( array $payload ) {
-		$plan = is_array( $payload['plan'] ?? null ) ? $payload['plan'] : array();
+		$plan       = is_array( $payload['plan'] ?? null ) ? $payload['plan'] : array();
 		$candidates = is_array( $plan['candidates'] ?? null ) ? array_values( $plan['candidates'] ) : array();
 		if ( 'toolbox_media_optimization_manifest.v1' !== (string) ( $plan['plan_contract_version'] ?? '' ) ) {
 			return $this->error( 'npcink_toolbox_media_batch_manifest_invalid', 'The media optimization manifest contract is invalid.', 400 );
@@ -40,9 +40,9 @@ final class Media_Optimization_Batches {
 
 		$items = array();
 		foreach ( $candidates as $candidate ) {
-			$candidate = is_array( $candidate ) ? $candidate : array();
+			$candidate     = is_array( $candidate ) ? $candidate : array();
 			$attachment_id = absint( $candidate['attachment_id'] ?? 0 );
-			$fingerprint = $this->normalize_fingerprint( (string) ( $candidate['media_fingerprint'] ?? '' ) );
+			$fingerprint   = $this->normalize_fingerprint( (string) ( $candidate['media_fingerprint'] ?? '' ) );
 			if ( $attachment_id <= 0 || isset( $items[ $attachment_id ] ) || ! $this->can_edit_image( $attachment_id ) || '' === $fingerprint ) {
 				return $this->error( 'npcink_toolbox_media_batch_item_invalid', 'A media optimization manifest item is invalid or duplicated.', 409 );
 			}
@@ -50,57 +50,57 @@ final class Media_Optimization_Batches {
 				return $this->error( 'npcink_toolbox_media_batch_source_drift', 'An image changed while the optimization list was being prepared.', 409 );
 			}
 			$items[ $attachment_id ] = array(
-				'attachment_id'     => $attachment_id,
-				'title'             => sanitize_text_field( (string) ( $candidate['title'] ?? '' ) ),
-				'mime_type'         => sanitize_text_field( (string) ( $candidate['mime_type'] ?? '' ) ),
-				'url'               => esc_url_raw( (string) ( $candidate['url'] ?? '' ) ),
-				'width'             => absint( $candidate['width'] ?? 0 ),
-				'height'            => absint( $candidate['height'] ?? 0 ),
-				'filesize_bytes'    => absint( $candidate['filesize_bytes'] ?? 0 ),
-				'source_fingerprint' => $fingerprint,
+				'attachment_id'       => $attachment_id,
+				'title'               => sanitize_text_field( (string) ( $candidate['title'] ?? '' ) ),
+				'mime_type'           => sanitize_text_field( (string) ( $candidate['mime_type'] ?? '' ) ),
+				'url'                 => esc_url_raw( (string) ( $candidate['url'] ?? '' ) ),
+				'width'               => absint( $candidate['width'] ?? 0 ),
+				'height'              => absint( $candidate['height'] ?? 0 ),
+				'filesize_bytes'      => absint( $candidate['filesize_bytes'] ?? 0 ),
+				'source_fingerprint'  => $fingerprint,
 				'cloud_request_input' => $this->cloud_input( $attachment_id, $candidate, $plan ),
-				'status'            => 'pending',
-				'attempt_count'     => 0,
-				'error_code'        => '',
-				'bytes_after'       => 0,
-				'replacement_id'    => '',
-				'backup_id'         => '',
-				'restore_status'    => 'available_after_success',
+				'status'              => 'pending',
+				'attempt_count'       => 0,
+				'error_code'          => '',
+				'bytes_after'         => 0,
+				'replacement_id'      => '',
+				'backup_id'           => '',
+				'restore_status'      => 'available_after_success',
 			);
 		}
 
-		$filters = is_array( $plan['filters'] ?? null ) ? $this->sanitize_array( $plan['filters'] ) : array();
+		$filters       = is_array( $plan['filters'] ?? null ) ? $this->sanitize_array( $plan['filters'] ) : array();
 		$manifest_seed = array(
-			'filters' => $filters,
+			'filters'              => $filters,
 			'optimization_profile' => 'auto_safe.v1',
-			'resize_mode' => 'fit' === (string) ( $filters['resize_mode'] ?? '' ) ? 'fit' : 'preserve',
-			'items' => array_map( static fn( $item ) => array( $item['attachment_id'], $item['source_fingerprint'] ), array_values( $items ) ),
+			'resize_mode'          => 'fit' === (string) ( $filters['resize_mode'] ?? '' ) ? 'fit' : 'preserve',
+			'items'                => array_map( static fn( $item ) => array( $item['attachment_id'], $item['source_fingerprint'] ), array_values( $items ) ),
 		);
-		$digest = 'sha256:' . hash( 'sha256', (string) wp_json_encode( $manifest_seed ) );
-		$existing = $this->find_ready_batch_by_digest( $digest );
+		$digest        = 'sha256:' . hash( 'sha256', (string) wp_json_encode( $manifest_seed ) );
+		$existing      = $this->find_ready_batch_by_digest( $digest );
 		if ( null !== $existing ) {
 			return $existing;
 		}
 		$batch_id = 'media_opt_' . str_replace( '-', '', (string) wp_generate_uuid4() );
-		$now = gmdate( 'c' );
-		$batch = array(
-			'contract_version' => self::CONTRACT_VERSION,
-			'batch_id' => $batch_id,
-			'manifest_digest' => $digest,
-			'created_at_gmt' => $now,
-			'updated_at_gmt' => $now,
-			'confirmed_at_gmt' => '',
-			'confirmed_by' => 0,
-			'status' => 'ready_for_review',
-			'optimization_profile' => 'auto_safe.v1',
-			'resize_mode' => $manifest_seed['resize_mode'],
-			'chunk_size' => self::CHUNK_SIZE,
+		$now      = gmdate( 'c' );
+		$batch    = array(
+			'contract_version'      => self::CONTRACT_VERSION,
+			'batch_id'              => $batch_id,
+			'manifest_digest'       => $digest,
+			'created_at_gmt'        => $now,
+			'updated_at_gmt'        => $now,
+			'confirmed_at_gmt'      => '',
+			'confirmed_by'          => 0,
+			'status'                => 'ready_for_review',
+			'optimization_profile'  => 'auto_safe.v1',
+			'resize_mode'           => $manifest_seed['resize_mode'],
+			'chunk_size'            => self::CHUNK_SIZE,
 			'recoverable_until_gmt' => gmdate( 'c', time() + ( 30 * 86400 ) ),
-			'filters' => $filters,
-			'items' => array_values( $items ),
-			'summary' => array(),
+			'filters'               => $filters,
+			'items'                 => array_values( $items ),
+			'summary'               => array(),
 		);
-		$batch = $this->with_summary( $batch );
+		$batch    = $this->with_summary( $batch );
 		$this->save_batch( $batch );
 		return $batch;
 	}
@@ -116,9 +116,9 @@ final class Media_Optimization_Batches {
 			return $this->error( 'npcink_toolbox_media_batch_confirmation_invalid', 'Confirm the exact media optimization list before starting.', 409 );
 		}
 		if ( 'completed' !== (string) $batch['status'] ) {
-			$batch['status'] = 'running';
+			$batch['status']           = 'running';
 			$batch['confirmed_at_gmt'] = gmdate( 'c' );
-			$batch['confirmed_by'] = get_current_user_id();
+			$batch['confirmed_by']     = get_current_user_id();
 			$this->save_batch( $batch );
 		}
 		return $this->with_summary( $batch );
@@ -141,30 +141,30 @@ final class Media_Optimization_Batches {
 		if ( in_array( (string) $item['status'], array( 'completed', 'skipped' ), true ) ) {
 			return $this->with_summary( $batch );
 		}
-		$status = sanitize_key( (string) ( $payload['status'] ?? '' ) );
+		$status                = sanitize_key( (string) ( $payload['status'] ?? '' ) );
 		$item['attempt_count'] = absint( $item['attempt_count'] ?? 0 ) + 1;
 		if ( 'skipped' === $status ) {
-			$item['status'] = 'skipped';
+			$item['status']     = 'skipped';
 			$item['error_code'] = sanitize_key( (string) ( $payload['reason'] ?? 'cloud_not_qualified' ) );
 		} elseif ( 'failed' === $status ) {
-			$item['status'] = 'failed';
+			$item['status']     = 'failed';
 			$item['error_code'] = sanitize_key( (string) ( $payload['reason'] ?? 'processing_failed' ) );
 		} elseif ( 'qualified' === $status ) {
 			$current = $this->current_fingerprint( $attachment_id );
 			if ( '' === $current || ! hash_equals( (string) $item['source_fingerprint'], $current ) ) {
-				$item['status'] = 'skipped';
+				$item['status']     = 'skipped';
 				$item['error_code'] = 'source_fingerprint_changed';
 			} else {
 				$result = $this->adopt( $batch, $item, $payload );
 				if ( is_wp_error( $result ) ) {
-					$item['status'] = 'failed';
+					$item['status']     = 'failed';
 					$item['error_code'] = sanitize_key( $result->get_error_code() );
 				} else {
-					$item['status'] = 'completed';
-					$item['error_code'] = '';
-					$item['bytes_after'] = absint( $result['after']['filesize_bytes'] ?? 0 );
+					$item['status']         = 'completed';
+					$item['error_code']     = '';
+					$item['bytes_after']    = absint( $result['after']['filesize_bytes'] ?? 0 );
 					$item['replacement_id'] = sanitize_text_field( (string) ( $result['replacement_id'] ?? '' ) );
-					$item['backup_id'] = sanitize_text_field( (string) ( $result['backup']['backup_id'] ?? $result['replacement_id'] ?? '' ) );
+					$item['backup_id']      = sanitize_text_field( (string) ( $result['backup']['backup_id'] ?? $result['replacement_id'] ?? '' ) );
 					$item['restore_status'] = 'available';
 				}
 			}
@@ -172,7 +172,7 @@ final class Media_Optimization_Batches {
 			return $this->error( 'npcink_toolbox_media_batch_item_status_invalid', 'The media optimization result status is invalid.', 400 );
 		}
 		$batch['items'][ $index ] = $item;
-		$batch = $this->apply_stop_policy( $this->with_summary( $batch ), $index );
+		$batch                    = $this->apply_stop_policy( $this->with_summary( $batch ), $index );
 		$this->save_batch( $batch );
 		return $batch;
 	}
@@ -183,12 +183,18 @@ final class Media_Optimization_Batches {
 		if ( empty( $batches ) ) {
 			return $this->error( 'npcink_toolbox_media_batch_not_found', 'No media optimization history is available.', 404 );
 		}
-		$batch = $this->with_summary( $batches[0] );
-		$cleanup = $this->run_registered_ability( 'npcink-abilities-toolkit/cleanup-media-backups', array( 'dry_run' => true, 'commit' => false ) );
+		$batch   = $this->with_summary( $batches[0] );
+		$cleanup = $this->run_registered_ability(
+			'npcink-abilities-toolkit/cleanup-media-backups',
+			array(
+				'dry_run' => true,
+				'commit'  => false,
+			)
+		);
 		if ( is_array( $cleanup ) ) {
 			$batch['backup_cleanup_preview'] = array(
-				'expired' => absint( $cleanup['expired'] ?? 0 ),
-				'retention_days' => absint( $cleanup['retention_days'] ?? 30 ),
+				'expired'                 => absint( $cleanup['expired'] ?? 0 ),
+				'retention_days'          => absint( $cleanup['retention_days'] ?? 30 ),
 				'current_media_preserved' => true,
 			);
 		}
@@ -197,7 +203,13 @@ final class Media_Optimization_Batches {
 
 	/** @return array<string,mixed>|WP_Error */
 	public function preview_backup_cleanup() {
-		return $this->run_registered_ability( self::CLEANUP_ABILITY_ID, array( 'dry_run' => true, 'commit' => false ) );
+		return $this->run_registered_ability(
+			self::CLEANUP_ABILITY_ID,
+			array(
+				'dry_run' => true,
+				'commit'  => false,
+			)
+		);
 	}
 
 	/** @return array<string,mixed>|WP_Error */
@@ -218,8 +230,8 @@ final class Media_Optimization_Batches {
 			return $this->run_registered_ability(
 				self::CLEANUP_ABILITY_ID,
 				array(
-					'dry_run' => false,
-					'commit' => true,
+					'dry_run'         => false,
+					'commit'          => true,
 					'idempotency_key' => 'toolbox-media-backup-cleanup-' . gmdate( 'Ymd' ),
 				)
 			);
@@ -231,38 +243,46 @@ final class Media_Optimization_Batches {
 	/** @return array<string,mixed>|WP_Error */
 	public function restore_item( string $batch_id, int $attachment_id ) {
 		$batch = $this->find( $batch_id );
-		if ( is_wp_error( $batch ) ) return $batch;
+		if ( is_wp_error( $batch ) ) {
+			return $batch;
+		}
 		$index = $this->item_index( $batch, $attachment_id );
-		if ( $index < 0 ) return $this->error( 'npcink_toolbox_media_batch_item_not_found', 'The image is not part of this optimization batch.', 404 );
+		if ( $index < 0 ) {
+			return $this->error( 'npcink_toolbox_media_batch_item_not_found', 'The image is not part of this optimization batch.', 404 );
+		}
 		$item = $batch['items'][ $index ];
-		if ( 'restored' === (string) ( $item['restore_status'] ?? '' ) ) return $batch;
+		if ( 'restored' === (string) ( $item['restore_status'] ?? '' ) ) {
+			return $batch;
+		}
 		if ( 'completed' !== (string) ( $item['status'] ?? '' ) || empty( $item['replacement_id'] ) ) {
 			return $this->error( 'npcink_toolbox_media_batch_restore_unavailable', 'This image does not have a completed optimization to restore.', 409 );
 		}
-		$input = array(
-			'attachment_id' => $attachment_id,
-			'backup_id' => (string) $item['backup_id'],
+		$input   = array(
+			'attachment_id'        => $attachment_id,
+			'backup_id'            => (string) $item['backup_id'],
 			'target_conflict_mode' => 'fail',
-			'idempotency_key' => 'toolbox-batch-restore-' . sanitize_key( $batch_id ) . '-' . $attachment_id,
-			'dry_run' => true,
-			'commit' => false,
+			'idempotency_key'      => 'toolbox-batch-restore-' . sanitize_key( $batch_id ) . '-' . $attachment_id,
+			'dry_run'              => true,
+			'commit'               => false,
 		);
 		$preview = $this->run_registered_ability( self::RESTORE_ABILITY_ID, $input );
-		if ( is_wp_error( $preview ) ) return $preview;
+		if ( is_wp_error( $preview ) ) {
+			return $preview;
+		}
 		$authorize = static fn( bool $allowed, string $ability_id ): bool => self::RESTORE_ABILITY_ID === $ability_id ? true : $allowed;
 		add_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10, 2 );
 		try {
 			$input['dry_run'] = false;
-			$input['commit'] = true;
-			$result = $this->run_registered_ability( self::RESTORE_ABILITY_ID, $input );
+			$input['commit']  = true;
+			$result           = $this->run_registered_ability( self::RESTORE_ABILITY_ID, $input );
 		} finally {
 			remove_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10 );
 		}
 		if ( is_wp_error( $result ) ) {
-			$item['restore_status'] = 'failed';
+			$item['restore_status']     = 'failed';
 			$item['restore_error_code'] = sanitize_key( $result->get_error_code() );
 		} else {
-			$item['restore_status'] = 'restored';
+			$item['restore_status']  = 'restored';
 			$item['restored_at_gmt'] = gmdate( 'c' );
 		}
 		$batch['items'][ $index ] = $item;
@@ -309,17 +329,17 @@ final class Media_Optimization_Batches {
 		if ( empty( $artifact['artifact_id'] ) ) {
 			return $this->error( 'npcink_toolbox_media_batch_artifact_missing', 'The qualified Cloud result did not include an artifact.', 400 );
 		}
-		$input = array(
-			'attachment_id' => (int) $item['attachment_id'],
-			'derivative_artifact' => $artifact,
+		$input   = array(
+			'attachment_id'                 => (int) $item['attachment_id'],
+			'derivative_artifact'           => $artifact,
 			'expected_derivative_mime_type' => sanitize_text_field( (string) ( $artifact['mime_type'] ?? 'image/webp' ) ),
-			'backup_suffix' => 'npcink-toolbox-batch-backup',
-			'idempotency_key' => 'toolbox-batch-' . sanitize_key( (string) $batch['batch_id'] ) . '-' . (int) $item['attachment_id'],
-			'batch_id' => (string) $batch['batch_id'],
-			'optimization_profile' => 'auto_safe.v1',
-			'batch_confirmation_digest' => (string) $batch['manifest_digest'],
-			'dry_run' => true,
-			'commit' => false,
+			'backup_suffix'                 => 'npcink-toolbox-batch-backup',
+			'idempotency_key'               => 'toolbox-batch-' . sanitize_key( (string) $batch['batch_id'] ) . '-' . (int) $item['attachment_id'],
+			'batch_id'                      => (string) $batch['batch_id'],
+			'optimization_profile'          => 'auto_safe.v1',
+			'batch_confirmation_digest'     => (string) $batch['manifest_digest'],
+			'dry_run'                       => true,
+			'commit'                        => false,
 		);
 		$preview = $this->run_registered_ability( self::ABILITY_ID, $input );
 		if ( is_wp_error( $preview ) ) {
@@ -329,7 +349,7 @@ final class Media_Optimization_Batches {
 		add_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10, 2 );
 		try {
 			$input['dry_run'] = false;
-			$input['commit'] = true;
+			$input['commit']  = true;
 			return $this->run_registered_ability( self::ABILITY_ID, $input );
 		} finally {
 			remove_filter( 'npcink_abilities_toolkit_write_commit_allowed', $authorize, 10 );
@@ -341,7 +361,7 @@ final class Media_Optimization_Batches {
 			return $this->error( 'npcink_toolbox_media_batch_toolkit_unavailable', 'Npcink Abilities Toolkit is required for media optimization.', 503 );
 		}
 		$registered = npcink_abilities_toolkit_get_registered();
-		$callback = $registered[ $ability_id ]['execute_callback'] ?? null;
+		$callback   = $registered[ $ability_id ]['execute_callback'] ?? null;
 		if ( ! is_callable( $callback ) ) {
 			return $this->error( 'npcink_toolbox_media_batch_ability_unavailable', 'The requested Toolkit media ability is unavailable.', 503 );
 		}
@@ -352,12 +372,12 @@ final class Media_Optimization_Batches {
 	private function cloud_input( int $attachment_id, array $candidate, array $plan ): array {
 		$filters = is_array( $plan['filters'] ?? null ) ? $plan['filters'] : array();
 		return array(
-			'attachment_id' => $attachment_id,
-			'optimization_mode' => 'auto_safe',
-			'optimization_profile' => 'auto_safe.v1',
-			'preferred_format' => 'webp',
-			'target_max_width' => 1920,
-			'resize_mode' => 'fit' === (string) ( $filters['resize_mode'] ?? '' ) ? 'fit' : 'preserve',
+			'attachment_id'                     => $attachment_id,
+			'optimization_mode'                 => 'auto_safe',
+			'optimization_profile'              => 'auto_safe.v1',
+			'preferred_format'                  => 'webp',
+			'target_max_width'                  => 1920,
+			'resize_mode'                       => 'fit' === (string) ( $filters['resize_mode'] ?? '' ) ? 'fit' : 'preserve',
 			'expected_source_media_fingerprint' => (string) ( $candidate['media_fingerprint'] ?? '' ),
 		);
 	}
@@ -393,7 +413,7 @@ final class Media_Optimization_Batches {
 	}
 
 	private function apply_stop_policy( array $batch, int $last_index ): array {
-		$items = (array) $batch['items'];
+		$items                = (array) $batch['items'];
 		$consecutive_failures = 0;
 		for ( $index = $last_index; $index >= 0; --$index ) {
 			if ( 'failed' !== (string) ( $items[ $index ]['status'] ?? '' ) ) {
@@ -402,11 +422,11 @@ final class Media_Optimization_Batches {
 			++$consecutive_failures;
 		}
 		$chunk_start = (int) floor( $last_index / self::CHUNK_SIZE ) * self::CHUNK_SIZE;
-		$chunk = array_slice( $items, $chunk_start, self::CHUNK_SIZE );
-		$processed = array_values( array_filter( $chunk, static fn( $item ) => in_array( (string) ( $item['status'] ?? '' ), array( 'completed', 'skipped', 'failed' ), true ) ) );
-		$failed = array_values( array_filter( $processed, static fn( $item ) => 'failed' === (string) ( $item['status'] ?? '' ) ) );
+		$chunk       = array_slice( $items, $chunk_start, self::CHUNK_SIZE );
+		$processed   = array_values( array_filter( $chunk, static fn( $item ) => in_array( (string) ( $item['status'] ?? '' ), array( 'completed', 'skipped', 'failed' ), true ) ) );
+		$failed      = array_values( array_filter( $processed, static fn( $item ) => 'failed' === (string) ( $item['status'] ?? '' ) ) );
 		if ( $consecutive_failures >= 3 || ( count( $processed ) >= 3 && count( $failed ) / count( $processed ) > 0.3 ) ) {
-			$batch['status'] = 'paused';
+			$batch['status']       = 'paused';
 			$batch['pause_reason'] = $consecutive_failures >= 3 ? 'three_consecutive_failures' : 'chunk_failure_rate_exceeded';
 		} elseif ( 0 === (int) ( $batch['summary']['pending'] ?? 0 ) ) {
 			$batch['status'] = 'completed';
@@ -415,20 +435,30 @@ final class Media_Optimization_Batches {
 	}
 
 	private function with_summary( array $batch ): array {
-		$summary = array( 'total' => 0, 'pending' => 0, 'success' => 0, 'skipped' => 0, 'failed' => 0, 'bytes_before' => 0, 'bytes_after' => 0, 'bytes_saved' => 0 );
+		$summary = array(
+			'total'        => 0,
+			'pending'      => 0,
+			'success'      => 0,
+			'skipped'      => 0,
+			'failed'       => 0,
+			'bytes_before' => 0,
+			'bytes_after'  => 0,
+			'bytes_saved'  => 0,
+		);
 		foreach ( (array) ( $batch['items'] ?? array() ) as $item ) {
-			if ( ! is_array( $item ) ) { continue; }
+			if ( ! is_array( $item ) ) {
+				continue; }
 			++$summary['total'];
 			$status = (string) ( $item['status'] ?? 'pending' );
-			$key = 'completed' === $status ? 'success' : ( isset( $summary[ $status ] ) ? $status : 'pending' );
+			$key    = 'completed' === $status ? 'success' : ( isset( $summary[ $status ] ) ? $status : 'pending' );
 			++$summary[ $key ];
 			if ( 'completed' === $status ) {
 				$summary['bytes_before'] += absint( $item['filesize_bytes'] ?? 0 );
-				$summary['bytes_after'] += absint( $item['bytes_after'] ?? 0 );
+				$summary['bytes_after']  += absint( $item['bytes_after'] ?? 0 );
 			}
 		}
-		$summary['bytes_saved'] = max( 0, $summary['bytes_before'] - $summary['bytes_after'] );
-		$batch['summary'] = $summary;
+		$summary['bytes_saved']  = max( 0, $summary['bytes_before'] - $summary['bytes_after'] );
+		$batch['summary']        = $summary;
 		$batch['updated_at_gmt'] = gmdate( 'c' );
 		return $batch;
 	}

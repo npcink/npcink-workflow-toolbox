@@ -78,7 +78,7 @@ final class Operation_Classifier {
 		$writes_state  = array_key_exists( 'writes_wordpress_state', $operation ) ? (bool) $operation['writes_wordpress_state'] : self::KIND_SUGGEST !== $kind;
 		$context       = array(
 			'request_source'         => $source,
-			'actor_presence'        => $actor,
+			'actor_presence'         => $actor,
 			'preview_completeness'   => $preview,
 			'scope'                  => $scope,
 			'reversibility'          => $reversibility,
@@ -269,7 +269,7 @@ final class Operation_Classifier {
 			'risk_factors'           => $this->risk_factors_for_context( $context ),
 			'required_evidence'      => $required_evidence,
 			'request_source'         => $this->sanitize_token( (string) ( $context['request_source'] ?? '' ) ),
-			'actor_presence'        => $this->sanitize_token( (string) ( $context['actor_presence'] ?? '' ) ),
+			'actor_presence'         => $this->sanitize_token( (string) ( $context['actor_presence'] ?? '' ) ),
 			'preview_completeness'   => $this->sanitize_token( (string) ( $context['preview_completeness'] ?? '' ) ),
 			'scope'                  => $this->sanitize_token( (string) ( $context['scope'] ?? '' ) ),
 			'reversibility'          => $this->sanitize_token( (string) ( $context['reversibility'] ?? '' ) ),

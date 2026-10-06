@@ -10,8 +10,8 @@ namespace Npcink\LocalAutomationRuntime\NightlyInspection;
 use Npcink_Toolbox\Settings;
 
 final class Basic_WP_Cron_Dry_Run {
-	public const HOOK                    = 'npcink_local_automation_runtime_nightly_inspection_dry_run';
-	public const LATEST_PREVIEW_OPTION   = 'npcink_local_automation_runtime_nightly_inspection_latest_preview';
+	public const HOOK                      = 'npcink_local_automation_runtime_nightly_inspection_dry_run';
+	public const LATEST_PREVIEW_OPTION     = 'npcink_local_automation_runtime_nightly_inspection_latest_preview';
 	public const SCHEDULE_SIGNATURE_OPTION = 'npcink_local_automation_runtime_nightly_inspection_schedule_signature';
 
 	private Settings $settings;
@@ -125,17 +125,17 @@ final class Basic_WP_Cron_Dry_Run {
 				'morning_brief' => $brief,
 			),
 			'safety'                 => array(
-				'dry_run'                            => true,
-				'latest_preview_option_only'         => true,
-				'direct_wordpress_content_write'     => false,
-				'cloud_called'                       => false,
-				'core_proposal_created'              => false,
-				'action_scheduler_used'              => false,
-				'custom_tables_created'              => false,
-				'lease_store_created'                => false,
-				'retry_processor_created'            => false,
-				'dead_letter_processor_created'      => false,
-				'cloud_scheduler_truth'              => false,
+				'dry_run'                        => true,
+				'latest_preview_option_only'     => true,
+				'direct_wordpress_content_write' => false,
+				'cloud_called'                   => false,
+				'core_proposal_created'          => false,
+				'action_scheduler_used'          => false,
+				'custom_tables_created'          => false,
+				'lease_store_created'            => false,
+				'retry_processor_created'        => false,
+				'dead_letter_processor_created'  => false,
+				'cloud_scheduler_truth'          => false,
 			),
 		);
 	}
@@ -172,7 +172,7 @@ final class Basic_WP_Cron_Dry_Run {
 	}
 
 	private function current_gmt_time(): string {
-		$timestamp = current_time( 'timestamp', true );
+		$timestamp = time();
 		if ( ! is_numeric( $timestamp ) ) {
 			$timestamp = time();
 		}

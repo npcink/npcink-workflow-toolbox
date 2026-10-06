@@ -154,5 +154,4 @@ final class Rest_Nightly_Inspection_Bridges {
 			)
 		);
 	}
-
 }

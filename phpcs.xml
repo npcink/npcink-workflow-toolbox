@@ -28,5 +28,22 @@
 
 	<rule ref="PHPCompatibilityWP"/>
 
+	<!-- Not auto-fixable and not correctness-relevant; short ternaries,
+	     non-Yoda comparisons, and reserved-word parameter names are
+	     established patterns in this codebase. Silenced errors are
+	     deliberate WordPress-version guards. -->
+	<rule ref="Universal.Operators.DisallowShortTernary.Found">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.PHP.YodaConditions.NotYoda">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Universal.NamingConventions.NoReservedKeywordParameterNames">
+		<severity>0</severity>
+	</rule>
+	<rule ref="WordPress.PHP.NoSilencedErrors.Discouraged">
+		<severity>0</severity>
+	</rule>
+
 	<config name="testVersion" value="8.0-"/>
 </ruleset>

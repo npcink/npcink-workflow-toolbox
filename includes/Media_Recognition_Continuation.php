@@ -12,12 +12,12 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 final class Media_Recognition_Continuation {
-	private const OPTION_NAME = 'npcink_toolbox_media_recognition_continuation';
-	private const LOCK_NAME   = 'npcink_toolbox_media_recognition_continuation_lock';
-	private const CRON_HOOK   = 'npcink_toolbox_continue_media_recognition';
-	private const MAX_RETRIES = 3;
+	private const OPTION_NAME  = 'npcink_toolbox_media_recognition_continuation';
+	private const LOCK_NAME    = 'npcink_toolbox_media_recognition_continuation_lock';
+	private const CRON_HOOK    = 'npcink_toolbox_continue_media_recognition';
+	private const MAX_RETRIES  = 3;
 	private const MAX_PER_PAGE = 10;
-	private const LOCK_TTL = 600;
+	private const LOCK_TTL     = 600;
 
 	private Provider_Client $client;
 
@@ -111,10 +111,10 @@ final class Media_Recognition_Continuation {
 		if ( $initiated_by <= 0 || ! current_user_can( 'upload_files' ) ) {
 			return new WP_Error( 'npcink_toolbox_media_recognition_permission_denied', 'You do not have permission to confirm media recognition.' );
 		}
-		$state['initiated_by'] = $initiated_by;
+		$state['initiated_by']        = $initiated_by;
 		$state['confirmation_status'] = 'confirmed';
-		$state['state'] = 'queued';
-		$state['next_eligible_at'] = gmdate( 'c' );
+		$state['state']               = 'queued';
+		$state['next_eligible_at']    = gmdate( 'c' );
 		update_option( self::OPTION_NAME, $state, false );
 		$this->schedule( 1 );
 		return $state;
@@ -192,41 +192,45 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 
-		$state['state'] = 'processing';
+		$state['state']       = 'processing';
 		$batch_attachment_ids = 'changed_attachments' === $state['scope']
 			? array_slice( array_values( array_filter( $state['attachment_ids'], static fn( int $id ): bool => $id > absint( $state['next_cursor']['after_id'] ?? 0 ) ) ), 0, $state['per_page'] )
 			: array();
 		if ( 'changed_attachments' === $state['scope'] && empty( $batch_attachment_ids ) ) {
 			$state['has_more'] = false;
-			$state = $this->commit_pending_batch( $state );
+			$state             = $this->commit_pending_batch( $state );
 			update_option( self::OPTION_NAME, $state, false );
 			return;
 		}
 		$result = $this->client->refresh_site_media_index_batch(
-			array_filter( array(
-				'after_id'    => absint( $state['next_cursor']['after_id'] ?? 0 ),
-				'per_page'    => $state['per_page'],
-				'upload_scope' => $state['plan_id'],
-				'attachment_ids' => $batch_attachment_ids,
-			), static fn( $value, $key ): bool => 'attachment_ids' !== $key || ! empty( $value ), ARRAY_FILTER_USE_BOTH )
+			array_filter(
+				array(
+					'after_id'       => absint( $state['next_cursor']['after_id'] ?? 0 ),
+					'per_page'       => $state['per_page'],
+					'upload_scope'   => $state['plan_id'],
+					'attachment_ids' => $batch_attachment_ids,
+				),
+				static fn( $value, $key ): bool => 'attachment_ids' !== $key || ! empty( $value ),
+				ARRAY_FILTER_USE_BOTH
+			)
 		);
 		if ( is_wp_error( $result ) ) {
 			$this->retry_or_pause( $state, $result->get_error_code() );
 			return;
 		}
 
-		$state['run_id']        = sanitize_text_field( (string) ( $result['visual_evidence_run_id'] ?? $result['run_id'] ?? '' ) );
+		$state['run_id']                       = sanitize_text_field( (string) ( $result['visual_evidence_run_id'] ?? $result['run_id'] ?? '' ) );
 		$state['current_batch_attachment_ids'] = $batch_attachment_ids;
-		$state['has_more']      = 'changed_attachments' === $state['scope']
+		$state['has_more']                     = 'changed_attachments' === $state['scope']
 			? count( array_filter( $state['attachment_ids'], static fn( int $id ): bool => $id > ( ! empty( $batch_attachment_ids ) ? max( $batch_attachment_ids ) : 0 ) ) ) > 0
 			: ! empty( $result['has_more'] );
-		$state['pending_counts'] = array(
+		$state['pending_counts']               = array(
 			'processed' => absint( $result['indexed_items'] ?? 0 ),
 			'qualified' => absint( $result['visual_evidence_reused_items'] ?? 0 ) + absint( $result['visual_evidence_recognized_items'] ?? 0 ),
 			'skipped'   => absint( $result['screened_items'] ?? 0 ),
 			'failed'    => 0,
 		);
-		$state['pending_cursor'] = array(
+		$state['pending_cursor']               = array(
 			'after_id' => ! empty( $batch_attachment_ids ) ? max( $batch_attachment_ids ) : absint( $result['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ),
 		);
 
@@ -263,7 +267,7 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 		if ( in_array( $remote_state, array( 'failed', 'error' ), true ) ) {
-			$state['run_id'] = '';
+			$state['run_id']         = '';
 			$state['pending_counts'] = $this->empty_counts();
 			$this->retry_or_pause( $state, 'cloud_run_' . $remote_state );
 			return;
@@ -288,13 +292,17 @@ final class Media_Recognition_Continuation {
 			return;
 		}
 		$sync = $this->client->refresh_site_media_index_batch(
-			array_filter( array(
-				'after_id'              => absint( $state['next_cursor']['after_id'] ?? 0 ),
-				'per_page'              => $state['per_page'],
-				'upload_scope'           => $state['plan_id'],
-				'attachment_ids'         => $state['current_batch_attachment_ids'],
-				'image_context_evidence' => $evidence,
-			), static fn( $value, $key ): bool => 'attachment_ids' !== $key || ! empty( $value ), ARRAY_FILTER_USE_BOTH )
+			array_filter(
+				array(
+					'after_id'               => absint( $state['next_cursor']['after_id'] ?? 0 ),
+					'per_page'               => $state['per_page'],
+					'upload_scope'           => $state['plan_id'],
+					'attachment_ids'         => $state['current_batch_attachment_ids'],
+					'image_context_evidence' => $evidence,
+				),
+				static fn( $value, $key ): bool => 'attachment_ids' !== $key || ! empty( $value ),
+				ARRAY_FILTER_USE_BOTH
+			)
 		);
 		if ( is_wp_error( $sync ) ) {
 			$this->retry_or_pause( $state, $sync->get_error_code() );
@@ -304,24 +312,24 @@ final class Media_Recognition_Continuation {
 			$this->retry_or_pause( $state, 'media_recognition_result_replay_invalid' );
 			return;
 		}
-		$committed_after_id = 'changed_attachments' === $state['scope']
+		$committed_after_id        = 'changed_attachments' === $state['scope']
 			? absint( $state['pending_cursor']['after_id'] ?? $state['next_cursor']['after_id'] ?? 0 )
 			: absint( $sync['next_cursor']['after_id'] ?? $state['next_cursor']['after_id'] );
-		$state['has_more']      = 'changed_attachments' === $state['scope']
+		$state['has_more']         = 'changed_attachments' === $state['scope']
 			? count( array_filter( $state['attachment_ids'], static fn( int $id ): bool => $id > $committed_after_id ) ) > 0
 			: ! empty( $sync['has_more'] );
-		$state['pending_cursor'] = array( 'after_id' => $committed_after_id );
-		$state['pending_counts'] = array(
+		$state['pending_cursor']   = array( 'after_id' => $committed_after_id );
+		$state['pending_counts']   = array(
 			'processed' => absint( $sync['indexed_items'] ?? 0 ),
 			'qualified' => $counts['qualified'],
 			'skipped'   => absint( $sync['screened_items'] ?? 0 ) + $counts['skipped'],
 			'failed'    => $counts['failed'],
 		);
-		$state['run_id'] = '';
-		$state                                 = $this->commit_pending_batch( $state );
-		$state['retry_count']                  = 0;
-		$state['pause_reason']                 = '';
-		$state['next_eligible_at']             = '';
+		$state['run_id']           = '';
+		$state                     = $this->commit_pending_batch( $state );
+		$state['retry_count']      = 0;
+		$state['pause_reason']     = '';
+		$state['next_eligible_at'] = '';
 		update_option( self::OPTION_NAME, $state, false );
 		if ( 'queued' === $state['state'] ) {
 			$this->schedule( 15 );
@@ -333,10 +341,10 @@ final class Media_Recognition_Continuation {
 		foreach ( array( 'processed', 'qualified', 'skipped', 'failed' ) as $key ) {
 			$state[ $key ] += absint( $state['pending_counts'][ $key ] ?? 0 );
 		}
-		$state['next_cursor']    = $state['pending_cursor'];
-		$state['pending_counts'] = $this->empty_counts();
+		$state['next_cursor']                  = $state['pending_cursor'];
+		$state['pending_counts']               = $this->empty_counts();
 		$state['current_batch_attachment_ids'] = array();
-		$state['state']          = ! empty( $state['has_more'] ) ? 'queued' : 'complete';
+		$state['state']                        = ! empty( $state['has_more'] ) ? 'queued' : 'complete';
 		if ( 'complete' === $state['state'] && ! empty( $state['pending_attachment_ids'] ) ) {
 			$state = $this->changed_attachments_state( $state['pending_attachment_ids'] );
 		}
@@ -345,8 +353,8 @@ final class Media_Recognition_Continuation {
 
 	/** @param array<string,mixed> $state */
 	private function retry_or_pause( array $state, string $reason ): void {
-		$state['retry_count']++;
-		$state['failed']++;
+		++$state['retry_count'];
+		++$state['failed'];
 		$state['pause_reason'] = sanitize_key( $reason );
 		if ( $state['retry_count'] >= self::MAX_RETRIES ) {
 			$state['state'] = 'paused';
@@ -373,7 +381,15 @@ final class Media_Recognition_Continuation {
 		}
 
 		$token = wp_generate_uuid4();
-		return add_option( self::LOCK_NAME, array( 'token' => $token, 'acquired_at' => time() ), '', false ) ? $token : '';
+		return add_option(
+			self::LOCK_NAME,
+			array(
+				'token'       => $token,
+				'acquired_at' => time(),
+			),
+			'',
+			false
+		) ? $token : '';
 	}
 
 	private function lock_is_current(): bool {
@@ -394,7 +410,10 @@ final class Media_Recognition_Continuation {
 		if ( ! is_array( $lock ) || '' === (string) ( $lock['token'] ?? '' ) || 0 >= absint( $lock['acquired_at'] ?? 0 ) ) {
 			return array();
 		}
-		return array( 'token' => (string) $lock['token'], 'acquired_at' => absint( $lock['acquired_at'] ) );
+		return array(
+			'token'       => (string) $lock['token'],
+			'acquired_at' => absint( $lock['acquired_at'] ),
+		);
 	}
 
 	/** @param array<string,mixed> $response @return array<string,mixed>|WP_Error */
@@ -420,7 +439,7 @@ final class Media_Recognition_Continuation {
 				static fn( $item ): bool => is_array( $item ) && absint( $item['attachment_id'] ?? 0 ) > 0
 			)
 		);
-		$progress = is_array( $result['progress'] ?? null ) ? $result['progress'] : array();
+		$progress  = is_array( $result['progress'] ?? null ) ? $result['progress'] : array();
 		return array(
 			'qualified' => $qualified,
 			'skipped'   => absint( $progress['skipped_items'] ?? 0 ),
@@ -431,12 +450,28 @@ final class Media_Recognition_Continuation {
 	/** @return array<string,mixed> */
 	private function default_state(): array {
 		return array(
-			'plan_id' => '', 'stable_order' => 'id_asc', 'next_cursor' => array( 'after_id' => 0 ),
-			'scope' => 'full', 'confirmation_status' => 'not_required', 'attachment_ids' => array(), 'pending_attachment_ids' => array(), 'current_batch_attachment_ids' => array(),
-			'pending_cursor' => array( 'after_id' => 0 ), 'pending_counts' => $this->empty_counts(),
-			'initiated_by' => 0, 'run_id' => '', 'state' => 'idle', 'processed' => 0, 'failed' => 0, 'skipped' => 0,
-			'qualified' => 0, 'retry_count' => 0, 'next_eligible_at' => '', 'pause_reason' => '',
-			'per_page' => self::MAX_PER_PAGE, 'has_more' => false,
+			'plan_id'                      => '',
+			'stable_order'                 => 'id_asc',
+			'next_cursor'                  => array( 'after_id' => 0 ),
+			'scope'                        => 'full',
+			'confirmation_status'          => 'not_required',
+			'attachment_ids'               => array(),
+			'pending_attachment_ids'       => array(),
+			'current_batch_attachment_ids' => array(),
+			'pending_cursor'               => array( 'after_id' => 0 ),
+			'pending_counts'               => $this->empty_counts(),
+			'initiated_by'                 => 0,
+			'run_id'                       => '',
+			'state'                        => 'idle',
+			'processed'                    => 0,
+			'failed'                       => 0,
+			'skipped'                      => 0,
+			'qualified'                    => 0,
+			'retry_count'                  => 0,
+			'next_eligible_at'             => '',
+			'pause_reason'                 => '',
+			'per_page'                     => self::MAX_PER_PAGE,
+			'has_more'                     => false,
 		);
 	}
 
@@ -448,48 +483,55 @@ final class Media_Recognition_Continuation {
 		return array_merge(
 			$this->default_state(),
 			array(
-				'plan_id' => sanitize_text_field( (string) ( $state['plan_id'] ?? '' ) ),
-				'scope' => 'changed_attachments' === sanitize_key( (string) ( $state['scope'] ?? '' ) ) ? 'changed_attachments' : 'full',
-				'confirmation_status' => sanitize_key( (string) ( $state['confirmation_status'] ?? 'not_required' ) ),
-				'attachment_ids' => $this->normalize_attachment_ids( $state['attachment_ids'] ?? array() ),
-				'pending_attachment_ids' => $this->normalize_attachment_ids( $state['pending_attachment_ids'] ?? array() ),
+				'plan_id'                      => sanitize_text_field( (string) ( $state['plan_id'] ?? '' ) ),
+				'scope'                        => 'changed_attachments' === sanitize_key( (string) ( $state['scope'] ?? '' ) ) ? 'changed_attachments' : 'full',
+				'confirmation_status'          => sanitize_key( (string) ( $state['confirmation_status'] ?? 'not_required' ) ),
+				'attachment_ids'               => $this->normalize_attachment_ids( $state['attachment_ids'] ?? array() ),
+				'pending_attachment_ids'       => $this->normalize_attachment_ids( $state['pending_attachment_ids'] ?? array() ),
 				'current_batch_attachment_ids' => $this->normalize_attachment_ids( $state['current_batch_attachment_ids'] ?? array() ),
-				'initiated_by' => absint( $state['initiated_by'] ?? 0 ),
-				'stable_order' => 'id_asc',
-				'next_cursor' => array( 'after_id' => absint( $next_cursor['after_id'] ?? 0 ) ),
-				'pending_cursor' => array( 'after_id' => absint( $pending_cursor['after_id'] ?? $next_cursor['after_id'] ?? 0 ) ),
-				'pending_counts' => array(
+				'initiated_by'                 => absint( $state['initiated_by'] ?? 0 ),
+				'stable_order'                 => 'id_asc',
+				'next_cursor'                  => array( 'after_id' => absint( $next_cursor['after_id'] ?? 0 ) ),
+				'pending_cursor'               => array( 'after_id' => absint( $pending_cursor['after_id'] ?? $next_cursor['after_id'] ?? 0 ) ),
+				'pending_counts'               => array(
 					'processed' => absint( $pending_counts['processed'] ?? 0 ),
 					'qualified' => absint( $pending_counts['qualified'] ?? 0 ),
-					'skipped' => absint( $pending_counts['skipped'] ?? 0 ),
-					'failed' => absint( $pending_counts['failed'] ?? 0 ),
+					'skipped'   => absint( $pending_counts['skipped'] ?? 0 ),
+					'failed'    => absint( $pending_counts['failed'] ?? 0 ),
 				),
-				'run_id' => sanitize_text_field( (string) ( $state['run_id'] ?? '' ) ),
-				'state' => sanitize_key( (string) ( $state['state'] ?? 'idle' ) ),
-				'processed' => absint( $state['processed'] ?? 0 ), 'failed' => absint( $state['failed'] ?? 0 ),
-				'skipped' => absint( $state['skipped'] ?? 0 ), 'qualified' => absint( $state['qualified'] ?? 0 ),
-				'retry_count' => min( self::MAX_RETRIES, absint( $state['retry_count'] ?? 0 ) ),
-				'next_eligible_at' => sanitize_text_field( (string) ( $state['next_eligible_at'] ?? '' ) ),
-				'pause_reason' => sanitize_key( (string) ( $state['pause_reason'] ?? '' ) ),
-				'per_page' => max( 1, min( self::MAX_PER_PAGE, absint( $state['per_page'] ?? self::MAX_PER_PAGE ) ) ),
-				'has_more' => ! empty( $state['has_more'] ),
+				'run_id'                       => sanitize_text_field( (string) ( $state['run_id'] ?? '' ) ),
+				'state'                        => sanitize_key( (string) ( $state['state'] ?? 'idle' ) ),
+				'processed'                    => absint( $state['processed'] ?? 0 ),
+				'failed'                       => absint( $state['failed'] ?? 0 ),
+				'skipped'                      => absint( $state['skipped'] ?? 0 ),
+				'qualified'                    => absint( $state['qualified'] ?? 0 ),
+				'retry_count'                  => min( self::MAX_RETRIES, absint( $state['retry_count'] ?? 0 ) ),
+				'next_eligible_at'             => sanitize_text_field( (string) ( $state['next_eligible_at'] ?? '' ) ),
+				'pause_reason'                 => sanitize_key( (string) ( $state['pause_reason'] ?? '' ) ),
+				'per_page'                     => max( 1, min( self::MAX_PER_PAGE, absint( $state['per_page'] ?? self::MAX_PER_PAGE ) ) ),
+				'has_more'                     => ! empty( $state['has_more'] ),
 			)
 		);
 	}
 
 	/** @return array{processed:int,qualified:int,skipped:int,failed:int} */
 	private function empty_counts(): array {
-		return array( 'processed' => 0, 'qualified' => 0, 'skipped' => 0, 'failed' => 0 );
+		return array(
+			'processed' => 0,
+			'qualified' => 0,
+			'skipped'   => 0,
+			'failed'    => 0,
+		);
 	}
 
 	/** @param array<int,int> $attachment_ids @return array<string,mixed> */
 	private function changed_attachments_state( array $attachment_ids ): array {
-		$state = $this->default_state();
-		$state['plan_id'] = 'media_changes_' . wp_generate_uuid4();
-		$state['scope'] = 'changed_attachments';
-		$state['attachment_ids'] = $this->normalize_attachment_ids( $attachment_ids );
+		$state                        = $this->default_state();
+		$state['plan_id']             = 'media_changes_' . wp_generate_uuid4();
+		$state['scope']               = 'changed_attachments';
+		$state['attachment_ids']      = $this->normalize_attachment_ids( $attachment_ids );
 		$state['confirmation_status'] = 'awaiting_confirmation';
-		$state['state'] = 'awaiting_confirmation';
+		$state['state']               = 'awaiting_confirmation';
 		return $state;
 	}
 
