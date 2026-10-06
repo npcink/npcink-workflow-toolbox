@@ -128,6 +128,7 @@ Start from the active documents below before changing code.
 - [Site Check Visibility Reassessment](site-check-visibility-reassessment-2026-07-10.md)
 - [Comment Moderation Review Set](comment-moderation-review-set.md)
 - [Taxonomy And Tag Review Set](taxonomy-tag-review-set.md)
+- [Internal-Link Review Set](internal-link-review-set.md)
 - [Flagged Media Review Set](flagged-media-review.md)
 - [Site Check Scheduled Review Cloud Addon Closeout](site-check-scheduled-review-cloud-addon-closeout-2026-07-01.md)
 - [Operator Path Validation Closeout](operator-path-validation-closeout-2026-07-02.md)

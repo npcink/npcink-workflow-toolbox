@@ -42,6 +42,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Article_Audio_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Image_Source_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Media_Recognition_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Taxonomy_Tag_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Internal_Link_Review_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Client.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Recognition_Continuation.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Media_Fingerprint_Scan.php';

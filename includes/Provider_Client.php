@@ -26,6 +26,7 @@ final class Provider_Client extends Provider_Client_Support {
 
 	private Provider_Flagged_Media_Service $flagged_media;
 	private Provider_Taxonomy_Tag_Service $taxonomy_tag;
+	private Provider_Internal_Link_Review_Service $internal_link_review;
 
 	private Provider_Hosted_AI_Service $hosted_ai;
 
@@ -140,6 +141,7 @@ final class Provider_Client extends Provider_Client_Support {
 
 		$this->flagged_media = new Provider_Flagged_Media_Service( $settings, $this );
 		$this->taxonomy_tag = new Provider_Taxonomy_Tag_Service( $settings, $this );
+		$this->internal_link_review = new Provider_Internal_Link_Review_Service( $settings, $this );
 
 		$this->hosted_ai = new Provider_Hosted_AI_Service( $settings, $this );
 
@@ -1042,6 +1044,18 @@ final class Provider_Client extends Provider_Client_Support {
 
 	public function local_taxonomy_tag_review_response( array $sample ): array {
 		return $this->taxonomy_tag->local_taxonomy_tag_review_response( $sample );
+	}
+
+	public function sample_sparse_internal_link_posts( int $limit = 50 ): array {
+		return $this->internal_link_review->sample_sparse_internal_link_posts( $limit );
+	}
+
+	public function build_internal_link_review_set( array $sample, array $suggestions = array(), string $cloud_status = 'cloud_required' ): array {
+		return $this->internal_link_review->build_internal_link_review_set( $sample, $suggestions, $cloud_status );
+	}
+
+	public function local_internal_link_review_response( array $sample ): array {
+		return $this->internal_link_review->local_internal_link_review_response( $sample );
 	}
 
 }
