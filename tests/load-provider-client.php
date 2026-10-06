@@ -18,6 +18,7 @@ require_once dirname( __DIR__ ) . '/includes/Provider_Web_Search_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Media_Alt_Caption_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Comment_Moderation_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Flagged_Media_Service.php';
+require_once dirname( __DIR__ ) . '/includes/Provider_Taxonomy_Tag_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Hosted_AI_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Site_Knowledge_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Content_Collector_Service.php';

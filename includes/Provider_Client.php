@@ -25,6 +25,7 @@ final class Provider_Client extends Provider_Client_Support {
 	private Provider_Comment_Moderation_Service $comment_moderation;
 
 	private Provider_Flagged_Media_Service $flagged_media;
+	private Provider_Taxonomy_Tag_Service $taxonomy_tag;
 
 	private Provider_Hosted_AI_Service $hosted_ai;
 
@@ -138,6 +139,7 @@ final class Provider_Client extends Provider_Client_Support {
 		$this->comment_moderation = new Provider_Comment_Moderation_Service( $settings, $this );
 
 		$this->flagged_media = new Provider_Flagged_Media_Service( $settings, $this );
+		$this->taxonomy_tag = new Provider_Taxonomy_Tag_Service( $settings, $this );
 
 		$this->hosted_ai = new Provider_Hosted_AI_Service( $settings, $this );
 
@@ -1027,4 +1029,19 @@ final class Provider_Client extends Provider_Client_Support {
 
 		return $this->site_knowledge->normalize_site_knowledge_cloud_response( is_array( $response ) ? $response : array(), $artifact_type, $composition_role, $runtime_payload );
 	}
+	/**
+	 * Delegates to the taxonomy tag review set service.
+	 */
+	public function sample_sparse_taxonomy_posts( int $limit = 50 ): array {
+		return $this->taxonomy_tag->sample_sparse_taxonomy_posts( $limit );
+	}
+
+	public function build_taxonomy_tag_review_set( array $sample, array $suggestions = array(), string $cloud_status = 'cloud_required' ): array {
+		return $this->taxonomy_tag->build_taxonomy_tag_review_set( $sample, $suggestions, $cloud_status );
+	}
+
+	public function local_taxonomy_tag_review_response( array $sample ): array {
+		return $this->taxonomy_tag->local_taxonomy_tag_review_response( $sample );
+	}
+
 }

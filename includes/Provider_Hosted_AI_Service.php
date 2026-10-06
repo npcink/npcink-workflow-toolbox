@@ -444,7 +444,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 
 	public function run_hosted_ai_site_helper( array $input ) {
 		$intent = sanitize_key( (string) ( $input['intent'] ?? '' ) );
-		if ( ! in_array( $intent, array( 'media_alt_suggestions', 'content_snapshot_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ) {
+		if ( ! in_array( $intent, array( 'media_alt_suggestions', 'content_snapshot_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions', 'taxonomy_tag_suggestions' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_hosted_ai_site_helper_intent',
 				__( 'A supported AI site-helper intent is required.', 'npcink-workflow-toolbox' ),
@@ -513,6 +513,18 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		);
 		$prompt                     = $this->hosted_ai_site_helper_prompt( $intent, $source, $context );
 		$data_classification        = in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ? 'pii' : 'public_site_content';
+		$taxonomy_sample_limit      = absint( $input['taxonomy_sample_size'] ?? ( $input['sample_size'] ?? 20 ) );
+		if ( 0 >= $taxonomy_sample_limit ) {
+			$taxonomy_sample_limit = 20;
+		}
+		$taxonomy_sample_limit    = max( 1, min( 50, $taxonomy_sample_limit ) );
+		$taxonomy_tag_sample      = 'taxonomy_tag_suggestions' === $intent
+			? $this->client->sample_sparse_taxonomy_posts( $taxonomy_sample_limit )
+			: array();
+		$taxonomy_tag_review_set  = 'taxonomy_tag_suggestions' === $intent
+			? $this->client->build_taxonomy_tag_review_set( $taxonomy_tag_sample )
+			: array();
+
 
 		$runtime_payload = array(
 			'ability_name'            => 'npcink-toolbox/ai-site-helper',
@@ -754,7 +766,8 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				'reject_if'                     => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
 				'media_alt_caption_review_set'  => 'media_alt_suggestions' === $intent ? $this->sanitize_payload( $local_review_set ) : array(),
 				'comment_moderation_review_set' => 'comment_moderation_suggestions' === $intent ? $this->sanitize_payload( $comment_moderation_review_set ) : array(),
-				'flagged_media_review_set'      => 'flagged_media_suggestions' === $intent ? $this->sanitize_payload( $flagged_media_review_set ) : array(),
+				'taxonomy_tag_review_set'  => $taxonomy_tag_review_set,
+			'flagged_media_review_set'      => 'flagged_media_suggestions' === $intent ? $this->sanitize_payload( $flagged_media_review_set ) : array(),
 				'write_posture'                 => 'suggestion_only',
 				'final_write_path'              => 'core_proposal_required',
 				'direct_wordpress_write'        => false,
