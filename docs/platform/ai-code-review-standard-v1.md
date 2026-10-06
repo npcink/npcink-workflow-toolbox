@@ -210,6 +210,42 @@ the same day. Future action bumps record the new tag-to-commit pair in
 the template comment and re-run the runner canary when the image
 changes.
 
+## Template Update - 2026-10-06
+
+Two gaps closed after the 2026-10-05 usage audit on
+`npcink-ai-client-adapter` found pull requests merged with no review
+delivered (#66, #71) and delivered findings left untriaged (#74's five
+findings, including a still-unaddressed `tee /dev/stderr` portability
+flag):
+
+- In-workflow retry. A transient run failure cost the whole round: run
+  `37268559643` (PR #71) died in 12s on git transport (exit 128), the
+  failure marker posted correctly, and the pull request still merged
+  unreviewed with no recorded exception. The template now runs the
+  review action up to three times per run: attempts 1-2
+  continue-on-error with 45s/90s pauses, attempt 3 is allowed to fail
+  the job so the failure-marker step still fires. GitHub Actions has no
+  native step retry and no YAML anchors, so the duplicated steps are
+  deliberate.
+- Publisher delivery + triage gate. `npcink-ai-client-adapter`'s
+  `scripts/publish-pr.sh` now calls `scripts/verify-ai-review.sh` after
+  creating (or reusing) the pull request and before requesting squash
+  auto-merge, mechanizing this standard's delivery-confirmation and
+  triage rules on the exact head SHA. The gate waits for the successful
+  `pull_request_target` review run and re-runs that same run once on
+  failure (comment-triggered rounds cannot be correlated to a head by
+  `head_sha`, so the run-id-preserving re-run is the machine retry).
+  Every inline finding of the delivered attempt must then have one line
+  in the pull request body's `## AI Review Triage` section:
+  `<finding-id> fix: <what changed>` or
+  `<finding-id> accept: <reason>`. The only path past an undelivered
+  review is `--no-review-because "<reason>"`, which the gate appends to
+  the PR body. Requesting auto-merge after delivery also removes the
+  earlier "comments arrive after the merge" hazard that motivated the
+  pre-publish local pass; see the cadence note below. Other enrolled
+  repositories adopt the same publisher pattern at their own pace; until
+  then their AGENTS.md local-gate wording stands.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
@@ -290,7 +326,8 @@ adoption decision record.
   had at least one delivered review round (posted review comments, not merely
   a green or missing check). A failed run leaves a marker comment; retry with
   a `/open-code-review` comment or record in the pull request why the change
-  merges unreviewed.
+  merges unreviewed. On `npcink-ai-client-adapter` this rule is mechanized at
+  the publisher since 2026-10-06 (see Template Update - 2026-10-06).
 - Rollback. Remove the repository's workflow file and delete its secrets; the
   local CLI is independent (`npm uninstall -g @alibaba-group/open-code-review`).
 
@@ -308,6 +345,13 @@ ocr review --format json --output result.json
 ocr session list                            # resume long reviews with --resume
 ```
 
-Recommended cadence for solo AI-assisted development: run `ocr review` before
-staging AI-generated changes, and
-`ocr review --from origin/master --to HEAD` before `composer pr:publish`.
+Cadence for solo AI-assisted development: on repositories with the
+publisher delivery + triage gate (`npcink-ai-client-adapter` since
+2026-10-06), the mandated check happens at `composer pr:publish` - the
+publisher waits for the delivered review and verified triage before
+requesting auto-merge, so no separate local pass is required. A local
+`ocr review --from origin/master --to HEAD` round before opening the
+pull request remains optional extra signal there, `ocr review` on
+uncommitted work stays useful before staging, and repositories without
+the publisher gate keep the pre-publish local pass mandated in their
+AGENTS.md.
