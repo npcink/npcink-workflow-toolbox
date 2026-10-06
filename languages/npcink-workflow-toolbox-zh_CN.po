@@ -9517,3 +9517,51 @@ msgstr "图片请求超时，未生成任何图片；请检查提示词后重试
 
 msgid "This request was replaced by a newer one. Nothing was written."
 msgstr "该请求已被更新的请求取代，未写入任何内容。"
+
+#: includes/Admin_Page.php
+msgid "Taxonomy and tag review"
+msgstr "分类与标签审查"
+
+#: includes/Admin_Page.php
+msgid "Cloud AI suggests existing categories and tags for published posts with sparse assignments. You assign in WordPress."
+msgstr "Cloud AI 为术语赋值稀疏的已发布文章建议已有分类和标签。您在 WordPress 中分配。"
+
+#: includes/Admin_Page.php
+msgid "Posts to review"
+msgstr "要审查的文章"
+
+#: includes/Admin_Page.php
+msgid "10 sparse posts"
+msgstr "10 篇稀疏文章"
+
+#: includes/Admin_Page.php
+msgid "20 sparse posts"
+msgstr "20 篇稀疏文章"
+
+#: includes/Admin_Page.php
+msgid "50 sparse posts"
+msgstr "50 篇稀疏文章"
+
+#: includes/Admin_Page.php
+msgid "Open the WordPress posts list"
+msgstr "打开 WordPress 文章列表"
+
+#: includes/Admin_Page.php
+msgid "This review is read-only: Toolbox never assigns terms, creates terms, or updates posts. Handle every assignment in the WordPress editor."
+msgstr "此审查为只读：Toolbox 绝不分配术语、创建术语或更新文章。所有分配操作请在 WordPress 编辑器中完成。"
+
+#: includes/Admin_Page.php
+msgid "Review sparse posts"
+msgstr "审查稀疏文章"
+
+#: includes/Admin_Page.php
+msgid "Internal-link review"
+msgstr "内链审查"
+
+#: includes/Admin_Page.php
+msgid "Cloud AI suggests internal links for published posts with sparse linking. You insert links in WordPress."
+msgstr "Cloud AI 为内链稀疏的已发布文章建议内链。您在 WordPress 中插入链接。"
+
+#: includes/Admin_Page.php
+msgid "This review is read-only: Toolbox never inserts links or updates post content. Handle every insertion in the WordPress editor."
+msgstr "此审查为只读：Toolbox 绝不插入链接或更新文章内容。所有插入操作请在 WordPress 编辑器中完成。"

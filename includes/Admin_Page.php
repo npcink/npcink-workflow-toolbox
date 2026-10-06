@@ -1113,6 +1113,8 @@ final class Admin_Page {
 			<?php endif; ?>
 		</section>
 			<?php $this->render_comment_moderation_review_tool(); ?>
+			<?php $this->render_taxonomy_tag_review_tool(); ?>
+			<?php $this->render_internal_link_review_tool(); ?>
 		</section>
 
 			<section class="npcink-toolbox__ops-panel" data-toolbox-site-check-panel="scheduled-review"<?php echo 'scheduled-review' === $active_site_check_tab ? '' : ' hidden'; ?>>
@@ -3941,6 +3943,78 @@ final class Admin_Page {
 		</form>
 		<?php
 	}
+
+	/**
+	 * Renders the taxonomy and tag review form.
+	 *
+	 * Zero-write surface: asks Cloud for existing-term suggestions for a
+	 * bounded sample of published posts with sparse assignments. Term
+	 * assignment and new vocabulary creation stay outside Toolbox.
+	 */
+	private function render_taxonomy_tag_review_tool(): void {
+		?>
+		<form class="npcink-toolbox__card npcink-toolbox__card--taxonomy-tag" data-toolbox-endpoint="ai/site-helpers" data-toolbox-taxonomy-tag-review
+			data-toolbox-post-edit-url="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>">
+			<div class="npcink-toolbox__section-heading">
+				<div>
+					<h3><?php esc_html_e( 'Taxonomy and tag review', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Cloud AI suggests existing categories and tags for published posts with sparse assignments. You assign in WordPress.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+			</div>
+			<input type="hidden" name="intent" value="taxonomy_tag_suggestions" />
+			<div class="npcink-toolbox__split">
+				<label>
+					<span><?php esc_html_e( 'Posts to review', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="taxonomy_sample_size">
+						<option value="10"><?php esc_html_e( '10 sparse posts', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="20" selected="selected"><?php esc_html_e( '20 sparse posts', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="50"><?php esc_html_e( '50 sparse posts', 'npcink-workflow-toolbox' ); ?></option>
+					</select>
+				</label>
+				<a class="button" href="<?php echo esc_url( admin_url( 'edit.php?post_type=post' ) ); ?>"><?php esc_html_e( 'Open the WordPress posts list', 'npcink-workflow-toolbox' ); ?></a>
+			</div>
+			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'This review is read-only: Toolbox never assigns terms, creates terms, or updates posts. Handle every assignment in the WordPress editor.', 'npcink-workflow-toolbox' ); ?></div>
+			<button type="submit" class="button button-primary"><?php esc_html_e( 'Review sparse posts', 'npcink-workflow-toolbox' ); ?></button>
+			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+		</form>
+		<?php
+	}
+	/**
+	 * Renders the internal-link review form.
+	 *
+	 * Zero-write surface: asks Cloud for internal-link candidates for a
+	 * bounded sample of published posts with sparse linking. Link insertion
+	 * stays in the WordPress editor or the sidebar's governed Apply flow.
+	 */
+	private function render_internal_link_review_tool(): void {
+		?>
+		<form class="npcink-toolbox__card npcink-toolbox__card--internal-link" data-toolbox-endpoint="ai/site-helpers" data-toolbox-internal-link-review
+			data-toolbox-post-edit-url="<?php echo esc_url( admin_url( 'post.php?action=edit' ) ); ?>">
+			<div class="npcink-toolbox__section-heading">
+				<div>
+					<h3><?php esc_html_e( 'Internal-link review', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Cloud AI suggests internal links for published posts with sparse linking. You insert links in WordPress.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+			</div>
+			<input type="hidden" name="intent" value="internal_link_suggestions" />
+			<div class="npcink-toolbox__split">
+				<label>
+					<span><?php esc_html_e( 'Posts to review', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="internal_link_sample_size">
+						<option value="10"><?php esc_html_e( '10 sparse posts', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="20" selected="selected"><?php esc_html_e( '20 sparse posts', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="50"><?php esc_html_e( '50 sparse posts', 'npcink-workflow-toolbox' ); ?></option>
+					</select>
+				</label>
+				<a class="button" href="<?php echo esc_url( admin_url( 'edit.php?post_type=post' ) ); ?>"><?php esc_html_e( 'Open the WordPress posts list', 'npcink-workflow-toolbox' ); ?></a>
+			</div>
+			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'This review is read-only: Toolbox never inserts links or updates post content. Handle every insertion in the WordPress editor.', 'npcink-workflow-toolbox' ); ?></div>
+			<button type="submit" class="button button-primary"><?php esc_html_e( 'Review sparse posts', 'npcink-workflow-toolbox' ); ?></button>
+			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
+		</form>
+		<?php
+	}
+
 
 	/**
 	 * Renders the flagged media review form.

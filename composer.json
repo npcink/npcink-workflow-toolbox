@@ -162,6 +162,7 @@
       "@test:editor-content-support",
       "@test:provider-services",
       "@test:taxonomy-tag-review",
+      "@test:internal-link-review",
       "@test:publish-preflight",
       "@test:performance-baseline",
       "@test:editor-progressive-js",
@@ -188,7 +189,8 @@
       "@smoke:site-ops-cloud-request"
     ],
     "smoke:ux-hardening-browser": "node tests/smoke-ux-hardening-browser.mjs",
-    "test:taxonomy-tag-review": "php tests/taxonomy-tag-review-set-behavior.php"
+    "test:taxonomy-tag-review": "php tests/taxonomy-tag-review-set-behavior.php",
+    "test:internal-link-review": "php tests/internal-link-review-set-behavior.php"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.2",
