@@ -476,6 +476,7 @@ require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Editor_Content_Format.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Local_Admin_Consent.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Media_Optimization_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Flow_Plan_Bridges.php';
@@ -489,6 +490,7 @@ $settings   = new Npcink_Toolbox\Settings();
 $client     = new Npcink_Toolbox\Provider_Client( $settings );
 $preflight  = new Npcink_Toolbox\Publish_Preflight_Service();
 $controller = new Npcink_Toolbox\Rest_Controller( $settings, $client, $preflight );
+$editor_service = new Npcink_Toolbox\Rest_Editor_Content_Support( $client, $preflight );
 
 /**
  * Behavior coverage for the default editor sidebar button intents on
@@ -692,12 +694,12 @@ npcink_toolbox_editor_flow_assert( true === $permission_probe( '/flows/article-p
 
 // Attachment metadata resolution inside the editor route stays object-authorized:
 // enumerating attachment ids requires upload_files regardless of the route scope.
-$attachment_item = new ReflectionMethod( Npcink_Toolbox\Rest_Controller::class, 'editor_attachment_media_item' );
+$attachment_item = new ReflectionMethod( Npcink_Toolbox\Rest_Editor_Content_Support::class, 'editor_attachment_media_item' );
 $attachment_item->setAccessible( true );
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts' );
-npcink_toolbox_editor_flow_assert( array() === $attachment_item->invoke( $controller, 31, 'featured_media' ), 'Editor-role users without upload_files cannot resolve attachment metadata by id.' );
+npcink_toolbox_editor_flow_assert( array() === $attachment_item->invoke( $editor_service, 31, 'featured_media' ), 'Editor-role users without upload_files cannot resolve attachment metadata by id.' );
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'edit_posts', 'upload_files' );
-npcink_toolbox_editor_flow_assert( array() !== $attachment_item->invoke( $controller, 31, 'featured_media' ), 'Users with upload_files resolve attachment metadata for the editor media context.' );
+npcink_toolbox_editor_flow_assert( array() !== $attachment_item->invoke( $editor_service, 31, 'featured_media' ), 'Users with upload_files resolve attachment metadata for the editor media context.' );
 
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array();
 npcink_toolbox_editor_flow_assert( false === $permission_probe( '/editor/content-support' ) && false === $permission_probe( '/agent-feedback' ), 'Users without the scoped capability are denied even the relaxed editor routes.' );

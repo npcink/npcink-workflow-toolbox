@@ -116,6 +116,7 @@ require_once $root . '/includes/Settings.php';
 require_once $root . '/tests/load-provider-client.php';
 require_once $root . '/includes/Rest_Controller_Support.php';
 require_once $root . '/includes/Rest_Surface_Bridges.php';
+require_once $root . '/includes/Rest_Editor_Content_Support.php';
 require_once $root . '/includes/Rest_Local_Admin_Consent.php';
 require_once $root . '/includes/Rest_Media_Optimization_Bridges.php';
 require_once $root . '/includes/Rest_Flow_Plan_Bridges.php';
@@ -141,6 +142,7 @@ $assert = static function ( bool $condition, string $message ) use ( $fail ): vo
 };
 
 $rest_controller = ( new ReflectionClass( \Npcink_Toolbox\Rest_Controller::class ) )->newInstanceWithoutConstructor();
+$editor_service_for_urls = ( new ReflectionClass( \Npcink_Toolbox\Rest_Editor_Content_Support::class ) )->newInstanceWithoutConstructor();
 $route_scope     = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'rest_route_scope' );
 $route_scope->setAccessible( true );
 $permission = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'permission' );
@@ -272,25 +274,25 @@ for ( $depth = 0; $depth < 8; ++$depth ) {
 $assert( 'secret' === $classify->invoke( $provider, $deep_secret, 'public_site_content', array() ), 'Uninspected payload data at the recursion budget fails closed as secret.' );
 $assert( 'public_site_content' === $classify->invoke( $provider, array( 'quota' => 100 ), 'public_site_content', array() ), 'Non-secret operational metadata is not misclassified as a secret.' );
 
-$public_host = new ReflectionMethod( \Npcink_Toolbox\Rest_Controller::class, 'editor_source_adaptation_host_is_public' );
+$public_host = new ReflectionMethod( \Npcink_Toolbox\Rest_Editor_Content_Support::class, 'editor_source_adaptation_host_is_public' );
 $public_host->setAccessible( true );
-$assert( false === $public_host->invoke( $rest_controller, '169.254.169.254' ), 'Source URL validation rejects link-local IP addresses.' );
-$assert( false === $public_host->invoke( $rest_controller, '255.255.255.255' ), 'Source URL validation rejects reserved broadcast IP addresses.' );
-$assert( false === $public_host->invoke( $rest_controller, '100.64.0.1' ), 'Source URL validation rejects shared CGNAT addresses.' );
-$assert( false === $public_host->invoke( $rest_controller, '198.18.0.1' ), 'Source URL validation rejects benchmark network addresses.' );
-$assert( false === $public_host->invoke( $rest_controller, '192.0.2.1' ), 'Source URL validation rejects documentation network addresses.' );
-$assert( false === $public_host->invoke( $rest_controller, '::ffff:10.0.0.1' ), 'Source URL validation rechecks IPv4-mapped IPv6 private addresses.' );
-$assert( true === $public_host->invoke( $rest_controller, '::ffff:93.184.216.34' ), 'Source URL validation permits an IPv4-mapped public address after rechecking it.' );
-$assert( false === $public_host->invoke( $rest_controller, '2001:db8::1' ), 'Source URL validation rejects IPv6 documentation addresses.' );
-$assert( true === $public_host->invoke( $rest_controller, '2606:4700:4700::1111' ), 'Source URL validation permits a global IPv6 address.' );
-$assert( true === $public_host->invoke( $rest_controller, '93.184.216.34' ), 'Source URL validation permits a public IP address.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '169.254.169.254' ), 'Source URL validation rejects link-local IP addresses.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '255.255.255.255' ), 'Source URL validation rejects reserved broadcast IP addresses.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '100.64.0.1' ), 'Source URL validation rejects shared CGNAT addresses.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '198.18.0.1' ), 'Source URL validation rejects benchmark network addresses.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '192.0.2.1' ), 'Source URL validation rejects documentation network addresses.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '::ffff:10.0.0.1' ), 'Source URL validation rechecks IPv4-mapped IPv6 private addresses.' );
+$assert( true === $public_host->invoke( $editor_service_for_urls, '::ffff:93.184.216.34' ), 'Source URL validation permits an IPv4-mapped public address after rechecking it.' );
+$assert( false === $public_host->invoke( $editor_service_for_urls, '2001:db8::1' ), 'Source URL validation rejects IPv6 documentation addresses.' );
+$assert( true === $public_host->invoke( $editor_service_for_urls, '2606:4700:4700::1111' ), 'Source URL validation permits a global IPv6 address.' );
+$assert( true === $public_host->invoke( $editor_service_for_urls, '93.184.216.34' ), 'Source URL validation permits a public IP address.' );
 
 $provider_source_files = glob( $root . '/includes/*.php' );
 $provider_source       = '';
 foreach ( $provider_source_files as $provider_source_file ) {
 	$provider_source .= "\n" . (string) file_get_contents( $provider_source_file );
 }
-$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php' );
+$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php', 'Rest_Editor_Content_Support.php' );
 $rest_source     = '';
 foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 	$rest_source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );
