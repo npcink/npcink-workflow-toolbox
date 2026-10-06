@@ -67,13 +67,22 @@ with the closing commit or PR for one release cycle, then prune.
   qualify for archival under the archive policy in
   [the documentation index](README.md); move them only together with the
   links that reference them.
-- **No live-site browser smoke has run against the split editor bundle**
-  (PR #179): the documented Local site no longer exists on this
-  workstation. The compensating static control is the
-  `test:editor-js-undefined` audit gate (added 2026-10-04, probe-validated
-  against the exact `internalLinkBlockContent` defect class); a live
-  Playwright pass over the editor sidebar remains owed before the next
-  split session stacks more clusters.
+- **Live editor verification reopened and available**: a standalone
+  five-plugin site (WP 7.1, plugins symlinked from the sibling repos)
+  runs at `http://127.0.0.1:8090` from `~/wp-sites/npcink-five` using the
+  Local MySQL socket and lightning PHP 8.2 (`php -S` with
+  `wp-sites/npcink-five/router.php`). On 2026-10-06 the progressive
+  browser smoke passed in full against the split bundle (sidebar render,
+  namespaces loaded, zero console/page errors, prefetch POST with the
+  progressive intent, no Cloud/Adapter/Core calls, no writes), and the
+  internal-link batch variant passed its 18 behavioral assertions
+  including disabled direct writes and Apply gating; its trailing
+  no-HTTP-errors gate fails only because this site has no Cloud
+  credentials (5xx from the Cloud-required route) and needs a
+  Cloud-connected run to close. Environment: WP_PATH, WP_BASE_URL,
+  WP_CLI_PHP, WP_DB_SOCKET, NODE_PATH to a playwright install,
+  BROWSER_EXECUTABLE to a cached Chromium; pretty permalinks required
+  (REST otherwise uses ?rest_route= and URL matchers miss).
 - **The standalone site-knowledge review UI smoke is red on master**
   (`composer` script exists but is not in the default gate): it still pins
   Admin_Page copy ("Review handoff", "Evidence first", "Core review only",
@@ -95,6 +104,11 @@ with the closing commit or PR for one release cycle, then prune.
   Rest_Controller split does this for its own file).
 
 ## Recently Closed
+
+- **No live-site smoke against the split editor bundle** — resolved
+  2026-10-06: the standalone five-plugin site above now runs the editor
+  browser smokes green; the compensating `test:editor-js-undefined`
+  audit gate stays as the static net.
 
 - **Toolbox enrolled in Static Analysis Standard v1** — 2026-10-04,
   advisory-first per the promotion rule: dev dependencies, PHPStan level 5
