@@ -260,6 +260,15 @@ final class Rest_Media_Derivative_Previews {
 		exit;
 	}
 
+	/**
+	 * Returns the exact preview input contract or rejects legacy/unknown fields.
+	 *
+	 * watermark_attachment_id is a WordPress-local upload selector. It is removed
+	 * before the canonical Toolkit ability input is dispatched.
+	 *
+	 * @return array<string, mixed>|WP_Error
+	 */
+
 	private function media_derivative_preview_input( WP_REST_Request $request ) {
 		$input = $request->get_param( 'input' );
 		$input = is_array( $input ) ? $input : array();

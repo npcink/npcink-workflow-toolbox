@@ -454,6 +454,7 @@ require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Local_Admin_Consent.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Media_Optimization_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Flow_Plan_Bridges.php';
@@ -467,6 +468,7 @@ $settings   = new Npcink_Toolbox\Settings();
 $client     = new Npcink_Toolbox\Provider_Client( $settings );
 $preflight  = new Npcink_Toolbox\Publish_Preflight_Service();
 $controller = new Npcink_Toolbox\Rest_Controller( $settings, $client, $preflight );
+$editor_service = new Npcink_Toolbox\Rest_Editor_Content_Support( $client, $preflight );
 
 function npcink_toolbox_progressive_request( Npcink_Toolbox\Rest_Controller $controller, array $payload ): array {
 	$response = $controller->editor_content_support( new WP_REST_Request( $payload ) );
@@ -702,12 +704,12 @@ npcink_toolbox_progressive_assert(
 	'Progressive preflight candidates keep a stable local review order for the active draft context.'
 );
 
-$writing_pack_method = new ReflectionMethod( Npcink_Toolbox\Rest_Controller::class, 'editor_article_writing_pack' );
+$writing_pack_method = new ReflectionMethod( Npcink_Toolbox\Rest_Editor_Content_Support::class, 'editor_article_writing_pack' );
 $writing_pack_method->setAccessible( true );
-$source_body_method = new ReflectionMethod( Npcink_Toolbox\Rest_Controller::class, 'editor_source_article_body_text' );
+$source_body_method = new ReflectionMethod( Npcink_Toolbox\Rest_Editor_Content_Support::class, 'editor_source_article_body_text' );
 $source_body_method->setAccessible( true );
 $trimmed_source_body = $source_body_method->invoke(
-	$controller,
+	$editor_service,
 	'Exact source article',
 	"* [Showcase](https://example.com/showcase)\n* [Plugins](https://example.com/plugins)\n# Exact source article\nThe real article starts here. It contains evidence. It continues for readers."
 );
@@ -717,12 +719,12 @@ npcink_toolbox_progressive_assert(
 	'Exact-title slicing removes reader navigation before source-body admission and hosted planning.'
 );
 $suffixed_title_body = $source_body_method->invoke(
-	$controller,
+	$editor_service,
 	'Exact source article – Publisher name',
 	"* [Showcase](https://example.com/showcase)\n# Exact source article\nThe suffix-free heading still identifies the real body. It has evidence. It has detail."
 );
 $missing_title_body = $source_body_method->invoke(
-	$controller,
+	$editor_service,
 	'Expected article title',
 	"* [Showcase](https://example.com/showcase)\n* [Plugins](https://example.com/plugins)\nNavigation without the article heading."
 );
@@ -742,7 +744,7 @@ npcink_toolbox_progressive_assert(
 	'Hosted writing-pack planning uses a locale-independent bounded article context instead of the Chinese-locale 420-character wp_trim_words result.'
 );
 $writing_pack = $writing_pack_method->invoke(
-	$controller,
+	$editor_service,
 	array(
 		'source_url'      => 'https://example.com/reference',
 		'input_mode'      => 'url_reference',
@@ -829,7 +831,7 @@ npcink_toolbox_progressive_assert(
 );
 
 $insufficient_source_pack = $writing_pack_method->invoke(
-	$controller,
+	$editor_service,
 	array( 'source_url' => 'https://example.com/navigation', 'input_mode' => 'url_reference' ),
 	array(
 		'status'       => 'ready',

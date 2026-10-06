@@ -80,6 +80,13 @@ with the closing commit or PR for one release cycle, then prune.
   "No direct write") that a prior admin-surface cleanup removed. Update the
   smoke to the current surface or retire it; found during the 2026-10-04
   REST controller split portability pass.
+- **The extracted editor content-support service is a 6.5k-line single
+  unit** (183 methods, PR for the facade closeout): the Rest_Controller
+  split moved it wholesale to end the facade bottleneck. Sub-dividing it
+  into cohesive editor sub-services (audio, taxonomy, media/ALT,
+  progressive, writing-pack/draft) follows the same standard in later
+  sessions, after the editor-content-support.js clusters establish the
+  JED translation policy.
 - **PHPStan/PHPCS ratchet debt after enrollment (2026-10-04).**
   `composer analyse:php` still reports 133 level-5 findings (dominated by
   defensive re-checks: `is_array()` on already-narrowed types, `??` on
