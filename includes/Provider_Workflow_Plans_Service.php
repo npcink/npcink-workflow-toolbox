@@ -40,10 +40,10 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			);
 		}
 
-		$topic   = trim( sanitize_text_field( (string) ( $input['topic'] ?? $title ) ) );
-		$context = $this->settings->get_content_context_for_ability();
+		$topic            = trim( sanitize_text_field( (string) ( $input['topic'] ?? $title ) ) );
+		$context          = $this->settings->get_content_context_for_ability();
 		$forbidden_claims = $this->sanitize_string_list( $context['claims']['forbidden'] ?? array() );
-		$blocked_claims = $this->sanitize_string_list( $input['blocked_claims'] ?? array() );
+		$blocked_claims   = $this->sanitize_string_list( $input['blocked_claims'] ?? array() );
 		foreach ( $forbidden_claims as $claim ) {
 			if ( '' !== $claim && false !== stripos( $content, $claim ) ) {
 				$blocked_claims[] = $claim;
@@ -57,19 +57,19 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		}
 		$ready_for_proposal = empty( $blocked_claims ) && 'high' !== $risk_level;
 
-		$goal_brief = is_array( $input['article_goal_brief'] ?? null ) ? $this->sanitize_payload( $input['article_goal_brief'] ) : array(
+		$goal_brief           = is_array( $input['article_goal_brief'] ?? null ) ? $this->sanitize_payload( $input['article_goal_brief'] ) : array(
 			'topic'           => $topic,
 			'target_audience' => $this->sanitize_payload( $context['target_audience'] ?? array() ),
 			'brand_voice'     => sanitize_textarea_field( (string) ( $context['brand_voice'] ?? '' ) ),
 		);
-		$evidence_pack = is_array( $input['research_evidence_pack'] ?? null ) ? $this->sanitize_payload( $input['research_evidence_pack'] ) : array(
+		$evidence_pack        = is_array( $input['research_evidence_pack'] ?? null ) ? $this->sanitize_payload( $input['research_evidence_pack'] ) : array(
 			'sources' => is_array( $input['sources'] ?? null ) ? $this->sanitize_payload( $input['sources'] ) : array(),
 		);
-		$outline = is_array( $input['article_outline'] ?? null ) ? $this->sanitize_payload( $input['article_outline'] ) : array(
+		$outline              = is_array( $input['article_outline'] ?? null ) ? $this->sanitize_payload( $input['article_outline'] ) : array(
 			'title'    => $title,
 			'sections' => array(),
 		);
-		$draft_candidate = is_array( $input['article_draft_candidate'] ?? null ) ? $this->sanitize_payload( $input['article_draft_candidate'] ) : array(
+		$draft_candidate      = is_array( $input['article_draft_candidate'] ?? null ) ? $this->sanitize_payload( $input['article_draft_candidate'] ) : array(
 			'content_markdown'  => $content,
 			'used_sources'      => $this->sanitize_string_list( $input['used_sources'] ?? array() ),
 			'unverified_claims' => $this->sanitize_string_list( $input['unverified_claims'] ?? array() ),
@@ -89,27 +89,27 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		);
 
 		return array(
-			'artifact_type'          => 'article_write_plan',
-			'composition_role'       => 'core_article_write_plan',
-			'version'                => 1,
-			'source_recipe_id'       => 'article_draft_v1',
-			'source_recipe_ref'      => 'npcink-abilities-toolkit/recipes/article-draft',
-			'source_recipe_provider' => 'npcink-abilities-toolkit',
-			'recipe_execution'       => 'local_operator_orchestration',
-			'write_posture'          => 'core_proposal_handoff',
-			'direct_wordpress_write' => false,
-			'batch_id'               => 'article_write_' . substr( md5( $title . '|' . $content ), 0, 12 ),
-			'requires_approval'      => true,
-			'dry_run'                => true,
-			'commit_execution'       => false,
-			'proposal_mode'          => 'single',
-			'article_goal_brief'     => $goal_brief,
-			'research_evidence_pack' => $evidence_pack,
-			'article_outline'        => $outline,
+			'artifact_type'           => 'article_write_plan',
+			'composition_role'        => 'core_article_write_plan',
+			'version'                 => 1,
+			'source_recipe_id'        => 'article_draft_v1',
+			'source_recipe_ref'       => 'npcink-abilities-toolkit/recipes/article-draft',
+			'source_recipe_provider'  => 'npcink-abilities-toolkit',
+			'recipe_execution'        => 'local_operator_orchestration',
+			'write_posture'           => 'core_proposal_handoff',
+			'direct_wordpress_write'  => false,
+			'batch_id'                => 'article_write_' . substr( md5( $title . '|' . $content ), 0, 12 ),
+			'requires_approval'       => true,
+			'dry_run'                 => true,
+			'commit_execution'        => false,
+			'proposal_mode'           => 'single',
+			'article_goal_brief'      => $goal_brief,
+			'research_evidence_pack'  => $evidence_pack,
+			'article_outline'         => $outline,
 			'article_draft_candidate' => $draft_candidate,
-			'discoverability_pack'   => $discoverability_pack,
-			'article_risk_report'    => $risk_report,
-			'write_actions'          => array(
+			'discoverability_pack'    => $discoverability_pack,
+			'article_risk_report'     => $risk_report,
+			'write_actions'           => array(
 				array(
 					'action_id'         => 'create_article_draft',
 					'target_ability_id' => 'npcink-abilities-toolkit/create-draft',
@@ -130,7 +130,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'reason'            => __( 'Create a reviewed AI-assisted article draft through Core governance.', 'npcink-workflow-toolbox' ),
 				),
 			),
-			'handoff'                => array(
+			'handoff'                 => array(
 				'plan_ability_id'        => 'npcink-toolbox/build-article-write-plan',
 				'recipe_id'              => 'article_draft_v1',
 				'recipe_ref'             => 'npcink-abilities-toolkit/recipes/article-draft',
@@ -154,7 +154,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 
 		$topic          = sanitize_text_field( (string) ( $input['topic'] ?? 'Article batch draft plan' ) );
 		$blocked_claims = $this->sanitize_string_list( $input['blocked_claims'] ?? array() );
-		$risk_level    = sanitize_key( (string) ( $input['risk_level'] ?? ( empty( $blocked_claims ) ? 'medium' : 'high' ) ) );
+		$risk_level     = sanitize_key( (string) ( $input['risk_level'] ?? ( empty( $blocked_claims ) ? 'medium' : 'high' ) ) );
 		if ( ! in_array( $risk_level, array( 'low', 'medium', 'high' ), true ) ) {
 			$risk_level = 'medium';
 		}
@@ -178,8 +178,8 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				);
 			}
 
-			$action_id = 'create_article_draft_' . ( $index + 1 );
-			$excerpt   = sanitize_textarea_field( (string) ( $article['excerpt'] ?? wp_trim_words( wp_strip_all_tags( $content ), 35, '' ) ) );
+			$action_id           = 'create_article_draft_' . ( $index + 1 );
+			$excerpt             = sanitize_textarea_field( (string) ( $article['excerpt'] ?? wp_trim_words( wp_strip_all_tags( $content ), 35, '' ) ) );
 			$article_artifacts[] = array(
 				'article_goal_brief'      => is_array( $article['article_goal_brief'] ?? null ) ? $this->sanitize_payload( $article['article_goal_brief'] ) : array(
 					'topic' => $topic,
@@ -204,11 +204,11 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'ready_for_proposal' => $ready_for_proposal,
 				),
 			);
-			$write_actions[] = array(
+			$write_actions[]     = array(
 				'action_id'         => $action_id,
 				'target_ability_id' => 'npcink-abilities-toolkit/create-draft',
 				'recipe_step'       => 'host_governed_create_draft',
-			'input'             => array(
+				'input'             => array(
 					'title'          => $title,
 					'content'        => $content,
 					'content_format' => sanitize_key( (string) ( $article['content_format'] ?? 'plain' ) ),
@@ -223,7 +223,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'proposal_ready'    => $ready_for_proposal,
 				'reason'            => __( 'Create one reviewed AI-assisted article draft through Core governance.', 'npcink-workflow-toolbox' ),
 			);
-			$preview[] = array(
+			$preview[]           = array(
 				'action_id' => $action_id,
 				'title'     => $title,
 				'status'    => 'draft',
@@ -336,13 +336,13 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				);
 			}
 
-			$position      = $index + 1;
-			$create_id     = 'create_article_draft_' . $position;
-			$upload_id     = 'upload_featured_image_' . $position;
-			$metadata_id   = 'update_featured_image_details_' . $position;
-			$featured_id   = 'set_featured_image_' . $position;
-			$excerpt       = sanitize_textarea_field( (string) ( $article['excerpt'] ?? wp_trim_words( wp_strip_all_tags( $content ), 35, '' ) ) );
-			$provider      = sanitize_key( (string) ( $candidate['provider'] ?? 'external' ) );
+			$position              = $index + 1;
+			$create_id             = 'create_article_draft_' . $position;
+			$upload_id             = 'upload_featured_image_' . $position;
+			$metadata_id           = 'update_featured_image_details_' . $position;
+			$featured_id           = 'set_featured_image_' . $position;
+			$excerpt               = sanitize_textarea_field( (string) ( $article['excerpt'] ?? wp_trim_words( wp_strip_all_tags( $content ), 35, '' ) ) );
+			$provider              = sanitize_key( (string) ( $candidate['provider'] ?? 'external' ) );
 			$candidate_source_type = sanitize_key( (string) ( $candidate['source_type'] ?? '' ) );
 			if ( 'ai_generated' === $provider || 'ai_generated' === $candidate_source_type ) {
 				$source_type = 'ai_generated';
@@ -351,33 +351,33 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			} else {
 				$source_type = 'external';
 			}
-			$source_url    = esc_url_raw( (string) ( $candidate['source_url'] ?? $candidate['html_url'] ?? '' ) );
-			$photographer  = sanitize_text_field( (string) ( $candidate['photographer'] ?? $candidate['photographer_name'] ?? '' ) );
-			$attribution   = sanitize_textarea_field( (string) ( $candidate['attribution'] ?? $candidate['attribution_text'] ?? '' ) );
-			$alt           = sanitize_textarea_field( (string) ( $candidate['alt_description'] ?? $candidate['description'] ?? $title ) );
-			$description   = sanitize_textarea_field( (string) ( $candidate['description'] ?? $alt ) );
-			$file_name     = sanitize_file_name( (string) ( $article['file_name'] ?? $candidate['file_name'] ?? '' ) );
+			$source_url   = esc_url_raw( (string) ( $candidate['source_url'] ?? $candidate['html_url'] ?? '' ) );
+			$photographer = sanitize_text_field( (string) ( $candidate['photographer'] ?? $candidate['photographer_name'] ?? '' ) );
+			$attribution  = sanitize_textarea_field( (string) ( $candidate['attribution'] ?? $candidate['attribution_text'] ?? '' ) );
+			$alt          = sanitize_textarea_field( (string) ( $candidate['alt_description'] ?? $candidate['description'] ?? $title ) );
+			$description  = sanitize_textarea_field( (string) ( $candidate['description'] ?? $alt ) );
+			$file_name    = sanitize_file_name( (string) ( $article['file_name'] ?? $candidate['file_name'] ?? '' ) );
 
 			$article_artifacts[] = array(
-				'article_goal_brief'      => is_array( $article['article_goal_brief'] ?? null ) ? $this->sanitize_payload( $article['article_goal_brief'] ) : array(
+				'article_goal_brief'       => is_array( $article['article_goal_brief'] ?? null ) ? $this->sanitize_payload( $article['article_goal_brief'] ) : array(
 					'topic'       => $topic,
 					'title'       => $title,
 					'image_query' => sanitize_text_field( (string) ( $article['image_query'] ?? $title ) ),
 				),
-				'research_evidence_pack'  => is_array( $article['research_evidence_pack'] ?? null ) ? $this->sanitize_payload( $article['research_evidence_pack'] ) : array(
+				'research_evidence_pack'   => is_array( $article['research_evidence_pack'] ?? null ) ? $this->sanitize_payload( $article['research_evidence_pack'] ) : array(
 					'sources' => is_array( $article['sources'] ?? null ) ? $this->sanitize_payload( $article['sources'] ) : array(),
 				),
-				'article_outline'         => is_array( $article['article_outline'] ?? null ) ? $this->sanitize_payload( $article['article_outline'] ) : array(
+				'article_outline'          => is_array( $article['article_outline'] ?? null ) ? $this->sanitize_payload( $article['article_outline'] ) : array(
 					'title'    => $title,
 					'sections' => array(),
 				),
-				'article_draft_candidate' => is_array( $article['article_draft_candidate'] ?? null ) ? $this->sanitize_payload( $article['article_draft_candidate'] ) : array(
+				'article_draft_candidate'  => is_array( $article['article_draft_candidate'] ?? null ) ? $this->sanitize_payload( $article['article_draft_candidate'] ) : array(
 					'content_markdown' => $content,
 				),
-				'discoverability_pack'    => is_array( $article['discoverability_pack'] ?? null ) ? $this->sanitize_payload( $article['discoverability_pack'] ) : array(
+				'discoverability_pack'     => is_array( $article['discoverability_pack'] ?? null ) ? $this->sanitize_payload( $article['discoverability_pack'] ) : array(
 					'excerpt' => $excerpt,
 				),
-				'article_risk_report'     => is_array( $article['article_risk_report'] ?? null ) ? $this->sanitize_payload( $article['article_risk_report'] ) : array(
+				'article_risk_report'      => is_array( $article['article_risk_report'] ?? null ) ? $this->sanitize_payload( $article['article_risk_report'] ) : array(
 					'risk_level'         => $risk_level,
 					'blocked_claims'     => $blocked_claims,
 					'ready_for_proposal' => $ready_for_proposal,
@@ -389,14 +389,14 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'action_id'         => $create_id,
 				'target_ability_id' => 'npcink-abilities-toolkit/create-draft',
 				'recipe_step'       => 'host_governed_create_draft',
-			'input'             => array(
-					'title'          => $title,
-					'content'        => $content,
-					'content_format' => sanitize_key( (string) ( $article['content_format'] ?? 'plain' ) ),
-					'excerpt'        => $excerpt,
-					'status'         => 'draft',
-					'dry_run'        => true,
-					'commit'         => false,
+				'input'             => array(
+					'title'           => $title,
+					'content'         => $content,
+					'content_format'  => sanitize_key( (string) ( $article['content_format'] ?? 'plain' ) ),
+					'excerpt'         => $excerpt,
+					'status'          => 'draft',
+					'dry_run'         => true,
+					'commit'          => false,
 					'idempotency_key' => 'article-media-draft-' . $position,
 				),
 				'risk'              => 'medium',
@@ -410,7 +410,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'target_ability_id' => 'npcink-abilities-toolkit/upload-media-from-url',
 				'recipe_step'       => 'host_governed_upload_featured_image',
 				'depends_on'        => array( $create_id ),
-			'input'             => array(
+				'input'             => array(
 					'url'               => $image_url,
 					'title'             => $title,
 					'file_name'         => $file_name,
@@ -438,7 +438,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'target_ability_id' => 'npcink-abilities-toolkit/update-media-details',
 				'recipe_step'       => 'host_governed_update_featured_image_metadata',
 				'depends_on'        => array( $upload_id ),
-			'input'             => array(
+				'input'             => array(
 					'attachment_id'     => '$outputs.' . $upload_id . '.attachment_id',
 					'alt'               => $alt,
 					'caption'           => $attribution,
@@ -462,11 +462,11 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'target_ability_id' => 'npcink-abilities-toolkit/set-post-featured-image',
 				'recipe_step'       => 'host_governed_set_featured_image',
 				'depends_on'        => array( $create_id, $upload_id ),
-			'input'             => array(
-					'post_id'        => '$outputs.' . $create_id . '.post_id',
-					'attachment_id'  => '$outputs.' . $upload_id . '.attachment_id',
-					'dry_run'        => true,
-					'commit'         => false,
+				'input'             => array(
+					'post_id'         => '$outputs.' . $create_id . '.post_id',
+					'attachment_id'   => '$outputs.' . $upload_id . '.attachment_id',
+					'dry_run'         => true,
+					'commit'          => false,
 					'idempotency_key' => 'article-media-featured-' . $position,
 				),
 				'risk'              => 'medium',
@@ -486,13 +486,13 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'attribution'        => $attribution,
 				'action_ids'         => array( $create_id, $upload_id, $metadata_id, $featured_id ),
 			);
-			$preview[] = array(
-				'action_id'         => $create_id,
-				'title'             => $title,
-				'status'            => 'draft',
-				'excerpt'           => $excerpt,
+			$preview[]        = array(
+				'action_id'          => $create_id,
+				'title'              => $title,
+				'status'             => 'draft',
+				'excerpt'            => $excerpt,
 				'featured_image_url' => $image_url,
-				'attribution'       => $attribution,
+				'attribution'        => $attribution,
 			);
 		}
 
@@ -626,7 +626,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			$duration_seconds = (float) $input['duration_seconds'];
 		}
 
-		$script = $this->trim_chars(
+		$script                  = $this->trim_chars(
 			sanitize_textarea_field( (string) ( $input['script'] ?? ( $candidate['script'] ?? '' ) ) ),
 			self::AUDIO_GENERATION_TEXT_CHARS
 		);
@@ -647,19 +647,19 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				?? ( $source_audio_generation['generated_at'] ?? ( $source_audio_generation['created_at'] ?? gmdate( 'c' ) ) )
 			)
 		);
-		$voice_id                = sanitize_text_field( (string) ( $candidate['voice_id'] ?? ( $source_audio_generation['voice_id'] ?? '' ) ) );
-		$model_id                = sanitize_text_field( (string) ( $candidate['model_id'] ?? ( $source_audio_generation['model_id'] ?? '' ) ) );
-		$provider                = sanitize_key( (string) ( $candidate['provider'] ?? ( $source_audio_generation['provider'] ?? 'cloud_audio' ) ) );
-		$trace_id                = sanitize_text_field( (string) ( $source_audio_generation['trace_id'] ?? ( $source_audio_generation['trace'] ?? '' ) ) );
-		$import_media            = array_key_exists( 'import_media', $input ) ? ! empty( $input['import_media'] ) : true;
-		$media_file_name         = sanitize_text_field( (string) ( $input['media_file_name'] ?? '' ) );
-		$planner_id              = 'npcink-abilities-toolkit/build-article-audio-adoption-plan';
-		$write_ability_id        = 'npcink-abilities-toolkit/adopt-article-audio';
-		$planner_available       = $this->registered_ability_callable( $planner_id );
-		$write_available         = $this->registered_ability_callable( $write_ability_id );
-		$proposal_ready          = $planner_available && $write_available;
-		$idempotency_key         = 'article-audio-adoption-' . substr( md5( $post_id . '|' . $candidate_type . '|' . $audio_url ), 0, 16 );
-		$audio_hash              = md5( $audio_url );
+		$voice_id            = sanitize_text_field( (string) ( $candidate['voice_id'] ?? ( $source_audio_generation['voice_id'] ?? '' ) ) );
+		$model_id            = sanitize_text_field( (string) ( $candidate['model_id'] ?? ( $source_audio_generation['model_id'] ?? '' ) ) );
+		$provider            = sanitize_key( (string) ( $candidate['provider'] ?? ( $source_audio_generation['provider'] ?? 'cloud_audio' ) ) );
+		$trace_id            = sanitize_text_field( (string) ( $source_audio_generation['trace_id'] ?? ( $source_audio_generation['trace'] ?? '' ) ) );
+		$import_media        = array_key_exists( 'import_media', $input ) ? ! empty( $input['import_media'] ) : true;
+		$media_file_name     = sanitize_text_field( (string) ( $input['media_file_name'] ?? '' ) );
+		$planner_id          = 'npcink-abilities-toolkit/build-article-audio-adoption-plan';
+		$write_ability_id    = 'npcink-abilities-toolkit/adopt-article-audio';
+		$planner_available   = $this->registered_ability_callable( $planner_id );
+		$write_available     = $this->registered_ability_callable( $write_ability_id );
+		$proposal_ready      = $planner_available && $write_available;
+		$idempotency_key     = 'article-audio-adoption-' . substr( md5( $post_id . '|' . $candidate_type . '|' . $audio_url ), 0, 16 );
+		$audio_hash          = md5( $audio_url );
 
 		$missing_dependencies = array();
 		if ( ! $planner_available ) {
@@ -676,11 +676,11 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		}
 
 		$meta_projection = array(
-			'_npcink_toolbox_article_audio_url'              => $audio_url,
-			'_npcink_toolbox_article_audio_title'            => $title,
-			'_npcink_toolbox_article_audio_kind'             => $candidate_type,
+			'_npcink_toolbox_article_audio_url'       => $audio_url,
+			'_npcink_toolbox_article_audio_title'     => $title,
+			'_npcink_toolbox_article_audio_kind'      => $candidate_type,
 			'_npcink_toolbox_article_audio_duration_seconds' => $duration_seconds,
-			'_npcink_toolbox_article_audio_mime_type'        => $mime_type,
+			'_npcink_toolbox_article_audio_mime_type' => $mime_type,
 			'_npcink_toolbox_article_audio_source_content_hash' => $source_content_hash,
 			'_npcink_toolbox_article_audio_source_word_count' => $source_word_count,
 			'_npcink_toolbox_article_audio_source_generated_at' => $source_generated_at,
@@ -700,44 +700,44 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		);
 
 		return array(
-			'artifact_type'            => 'article_audio_adoption_plan.v1',
-			'composition_role'         => 'core_article_audio_adoption_plan',
-			'version'                  => 1,
-			'post_id'                  => $post_id,
-			'post_type'                => $post_type,
-			'candidate_type'           => $candidate_type,
-			'write_posture'            => 'core_proposal_handoff',
-			'final_write_path'         => 'core_proposal_required',
-			'direct_wordpress_write'   => false,
-			'proposal_ready'           => $proposal_ready,
-			'requires_approval'        => true,
-			'dry_run'                  => true,
-			'commit_execution'         => false,
-			'proposal_mode'            => 'single',
-			'target_plan_ability_id'   => $planner_id,
-			'target_write_ability_id'  => $write_ability_id,
-			'missing_dependencies'     => $missing_dependencies,
-			'audio_candidate'          => $this->sanitize_payload( $audio_candidate ),
-			'script'                   => $script,
-			'source_audio_generation'  => $source_audio_generation,
-			'evidence_refs'            => array(
+			'artifact_type'           => 'article_audio_adoption_plan.v1',
+			'composition_role'        => 'core_article_audio_adoption_plan',
+			'version'                 => 1,
+			'post_id'                 => $post_id,
+			'post_type'               => $post_type,
+			'candidate_type'          => $candidate_type,
+			'write_posture'           => 'core_proposal_handoff',
+			'final_write_path'        => 'core_proposal_required',
+			'direct_wordpress_write'  => false,
+			'proposal_ready'          => $proposal_ready,
+			'requires_approval'       => true,
+			'dry_run'                 => true,
+			'commit_execution'        => false,
+			'proposal_mode'           => 'single',
+			'target_plan_ability_id'  => $planner_id,
+			'target_write_ability_id' => $write_ability_id,
+			'missing_dependencies'    => $missing_dependencies,
+			'audio_candidate'         => $this->sanitize_payload( $audio_candidate ),
+			'script'                  => $script,
+			'source_audio_generation' => $source_audio_generation,
+			'evidence_refs'           => array(
 				array(
-					'kind'        => 'article_audio_candidate',
-					'post_id'     => $post_id,
-					'audio_hash'  => $audio_hash,
-					'provider'    => $provider,
-					'model_id'    => $model_id,
-					'voice_id'    => $voice_id,
-					'trace_id'    => $trace_id,
-					'url_host'    => sanitize_text_field( (string) wp_parse_url( $audio_url, PHP_URL_HOST ) ),
-					'import_media' => $import_media,
-					'script_hash' => '' !== $script ? md5( $script ) : '',
+					'kind'                => 'article_audio_candidate',
+					'post_id'             => $post_id,
+					'audio_hash'          => $audio_hash,
+					'provider'            => $provider,
+					'model_id'            => $model_id,
+					'voice_id'            => $voice_id,
+					'trace_id'            => $trace_id,
+					'url_host'            => sanitize_text_field( (string) wp_parse_url( $audio_url, PHP_URL_HOST ) ),
+					'import_media'        => $import_media,
+					'script_hash'         => '' !== $script ? md5( $script ) : '',
 					'source_content_hash' => $source_content_hash,
-					'source_word_count' => $source_word_count,
+					'source_word_count'   => $source_word_count,
 					'source_generated_at' => $source_generated_at,
 				),
 			),
-			'preview'                  => array(
+			'preview'                 => array(
 				array(
 					'action_id'        => 'adopt_article_audio',
 					'post_id'          => $post_id,
@@ -758,7 +758,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'governance_owner' => 'npcink-governance-core',
 				),
 			),
-			'write_actions'            => array(
+			'write_actions'           => array(
 				array(
 					'action_id'         => 'adopt_article_audio',
 					'target_ability_id' => $write_ability_id,
@@ -789,13 +789,13 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'reason'            => __( 'Adopting generated article audio imports the reviewed audio into the local media library when requested and writes playback metadata through Core governance before Adapter execution.', 'npcink-workflow-toolbox' ),
 				),
 			),
-			'blocked_actions'          => array(
+			'blocked_actions'         => array(
 				'no_audio_meta_write_in_toolbox',
 				'no_media_import_in_toolbox',
 				'no_post_content_patch',
 				'no_direct_wordpress_write',
 			),
-			'handoff'                  => array(
+			'handoff'                 => array(
 				'plan_ability_id'        => $planner_id,
 				'recipe_id'              => 'article_audio_adoption_v1',
 				'recipe_ref'             => 'workflow/article_audio_adoption',
@@ -951,9 +951,9 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			);
 		}
 
-		$selected_items = array_slice( $selected_items, 0, 5 );
-		$cloud_run_id   = sanitize_text_field( (string) ( $input['cloud_run_id'] ?? ( $input['run_id'] ?? '' ) ) );
-		$agent_version  = sanitize_text_field( (string) ( $input['agent_version'] ?? 'nightly_site_inspection_cloud_runtime.v1' ) );
+		$selected_items      = array_slice( $selected_items, 0, 5 );
+		$cloud_run_id        = sanitize_text_field( (string) ( $input['cloud_run_id'] ?? ( $input['run_id'] ?? '' ) ) );
+		$agent_version       = sanitize_text_field( (string) ( $input['agent_version'] ?? 'nightly_site_inspection_cloud_runtime.v1' ) );
 		$core_intake_package = is_array( $input['core_intake_package'] ?? null ) ? $this->sanitize_payload( $input['core_intake_package'] ) : array();
 		$core_intake_summary = array(
 			'contract_version'                 => sanitize_text_field( (string) ( $core_intake_package['contract_version'] ?? '' ) ),
@@ -968,12 +968,12 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			'direct_wordpress_write'           => false,
 			'proposal_created'                 => false,
 		);
-		$evidence_refs  = array();
-		$issue_types    = array();
-		$max_score      = null;
+		$evidence_refs       = array();
+		$issue_types         = array();
+		$max_score           = null;
 
 		foreach ( $selected_items as $index => $raw_item ) {
-			$item = is_array( $raw_item ) ? $raw_item : array();
+			$item      = is_array( $raw_item ) ? $raw_item : array();
 			$action_id = sanitize_text_field( (string) ( $item['action_id'] ?? '' ) );
 			if ( '' === $action_id ) {
 				$action_id = 'morning_brief_review_' . ( $index + 1 );
@@ -1144,8 +1144,8 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 
 
 	public function build_media_alt_caption_review_plan( array $input ): array {
-		$selected_items = is_array( $input['selected_items'] ?? null ) ? $input['selected_items'] : array();
-		$actions        = array();
+		$selected_items  = is_array( $input['selected_items'] ?? null ) ? $input['selected_items'] : array();
+		$actions         = array();
 		$blocked_actions = array();
 
 		foreach ( $selected_items as $item ) {
@@ -1158,11 +1158,11 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				continue;
 			}
 
-			$alt_candidates = is_array( $item['alt_candidates'] ?? null ) ? $item['alt_candidates'] : array();
-			$raw_alt        = array_key_exists( 'accepted_alt', $item ) ? (string) $item['accepted_alt'] : (string) ( $alt_candidates[0] ?? '' );
-			$proposed_alt   = $this->client->media_alt_caption_clean_candidate( $raw_alt );
+			$alt_candidates   = is_array( $item['alt_candidates'] ?? null ) ? $item['alt_candidates'] : array();
+			$raw_alt          = array_key_exists( 'accepted_alt', $item ) ? (string) $item['accepted_alt'] : (string) ( $alt_candidates[0] ?? '' );
+			$proposed_alt     = $this->client->media_alt_caption_clean_candidate( $raw_alt );
 			$proposed_caption = $this->client->media_alt_caption_clean_candidate( (string) ( $item['accepted_caption'] ?? '' ) );
-			$alt_rejection = '' !== $proposed_alt ? $this->client->media_alt_caption_candidate_rejection_reason( $proposed_alt, $item, 'alt' ) : '';
+			$alt_rejection    = '' !== $proposed_alt ? $this->client->media_alt_caption_candidate_rejection_reason( $proposed_alt, $item, 'alt' ) : '';
 			if ( '' !== $alt_rejection ) {
 				$blocked_actions[] = array(
 					'action_id'            => 'media-alt-caption:' . $attachment_id . ':alt',
@@ -1171,7 +1171,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'blocked_reason'       => $alt_rejection,
 					'operator_next_action' => 'revise_alt_before_core_handoff',
 				);
-				$proposed_alt = '';
+				$proposed_alt      = '';
 			}
 			$caption_rejection = '' !== $proposed_caption ? $this->client->media_alt_caption_candidate_rejection_reason( $proposed_caption, $item, 'caption' ) : '';
 			if ( '' !== $caption_rejection ) {
@@ -1182,7 +1182,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'blocked_reason'       => $caption_rejection,
 					'operator_next_action' => 'revise_caption_before_core_handoff',
 				);
-				$proposed_caption = '';
+				$proposed_caption  = '';
 			}
 			if ( '' !== $proposed_caption ) {
 				$blocked_actions[] = array(
@@ -1192,26 +1192,26 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'blocked_reason'       => 'caption_requires_manual_review',
 					'operator_next_action' => 'submit_alt_only_or_review_caption_manually',
 				);
-				$proposed_caption = '';
+				$proposed_caption  = '';
 			}
 			if ( '' === $proposed_alt ) {
 				continue;
 			}
 
-			$title             = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
-			$filename          = sanitize_text_field( (string) ( $item['filename'] ?? '' ) );
-			$current_alt       = sanitize_text_field( (string) ( $item['current_alt'] ?? ( $item['alt'] ?? '' ) ) );
-			$current_caption   = sanitize_textarea_field( (string) ( $item['current_caption'] ?? ( $item['caption'] ?? '' ) ) );
-			$current_alt_status = sanitize_key( (string) ( $item['current_alt_status'] ?? '' ) );
-			$candidate_basis   = $this->sanitize_string_list( $item['candidate_basis'] ?? array() );
-			$candidate_flags   = $this->sanitize_string_list( $item['candidate_quality_flags'] ?? array() );
-			$candidate_fact_types    = $this->sanitize_string_list( $item['candidate_fact_types'] ?? array() );
-			$candidate_confidence    = sanitize_key( (string) ( $item['candidate_confidence'] ?? '' ) );
-			$candidate_review_status = sanitize_key( (string) ( $item['candidate_review_status'] ?? '' ) );
+			$title                      = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
+			$filename                   = sanitize_text_field( (string) ( $item['filename'] ?? '' ) );
+			$current_alt                = sanitize_text_field( (string) ( $item['current_alt'] ?? ( $item['alt'] ?? '' ) ) );
+			$current_caption            = sanitize_textarea_field( (string) ( $item['current_caption'] ?? ( $item['caption'] ?? '' ) ) );
+			$current_alt_status         = sanitize_key( (string) ( $item['current_alt_status'] ?? '' ) );
+			$candidate_basis            = $this->sanitize_string_list( $item['candidate_basis'] ?? array() );
+			$candidate_flags            = $this->sanitize_string_list( $item['candidate_quality_flags'] ?? array() );
+			$candidate_fact_types       = $this->sanitize_string_list( $item['candidate_fact_types'] ?? array() );
+			$candidate_confidence       = sanitize_key( (string) ( $item['candidate_confidence'] ?? '' ) );
+			$candidate_review_status    = sanitize_key( (string) ( $item['candidate_review_status'] ?? '' ) );
 			$needs_context_confirmation = ! empty( $item['needs_context_confirmation'] )
 				|| in_array( 'needs_context_confirmation', $candidate_flags, true )
 				|| 'needs_context_confirmation' === $candidate_review_status;
-			$context_confirmed = $this->is_truthy( $item['context_confirmed'] ?? false );
+			$context_confirmed          = $this->is_truthy( $item['context_confirmed'] ?? false );
 			if ( $needs_context_confirmation && $this->client->media_alt_caption_candidate_needs_context_confirmation( $proposed_alt ) && ! $context_confirmed ) {
 				$blocked_actions[] = array(
 					'action_id'                  => 'media-alt-caption:' . $attachment_id . ':alt',
@@ -1224,27 +1224,54 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				);
 				continue;
 			}
-			$proposal_input    = array(
+			$proposal_input   = array(
 				'attachment_id'   => $attachment_id,
 				'alt'             => $proposed_alt,
 				'dry_run'         => true,
 				'commit'          => false,
 				'idempotency_key' => 'toolbox-media-alt-' . $attachment_id . '-' . substr( md5( $proposed_alt ), 0, 12 ),
 			);
-			$proposal_preview  = array(
-				'artifact_type'                 => 'media_alt_caption_review_item',
-				'contract_version'             => 'media_alt_caption_review_item.v1',
-				'review_set_contract'          => 'media_alt_caption_review_set.v1',
-				'source'                       => array(
+			$proposal_preview = array(
+				'artifact_type'                    => 'media_alt_caption_review_item',
+				'contract_version'                 => 'media_alt_caption_review_item.v1',
+				'review_set_contract'              => 'media_alt_caption_review_set.v1',
+				'source'                           => array(
 					'type'    => 'toolbox_media_alt_caption_review',
 					'surface' => 'npcink_toolbox_batch_alt',
 				),
+				'attachment_id'                    => $attachment_id,
+				'title'                            => $title,
+				'filename'                         => $filename,
+				'current_alt_status'               => $current_alt_status,
+				'current_alt'                      => $current_alt,
+				'proposed_alt'                     => $proposed_alt,
+				'candidate_basis'                  => $candidate_basis,
+				'candidate_quality_flags'          => $candidate_flags,
+				'candidate_fact_types'             => $candidate_fact_types,
+				'candidate_confidence'             => $candidate_confidence,
+				'candidate_review_status'          => $needs_context_confirmation && ! $context_confirmed ? 'needs_context_confirmation' : $candidate_review_status,
+				'needs_context_confirmation'       => $needs_context_confirmation,
+				'context_confirmed'                => $context_confirmed,
+				'operator_reviewed'                => true,
+				'operator_visual_review_confirmed' => true,
+				'visual_confirmation_required'     => true,
+				'direct_wordpress_write'           => false,
+			);
+
+			$actions[] = array(
+				'action_id'                    => 'media-alt-caption:' . $attachment_id,
 				'attachment_id'                => $attachment_id,
 				'title'                        => $title,
 				'filename'                     => $filename,
 				'current_alt_status'           => $current_alt_status,
+				'current_caption_status'       => sanitize_key( (string) ( $item['current_caption_status'] ?? '' ) ),
 				'current_alt'                  => $current_alt,
-				'proposed_alt'                 => $proposed_alt,
+				'current_caption'              => $current_caption,
+				'thumbnail_url'                => esc_url_raw( (string) ( $item['thumbnail_url'] ?? '' ) ),
+				'accepted_alt'                 => $proposed_alt,
+				'accepted_caption'             => '',
+				'needs_human_visual_check'     => true,
+				'visual_confirmation_required' => true,
 				'candidate_basis'              => $candidate_basis,
 				'candidate_quality_flags'      => $candidate_flags,
 				'candidate_fact_types'         => $candidate_fact_types,
@@ -1252,87 +1279,60 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'candidate_review_status'      => $needs_context_confirmation && ! $context_confirmed ? 'needs_context_confirmation' : $candidate_review_status,
 				'needs_context_confirmation'   => $needs_context_confirmation,
 				'context_confirmed'            => $context_confirmed,
-				'operator_reviewed'            => true,
-				'operator_visual_review_confirmed' => true,
-				'visual_confirmation_required' => true,
+				'target_ability_id'            => 'npcink-abilities-toolkit/update-media-details',
+				'target_write_path'            => 'core_proposal_required',
+				'auto_execution_supported'     => false,
+				'submission_status'            => 'preview_only_not_submitted',
+				'target_contract_status'       => 'future_or_unavailable',
+				'proposal_created'             => false,
+				'execution_created'            => false,
+				'not_submittable'              => true,
+				'future_contract_preview'      => array(
+					'ability_id'             => 'npcink-abilities-toolkit/update-media-details',
+					'submission_status'      => 'preview_only_not_submitted',
+					'target_contract_status' => 'future_or_unavailable',
+					'not_submittable'        => true,
+					'proposal_created'       => false,
+					'execution_created'      => false,
+					'direct_wordpress_write' => false,
+					'title'                  => sprintf( 'Preview ALT update for attachment #%d', $attachment_id ),
+					'summary'                => 'Preview one reviewed ALT text suggestion for a media-library image. No proposal is created from this Toolbox preview.',
+					'input'                  => $proposal_input,
+					'preview'                => $proposal_preview,
+				),
 				'direct_wordpress_write'       => false,
-			);
-
-			$actions[] = array(
-				'action_id'                   => 'media-alt-caption:' . $attachment_id,
-				'attachment_id'               => $attachment_id,
-				'title'                       => $title,
-				'filename'                    => $filename,
-				'current_alt_status'          => $current_alt_status,
-				'current_caption_status'      => sanitize_key( (string) ( $item['current_caption_status'] ?? '' ) ),
-				'current_alt'                 => $current_alt,
-				'current_caption'             => $current_caption,
-				'thumbnail_url'               => esc_url_raw( (string) ( $item['thumbnail_url'] ?? '' ) ),
-				'accepted_alt'                => $proposed_alt,
-				'accepted_caption'            => '',
-				'needs_human_visual_check'    => true,
-				'visual_confirmation_required' => true,
-				'candidate_basis'             => $candidate_basis,
-				'candidate_quality_flags'     => $candidate_flags,
-				'candidate_fact_types'        => $candidate_fact_types,
-				'candidate_confidence'        => $candidate_confidence,
-				'candidate_review_status'     => $needs_context_confirmation && ! $context_confirmed ? 'needs_context_confirmation' : $candidate_review_status,
-				'needs_context_confirmation'  => $needs_context_confirmation,
-				'context_confirmed'           => $context_confirmed,
-				'target_ability_id'           => 'npcink-abilities-toolkit/update-media-details',
-					'target_write_path'           => 'core_proposal_required',
-					'auto_execution_supported'    => false,
-					'submission_status'           => 'preview_only_not_submitted',
-					'target_contract_status'      => 'future_or_unavailable',
-					'proposal_created'            => false,
-					'execution_created'           => false,
-					'not_submittable'             => true,
-					'future_contract_preview'     => array(
-						'ability_id'              => 'npcink-abilities-toolkit/update-media-details',
-						'submission_status'       => 'preview_only_not_submitted',
-						'target_contract_status'  => 'future_or_unavailable',
-						'not_submittable'         => true,
-						'proposal_created'        => false,
-						'execution_created'       => false,
-						'direct_wordpress_write'  => false,
-						'title'                   => sprintf( 'Preview ALT update for attachment #%d', $attachment_id ),
-						'summary'                 => 'Preview one reviewed ALT text suggestion for a media-library image. No proposal is created from this Toolbox preview.',
-						'input'                   => $proposal_input,
-						'preview'                 => $proposal_preview,
-					),
-				'direct_wordpress_write'      => false,
 			);
 		}
 
 		$review_set = is_array( $input['review_set'] ?? null ) ? $this->sanitize_payload( $input['review_set'] ) : array();
 		return array(
-			'artifact_type'          => 'media_alt_caption_core_handoff_plan',
-			'contract_version'      => 'media_alt_caption_core_handoff_plan.v1',
-			'composition_role'       => 'core_handoff_draft',
-			'write_posture'          => 'suggestion_only',
-				'final_write_path'       => 'core_proposal_required',
-				'direct_wordpress_write' => false,
-				'proposal_created'       => false,
-				'core_submission'        => 'preview_only_not_submitted',
-				'workflow_runtime'       => false,
-			'queue_created'          => false,
-			'selected_count'         => count( $actions ),
-			'selected_actions'       => $actions,
-			'blocked_actions'        => $blocked_actions,
-			'review_set_summary'     => array(
+			'artifact_type'             => 'media_alt_caption_core_handoff_plan',
+			'contract_version'          => 'media_alt_caption_core_handoff_plan.v1',
+			'composition_role'          => 'core_handoff_draft',
+			'write_posture'             => 'suggestion_only',
+			'final_write_path'          => 'core_proposal_required',
+			'direct_wordpress_write'    => false,
+			'proposal_created'          => false,
+			'core_submission'           => 'preview_only_not_submitted',
+			'workflow_runtime'          => false,
+			'queue_created'             => false,
+			'selected_count'            => count( $actions ),
+			'selected_actions'          => $actions,
+			'blocked_actions'           => $blocked_actions,
+			'review_set_summary'        => array(
 				'contract_version' => sanitize_text_field( (string) ( $review_set['contract_version'] ?? '' ) ),
 				'source_policy'    => sanitize_key( (string) ( $review_set['source_policy'] ?? '' ) ),
 				'media_scope'      => sanitize_key( (string) ( $review_set['media_scope'] ?? '' ) ),
 				'selected_count'   => absint( $review_set['selected_count'] ?? count( $actions ) ),
 			),
 			'core_auto_approval_policy' => array(
-				'request_supported'          => false,
-				'toolbox_direct_apply'       => false,
-					'approval_owner'             => 'npcink-governance-core',
-					'execution_owner'            => 'wordpress_abilities',
-					'safe_action_candidate'      => 'fill_missing_or_weak_alt_only',
-					'current_stage'              => 'future_policy_only',
-					'required_policy_checks'     => array(
+				'request_supported'      => false,
+				'toolbox_direct_apply'   => false,
+				'approval_owner'         => 'npcink-governance-core',
+				'execution_owner'        => 'wordpress_abilities',
+				'safe_action_candidate'  => 'fill_missing_or_weak_alt_only',
+				'current_stage'          => 'future_policy_only',
+				'required_policy_checks' => array(
 					'operator_enabled_core_policy',
 					'missing_or_weak_alt_only',
 					'candidate_quality_gate_passed',
@@ -1344,27 +1344,27 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 					'old_value_audit_and_rollback_evidence',
 				),
 			),
-			'handoff'                => array(
+			'handoff'                   => array(
 				'plan_route'             => '/wp-json/npcink-toolbox/v1/flows/media-alt-caption-review-plan',
 				'plan_surface'           => 'toolbox_rest_route',
 				'target_ability_id'      => 'npcink-abilities-toolkit/update-media-details',
 				'recipe_id'              => 'media_alt_caption_review_v1',
 				'core_route'             => '/wp-json/npcink-governance-core/v1/proposals/from-plan',
-					'proposal_ready'         => false,
-					'preview_available'      => 0 < count( $actions ),
+				'proposal_ready'         => false,
+				'preview_available'      => 0 < count( $actions ),
 				'core_submission'        => 'preview_only_not_submitted',
 				'final_write_path'       => 'core_proposal_required',
 				'direct_wordpress_write' => false,
 			),
-			'operator_next_action'   => 0 < count( $actions )
+			'operator_next_action'      => 0 < count( $actions )
 					? 'review_handoff_preview_before_future_core_submission'
 				: 'select_reviewed_media_alt_caption_items',
-			'guardrails'             => array(
+			'guardrails'                => array(
 				'no_media_metadata_write_in_toolbox',
 				'no_toolbox_auto_approval',
-					'no_adapter_or_core_submission_from_preview',
-					'core_policy_owns_auto_approval',
-					'alt_only_auto_execution_candidate_future_only',
+				'no_adapter_or_core_submission_from_preview',
+				'core_policy_owns_auto_approval',
+				'alt_only_auto_execution_candidate_future_only',
 				'human_visual_confirmation_required',
 				'core_approval_required_before_final_write',
 			),
@@ -1378,7 +1378,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 	 * @return array<string,mixed>
 	 */
 	private function normalize_content_metadata_apply_plan_contract( array $data ): array {
-		$authorization = is_array( $data['authorization'] ?? null ) ? $data['authorization'] : array();
+		$authorization  = is_array( $data['authorization'] ?? null ) ? $data['authorization'] : array();
 		$classification = sanitize_key( (string) ( $authorization['classification'] ?? Operation_Classifier::CORE_PROPOSAL_REQUIRED ) );
 		if ( '' === $classification ) {
 			$classification = Operation_Classifier::CORE_PROPOSAL_REQUIRED;
@@ -1411,8 +1411,8 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			$decision_version = 'operation-classification-v1';
 		}
 
-		$decision_envelope = is_array( $authorization['decision_envelope'] ?? null ) ? $authorization['decision_envelope'] : array();
-		$decision_envelope = array_merge(
+		$decision_envelope                           = is_array( $authorization['decision_envelope'] ?? null ) ? $authorization['decision_envelope'] : array();
+		$decision_envelope                           = array_merge(
 			array(
 				'decision_version'  => $decision_version,
 				'classification'    => $classification,
@@ -1436,8 +1436,8 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		$authorization['reasons']           = $reasons;
 		$authorization['required_evidence'] = $required_evidence;
 		$authorization['decision_envelope'] = $this->sanitize_payload( $decision_envelope );
-		$data['authorization']             = $authorization;
-		$data['classification_evidence']   = $authorization;
+		$data['authorization']              = $authorization;
+		$data['classification_evidence']    = $authorization;
 		$data['direct_wordpress_write']     = false;
 		$data['requires_approval']          = true;
 		$data['dry_run']                    = true;
@@ -1453,12 +1453,12 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			return $source;
 		}
 
-		$context           = $this->settings->get_content_context_for_ability();
-		$validation        = $this->settings->validate_content_context_for_ability();
-		$allowed_fields    = $this->sanitize_string_list( $context['proposal_allowed_fields'] ?? array() );
-		$exceptions        = is_array( $context['exceptions'] ?? null ) ? $this->sanitize_payload( $context['exceptions'] ) : array();
-		$proposal_template = array();
-		$candidates        = array();
+		$context                 = $this->settings->get_content_context_for_ability();
+		$validation              = $this->settings->validate_content_context_for_ability();
+		$allowed_fields          = $this->sanitize_string_list( $context['proposal_allowed_fields'] ?? array() );
+		$exceptions              = is_array( $context['exceptions'] ?? null ) ? $this->sanitize_payload( $context['exceptions'] ) : array();
+		$proposal_template       = array();
+		$candidates              = array();
 		$include_external_search = ! array_key_exists( 'include_external_search', $input ) || ! empty( $input['include_external_search'] );
 		$external_search_intent  = sanitize_key( (string) ( $input['external_search_intent'] ?? 'writing_context' ) );
 		if ( ! in_array( $external_search_intent, array( 'article_background', 'fact_check', 'news', 'writing_context', 'competitor_research', 'pricing_snapshot', 'product_comparison', 'source_discovery', 'external_links' ), true ) ) {
@@ -1467,67 +1467,67 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		$external_research = $include_external_search
 			? $this->client->cloud_web_search_for_content( sanitize_text_field( (string) ( $source['topic'] ?? $source['title'] ?? '' ) ), $external_search_intent, 3 )
 			: $this->client->cloud_web_search_notice();
-		$cloud_evidence   = $this->client->cloud_web_search_evidence( $external_research );
+		$cloud_evidence    = $this->client->cloud_web_search_evidence( $external_research );
 		$sections          = array(
 			'seo' => array(
-				'rules'              => sanitize_textarea_field( (string) ( $context['rules']['seo'] ?? '' ) ),
-				'allowed_fields'     => array(),
-				'proposal_template'  => array(),
+				'rules'                 => sanitize_textarea_field( (string) ( $context['rules']['seo'] ?? '' ) ),
+				'allowed_fields'        => array(),
+				'proposal_template'     => array(),
 				'candidate_suggestions' => array(),
 			),
 			'aeo' => array(
-				'rules'              => sanitize_textarea_field( (string) ( $context['rules']['aeo'] ?? '' ) ),
-				'allow_faq_generation' => ! empty( $context['rules']['allow_faq_generation'] ),
-				'allow_answer_summary' => ! empty( $context['rules']['allow_aeo_summary'] ),
-				'allowed_fields'     => array(),
-				'proposal_template'  => array(),
+				'rules'                 => sanitize_textarea_field( (string) ( $context['rules']['aeo'] ?? '' ) ),
+				'allow_faq_generation'  => ! empty( $context['rules']['allow_faq_generation'] ),
+				'allow_answer_summary'  => ! empty( $context['rules']['allow_aeo_summary'] ),
+				'allowed_fields'        => array(),
+				'proposal_template'     => array(),
 				'candidate_suggestions' => array(),
 			),
 			'geo' => array(
-				'rules'              => sanitize_textarea_field( (string) ( $context['rules']['geo'] ?? '' ) ),
-				'allow_geo_summary'  => ! empty( $context['rules']['allow_geo_summary'] ),
+				'rules'                             => sanitize_textarea_field( (string) ( $context['rules']['geo'] ?? '' ) ),
+				'allow_geo_summary'                 => ! empty( $context['rules']['allow_geo_summary'] ),
 				'allow_structured_data_suggestions' => ! empty( $context['rules']['allow_structured_data_suggestions'] ),
-				'allowed_fields'     => array(),
-				'proposal_template'  => array(),
-				'candidate_suggestions' => array(),
+				'allowed_fields'                    => array(),
+				'proposal_template'                 => array(),
+				'candidate_suggestions'             => array(),
 			),
 		);
 
 		foreach ( $allowed_fields as $field ) {
-			$proposal_template[ $field ] = array(
+			$proposal_template[ $field ]            = array(
 				'instruction' => $this->client->content_discoverability_field_instruction( $field ),
 				'value'       => null,
 			);
-			$group = $this->client->content_discoverability_field_group( $field );
+			$group                                  = $this->client->content_discoverability_field_group( $field );
 			$sections[ $group ]['allowed_fields'][] = $field;
 			$sections[ $group ]['proposal_template'][ $field ] = $proposal_template[ $field ];
 
 			$candidate = $this->client->content_discoverability_candidate( $field, $source, $context );
 			if ( null !== $candidate ) {
-				$candidates[ $field ] = $candidate;
+				$candidates[ $field ]                                  = $candidate;
 				$sections[ $group ]['candidate_suggestions'][ $field ] = $candidate;
 			}
 		}
 
 		return array(
-			'artifact_type'          => 'content_discoverability_brief',
-			'composition_role'       => 'seo_aeo_geo_brief',
-			'version'                => 1,
-			'primary_contract'       => true,
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'core_proposal_required',
-			'direct_wordpress_write' => false,
-			'context_validation'     => $validation,
-			'content_context'        => $context,
-			'exceptions'             => $exceptions,
-			'special_cases'          => $exceptions,
-			'source'                 => $source,
-			'external_research'      => $external_research,
-			'cloud_evidence'         => $cloud_evidence,
-			'seo'                    => $sections['seo'],
-			'aeo'                    => $sections['aeo'],
-			'geo'                    => $sections['geo'],
-			'ai_instructions'        => array(
+			'artifact_type'           => 'content_discoverability_brief',
+			'composition_role'        => 'seo_aeo_geo_brief',
+			'version'                 => 1,
+			'primary_contract'        => true,
+			'write_posture'           => 'suggestion_only',
+			'final_write_path'        => 'core_proposal_required',
+			'direct_wordpress_write'  => false,
+			'context_validation'      => $validation,
+			'content_context'         => $context,
+			'exceptions'              => $exceptions,
+			'special_cases'           => $exceptions,
+			'source'                  => $source,
+			'external_research'       => $external_research,
+			'cloud_evidence'          => $cloud_evidence,
+			'seo'                     => $sections['seo'],
+			'aeo'                     => $sections['aeo'],
+			'geo'                     => $sections['geo'],
+			'ai_instructions'         => array(
 				'Use the content_context as the site-level rule source.',
 				'Use only facts present in the supplied source, public site context, or cited evidence.',
 				'Use external_research only as suggestion evidence and preserve source URLs for operator review.',
@@ -1538,9 +1538,9 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'Final WordPress writes must go through Core proposal approval.',
 			),
 			'proposal_allowed_fields' => $allowed_fields,
-			'proposal_template'      => $proposal_template,
-			'candidate_suggestions'  => $candidates,
-			'handoff'                => array(
+			'proposal_template'       => $proposal_template,
+			'candidate_suggestions'   => $candidates,
+			'handoff'                 => array(
 				'brief_ability_id'       => 'npcink-toolbox/build-content-discoverability-brief',
 				'context_ability_id'     => 'npcink-toolbox/get-content-discoverability-context',
 				'validation_ability_id'  => 'npcink-toolbox/validate-content-discoverability-context',
@@ -1581,31 +1581,31 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		$cloud_evidence     = is_array( $brief['cloud_evidence'] ?? null ) ? $brief['cloud_evidence'] : $this->client->cloud_web_search_evidence( $external_research );
 
 		return array(
-			'artifact_type'          => 'ai_article_writing_pack',
-			'composition_role'       => 'ai_article_writing_pack',
-			'version'                => 1,
-			'primary_contract'       => false,
-			'contract_role'          => 'openclaw_natural_language_fallback',
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'core_proposal_required',
-			'direct_wordpress_write' => false,
-			'provider_execution'     => 'none',
-			'ready_for_writing'      => $ready_for_writing,
-			'context_status'         => $context_status,
-			'source'                 => $source,
-			'topic'                  => $topic,
-			'title'                  => $title,
-			'language'               => $language,
-			'article_type'           => $article_type,
-			'target_word_count'      => $target_word_count,
-			'content_context'        => $context,
-			'context_validation'     => $validation,
-			'discoverability_brief'  => $brief,
-			'external_research'      => $external_research,
-			'cloud_evidence'         => $cloud_evidence,
-			'exceptions'             => is_array( $brief['exceptions'] ?? null ) ? $brief['exceptions'] : array(),
-			'special_cases'          => is_array( $brief['special_cases'] ?? null ) ? $brief['special_cases'] : array(),
-			'article_prompt_pack'    => array(
+			'artifact_type'               => 'ai_article_writing_pack',
+			'composition_role'            => 'ai_article_writing_pack',
+			'version'                     => 1,
+			'primary_contract'            => false,
+			'contract_role'               => 'openclaw_natural_language_fallback',
+			'write_posture'               => 'suggestion_only',
+			'final_write_path'            => 'core_proposal_required',
+			'direct_wordpress_write'      => false,
+			'provider_execution'          => 'none',
+			'ready_for_writing'           => $ready_for_writing,
+			'context_status'              => $context_status,
+			'source'                      => $source,
+			'topic'                       => $topic,
+			'title'                       => $title,
+			'language'                    => $language,
+			'article_type'                => $article_type,
+			'target_word_count'           => $target_word_count,
+			'content_context'             => $context,
+			'context_validation'          => $validation,
+			'discoverability_brief'       => $brief,
+			'external_research'           => $external_research,
+			'cloud_evidence'              => $cloud_evidence,
+			'exceptions'                  => is_array( $brief['exceptions'] ?? null ) ? $brief['exceptions'] : array(),
+			'special_cases'               => is_array( $brief['special_cases'] ?? null ) ? $brief['special_cases'] : array(),
+			'article_prompt_pack'         => array(
 				'user_intent'      => sanitize_textarea_field( (string) ( $input['user_intent'] ?? 'Write one article from the supplied topic and site rules.' ) ),
 				'writing_goal'     => sprintf(
 					'Write one %1$s article in %2$s about: %3$s.',
@@ -1630,7 +1630,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'forbidden_claims' => $forbidden_claims,
 			),
 			'suggested_article_structure' => $this->article_writing_pack_structure( $rules ),
-			'ai_instructions'      => array(
+			'ai_instructions'             => array(
 				'Use this pack as the local site-context source before writing.',
 				'If ready_for_writing is false, stop and ask the operator to complete Toolbox Content Context.',
 				'Write from the supplied source and topic; do not invent product facts, customer cases, rankings, citations, or unavailable features.',
@@ -1638,13 +1638,13 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'Return article draft text and proposal-ready SEO/AEO/GEO suggestions only.',
 				'Do not write WordPress data. Final WordPress writes must go through Core proposal approval and commit preflight.',
 			),
-			'handoff'              => array(
-				'pack_ability_id'       => 'npcink-toolbox/build-ai-article-writing-pack',
-				'brief_ability_id'      => 'npcink-toolbox/build-content-discoverability-brief',
-				'write_plan_ability_id' => 'npcink-toolbox/build-article-write-plan',
-				'final_writes'          => 'core_proposal_required',
+			'handoff'                     => array(
+				'pack_ability_id'        => 'npcink-toolbox/build-ai-article-writing-pack',
+				'brief_ability_id'       => 'npcink-toolbox/build-content-discoverability-brief',
+				'write_plan_ability_id'  => 'npcink-toolbox/build-article-write-plan',
+				'final_writes'           => 'core_proposal_required',
 				'direct_wordpress_write' => false,
-				'next_steps'            => array(
+				'next_steps'             => array(
 					'Use the pack to draft one article and SEO/AEO/GEO suggestions.',
 					'After human review, convert the reviewed draft with build-article-write-plan.',
 					'Send write-like outcomes through Core proposal, approval, and commit preflight.',
@@ -1682,11 +1682,11 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		return $this->client->image_candidates(
 			$this->post_context_to_image_query( $post_context ),
 			array(
-				'per_page'                     => 8,
+				'per_page'                    => 8,
 				'runtime_data_classification' => 'pii',
-				'image_mode'                   => $image_mode,
-				'refresh_variant'              => $refresh_variant,
-				'visual_context'               => $visual_context,
+				'image_mode'                  => $image_mode,
+				'refresh_variant'             => $refresh_variant,
+				'visual_context'              => $visual_context,
 			)
 		);
 	}
@@ -1718,19 +1718,19 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		$toolbox_policy = $this->settings->media_optimization_policy_summary();
 		$ability_input  = $this->settings->build_media_derivative_ability_input( $overrides );
 
-		$warnings = array();
+		$warnings       = array();
 		$watermark_mode = sanitize_key( (string) ( $input['watermark_mode'] ?? $input['watermark_type'] ?? 'core' ) );
 		if ( ! empty( $toolbox_policy['watermark_enabled'] ) && empty( $toolbox_policy['watermark_configured'] ) && ! in_array( $watermark_mode, array( 'off', 'text' ), true ) ) {
 			$warnings[] = __( 'Toolbox watermark policy is enabled but no logo attachment is configured.', 'npcink-workflow-toolbox' );
 		}
 
 		return array(
-			'artifact_type'          => 'media_derivative_handoff',
-			'composition_role'       => 'media_derivative_operator_handoff',
-			'version'                => 1,
-			'workflow_projection'    => array(
-				'definition_owner'            => 'npcink-abilities-toolkit',
-				'projection_role'             => 'fixed_button',
+			'artifact_type'                => 'media_derivative_handoff',
+			'composition_role'             => 'media_derivative_operator_handoff',
+			'version'                      => 1,
+			'workflow_projection'          => array(
+				'definition_owner'             => 'npcink-abilities-toolkit',
+				'projection_role'              => 'fixed_button',
 				'recipe_id'                    => 'npcink-abilities-toolkit/recipes/media-optimization',
 				'recipe_alias'                 => 'media_optimization_v1',
 				'contract_version'             => 'v1',
@@ -1742,25 +1742,25 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'host_governed_write_boundary' => true,
 				'canonical_definition_storage' => false,
 			),
-			'write_posture'          => 'core_proposal_handoff',
-			'direct_wordpress_write' => false,
-			'provider'               => 'toolbox',
-			'attachment_id'          => $attachment_id,
-			'toolbox_policy_available' => true,
-			'toolbox_policy'         => $this->sanitize_payload( $toolbox_policy ),
-			'ability_id'             => 'npcink-abilities-toolkit/build-media-derivative-cloud-request',
-			'ability_input'          => $this->sanitize_payload( $ability_input ),
+			'write_posture'                => 'core_proposal_handoff',
+			'direct_wordpress_write'       => false,
+			'provider'                     => 'toolbox',
+			'attachment_id'                => $attachment_id,
+			'toolbox_policy_available'     => true,
+			'toolbox_policy'               => $this->sanitize_payload( $toolbox_policy ),
+			'ability_id'                   => 'npcink-abilities-toolkit/build-media-derivative-cloud-request',
+			'ability_input'                => $this->sanitize_payload( $ability_input ),
 			'optimization_plan_ability_id' => 'npcink-abilities-toolkit/build-media-optimization-plan',
-			'preferred_core_route'   => '/wp-json/npcink-openclaw-adapter/v1/proposals/from-plan',
-			'required_reviewed_input' => array( 'media_details_input', 'derivative_artifact' ),
-			'warnings'               => $warnings,
-			'handoff'                => array(
-				'final_write_path'       => 'core_proposal_required',
-				'direct_wordpress_write' => false,
-				'default_user_intent'    => 'optimize_this_media_item',
+			'preferred_core_route'         => '/wp-json/npcink-openclaw-adapter/v1/proposals/from-plan',
+			'required_reviewed_input'      => array( 'media_details_input', 'derivative_artifact' ),
+			'warnings'                     => $warnings,
+			'handoff'                      => array(
+				'final_write_path'         => 'core_proposal_required',
+				'direct_wordpress_write'   => false,
+				'default_user_intent'      => 'optimize_this_media_item',
 				'do_not_split_user_intent' => true,
-				'legacy_derivative_only' => 'lower_level_review_only',
-				'next_steps'             => array(
+				'legacy_derivative_only'   => 'lower_level_review_only',
+				'next_steps'               => array(
 					'Run the local media derivative request ability with ability_input.',
 					'Use Cloud Addon only as a verified transport when available.',
 					'Add reviewed media_details_input before Core proposal submission.',
@@ -1791,7 +1791,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		$opacity = '' !== trim( (string) ( $input['watermark_opacity'] ?? '' ) )
 			? absint( $input['watermark_opacity'] )
 			: 80;
-		$margin = max( 0, min( 1000, absint( $input['watermark_margin'] ?? 24 ) ) );
+		$margin  = max( 0, min( 1000, absint( $input['watermark_margin'] ?? 24 ) ) );
 
 		if ( 'text' === $mode ) {
 			$text = trim( sanitize_text_field( (string) ( $input['watermark_text'] ?? 'AI' ) ) );

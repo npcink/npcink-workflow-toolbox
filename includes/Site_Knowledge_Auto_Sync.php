@@ -48,40 +48,40 @@ final class Site_Knowledge_Auto_Sync {
 		$truth_boundaries = self::default_cloud_truth_boundaries();
 
 		return array(
-			'owner'                   => 'cloud_addon_required',
-			'mode'                    => 'site_knowledge_change_bridge_required',
-			'legacy_toolbox_fallback' => false,
-			'status'                  => 'disabled',
-			'enabled'                 => false,
-			'configured'              => false,
-			'verified'                => false,
-			'buffer_count'            => 0,
-			'queue_count'             => 0,
-			'next_flush_at'           => '',
-			'next_queue_run_at'       => '',
-			'next_reconcile_at'       => '',
-			'last_delivery_at'        => '',
-			'last_success_at'         => '',
-			'last_error_code'         => '',
-			'wp_cron_disabled'        => defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON,
-			'server_cron_recommended' => false,
-			'cron_command'            => '',
-			'wp_cli_command'          => '',
-			'write_posture'           => 'suggestion_only',
-			'index_lifecycle_owner'   => 'cloud_service',
-			'scheduler_truth'         => false,
-			'workflow_truth'          => false,
-			'wordpress_write_included' => false,
-			'ownership'               => $ownership,
-			'truth_boundaries'        => $truth_boundaries,
+			'owner'                         => 'cloud_addon_required',
+			'mode'                          => 'site_knowledge_change_bridge_required',
+			'legacy_toolbox_fallback'       => false,
+			'status'                        => 'disabled',
+			'enabled'                       => false,
+			'configured'                    => false,
+			'verified'                      => false,
+			'buffer_count'                  => 0,
+			'queue_count'                   => 0,
+			'next_flush_at'                 => '',
+			'next_queue_run_at'             => '',
+			'next_reconcile_at'             => '',
+			'last_delivery_at'              => '',
+			'last_success_at'               => '',
+			'last_error_code'               => '',
+			'wp_cron_disabled'              => defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON,
+			'server_cron_recommended'       => false,
+			'cron_command'                  => '',
+			'wp_cli_command'                => '',
+			'write_posture'                 => 'suggestion_only',
+			'index_lifecycle_owner'         => 'cloud_service',
+			'scheduler_truth'               => false,
+			'workflow_truth'                => false,
+			'wordpress_write_included'      => false,
+			'ownership'                     => $ownership,
+			'truth_boundaries'              => $truth_boundaries,
 			'site_knowledge_cloud_boundary' => self::cloud_boundary_projection(
 				array(
 					'ownership'        => $ownership,
 					'truth_boundaries' => $truth_boundaries,
 				)
 			),
-			'compatibility_aliases'    => array( 'auto_sync', 'queue_count', 'next_queue_run_at' ),
-			'message'                 => __( 'Install and verify Cloud Addon to enable automatic Site Knowledge public-change delivery. Manual Site Knowledge sync remains available from Toolbox.', 'npcink-workflow-toolbox' ),
+			'compatibility_aliases'         => array( 'auto_sync', 'queue_count', 'next_queue_run_at' ),
+			'message'                       => __( 'Install and verify Cloud Addon to enable automatic Site Knowledge public-change delivery. Manual Site Knowledge sync remains available from Toolbox.', 'npcink-workflow-toolbox' ),
 		);
 	}
 
@@ -155,31 +155,31 @@ final class Site_Knowledge_Auto_Sync {
 		$normalized = array_merge(
 			$snapshot,
 			array(
-				'owner'                   => 'cloud_addon',
-				'mode'                    => 'site_knowledge_change_bridge',
-				'legacy_toolbox_fallback' => false,
-				'status'                  => $status,
-				'enabled'                 => $enabled,
-				'configured'              => $configured,
-				'verified'                => $verified,
-				'buffer_count'            => $buffer_count,
-				'queue_count'             => $buffer_count,
-				'next_flush_at'           => sanitize_text_field( (string) ( $snapshot['next_flush_at'] ?? '' ) ),
-				'next_queue_run_at'       => sanitize_text_field( (string) ( $snapshot['next_flush_at'] ?? '' ) ),
-				'next_reconcile_at'       => sanitize_text_field( (string) ( $snapshot['next_reconcile_at'] ?? '' ) ),
-				'last_delivery_at'        => sanitize_text_field( (string) ( $snapshot['last_delivery_at'] ?? ( $snapshot['last_delivered_at'] ?? '' ) ) ),
-				'last_success_at'         => sanitize_text_field( (string) ( $snapshot['last_success_at'] ?? '' ) ),
-				'last_error_code'         => sanitize_key( (string) ( $snapshot['last_error_code'] ?? '' ) ),
-				'server_cron_recommended' => $enabled,
-				'write_posture'           => 'suggestion_only',
-				'index_lifecycle_owner'   => 'cloud_service',
-				'scheduler_truth'         => false,
-				'workflow_truth'          => false,
+				'owner'                    => 'cloud_addon',
+				'mode'                     => 'site_knowledge_change_bridge',
+				'legacy_toolbox_fallback'  => false,
+				'status'                   => $status,
+				'enabled'                  => $enabled,
+				'configured'               => $configured,
+				'verified'                 => $verified,
+				'buffer_count'             => $buffer_count,
+				'queue_count'              => $buffer_count,
+				'next_flush_at'            => sanitize_text_field( (string) ( $snapshot['next_flush_at'] ?? '' ) ),
+				'next_queue_run_at'        => sanitize_text_field( (string) ( $snapshot['next_flush_at'] ?? '' ) ),
+				'next_reconcile_at'        => sanitize_text_field( (string) ( $snapshot['next_reconcile_at'] ?? '' ) ),
+				'last_delivery_at'         => sanitize_text_field( (string) ( $snapshot['last_delivery_at'] ?? ( $snapshot['last_delivered_at'] ?? '' ) ) ),
+				'last_success_at'          => sanitize_text_field( (string) ( $snapshot['last_success_at'] ?? '' ) ),
+				'last_error_code'          => sanitize_key( (string) ( $snapshot['last_error_code'] ?? '' ) ),
+				'server_cron_recommended'  => $enabled,
+				'write_posture'            => 'suggestion_only',
+				'index_lifecycle_owner'    => 'cloud_service',
+				'scheduler_truth'          => false,
+				'workflow_truth'           => false,
 				'wordpress_write_included' => false,
-				'ownership'               => $ownership,
-				'truth_boundaries'        => $truth_boundaries,
+				'ownership'                => $ownership,
+				'truth_boundaries'         => $truth_boundaries,
 				'compatibility_aliases'    => array( 'auto_sync', 'queue_count', 'next_queue_run_at' ),
-				'message'                 => $message,
+				'message'                  => $message,
 			)
 		);
 
@@ -193,17 +193,17 @@ final class Site_Knowledge_Auto_Sync {
 	 */
 	private static function default_cloud_boundary_ownership( string $delivery_bridge_owner ): array {
 		return array(
-			'source_content_owner'     => 'local_wordpress_host',
-			'delivery_bridge_owner'    => $delivery_bridge_owner,
-			'index_execution_owner'    => 'cloud_service',
-			'index_lifecycle_owner'    => 'cloud_service',
-			'freshness_policy_owner'   => 'cloud_service',
-			'diagnostics_detail_owner' => 'cloud_service',
-			'vector_storage_owner'     => 'cloud_service',
+			'source_content_owner'      => 'local_wordpress_host',
+			'delivery_bridge_owner'     => $delivery_bridge_owner,
+			'index_execution_owner'     => 'cloud_service',
+			'index_lifecycle_owner'     => 'cloud_service',
+			'freshness_policy_owner'    => 'cloud_service',
+			'diagnostics_detail_owner'  => 'cloud_service',
+			'vector_storage_owner'      => 'cloud_service',
 			'embedding_execution_owner' => 'cloud_service',
-			'approval_owner'           => 'local_wordpress_host',
-			'final_write_owner'        => 'local_wordpress_host',
-			'wordpress_write_owner'    => 'local_wordpress_host',
+			'approval_owner'            => 'local_wordpress_host',
+			'final_write_owner'         => 'local_wordpress_host',
+			'wordpress_write_owner'     => 'local_wordpress_host',
 		);
 	}
 
@@ -212,14 +212,14 @@ final class Site_Knowledge_Auto_Sync {
 	 */
 	private static function default_cloud_truth_boundaries(): array {
 		return array(
-			'cloud_is_index_truth'              => true,
-			'cloud_is_freshness_truth'          => true,
-			'cloud_is_diagnostics_truth'        => true,
-			'cloud_is_wordpress_control_plane'  => false,
-			'cloud_creates_wordpress_writes'    => false,
-			'cloud_owns_local_approval'         => false,
-			'cloud_owns_ability_registry'       => false,
-			'cloud_owns_workflow_registry'      => false,
+			'cloud_is_index_truth'             => true,
+			'cloud_is_freshness_truth'         => true,
+			'cloud_is_diagnostics_truth'       => true,
+			'cloud_is_wordpress_control_plane' => false,
+			'cloud_creates_wordpress_writes'   => false,
+			'cloud_owns_local_approval'        => false,
+			'cloud_owns_ability_registry'      => false,
+			'cloud_owns_workflow_registry'     => false,
 		);
 	}
 
@@ -241,7 +241,7 @@ final class Site_Knowledge_Auto_Sync {
 			'final_write_owner',
 			'wordpress_write_owner',
 		);
-		$normalized = array();
+		$normalized   = array();
 
 		foreach ( $allowed_keys as $key ) {
 			$value = sanitize_key( (string) ( $ownership[ $key ] ?? '' ) );
@@ -268,7 +268,7 @@ final class Site_Knowledge_Auto_Sync {
 			'cloud_owns_ability_registry',
 			'cloud_owns_workflow_registry',
 		);
-		$normalized = array();
+		$normalized   = array();
 
 		foreach ( $allowed_keys as $key ) {
 			if ( array_key_exists( $key, $truth_boundaries ) ) {

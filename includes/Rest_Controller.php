@@ -36,17 +36,17 @@ final class Rest_Controller extends Rest_Controller_Support {
 	);
 
 	public function __construct( Settings $settings, Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
-		$this->settings          = $settings;
-		$this->client            = $client;
-		$this->publish_preflight = $publish_preflight;
-		$this->nightly_bridges   = new Rest_Nightly_Inspection_Bridges( $settings, $client );
-		$this->web_search_bridges = new Rest_Web_Search_Bridges( $client );
-		$this->site_knowledge_bridges = new Rest_Site_Knowledge_Bridges( $client );
-		$this->media_derivative_previews = new Rest_Media_Derivative_Previews( $client );
-		$this->flow_plan_bridges = new Rest_Flow_Plan_Bridges( $client );
-		$this->media_optimization_bridges = new Rest_Media_Optimization_Bridges();
-		$this->surface_bridges     = new Rest_Surface_Bridges( $settings, $client );
-		$this->local_admin_consent = new Rest_Local_Admin_Consent();
+		$this->settings                       = $settings;
+		$this->client                         = $client;
+		$this->publish_preflight              = $publish_preflight;
+		$this->nightly_bridges                = new Rest_Nightly_Inspection_Bridges( $settings, $client );
+		$this->web_search_bridges             = new Rest_Web_Search_Bridges( $client );
+		$this->site_knowledge_bridges         = new Rest_Site_Knowledge_Bridges( $client );
+		$this->media_derivative_previews      = new Rest_Media_Derivative_Previews( $client );
+		$this->flow_plan_bridges              = new Rest_Flow_Plan_Bridges( $client );
+		$this->media_optimization_bridges     = new Rest_Media_Optimization_Bridges();
+		$this->surface_bridges                = new Rest_Surface_Bridges( $settings, $client );
+		$this->local_admin_consent            = new Rest_Local_Admin_Consent();
 		$this->editor_content_support_service = new Rest_Editor_Content_Support( $client, $publish_preflight );
 	}
 
@@ -219,38 +219,38 @@ final class Rest_Controller extends Rest_Controller_Support {
 		}
 
 		$scopes = array(
-			'/status'                                      => 'cap.toolbox.status.read',
-			'/image-candidates'                            => 'cap.toolbox.image_source',
-			'/web-search/test'                             => 'cap.toolbox.web_search',
-			'/web-search/diagnostics'                      => 'cap.toolbox.web_search',
-			'/site-knowledge/status'                       => 'cap.toolbox.knowledge.read',
-			'/site-knowledge/search'                       => 'cap.toolbox.knowledge.search',
-			'/site-knowledge/sync'                         => 'cap.toolbox.knowledge.sync',
-			'/site-media/index-batch'                      => 'cap.toolbox.knowledge.sync',
-			'/agent-feedback'                              => 'cap.toolbox.feedback.write',
-			'/agent-feedback/summary'                      => 'cap.toolbox.feedback.read',
-			'/ai/content-support'                          => 'cap.toolbox.workflow_suggest',
-			'/ai/site-helpers'                             => 'cap.toolbox.workflow_suggest',
-			'/ai/image-generation'                         => 'cap.toolbox.image_source',
-			'/flows/article-plan'                          => 'cap.toolbox.workflow_suggest',
-			'/flows/image-candidate-adoption-plan'         => 'cap.toolbox.workflow_suggest',
-			'/flows/article-audio-adoption-plan'           => 'cap.toolbox.workflow_suggest',
-			'/local-admin-consent' . '/featured-image'     => 'cap.toolbox.local_admin_consent',
-			'/media-optimization-manifest'                 => 'cap.toolbox.image_adoption',
-			'/media-optimization-health'                   => 'cap.toolbox.image_adoption',
-			'/flows/site-knowledge-review-plan'            => 'cap.toolbox.workflow_suggest',
-			'/flows/nightly-inspection-review-plan'        => 'cap.toolbox.workflow_suggest',
-			'/flows/content-metadata-apply-plan'           => 'cap.toolbox.workflow_suggest',
-			'/flows/media-alt-caption-review-plan'         => 'cap.toolbox.workflow_suggest',
-			'/flows/media-brief'                           => 'cap.toolbox.workflow_suggest',
-			'/editor/content-support'                      => 'cap.toolbox.editor_suggest',
-			'/media-derivative-handoff'                    => 'cap.toolbox.workflow_suggest',
-			'/media-derivative-preview'                    => 'cap.toolbox.workflow_suggest',
-			'/media-derivative-optimization-payload'       => 'cap.toolbox.workflow_suggest',
+			'/status'                                  => 'cap.toolbox.status.read',
+			'/image-candidates'                        => 'cap.toolbox.image_source',
+			'/web-search/test'                         => 'cap.toolbox.web_search',
+			'/web-search/diagnostics'                  => 'cap.toolbox.web_search',
+			'/site-knowledge/status'                   => 'cap.toolbox.knowledge.read',
+			'/site-knowledge/search'                   => 'cap.toolbox.knowledge.search',
+			'/site-knowledge/sync'                     => 'cap.toolbox.knowledge.sync',
+			'/site-media/index-batch'                  => 'cap.toolbox.knowledge.sync',
+			'/agent-feedback'                          => 'cap.toolbox.feedback.write',
+			'/agent-feedback/summary'                  => 'cap.toolbox.feedback.read',
+			'/ai/content-support'                      => 'cap.toolbox.workflow_suggest',
+			'/ai/site-helpers'                         => 'cap.toolbox.workflow_suggest',
+			'/ai/image-generation'                     => 'cap.toolbox.image_source',
+			'/flows/article-plan'                      => 'cap.toolbox.workflow_suggest',
+			'/flows/image-candidate-adoption-plan'     => 'cap.toolbox.workflow_suggest',
+			'/flows/article-audio-adoption-plan'       => 'cap.toolbox.workflow_suggest',
+			'/local-admin-consent' . '/featured-image' => 'cap.toolbox.local_admin_consent',
+			'/media-optimization-manifest'             => 'cap.toolbox.image_adoption',
+			'/media-optimization-health'               => 'cap.toolbox.image_adoption',
+			'/flows/site-knowledge-review-plan'        => 'cap.toolbox.workflow_suggest',
+			'/flows/nightly-inspection-review-plan'    => 'cap.toolbox.workflow_suggest',
+			'/flows/content-metadata-apply-plan'       => 'cap.toolbox.workflow_suggest',
+			'/flows/media-alt-caption-review-plan'     => 'cap.toolbox.workflow_suggest',
+			'/flows/media-brief'                       => 'cap.toolbox.workflow_suggest',
+			'/editor/content-support'                  => 'cap.toolbox.editor_suggest',
+			'/media-derivative-handoff'                => 'cap.toolbox.workflow_suggest',
+			'/media-derivative-preview'                => 'cap.toolbox.workflow_suggest',
+			'/media-derivative-optimization-payload'   => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-local-review/(?P<artifact_id>art_[0-9a-f]{32})' => 'cap.toolbox.workflow_suggest',
 			'/nightly-inspection/cloud-runtime-entitlement' => 'cap.toolbox.nightly_inspection',
-			'/nightly-inspection/cloud-batch'              => 'cap.toolbox.nightly_inspection',
-			'/nightly-inspection/cloud-batch/recent'       => 'cap.toolbox.nightly_inspection',
+			'/nightly-inspection/cloud-batch'          => 'cap.toolbox.nightly_inspection',
+			'/nightly-inspection/cloud-batch/recent'   => 'cap.toolbox.nightly_inspection',
 		);
 
 		return $scopes[ $route ] ?? 'cap.toolbox.admin';
@@ -465,26 +465,65 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	private function media_derivative_local_review_route_args(): array {
 		return array(
-			'artifact_id'         => array(
+			'artifact_id' => array(
 				'required'          => true,
 				'type'              => 'string',
 				'validate_callback' => static fn( $value ): bool => is_string( $value ) && 1 === preg_match( '/^art_[0-9a-f]{32}$/', $value ),
 			),
-			'artifact'            => array(
+			'artifact'    => array(
 				'required'             => true,
 				'type'                 => 'object',
 				'additionalProperties' => false,
 				'validate_callback'    => 'rest_validate_request_arg',
 				'properties'           => array(
-					'artifact_id'         => array( 'required' => true, 'type' => 'string', 'pattern' => '^art_[0-9a-f]{32}$' ),
-					'expires_at'          => array( 'required' => true, 'type' => 'string' ),
-					'mime_type'           => array( 'required' => true, 'type' => 'string', 'enum' => array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ) ),
-					'format'              => array( 'required' => true, 'type' => 'string', 'enum' => array( 'avif', 'jpeg', 'png', 'webp' ) ),
-					'width'               => array( 'required' => true, 'type' => 'integer', 'minimum' => 1, 'maximum' => 8192 ),
-					'height'              => array( 'required' => true, 'type' => 'integer', 'minimum' => 1, 'maximum' => 8192 ),
-					'filesize_bytes'      => array( 'required' => true, 'type' => 'integer', 'minimum' => 1, 'maximum' => 26214400 ),
-					'sha256'              => array( 'required' => true, 'type' => 'string', 'pattern' => '^[0-9a-f]{64}$' ),
-					'suggested_filename'  => array( 'required' => true, 'type' => 'string', 'minLength' => 1, 'maxLength' => 120 ),
+					'artifact_id'         => array(
+						'required' => true,
+						'type'     => 'string',
+						'pattern'  => '^art_[0-9a-f]{32}$',
+					),
+					'expires_at'          => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'mime_type'           => array(
+						'required' => true,
+						'type'     => 'string',
+						'enum'     => array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ),
+					),
+					'format'              => array(
+						'required' => true,
+						'type'     => 'string',
+						'enum'     => array( 'avif', 'jpeg', 'png', 'webp' ),
+					),
+					'width'               => array(
+						'required' => true,
+						'type'     => 'integer',
+						'minimum'  => 1,
+						'maximum'  => 8192,
+					),
+					'height'              => array(
+						'required' => true,
+						'type'     => 'integer',
+						'minimum'  => 1,
+						'maximum'  => 8192,
+					),
+					'filesize_bytes'      => array(
+						'required' => true,
+						'type'     => 'integer',
+						'minimum'  => 1,
+						'maximum'  => 26214400,
+					),
+					'sha256'              => array(
+						'required' => true,
+						'type'     => 'string',
+						'pattern'  => '^[0-9a-f]{64}$',
+					),
+					'suggested_filename'  => array(
+						'required'  => true,
+						'type'      => 'string',
+						'minLength' => 1,
+						'maxLength' => 120,
+					),
 					'filename_basis'      => array(
 						'required' => true,
 						'type'     => 'object',
@@ -494,9 +533,18 @@ final class Rest_Controller extends Rest_Controller_Support {
 								'additionalProperties' => false,
 								'required'             => array( 'owner', 'strategy', 'final_sanitize_unique_required' ),
 								'properties'           => array(
-									'owner'                          => array( 'type' => 'string', 'enum' => array( 'wordpress_write_ability_final' ) ),
-									'strategy'                       => array( 'type' => 'string', 'enum' => array( 'format_checksum' ) ),
-									'final_sanitize_unique_required' => array( 'type' => 'boolean', 'enum' => array( true ) ),
+									'owner'    => array(
+										'type' => 'string',
+										'enum' => array( 'wordpress_write_ability_final' ),
+									),
+									'strategy' => array(
+										'type' => 'string',
+										'enum' => array( 'format_checksum' ),
+									),
+									'final_sanitize_unique_required' => array(
+										'type' => 'boolean',
+										'enum' => array( true ),
+									),
 								),
 							),
 						),
@@ -505,9 +553,12 @@ final class Rest_Controller extends Rest_Controller_Support {
 						'required' => true,
 						'type'     => 'array',
 						'maxItems' => 20,
-						'items'    => array( 'type' => 'string', 'maxLength' => 200 ),
+						'items'    => array(
+							'type'      => 'string',
+							'maxLength' => 200,
+						),
 					),
-					'transform_facts' => array(
+					'transform_facts'     => array(
 						'required'             => true,
 						'type'                 => 'object',
 						'additionalProperties' => true,
@@ -516,5 +567,4 @@ final class Rest_Controller extends Rest_Controller_Support {
 			),
 		);
 	}
-
 }

@@ -25,12 +25,12 @@ final class Rest_Media_Optimization_Bridges {
 		if ( ! function_exists( 'npcink_cloud_addon_get_manual_readiness_result' ) ) {
 			return rest_ensure_response(
 				array(
-					'ready'             => false,
-					'status'            => 'unavailable',
-					'blocked_reason'    => 'cloud_addon_not_installed',
-					'next_action'       => 'check_cloud_connection',
-					'write_posture'     => 'read_only',
-					'contract_version'  => 'toolbox_media_optimization_health.v1',
+					'ready'            => false,
+					'status'           => 'unavailable',
+					'blocked_reason'   => 'cloud_addon_not_installed',
+					'next_action'      => 'check_cloud_connection',
+					'write_posture'    => 'read_only',
+					'contract_version' => 'toolbox_media_optimization_health.v1',
 				)
 			);
 		}
@@ -98,5 +98,4 @@ final class Rest_Media_Optimization_Bridges {
 		$result = ( new Media_Optimization_Batches() )->cleanup_backups( $params );
 		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
-
 }

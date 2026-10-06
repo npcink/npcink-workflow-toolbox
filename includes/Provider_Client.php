@@ -228,7 +228,7 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the hosted AI service.
 	 */
-	public function hosted_ai_site_helper_quality_contract( string $intent ) : array {
+	public function hosted_ai_site_helper_quality_contract( string $intent ): array {
 		return $this->hosted_ai->hosted_ai_site_helper_quality_contract( $intent );
 	}
 	/**
@@ -254,56 +254,56 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function collect_hosted_ai_post_context( int $post_id ) : array {
+	public function collect_hosted_ai_post_context( int $post_id ): array {
 		return $this->collectors->collect_hosted_ai_post_context( $post_id );
 	}
 
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function collect_hosted_ai_site_snapshot() : array {
+	public function collect_hosted_ai_site_snapshot(): array {
 		return $this->collectors->collect_hosted_ai_site_snapshot();
 	}
 
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function collect_hosted_ai_media_alt_snapshot( int $limit, string $filter = 'missing_or_weak_alt' ) : array {
+	public function collect_hosted_ai_media_alt_snapshot( int $limit, string $filter = 'missing_or_weak_alt' ): array {
 		return $this->collectors->collect_hosted_ai_media_alt_snapshot( $limit, $filter );
 	}
 
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function collect_hosted_ai_current_article_media_alt_snapshot( int $post_id, int $limit ) : array {
+	public function collect_hosted_ai_current_article_media_alt_snapshot( int $post_id, int $limit ): array {
 		return $this->collectors->collect_hosted_ai_current_article_media_alt_snapshot( $post_id, $limit );
 	}
 
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function collect_hosted_ai_selected_media_alt_snapshot( array $attachment_ids, int $limit, string $filter = 'missing_or_weak_alt' ) : array {
+	public function collect_hosted_ai_selected_media_alt_snapshot( array $attachment_ids, int $limit, string $filter = 'missing_or_weak_alt' ): array {
 		return $this->collectors->collect_hosted_ai_selected_media_alt_snapshot( $attachment_ids, $limit, $filter );
 	}
 
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function collect_site_knowledge_documents( array $post_ids, int $max_posts ) : array {
+	public function collect_site_knowledge_documents( array $post_ids, int $max_posts ): array {
 		return $this->collectors->collect_site_knowledge_documents( $post_ids, $max_posts );
 	}
 
 	/**
 	 * Delegates to the content collector service.
 	 */
-	public function site_knowledge_post_types(  ) : array {
-		return $this->collectors->site_knowledge_post_types(  );
+	public function site_knowledge_post_types(): array {
+		return $this->collectors->site_knowledge_post_types();
 	}
 
 	/**
 	 * Delegates to the hosted AI service.
 	 */
-	public function hosted_ai_media_alt_snapshot_item( int $attachment_id, string $source ) : array {
+	public function hosted_ai_media_alt_snapshot_item( int $attachment_id, string $source ): array {
 		return $this->hosted_ai->hosted_ai_media_alt_snapshot_item( $attachment_id, $source );
 	}
 
@@ -317,14 +317,14 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function media_alt_caption_candidate_is_too_short( string $value ) : bool {
+	public function media_alt_caption_candidate_is_too_short( string $value ): bool {
 		return $this->media_alt->media_alt_caption_candidate_is_too_short( $value );
 	}
 
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function media_alt_caption_is_filename_like( string $value, array $item ) : bool {
+	public function media_alt_caption_is_filename_like( string $value, array $item ): bool {
 		return $this->media_alt->media_alt_caption_is_filename_like( $value, $item );
 	}
 	/**
@@ -386,7 +386,7 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the workflow plans service.
 	 */
-	public function build_media_alt_caption_review_plan( array $input ) : array {
+	public function build_media_alt_caption_review_plan( array $input ): array {
 		return $this->plans->build_media_alt_caption_review_plan( $input );
 	}
 
@@ -421,42 +421,42 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the Cloud web search service.
 	 */
-	public function cloud_web_search_for_content( string $query, string $intent = 'writing_context', int $max_results = 3 ) : array {
+	public function cloud_web_search_for_content( string $query, string $intent = 'writing_context', int $max_results = 3 ): array {
 		return $this->web_search->cloud_web_search_for_content( $query, $intent, $max_results );
 	}
 
 	/**
 	 * Delegates to the Cloud web search service.
 	 */
-	public function cloud_web_search_notice(  ) : array {
-		return $this->web_search->cloud_web_search_notice(  );
+	public function cloud_web_search_notice(): array {
+		return $this->web_search->cloud_web_search_notice();
 	}
 
 	/**
 	 * Delegates to the Cloud web search service.
 	 */
-	public function cloud_web_search_evidence( array $research ) : array {
+	public function cloud_web_search_evidence( array $research ): array {
 		return $this->web_search->cloud_web_search_evidence( $research );
 	}
 
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function media_alt_caption_clean_candidate( string $value ) : string {
+	public function media_alt_caption_clean_candidate( string $value ): string {
 		return $this->media_alt->media_alt_caption_clean_candidate( $value );
 	}
 
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function media_alt_caption_candidate_rejection_reason( string $candidate, array $item, string $target_field ) : string {
+	public function media_alt_caption_candidate_rejection_reason( string $candidate, array $item, string $target_field ): string {
 		return $this->media_alt->media_alt_caption_candidate_rejection_reason( $candidate, $item, $target_field );
 	}
 
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function media_alt_caption_candidate_needs_context_confirmation( string $candidate ) : bool {
+	public function media_alt_caption_candidate_needs_context_confirmation( string $candidate ): bool {
 		return $this->media_alt->media_alt_caption_candidate_needs_context_confirmation( $candidate );
 	}
 
@@ -470,14 +470,14 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the discoverability service.
 	 */
-	public function content_discoverability_field_instruction( string $field ) : string {
+	public function content_discoverability_field_instruction( string $field ): string {
 		return $this->discoverability->content_discoverability_field_instruction( $field );
 	}
 
 	/**
 	 * Delegates to the discoverability service.
 	 */
-	public function content_discoverability_field_group( string $field ) : string {
+	public function content_discoverability_field_group( string $field ): string {
 		return $this->discoverability->content_discoverability_field_group( $field );
 	}
 
@@ -490,87 +490,87 @@ final class Provider_Client extends Provider_Client_Support {
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function build_media_alt_caption_review_set( array $media_snapshot, int $max_items, array $image_context_evidence = array() ) : array {
+	public function build_media_alt_caption_review_set( array $media_snapshot, int $max_items, array $image_context_evidence = array() ): array {
 		return $this->media_alt->build_media_alt_caption_review_set( $media_snapshot, $max_items, $image_context_evidence );
 	}
 
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function maybe_request_media_alt_caption_image_context_evidence( array $review_set ) : array {
+	public function maybe_request_media_alt_caption_image_context_evidence( array $review_set ): array {
 		return $this->media_alt->maybe_request_media_alt_caption_image_context_evidence( $review_set );
 	}
 
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */
-	public function local_media_alt_caption_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'optional_not_requested' ) : array {
+	public function local_media_alt_caption_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'optional_not_requested' ): array {
 		return $this->media_alt->local_media_alt_caption_review_response( $runtime_payload, $review_set, $cloud_status );
 	}
 
 	/**
 	 * Collects the bounded pending-comment moderation sample.
 	 */
-	public function collect_hosted_ai_comment_moderation_sample( int $limit ) : array {
+	public function collect_hosted_ai_comment_moderation_sample( int $limit ): array {
 		return $this->collectors->collect_hosted_ai_comment_moderation_sample( $limit );
 	}
 
 	/**
 	 * Delegates to the comment moderation service.
 	 */
-	public function build_comment_moderation_review_set( array $sample, array $classifications = array(), string $cloud_status = 'cloud_required' ) : array {
+	public function build_comment_moderation_review_set( array $sample, array $classifications = array(), string $cloud_status = 'cloud_required' ): array {
 		return $this->comment_moderation->build_comment_moderation_review_set( $sample, $classifications, $cloud_status );
 	}
 
 	/**
 	 * Delegates to the comment moderation service.
 	 */
-	public function local_comment_moderation_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ) : array {
+	public function local_comment_moderation_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ): array {
 		return $this->comment_moderation->local_comment_moderation_review_response( $runtime_payload, $review_set, $cloud_status );
 	}
 
 	/**
 	 * Delegates to the flagged media service.
 	 */
-	public function build_flagged_media_review_set( array $sample, array $safety_statuses = array(), string $cloud_status = 'cloud_required' ) : array {
+	public function build_flagged_media_review_set( array $sample, array $safety_statuses = array(), string $cloud_status = 'cloud_required' ): array {
 		return $this->flagged_media->build_flagged_media_review_set( $sample, $safety_statuses, $cloud_status );
 	}
 
 	/**
 	 * Delegates to the flagged media service.
 	 */
-	public function local_flagged_media_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ) : array {
+	public function local_flagged_media_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'cloud_required' ): array {
 		return $this->flagged_media->local_flagged_media_review_response( $runtime_payload, $review_set, $cloud_status );
 	}
 	/**
 	 * @return array<int|string,mixed>|WP_Error Envelope or item shapes for the bounded continuation, or a transport error.
 	 */
 	public function refresh_site_media_index_batch( array $input ) {
-		$page = max( 1, absint( $input['page'] ?? 1 ) );
-		$per_page = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );
+		$page                  = max( 1, absint( $input['page'] ?? 1 ) );
+		$per_page              = max( 1, min( 10, absint( $input['per_page'] ?? 10 ) ) );
 		$target_attachment_ids = array_slice( $this->sanitize_absint_list( $input['attachment_ids'] ?? array() ), 0, $per_page );
-		$uses_targeted_ids = ! empty( $target_attachment_ids );
-		$uses_stable_cursor = ! $uses_targeted_ids && array_key_exists( 'after_id', $input );
-		$after_id = absint( $input['after_id'] ?? 0 );
-		$upload_scope = preg_replace( '/[^A-Za-z0-9._:-]/', '', (string) ( $input['upload_scope'] ?? '' ) );
-		$upload_scope = is_string( $upload_scope ) ? substr( $upload_scope, 0, 96 ) : '';
-		$inventory = $uses_targeted_ids
+		$uses_targeted_ids     = ! empty( $target_attachment_ids );
+		$uses_stable_cursor    = ! $uses_targeted_ids && array_key_exists( 'after_id', $input );
+		$after_id              = absint( $input['after_id'] ?? 0 );
+		$upload_scope          = preg_replace( '/[^A-Za-z0-9._:-]/', '', (string) ( $input['upload_scope'] ?? '' ) );
+		$upload_scope          = is_string( $upload_scope ) ? substr( $upload_scope, 0, 96 ) : '';
+		$inventory             = $uses_targeted_ids
 			? $this->toolkit_media_inventory(
 				array(
-					'mime_type'     => 'image',
+					'mime_type'      => 'image',
 					'attachment_ids' => $target_attachment_ids,
-					'page'          => 1,
-					'per_page'      => $per_page,
-					'stable_order'  => 'id_asc',
+					'page'           => 1,
+					'per_page'       => $per_page,
+					'stable_order'   => 'id_asc',
 				)
 			)
 			: ( $uses_stable_cursor
 			? $this->toolkit_media_inventory_after_id( $after_id, $per_page )
 			: $this->toolkit_media_inventory(
 				array(
-					'mime_type'   => 'image',
-					'page'        => $page,
-					'per_page'    => $per_page,
+					'mime_type'    => 'image',
+					'page'         => $page,
+					'per_page'     => $per_page,
 					'stable_order' => 'id_asc',
 				)
 			) );
@@ -578,8 +578,8 @@ final class Provider_Client extends Provider_Client_Support {
 			return $inventory;
 		}
 
-		$items = is_array( $inventory['items'] ?? null ) ? $inventory['items'] : array();
-		$has_more = $uses_targeted_ids ? false : ( $uses_stable_cursor
+		$items         = is_array( $inventory['items'] ?? null ) ? $inventory['items'] : array();
+		$has_more      = $uses_targeted_ids ? false : ( $uses_stable_cursor
 			? ! empty( $inventory['continuation_has_more'] )
 			: $page * $per_page < absint( $inventory['total'] ?? count( $items ) ) );
 		$next_after_id = $uses_stable_cursor ? absint( $inventory['continuation_after_id'] ?? $after_id ) : 0;
@@ -623,21 +623,21 @@ final class Provider_Client extends Provider_Client_Support {
 				continue;
 			}
 			$evidence_request['items'][] = array(
-				'attachment_id'   => (string) absint( $item['attachment_id'] ),
-				'title'           => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-				'filename'        => sanitize_file_name( wp_basename( (string) $item['url'] ) ),
-				'mime_type'       => $mime_type,
-				'url'             => $this->runtime_safe_media_url( (string) $item['url'] ),
-				'attachment_url'  => $this->runtime_safe_media_url( (string) $item['url'] ),
-				'media_fingerprint' => (string) ( $item['media_fingerprint'] ?? '' ),
+				'attachment_id'           => (string) absint( $item['attachment_id'] ),
+				'title'                   => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'filename'                => sanitize_file_name( wp_basename( (string) $item['url'] ) ),
+				'mime_type'               => $mime_type,
+				'url'                     => $this->runtime_safe_media_url( (string) $item['url'] ),
+				'attachment_url'          => $this->runtime_safe_media_url( (string) $item['url'] ),
+				'media_fingerprint'       => (string) ( $item['media_fingerprint'] ?? '' ),
 				'candidate_quality_flags' => array( 'semantic_index_refresh' ),
 			);
 		}
 		$evidence_request['requested_count'] = count( $evidence_request['items'] );
 		$evidence_request['max_items']       = $per_page;
-		$evidence_request['dispatch_mode']  = 'background_completion';
-		$evidence_requested = ! empty( $evidence_request['items'] );
-		$provided_evidence = is_array( $input['image_context_evidence'] ?? null ) ? $input['image_context_evidence'] : array();
+		$evidence_request['dispatch_mode']   = 'background_completion';
+		$evidence_requested                  = ! empty( $evidence_request['items'] );
+		$provided_evidence                   = is_array( $input['image_context_evidence'] ?? null ) ? $input['image_context_evidence'] : array();
 		if ( ! empty( $provided_evidence ) ) {
 			if (
 				'image_context_evidence.v1' !== (string) ( $provided_evidence['contract_version'] ?? '' )
@@ -703,8 +703,8 @@ final class Provider_Client extends Provider_Client_Support {
 			if ( $attachment_id <= 0 ) {
 				continue;
 			}
-			$visual = is_array( $evidence_by_id[ $attachment_id ] ?? null ) ? $evidence_by_id[ $attachment_id ] : array();
-			$visual_source = $this->local_media_visual_source( $attachment_id );
+			$visual            = is_array( $evidence_by_id[ $attachment_id ] ?? null ) ? $evidence_by_id[ $attachment_id ] : array();
+			$visual_source     = $this->local_media_visual_source( $attachment_id );
 			$media_fingerprint = sanitize_text_field(
 				(string) (
 					$visual['media_fingerprint']
@@ -712,26 +712,26 @@ final class Provider_Client extends Provider_Client_Support {
 					?? $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) )
 				)
 			);
-			$media_items[] = array(
-				'attachment_id'    => $attachment_id,
-				'mime_type'        => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
-				'title'            => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-				'url'              => $this->runtime_safe_media_url( (string) ( $item['url'] ?? '' ) ),
-				'modified_gmt'     => sanitize_text_field( (string) ( $item['modified_gmt'] ?? '' ) ),
-				'media_fingerprint' => $media_fingerprint,
-				'alt'              => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
-				'caption'          => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
-				'description'      => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
-				'visual_summary'   => sanitize_textarea_field( (string) ( $visual['visual_summary'] ?? '' ) ),
-				'visible_text'     => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
-				'subject_tags'     => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
-				'alt_text_basis'   => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
+			$media_items[]     = array(
+				'attachment_id'           => $attachment_id,
+				'mime_type'               => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
+				'title'                   => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
+				'url'                     => $this->runtime_safe_media_url( (string) ( $item['url'] ?? '' ) ),
+				'modified_gmt'            => sanitize_text_field( (string) ( $item['modified_gmt'] ?? '' ) ),
+				'media_fingerprint'       => $media_fingerprint,
+				'alt'                     => sanitize_text_field( (string) ( $item['alt'] ?? '' ) ),
+				'caption'                 => sanitize_textarea_field( (string) ( $item['caption'] ?? '' ) ),
+				'description'             => sanitize_textarea_field( (string) ( $item['description'] ?? '' ) ),
+				'visual_summary'          => sanitize_textarea_field( (string) ( $visual['visual_summary'] ?? '' ) ),
+				'visible_text'            => $this->sanitize_string_list( $visual['visible_text'] ?? array() ),
+				'subject_tags'            => $this->sanitize_string_list( $visual['subject_tags'] ?? array() ),
+				'alt_text_basis'          => sanitize_textarea_field( (string) ( $visual['alt_text_basis'] ?? '' ) ),
 				'vision_contract_version' => sanitize_text_field( (string) ( $visual['contract_version'] ?? '' ) ),
-				'vision_source'    => sanitize_key( (string) ( $visual['source'] ?? '' ) ),
-				'vision_model_id'  => sanitize_text_field( (string) ( $visual['model_id'] ?? '' ) ),
-				'vision_run_id'    => sanitize_text_field( (string) ( $visual['run_id'] ?? '' ) ),
-				'confidence'       => (float) ( $visual['confidence'] ?? 0 ),
-				'uncertainty_flags' => $this->sanitize_string_list( $visual['uncertainty_flags'] ?? array() ),
+				'vision_source'           => sanitize_key( (string) ( $visual['source'] ?? '' ) ),
+				'vision_model_id'         => sanitize_text_field( (string) ( $visual['model_id'] ?? '' ) ),
+				'vision_run_id'           => sanitize_text_field( (string) ( $visual['run_id'] ?? '' ) ),
+				'confidence'              => (float) ( $visual['confidence'] ?? 0 ),
+				'uncertainty_flags'       => $this->sanitize_string_list( $visual['uncertainty_flags'] ?? array() ),
 			);
 		}
 
@@ -754,27 +754,27 @@ final class Provider_Client extends Provider_Client_Support {
 			return $sync;
 		}
 
-		$sync['page']                  = $page;
-		$sync['per_page']              = $per_page;
-		$sync['total']                 = absint( $inventory['total'] ?? count( $items ) );
-		$sync['indexed_items']         = count( $media_items );
-		$sync['visual_evidence_items'] = count( $evidence_by_id );
-		$sync['visual_evidence_reused_items'] = absint( $evidence['reused_count'] ?? 0 );
+		$sync['page']                             = $page;
+		$sync['per_page']                         = $per_page;
+		$sync['total']                            = absint( $inventory['total'] ?? count( $items ) );
+		$sync['indexed_items']                    = count( $media_items );
+		$sync['visual_evidence_items']            = count( $evidence_by_id );
+		$sync['visual_evidence_reused_items']     = absint( $evidence['reused_count'] ?? 0 );
 		$sync['visual_evidence_recognized_items'] = absint( $evidence['recognized_count'] ?? 0 );
-		$sync['screened_items']        = max( 0, count( $items ) - count( $evidence_request['items'] ) );
-		$sync['visual_evidence_status'] = ! $evidence_requested
+		$sync['screened_items']                   = max( 0, count( $items ) - count( $evidence_request['items'] ) );
+		$sync['visual_evidence_status']           = ! $evidence_requested
 			? 'not_requested'
 			: (
 				empty( $evidence_by_id )
 					? 'metadata_only_fallback'
 					: ( count( $evidence_by_id ) < count( $media_items ) ? 'partial' : 'ready' )
 			);
-		$sync['visual_evidence_error_code'] = $evidence_requested && empty( $evidence_by_id )
+		$sync['visual_evidence_error_code']       = $evidence_requested && empty( $evidence_by_id )
 			? 'visual_evidence_unavailable'
 			: ( count( $evidence_by_id ) < count( $media_items ) ? 'visual_evidence_partial' : '' );
-		$sync['has_more']              = $has_more;
-		$sync['next_cursor']           = array( 'after_id' => $next_after_id );
-		$sync['visual_evidence_run_id'] = '';
+		$sync['has_more']                         = $has_more;
+		$sync['next_cursor']                      = array( 'after_id' => $next_after_id );
+		$sync['visual_evidence_run_id']           = '';
 		return $sync;
 	}
 
@@ -803,7 +803,10 @@ final class Provider_Client extends Provider_Client_Support {
 			$source  = $this->local_media_visual_source( $attachment_id );
 			$current = $this->runtime_safe_media_fingerprint( (string) ( $source['media_fingerprint'] ?? '' ) );
 			if ( '' !== $current && isset( $known[ $attachment_id ] ) && $current !== $known[ $attachment_id ] ) {
-				$changes[] = array( 'attachment_id' => $attachment_id, 'media_fingerprint' => $current );
+				$changes[] = array(
+					'attachment_id'     => $attachment_id,
+					'media_fingerprint' => $current,
+				);
 			}
 		}
 		return $changes;
@@ -825,18 +828,37 @@ final class Provider_Client extends Provider_Client_Support {
 
 		$recent_attachments = get_posts(
 			array(
-				'post_type' => 'attachment', 'post_status' => 'inherit', 'post_mime_type' => 'image',
-				'posts_per_page' => $limit, 'fields' => 'ids', 'orderby' => 'post_modified_gmt', 'order' => 'DESC',
-				'date_query' => array( array( 'column' => 'post_modified_gmt', 'after' => $lookback_at ) ),
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image',
+				'posts_per_page' => $limit,
+				'fields'         => 'ids',
+				'orderby'        => 'post_modified_gmt',
+				'order'          => 'DESC',
+				'date_query'     => array(
+					array(
+						'column' => 'post_modified_gmt',
+						'after'  => $lookback_at,
+					),
+				),
 			)
 		);
 		$append_ids( $ids, $recent_attachments );
 
 		$recent_posts = get_posts(
 			array(
-				'post_type' => array( 'post', 'page' ), 'post_status' => array( 'publish', 'private', 'draft', 'pending', 'future' ),
-				'posts_per_page' => min( 100, max( 20, $limit ) ), 'fields' => 'ids', 'orderby' => 'post_modified_gmt', 'order' => 'DESC',
-				'date_query' => array( array( 'column' => 'post_modified_gmt', 'after' => $lookback_at ) ),
+				'post_type'      => array( 'post', 'page' ),
+				'post_status'    => array( 'publish', 'private', 'draft', 'pending', 'future' ),
+				'posts_per_page' => min( 100, max( 20, $limit ) ),
+				'fields'         => 'ids',
+				'orderby'        => 'post_modified_gmt',
+				'order'          => 'DESC',
+				'date_query'     => array(
+					array(
+						'column' => 'post_modified_gmt',
+						'after'  => $lookback_at,
+					),
+				),
 			)
 		);
 		foreach ( (array) $recent_posts as $post_id ) {
@@ -885,8 +907,8 @@ final class Provider_Client extends Provider_Client_Support {
 			);
 		}
 		$registered = npcink_abilities_toolkit_get_registered();
-		$ability = is_array( $registered ) ? ( $registered[ $ability_id ] ?? null ) : null;
-		$callback = is_array( $ability ) ? ( $ability['execute_callback'] ?? null ) : null;
+		$ability    = is_array( $registered ) ? ( $registered[ $ability_id ] ?? null ) : null;
+		$callback   = is_array( $ability ) ? ( $ability['execute_callback'] ?? null ) : null;
 		if ( ! is_callable( $callback ) ) {
 			return new WP_Error(
 				'npcink_toolbox_site_media_ability_unavailable',
@@ -913,7 +935,7 @@ final class Provider_Client extends Provider_Client_Support {
 		global $wpdb;
 		$limit = max( 1, min( 10, $per_page ) ) + 1;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- A bounded ID-only cursor cannot use WP_Query without page drift.
-		$ids = $wpdb->get_col(
+		$ids      = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE ID > %d AND post_type = %s AND post_status = %s AND post_mime_type LIKE %s ORDER BY ID ASC LIMIT %d",
 				$after_id,
@@ -927,11 +949,21 @@ final class Provider_Client extends Provider_Client_Support {
 		$has_more = count( $ids ) > $per_page;
 		$ids      = array_slice( $ids, 0, $per_page );
 		if ( empty( $ids ) ) {
-			return array( 'items' => array(), 'total' => 0, 'continuation_has_more' => false, 'continuation_after_id' => $after_id );
+			return array(
+				'items'                 => array(),
+				'total'                 => 0,
+				'continuation_has_more' => false,
+				'continuation_after_id' => $after_id,
+			);
 		}
 
 		$inventory = $this->toolkit_media_inventory(
-			array( 'mime_type' => 'image', 'attachment_ids' => $ids, 'page' => 1, 'per_page' => $per_page )
+			array(
+				'mime_type'      => 'image',
+				'attachment_ids' => $ids,
+				'page'           => 1,
+				'per_page'       => $per_page,
+			)
 		);
 		if ( is_wp_error( $inventory ) ) {
 			return $inventory;
@@ -995,7 +1027,4 @@ final class Provider_Client extends Provider_Client_Support {
 
 		return $this->site_knowledge->normalize_site_knowledge_cloud_response( is_array( $response ) ? $response : array(), $artifact_type, $composition_role, $runtime_payload );
 	}
-
-
-
 }

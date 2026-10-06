@@ -42,31 +42,31 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 				array(
 					'site_search',
 					'related_content',
-						'writing_context',
-						'internal_links',
-						'refresh_suggestions',
-						'image_context',
-						'faq_candidates',
-						'content_gap_analysis',
-						'duplicate_check',
-						'summary_context',
-						'writing_support_plan',
-						'media_library_search',
-					),
-					true
-				)
+					'writing_context',
+					'internal_links',
+					'refresh_suggestions',
+					'image_context',
+					'faq_candidates',
+					'content_gap_analysis',
+					'duplicate_check',
+					'summary_context',
+					'writing_support_plan',
+					'media_library_search',
+				),
+				true
+			)
 			) {
 			$intent = 'site_search';
 		}
 
-		$filters = is_array( $input['filters'] ?? null ) ? $this->sanitize_payload( $input['filters'] ) : array();
+		$filters            = is_array( $input['filters'] ?? null ) ? $this->sanitize_payload( $input['filters'] ) : array();
 		$result_granularity = sanitize_key( (string) ( $input['result_granularity'] ?? '' ) );
-		$payload = array(
-			'contract_version' => 'site_knowledge_search.v1',
-			'query'            => $query,
-			'intent'           => $intent,
-			'current_post_id'  => absint( $input['current_post_id'] ?? 0 ),
-			'max_results'      => max( 1, min( 20, absint( $input['max_results'] ?? 8 ) ) ),
+		$payload            = array(
+			'contract_version'       => 'site_knowledge_search.v1',
+			'query'                  => $query,
+			'intent'                 => $intent,
+			'current_post_id'        => absint( $input['current_post_id'] ?? 0 ),
+			'max_results'            => max( 1, min( 20, absint( $input['max_results'] ?? 8 ) ) ),
 			'filters'                => is_array( $filters ) ? $filters : array(),
 			'write_posture'          => 'suggestion_only',
 			'direct_wordpress_write' => false,
@@ -154,32 +154,32 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 	public function normalize_site_knowledge_cloud_response( array $response, string $artifact_type, string $composition_role, array $runtime_payload ): array {
 		$result = $this->extract_cloud_runtime_result( $response );
 
-		$results = is_array( $result['results'] ?? null ) ? $this->sanitize_payload( $result['results'] ) : array();
-		$results = $this->filter_current_public_site_knowledge_results( $results );
-		$agent_handoff = is_array( $result['agent_handoff'] ?? null ) ? $this->sanitize_payload( $result['agent_handoff'] ) : array();
+		$results        = is_array( $result['results'] ?? null ) ? $this->sanitize_payload( $result['results'] ) : array();
+		$results        = $this->filter_current_public_site_knowledge_results( $results );
+		$agent_handoff  = is_array( $result['agent_handoff'] ?? null ) ? $this->sanitize_payload( $result['agent_handoff'] ) : array();
 		$cloud_boundary = $this->normalize_site_knowledge_cloud_boundary( $result, $response, $runtime_payload );
 
 		$payload = $this->with_output_contract(
 			array(
-				'provider'          => 'npcink_cloud',
-			'contract_version'  => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? '' ) ),
-				'cloud_ability'     => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? '' ) ),
-			'execution_pattern' => sanitize_key( (string) ( $runtime_payload['execution_pattern'] ?? 'inline' ) ),
-				'status'            => sanitize_key( (string) ( $result['status'] ?? ( $response['status'] ?? 'unknown' ) ) ),
-				'run_id'            => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
-				'results'           => $results,
-				'coverage'          => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
+				'provider'             => 'npcink_cloud',
+				'contract_version'     => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? '' ) ),
+				'cloud_ability'        => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? '' ) ),
+				'execution_pattern'    => sanitize_key( (string) ( $runtime_payload['execution_pattern'] ?? 'inline' ) ),
+				'status'               => sanitize_key( (string) ( $result['status'] ?? ( $response['status'] ?? 'unknown' ) ) ),
+				'run_id'               => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
+				'results'              => $results,
+				'coverage'             => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
 				'media_evidence_items' => is_array( $result['media_evidence_items'] ?? null ) ? $this->sanitize_payload( $result['media_evidence_items'] ) : array(),
-				'sync'              => is_array( $result['sync'] ?? null ) ? $this->sanitize_payload( $result['sync'] ) : array(),
-				'progress'          => is_array( $result['progress'] ?? null ) ? $this->sanitize_payload( $result['progress'] ) : array(),
-				'active_run'        => is_array( $result['active_run'] ?? null ) ? $this->sanitize_payload( $result['active_run'] ) : array(),
-				'intent'            => sanitize_key( (string) ( $result['intent'] ?? '' ) ),
-				'result_granularity' => sanitize_key( (string) ( $result['result_granularity'] ?? 'chunk' ) ),
-				'result_grouping'    => is_array( $result['result_grouping'] ?? null ) ? $this->sanitize_payload( $result['result_grouping'] ) : array(),
-				'evidence_gate'     => is_array( $result['evidence_gate'] ?? null ) ? $this->sanitize_payload( $result['evidence_gate'] ) : array(),
-				'retrieval_readiness' => is_array( $result['retrieval_readiness'] ?? null ) ? $this->sanitize_payload( $result['retrieval_readiness'] ) : array(),
-				'agent_handoff'     => $agent_handoff,
-				'handoff'           => $this->site_knowledge_handoff_for_display( $agent_handoff ),
+				'sync'                 => is_array( $result['sync'] ?? null ) ? $this->sanitize_payload( $result['sync'] ) : array(),
+				'progress'             => is_array( $result['progress'] ?? null ) ? $this->sanitize_payload( $result['progress'] ) : array(),
+				'active_run'           => is_array( $result['active_run'] ?? null ) ? $this->sanitize_payload( $result['active_run'] ) : array(),
+				'intent'               => sanitize_key( (string) ( $result['intent'] ?? '' ) ),
+				'result_granularity'   => sanitize_key( (string) ( $result['result_granularity'] ?? 'chunk' ) ),
+				'result_grouping'      => is_array( $result['result_grouping'] ?? null ) ? $this->sanitize_payload( $result['result_grouping'] ) : array(),
+				'evidence_gate'        => is_array( $result['evidence_gate'] ?? null ) ? $this->sanitize_payload( $result['evidence_gate'] ) : array(),
+				'retrieval_readiness'  => is_array( $result['retrieval_readiness'] ?? null ) ? $this->sanitize_payload( $result['retrieval_readiness'] ) : array(),
+				'agent_handoff'        => $agent_handoff,
+				'handoff'              => $this->site_knowledge_handoff_for_display( $agent_handoff ),
 			),
 			$artifact_type,
 			$composition_role
@@ -224,7 +224,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 				continue;
 			}
 
-			$source = is_array( $candidate['site_knowledge_cloud_boundary'] ?? null )
+			$source           = is_array( $candidate['site_knowledge_cloud_boundary'] ?? null )
 				? $candidate['site_knowledge_cloud_boundary']
 				: $candidate;
 			$ownership        = $this->normalize_site_knowledge_ownership_map( is_array( $source['ownership'] ?? null ) ? $source['ownership'] : array() );
@@ -263,7 +263,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 			'final_write_owner',
 			'wordpress_write_owner',
 		);
-		$normalized = array();
+		$normalized   = array();
 
 		foreach ( $allowed_keys as $key ) {
 			$value = sanitize_key( (string) ( $ownership[ $key ] ?? '' ) );
@@ -290,7 +290,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 			'cloud_owns_ability_registry',
 			'cloud_owns_workflow_registry',
 		);
-		$normalized = array();
+		$normalized   = array();
 
 		foreach ( $allowed_keys as $key ) {
 			if ( array_key_exists( $key, $truth_boundaries ) ) {
@@ -406,9 +406,9 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 		return $this->with_output_contract(
 			array(
 				'provider'          => 'npcink_cloud',
-			'contract_version'  => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? '' ) ),
+				'contract_version'  => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? '' ) ),
 				'cloud_ability'     => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? '' ) ),
-			'execution_pattern' => sanitize_key( (string) ( $runtime_payload['execution_pattern'] ?? 'inline' ) ),
+				'execution_pattern' => sanitize_key( (string) ( $runtime_payload['execution_pattern'] ?? 'inline' ) ),
 				'status'            => 'syncing',
 				'results'           => array(),
 				'coverage'          => array(),
@@ -454,7 +454,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 			if ( $total_chars + $text_length > 12000 ) {
 				break;
 			}
-			$passages[] = $text;
+			$passages[]   = $text;
 			$total_chars += $text_length;
 		}
 

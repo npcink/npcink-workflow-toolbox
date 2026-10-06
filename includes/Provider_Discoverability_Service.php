@@ -141,7 +141,7 @@ final class Provider_Discoverability_Service extends Provider_Client_Support {
 		if ( 'faq' === $field && ! empty( $context['rules']['allow_faq_generation'] ) ) {
 			return array(
 				array(
-					'question' => sprintf(
+					'question'        => sprintf(
 						/* translators: %s: topic. */
 						__( 'What should readers know about %s?', 'npcink-workflow-toolbox' ),
 						$topic
@@ -149,7 +149,7 @@ final class Provider_Discoverability_Service extends Provider_Client_Support {
 					'answer_guidance' => __( 'Answer only with facts supported by the supplied source and site context.', 'npcink-workflow-toolbox' ),
 				),
 				array(
-					'question' => sprintf(
+					'question'        => sprintf(
 						/* translators: %s: topic. */
 						__( 'How does %s affect the target audience?', 'npcink-workflow-toolbox' ),
 						$topic

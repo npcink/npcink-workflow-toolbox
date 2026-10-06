@@ -77,20 +77,20 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 			$intent = 'news';
 		}
 
-		$max_results  = max( 1, min( 5, absint( $input['max_results'] ?? 3 ) ) );
-		$recency_days = max( 0, min( 30, absint( $input['recency_days'] ?? 7 ) ) );
+		$max_results    = max( 1, min( 5, absint( $input['max_results'] ?? 3 ) ) );
+		$recency_days   = max( 0, min( 30, absint( $input['recency_days'] ?? 7 ) ) );
 		$managed_source = sanitize_key( (string) ( $input['managed_source'] ?? '' ) );
-		$runtime_input = array(
-			'contract_version'    => 'web_search.v1',
-			'query'               => $query,
-			'intent'              => $intent,
-			'max_results'         => $max_results,
-			'recency_days'        => $recency_days,
-			'evidence_policy'     => array(
+		$runtime_input  = array(
+			'contract_version' => 'web_search.v1',
+			'query'            => $query,
+			'intent'           => $intent,
+			'max_results'      => $max_results,
+			'recency_days'     => $recency_days,
+			'evidence_policy'  => array(
 				'required_sources' => 1,
 				'no_hit_policy'    => 'abstain',
 			),
-			'write_posture'       => 'suggestion_only',
+			'write_posture'    => 'suggestion_only',
 		);
 		if ( 'source_extraction_preview' === $intent ) {
 			$runtime_input['source_url'] = esc_url_raw( (string) ( $input['source_url'] ?? '' ), array( 'http', 'https' ) );
@@ -103,40 +103,40 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 			$runtime_input['enhance_with_reader'] = true;
 		}
 		if ( 'zhihu_research' === $managed_source ) {
-			$runtime_input['provider']         = 'zhihu';
-			$runtime_input['source_type']      = 'zhihu_research';
+			$runtime_input['provider']    = 'zhihu';
+			$runtime_input['source_type'] = 'zhihu_research';
 		}
 		if ( 'zhihu_hot_topics' === $managed_source ) {
-			$runtime_input['provider']         = 'zhihu';
-			$runtime_input['managed_source']   = 'zhihu_hot_topics';
-			$runtime_input['source_type']      = 'zhihu_hot_list';
+			$runtime_input['provider']       = 'zhihu';
+			$runtime_input['managed_source'] = 'zhihu_hot_topics';
+			$runtime_input['source_type']    = 'zhihu_hot_list';
 		}
 		if ( 'zhihu_global_search' === $managed_source ) {
-			$runtime_input['provider']         = 'zhihu';
-			$runtime_input['source_type']      = 'zhihu_global_search';
+			$runtime_input['provider']    = 'zhihu';
+			$runtime_input['source_type'] = 'zhihu_global_search';
 		}
 		if ( in_array( $managed_source, array( 'zhida_simple', 'zhida_deep', 'zhida_deepsearch' ), true ) ) {
-			$runtime_input['provider']         = 'zhihu';
-			$runtime_input['source_type']      = $managed_source;
+			$runtime_input['provider']    = 'zhihu';
+			$runtime_input['source_type'] = $managed_source;
 		}
 
 		$runtime_payload = array(
-			'ability_name'        => 'npcink-cloud/web-search',
-			'ability_family'      => 'knowledge',
-			'contract_version'    => 'web_search.v1',
-			'channel'             => 'toolbox_admin',
-			'execution_kind'      => 'web_search',
-			'profile_id'          => 'web-search.managed',
-			'execution_pattern'   => 'inline',
-			'data_classification' => 'public',
-			'storage_mode'        => 'result_only',
-			'retention_ttl'       => 3600,
-			'timeout_seconds'     => 30,
-			'http_timeout_seconds' => 30,
+			'ability_name'            => 'npcink-cloud/web-search',
+			'ability_family'          => 'knowledge',
+			'contract_version'        => 'web_search.v1',
+			'channel'                 => 'toolbox_admin',
+			'execution_kind'          => 'web_search',
+			'profile_id'              => 'web-search.managed',
+			'execution_pattern'       => 'inline',
+			'data_classification'     => 'public',
+			'storage_mode'            => 'result_only',
+			'retention_ttl'           => 3600,
+			'timeout_seconds'         => 30,
+			'http_timeout_seconds'    => 30,
 			'connect_timeout_seconds' => self::HTTP_CONNECT_TIMEOUT,
-			'retry_max'           => 0,
-			'input'               => $this->sanitize_payload( $runtime_input ),
-			'policy'              => array(
+			'retry_max'               => 0,
+			'input'                   => $this->sanitize_payload( $runtime_input ),
+			'policy'                  => array(
 				'allow_fallback' => true,
 			),
 		);
@@ -211,9 +211,9 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 
 		$artifact = $this->client->build_content_discoverability_brief(
 			array(
-				'topic'                  => $topic,
-				'title'                  => sanitize_text_field( (string) ( $input['title'] ?? $topic ) ),
-				'external_search_intent' => 'publish_preflight' === $scenario ? 'fact_check' : 'writing_context',
+				'topic'                   => $topic,
+				'title'                   => sanitize_text_field( (string) ( $input['title'] ?? $topic ) ),
+				'external_search_intent'  => 'publish_preflight' === $scenario ? 'fact_check' : 'writing_context',
 				'include_external_search' => true,
 			)
 		);
@@ -222,28 +222,28 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 			return $artifact;
 		}
 
-		$artifact = is_array( $artifact ) ? $artifact : array();
-		$search   = $this->extract_workflow_web_search_report( $artifact, $scenario );
-		$status   = sanitize_key( (string) ( $search['status'] ?? '' ) );
+		$artifact  = is_array( $artifact ) ? $artifact : array();
+		$search    = $this->extract_workflow_web_search_report( $artifact, $scenario );
+		$status    = sanitize_key( (string) ( $search['status'] ?? '' ) );
 		$triggered = array() !== $search && ! in_array( $status, array( '', 'cloud_managed', 'skipped' ), true );
 
 		return $this->with_output_contract(
 			array(
-				'provider'              => 'toolbox',
-				'scenario'              => $scenario,
-				'topic'                 => $topic,
-				'status'                => $triggered ? $status : 'not_triggered',
-				'search_triggered'      => $triggered,
+				'provider'               => 'toolbox',
+				'scenario'               => $scenario,
+				'topic'                  => $topic,
+				'status'                 => $triggered ? $status : 'not_triggered',
+				'search_triggered'       => $triggered,
 				'workflow_artifact_type' => sanitize_key( (string) ( $artifact['artifact_type'] ?? '' ) ),
-				'workflow_search'       => $search,
-				'result_count'          => absint( $search['result_count'] ?? 0 ),
-				'source_count'          => absint( $search['source_count'] ?? 0 ),
-				'provider_call_count'   => absint( $search['provider_call_count'] ?? 0 ),
-				'provider_mode'         => sanitize_key( (string) ( $search['provider_mode'] ?? '' ) ),
-				'cloud_provider'        => sanitize_key( (string) ( $search['provider'] ?? '' ) ),
-				'usage_summary'         => is_array( $search['usage_summary'] ?? null ) ? $this->sanitize_payload( $search['usage_summary'] ) : array(),
-				'error_code'            => sanitize_key( (string) ( $search['error_code'] ?? '' ) ),
-				'handoff'               => array(
+				'workflow_search'        => $search,
+				'result_count'           => absint( $search['result_count'] ?? 0 ),
+				'source_count'           => absint( $search['source_count'] ?? 0 ),
+				'provider_call_count'    => absint( $search['provider_call_count'] ?? 0 ),
+				'provider_mode'          => sanitize_key( (string) ( $search['provider_mode'] ?? '' ) ),
+				'cloud_provider'         => sanitize_key( (string) ( $search['provider'] ?? '' ) ),
+				'usage_summary'          => is_array( $search['usage_summary'] ?? null ) ? $this->sanitize_payload( $search['usage_summary'] ) : array(),
+				'error_code'             => sanitize_key( (string) ( $search['error_code'] ?? '' ) ),
+				'handoff'                => array(
 					'cloud_runtime'          => 'npcink_cloud_addon',
 					'final_writes'           => 'core_proposal_required',
 					'direct_wordpress_write' => false,
@@ -289,50 +289,50 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 
 		$payload = $this->with_output_contract(
 			array(
-				'artifact_type'        => sanitize_key( (string) ( $result['artifact_type'] ?? '' ) ),
-				'provider'             => sanitize_key( (string) ( $result['provider'] ?? 'cloud_web_search' ) ),
-				'provider_mode'        => sanitize_key( (string) ( $result['provider_mode'] ?? 'cloud_managed' ) ),
-				'contract_version'     => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'web_search.v1' ) ),
-				'output_contract'      => sanitize_text_field( (string) ( $result['output_contract'] ?? $result['evidence_pack']['contract_version'] ?? '' ) ),
-				'requested_url'        => esc_url_raw( (string) ( $result['requested_url'] ?? '' ) ),
-				'resolved_url'         => esc_url_raw( (string) ( $result['resolved_url'] ?? '' ) ),
-				'url_match'            => sanitize_key( (string) ( $result['url_match'] ?? '' ) ),
-				'title'                => sanitize_text_field( (string) ( $result['title'] ?? '' ) ),
-				'language'             => sanitize_text_field( (string) ( $result['language'] ?? '' ) ),
-				'published_at'         => sanitize_text_field( (string) ( $result['published_at'] ?? '' ) ),
-				'content_hash'         => sanitize_text_field( (string) ( $result['content_hash'] ?? '' ) ),
-				'char_count'           => absint( $result['char_count'] ?? 0 ),
-				'word_count'           => absint( $result['word_count'] ?? 0 ),
-				'preview_start'        => sanitize_textarea_field( (string) ( $result['preview_start'] ?? '' ) ),
-				'preview_end'          => sanitize_textarea_field( (string) ( $result['preview_end'] ?? '' ) ),
-				'coverage'             => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
-				'content_trust'        => sanitize_key( (string) ( $result['content_trust'] ?? '' ) ),
+				'artifact_type'                    => sanitize_key( (string) ( $result['artifact_type'] ?? '' ) ),
+				'provider'                         => sanitize_key( (string) ( $result['provider'] ?? 'cloud_web_search' ) ),
+				'provider_mode'                    => sanitize_key( (string) ( $result['provider_mode'] ?? 'cloud_managed' ) ),
+				'contract_version'                 => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'web_search.v1' ) ),
+				'output_contract'                  => sanitize_text_field( (string) ( $result['output_contract'] ?? $result['evidence_pack']['contract_version'] ?? '' ) ),
+				'requested_url'                    => esc_url_raw( (string) ( $result['requested_url'] ?? '' ) ),
+				'resolved_url'                     => esc_url_raw( (string) ( $result['resolved_url'] ?? '' ) ),
+				'url_match'                        => sanitize_key( (string) ( $result['url_match'] ?? '' ) ),
+				'title'                            => sanitize_text_field( (string) ( $result['title'] ?? '' ) ),
+				'language'                         => sanitize_text_field( (string) ( $result['language'] ?? '' ) ),
+				'published_at'                     => sanitize_text_field( (string) ( $result['published_at'] ?? '' ) ),
+				'content_hash'                     => sanitize_text_field( (string) ( $result['content_hash'] ?? '' ) ),
+				'char_count'                       => absint( $result['char_count'] ?? 0 ),
+				'word_count'                       => absint( $result['word_count'] ?? 0 ),
+				'preview_start'                    => sanitize_textarea_field( (string) ( $result['preview_start'] ?? '' ) ),
+				'preview_end'                      => sanitize_textarea_field( (string) ( $result['preview_end'] ?? '' ) ),
+				'coverage'                         => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
+				'content_trust'                    => sanitize_key( (string) ( $result['content_trust'] ?? '' ) ),
 				'prompt_injection_review_required' => ! empty( $result['prompt_injection_review_required'] ),
-				'source_priority'      => sanitize_key( (string) ( $result['source_priority'] ?? $result['evidence_pack']['source_priority'] ?? '' ) ),
-				'cloud_ability'        => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-cloud/web-search' ) ),
-				'cloud_runtime'        => 'npcink_cloud_addon',
-				'status'               => sanitize_key( (string) ( $result['status'] ?? ( $response['status'] ?? 'unknown' ) ) ),
-				'run_id'               => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
-				'query'                => sanitize_text_field( (string) ( $input['query'] ?? '' ) ),
-				'intent'               => sanitize_key( (string) ( $result['intent'] ?? $input['intent'] ?? '' ) ),
-				'max_results'          => max( 1, min( 10, (int) ( $input['max_results'] ?? 3 ) ) ),
-				'result_count'         => $result_count,
-				'evidence_gate'        => is_array( $result['evidence_gate'] ?? null ) ? $this->sanitize_payload( $result['evidence_gate'] ) : array(),
-				'evidence_pack'        => is_array( $result['evidence_pack'] ?? null ) ? $this->sanitize_payload( $result['evidence_pack'] ) : array(),
-				'atomic_outputs'       => $atomic_outputs,
-				'provider_call_count'  => absint( $response['provider_call_count'] ?? ( $response['data']['provider_call_count'] ?? 0 ) ),
-				'usage_summary'        => array(
-					'provider'             => sanitize_key( (string) ( $result['provider'] ?? 'cloud_web_search' ) ),
-					'provider_mode'        => sanitize_key( (string) ( $result['provider_mode'] ?? 'cloud_managed' ) ),
-					'output_contract'      => sanitize_text_field( (string) ( $result['output_contract'] ?? $result['evidence_pack']['contract_version'] ?? '' ) ),
-					'source_priority'      => sanitize_key( (string) ( $result['source_priority'] ?? $result['evidence_pack']['source_priority'] ?? '' ) ),
-					'provider_call_count'  => absint( $response['provider_call_count'] ?? ( $response['data']['provider_call_count'] ?? 0 ) ),
-					'result_count'         => $result_count,
-					'evidence_status'      => sanitize_key( (string) ( $result['evidence_gate']['status'] ?? '' ) ),
-					'failure_reason'       => sanitize_text_field( (string) ( $result['error_code'] ?? $response['error_code'] ?? '' ) ),
+				'source_priority'                  => sanitize_key( (string) ( $result['source_priority'] ?? $result['evidence_pack']['source_priority'] ?? '' ) ),
+				'cloud_ability'                    => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-cloud/web-search' ) ),
+				'cloud_runtime'                    => 'npcink_cloud_addon',
+				'status'                           => sanitize_key( (string) ( $result['status'] ?? ( $response['status'] ?? 'unknown' ) ) ),
+				'run_id'                           => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
+				'query'                            => sanitize_text_field( (string) ( $input['query'] ?? '' ) ),
+				'intent'                           => sanitize_key( (string) ( $result['intent'] ?? $input['intent'] ?? '' ) ),
+				'max_results'                      => max( 1, min( 10, (int) ( $input['max_results'] ?? 3 ) ) ),
+				'result_count'                     => $result_count,
+				'evidence_gate'                    => is_array( $result['evidence_gate'] ?? null ) ? $this->sanitize_payload( $result['evidence_gate'] ) : array(),
+				'evidence_pack'                    => is_array( $result['evidence_pack'] ?? null ) ? $this->sanitize_payload( $result['evidence_pack'] ) : array(),
+				'atomic_outputs'                   => $atomic_outputs,
+				'provider_call_count'              => absint( $response['provider_call_count'] ?? ( $response['data']['provider_call_count'] ?? 0 ) ),
+				'usage_summary'                    => array(
+					'provider'            => sanitize_key( (string) ( $result['provider'] ?? 'cloud_web_search' ) ),
+					'provider_mode'       => sanitize_key( (string) ( $result['provider_mode'] ?? 'cloud_managed' ) ),
+					'output_contract'     => sanitize_text_field( (string) ( $result['output_contract'] ?? $result['evidence_pack']['contract_version'] ?? '' ) ),
+					'source_priority'     => sanitize_key( (string) ( $result['source_priority'] ?? $result['evidence_pack']['source_priority'] ?? '' ) ),
+					'provider_call_count' => absint( $response['provider_call_count'] ?? ( $response['data']['provider_call_count'] ?? 0 ) ),
+					'result_count'        => $result_count,
+					'evidence_status'     => sanitize_key( (string) ( $result['evidence_gate']['status'] ?? '' ) ),
+					'failure_reason'      => sanitize_text_field( (string) ( $result['error_code'] ?? $response['error_code'] ?? '' ) ),
 				),
-				'results'              => $results,
-				'handoff'              => array(
+				'results'                          => $results,
+				'handoff'                          => array(
 					'cloud_runtime'          => 'npcink_cloud_addon',
 					'final_writes'           => 'core_proposal_required',
 					'direct_wordpress_write' => false,
@@ -395,22 +395,22 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 		}
 
 		return array(
-			'artifact_type'           => 'zhihu_hot_topic_pool',
-			'contract_version'        => 'zhihu_hot_topic_pool.v1',
-			'cloud_atomic_contract'   => sanitize_text_field( (string) ( $topic_candidates['contract_version'] ?? 'topic_candidate.v1' ) ),
-			'status'                  => array() === $items ? 'empty' : 'ready',
-			'problem_solved'          => 'daily_topic_selection',
-			'use_cases'               => array(
+			'artifact_type'          => 'zhihu_hot_topic_pool',
+			'contract_version'       => 'zhihu_hot_topic_pool.v1',
+			'cloud_atomic_contract'  => sanitize_text_field( (string) ( $topic_candidates['contract_version'] ?? 'topic_candidate.v1' ) ),
+			'status'                 => array() === $items ? 'empty' : 'ready',
+			'problem_solved'         => 'daily_topic_selection',
+			'use_cases'              => array(
 				'choose_today_topic',
 				'screen_audience_fit',
 				'build_manual_research_queue',
 			),
-			'operator_next_action'    => 'select_topic_then_manual_research',
-			'source_priority'         => 'trend_signal_not_factual_source',
-			'result_count'            => count( $items ),
-			'items'                   => $items,
-			'write_posture'           => 'suggestion_only',
-			'direct_wordpress_write'  => false,
+			'operator_next_action'   => 'select_topic_then_manual_research',
+			'source_priority'        => 'trend_signal_not_factual_source',
+			'result_count'           => count( $items ),
+			'items'                  => $items,
+			'write_posture'          => 'suggestion_only',
+			'direct_wordpress_write' => false,
 		);
 	}
 
@@ -454,16 +454,16 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 		$results  = is_array( $research['results'] ?? null ) ? $research['results'] : array();
 
 		return array(
-			'status'        => sanitize_key( (string) ( $research['status'] ?? '' ) ),
-			'provider'      => sanitize_key( (string) ( $research['provider'] ?? 'cloud_web_search' ) ),
-			'provider_mode' => sanitize_key( (string) ( $research['provider_mode'] ?? '' ) ),
-			'result_count'  => absint( $research['result_count'] ?? count( $results ) ),
-			'source_count'  => count( $results ),
+			'status'              => sanitize_key( (string) ( $research['status'] ?? '' ) ),
+			'provider'            => sanitize_key( (string) ( $research['provider'] ?? 'cloud_web_search' ) ),
+			'provider_mode'       => sanitize_key( (string) ( $research['provider_mode'] ?? '' ) ),
+			'result_count'        => absint( $research['result_count'] ?? count( $results ) ),
+			'source_count'        => count( $results ),
 			'provider_call_count' => absint( $research['provider_call_count'] ?? 0 ),
-			'usage_summary' => is_array( $research['usage_summary'] ?? null ) ? $this->sanitize_payload( $research['usage_summary'] ) : array(),
-			'error_code'    => sanitize_key( (string) ( $research['error_code'] ?? '' ) ),
-			'evidence_gate' => is_array( $research['evidence_gate'] ?? null ) ? $this->sanitize_payload( $research['evidence_gate'] ) : array(),
-			'sources'       => $this->sanitize_payload( array_slice( $results, 0, 5 ) ),
+			'usage_summary'       => is_array( $research['usage_summary'] ?? null ) ? $this->sanitize_payload( $research['usage_summary'] ) : array(),
+			'error_code'          => sanitize_key( (string) ( $research['error_code'] ?? '' ) ),
+			'evidence_gate'       => is_array( $research['evidence_gate'] ?? null ) ? $this->sanitize_payload( $research['evidence_gate'] ) : array(),
+			'sources'             => $this->sanitize_payload( array_slice( $results, 0, 5 ) ),
 		);
 	}
 }

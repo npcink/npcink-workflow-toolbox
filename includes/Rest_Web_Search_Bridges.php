@@ -28,19 +28,19 @@ final class Rest_Web_Search_Bridges extends Rest_Controller_Support {
 		if ( is_wp_error( $query ) ) {
 			return $query;
 		}
-		$intent            = sanitize_key( (string) ( $request->get_param( 'intent' ) ?: 'news' ) );
-		$recency_param     = $request->get_param( 'recency_days' );
-		$default_recency   = in_array( $intent, array( 'pricing_snapshot', 'product_comparison' ), true ) ? 0 : ( 'news' === $intent ? 7 : 30 );
-		$recency_days      = null === $recency_param || '' === $recency_param ? $default_recency : (int) $recency_param;
+		$intent          = sanitize_key( (string) ( $request->get_param( 'intent' ) ?: 'news' ) );
+		$recency_param   = $request->get_param( 'recency_days' );
+		$default_recency = in_array( $intent, array( 'pricing_snapshot', 'product_comparison' ), true ) ? 0 : ( 'news' === $intent ? 7 : 30 );
+		$recency_days    = null === $recency_param || '' === $recency_param ? $default_recency : (int) $recency_param;
 
 		return rest_ensure_response(
 			$this->client->test_cloud_web_search(
 				array(
-					'query'               => $query,
-					'intent'              => $intent,
-					'managed_source'      => sanitize_key( (string) $request->get_param( 'managed_source' ) ),
-					'max_results'         => max( 1, min( 5, (int) ( $request->get_param( 'max_results' ) ?: 3 ) ) ),
-					'recency_days'        => max( 0, min( 30, $recency_days ) ),
+					'query'          => $query,
+					'intent'         => $intent,
+					'managed_source' => sanitize_key( (string) $request->get_param( 'managed_source' ) ),
+					'max_results'    => max( 1, min( 5, (int) ( $request->get_param( 'max_results' ) ?: 3 ) ) ),
+					'recency_days'   => max( 0, min( 30, $recency_days ) ),
 				)
 			)
 		);
@@ -62,5 +62,4 @@ final class Rest_Web_Search_Bridges extends Rest_Controller_Support {
 			)
 		);
 	}
-
 }

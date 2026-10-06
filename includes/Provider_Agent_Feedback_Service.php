@@ -80,9 +80,9 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 	}
 
 	private function agent_feedback_payload( array $input ) {
-		$handoff        = is_array( $input['handoff'] ?? null ) ? $input['handoff'] : array();
-		$proposal_input = is_array( $handoff['proposal_input'] ?? null ) ? $handoff['proposal_input'] : array();
-		$outcome        = sanitize_key( (string) ( $input['local_outcome'] ?? '' ) );
+		$handoff          = is_array( $input['handoff'] ?? null ) ? $input['handoff'] : array();
+		$proposal_input   = is_array( $handoff['proposal_input'] ?? null ) ? $handoff['proposal_input'] : array();
+		$outcome          = sanitize_key( (string) ( $input['local_outcome'] ?? '' ) );
 		$allowed_outcomes = array(
 			'accepted',
 			'rejected',
@@ -101,8 +101,8 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 			);
 		}
 
-		$agent_id      = sanitize_key( (string) ( $input['agent_id'] ?? ( $handoff['agent_id'] ?? 'site_knowledge_suggestion_agent' ) ) );
-		$handoff_type  = sanitize_key( (string) ( $input['handoff_type'] ?? ( $handoff['handoff_type'] ?? 'proposal_input' ) ) );
+		$agent_id       = sanitize_key( (string) ( $input['agent_id'] ?? ( $handoff['agent_id'] ?? 'site_knowledge_suggestion_agent' ) ) );
+		$handoff_type   = sanitize_key( (string) ( $input['handoff_type'] ?? ( $handoff['handoff_type'] ?? 'proposal_input' ) ) );
 		$source_runtime = sanitize_key( (string) ( $input['source_runtime'] ?? 'site_knowledge' ) );
 		if ( '' === $agent_id ) {
 			$agent_id = 'site_knowledge_suggestion_agent';
@@ -124,33 +124,33 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 		}
 
 		return array(
-			'contract_version' => 'cloud_agent_feedback.v1',
-			'agent_id'         => $agent_id,
-			'agent_version'    => sanitize_text_field( (string) ( $input['agent_version'] ?? ( $handoff['agent_version'] ?? '' ) ) ),
-			'source_runtime'   => $source_runtime,
-			'source_run_id'    => sanitize_text_field( (string) ( $input['source_run_id'] ?? ( $handoff['source_run_id'] ?? '' ) ) ),
-			'handoff_id'       => $handoff_id,
-			'handoff_type'     => $handoff_type,
-			'local_surface'    => sanitize_key( (string) ( $input['local_surface'] ?? 'toolbox_site_knowledge' ) ),
-			'local_outcome'    => $outcome,
-			'feedback_labels'  => $this->sanitize_agent_feedback_labels( $input['feedback_labels'] ?? array() ),
-			'operator_note'    => substr( sanitize_textarea_field( (string) ( $input['operator_note'] ?? '' ) ), 0, 500 ),
-			'local_proposal_id' => sanitize_text_field( (string) ( $input['local_proposal_id'] ?? '' ) ),
-			'evidence_ref_ids' => $this->agent_feedback_evidence_ref_ids( $input, $proposal_input ),
-			'source_action_id' => substr( sanitize_text_field( (string) ( $input['source_action_id'] ?? '' ) ), 0, 191 ),
-			'source_object_type' => sanitize_key( (string) ( $input['source_object_type'] ?? '' ) ),
-			'source_object_id' => substr( sanitize_text_field( (string) ( $input['source_object_id'] ?? '' ) ), 0, 191 ),
+			'contract_version'    => 'cloud_agent_feedback.v1',
+			'agent_id'            => $agent_id,
+			'agent_version'       => sanitize_text_field( (string) ( $input['agent_version'] ?? ( $handoff['agent_version'] ?? '' ) ) ),
+			'source_runtime'      => $source_runtime,
+			'source_run_id'       => sanitize_text_field( (string) ( $input['source_run_id'] ?? ( $handoff['source_run_id'] ?? '' ) ) ),
+			'handoff_id'          => $handoff_id,
+			'handoff_type'        => $handoff_type,
+			'local_surface'       => sanitize_key( (string) ( $input['local_surface'] ?? 'toolbox_site_knowledge' ) ),
+			'local_outcome'       => $outcome,
+			'feedback_labels'     => $this->sanitize_agent_feedback_labels( $input['feedback_labels'] ?? array() ),
+			'operator_note'       => substr( sanitize_textarea_field( (string) ( $input['operator_note'] ?? '' ) ), 0, 500 ),
+			'local_proposal_id'   => sanitize_text_field( (string) ( $input['local_proposal_id'] ?? '' ) ),
+			'evidence_ref_ids'    => $this->agent_feedback_evidence_ref_ids( $input, $proposal_input ),
+			'source_action_id'    => substr( sanitize_text_field( (string) ( $input['source_action_id'] ?? '' ) ), 0, 191 ),
+			'source_object_type'  => sanitize_key( (string) ( $input['source_object_type'] ?? '' ) ),
+			'source_object_id'    => substr( sanitize_text_field( (string) ( $input['source_object_id'] ?? '' ) ), 0, 191 ),
 			'source_reason_codes' => $this->sanitize_string_list( $input['source_reason_codes'] ?? array(), 12 ),
-			'source_score'     => isset( $input['source_score'] ) ? max( 0, min( 100, (int) $input['source_score'] ) ) : null,
-			'source_severity'  => sanitize_key( (string) ( $input['source_severity'] ?? '' ) ),
-			'redaction_status' => 'metadata_only',
-			'retention_class'  => 'quality_eval',
-			'created_at'       => $created_at,
+			'source_score'        => isset( $input['source_score'] ) ? max( 0, min( 100, (int) $input['source_score'] ) ) : null,
+			'source_severity'     => sanitize_key( (string) ( $input['source_severity'] ?? '' ) ),
+			'redaction_status'    => 'metadata_only',
+			'retention_class'     => 'quality_eval',
+			'created_at'          => $created_at,
 		);
 	}
 
 	private function sanitize_agent_feedback_labels( $labels ): array {
-		$allowed = array(
+		$allowed    = array(
 			'evidence_useful',
 			'evidence_weak',
 			'wrong_intent',
@@ -164,21 +164,21 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 			'good_but_needs_human_draft',
 			'not_relevant_to_site',
 			'source_or_license_risk',
-				'visual_quality_low',
-				'operator_confidence_high',
-				'operator_confidence_low',
-				'media_search_has_results',
-				'media_search_no_results',
-				'media_search_runtime_error',
-				'media_candidate_adopted',
-				'alt_suggestion_applied',
-				'alt_saved_unchanged',
-				'alt_saved_edited',
-				'alt_saved_decorative',
-				'alt_saved_cleared',
-				'alt_suggestion_not_saved',
-			);
-		$items = is_array( $labels ) ? $labels : array();
+			'visual_quality_low',
+			'operator_confidence_high',
+			'operator_confidence_low',
+			'media_search_has_results',
+			'media_search_no_results',
+			'media_search_runtime_error',
+			'media_candidate_adopted',
+			'alt_suggestion_applied',
+			'alt_saved_unchanged',
+			'alt_saved_edited',
+			'alt_saved_decorative',
+			'alt_saved_cleared',
+			'alt_suggestion_not_saved',
+		);
+		$items      = is_array( $labels ) ? $labels : array();
 		$normalized = array();
 		foreach ( $items as $label ) {
 			$value = sanitize_key( (string) $label );
@@ -208,9 +208,9 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 			}
 			$value = sanitize_text_field( (string) ( $ref['id'] ?? ( $ref['ref_id'] ?? '' ) ) );
 			if ( '' === $value ) {
-				$source = sanitize_key( (string) ( $ref['source_type'] ?? 'evidence' ) );
+				$source    = sanitize_key( (string) ( $ref['source_type'] ?? 'evidence' ) );
 				$source_id = sanitize_text_field( (string) ( $ref['source_id'] ?? ( $ref['post_id'] ?? ( $ref['url'] ?? ( $index + 1 ) ) ) ) );
-				$value = $source . ':' . $source_id;
+				$value     = $source . ':' . $source_id;
 			}
 			$value = substr( $value, 0, 191 );
 			if ( '' !== $value && ! in_array( $value, $ids, true ) ) {
@@ -225,7 +225,7 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 		$data = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
 
 		return array(
-			'artifact_type'             => 'site_knowledge_agent_feedback_receipt',
+			'artifact_type'            => 'site_knowledge_agent_feedback_receipt',
 			'contract_version'         => 'cloud_agent_feedback.v1',
 			'status'                   => sanitize_key( (string) ( $response['status'] ?? 'ok' ) ),
 			'cloud_submission'         => 'submitted_for_eval',
@@ -245,7 +245,7 @@ final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 		$data = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
 
 		return array(
-			'artifact_type'        => 'site_knowledge_agent_feedback_summary',
+			'artifact_type'       => 'site_knowledge_agent_feedback_summary',
 			'contract_version'    => 'cloud_agent_feedback.v1',
 			'window_hours'        => $window_hours,
 			'events_total'        => absint( $data['events_total'] ?? 0 ),

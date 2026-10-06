@@ -13,7 +13,7 @@ final class Editor_Content_Format {
 	/** Accept exact editor content before the ordinary context sanitizer or cache. */
 	public static function request( WP_REST_Request $request ) {
 		$params = $request->get_json_params();
-		$keys = is_array( $params ) ? array_keys( $params ) : array();
+		$keys   = is_array( $params ) ? array_keys( $params ) : array();
 		sort( $keys );
 		$content = $params['content'] ?? null;
 		$post_id = $params['post_id'] ?? null;
@@ -28,11 +28,13 @@ final class Editor_Content_Format {
 		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_content_format_runtime' ) ) {
 			return self::error( 'unavailable', __( 'Cloud Addon is not ready yet. The original text is unchanged.', 'npcink-workflow-toolbox' ), 503 );
 		}
-		$response = npcink_cloud_addon_execute_toolbox_content_format_runtime( array(
-			'content' => $content,
-			'format' => 'html',
-			'source_sha256' => hash( 'sha256', $content ),
-		) );
+		$response = npcink_cloud_addon_execute_toolbox_content_format_runtime(
+			array(
+				'content'       => $content,
+				'format'        => 'html',
+				'source_sha256' => hash( 'sha256', $content ),
+			)
+		);
 		if ( is_wp_error( $response ) ) {
 			// Never echo arbitrary upstream errors or runtime payloads into the editor.
 			return self::error( 'cloud', __( 'Cloud formatting is temporarily unavailable. The original text is unchanged.', 'npcink-workflow-toolbox' ), 502 );
@@ -41,9 +43,9 @@ final class Editor_Content_Format {
 		if ( ! self::valid_result( $content, $result ) ) {
 			return self::error( 'candidate', __( 'The formatting result failed the body protection check. The original text is unchanged.', 'npcink-workflow-toolbox' ), 422 );
 		}
-		$result['post_id'] = $post_id;
+		$result['post_id']   = $post_id;
 		$result['persisted'] = false;
-		$response = rest_ensure_response( $result );
+		$response            = rest_ensure_response( $result );
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;
 	}
@@ -69,7 +71,7 @@ final class Editor_Content_Format {
 			|| hash( 'sha256', $result['candidate'] ) !== ( $result['candidate_sha256'] ?? null ) ) {
 			return false;
 		}
-		$candidate = $result['candidate'];
+		$candidate       = $result['candidate'];
 		$expected_status = $result['protected_content_skipped']
 			? ( $source === $candidate ? 'REVIEW' : 'PARTIAL' )
 			: ( $source === $candidate ? 'UNCHANGED' : 'CHANGED' );
@@ -85,14 +87,18 @@ final class Editor_Content_Format {
 	}
 
 	private static function protected_blocks_unchanged( array $before, array $after ): bool {
-		if ( count( $before ) !== count( $after ) ) { return false; }
+		if ( count( $before ) !== count( $after ) ) {
+			return false; }
 		foreach ( $before as $index => $block ) {
 			$next = $after[ $index ];
-			if ( $block['blockName'] !== $next['blockName'] || $block['attrs'] !== $next['attrs'] ) { return false; }
+			if ( $block['blockName'] !== $next['blockName'] || $block['attrs'] !== $next['attrs'] ) {
+				return false; }
 			$editable = in_array( $block['blockName'], array( 'core/paragraph', 'core/heading', 'core/list', 'core/list-item', 'core/quote' ), true )
 				&& ! isset( $block['attrs']['metadata'] );
-			if ( ! $editable && null !== $block['blockName'] && $block !== $next ) { return false; }
-			if ( ! self::protected_blocks_unchanged( $block['innerBlocks'], $next['innerBlocks'] ) ) { return false; }
+			if ( ! $editable && null !== $block['blockName'] && $block !== $next ) {
+				return false; }
+			if ( ! self::protected_blocks_unchanged( $block['innerBlocks'], $next['innerBlocks'] ) ) {
+				return false; }
 		}
 		return true;
 	}
@@ -105,17 +111,22 @@ final class Editor_Content_Format {
 			|| ! is_bool( $result['protected_content_skipped'] ) || ! is_int( $result['structural_changes'] ) || $result['structural_changes'] < 0
 			|| ! is_int( $result['inserted_spaces'] ) || $result['inserted_spaces'] < 0
 			|| ! is_string( $result['candidate'] ) || strlen( $result['candidate'] ) > 200000
-			|| hash( 'sha256', $source ) !== $result['source_sha256'] || hash( 'sha256', $result['candidate'] ) !== $result['candidate_sha256'] ) { return false; }
+			|| hash( 'sha256', $source ) !== $result['source_sha256'] || hash( 'sha256', $result['candidate'] ) !== $result['candidate_sha256'] ) {
+			return false; }
 		$changed = $source !== $result['candidate'];
-		$status = $result['protected_content_skipped'] ? ( $changed ? 'PARTIAL' : 'REVIEW' ) : ( $changed ? 'CHANGED' : 'UNCHANGED' );
-		if ( $status !== $result['status'] || ( ! $changed && ( $result['structural_changes'] || $result['inserted_spaces'] ) ) ) { return false; }
-		if ( ! $changed ) { return true; }
+		$status  = $result['protected_content_skipped'] ? ( $changed ? 'PARTIAL' : 'REVIEW' ) : ( $changed ? 'CHANGED' : 'UNCHANGED' );
+		if ( $status !== $result['status'] || ( ! $changed && ( $result['structural_changes'] || $result['inserted_spaces'] ) ) ) {
+			return false; }
+		if ( ! $changed ) {
+			return true; }
 		$before = self::structure_projection( parse_blocks( $source ) );
-		$after = self::structure_projection( parse_blocks( $result['candidate'] ) );
-		if ( false === $before || false === $after || count( $before ) !== count( $after ) ) { return false; }
+		$after  = self::structure_projection( parse_blocks( $result['candidate'] ) );
+		if ( false === $before || false === $after || count( $before ) !== count( $after ) ) {
+			return false; }
 		foreach ( $before as $index => $token ) {
 			$next = $after[ $index ];
-			if ( $token[0] !== $next[0] || ( 'text' === $token[0] ? ! self::only_inserted_spaces( $token[1], $next[1] ) : $token !== $next ) ) { return false; }
+			if ( $token[0] !== $next[0] || ( 'text' === $token[0] ? ! self::only_inserted_spaces( $token[1], $next[1] ) : $token !== $next ) ) {
+				return false; }
 		}
 		return true;
 	}
@@ -125,47 +136,62 @@ final class Editor_Content_Format {
 		$tokens = array();
 		$append = static function ( string $kind, $value ) use ( &$tokens ): void {
 			$last = count( $tokens ) - 1;
-			if ( 'text' === $kind && $last >= 0 && 'text' === $tokens[ $last ][0] ) { $tokens[ $last ][1] .= $value; }
-			else { $tokens[] = array( $kind, $value ); }
+			if ( 'text' === $kind && $last >= 0 && 'text' === $tokens[ $last ][0] ) {
+				$tokens[ $last ][1] .= $value; } else {
+				$tokens[] = array( $kind, $value ); }
 		};
 		foreach ( $blocks as $block ) {
-			if ( null === $block['blockName'] && '' === trim( $block['innerHTML'] ) ) { continue; }
+			if ( null === $block['blockName'] && '' === trim( $block['innerHTML'] ) ) {
+				continue; }
 			$fragments = array();
 			if ( 'core/paragraph' === $block['blockName'] && ! $block['attrs'] && ! $block['innerBlocks']
-				&& preg_match( '~^\s*<p>(.*)</p>\s*$~s', $block['innerHTML'], $match ) ) { $fragments[] = $match[1]; }
-			elseif ( 'core/list' === $block['blockName'] && ! $block['attrs']
+				&& preg_match( '~^\s*<p>(.*)</p>\s*$~s', $block['innerHTML'], $match ) ) {
+				$fragments[] = $match[1]; } elseif ( 'core/list' === $block['blockName'] && ! $block['attrs']
 				&& preg_match( '~^\s*<ul class="wp-block-list">\s*</ul>\s*$~s', $block['innerHTML'] ) ) {
-				foreach ( $block['innerBlocks'] as $item ) {
-					if ( 'core/list-item' !== $item['blockName'] || $item['attrs'] || $item['innerBlocks']
-						|| ! preg_match( '~^\s*<li>(.*)</li>\s*$~s', $item['innerHTML'], $match ) ) { return false; }
-					$fragments[] = $match[1];
+					foreach ( $block['innerBlocks'] as $item ) {
+						if ( 'core/list-item' !== $item['blockName'] || $item['attrs'] || $item['innerBlocks']
+						|| ! preg_match( '~^\s*<li>(.*)</li>\s*$~s', $item['innerHTML'], $match ) ) {
+							return false; }
+						$fragments[] = $match[1];
+					}
+				} else {
+					$append( 'protected', serialize_block( $block ) );
+					continue; }
+				foreach ( $fragments as $html ) {
+					$parser = new WP_HTML_Tag_Processor( $html );
+					$stack  = array();
+					while ( $parser->next_token() ) {
+						$type = $parser->get_token_type();
+						if ( '#text' === $type ) {
+							$append( array_intersect( array( 'A', 'CODE' ), $stack ) ? 'protected_text' : 'text', $parser->get_modifiable_text() );
+							continue; }
+						if ( '#tag' !== $type ) {
+							return false; }
+						$tag   = $parser->get_tag();
+						$attrs = array();
+						foreach ( $parser->get_attribute_names_with_prefix( '' ) ?? array() as $name ) {
+							$attrs[ $name ] = $parser->get_attribute( $name ); }
+						ksort( $attrs );
+						if ( 'BR' === $tag && ! $attrs && ! $parser->is_tag_closer() ) {
+							continue; }
+						if ( ! in_array( $tag, array( 'A', 'STRONG', 'EM', 'B', 'I', 'S', 'DEL', 'CODE' ), true ) ) {
+							return false; }
+						if ( $parser->is_tag_closer() ) {
+							if ( array_pop( $stack ) !== $tag ) {
+												return false; }
+						} else {
+										$stack[] = $tag; }
+						$append( 'tag', array( $tag, $parser->is_tag_closer(), $attrs ) );
+					}
+					if ( $stack ) {
+						return false; }
 				}
-			} else { $append( 'protected', serialize_block( $block ) ); continue; }
-			foreach ( $fragments as $html ) {
-				$parser = new WP_HTML_Tag_Processor( $html );
-				$stack = array();
-				while ( $parser->next_token() ) {
-					$type = $parser->get_token_type();
-					if ( '#text' === $type ) { $append( array_intersect( array( 'A', 'CODE' ), $stack ) ? 'protected_text' : 'text', $parser->get_modifiable_text() ); continue; }
-					if ( '#tag' !== $type ) { return false; }
-					$tag = $parser->get_tag();
-					$attrs = array();
-					foreach ( $parser->get_attribute_names_with_prefix( '' ) ?? array() as $name ) { $attrs[ $name ] = $parser->get_attribute( $name ); }
-					ksort( $attrs );
-					if ( 'BR' === $tag && ! $attrs && ! $parser->is_tag_closer() ) { continue; }
-					if ( ! in_array( $tag, array( 'A', 'STRONG', 'EM', 'B', 'I', 'S', 'DEL', 'CODE' ), true ) ) { return false; }
-					if ( $parser->is_tag_closer() ) { if ( array_pop( $stack ) !== $tag ) { return false; } }
-					else { $stack[] = $tag; }
-					$append( 'tag', array( $tag, $parser->is_tag_closer(), $attrs ) );
-				}
-				if ( $stack ) { return false; }
-			}
 		}
 		return $tokens;
 	}
 
 	public static function only_inserted_spaces( string $source, string $candidate ): bool {
-		$i = 0;
+		$i      = 0;
 		$length = strlen( $source );
 		for ( $j = 0, $end = strlen( $candidate ); $j < $end; ++$j ) {
 			if ( $i < $length && $source[ $i ] === $candidate[ $j ] ) {
@@ -180,7 +206,7 @@ final class Editor_Content_Format {
 	private static function markup_fingerprint( string $html ): string {
 		$processor = new WP_HTML_Tag_Processor( $html );
 		$protected = array();
-		$mask = array();
+		$mask      = array();
 		while ( $processor->next_token() ) {
 			$type = $processor->get_token_type();
 			if ( '#tag' === $type ) {

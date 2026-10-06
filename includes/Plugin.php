@@ -12,11 +12,11 @@ use Npcink\LocalAutomationRuntime\NightlyInspection\Basic_WP_Cron_Dry_Run;
 defined( 'ABSPATH' ) || exit;
 
 final class Plugin {
-	public const OPTION_NAME         = 'npcink_toolbox_settings';
-	public const CONTEXT_OPTION_NAME = 'npcink_toolbox_content_context';
-	public const MEDIA_OPTION_NAME   = 'npcink_toolbox_media_optimization_settings';
+	public const OPTION_NAME           = 'npcink_toolbox_settings';
+	public const CONTEXT_OPTION_NAME   = 'npcink_toolbox_content_context';
+	public const MEDIA_OPTION_NAME     = 'npcink_toolbox_media_optimization_settings';
 	public const WATERMARK_OPTION_NAME = 'npcink_toolbox_watermark_templates';
-	public const REST_NAMESPACE      = 'npcink-toolbox/v1';
+	public const REST_NAMESPACE        = 'npcink-toolbox/v1';
 
 	private static ?Plugin $instance = null;
 
@@ -35,19 +35,19 @@ final class Plugin {
 	private Abilities $abilities;
 
 	private function __construct() {
-		$this->settings          = new Settings();
-		$this->client            = new Provider_Client( $this->settings );
-		$this->publish_preflight = new Publish_Preflight_Service();
-		$this->rest_controller   = new Rest_Controller( $this->settings, $this->client, $this->publish_preflight );
-		$this->admin_page        = new Admin_Page( $this->settings );
-		$this->dashboard_widget = new Dashboard_Widget( $this->client );
-		$this->editor_content_support = new Editor_Content_Support( $this->settings );
-		$this->article_audio_playback = new Article_Audio_Playback();
-		$this->site_knowledge_auto_sync = new Site_Knowledge_Auto_Sync( $this->client );
-		$this->nightly_inspection_cron = new Basic_WP_Cron_Dry_Run( $this->settings );
-		$this->media_fingerprint_scan = new Media_Fingerprint_Scan( $this->client );
+		$this->settings                       = new Settings();
+		$this->client                         = new Provider_Client( $this->settings );
+		$this->publish_preflight              = new Publish_Preflight_Service();
+		$this->rest_controller                = new Rest_Controller( $this->settings, $this->client, $this->publish_preflight );
+		$this->admin_page                     = new Admin_Page( $this->settings );
+		$this->dashboard_widget               = new Dashboard_Widget( $this->client );
+		$this->editor_content_support         = new Editor_Content_Support( $this->settings );
+		$this->article_audio_playback         = new Article_Audio_Playback();
+		$this->site_knowledge_auto_sync       = new Site_Knowledge_Auto_Sync( $this->client );
+		$this->nightly_inspection_cron        = new Basic_WP_Cron_Dry_Run( $this->settings );
+		$this->media_fingerprint_scan         = new Media_Fingerprint_Scan( $this->client );
 		$this->media_recognition_continuation = new Media_Recognition_Continuation( $this->client );
-		$this->abilities       = new Abilities( $this->settings, $this->client );
+		$this->abilities                      = new Abilities( $this->settings, $this->client );
 	}
 
 	public static function instance(): Plugin {
@@ -198,5 +198,4 @@ final class Plugin {
 
 		return false;
 	}
-
 }

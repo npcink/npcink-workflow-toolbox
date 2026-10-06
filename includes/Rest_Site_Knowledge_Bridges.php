@@ -27,7 +27,7 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 
 	public function site_knowledge_status( WP_REST_Request $request ) {
 		$public_post_ids = $this->public_site_knowledge_post_ids();
-		$status = $this->client->get_site_knowledge_status(
+		$status          = $this->client->get_site_knowledge_status(
 			array(
 				'include_coverage' => true,
 				'post_ids'         => $public_post_ids,
@@ -36,9 +36,9 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 
 		if ( is_array( $status ) ) {
 			$status['article_index_statuses'] = $this->site_knowledge_article_index_statuses( $status, $public_post_ids );
-			$change_bridge = Site_Knowledge_Auto_Sync::health_snapshot();
-			$status['change_bridge'] = $change_bridge;
-			$status['auto_sync']     = $change_bridge;
+			$change_bridge                    = Site_Knowledge_Auto_Sync::health_snapshot();
+			$status['change_bridge']          = $change_bridge;
+			$status['auto_sync']              = $change_bridge;
 			if ( ! is_array( $status['site_knowledge_cloud_boundary'] ?? null ) ) {
 				$boundary = Site_Knowledge_Auto_Sync::cloud_boundary_projection( $change_bridge );
 				if ( array() !== $boundary ) {
@@ -59,14 +59,14 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 	private function public_site_knowledge_post_ids(): array {
 		$posts = get_posts(
 			array(
-				'post_type'              => array( 'post', 'page' ),
-				'post_status'            => 'publish',
-				'posts_per_page'         => 1000,
-				'fields'                 => 'ids',
-				'no_found_rows'          => true,
-				'orderby'                => 'modified',
-				'order'                  => 'DESC',
-				'ignore_sticky_posts'    => true,
+				'post_type'           => array( 'post', 'page' ),
+				'post_status'         => 'publish',
+				'posts_per_page'      => 1000,
+				'fields'              => 'ids',
+				'no_found_rows'       => true,
+				'orderby'             => 'modified',
+				'order'               => 'DESC',
+				'ignore_sticky_posts' => true,
 			)
 		);
 
@@ -79,7 +79,7 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 	 * @return array<int,array<string,mixed>>
 	 */
 	private function site_knowledge_article_index_statuses( array $status, array $public_post_ids ): array {
-		$coverage = is_array( $status['coverage'] ?? null ) ? $status['coverage'] : array();
+		$coverage        = is_array( $status['coverage'] ?? null ) ? $status['coverage'] : array();
 		$public_post_ids = array_values( array_unique( array_filter( array_map( 'absint', $public_post_ids ) ) ) );
 		if (
 			array() !== $public_post_ids
@@ -91,18 +91,18 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 			return array();
 		}
 		$indexed_ids = array_fill_keys( array_map( 'absint', is_array( $coverage['indexed_post_ids'] ?? null ) ? $coverage['indexed_post_ids'] : array() ), true );
-		$statuses = array();
+		$statuses    = array();
 		foreach ( $public_post_ids as $post_id ) {
 			$post = get_post( $post_id );
 			if ( ! $post ) {
 				continue;
 			}
 			$statuses[] = array(
-				'post_id'       => $post_id,
-				'title'         => sanitize_text_field( get_the_title( $post ) ),
-				'url'           => esc_url_raw( get_permalink( $post ) ),
-				'modified_gmt'  => sanitize_text_field( (string) $post->post_modified_gmt ),
-				'status'        => isset( $indexed_ids[ $post_id ] ) ? 'indexed' : 'not_indexed',
+				'post_id'      => $post_id,
+				'title'        => sanitize_text_field( get_the_title( $post ) ),
+				'url'          => esc_url_raw( get_permalink( $post ) ),
+				'modified_gmt' => sanitize_text_field( (string) $post->post_modified_gmt ),
+				'status'       => isset( $indexed_ids[ $post_id ] ) ? 'indexed' : 'not_indexed',
 			);
 		}
 
@@ -155,5 +155,4 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
 		return rest_ensure_response( $this->client->build_site_knowledge_review_plan( is_array( $params ) ? $params : array() ) );
 	}
-
 }

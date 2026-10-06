@@ -7,7 +7,11 @@
 
 $root     = dirname( __DIR__ );
 $admin_js = file_get_contents( $root . '/assets/admin.js' );
-$client   = file_get_contents( $root . '/includes/Provider_Client.php' );
+$client_source_files = glob( $root . '/includes/*.php' );
+$client   = '';
+foreach ( $client_source_files as $client_source_file ) {
+	$client .= "\n" . (string) file_get_contents( $client_source_file );
+}
 
 function npcink_toolbox_image_feedback_smoke_assert( $condition, $message ) {
 	if ( ! $condition ) {
