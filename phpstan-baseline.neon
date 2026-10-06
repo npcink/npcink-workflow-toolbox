@@ -283,6 +283,18 @@ parameters:
 			path: includes/Provider_Hosted_AI_Service.php
 
 		-
+			message: '#^Undefined variable\: \$internal_link_review_set$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/Provider_Hosted_AI_Service.php
+
+		-
+			message: '#^Undefined variable\: \$taxonomy_tag_review_set$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/Provider_Hosted_AI_Service.php
+
+		-
 			message: '#^Method Npcink_Toolbox\\Provider_Media_Alt_Caption_Service\:\:media_alt_caption_alt_candidates\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1

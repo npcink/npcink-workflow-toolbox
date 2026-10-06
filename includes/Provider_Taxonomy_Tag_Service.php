@@ -15,11 +15,15 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 
+	public function __construct( Settings $settings ) {
+		parent::__construct( $settings );
+	}
+
 	private const SUGGESTED_ACTION_VALUES = array( 'open_in_wordpress_editor', 'review_manually' );
 
-	private const MAX_POSTS_PER_REQUEST  = 50;
-	private const MAX_TITLE_CHARS        = 200;
-	private const MAX_EXCERPT_CHARS      = 300;
+	private const MAX_POSTS_PER_REQUEST   = 50;
+	private const MAX_TITLE_CHARS         = 200;
+	private const MAX_EXCERPT_CHARS       = 300;
 	private const MAX_EXISTING_CATEGORIES = 10;
 	private const MAX_EXISTING_TAGS       = 20;
 
@@ -67,9 +71,9 @@ final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 				continue;
 			}
 			$sparse[] = array(
-				'post_id'            => $post_id,
-				'post_title'         => $this->bounded_text( (string) $post_object->post_title, self::MAX_TITLE_CHARS ),
-				'post_excerpt'       => $this->bounded_text(
+				'post_id'             => $post_id,
+				'post_title'          => $this->bounded_text( (string) $post_object->post_title, self::MAX_TITLE_CHARS ),
+				'post_excerpt'        => $this->bounded_text(
 					'' !== (string) $post_object->post_excerpt
 						? (string) $post_object->post_excerpt
 						: wp_trim_words( (string) $post_object->post_content, 40, '…' ),
@@ -123,7 +127,7 @@ final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 		if ( ! $cloud_ready ) {
 			foreach ( $sample as $post ) {
 				$base['blocked_items'][] = array(
-					'post_id'       => (int) ( $post['post_id'] ?? 0 ),
+					'post_id'        => (int) ( $post['post_id'] ?? 0 ),
 					'blocked_reason' => 'cloud_classification_unavailable',
 				);
 			}
@@ -134,9 +138,9 @@ final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 		$available_tags       = $this->available_term_slugs( 'post_tag' );
 
 		foreach ( $sample as $post ) {
-			$post_id     = (int) ( $post['post_id'] ?? 0 );
-			$suggestion  = $indexed[ $post_id ] ?? null;
-			$item_base   = array(
+			$post_id    = (int) ( $post['post_id'] ?? 0 );
+			$suggestion = $indexed[ $post_id ] ?? null;
+			$item_base  = array(
 				'post_id'             => $post_id,
 				'post_title'          => (string) ( $post['post_title'] ?? '' ),
 				'existing_categories' => is_array( $post['existing_categories'] ?? null ) ? $post['existing_categories'] : array(),
@@ -155,7 +159,7 @@ final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 				is_array( $suggestion['suggested_categories'] ?? null ) ? $suggestion['suggested_categories'] : array(),
 				$available_categories
 			);
-			$suggested_tags = $this->filter_to_existing_terms(
+			$suggested_tags       = $this->filter_to_existing_terms(
 				is_array( $suggestion['suggested_tags'] ?? null ) ? $suggestion['suggested_tags'] : array(),
 				$available_tags
 			);
@@ -197,8 +201,8 @@ final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 	public function local_taxonomy_tag_review_response( array $sample ): array {
 		$review_set = $this->build_taxonomy_tag_review_set( $sample, array(), 'cloud_required' );
 		return array(
-			'intent'                => 'taxonomy_tag_suggestions',
-			'cloud_status'          => 'cloud_required',
+			'intent'                  => 'taxonomy_tag_suggestions',
+			'cloud_status'            => 'cloud_required',
 			'taxonomy_tag_review_set' => $review_set,
 		);
 	}
@@ -211,9 +215,9 @@ final class Provider_Taxonomy_Tag_Service extends Provider_Client_Support {
 	 */
 	public function cloud_request_payload( array $sample ): array {
 		return array(
-			'intent'         => 'taxonomy_tag_suggestions',
-			'data_classification' => 'pii',
-			'post_sample'    => $sample,
+			'intent'               => 'taxonomy_tag_suggestions',
+			'data_classification'  => 'pii',
+			'post_sample'          => $sample,
 			'available_categories' => $this->available_term_slugs( 'category', 200 ),
 			'available_tags'       => $this->available_term_slugs( 'post_tag', 500 ),
 		);

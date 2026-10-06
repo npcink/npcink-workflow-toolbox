@@ -119,7 +119,7 @@ tt_assert( false !== strpos( $source, "'proposal_created'          => false" ), 
 tt_assert( false !== strpos( $source, "'write_posture'             => 'suggestion_only'" ), 'Posture: suggestion_only' );
 
 // Verify bounded sampling (50 max).
-tt_assert( false !== strpos( $source, 'MAX_POSTS_PER_REQUEST  = 50' ), 'Bounded to 50 posts max' );
+tt_assert( false !== strpos( $source, 'MAX_POSTS_PER_REQUEST   = 50' ), 'Bounded to 50 posts max' );
 
 // Verify existing-terms-only boundary.
 tt_assert( false !== strpos( $source, 'filter_to_existing_terms' ), 'Filters suggestions to existing terms only' );

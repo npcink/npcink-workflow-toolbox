@@ -139,9 +139,9 @@ final class Provider_Client extends Provider_Client_Support {
 
 		$this->comment_moderation = new Provider_Comment_Moderation_Service( $settings, $this );
 
-		$this->flagged_media = new Provider_Flagged_Media_Service( $settings, $this );
-		$this->taxonomy_tag = new Provider_Taxonomy_Tag_Service( $settings, $this );
-		$this->internal_link_review = new Provider_Internal_Link_Review_Service( $settings, $this );
+		$this->flagged_media        = new Provider_Flagged_Media_Service( $settings, $this );
+		$this->taxonomy_tag         = new Provider_Taxonomy_Tag_Service( $settings );
+		$this->internal_link_review = new Provider_Internal_Link_Review_Service( $settings );
 
 		$this->hosted_ai = new Provider_Hosted_AI_Service( $settings, $this );
 
@@ -1057,5 +1057,4 @@ final class Provider_Client extends Provider_Client_Support {
 	public function local_internal_link_review_response( array $sample ): array {
 		return $this->internal_link_review->local_internal_link_review_response( $sample );
 	}
-
 }
