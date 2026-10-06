@@ -45,17 +45,14 @@ with the closing commit or PR for one release cycle, then prune.
   (DOMParser-based extraction or attribute stripping) is deferred to a
   dedicated behavior-change session; flagged by the 2026-10 split-session
   advisory review.
-- **Structure: staged splits are partially landed.** The first
-  editor-content-support session extracted the pure `text-utils.js` and
-  `internal-links.js` part files behind frozen namespaces (main bundle
-  11,191 -> 10,724 lines). Still owed: the remaining
-  `editor-content-support.js` clusters (image candidates, audio,
-  preflight, progressive, draft flows), `includes/Rest_Controller.php`
-  (~8.5k), `assets/admin.js` (~8k), and `includes/Admin_Page.php`
-  (~4.5k), following [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
-  (portable assertion sources first; part files must carry no
-  translations unless a per-handle JED contract is added). Sources: the
-  2026-10-03 systematic review and the first split session.
+- **Structure: audio cluster extracted; remaining JS clusters deferred
+  to just-in-time.** The editor-content-support split landed three parts
+  (text-utils, internal-links, audio-preferences) behind the JED
+  translation policy; the Rest_Controller split is complete (520-line
+  facade, 9 services). Remaining clusters (image candidates, preflight,
+  progressive, draft flows) are deferred until product work touches them,
+  per the just-in-time refactoring decision. `admin.js` (~8.2k) and
+  `Admin_Page.php` (~4.5k) are similarly deferred.
 - **`Rest_Controller::rest_route_scope()` coverage is asserted one-way**:
   a route registered but missing from the scope map silently degrades to
   coarse `manage_options` instead of failing the gate. A static contract
@@ -67,22 +64,7 @@ with the closing commit or PR for one release cycle, then prune.
   qualify for archival under the archive policy in
   [the documentation index](README.md); move them only together with the
   links that reference them.
-- **Live editor verification reopened and available**: a standalone
-  five-plugin site (WP 7.1, plugins symlinked from the sibling repos)
-  runs at `http://127.0.0.1:8090` from `~/wp-sites/npcink-five` using the
-  Local MySQL socket and lightning PHP 8.2 (`php -S` with
-  `wp-sites/npcink-five/router.php`). On 2026-10-06 the progressive
-  browser smoke passed in full against the split bundle (sidebar render,
-  namespaces loaded, zero console/page errors, prefetch POST with the
-  progressive intent, no Cloud/Adapter/Core calls, no writes), and the
-  internal-link batch variant passed its 18 behavioral assertions
-  including disabled direct writes and Apply gating; its trailing
-  no-HTTP-errors gate fails only because this site has no Cloud
-  credentials (5xx from the Cloud-required route) and needs a
-  Cloud-connected run to close. Environment: WP_PATH, WP_BASE_URL,
-  WP_CLI_PHP, WP_DB_SOCKET, NODE_PATH to a playwright install,
-  BROWSER_EXECUTABLE to a cached Chromium; pretty permalinks required
-  (REST otherwise uses ?rest_route= and URL matchers miss).
+
 - **The standalone site-knowledge review UI smoke is red on master**
   (`composer` script exists but is not in the default gate): it still pins
   Admin_Page copy ("Review handoff", "Evidence first", "Core review only",
@@ -104,6 +86,20 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **Live editor verification passed for the split bundle** — 2026-10-06:
+  the standalone five-plugin site ran the progressive browser smoke in
+  full (namespaces loaded, zero console/page errors, no-write assertions
+  all green) and the internal-link batch variant passed its 18 behavioral
+  assertions. The environment recipe is preserved here for repeat runs:
+  `php -S` at 127.0.0.1:8090 with pretty permalinks, WP_PATH/WP_BASE_URL/
+  WP_CLI_PHP/WP_DB_SOCKET env vars, and NODE_PATH+BROWSER_EXECUTABLE for
+  Playwright.
+- **0.4.0 shipped to WordPress.org** — SVN revision 3730454; the
+  five-review-set arc is complete (media ALT, taxonomy/tag, internal-link,
+  comment moderation, flagged media) alongside the Rest_Controller
+  restructure, editor JS part-file split, and required static analysis
+  gates.
 
 - **No live-site smoke against the split editor bundle** — resolved
   2026-10-06: the standalone five-plugin site above now runs the editor
