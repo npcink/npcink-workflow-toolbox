@@ -35,7 +35,7 @@ il_assert( false === strpos( $source, 'wp_update_post' ), 'Service never calls w
 il_assert( false === strpos( $source, 'wp_insert_post' ), 'Service never calls wp_insert_post' );
 il_assert( false === strpos( $source, 'wp_set_post_terms' ), 'Service never calls wp_set_post_terms' );
 il_assert( false !== strpos( $source, "'post_content_unchanged'" ), 'Posture: post_content_unchanged' );
-il_assert( false !== strpos( $source, "'write_posture'           => 'suggestion_only'" ), 'Posture: suggestion_only' );
+il_assert( false !== strpos( $source, "'write_posture'          => 'suggestion_only'" ), 'Posture: suggestion_only' );
 il_assert( false !== strpos( $source, 'internal_link_review_set.v1' ), 'Contract version v1' );
 il_assert( false !== strpos( $source, 'MAX_POSTS_PER_REQUEST = 50' ), 'Bounded to 50 posts' );
 il_assert( false !== strpos( $source, 'SPARSE_LINK_THRESHOLD = 3' ), 'Sparse threshold: 3 links' );

@@ -15,6 +15,10 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Provider_Internal_Link_Review_Service extends Provider_Client_Support {
 
+	public function __construct( Settings $settings ) {
+		parent::__construct( $settings );
+	}
+
 	private const MAX_POSTS_PER_REQUEST = 50;
 	private const MAX_TITLE_CHARS       = 200;
 	private const MAX_EXCERPT_CHARS     = 300;
@@ -63,15 +67,15 @@ final class Provider_Internal_Link_Review_Service extends Provider_Client_Suppor
 				continue;
 			}
 			$sparse[] = array(
-				'post_id'          => $post_id,
-				'post_title'       => $this->bounded_text( (string) $post_object->post_title, self::MAX_TITLE_CHARS ),
-				'post_excerpt'     => $this->bounded_text(
+				'post_id'             => $post_id,
+				'post_title'          => $this->bounded_text( (string) $post_object->post_title, self::MAX_TITLE_CHARS ),
+				'post_excerpt'        => $this->bounded_text(
 					'' !== (string) $post_object->post_excerpt
 						? (string) $post_object->post_excerpt
 						: wp_trim_words( (string) $post_object->post_content, 40, '…' ),
 					self::MAX_EXCERPT_CHARS
 				),
-				'existing_links'   => $existing_links,
+				'existing_links'      => $existing_links,
 				'existing_link_count' => count( $existing_links ),
 			);
 		}
@@ -92,25 +96,25 @@ final class Provider_Internal_Link_Review_Service extends Provider_Client_Suppor
 		$indexed     = $cloud_ready ? $this->index_by_post( $suggestions ) : array();
 
 		$base = array(
-			'artifact_type'           => 'internal_link_review_set',
-			'contract_version'        => 'internal_link_review_set.v1',
-			'write_posture'           => 'suggestion_only',
-			'post_content_unchanged'  => true,
-			'direct_wordpress_write'  => false,
-			'proposal_created'        => false,
-			'cloud_status'            => $cloud_ready ? 'available' : $cloud_status,
-			'eligibility_summary'     => array(
-				'sampled_post_count'   => count( $sample ),
+			'artifact_type'          => 'internal_link_review_set',
+			'contract_version'       => 'internal_link_review_set.v1',
+			'write_posture'          => 'suggestion_only',
+			'post_content_unchanged' => true,
+			'direct_wordpress_write' => false,
+			'proposal_created'       => false,
+			'cloud_status'           => $cloud_ready ? 'available' : $cloud_status,
+			'eligibility_summary'    => array(
+				'sampled_post_count'     => count( $sample ),
 				'sparse_link_post_count' => count( $sample ),
-				'selection_rule'       => 'published_posts_with_fewer_than_3_internal_links',
+				'selection_rule'         => 'published_posts_with_fewer_than_3_internal_links',
 			),
-			'selected_items'          => array(),
-			'blocked_items'           => array(),
-			'operator_next_action'    => $cloud_ready
+			'selected_items'         => array(),
+			'blocked_items'          => array(),
+			'operator_next_action'   => $cloud_ready
 				? __( 'Review each suggested internal link, then open the post in the WordPress editor to insert links.', 'npcink-workflow-toolbox' )
 				: __( 'Connect Npcink Cloud to get internal-link suggestions for posts with sparse linking.', 'npcink-workflow-toolbox' ),
-			'retryable'               => ! $cloud_ready,
-			'retry_guidance'          => $cloud_ready
+			'retryable'              => ! $cloud_ready,
+			'retry_guidance'         => $cloud_ready
 				? ''
 				: __( 'This review set needs the Cloud hosted AI runtime. Connect Cloud in the Cloud Addon settings, then retry.', 'npcink-workflow-toolbox' ),
 		);
@@ -142,17 +146,17 @@ final class Provider_Internal_Link_Review_Service extends Provider_Client_Suppor
 				if ( ! is_array( $link ) ) {
 					continue;
 				}
-				$target_id = absint( $link['target_post_id'] ?? 0 );
+				$target_id  = absint( $link['target_post_id'] ?? 0 );
 				$target_url = esc_url_raw( (string) ( $link['target_url'] ?? '' ) );
 				if ( $target_id < 1 || '' === $target_url ) {
 					continue;
 				}
 				$links[] = array(
-					'target_post_id'      => $target_id,
-					'target_title'        => $this->bounded_text( (string) ( $link['target_title'] ?? '' ), 120 ),
-					'target_url'          => $target_url,
+					'target_post_id'        => $target_id,
+					'target_title'          => $this->bounded_text( (string) ( $link['target_title'] ?? '' ), 120 ),
+					'target_url'            => $target_url,
 					'suggested_anchor_text' => $this->bounded_text( (string) ( $link['suggested_anchor_text'] ?? '' ), 80 ),
-					'confidence'          => max( 0.0, min( 1.0, (float) ( $link['confidence'] ?? 0.0 ) ) ),
+					'confidence'            => max( 0.0, min( 1.0, (float) ( $link['confidence'] ?? 0.0 ) ) ),
 				);
 			}
 

@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,31 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.4.0 =
+
+* Completed the five-review-set arc: taxonomy and tag review, internal-link
+  review, comment moderation review, flagged media review, and media
+  ALT/caption review all share the same bounded, suggestion-only pattern.
+* Added the taxonomy and tag review set as a site-level site-helper intent:
+  samples published posts with sparse term assignments and suggests existing
+  categories and tags. No term creation, no assignment.
+* Added the internal-link review set: samples published posts with sparse
+  internal linking and suggests link candidates from existing content.
+  No link insertion from this surface.
+* Added admin panels for both new review sets alongside the existing
+  comment moderation and flagged media panels.
+* Restructured the REST controller into nine focused service classes behind
+  a thin facade (520 lines, down from 8,517), making future cluster work
+  independently revertible.
+* Split editor JavaScript into part files behind explicit namespaces with a
+  per-handle translation policy for translated parts.
+* Enrolled in the Static Analysis Standard with PHPStan level 5 and PHPCS
+  WordPress-Core as required CI gates after a full phpcbf formatting pass.
+* Added a zero-dependency undefined-call audit gate for the editor bundle.
+* Verified the split bundle on a live five-plugin WordPress site with green
+  progressive browser smokes and internal-link batch behavior checks.
+
 
 = 0.3.0 =
 

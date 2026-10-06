@@ -38,7 +38,7 @@ if ( ! function_exists( 'npcink_cloud_addon_site_knowledge_change_bridge_health'
 // Plugin constants defined in the guarded bootstrap at the repository root;
 // PHPStan's collector does not see past the early-return guard.
 if ( ! defined( 'NPCINK_TOOLBOX_VERSION' ) ) {
-	define( 'NPCINK_TOOLBOX_VERSION', '0.3.0' );
+	define( 'NPCINK_TOOLBOX_VERSION', '0.4.0' );
 }
 if ( ! defined( 'NPCINK_TOOLBOX_FILE' ) ) {
 	define( 'NPCINK_TOOLBOX_FILE', __FILE__ );
