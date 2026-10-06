@@ -77,18 +77,15 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
-      # Static Analysis Standard v1, advisory since 2026-10-04: the gate
-      # findings stay visible but never block. Promote to required by
-      # deleting continue-on-error once every PR since introduction has
-      # run both gates clean on master. PHPStan findings render as PR
-      # annotations; PHPCS findings appear in this job's log.
+      # Static Analysis Standard v1, required since 2026-10-06 after
+      # running advisory-clean since introduction (PR #184). PHPStan
+      # findings render as PR annotations; PHPCS findings appear in
+      # this job's log.
       - name: Run PHPStan (level 5)
         run: composer analyse:php -- --error-format=github
-        continue-on-error: true
 
       - name: Run PHPCS
         run: composer lint:standards
-        continue-on-error: true
 
       - name: Run static contracts on PHP 8.4
         run: composer test:all

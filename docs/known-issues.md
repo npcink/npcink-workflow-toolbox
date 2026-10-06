@@ -96,19 +96,12 @@ with the closing commit or PR for one release cycle, then prune.
   progressive, writing-pack/draft) follows the same standard in later
   sessions, after the editor-content-support.js clusters establish the
   JED translation policy.
-- **PHPStan/PHPCS ratchet debt after enrollment (2026-10-04).**
-  `composer analyse:php` still reports 133 level-5 findings (dominated by
-  defensive re-checks: `is_array()` on already-narrowed types, `??` on
-  stub-typed non-nullable `WP_Post` properties and proven-present offsets)
-  and 16 unused methods (mostly `Admin_Page` media-derivative render
-  helpers that look like ADR-017 cleanup leftovers); `composer
-  lint:standards` reports 505 errors + 3,375 warnings across 38 files,
-  3,801 of them auto-fixable alignment noise. Both gates run advisory in
-  CI. Promotion requires: delete the dead methods in a dedicated cleanup
-  (each deletion must be checked against pinned needles), ratchet the
-  defensive findings into narrow commented `ignoreErrors` or code fixes,
-  and hold `phpcbf` until the needle-pinned sources are portable (the
-  Rest_Controller split does this for its own file).
+- **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
+  findings live in `phpstan-baseline.neon` after the phpcbf pass and
+  promotion to required. The baseline exists to shrink: when a cluster
+  split or cleanup removes a finding class, regenerate the baseline and
+  the ratchet holds. The 16 unused-method candidates remain in the
+  baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
 
