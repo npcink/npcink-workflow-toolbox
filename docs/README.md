@@ -66,6 +66,7 @@ Start from the active documents below before changing code.
 - [WordPress MCP Approval Hook Proposal Draft](platform/wordpress-mcp-approval-hook-proposal-draft.md)
 - [UX Hardening Operator Trial 2026-10](ux-hardening-operator-trial-2026-10.md)
 - [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md)
+- [Development Lessons And Closeout 2026-10](development-lessons-2026-10.md)
 
 ## Product Surfaces
 
