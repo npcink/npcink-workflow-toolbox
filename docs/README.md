@@ -60,6 +60,7 @@ Start from the active documents below before changing code.
 - [WordPress.org Publication And Translation Closeout](archive/2026-07/wordpress-org-publication-translation-closeout-2026-07-03.md)
 - [WordPress.org 0.3.0 Publication Closeout](archive/2026-10/wordpress-org-publication-0-3-0-closeout-2026-10-02.md)
 - [Translation Source Language Policy](translation-source-language-policy.md)
+- [Editor Part JED Translation Policy v1](editor-part-jed-policy.md)
 - [Operator Terminology Standard v1](platform/operator-terminology-standard-v1.md)
 - [MCP Governance Surface Decision](platform/mcp-governance-surface-decision.md)
 - [WordPress MCP Approval Hook Proposal Draft](platform/wordpress-mcp-approval-hook-proposal-draft.md)

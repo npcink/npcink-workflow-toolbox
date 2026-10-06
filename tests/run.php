@@ -1077,9 +1077,37 @@ toolbox_assert( false !== strpos( $development_workflow, 'accepted_fix' ) && fal
 $editor_support = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
 $editor_rest_source = toolbox_read_rest_controller_sources( $root );
 toolbox_assert( false !== strpos( $editor_support, 'assets/editor-content-support.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support.css' ) && false !== strpos( $editor_support, 'assets/editor-content-support/text-utils.js' ) && false !== strpos( $editor_support, 'assets/editor-content-support/internal-links.js' ), 'Post editor content support enqueues its editor assets.' );
-toolbox_assert( false !== strpos( $editor_support, "array( 'npcink-toolbox-editor-content-support-text-utils' )" ) && false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-internal-links', 'wp-api-fetch'" ), 'Editor content-support parts load before the main bundle through the enqueue dependency chain.' );
+toolbox_assert( false !== strpos( $editor_support, "array( 'npcink-toolbox-editor-content-support-text-utils' )" ) && false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch'" ), 'Editor content-support parts load before the main bundle through the enqueue dependency chain.' );
 $editor_support_part_sources = toolbox_read_editor_content_support_parts( $root );
-toolbox_assert( '' !== $editor_support_part_sources && false === strpos( $editor_support_part_sources, '__(' ) && false === strpos( $editor_support_part_sources, 'apiFetch' ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-text-utils'" ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-internal-links'" ), 'Editor content-support parts stay pure: no translations, no requests, and no per-part script translations.' );
+foreach ( toolbox_editor_content_support_part_names( $root ) as $editor_part_policy_name ) {
+	$editor_part_policy_source = (string) file_get_contents( $root . '/assets/editor-content-support/' . $editor_part_policy_name );
+	$editor_part_policy_handle = '';
+	preg_match( "#'([^']+)',\s*NPCINK_TOOLBOX_URL \. 'assets/editor-content-support/" . $editor_part_policy_name . "'#", $editor_support, $editor_part_policy_handle_match );
+	$editor_part_policy_handle = (string) ( $editor_part_policy_handle_match[1] ?? '' );
+	if ( false === strpos( $editor_part_policy_source, '__(' ) ) {
+		toolbox_assert( false === strpos( $editor_part_policy_source, 'apiFetch' ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'" . $editor_part_policy_handle . "'" ), "The pure part {$editor_part_policy_name} stays translation-free with no requests and no script translations, per the editor part JED policy." );
+	} else {
+		toolbox_assert( false !== strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'" . $editor_part_policy_handle . "'" ) && is_file( $root . '/languages/npcink-workflow-toolbox-zh_CN-' . $editor_part_policy_handle . '.json' ), "The translated part {$editor_part_policy_name} registers its own handle, script translations, and per-handle JED catalog, per the editor part JED policy." );
+	}
+}
+$editor_part_jed_policy = (string) file_get_contents( $root . '/docs/editor-part-jed-policy.md' );
+$audio_part_source      = (string) file_get_contents( $root . '/assets/editor-content-support/audio-preferences.js' );
+$audio_jed              = file_get_contents( $root . '/languages/npcink-workflow-toolbox-zh_CN-npcink-toolbox-editor-content-support-audio.json' );
+toolbox_assert( false !== strpos( $editor_part_jed_policy, 'One handle, one catalog' ) && false !== strpos( $editor_part_jed_policy, 'main bundle catalog stays a superset' ), 'The editor part JED translation policy is recorded and discoverable.' );
+toolbox_assert( false !== strpos( $editor_support, "'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch'" ) && false !== strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-editor-content-support-audio'" ) && false !== strpos( $editor_support, 'assets/editor-content-support/audio-preferences.js' ) && false === strpos( $editor_support_part_sources, 'apiFetch' ), 'The translated audio part enqueues its own handle with its own script translations registration before the main bundle, and no part makes requests.' );
+$audio_jed_decoded = is_string( $audio_jed ) ? json_decode( $audio_jed, true ) : null;
+$audio_jed_messages = is_array( $audio_jed_decoded ) && isset( $audio_jed_decoded['locale_data']['messages'] ) && is_array( $audio_jed_decoded['locale_data']['messages'] ) ? $audio_jed_decoded['locale_data']['messages'] : array();
+toolbox_assert( array() !== $audio_jed_messages && array_key_exists( 'Calm', $audio_jed_messages ) && array_key_exists( 'Tone: calm and steady.', $audio_jed_messages ) && '' !== (string) ( $audio_jed_messages['Calm'][0] ?? '' ), 'The audio part JED catalog uses the locale_data structure WordPress loads and translates its option labels.' );
+toolbox_assert( false !== strpos( $editor_support, "array( 'wp-i18n', 'wp-element', 'wp-components' )," ), 'The translated audio part declares the wp packages it captures at load time.' );
+preg_match_all( '/__(?:\()\s*(["\'])((?:\\\\.|(?!\1).)*)\1\s*,\s*(["\'])npcink-workflow-toolbox\3/', $audio_part_source, $audio_part_translation_matches );
+$missing_audio_part_translations = array();
+foreach ( array_unique( $audio_part_translation_matches[2] ?? array() ) as $audio_part_msgid ) {
+	$normalized_audio_msgid = stripcslashes( $audio_part_msgid );
+	if ( ! array_key_exists( $normalized_audio_msgid, $audio_jed_messages ) || '' === (string) ( $audio_jed_messages[ $normalized_audio_msgid ][0] ?? '' ) ) {
+		$missing_audio_part_translations[] = $normalized_audio_msgid;
+	}
+}
+toolbox_assert( array() === $missing_audio_part_translations, 'The audio part JED catalog covers every literal part string: ' . implode( ' | ', array_slice( $missing_audio_part_translations, 0, 8 ) ) );
 $editor_main_js_source = (string) file_get_contents( $root . '/assets/editor-content-support.js' );
 $internal_links_part_source   = (string) file_get_contents( $root . '/assets/editor-content-support/internal-links.js' );
 $internal_links_exported      = array();

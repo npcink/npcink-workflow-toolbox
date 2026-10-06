@@ -11,6 +11,7 @@ const mainPath = fileURLToPath(new URL('../assets/editor-content-support.js', im
 export const PART_ORDER = [
 	'text-utils.js',
 	'internal-links.js',
+	'audio-preferences.js',
 ];
 
 export function readEditorContentSupportSources() {
