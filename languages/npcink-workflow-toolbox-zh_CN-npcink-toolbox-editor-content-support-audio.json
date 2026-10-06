@@ -1,0 +1,42 @@
+{
+  "translation-revision-date": "2026-10-06 00:00+0800",
+  "generator": "Codex",
+  "domain": "messages",
+  "locale_data": {
+    "messages": {
+      "": {"domain": "messages", "lang": "zh_CN", "plural_forms": "nplurals=1; plural=0;"},
+      "Calm": ["平稳"],
+      "Content handling": ["内容处理"],
+      "Content handling: read important code fragments when they are useful to listeners.": ["内容处理：当代码片段对听众有用时读出重点代码。"],
+      "Content handling: skip code blocks and inline code fragments.": ["内容处理：跳过代码块和行内代码片段。"],
+      "Content handling: skip tables and dense lists.": ["内容处理：跳过表格和密集列表。"],
+      "Expressive": ["有感染力"],
+      "Extra request: ": ["补充要求："],
+      "Faster": ["偏快"],
+      "Focus": ["重点"],
+      "Focus: add clear pauses around headings.": ["重点：标题前后停顿清楚。"],
+      "Focus: pronounce numbers and units clearly.": ["重点：数字和单位读清楚。"],
+      "Focus: pronounce product names clearly.": ["重点：产品名读清楚。"],
+      "Formal": ["正式"],
+      "Heading pauses": ["标题停顿"],
+      "Narration preferences": ["朗读偏好"],
+      "Normal": ["正常"],
+      "Numbers": ["数字"],
+      "Pace": ["语速"],
+      "Pace: normal.": ["语速：正常。"],
+      "Pace: slightly faster while staying clear.": ["语速：略快，但保持清晰。"],
+      "Pace: slightly slower for listening clarity.": ["语速：略慢，便于听清。"],
+      "Product names": ["产品名"],
+      "Read code": ["读出代码"],
+      "Relaxed": ["轻松"],
+      "Skip code": ["跳过代码"],
+      "Skip tables": ["跳过表格"],
+      "Slower": ["偏慢"],
+      "Tone": ["语气"],
+      "Tone: calm and steady.": ["语气：平稳、稳定。"],
+      "Tone: expressive but not exaggerated.": ["语气：有感染力，但不过度夸张。"],
+      "Tone: formal and clear.": ["语气：正式、清晰。"],
+      "Tone: relaxed and natural.": ["语气：轻松、自然。"]
+    }
+  }
+}
