@@ -195,6 +195,36 @@ gate_triage_matches() {
 	grep -Eq "^[[:space:]]*[-*][[:space:]]*(\\[[ xX]\\][[:space:]]*)?$(gate_escape_id "$2")[[:space:]]+(fix|accept):" <<< "$1"
 }
 
+# The body slice between the "## AI Review Triage" heading and the next
+# heading; only lines inside this slice can satisfy triage - a matching
+# line quoted in another section must not count.
+gate_triage_section() {
+	awk '/^## AI Review Triage[[:space:]]*$/ { in_section = 1; next } /^## / { in_section = 0 } in_section { print }' <<< "$1"
+}
+
+# Build the body with one exception line inserted under the existing
+# AI Review Exceptions header (never at the body end, which could land
+# the bullet after later sections). The line goes in through ENVIRON:
+# awk -v would process backslash escapes in the free-text reason.
+exception_body_from() {
+	local body="$1"
+	# Idempotent for the bullet itself: an identical exception line means
+	# the body already records this exception.
+	if grep -Fq -- "${exception_line}" <<< "${body}"; then
+		printf '%s\n' "${body}"
+		return 0
+	fi
+	if grep -Eq '^[[:space:]]*##[[:space:]]+AI Review Exceptions[[:space:]]*$' <<< "${body}"; then
+		printf '%s\n' "${body}" | EXCEPTION_LINE="${exception_line}" awk '
+			BEGIN { line = ENVIRON["EXCEPTION_LINE"] }
+			!inserted && /^[[:space:]]*##[[:space:]]+AI Review Exceptions[[:space:]]*$/ { print; print line; inserted = 1; next }
+			{ print }
+		'
+	else
+		printf '%s\n\n## AI Review Exceptions\n\n%s\n' "${body}" "${exception_line}"
+	fi
+}
+
 # --- Self-test ---------------------------------------------------------------
 # Pins the producer contract against the five real summary shapes observed
 # from the pinned action, plus marker extraction, id escaping, triage
@@ -292,6 +322,49 @@ Third block, different file.'
 	check 'triage line matches embedded id' "$(gate_triage_matches "${triage_slice}" 'emb:a\b(c).L1' && echo yes)" 'yes'
 	check 'unanchored mention does not count' "$(gate_triage_matches "elsewhere: see 2b8d2a4f5d1a325f in prose" '2b8d2a4f5d1a325f' || echo no)" 'no'
 
+	# The gate-owned string surfaces (not producer contracts) are pinned
+	# here too: the triage slice must be scoped to its own section, and
+	# the exception writer must be idempotent, insert under the existing
+	# header, and append a new section - each without disturbing the rest
+	# of the body.
+	local scoped_body='## AI Review Triage
+
+- abc123 fix: x
+
+## Notes
+
+- abc123 accept: quoted elsewhere'
+	check 'triage slice scoped to its section' "$(gate_triage_section "$(printf '%s
+' "${scoped_body}")" | grep -c 'abc123')" '1'
+
+	local exception_line='- 2026-10-07 — merged without a delivered OpenCodeReview round (fixture): reason'
+	local exc_header_only exc_with_line exc_expected_insert exc_append
+	exc_header_only="$(printf '%s
+
+%s
+
+%s' 'body' '## AI Review Exceptions' '- old line')"
+	exc_with_line="$(printf '%s
+
+%s
+
+%s
+%s' 'body' '## AI Review Exceptions' "${exception_line}" '- old line')"
+	check 'exception idempotent re-run' "$(exception_body_from "${exc_with_line}")" "${exc_with_line}"
+	exc_expected_insert="$(printf '%s
+
+%s
+%s
+
+%s' 'body' '## AI Review Exceptions' "${exception_line}" '- old line')"
+	check 'exception inserted under header' "$(exception_body_from "${exc_header_only}")" "${exc_expected_insert}"
+	exc_append="$(printf '%s
+
+%s
+
+%s' 'body' '## AI Review Exceptions' "${exception_line}")"
+	check 'exception appends new section' "$(exception_body_from 'body')" "${exc_append}"
+
 	if [ "${failures}" -ne 0 ]; then
 		echo "[ai-review-gate] self-test failed (${failures} assertion(s))" >&2
 		return 1
@@ -307,6 +380,11 @@ if [ "${self_test}" = '1' ]; then
 	gate_self_test
 	exit $?
 fi
+
+# jq is required by the self-test fixtures too (gate_marker_tsv pipes
+# through jq), so the guard must sit above the self-test dispatch; gh is
+# only needed by the live gate flow.
+command -v jq >/dev/null 2>&1 || fail 'jq is required'
 
 [ -n "${pr_number}" ] || fail '--pr is required'
 [ -n "${head_sha}" ] || fail '--head-sha is required'
@@ -326,7 +404,6 @@ esac
 head_sha="$(printf '%s' "${head_sha}" | tr '[:upper:]' '[:lower:]')"
 
 command -v gh >/dev/null 2>&1 || fail 'GitHub CLI (gh) is required'
-command -v jq >/dev/null 2>&1 || fail 'jq is required'
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || fail 'run inside a Git worktree'
 cd "${repo_root}"
@@ -335,10 +412,10 @@ github_repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)" \
 	|| fail 'could not resolve the repository from the gh context'
 
 run_poll_seconds=20
-# The review workflow's own timeout-minutes is 30, and the completion wait
+# The review workflow's own timeout-minutes is 45, and the completion wait
 # also absorbs queue time before the job starts (plus 45s/90s in-run retry
-# pauses), so 105 x 20s = 35 minutes covers the worst legitimate round.
-run_poll_max_iterations=105
+# pauses), so 150 x 20s = 50 minutes covers the worst legitimate round.
+run_poll_max_iterations=150
 discovery_poll_seconds=15
 discovery_poll_max=6
 
@@ -384,28 +461,6 @@ wait_for_completion() {
 	return 1
 }
 
-# Build the body with one exception line inserted under the existing
-# AI Review Exceptions header (never at the body end, which could land
-# the bullet after later sections). The line goes in through ENVIRON:
-# awk -v would process backslash escapes in the free-text reason.
-exception_body_from() {
-	local body="$1"
-	# Idempotent for the bullet itself: an identical exception line means
-	# the body already records this exception.
-	if grep -Fq -- "${exception_line}" <<< "${body}"; then
-		printf '%s\n' "${body}"
-		return 0
-	fi
-	if grep -Eq '^[[:space:]]*##[[:space:]]+AI Review Exceptions[[:space:]]*$' <<< "${body}"; then
-		printf '%s\n' "${body}" | EXCEPTION_LINE="${exception_line}" awk '
-			BEGIN { line = ENVIRON["EXCEPTION_LINE"] }
-			!inserted && /^[[:space:]]*##[[:space:]]+AI Review Exceptions[[:space:]]*$/ { print; print line; inserted = 1; next }
-			{ print }
-		'
-	else
-		printf '%s\n\n## AI Review Exceptions\n\n%s\n' "${body}" "${exception_line}"
-	fi
-}
 
 undelivered_exit() {
 	local cause="$1"
@@ -418,15 +473,21 @@ undelivered_exit() {
 		# inside the one-round-trip window is recovered instead of lost.
 		# Idempotent: a repeated --no-review-because run appends under the
 		# existing exceptions section instead of stacking headers.
-		current="$(gh pr view "${pr_number}" --json body --jq '.body // ""')"
+		if ! current="$(gh pr view "${pr_number}" --json body --jq '.body // ""' 2>/dev/null)"; then
+			fail "could not read PR #${pr_number} while recording the exception; the exception is NOT recorded and publishing must stop"
+		fi
 		new_body="$(exception_body_from "${current}")"
 		if ! printf '%s' "${new_body}" | gh pr edit "${pr_number}" --body-file - >/dev/null 2>&1; then
 			fail "could not write the exception line to PR #${pr_number}; the exception is NOT recorded and publishing must stop"
 		fi
-		verify_body="$(gh pr view "${pr_number}" --json body --jq '.body // ""')"
+		if ! verify_body="$(gh pr view "${pr_number}" --json body --jq '.body // ""' 2>/dev/null)"; then
+			fail "could not read PR #${pr_number} back after writing the exception; the exception state is UNVERIFIED and publishing must stop"
+		fi
 		if ! grep -Fq -- "${exception_line}" <<< "${verify_body}"; then
 			echo '[ai-review-gate] the exception line did not land (concurrent body edit); retrying once' >&2
-			current="$(gh pr view "${pr_number}" --json body --jq '.body // ""')"
+			if ! current="$(gh pr view "${pr_number}" --json body --jq '.body // ""' 2>/dev/null)"; then
+				fail "could not re-read PR #${pr_number} while recording the exception; the exception is NOT recorded and publishing must stop"
+			fi
 			if ! grep -Fq -- "${exception_line}" <<< "${current}"; then
 				new_body="$(exception_body_from "${current}")"
 				if ! printf '%s' "${new_body}" | gh pr edit "${pr_number}" --body-file - >/dev/null 2>&1; then
@@ -474,8 +535,17 @@ if [ "${conclusion}" != 'success' ]; then
 	case "${attempt_before}" in
 		''|*[!0-9]*) undelivered_exit 'the review run state is unreadable' ;;
 	esac
-	echo "[ai-review-gate] review run ${run_id} failed (${conclusion}); re-running its failed jobs once"
-	if ! rerun_output="$(gh run rerun "${run_id}" --failed 2>&1)"; then
+	# --failed re-runs only failed jobs; a cancelled run (its own timeout
+	# kill, or the per-PR concurrency group cancelling it for an interleaved
+	# round) has no failed jobs to select and needs a full re-run.
+	rerun_mode='--failed'
+	if [ "${conclusion}" = 'cancelled' ]; then
+		rerun_mode=''
+	fi
+	echo "[ai-review-gate] review run ${run_id} failed (${conclusion}); re-running it once (${rerun_mode:-all jobs})"
+	# rerun_mode is one of two fixed literals; the unquoted expansion is
+	# the word-split that turns '' into no flag.
+	if ! rerun_output="$(gh run rerun "${run_id}" ${rerun_mode} 2>&1)"; then
 		echo "[ai-review-gate] the re-run request itself failed: ${rerun_output}" >&2
 		undelivered_exit 'the re-run request failed'
 	fi
@@ -653,9 +723,9 @@ if ! pr_body="$(gh pr view "${pr_number}" --json body --jq '.body // ""')"; then
 	fail 'could not fetch the pull request body for triage verification'
 fi
 # Only the "## AI Review Triage" section counts; a - <id> fix:/accept:
-# shaped line elsewhere in the body (quoted example, code block) must
-# not satisfy the gate.
-triage_slice="$(printf '%s\n' "${pr_body}" | awk '/^## AI Review Triage[[:space:]]*$/ { in_section = 1; next } /^## / { in_section = 0 } in_section { print }')"
+# shaped line elsewhere in the body (quoted example, code block) must not
+# satisfy the gate.
+triage_slice="$(gate_triage_section "${pr_body}")"
 
 pending=''
 pending_count=0

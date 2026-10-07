@@ -275,17 +275,19 @@ where it does not exist yet, so no CI round can register for its own
 enabling PR. The compensating local pre-publish review round covered it,
 and the first ordinary pull request after the merge runs the full CI loop.
 
-That local round raised seven findings on the new scripts; all seven were
-fixed in the same PR and the fixes are deltas against the
+Two local rounds raised 23 findings on the new scripts; the load-bearing
+ones were fixed in the same PR and the fixes are deltas against the
 `npcink-ai-client-adapter` originals, which should re-port them:
 
 - the publisher's open-PR reuse is scoped to the requested `--base`
   (one head can feed open PRs to different bases);
-- a gate failure now disarms a previously armed auto-merge first
-  (`gh pr merge --disable-auto`): GitHub keeps auto-merge enabled across
-  head pushes and `--match-head-commit` is only checked at request time,
-  so an armed merge could otherwise merge a newer untriaged head once
-  required checks pass;
+- the publisher disarms a previously armed auto-merge BEFORE the gate
+  waits (a stale armed merge could otherwise merge the newer, untriaged
+  head during the gate's polling, since GitHub keeps auto-merge enabled
+  across head pushes, `--match-head-commit` is only checked at request
+  time, and the review workflow is advisory and never a required check);
+  the disarm is state-aware (`gh pr view --json autoMergeRequest`), retries
+  once, and reports an undisableable armed merge loudly;
 - the reuse path re-validates the four shared headings (and the
   production approval line) against the live pull request body, which can
   drift from the local `--body-file` between runs;
@@ -293,9 +295,18 @@ fixed in the same PR and the fixes are deltas against the
   summary's `ocr-summary-run:` tag names a run other than the pinned one
   (an interleaved comment-triggered round edited it); an absent tag stays
   allowed because the observed skipped shape ships without one;
-- the gate's completion budget rose to 35 minutes (105 x 20s), past the
-  workflow timeout plus queue time;
-- `--head-sha` accepts 40- or 64-character shas (SHA-256 object format).
+- the gate's completion budget is 50 minutes (150 x 20s), past the
+  45-minute workflow timeout plus queue time;
+- a cancelled review run is re-run in full (`gh run rerun` without
+  `--failed`), because a cancelled run has no failed jobs to select;
+- `--head-sha` accepts 40- or 64-character shas (SHA-256 object format);
+- the jq dependency guard sits above the `--self-test` dispatch, and the
+  exception-recording PR-body reads fail with the auditable message
+  instead of a raw `set -e` abort;
+- the self-test pins the gate-owned string surfaces too (28 assertions):
+  the triage slice is scoped to its section, and the exception writer is
+  idempotent, inserts under the existing header, and appends a new
+  section.
 
 The template's `timeout-minutes` also rose from 30 to 45 the same day: the
 in-run triple retry can legitimately need ~33 minutes, and a timeout-killed
