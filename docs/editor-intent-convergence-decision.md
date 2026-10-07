@@ -85,12 +85,33 @@ rather than losing it.
    their query/context/result-shaping branches.
 2. Delete their result renderers from `assets/editor-content-support.js`
    (this is also the natural moment for the next JS cluster split).
-3. Update `tests/run.php` needles, the README/boundary/architecture
+3. Run a private-method reachability sweep from the public entrypoints and
+   delete every unreachable helper family in the same change (the
+   2026-10-07 implementation found 24 orphaned methods behind the removed
+   branches; see the Provider Split Refactor Standard lesson 7).
+4. Update `tests/run.php` needles, the README/boundary/architecture
    intent lists, and the fixed-button contract table in the same change.
-4. Retire the related msgids under the file-by-file Translation Source
+5. Retire the related msgids under the file-by-file Translation Source
    Language Policy; no bulk catalog regeneration.
-5. Gate: `composer test:all` plus the editor JS/browser smokes that cover
+6. Gate: `composer test:all` plus the editor JS/browser smokes that cover
    the surviving intents.
+
+## Lessons (2026-10-07 implementation)
+
+- **Cross-repo caller verification must classify hits by channel, not by
+  name.** Every same-name grep hit in the sibling repos belonged to a
+  different channel: Toolkit output fields, Core/Adapter plan artifact
+  keys, the Cloud Addon web-search guard allowlist, and the Cloud
+  site-knowledge `writing_support_plan` intent. Only after classifying all
+  of them does "zero family callers" become evidence rather than a guess.
+- **The fold needs a single writer.** The first implementation pre-assigned
+  the `local_article_checkup` section key in the editor service while
+  `build_sections()` also returned it; the advisory review flagged the
+  double writer. Additive folds should extend exactly one artifact
+  assembler.
+- **Retirement PRs should pin the new allowlist exactly.** A static
+  contract that pins the twelve-intent allowlist verbatim turns any future
+  add/remove into a deliberate, reviewable change instead of drift.
 
 Estimated reduction: roughly 10 route intents, their PHP branches and JS
 renderers, on the order of several hundred lines each side, plus needles
