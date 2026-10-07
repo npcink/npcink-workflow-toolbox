@@ -162,6 +162,25 @@ function toolbox_read_rest_controller_sources( string $root ): string {
 	return $source;
 }
 
+/**
+ * Admin page assertion source: the admin page facade plus every extracted
+ * Admin_Page_* render-cluster class, in sorted file order, so needles stop
+ * depending on which class a moved method lives in.
+ */
+function toolbox_read_admin_page_sources( string $root ): string {
+	$admin_page_files = glob( $root . '/includes/Admin_Page*.php' ) ?: array();
+	sort( $admin_page_files );
+	toolbox_assert( ! empty( $admin_page_files ), 'The admin page assertion source finds at least the facade file.' );
+	$source = '';
+	foreach ( $admin_page_files as $admin_page_file_index => $admin_page_file ) {
+		$admin_page_file_contents = file_get_contents( $admin_page_file );
+		toolbox_assert( false !== $admin_page_file_contents, 'The admin page source file ' . basename( (string) $admin_page_file ) . ' is readable.' );
+		$source .= ( 0 === $admin_page_file_index ? '' : "\n" ) . (string) $admin_page_file_contents;
+	}
+
+	return $source;
+}
+
 
 $main = file_get_contents( $root . '/npcink-workflow-toolbox.php' );
 $site_ops_insight_builder = file_get_contents( $root . '/includes/Site_Ops_Insight_Builder.php' );
@@ -695,11 +714,11 @@ toolbox_assert( false !== strpos( $site_knowledge_vector_contract, 'Jina And Rer
 toolbox_assert( false !== strpos( $site_knowledge_vector_contract, '`manage_options`' ) && false !== strpos( $site_knowledge_vector_contract, 'published posts and pages' ) && false !== strpos( $site_knowledge_vector_contract, 'approved comments' ) && false !== strpos( $site_knowledge_vector_contract, 'must not include' ) && false !== strpos( $site_knowledge_vector_contract, 'drafts, private posts, password-protected posts' ), 'Site Knowledge vector operations contract records permissions and public content admission.' );
 toolbox_assert( false !== strpos( $site_knowledge_vector_contract, '`sync_mode=refresh`' ) && false !== strpos( $site_knowledge_vector_contract, '`sync_mode=rebuild`' ) && false !== strpos( $site_knowledge_vector_contract, '`sync_mode=delete`' ) && false !== strpos( $site_knowledge_vector_contract, 'embedding provider settings' ) && false !== strpos( $site_knowledge_vector_contract, 'direct_wordpress_write' ), 'Site Knowledge vector operations contract allows refresh while forbidding local lifecycle and write operations.' );
 
-$admin_page = file_get_contents( $root . '/includes/Admin_Page.php' );
+$admin_page = toolbox_read_admin_page_sources( $root );
 $admin_css  = file_get_contents( $root . '/assets/admin.css' );
 $ability_surface_metadata = file_get_contents( $root . '/includes/Ability_Surface_Metadata.php' );
 toolbox_assert( false !== strpos( $admin_page, "private const PARENT_MENU_SLUG = 'npcink-ai';" ), 'Admin page targets the shared Npcink AI parent menu.' );
-toolbox_assert( false !== strpos( $admin_page, "private const MENU_SLUG        = 'npcink-toolbox';" ), 'Admin page uses stable Toolbox menu slug.' );
+toolbox_assert( false !== strpos( $admin_page, "protected const MENU_SLUG = 'npcink-toolbox';" ), 'Admin page keeps the stable Toolbox menu slug, shared with the site-check render cluster base.' );
 $retired_toolbox_slug = implode( '-', array( 'magick', 'ai', 'toolbox' ) );
 $retired_menu_const   = 'LEGACY_' . 'MENU_SLUG';
 $retired_redirect     = 'redirect_' . 'legacy_menu_slug';
@@ -767,7 +786,7 @@ toolbox_assert( false === strpos( $admin_page, 'admin_post_npcink_toolbox_nightl
 toolbox_assert( false === strpos( $admin_page, "if ( 'advanced' === \$requested" ) && false === strpos( $admin_page, "'morning-brief'" ) && false === strpos( $admin_page, 'render_advanced_panel' ) && false === strpos( $admin_page, 'npcink-toolbox__advanced-group' ) && false === strpos( $admin_page, "query_text_param( 'tab' )" ) && false === strpos( $admin_page, "query_text_param( 'tool' )" ), 'Old Advanced directory URLs, tab/tool alias handling, and separate Advanced rendering are fully removed.' );
 toolbox_assert( false === strpos( $admin_page, 'Prepare reference context before running review tools.' ) && false === strpos( $admin_page, 'Open the detailed read-only report for the current site check.' ) && false !== strpos( $admin_page, 'data-toolbox-site-check-panel="scheduled-review"' ) && false !== strpos( $admin_page, 'Preview scheduled review' ) && false !== strpos( $admin_page, 'Cloud run history and recovery open in Cloud Addon.' ) && false !== strpos( $admin_page, 'Open Cloud run recovery' ) && false === strpos( $admin_page, 'Open related controls' ) && false === strpos( $admin_page, 'Check Cloud-backed reachability without changing WordPress.' ), 'Site Check scheduled-review sub tab routes preview and Cloud recovery without an Advanced middle page.' );
 toolbox_assert( false === strpos( $admin_page, 'Troubleshooting checks' ) && false === strpos( $admin_page, 'toolbox_tab=cloud-checks' ) && false === strpos( $admin_page, 'Content library connection' ) && false === strpos( $admin_page, 'Open Cloud Addon for Site Knowledge connector status and public refresh.' ), 'Site Check omits Toolbox Cloud Checks and Cloud Addon content-library setup links.' );
-toolbox_assert( false !== strpos( $admin_page, 'private function content_context_ready' ) && false === strpos( $admin_page, '$this->normalize_string_list' ), 'Start readiness stays self-contained in Admin_Page and does not call Settings-only helpers.' );
+toolbox_assert( false !== strpos( $admin_page, 'protected function content_context_ready' ) && false === strpos( $admin_page, '$this->normalize_string_list' ), 'Start readiness stays self-contained in the Admin_Page family (facade plus site-check base) and does not call Settings-only helpers.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-tab-panel="site-knowledge"' ) && false === strpos( $admin_page, 'Content Library Usage' ), 'Admin page removes the independent Site Knowledge panel from Toolbox.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-site-knowledge-sync-submit' ) && false === strpos( $admin_page, 'Start indexing' ) && false === strpos( $admin_page, 'Refresh index' ), 'Site Knowledge index actions are absent from Toolbox.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-site-knowledge-status' ), 'Site Knowledge status controls are absent from Toolbox.' );

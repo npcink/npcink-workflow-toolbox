@@ -45,14 +45,24 @@ with the closing commit or PR for one release cycle, then prune.
   (DOMParser-based extraction or attribute stripping) is deferred to a
   dedicated behavior-change session; flagged by the 2026-10 split-session
   advisory review.
-- **Structure: audio cluster extracted; remaining JS clusters deferred
-  to just-in-time.** The editor-content-support split landed three parts
+- **Structure: staged splits; remaining clusters deferred to
+  just-in-time.** The editor-content-support split landed three parts
   (text-utils, internal-links, audio-preferences) behind the JED
   translation policy; the Rest_Controller split is complete (520-line
-  facade, 9 services). Remaining clusters (image candidates, preflight,
-  progressive, draft flows) are deferred until product work touches them,
-  per the just-in-time refactoring decision. `admin.js` (~8.2k) and
-  `Admin_Page.php` (~4.5k) are similarly deferred.
+  facade, 9 services); and the 2026-10-07 session extracted the Site
+  Check render cluster from `Admin_Page.php` into
+  `Admin_Page_Site_Ops_Panel` (4,620 -> 2,762 facade lines) with portable
+  admin-page assertion sources. Still owed, deferred until product work
+  touches them per the just-in-time refactoring decision: the remaining
+  `editor-content-support.js` clusters (image candidates, preflight,
+  progressive, draft flows), `includes/Rest_Editor_Content_Support.php`
+  (~6.5k), `assets/admin.js` (~8.2k), and the remaining `Admin_Page.php`
+  clusters (review-set tools, media derivative controls, content context
+  form), following [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
+  (portable assertion sources first; part files must carry no
+  translations unless a per-handle JED contract is added). Sources: the
+  2026-10-03 systematic review, the first split session, and the
+  2026-10-07 churn-ranked closeout.
 - **Dated closeout records at the `docs/` root** (June-July 2026 records
   such as the WordPress.org release readiness, site-check, operator-path,
   cross-repo 2026-07-08 series, and five-plugin hardening closeouts)
