@@ -319,6 +319,32 @@ The [PR publishing standard](pr-publishing-standard-v1.md) was updated the
 same day: the publisher's pre-push checklist now records the open-PR reuse
 behavior and the gate wait before the auto-merge request.
 
+## Effectiveness Metrics - 2026-10-07
+
+The deferred work from the pilot's hardening closeout ("OCR zero-findings
+summary comment and the three monthly OCR metrics") resolved differently
+than expected for its first half: the action already posts a sticky
+`<!-- ocr-summary -->` conversation comment on every finished round,
+including zero-findings completions ("Review complete: 0 finding(s)
+across N selected item(s)") and selection skips ("Review skipped: no
+items were selected" on docs-only diffs). No template change is needed
+for zero-findings visibility - the summary comment is the mechanical
+delivery signal in all finished outcomes, next to the
+`<!-- ocr-review-failed -->` marker for failed runs.
+
+On that basis this standard now carries a light monthly effectiveness
+record: three numbers per enrolled repository, collected by hand, no
+dashboard. Delivery rate (merged pull requests with at least one
+delivered round over all merged pull requests), findings by severity
+(delivered inline findings grouped by badge category and severity), and
+the triage ratio ("Fixed in <sha>" versus "Declined" maintainer replies).
+The numbers, the collection recipe, and the pilot baseline live in
+[`ai-code-review-metrics.md`](ai-code-review-metrics.md); headline of the
+pilot baseline (npcink-abilities-toolkit, pull requests #141-#210,
+2026-09-29 through 2026-10-07): 65/68 delivered (96%; all three gaps
+accounted for by record), 146 inline findings, 52 fixes against
+9 declines.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
@@ -397,12 +423,22 @@ adoption decision record.
 - Delivery confirmation. Advisory means a failed run blocks nothing, and a
   silent failure equals no review at all. Every merged pull request must have
   had at least one delivered review round (posted review comments, not merely
-  a green or missing check). A failed run leaves a marker comment; retry with
+  a green or missing check). A finished round always leaves the sticky
+  `<!-- ocr-summary -->` bot comment - on findings, zero-findings, and
+  selection-skip rounds alike - so that comment is the mechanical delivery
+  signal (see Effectiveness Metrics - 2026-10-07). A failed run leaves the
+  `<!-- ocr-review-failed -->` marker comment; retry with
   a `/open-code-review` comment or record in the pull request why the change
   merges unreviewed. On `npcink-ai-client-adapter` (since 2026-10-06) and
   `npcink-workflow-toolbox` (since 2026-10-07) this rule is mechanized at
   the publisher (see Template Update - 2026-10-06 and Enrollment And
   Publisher Gate - 2026-10-07).
+- Effectiveness metrics. Monthly, per enrolled repository: collect the
+  delivery rate, findings by severity, and the fix/decline triage ratio
+  with the recipe in [`ai-code-review-metrics.md`](ai-code-review-metrics.md)
+  and append a dated record there. Three numbers, collected by hand - no
+  dashboard, no automation - so "is it worth it" stays answerable from
+  evidence instead of anecdote.
 - Rollback. Remove the repository's workflow file and delete its secrets; the
   local CLI is independent (`npm uninstall -g @alibaba-group/open-code-review`).
 
