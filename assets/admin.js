@@ -1421,10 +1421,16 @@
 		appendMeta(meta, t('Source content owner'), formatSiteKnowledgeOwner(ownership.source_content_owner));
 		appendMeta(meta, t('Delivery bridge owner'), formatSiteKnowledgeOwner(ownership.delivery_bridge_owner));
 		appendMeta(meta, t('Index execution owner'), formatSiteKnowledgeOwner(ownership.index_execution_owner));
+		appendMeta(meta, t('Index lifecycle owner'), formatSiteKnowledgeOwner(ownership.index_lifecycle_owner));
+		appendMeta(meta, t('Freshness policy owner'), formatSiteKnowledgeOwner(ownership.freshness_policy_owner));
+		appendMeta(meta, t('Diagnostics detail owner'), formatSiteKnowledgeOwner(ownership.diagnostics_detail_owner));
 		appendMeta(meta, t('Vector storage owner'), formatSiteKnowledgeOwner(ownership.vector_storage_owner));
+		appendMeta(meta, t('Embedding execution owner'), formatSiteKnowledgeOwner(ownership.embedding_execution_owner));
 		appendMeta(meta, t('Approval owner'), formatSiteKnowledgeOwner(ownership.approval_owner));
 		appendMeta(meta, t('Final write owner'), formatSiteKnowledgeOwner(ownership.final_write_owner || ownership.wordpress_write_owner));
 		appendMeta(meta, t('Cloud is index truth'), truth.cloud_is_index_truth === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Cloud is freshness truth'), truth.cloud_is_freshness_truth === true ? t('Yes') : t('No'));
+		appendMeta(meta, t('Cloud is diagnostics truth'), truth.cloud_is_diagnostics_truth === true ? t('Yes') : t('No'));
 		appendMeta(meta, t('Cloud is WordPress control plane'), truth.cloud_is_wordpress_control_plane === true ? t('Yes') : t('No'));
 		appendMeta(meta, t('Cloud creates WordPress writes'), truth.cloud_creates_wordpress_writes === true ? t('Yes') : t('No'));
 		appendMeta(meta, t('Cloud owns ability registry'), truth.cloud_owns_ability_registry === true ? t('Yes') : t('No'));

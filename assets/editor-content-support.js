@@ -660,6 +660,26 @@
 		return false;
 	}
 
+	// Author/admin error audience split (ADR-018): admin-gated sidebar
+	// actions surface permission errors for editor-role users by design;
+	// the plain copy states the seam and the nothing-written posture while
+	// the original REST denial stays on the error object for the
+	// technical-detail folds admins read.
+	function normalizeRestErrorForAudience(error, httpStatus) {
+		if (!error || typeof error !== 'object') {
+			return error;
+		}
+		if (httpStatus && error.http_status === undefined) {
+			error.http_status = httpStatus;
+		}
+		if (httpStatus === 403 || error.code === 'rest_forbidden') {
+			error.code = error.code || 'rest_forbidden';
+			error.original_message = error.original_message || error.message || '';
+			error.message = __('This action needs a site administrator. Nothing was written.', 'npcink-workflow-toolbox');
+		}
+		return error;
+	}
+
 	async function postJsonToUrl(url, payload) {
 		const response = await fetch(url, {
 			method: 'POST',
@@ -671,7 +691,7 @@
 		});
 		const body = await response.json().catch(() => ({}));
 		if (!response.ok) {
-			throw body;
+			throw normalizeRestErrorForAudience(body, response.status);
 		}
 		return body;
 	}
@@ -709,7 +729,7 @@
 			});
 			const body = await response.json().catch(() => ({}));
 			if (!response.ok) {
-				throw body;
+				throw normalizeRestErrorForAudience(body, response.status);
 			}
 			return body;
 		} catch (error) {

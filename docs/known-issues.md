@@ -22,12 +22,11 @@ with the closing commit or PR for one release cycle, then prune.
   access.** Tracked with the audit trail in
   [Scoped Editor Permissions Lessons 2026-09](scoped-editor-permissions-lessons-2026-09.md);
   the object-level audits live there, not here.
-- **Full guided fresh-install onboarding tour needs product design**; the
-  shipped surface is notices plus a three-step card. Source:
-  [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md).
-- **Site Knowledge status owner-matrix rows and the author/admin error
-  audience split remain follow-ups.** The acceptance loop is the
-  [UX Hardening Operator Trial 2026-10](ux-hardening-operator-trial-2026-10.md).
+- **Full guided fresh-install onboarding tour has a proposed design**
+  ([Onboarding Tour Design v1](onboarding-tour-design-v1.md)) awaiting the
+  operator trial; the shipped surface remains notices plus a three-step
+  card until the trial answers the entry questions. Source: [UX Hardening
+  Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md).
 - **Cross-plugin "Core proposal" terminology** waits on the Operator
   Terminology Standard being accepted in all five repos. Source:
   [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md).
@@ -86,6 +85,19 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **Site Knowledge status owner-matrix rows and the author/admin error
+  audience split** — resolved 2026-10-07: the admin Site Knowledge status
+  renderer now shows every ownership row Cloud reports (adding
+  index-lifecycle, freshness-policy, diagnostics-detail, and
+  embedding-execution owners) plus the freshness and diagnostics truth
+  rows, pinned by a static contract so rows cannot silently drop again;
+  both editor REST wrappers normalize permission failures for the acting
+  audience (plain "This action needs a site administrator. Nothing was
+  written." copy with the original REST denial and http status preserved
+  on the error object), keeping the server-side scope boundary
+  authoritative per ADR-018. Trial steps 9 and 10 cover both in the
+  acceptance loop.
 
 - **Sixteen non-default editor intents converged 2026-10-07**: the accepted
   [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)

@@ -929,6 +929,16 @@ toolbox_assert( false !== strpos( $admin_js, 'toolWorkspaceForTarget' ) && false
 toolbox_assert( false !== strpos( $admin_js, 'data-toolbox-tool-panel-extra' ), 'Admin JavaScript toggles attached Workflow settings panels with their primary tool.' );
 toolbox_assert( false !== strpos( $admin_js, 'function formatDateTime' ) && false !== strpos( $admin_js, 'window.NpcinkToolbox.dateTime' ) && false !== strpos( $admin_js, "return parts.year + '-' + parts.month + '-' + parts.day + ' ' + hour" ), 'Admin JavaScript formats visible timestamps through the localized WordPress timezone.' );
 toolbox_assert( false !== strpos( $admin_js, "appendMeta(meta, t('Last sync'), formatDateTime(coverage.last_sync_at))" ) && false !== strpos( $admin_js, 'renderSiteKnowledgeArticleIndexStatuses' ) && false !== strpos( $admin_js, 'article_index_statuses' ), 'Site Knowledge status displays bounded article-level index coverage.' );
+toolbox_assert(
+	false !== strpos( $admin_js, "formatSiteKnowledgeOwner(ownership.index_lifecycle_owner)" )
+	&& false !== strpos( $admin_js, "formatSiteKnowledgeOwner(ownership.freshness_policy_owner)" )
+	&& false !== strpos( $admin_js, "formatSiteKnowledgeOwner(ownership.diagnostics_detail_owner)" )
+	&& false !== strpos( $admin_js, "formatSiteKnowledgeOwner(ownership.embedding_execution_owner)" )
+	&& false !== strpos( $admin_js, "formatSiteKnowledgeOwner(ownership.final_write_owner || ownership.wordpress_write_owner)" )
+	&& false !== strpos( $admin_js, 'truth.cloud_is_freshness_truth' )
+	&& false !== strpos( $admin_js, 'truth.cloud_is_diagnostics_truth' ),
+	'Site Knowledge status renders every ownership and truth row Cloud reports, including the index-lifecycle, freshness-policy, diagnostics-detail, embedding-execution owners and the freshness and diagnostics truth rows.'
+);
 toolbox_assert( false !== strpos( $admin_js, "appendMeta(meta, t('Expires'), formatDateTime(derivative.expires_at))" ) && false !== strpos( $admin_js, "appendMeta(itemMeta, t('Expires'), formatDateTime(derivative.expires_at))" ), 'Media derivative expiry display uses WordPress datetime formatting.' );
 toolbox_assert( false === strpos( $admin_js, 'initCloudCheckSwitcher' ) && false === strpos( $admin_js, 'data-toolbox-cloud-check-target' ), 'Admin JavaScript no longer initializes Cloud check section switching.' );
 toolbox_assert( false === strpos( $admin_js, 'data-toolbox-cloud-check-details' ) && false === strpos( $admin_js, 'activateCloudCheckPanel' ), 'Admin JavaScript no longer opens folded AI service diagnostics for cloud-checks deep links.' );
@@ -1477,6 +1487,14 @@ toolbox_assert( false !== strpos( $editor_js, 'copyReviewedValue' ) && false !==
 toolbox_assert( false !== strpos( $editor_js, 'Showing %1$d of %2$d items.' ) && false !== strpos( $editor_js, 'Tidy paragraph spacing, lists, and line breaks' ), 'Editor result lists disclose truncation counts and the format flow carries a description like its siblings.' );
 toolbox_assert( false !== strpos( $editor_js, 'CONTENT_SUPPORT_LONG_TIMEOUT_MS = 120000' ) && false !== strpos( $editor_js, 'beginContentRequest()' ) && false !== strpos( $editor_js, 'function cancelActiveContentRequest' ) && false !== strpos( $editor_js, 'npcink_toolbox_request_cancelled' ) && false !== strpos( $editor_js, "postJsonWithTimeout('ai/image-generation'" ) && false !== strpos( $editor_js, "postJsonWithTimeout(\n\t\t\t\t\t\t'flows/media-brief'" ) && false !== strpos( $editor_js, "'editor/content-support',\n\t\t\t\t\t\t\tpayload" ), 'Editor long Cloud flows run behind one cancellable signal with a generous shared timeout instead of an unbounded fetch.' );
 toolbox_assert( false !== strpos( $editor_js, 'coreHandoffFailure' ) && false !== strpos( $editor_js, 'handoffErrorMessage' ) && false !== strpos( $editor_js, 'handoff_failed' ) && false !== strpos( $editor_js, 'review_adapter_core_error' ) && false !== strpos( $editor_js, 'controls.error && controls.error.handoff_receipt' ), 'Editor Content Support renders failed metadata and SEO handoffs as receipt feedback instead of string-only errors.' );
+toolbox_assert(
+	false !== strpos( $editor_js, 'function normalizeRestErrorForAudience' )
+	&& false !== strpos( $editor_js, "error.code === 'rest_forbidden'" )
+	&& false !== strpos( $editor_js, 'error.original_message = error.original_message || error.message' )
+	&& false !== strpos( $editor_js, 'This action needs a site administrator. Nothing was written.' )
+	&& 2 === substr_count( $editor_js, 'throw normalizeRestErrorForAudience(body, response.status)' ),
+	'Both editor REST wrappers normalize permission failures for the acting audience: plain administrator copy, preserved original message and http status, and the server-side scope boundary stays authoritative (ADR-018).'
+);
 toolbox_assert( false !== strpos( $editor_js, "handoff_type: 'content_metadata_delta_handoff'" ) && false !== strpos( $editor_js, "source_item_id: 'summary_terms_optimization'" ) && false !== strpos( $editor_js, "handoff_type: 'seo_meta_handoff_preview'" ) && false !== strpos( $editor_js, "source_item_id: 'seo_handoff'" ), 'Editor handoff receipts identify metadata and SEO source review items.' );
 toolbox_assert( false !== strpos( $editor_js, 'renderCompactMetadataSection' ) && false !== strpos( $editor_js, 'mergeContentSupportResult' ) && false !== strpos( $editor_js, 'Category suggestions' ) && false !== strpos( $editor_js, 'Tag suggestions' ), 'Editor Content Support keeps split metadata results compact and mergeable.' );
 toolbox_assert( false !== strpos( $editor_js, 'metadataSectionHasSource' ) && false !== strpos( $editor_js, 'item && item.value' ) && false !== strpos( $editor_js, 'metadataHandoffHasChoices' ) && false !== strpos( $editor_js, "['summary_terms_optimization', 'category_suggestions', 'tag_suggestions']" ), 'Editor Content Support keeps metadata Core handoff available for the full metadata flow and focused term shortcuts.' );
