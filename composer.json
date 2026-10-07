@@ -204,6 +204,7 @@
     "dealerdirect/phpcodesniffer-composer-installer": "^1.2"
   },
   "config": {
+    "process-timeout": 900,
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
