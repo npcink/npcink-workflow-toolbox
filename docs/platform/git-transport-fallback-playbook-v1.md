@@ -71,6 +71,30 @@ Test all three paths before choosing a route:
    the GraphQL `resolveReviewThread` mutation using a freshly fetched
    thread id (reused ids silently resolve the wrong thread).
 
+## Addendum - 2026-10-07 (PR #210 outage round)
+
+Three additions proven while publishing through the new AI-review
+publisher gate with github.com HTTPS down (SSH fetch worked, but this
+machine's deploy key is read-only for this repository, and the
+publisher's `git fetch` retry budget does not survive a full outage):
+
+- **Remote branch deletion during an outage**: the deploy key cannot
+  push deletes, but the REST API can:
+  `gh api -X DELETE repos/{repo}/git/refs/heads/{branch}`.
+- **Master sync without HTTPS**: fetch over SSH and fast-forward
+  (`git fetch git@github.com:{repo}.git master && git merge --ff-only
+  FETCH_HEAD`). The `origin/master` tracking ref stays stale (status
+  shows `[ahead 1]`) until HTTPS recovers; that is cosmetic, and a
+  plain `git fetch origin` reconciles it.
+- **Composing the fallback with the AI-review gate**: after an API
+  replay push, create the PR with `gh pr create`, then run
+  `bash scripts/verify-ai-review.sh --pr {N} --head-sha {remote-sha}`
+  directly with the REMOTE head sha (the replayed commit SHA may differ
+  from the local one), and request auto-merge with the same remote sha
+  in `--match-head-commit`. The gate's run discovery matches on the
+  remote head, so this path verifies delivery exactly like the
+  publisher's own invocation.
+
 ## Local Worktree Protocol
 
 - Use sibling directories under `/Users/muze/gitee/` (for example
