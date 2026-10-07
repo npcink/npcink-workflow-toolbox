@@ -88,6 +88,7 @@ Start here before multi-repository design or implementation:
 - [AI Change Envelope Template](../ai-change-envelope-template.md)
 - [Pull Request Publishing Standard v1](pr-publishing-standard-v1.md)
 - [AI Code Review Standard v1](ai-code-review-standard-v1.md)
+- [AI Code Review Effectiveness Metrics](ai-code-review-metrics.md) — monthly three-number record (delivery rate, findings by severity, triage ratio) with the hand-collection recipe; keeps the advisory review's worth answerable from evidence.
 - [Git Transport Fallback Playbook v1](git-transport-fallback-playbook-v1.md) — how to keep publishing branches, pull requests, and merges when github.com git transports fail while api.github.com stays reachable: diagnosis matrix, Git Data API replay, server-side merges, and the local worktree protocol.
 - [Static Analysis Standard v1](static-analysis-standard-v1.md) — shared PHPStan + PHPCS setup for Npcink WordPress plugins: reference config, advisory-to-required promotion rule, and stub/impurity lessons. — shared advisory OpenCodeReview adoption: one machine-level CLI install plus a canonical per-repo workflow template; advisory only, never a required check.
 - [Provider Split Refactor Standard v1](provider-split-refactor-standard-v1.md) — method, needle-sensitivity inventory, and verification discipline for splitting contract-pinned god classes into facade plus cluster services with zero behavior change.
