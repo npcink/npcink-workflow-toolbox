@@ -7,6 +7,15 @@ Git CLI publication. Use `gh` only for GitHub-specific PR metadata, check
 inspection, or PR operations that plain `git` cannot perform after a successful
 push.
 
+`composer pr:publish` runs the publisher as a Composer script, and Composer's
+default 300-second process timeout can kill it mid-run when network retries or
+the AI review gate's polling stretch past five minutes (observed 2026-10-07:
+the gate's ~90-second discovery wait plus one 45-second retry exhausted it).
+`composer.json` sets `config.process-timeout: 900` for this reason; if the
+timeout still trips during a long outage, invoke
+`bash scripts/publish-pr.sh` directly with the same arguments (AGENTS.md
+sanctions both forms).
+
 ## Standard Path
 
 Before publishing, confirm scope and upstream state:
