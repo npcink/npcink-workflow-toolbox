@@ -63,12 +63,17 @@ with the closing commit or PR for one release cycle, then prune.
   translations unless a per-handle JED contract is added). Sources: the
   2026-10-03 systematic review, the first split session, and the
   2026-10-07 churn-ranked closeout.
-- **Dated closeout records at the `docs/` root** (June-July 2026 records
-  such as the WordPress.org release readiness, site-check, operator-path,
-  cross-repo 2026-07-08 series, and five-plugin hardening closeouts)
-  qualify for archival under the archive policy in
-  [the documentation index](README.md); move them only together with the
-  links that reference them.
+- **Dated closeout records at the `docs/` root** (June-July 2026 records):
+  the 2026-10-07 archival pass moved fourteen records (WordPress.org
+  release readiness, the site-check and operator-path closeouts, the
+  cross-repo 2026-07-08 series, media ALT governed closeout, and the
+  five-plugin hardening closeout) into `docs/archive/2026-06|07/` with
+  inbound links updated. A few dated summaries remain at the root
+  (admin-operator-ux-cleanup, toolbox-fixed-button-reference-notes,
+  reference-learning-synthesis, and the recent 2026-09/10 records);
+  qualify each under the archive policy in
+  [the documentation index](README.md) and move them only together with
+  the links that reference them.
 - **The extracted editor content-support service is a 6.5k-line single
   unit** (183 methods, PR for the facade closeout): the Rest_Controller
   split moved it wholesale to end the facade bottleneck. Sub-dividing it

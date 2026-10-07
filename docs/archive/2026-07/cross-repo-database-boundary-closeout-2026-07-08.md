@@ -12,7 +12,7 @@ WordPress-side projects:
 - `npcink-cloud-addon`
 
 The normative rule remains
-[Cross-Repo Database Boundary](cross-repo-database-boundary.md). This document
+[Cross-Repo Database Boundary](../../cross-repo-database-boundary.md). This document
 captures how that rule was derived, implemented, and verified so future AI
 sessions can continue from the same facts instead of re-opening the same
 boundary question.

@@ -440,12 +440,12 @@ For future cross-repository work, use this order:
 
 ## Authoritative Follow-Up Reading
 
-- [Platform Governance Index](platform/README.md)
-- [Platform Boundary And Development Summary](platform-boundary-and-development-summary-2026-07-12.md)
-- [Project History And Development Thinking](project-history-and-development-thinking-2026-07-12.md)
-- [Cross-Repo Boundary Matrix](cross-repo-boundary-matrix.md)
-- [Security And Performance Release Gate](security-performance-release-gate.md)
-- [Cloud Addon Transport Release Gate](cloud-addon-transport-release-gate.md)
-- [Development Workflow](development-workflow.md)
-- [AI Development Quality Workflow](ai-development-quality-workflow.md)
-- [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
+- [Platform Governance Index](../../platform/README.md)
+- [Platform Boundary And Development Summary](../../platform-boundary-and-development-summary-2026-07-12.md)
+- [Project History And Development Thinking](../../project-history-and-development-thinking-2026-07-12.md)
+- [Cross-Repo Boundary Matrix](../../cross-repo-boundary-matrix.md)
+- [Security And Performance Release Gate](../../security-performance-release-gate.md)
+- [Cloud Addon Transport Release Gate](../../cloud-addon-transport-release-gate.md)
+- [Development Workflow](../../development-workflow.md)
+- [AI Development Quality Workflow](../../ai-development-quality-workflow.md)
+- [ADR-008: Freeze Fixed-Button And Generic AI-Client Boundaries](../../decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md)
