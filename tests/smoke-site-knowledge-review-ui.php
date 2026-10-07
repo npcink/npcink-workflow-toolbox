@@ -48,11 +48,12 @@ npcink_toolbox_sk_review_smoke_assert(
 );
 
 npcink_toolbox_sk_review_smoke_assert(
-	false !== strpos( $admin_page, 'Review handoff' )
-	&& false !== strpos( $admin_page, 'Evidence first' )
-	&& false !== strpos( $admin_page, 'Core review only' )
-	&& false !== strpos( $admin_page, 'No direct write' ),
-	'Site Knowledge page explains the narrow evidence-backed Agent handoff before operator submission.'
+	false !== strpos( $admin_js, "'Governed handoff'" )
+		&& false !== strpos( $admin_js, 'Candidate prepared locally only. It has not been submitted to Core, approved, preflighted, or executed.' )
+		&& false !== strpos( $admin_js, 'Proposal candidate only. Review evidence, then use Core governance for approval, preflight, audit, and final WordPress writes.' )
+		&& false !== strpos( $admin_js, 'Review evidence and decide whether a local write plan is warranted.' )
+		&& false !== strpos( $admin_js, "'Prepare local proposal candidate'" ),
+	'Admin UI explains the narrow evidence-backed Agent handoff before operator submission through the client-side governed handoff renderer.'
 );
 
 npcink_toolbox_sk_review_smoke_assert(

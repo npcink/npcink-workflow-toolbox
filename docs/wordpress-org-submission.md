@@ -9,7 +9,7 @@ The 0.1.1 approval, publication, and zh_CN translation history is
 recorded in the closeouts linked below.
 
 The current release-readiness closeout is recorded in
-[`WordPress.org Release Readiness Closeout - 2026-06-29`](wordpress-org-release-readiness-closeout-2026-06-29.md).
+[`WordPress.org Release Readiness Closeout - 2026-06-29`](archive/2026-06/wordpress-org-release-readiness-closeout-2026-06-29.md).
 The post-approval publication and zh_CN translation closeout is recorded in
 [`WordPress.org Publication And Translation Closeout - 2026-07-03`](archive/2026-07/wordpress-org-publication-translation-closeout-2026-07-03.md).
 

@@ -162,6 +162,25 @@ function toolbox_read_rest_controller_sources( string $root ): string {
 	return $source;
 }
 
+/**
+ * Admin page assertion source: the admin page facade plus every extracted
+ * Admin_Page_* render-cluster class, in sorted file order, so needles stop
+ * depending on which class a moved method lives in.
+ */
+function toolbox_read_admin_page_sources( string $root ): string {
+	$admin_page_files = glob( $root . '/includes/Admin_Page*.php' ) ?: array();
+	sort( $admin_page_files );
+	toolbox_assert( ! empty( $admin_page_files ), 'The admin page assertion source finds at least the facade file.' );
+	$source = '';
+	foreach ( $admin_page_files as $admin_page_file_index => $admin_page_file ) {
+		$admin_page_file_contents = file_get_contents( $admin_page_file );
+		toolbox_assert( false !== $admin_page_file_contents, 'The admin page source file ' . basename( (string) $admin_page_file ) . ' is readable.' );
+		$source .= ( 0 === $admin_page_file_index ? '' : "\n" ) . (string) $admin_page_file_contents;
+	}
+
+	return $source;
+}
+
 
 $main = file_get_contents( $root . '/npcink-workflow-toolbox.php' );
 $site_ops_insight_builder = file_get_contents( $root . '/includes/Site_Ops_Insight_Builder.php' );
@@ -320,11 +339,11 @@ toolbox_assert( false !== strpos( $site_ops_operator_loop_doc, 'Site Check is th
 
 $cross_repo_boundary_doc              = file_get_contents( $root . '/docs/cross-repo-boundary-matrix.md' );
 $cross_repo_database_boundary_doc     = file_get_contents( $root . '/docs/cross-repo-database-boundary.md' );
-$cross_repo_database_closeout_doc     = file_get_contents( $root . '/docs/cross-repo-database-boundary-closeout-2026-07-08.md' );
+$cross_repo_database_closeout_doc     = file_get_contents( $root . '/docs/archive/2026-07/cross-repo-database-boundary-closeout-2026-07-08.md' );
 $cross_repo_contract_reuse_doc        = file_get_contents( $root . '/docs/cross-repo-contract-reuse-acceptance.md' );
-$cross_repo_contract_release_prep_doc = file_get_contents( $root . '/docs/cross-repo-contract-reuse-release-prep-2026-07-08.md' );
-$cross_repo_contract_stage_closeout   = file_get_contents( $root . '/docs/cross-repo-contract-reuse-stage-closeout-2026-07-08.md' );
-$toolbox_contract_reuse_readiness_doc = file_get_contents( $root . '/docs/toolbox-contract-reuse-readiness-2026-07-08.md' );
+$cross_repo_contract_release_prep_doc = file_get_contents( $root . '/docs/archive/2026-07/cross-repo-contract-reuse-release-prep-2026-07-08.md' );
+$cross_repo_contract_stage_closeout   = file_get_contents( $root . '/docs/archive/2026-07/cross-repo-contract-reuse-stage-closeout-2026-07-08.md' );
+$toolbox_contract_reuse_readiness_doc = file_get_contents( $root . '/docs/archive/2026-07/toolbox-contract-reuse-readiness-2026-07-08.md' );
 $platform_governance_index_doc        = file_get_contents( $root . '/docs/platform/README.md' );
 $platform_governance_history_doc      = file_get_contents( $root . '/docs/platform/cross-repo-platform-governance-history-2026-07-08.md' );
 $platform_history_readme_doc          = file_get_contents( $root . '/README.md' );
@@ -347,7 +366,7 @@ foreach ( array( 'Cross-Repo Database Boundary Closeout', 'ff5f450 Document cros
 	toolbox_assert( false !== strpos( $cross_repo_database_closeout_doc, $required_database_closeout_text ), 'Cross-repo database boundary closeout preserves history: ' . $required_database_closeout_text );
 }
 toolbox_assert( false !== strpos( $platform_history_readme_doc, 'docs/cross-repo-database-boundary.md' ) && false !== strpos( $platform_history_docs_index_doc, 'cross-repo-database-boundary.md' ), 'Cross-repo database boundary is indexed from README and docs index.' );
-toolbox_assert( false !== strpos( $platform_history_readme_doc, 'docs/cross-repo-database-boundary-closeout-2026-07-08.md' ) && false !== strpos( $platform_history_docs_index_doc, 'cross-repo-database-boundary-closeout-2026-07-08.md' ) && false !== strpos( $platform_governance_index_doc, 'cross-repo-database-boundary-closeout-2026-07-08.md' ), 'Cross-repo database boundary closeout is indexed from README, docs index, and platform index.' );
+toolbox_assert( false !== strpos( $platform_history_readme_doc, 'docs/archive/2026-07/cross-repo-database-boundary-closeout-2026-07-08.md' ) && false !== strpos( $platform_history_docs_index_doc, 'cross-repo-database-boundary-closeout-2026-07-08.md' ) && false !== strpos( $platform_governance_index_doc, 'cross-repo-database-boundary-closeout-2026-07-08.md' ), 'Cross-repo database boundary closeout is indexed from README, docs index, and platform index.' );
 foreach ( array( 'platform coordination index', 'not a replacement for each repository', 'Keep `npcink-governance-core` as the governance truth source only', 'proposal records', 'approval policy', 'commit preflight', 'operation classification', 'app-key governance', 'audit evidence', 'Each rule must have one authoritative owner', 'Default to `suggestion_only`', 'Escalate to `core_proposal_required`', 'Do not migrate a scattered norm into this repository just because it is useful', 'Existing Core documents that are governance-specific should remain in Core', 'second ability registry', 'second workflow registry', 'second approval store', 'second WordPress write executor' ) as $required_platform_index_text ) {
 	toolbox_assert( false !== strpos( $platform_governance_index_doc, $required_platform_index_text ), 'Platform governance index preserves rule: ' . $required_platform_index_text );
 }
@@ -695,11 +714,11 @@ toolbox_assert( false !== strpos( $site_knowledge_vector_contract, 'Jina And Rer
 toolbox_assert( false !== strpos( $site_knowledge_vector_contract, '`manage_options`' ) && false !== strpos( $site_knowledge_vector_contract, 'published posts and pages' ) && false !== strpos( $site_knowledge_vector_contract, 'approved comments' ) && false !== strpos( $site_knowledge_vector_contract, 'must not include' ) && false !== strpos( $site_knowledge_vector_contract, 'drafts, private posts, password-protected posts' ), 'Site Knowledge vector operations contract records permissions and public content admission.' );
 toolbox_assert( false !== strpos( $site_knowledge_vector_contract, '`sync_mode=refresh`' ) && false !== strpos( $site_knowledge_vector_contract, '`sync_mode=rebuild`' ) && false !== strpos( $site_knowledge_vector_contract, '`sync_mode=delete`' ) && false !== strpos( $site_knowledge_vector_contract, 'embedding provider settings' ) && false !== strpos( $site_knowledge_vector_contract, 'direct_wordpress_write' ), 'Site Knowledge vector operations contract allows refresh while forbidding local lifecycle and write operations.' );
 
-$admin_page = file_get_contents( $root . '/includes/Admin_Page.php' );
+$admin_page = toolbox_read_admin_page_sources( $root );
 $admin_css  = file_get_contents( $root . '/assets/admin.css' );
 $ability_surface_metadata = file_get_contents( $root . '/includes/Ability_Surface_Metadata.php' );
 toolbox_assert( false !== strpos( $admin_page, "private const PARENT_MENU_SLUG = 'npcink-ai';" ), 'Admin page targets the shared Npcink AI parent menu.' );
-toolbox_assert( false !== strpos( $admin_page, "private const MENU_SLUG        = 'npcink-toolbox';" ), 'Admin page uses stable Toolbox menu slug.' );
+toolbox_assert( false !== strpos( $admin_page, "protected const MENU_SLUG = 'npcink-toolbox';" ), 'Admin page keeps the stable Toolbox menu slug, shared with the site-check render cluster base.' );
 $retired_toolbox_slug = implode( '-', array( 'magick', 'ai', 'toolbox' ) );
 $retired_menu_const   = 'LEGACY_' . 'MENU_SLUG';
 $retired_redirect     = 'redirect_' . 'legacy_menu_slug';
@@ -767,7 +786,7 @@ toolbox_assert( false === strpos( $admin_page, 'admin_post_npcink_toolbox_nightl
 toolbox_assert( false === strpos( $admin_page, "if ( 'advanced' === \$requested" ) && false === strpos( $admin_page, "'morning-brief'" ) && false === strpos( $admin_page, 'render_advanced_panel' ) && false === strpos( $admin_page, 'npcink-toolbox__advanced-group' ) && false === strpos( $admin_page, "query_text_param( 'tab' )" ) && false === strpos( $admin_page, "query_text_param( 'tool' )" ), 'Old Advanced directory URLs, tab/tool alias handling, and separate Advanced rendering are fully removed.' );
 toolbox_assert( false === strpos( $admin_page, 'Prepare reference context before running review tools.' ) && false === strpos( $admin_page, 'Open the detailed read-only report for the current site check.' ) && false !== strpos( $admin_page, 'data-toolbox-site-check-panel="scheduled-review"' ) && false !== strpos( $admin_page, 'Preview scheduled review' ) && false !== strpos( $admin_page, 'Cloud run history and recovery open in Cloud Addon.' ) && false !== strpos( $admin_page, 'Open Cloud run recovery' ) && false === strpos( $admin_page, 'Open related controls' ) && false === strpos( $admin_page, 'Check Cloud-backed reachability without changing WordPress.' ), 'Site Check scheduled-review sub tab routes preview and Cloud recovery without an Advanced middle page.' );
 toolbox_assert( false === strpos( $admin_page, 'Troubleshooting checks' ) && false === strpos( $admin_page, 'toolbox_tab=cloud-checks' ) && false === strpos( $admin_page, 'Content library connection' ) && false === strpos( $admin_page, 'Open Cloud Addon for Site Knowledge connector status and public refresh.' ), 'Site Check omits Toolbox Cloud Checks and Cloud Addon content-library setup links.' );
-toolbox_assert( false !== strpos( $admin_page, 'private function content_context_ready' ) && false === strpos( $admin_page, '$this->normalize_string_list' ), 'Start readiness stays self-contained in Admin_Page and does not call Settings-only helpers.' );
+toolbox_assert( false !== strpos( $admin_page, 'protected function content_context_ready' ) && false === strpos( $admin_page, '$this->normalize_string_list' ), 'Start readiness stays self-contained in the Admin_Page family (facade plus site-check base) and does not call Settings-only helpers.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-tab-panel="site-knowledge"' ) && false === strpos( $admin_page, 'Content Library Usage' ), 'Admin page removes the independent Site Knowledge panel from Toolbox.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-site-knowledge-sync-submit' ) && false === strpos( $admin_page, 'Start indexing' ) && false === strpos( $admin_page, 'Refresh index' ), 'Site Knowledge index actions are absent from Toolbox.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-site-knowledge-status' ), 'Site Knowledge status controls are absent from Toolbox.' );
@@ -1804,6 +1823,66 @@ foreach ( $route_boundary_scopes as $route => $scope ) {
 	$route_literal = str_replace( "/local-admin-consent/featured-image", "/local-admin-consent' . '/featured-image", $route );
 	toolbox_assert( false !== strpos( $rest, "'{$route_literal}'" ) && false !== strpos( $rest, "=> '{$scope}'" ), 'REST scope map includes route scope from the boundary table: ' . $route );
 }
+
+$route_scope_method_start = strpos( $rest, 'private function rest_route_scope' );
+$route_scope_method_end   = false !== $route_scope_method_start ? strpos( $rest, "\n\t}\n", $route_scope_method_start ) : false;
+$route_scope_method       = false !== $route_scope_method_start && false !== $route_scope_method_end ? substr( $rest, $route_scope_method_start, $route_scope_method_end - $route_scope_method_start ) : '';
+toolbox_assert( '' !== $route_scope_method, 'REST route scope resolver source is present for the full-coverage contract.' );
+$route_scope_method = str_replace( "'/local-admin-consent' . '/featured-image'", "'/local-admin-consent/featured-image'", $route_scope_method );
+$route_scope_regex_rules = array();
+$route_scope_literal_map = array();
+$route_scope_exact_map   = array();
+if ( preg_match_all( "/preg_match\(\s*'#([^']+)#'\s*,\s*\\\$route\s*\)[^}]*?return\s+'(cap\.toolbox\.[a-z_]+(?:\.[a-z_]+)*)';/s", $route_scope_method, $scope_regex_matches ) ) {
+	foreach ( $scope_regex_matches[1] as $scope_regex_index => $scope_regex_pattern ) {
+		$route_scope_regex_rules[] = array( $scope_regex_pattern, $scope_regex_matches[2][ $scope_regex_index ] );
+	}
+}
+if ( preg_match_all( "/in_array\(\s*\\\$route,\s*array\(\s*'([^']+)'\s*,\s*'([^']+)'\s*\),\s*true\s*\)[^}]*?return\s+'(cap\.toolbox\.[a-z_]+(?:\.[a-z_]+)*)';/s", $route_scope_method, $scope_literal_matches ) ) {
+	foreach ( $scope_literal_matches[3] as $scope_literal_index => $scope_literal_scope ) {
+		$route_scope_literal_map[ $scope_literal_matches[1][ $scope_literal_index ] ] = $scope_literal_scope;
+		$route_scope_literal_map[ $scope_literal_matches[2][ $scope_literal_index ] ] = $scope_literal_scope;
+	}
+}
+if ( preg_match_all( "/'([^']+)'\s*=>\s*'(cap\.toolbox\.[a-z_]+(?:\.[a-z_]+)*)'/", $route_scope_method, $scope_exact_matches ) ) {
+	foreach ( $scope_exact_matches[1] as $scope_exact_index => $scope_exact_route ) {
+		$route_scope_exact_map[ $scope_exact_route ] = $scope_exact_matches[2][ $scope_exact_index ];
+	}
+}
+toolbox_assert( ! empty( $route_scope_regex_rules ) && ! empty( $route_scope_exact_map ), 'REST route scope full-coverage contract parses regex, literal, and exact scope rules from the resolver.' );
+$route_scope_param_samples = array(
+	'batch_id'      => 'media_opt_Ab12Cd',
+	'attachment_id' => '42',
+	'run_id'        => 'run.A1-b2:C3',
+	'artifact_id'   => 'art_' . str_repeat( 'a', 32 ),
+);
+foreach ( $registered_rest_routes as $scope_coverage_route ) {
+	$runtime_scope_route = (string) preg_replace_callback(
+		'/\(\?P<(\w+)>[^)]*\)/',
+		static function ( $scope_param_match ) use ( $route_scope_param_samples ): string {
+			return $route_scope_param_samples[ $scope_param_match[1] ] ?? 'sample_value';
+		},
+		$scope_coverage_route
+	);
+	$route_scope_covered   = false;
+	$resolved_route_scope = 'cap.toolbox.admin';
+	foreach ( $route_scope_regex_rules as $route_scope_regex_rule ) {
+		if ( 1 === preg_match( '#' . $route_scope_regex_rule[0] . '#', $runtime_scope_route ) ) {
+			$route_scope_covered   = true;
+			$resolved_route_scope = $route_scope_regex_rule[1];
+			break;
+		}
+	}
+	if ( ! $route_scope_covered && isset( $route_scope_literal_map[ $runtime_scope_route ] ) ) {
+		$route_scope_covered   = true;
+		$resolved_route_scope = $route_scope_literal_map[ $runtime_scope_route ];
+	}
+	if ( ! $route_scope_covered && isset( $route_scope_exact_map[ $runtime_scope_route ] ) ) {
+		$route_scope_covered   = true;
+		$resolved_route_scope = $route_scope_exact_map[ $runtime_scope_route ];
+	}
+	toolbox_assert( $route_scope_covered, 'REST route scope coverage is explicit for the runtime path of every registered route (no silent cap.toolbox.admin fallback): ' . $scope_coverage_route );
+	toolbox_assert( ( $route_boundary_scopes[ $scope_coverage_route ] ?? '' ) === $resolved_route_scope, 'Runtime REST scope resolution matches the documented boundary scope: ' . $scope_coverage_route );
+}
 $readme_route_doc       = (string) file_get_contents( $root . '/README.md' );
 $boundary_route_doc     = (string) file_get_contents( $root . '/docs/boundary.md' );
 $architecture_route_doc = (string) file_get_contents( $root . '/docs/architecture.md' );
@@ -2802,7 +2881,7 @@ toolbox_assert( false !== $media_optimization_operator_trial && false !== strpos
 toolbox_assert( false !== strpos( $media_optimization_operator_trial, 'The smoke scripts are release gates, not the real-attachment trial runner' ) && false !== strpos( $media_optimization_operator_trial, 'read-only candidate packet' ) && false !== strpos( $media_optimization_operator_trial, 'public_content_refs=0' ) && false !== strpos( $media_optimization_operator_trial, 'must explicitly choose the 5 to 10' ) && false !== strpos( $media_optimization_operator_trial, 'trial attachments before preview generation' ), 'Media optimization operator trial keeps real-attachment selection explicit and separate from fixture smokes.' );
 toolbox_assert( false !== strpos( $media_optimization_operator_trial, 'media ALT and caption review set' ) && false !== strpos( $media_optimization_operator_trial, 'taxonomy and tag review set' ) && false !== strpos( $media_optimization_operator_trial, 'internal-link review set' ) && false !== strpos( $media_optimization_operator_trial, 'Do not add old-article source coverage as a local Toolbox batch surface' ), 'Media optimization operator trial orders next batch candidates and blocks local old-article source coverage.' );
 $media_alt_caption_operator_trial = file_get_contents( $root . '/docs/archive/2026-06/media-alt-caption-operator-trial-2026-06-21.md' );
-$media_alt_governed_closeout = file_get_contents( $root . '/docs/media-alt-governed-workflow-closeout-2026-07-11.md' );
+$media_alt_governed_closeout = file_get_contents( $root . '/docs/archive/2026-07/media-alt-governed-workflow-closeout-2026-07-11.md' );
 toolbox_assert( false !== $media_alt_governed_closeout && false !== strpos( $media_alt_governed_closeout, 'Media ALT Governed Workflow Closeout - 2026-07-11' ) && false !== strpos( $media_alt_governed_closeout, 'build-media-alt-apply-plan' ) && false !== strpos( $media_alt_governed_closeout, 'media_alt_apply_plan.v1' ) && false !== strpos( $media_alt_governed_closeout, 'Toolkit, Core, Adapter, Toolbox' ), 'Media ALT governed workflow closeout records the shared four-layer contract and final plan.' );
 toolbox_assert( false !== strpos( $media_alt_governed_closeout, 'Author-reviewed editor actions' ) && false !== strpos( $media_alt_governed_closeout, 'article context before vision' ) && false !== strpos( $media_alt_governed_closeout, 'What Not To Build Next' ) && false !== strpos( $media_alt_governed_closeout, 'taxonomy/tag review' ) && false !== strpos( $media_alt_governed_closeout, 'internal-link review' ), 'Media ALT governed workflow closeout preserves the editor exception, context-first strategy, stop rule, and next priorities.' );
 $media_alt_write_gate = file_get_contents( $root . '/docs/media-alt-governed-write-implementation-gate.md' );
@@ -2865,11 +2944,11 @@ toolbox_assert( false !== $recommendation_eval_doc && false !== strpos( $recomme
 toolbox_assert( false !== $recommendation_quality_closeout_doc && false !== strpos( $recommendation_quality_closeout_doc, 'b8640927ce9fa0a53385552969b15852cc7250b1' ) && false !== strpos( $recommendation_quality_closeout_doc, '4aadcb7694bbc987c0a6ccd0fad4fd0f50ba0fab' ) && false !== strpos( $recommendation_quality_closeout_doc, 'c7f1160e60b871d44a35b951459e8ab8dffb72aa' ) && false !== strpos( $recommendation_quality_closeout_doc, 'AI agreement is silver evidence' ) && false !== strpos( $recommendation_quality_closeout_doc, 'A real denominator comes first' ), 'Recommendation quality closeout records cross-repo delivery and reusable development lessons.' );
 toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/related-article-and-internal-link-recommendation-standard-v1.md' ) && false !== strpos( $readme_doc, 'docs/recommendation-eval.md' ) && false !== strpos( $readme_doc, 'docs/archive/2026-08/recommendation-quality-mvp-closeout-2026-08-30.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'archive/2026-08/recommendation-quality-mvp-closeout-2026-08-30.md' ), 'Recommendation standard, evaluation guidance, and MVP closeout are indexed from the root README and documentation index.' );
 toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/decisions/ADR-014-current-article-multi-link-editor-transaction.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'decisions/ADR-014-current-article-multi-link-editor-transaction.md' ), 'ADR-014 is indexed from the root README and documentation index.' );
-toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/media-alt-governed-workflow-closeout-2026-07-11.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'media-alt-governed-workflow-closeout-2026-07-11.md' ), 'Media ALT governed workflow closeout is indexed from the root README and documentation index.' );
+toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/archive/2026-07/media-alt-governed-workflow-closeout-2026-07-11.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'media-alt-governed-workflow-closeout-2026-07-11.md' ), 'Media ALT governed workflow closeout is indexed from the root README and documentation index.' );
 toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/reference-plugin-evaluation-checklist.md' ) && false !== strpos( $readme_doc, 'docs/reference-plugin-evaluation-record-template.md' ) && false !== strpos( $readme_doc, 'docs/reference-plugin-evaluations/README.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'reference-plugin-evaluation-checklist.md' ) && false !== strpos( $docs_index_doc, 'reference-plugin-evaluation-record-template.md' ) && false !== strpos( $docs_index_doc, 'reference-plugin-evaluations/README.md' ), 'Reference plugin evaluation checklist, template, and evaluation records are indexed from the root README and documentation index.' );
-$reference_learning_closeout = file_get_contents( $root . '/docs/reference-learning-migration-closeout-2026-07-08.md' );
+$reference_learning_closeout = file_get_contents( $root . '/docs/archive/2026-07/reference-learning-migration-closeout-2026-07-08.md' );
 toolbox_assert( false !== $reference_learning_closeout && false !== strpos( $reference_learning_closeout, 'Reference Learning Migration Closeout - 2026-07-08' ) && false !== strpos( $reference_learning_closeout, 'npcink-eval-lab' ) && false !== strpos( $reference_learning_closeout, 'migrated pointer docs' ) && false !== strpos( $reference_learning_closeout, 'suggestion-only surface' ) && false !== strpos( $reference_learning_closeout, 'Core-governed handoff' ) && false !== strpos( $reference_learning_closeout, 'second ability registry' ) && false !== strpos( $reference_learning_closeout, 'local runtime queue' ) && false !== strpos( $reference_learning_closeout, 'WordPress write path' ) && false !== strpos( $reference_learning_closeout, 'composer test:all' ), 'Reference learning migration closeout keeps canonical learning in eval-lab and preserves the Toolbox boundary.' );
-toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/reference-learning-migration-closeout-2026-07-08.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'reference-learning-migration-closeout-2026-07-08.md' ), 'Reference learning migration closeout is indexed from the root README and documentation index.' );
+toolbox_assert( false !== $readme_doc && false !== strpos( $readme_doc, 'docs/archive/2026-07/reference-learning-migration-closeout-2026-07-08.md' ) && false !== $docs_index_doc && false !== strpos( $docs_index_doc, 'reference-learning-migration-closeout-2026-07-08.md' ), 'Reference learning migration closeout is indexed from the root README and documentation index.' );
 $reference_plugin_template = file_get_contents( $root . '/docs/reference-plugin-evaluation-record-template.md' );
 $reference_plugin_records_index = file_get_contents( $root . '/docs/reference-plugin-evaluations/README.md' );
 $reference_plugin_first_trial = file_get_contents( $root . '/docs/reference-plugin-evaluations/seo-media-metadata-checklist-2026-07-08.md' );

@@ -7,12 +7,6 @@ parameters:
 			path: includes/Abilities.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
 			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:media_library_url\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
@@ -61,12 +55,6 @@ parameters:
 			path: includes/Admin_Page.php
 
 		-
-			message: '#^Offset ''finding'' on array\{key\: ''manual''\|''review''\|''watch'', label\: mixed, count\: mixed, finding\: array, summary\: mixed, next_step\: mixed, empty_text\: mixed\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
 			message: '#^Offset ''secondary'' on array\{title\: mixed, description\: mixed\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
 			count: 1
@@ -83,6 +71,18 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 2
 			path: includes/Admin_Page.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Admin_Page_Site_Ops_Panel.php
+
+		-
+			message: '#^Offset ''finding'' on array\{key\: ''manual''\|''review''\|''watch'', label\: mixed, count\: mixed, finding\: array, summary\: mixed, next_step\: mixed, empty_text\: mixed\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Admin_Page_Site_Ops_Panel.php
 
 		-
 			message: '#^Offset ''mime'' on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\} on left side of \?\? always exists and is not nullable\.$#'

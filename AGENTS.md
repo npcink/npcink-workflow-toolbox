@@ -5,14 +5,15 @@
 Every new AI development session should start with:
 
 1. Run `git status --short --branch`.
-2. Read `README.md`.
-3. Read these docs before editing:
-   - `docs/product-positioning.md`
-   - `docs/boundary.md`
-   - `docs/architecture.md`
-   - `docs/roadmap.md`
-   - `docs/development-workflow.md`
-   - `docs/decisions/ADR-001-toolbox-as-product-surface.md`
+2. Read `docs/current-state.md` (the orientation page: repo map, gates,
+   open debt, pointers).
+3. Read `docs/boundary.md` before editing; it is the hard-block authority.
+   Read the module-specific contract doc that `docs/current-state.md`
+   points at for the area you touch (`docs/product-positioning.md`,
+   `docs/architecture.md`, `docs/roadmap.md`,
+   `docs/development-workflow.md`, or
+   `docs/decisions/ADR-001-toolbox-as-product-surface.md`) rather than all
+   of them up front.
 4. Briefly report the current module, relevant boundary, and intended focused
    gate before editing.
 
