@@ -72,3 +72,44 @@ five-plugin site.
 For each step: pass / confusion (what did they read?) / fail. Confusions
 about wording are catalog fixes; failures are code issues. File results in
 this document's "Findings" section before the next release tag.
+
+## Findings
+
+### Automated pre-pass - 2026-10-07
+
+An automated browser pre-pass ran on the local five-plugin site
+(~/wp-sites/npcink-five, Toolbox at master 66d76cc) before the operator
+session. It covers the mechanically checkable parts; the human questions
+stay open for the operator.
+
+- **Step 1 (fresh-install path): pass.** With the Cloud Addon deactivated,
+  the Overview renders the "AI service is not connected" banner with an
+  install action link, and the Getting started card leads with "Three
+  steps to your first AI-assisted task. Nothing is written without your
+  review." plus the Cloud Addon step link. Both are self-explanatory
+  without help; wording judgment still belongs to the operator.
+- **Step 9 (review-set sampling): partially verified.** The Media ALT
+  review set runs locally end to end (bounded sample controls, stats,
+  clean empty state when no missing ALT exists). The four Cloud-dependent
+  sets (taxonomy/tag, internal-link, comment moderation, flagged media)
+  fail closed with "Npcink Cloud is not configured." plus the
+  `cloud_runtime_unconfigured` code folded into the error payload - the
+  local site has no Cloud credentials, so adoption-rate data collection
+  must happen on a Cloud-connected site during the operator session.
+- **Step 10 (owner matrix and permission copy): partially verified.**
+  Live rendering of the full owner matrix requires a Cloud boundary
+  payload; without Cloud the matrix correctly renders nothing instead of
+  half-rows (the renderer is gated on the boundary block as designed, and
+  the full-row contract is pinned in `tests/run.php`). The author-side
+  permission split is verified in three parts: an `edit_posts` author sees
+  the Content Support sidebar and runs allowed flows with clean empty
+  states (live); a gated route (`flows/media-brief`) returns HTTP 403
+  `rest_forbidden` with the raw "Sorry, you are not allowed to do that."
+  message for the author (live - the exact wrapper input shape, and not a
+  nonce failure); the wrapper rewrite for that code and the plain copy are
+  pinned by static contract. One operator click on a Cloud-connected site
+  (a metadata handoff submit as an author) closes the loop visually.
+- **Steps 2-8: not re-run manually.** They are covered by the existing
+  browser smokes (`smoke-ux-hardening-browser`,
+  `smoke-core-handoff-receipt-ui`) in `composer test:all`; the operator
+  session should still walk them for wording judgment.
