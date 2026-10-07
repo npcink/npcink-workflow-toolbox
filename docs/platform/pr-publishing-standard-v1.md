@@ -87,8 +87,14 @@ The publisher performs these checks before push:
 - the current branch is neither detached nor the target base branch;
 - the worktree is clean;
 - the branch includes the latest fetched `origin/<base>`;
-- the branch has at least one commit beyond the base;
-- no open PR already exists for the same branch.
+- the branch has at least one commit beyond the base.
+
+An open PR for the same branch is reused, not an error (adopted with the
+AI review triage loop on `npcink-ai-client-adapter` 2026-10-06 and
+`npcink-workflow-toolbox` 2026-10-07): triage iterations push fixes or edit
+the PR body, then re-run the publisher, which re-verifies and finally
+requests auto-merge. `--title`/`--body-file` are not re-applied to a reused
+pull request; edit those with `gh pr edit`.
 
 It then pushes the current branch, creates the PR with `--body-file`, and
 requests:
@@ -96,6 +102,12 @@ requests:
 ```text
 squash auto-merge + exact head commit match
 ```
+
+On repositories enrolled in the advisory AI review publisher gate (see
+[ai-code-review-standard-v1.md](ai-code-review-standard-v1.md)), the
+auto-merge request additionally waits until the gate passes: a delivered
+OpenCodeReview round for the exact head SHA plus a fix:/accept: triage
+line for every finding, or a recorded `--no-review-because` exception.
 
 Required checks and branch protection remain the merge authority. Auto-merge
 waits; it does not bypass checks or conversation resolution.

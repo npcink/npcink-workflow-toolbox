@@ -135,15 +135,22 @@ Default gate:
 composer test:all
 ```
 
-Advisory AI review gate (run before `composer pr:publish`):
+Advisory AI review gate, mechanized at the publisher since 2026-10-07:
+`composer pr:publish` waits for the delivered OpenCodeReview CI round on
+the exact head SHA and verifies a `fix:`/`accept:` triage line for every
+finding in the pull request body's `## AI Review Triage` section before
+requesting auto-merge. The only path past an undelivered review is
+`composer pr:publish -- --no-review-because "<reason>"`, which the gate
+records in the PR body. A local pre-publish round
 
 ```bash
 ocr review --from origin/master --to HEAD
 ```
 
-Treat findings as a second opinion: fix real defects or record why they are
-acceptable. Follows AI Code Review Standard v1 in
-`docs/platform/ai-code-review-standard-v1.md`; the CI workflow posting the same
+is optional extra signal (and still useful on uncommitted work before
+staging). Treat findings as a second opinion: fix real defects or record
+why they are acceptable. Follows AI Code Review Standard v1 in
+`docs/platform/ai-code-review-standard-v1.md`; the CI workflow posting the
 review on pull requests is advisory and never a required check.
 
 Composer metadata:
