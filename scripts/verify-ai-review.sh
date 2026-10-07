@@ -566,10 +566,16 @@ if [ "${conclusion}" != 'success' ]; then
 	rerun_flags=( --failed )
 	if [ "${conclusion}" = 'cancelled' ]; then
 		newest_id="$(latest_review_run | jq -r '.id // empty')"
-		if [ -n "${newest_id}" ] && [ "${newest_id}" != "${run_id}" ]; then
+		if [ "${newest_id}" = "${run_id}" ]; then
+			rerun_flags=()
+		elif [ -n "${newest_id}" ]; then
 			undelivered_exit "run ${run_id} was cancelled and superseded by run ${newest_id}"
+		else
+			# The newest-run read failed (latest_review_run swallows API
+			# errors); an unreadable supersession state must not fall
+			# through to a rerun that could cancel a displacing run.
+			undelivered_exit 'could not determine whether run ${run_id} is still the newest for this head'
 		fi
-		rerun_flags=()
 	fi
 	echo "[ai-review-gate] review run ${run_id} failed (${conclusion}); re-running it once (${rerun_flags[*]:-all jobs})"
 	if ! rerun_output="$(gh run rerun "${run_id}" ${rerun_flags[@]+"${rerun_flags[@]}"} 2>&1)"; then
