@@ -574,7 +574,7 @@ if [ "${conclusion}" != 'success' ]; then
 			# The newest-run read failed (latest_review_run swallows API
 			# errors); an unreadable supersession state must not fall
 			# through to a rerun that could cancel a displacing run.
-			undelivered_exit 'could not determine whether run ${run_id} is still the newest for this head'
+			undelivered_exit "could not determine whether run ${run_id} is still the newest for this head"
 		fi
 	fi
 	echo "[ai-review-gate] review run ${run_id} failed (${conclusion}); re-running it once (${rerun_flags[*]:-all jobs})"
