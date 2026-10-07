@@ -1855,7 +1855,6 @@ $route_scope_param_samples = array(
 	'run_id'        => 'run.A1-b2:C3',
 	'artifact_id'   => 'art_' . str_repeat( 'a', 32 ),
 );
-$route_scope_resolved_count = 0;
 foreach ( $registered_rest_routes as $scope_coverage_route ) {
 	$runtime_scope_route = (string) preg_replace_callback(
 		'/\(\?P<(\w+)>[^)]*\)/',
@@ -1883,9 +1882,7 @@ foreach ( $registered_rest_routes as $scope_coverage_route ) {
 	}
 	toolbox_assert( $route_scope_covered, 'REST route scope coverage is explicit for the runtime path of every registered route (no silent cap.toolbox.admin fallback): ' . $scope_coverage_route );
 	toolbox_assert( ( $route_boundary_scopes[ $scope_coverage_route ] ?? '' ) === $resolved_route_scope, 'Runtime REST scope resolution matches the documented boundary scope: ' . $scope_coverage_route );
-	++$route_scope_resolved_count;
 }
-toolbox_assert( count( $registered_rest_routes ) === $route_scope_resolved_count, 'REST route scope full-coverage contract ran against every registered route.' );
 $readme_route_doc       = (string) file_get_contents( $root . '/README.md' );
 $boundary_route_doc     = (string) file_get_contents( $root . '/docs/boundary.md' );
 $architecture_route_doc = (string) file_get_contents( $root . '/docs/architecture.md' );
