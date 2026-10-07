@@ -246,6 +246,43 @@ flag):
   repositories adopt the same publisher pattern at their own pace; until
   then their AGENTS.md local-gate wording stands.
 
+## Platform Sync Round - 2026-10-08
+
+The re-port and template re-sync promised above landed, plus an
+unplanned review loop on the re-ported scripts:
+
+| Repository | Pull request | Status |
+| --- | --- | --- |
+| `npcink-ai-client-adapter` | #90 | re-port + three delivered review rounds (6, 4, and 3 findings; every finding fixed or accepted with a recorded triage line) |
+| `npcink-workflow-toolbox` | #213, #214 | composer process-timeout 900s; the same review-loop fixes as the canonical copy |
+| `npcink-abilities-toolkit` | #211 | merged |
+| `npcink-governance-core` | #93 | merged |
+| `npcink-cloud-addon` | #242 | merged |
+| `npcink-eval-lab` | #104 | merged (copy also moved to `ubuntu-26.04` from the lagged `ubuntu-latest`) |
+| `npcink-device-inventory` | #11 | open: pre-existing `npm audit --audit-level=high` red in the `ele-rs` desktop tree (unchanged dependencies, documented since 2026-10-04); diagnosis on the pull request |
+| `npcink-ai-cloud` | #1078 | open: branch protection requires a literal `backend` check name that never reports on PR events (the sharded `backend-targeted` checks all pass); same protection mismatch as the 2026-10-04 round (#1060); repo-owner decision |
+
+Hardening deltas from the re-port review loop (both gated copies now
+carry them): the disarm state read captures stdout separately so a
+failed read preserves the unknown sentinel (an assignment substitution
+overwrote it), retries four times with growing delay, fails closed on
+unreadable state for production bases, and fails outright when an armed
+merge cannot be disabled; every `ocr-summary-run` tag in the rolling
+summary must match the pinned run-attempt; heading checks use the
+pr-body-contract word-boundary form (anchoring at the heading start
+would reject the family's own "## Toolbox Boundary" templates); the
+triage-section closing heading tolerates leading whitespace; the jq
+guard genuinely precedes the `--self-test` dispatch; the rerun flag
+uses a bash-3.2-safe guarded array; the observed `ocr-summary-run`
+producer version is recorded with the pinned-action contract notes.
+
+Operational notes: github.com HTTPS was down for the whole round, so
+every push went through the Git Data API replay path (the playbook
+addendum's composition); the fallback publisher used for the round
+respects the gate's exit contract (disarms instead of arming auto-merge
+past a failed gate); API brownouts (HTTP 500 on pulls PATCH) recovered
+within minutes on both occurrences.
+
 ## Enrollment And Publisher Gate - 2026-10-07
 
 `npcink-workflow-toolbox` (this repository) enrolled in Layer 2 and adopted
