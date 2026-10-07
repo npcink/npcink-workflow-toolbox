@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.5.0
+Stable tag: 0.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,21 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.5.1 =
+
+* The admin Site Knowledge status owner matrix now renders every row Cloud
+  reports: index lifecycle, freshness policy, diagnostics detail, and
+  embedding execution owners plus the freshness and diagnostics truth rows
+  join the existing set, and a static contract keeps rows from silently
+  dropping again.
+* Permission failures in the editor sidebar now read as plain operator
+  copy ("This action needs a site administrator. Nothing was written.")
+  instead of the raw REST denial, keyed on scope denials only - core
+  cookie and nonce failures keep their reload or sign-in guidance.
+* Guided-onboarding product design proposed; the operator trial script
+  gained review-set adoption data collection and the owner-matrix and
+  permission-copy checks.
 
 = 0.5.0 =
 
