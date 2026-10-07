@@ -128,7 +128,7 @@ gate_failed_counts() {
 # interleaved round (e.g. a comment-triggered one) edited the single
 # rolling summary after the verified run was pinned.
 gate_summary_run_tag() {
-	printf '%s\n' "$1" | grep -oE '<!-- ocr-summary-run:[0-9]+-[0-9]+ *-->' | sort -u || true
+	printf '%s\n' "$1" | grep -oE '<!-- ocr-summary-run:[0-9]+-[0-9]+ -->' | sort -u || true
 }
 
 # Inline marker extraction: id, run, attempt, label, path:line per finding.
@@ -557,6 +557,12 @@ if [ "${conclusion}" != 'success' ]; then
 	# newer run that is about to deliver - the exact inversion the group
 	# exists to prevent. A displaced run hands off to undelivered_exit,
 	# whose retry guidance points at the newer run.
+	# Documented residual: this newest-run check filters by head_sha and
+	# pull_request_target events, so a comment-triggered displacer (whose
+	# runs-API head is the default branch) is invisible here; if the pinned
+	# run was cancelled by a comment round, the rerun below may cancel that
+	# comment round. Solo-operator usage makes comment rounds rare, and the
+	# gate's own delivery re-verification still holds the merge either way.
 	rerun_flags=( --failed )
 	if [ "${conclusion}" = 'cancelled' ]; then
 		newest_id="$(latest_review_run | jq -r '.id // empty')"
