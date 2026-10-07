@@ -54,7 +54,7 @@ while [ "$#" -gt 0 ]; do
 			;;
 		--no-review-because)
 			[ "$#" -ge 2 ] || fail '--no-review-because requires a value'
-			[ -n "$2" ] || fail '--no-review-because requires a non-empty value'
+			[ -n "$(printf '%s' "$2" | tr -d '[:space:]')" ] || fail '--no-review-because requires a non-whitespace value'
 			case "$2" in
 				*$'\n'*) fail '--no-review-because must be a single line' ;;
 			esac
