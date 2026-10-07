@@ -1,10 +1,11 @@
 # Editor Intent Convergence Decision
 
-Status: proposal awaiting operator acceptance. Nothing in this record is
-implemented yet; retiring an intent changes the public REST contract and
-must ship as its own scoped change once accepted.
+Status: accepted and implemented 2026-10-07. The ten retirements below shipped
+with the prose-quality fold into `publish_preflight`; option 2 of the record.
+Restoring any retired intent requires a new boundary decision naming its
+operator surface.
 
-Date proposed: 2026-10-07.
+Date proposed: 2026-10-07. Accepted: 2026-10-07.
 
 ## Problem
 

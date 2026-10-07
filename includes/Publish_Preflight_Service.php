@@ -19,13 +19,15 @@ final class Publish_Preflight_Service {
 	 * @param array<string,mixed> $context Editor post context.
 	 * @param array<string,mixed> $discoverability Discoverability evidence.
 	 * @param array<string,mixed> $duplicate_check Site Knowledge evidence.
+	 * @param array<string,mixed> $local_article_checkup Local full-draft heuristic checkup section.
 	 * @return array<string,mixed>
 	 */
-	public function build_sections( array $context, array $discoverability, array $duplicate_check ): array {
+	public function build_sections( array $context, array $discoverability, array $duplicate_check, array $local_article_checkup = array() ): array {
 		$sections                       = array(
-			'checks'          => $this->local_checks( $context ),
-			'duplicate_check' => $duplicate_check,
-			'seo_handoff'     => $this->seo_handoff_preview( $context, $discoverability ),
+			'checks'                => $this->local_checks( $context ),
+			'duplicate_check'       => $duplicate_check,
+			'seo_handoff'           => $this->seo_handoff_preview( $context, $discoverability ),
+			'local_article_checkup' => $local_article_checkup,
 		);
 		$sections['pre_publish_review'] = $this->pre_publish_review( $context, $sections );
 
@@ -169,14 +171,16 @@ final class Publish_Preflight_Service {
 	 * @return array<string,mixed>
 	 */
 	private function pre_publish_review( array $context, array $sections ): array {
-		$duplicate_items = $this->related_content_items( is_array( $sections['duplicate_check'] ?? null ) ? $sections['duplicate_check'] : array() );
-		$seo_handoff     = is_array( $sections['seo_handoff'] ?? null ) ? $sections['seo_handoff'] : array();
-		$items           = array(
+		$duplicate_items     = $this->related_content_items( is_array( $sections['duplicate_check'] ?? null ) ? $sections['duplicate_check'] : array() );
+		$seo_handoff         = is_array( $sections['seo_handoff'] ?? null ) ? $sections['seo_handoff'] : array();
+		$local_checkup       = is_array( $sections['local_article_checkup'] ?? null ) ? $sections['local_article_checkup'] : array();
+		$checkup_issue_count = (int) ( is_array( $local_checkup['summary'] ?? null ) ? ( $local_checkup['summary']['issue_count'] ?? 0 ) : 0 );
+		$items               = array(
 			$this->review_item(
 				'summary',
 				'' !== trim( (string) ( $context['excerpt'] ?? '' ) ) ? 'ok' : 'warning',
 				'' !== trim( (string) ( $context['excerpt'] ?? '' ) ) ? __( 'Excerpt is present for archives and sharing contexts.', 'npcink-workflow-toolbox' ) : __( 'Run summary suggestions before publishing if the excerpt is empty.', 'npcink-workflow-toolbox' ),
-				'summary_suggestions'
+				'summary_terms_optimization'
 			),
 			$this->review_item(
 				'categories',
@@ -209,6 +213,18 @@ final class Publish_Preflight_Service {
 				'seo_meta_single_post_handoff'
 			),
 			$this->review_item(
+				'prose_quality',
+				0 < $checkup_issue_count ? 'review' : 'ok',
+				0 < $checkup_issue_count
+					? sprintf(
+						/* translators: %d: number of local prose review notes. */
+						__( '%d local prose review notes. Review the flagged paragraphs before publishing.', 'npcink-workflow-toolbox' ),
+						$checkup_issue_count
+					)
+					: __( 'No high-confidence local article issues were found.', 'npcink-workflow-toolbox' ),
+				'polish_notes'
+			),
+			$this->review_item(
 				'duplicate_risk',
 				empty( $duplicate_items ) ? 'ok' : 'review',
 				empty( $duplicate_items ) ? __( 'No duplicate-risk candidates were returned by Site Knowledge.', 'npcink-workflow-toolbox' ) : __( 'Related public content was found; compare overlap before publishing.', 'npcink-workflow-toolbox' ),
@@ -224,12 +240,13 @@ final class Publish_Preflight_Service {
 			'direct_wordpress_write' => false,
 			'items'                  => $items,
 			'next_actions'           => array(
-				'summary_suggestions',
+				'summary_terms_optimization',
 				'category_suggestions',
 				'tag_suggestions',
 				'internal_links',
 				'image_candidates',
 				'seo_meta_single_post_handoff',
+				'polish_notes',
 			),
 			'handoff'                => array(
 				'metadata'               => 'core_proposal_required',

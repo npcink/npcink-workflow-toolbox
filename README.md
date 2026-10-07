@@ -51,9 +51,12 @@ The first version provides:
   internal-link candidates, current-article contextual ALT review, and image
   candidates.
   Article narration and audio summary remain callable compatibility flows but
-  are temporarily hidden from the default menu. Generic title, summary,
-  broader taxonomy workflow, outline, and
-  article-checkup support remains available through compatible route/rendering paths, plus
+  are temporarily hidden from the default menu. The 2026-10-07 intent
+  convergence retired the route-only generic intents (title/summary
+  suggestions, outline, article checkup, discoverability, comment reply,
+  combined taxonomy tags, writing support, and the editor-route Zhihu
+  aliases); article checkup's local prose signals now surface inside
+  publish preflight, plus
   selected-paragraph toolbar checks that do not replace body text;
 - the operator-facing **Draft from source materials** entry stays compact in
   the sidebar and opens one three-step work modal: provide a URL or brief,
@@ -555,11 +558,13 @@ The post editor also exposes **Npcink Content Support** as a plugin sidebar
 opened from the editor top toolbar. Its visible buttons run fixed Npcink flows
 for publish preflight, internal-link candidates, and image-source candidates
 from the current draft context. Article narration and audio summary remain
-callable but are temporarily hidden from the default menu. Generic title,
-summary, category, tag, outline, article-checkup, discoverability,
-current-article ALT, and comment-reply support remains available through
-compatible REST/result-rendering paths, but those entries are not default
-buttons when a generic AI plugin already owns similar experiments. Related
+callable but are temporarily hidden from the default menu. The 2026-10-07
+intent convergence retired the route-only generic intents (title/summary
+suggestions, outline, article checkup, discoverability, comment reply,
+combined taxonomy tags, writing support, and the editor-route Zhihu
+aliases); article checkup's local prose-quality signals folded into the
+publish preflight review, and current-article ALT remains a default
+capability without duplicating generic AI plugin experiments. Related
 existing-post review is handled through publish preflight duplicate-risk checks
 and Toolkit-backed internal-link candidates rather than a separate visible
 button. The route-only article checkup remains a local full-draft diagnostic
@@ -709,10 +714,10 @@ The post editor **Npcink Content Support** sidebar owns high-frequency Npcink
 review and handoff actions because those actions need the current article
 context: publish preflight, internal-link candidates, and image candidates.
 Article narration and audio summary remain callable but temporarily hidden.
-Generic writing, metadata, article-checkup,
-discoverability, comment, and current-article ALT capabilities stay available
-as compatible route-only or result-rendering paths rather than default visible
-buttons. The admin
+The generic writing, title/summary suggestion, outline, article-checkup,
+discoverability, and comment-reply route intents were retired by the
+2026-10-07 convergence; the local checkup signals live inside publish
+preflight, and current-article ALT stays a default capability. The admin
 **Workflows** tab stays focused on site helpers, fallback
 bundles, governed handoffs, and media planning rather than draft-side writing
 buttons.

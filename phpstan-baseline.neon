@@ -373,12 +373,6 @@ parameters:
 			path: includes/Rest_Controller.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 4
-			path: includes/Rest_Editor_Content_Support.php
-
-		-
 			message: '#^Call to function is_array\(\) with array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -393,12 +387,6 @@ parameters:
 		-
 			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\>\.$#'
 			identifier: return.type
-			count: 1
-			path: includes/Rest_Editor_Content_Support.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_metadata_suggestion_section\(\) is unused\.$#'
-			identifier: method.unused
 			count: 1
 			path: includes/Rest_Editor_Content_Support.php
 

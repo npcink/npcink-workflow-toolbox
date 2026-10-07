@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.4.0
+Stable tag: 0.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,21 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.5.0 =
+
+* Retired the ten route-only editor content-support intents (generic writing
+  support, both editor-route Zhihu aliases, article checkup, title and
+  summary suggestions, outline, combined taxonomy tags, comment reply
+  suggestions, and discoverability) following the accepted editor intent
+  convergence decision; they now return the invalid-intent error. The admin
+  content-support route keeps its own hosted intent set.
+* Folded the local article-checkup prose signals into publish preflight: the
+  pre-publish review now includes a prose-quality row plus the local
+  checkup detail, so sentence-density, fact-gap, tone, structure, and format
+  review notes stay available without the retired standalone intent.
+* Froze the editor content-support intent allowlist to twelve intents,
+  enforced by a new static contract.
 
 = 0.4.0 =
 

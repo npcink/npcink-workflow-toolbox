@@ -68,9 +68,9 @@ Last reviewed: 2026-10-07.
    after the JS clusters set the JED translation policy.
 3. `assets/admin.js` (8.2k) and remaining `Admin_Page.php` clusters
    (review-set tools, media derivative controls, content context form).
-4. Sixteen non-default editor intents remain callable; the retirement
-   recommendation awaits acceptance in
-   `docs/editor-intent-convergence-decision.md`.
+4. Editor intent convergence shipped 2026-10-07: twelve-intent editor
+   allowlist; see `docs/editor-intent-convergence-decision.md` before
+   adding any new editor intent.
 5. PHPStan baseline ratchet (136 findings; shrinks with cluster splits).
 6. `plainTextFromHtml` innerHTML hardening; guided onboarding tour;
    "Core proposal" terminology standard cross-repo rollout.
