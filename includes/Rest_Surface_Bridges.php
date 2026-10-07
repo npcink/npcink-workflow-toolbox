@@ -208,14 +208,6 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 					'direct_wordpress_write' => false,
 					'feedback_scope'         => 'media_alt_caption',
 				),
-				'comment_reply_suggestion.v1'     => array(
-					'state'                  => 'covered_by_existing_projection',
-					'current_artifacts'      => array( 'comment_reply_suggestion.v1' ),
-					'route'                  => '/editor/content-support',
-					'final_write_path'       => 'core_proposal_required',
-					'direct_wordpress_write' => false,
-					'feedback_scope'         => 'comment_reply',
-				),
 			),
 			'feedback'               => array(
 				'route'                  => '/agent-feedback',

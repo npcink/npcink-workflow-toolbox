@@ -13,15 +13,8 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Open
 
-- **Sixteen non-default editor intents remain callable** (title, summary,
-  category, tag, outline, checkup, discoverability, comment-reply, and
-  related compatibility paths; category/tag were since promoted to default
-  buttons). The convergence inventory and recommendation now live in
-  [Editor Intent Convergence Decision](editor-intent-convergence-decision.md):
-  retire the ten route-only intents, keep the default and toolbar paths.
-  Converging or retiring remains a mid-term product decision, not a
-  cleanup. Source:
-  [Pre-Release Hardening Closeout 2026-09-30](pre-release-hardening-closeout-2026-09-30.md).
+- **Editor intent convergence accepted 2026-10-07** and moved to Recently
+  Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **The editor `整理` (format content) button label is Chinese inside an
   otherwise English UI**; unify label language in a scoped i18n pass.
   Source: [Pre-Release Hardening Closeout 2026-09-30](pre-release-hardening-closeout-2026-09-30.md).
@@ -93,6 +86,19 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **Sixteen non-default editor intents converged 2026-10-07**: the accepted
+  [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)
+  retired the ten route-only intents from `/editor/content-support`
+  (writing_support, both editor-route Zhihu aliases, article_checkup,
+  title/summary suggestions, article_outline, taxonomy_tags,
+  comment_reply_suggestion, discoverability) with zero family callers
+  (verified across all five sibling repos), folded the local article-checkup
+  prose signals into publish preflight as `local_article_checkup` plus a
+  `prose_quality` review row, and removed the dead PHP branches, orphaned
+  helper families, JS render paths, and their catalog entries. The editor
+  allowlist is pinned to the twelve kept intents by a static contract.
+  Source: [Pre-Release Hardening Closeout 2026-09-30](pre-release-hardening-closeout-2026-09-30.md).
 
 - **Site Knowledge review UI smoke repaired and promoted into the default
   gate** — resolved 2026-10-07: the red assertion pinned four Admin_Page

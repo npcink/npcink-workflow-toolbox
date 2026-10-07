@@ -91,7 +91,7 @@ $discoverability = array(
 );
 
 $sections = $service->build_sections( $context, $discoverability, array( 'results' => array() ) );
-npcink_toolbox_preflight_assert( array( 'checks', 'duplicate_check', 'seo_handoff', 'pre_publish_review' ) === array_keys( $sections ), 'Publish preflight keeps the established section order and shape.' );
+npcink_toolbox_preflight_assert( array( 'checks', 'duplicate_check', 'seo_handoff', 'local_article_checkup', 'pre_publish_review' ) === array_keys( $sections ), 'Publish preflight keeps the established section order and shape, with the folded local article checkup before the review.' );
 
 $checks = npcink_toolbox_preflight_index( (array) ( $sections['checks']['items'] ?? array() ), 'id' );
 npcink_toolbox_preflight_assert( array( 'title', 'excerpt', 'terms', 'featured_media' ) === array_keys( $checks ), 'Local checks keep the four established check ids.' );
@@ -118,13 +118,14 @@ npcink_toolbox_preflight_assert(
 		'featured_image' => 'ok',
 		'internal_links' => 'review',
 		'seo_meta'       => 'review',
+		'prose_quality'  => 'ok',
 		'duplicate_risk' => 'ok',
 	) === $review_statuses,
 	'Unified review maps complete context, manual link review, SEO review, and no duplicate evidence exactly.'
 );
 npcink_toolbox_preflight_assert( 'pre_publish_review.v1' === (string) ( $review['artifact_type'] ?? '' ) && 'core_proposal_required' === (string) ( $review['final_write_path'] ?? '' ), 'Unified review keeps its v1 artifact and governed final-write path.' );
 npcink_toolbox_preflight_assert(
-	array( 'summary_suggestions', 'category_suggestions', 'tag_suggestions', 'internal_links', 'image_candidates', 'seo_meta_single_post_handoff' ) === (array) ( $review['next_actions'] ?? array() ),
+	array( 'summary_terms_optimization', 'category_suggestions', 'tag_suggestions', 'internal_links', 'image_candidates', 'seo_meta_single_post_handoff', 'polish_notes' ) === (array) ( $review['next_actions'] ?? array() ),
 	'Unified review keeps the established next-action contract.'
 );
 npcink_toolbox_preflight_assert( false === (bool) ( $review['direct_wordpress_write'] ?? true ) && false === (bool) ( $review['handoff']['direct_wordpress_write'] ?? true ), 'Unified review and handoff both prohibit direct WordPress writes.' );

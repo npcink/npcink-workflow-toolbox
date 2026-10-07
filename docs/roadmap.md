@@ -37,7 +37,8 @@ its own boundary check:
 
 - taxonomy/tag and internal-link review sets (review-set order items 2
   and 3);
-- the sixteen non-default editor intent convergence decision;
+- the sixteen non-default editor intent convergence decision (resolved
+  2026-10-07 by the accepted editor intent convergence retirement);
 - a full guided fresh-install onboarding tour;
 - Site Knowledge status owner-matrix rows and the author/admin error
   audience split;

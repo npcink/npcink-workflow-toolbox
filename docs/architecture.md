@@ -526,13 +526,18 @@ queue/scheduler ownership, approval, write confirmation, featured-image
 mutation, media upload/import, SEO mutation, indexing, or re-indexing.
 
 `/editor/content-support` is the post-editor entrypoint for fixed, bounded
-support flows. It accepts current draft context plus one intent:
-`source_adaptation_review`, `writing_support`, local full-draft diagnostics via `article_checkup`,
-`title_suggestions`, `article_outline`, selection-only paragraph review via
-`polish_notes`, `publish_preflight`, `discoverability`, `summary_suggestions`,
-`category_suggestions`, `tag_suggestions`, `summary_terms_optimization`,
-`taxonomy_tags`, `internal_links`, `image_candidates`, or
-`image_alt_suggestions`.
+support flows. It accepts current draft context plus one intent from the
+twelve-intent allowlist frozen by the 2026-10-07 convergence:
+`source_adaptation_review`, `polish_notes`, `publish_preflight`,
+`article_narration`, `article_audio_summary`, `category_suggestions`,
+`tag_suggestions`, `summary_terms_optimization`, `internal_links`,
+`image_candidates`, `image_alt_suggestions`, and the automatic local
+`progressive_recommendations` prefetch. The retired route-only intents
+(`writing_support`, `zhihu_research`, `zhihu_hot_topics`, `article_checkup`,
+`title_suggestions`, `article_outline`, `summary_suggestions`, `taxonomy_tags`,
+`comment_reply_suggestion`, `discoverability`) return the invalid-intent
+error; the local article-checkup signals ride inside publish preflight as the
+`local_article_checkup` section and the `prose_quality` review row.
 The editor UI groups the default buttons around the author workflow. Common
 default buttons are now Npcink review and handoff actions: URL-reference article
 writing pack, publish preflight, direct existing-category and existing-tag
@@ -556,18 +561,17 @@ and `core/paragraph` blocks when the current editor body is empty. The click
 handler rechecks live block state, does not apply the generated title or
 excerpt, and does not call a REST write or native save action. Existing body
 content makes the action copy-only.
-Generic AI-plugin-style generation and diagnosis intents such as
-`article_checkup`, `title_suggestions`, `summary_suggestions`,
-`category_suggestions`, `tag_suggestions`, `article_outline`,
-`discoverability`, and `comment_reply_suggestion`
-remain supported by compatible route/result-rendering code, but they are not
-default visible buttons. Related existing-post review is folded into publish
-preflight duplicate-risk checks and internal-link candidates; `writing_support`
-also remains a supported route intent for compatibility but is not a default
-editor button. Article checkup is a local suggestion-only diagnostic that points
-to sentence-density, fact-gap, tone, structure, and format review items without
-rewriting or inserting text. Paragraph review lives in the selected-block
-toolbar.
+The 2026-10-07 editor intent convergence retired the route-only generic
+AI-plugin-style intents (`article_checkup`, `title_suggestions`,
+`summary_suggestions`, `article_outline`, `discoverability`,
+`comment_reply_suggestion`, `taxonomy_tags`, `writing_support`, and the two
+editor-route Zhihu aliases) following the accepted no-caller removal
+precedent; the admin `/ai/content-support` route keeps its own intent set.
+The local article-checkup heuristics survive inside `publish_preflight` as a
+suggestion-only `local_article_checkup` section and `prose_quality` review row
+that points to sentence-density, fact-gap, tone, structure, and format review
+items without rewriting or inserting text. Paragraph review lives in the
+selected-block toolbar.
 The `source_adaptation_review` route intent is deliberately retained for
 compatibility but now returns the planning artifact `article_writing_pack.v1`.
 Its editor projection is a request-scoped three-step modal over the existing
@@ -805,9 +809,11 @@ and `toolbox_tab=tools&toolbox_tool=media-batch-optimize`; the deprecated
 The writing-pack entry, publish preflight, direct existing-category and
 existing-tag suggestions, internal-link candidates, current-article ALT review,
 and image candidates stay as default post editor buttons. Article narration and
-audio summary stay callable but hidden. Summary suggestions, combined taxonomy
-support, article checkup, discoverability, outline, and comment-reply support
-stay route-compatible but are not default editor buttons.
+audio summary stay callable but hidden. The retired generic intents
+(summary/title suggestions, combined taxonomy support, article checkup,
+discoverability, outline, comment reply, writing support, and the Zhihu
+editor-route aliases) are removed from the route, with the local checkup
+signals folded into publish preflight.
 
 Toolbox also renders additive `operator_feedback` payloads from governed
 handoff failures, including reasons, revision fields, next steps, retry state,
@@ -836,9 +842,10 @@ same fixed workflows that the admin surface owns:
 - article audio candidates that can prepare a Core-governed audio adoption
   plan.
 
-Generic title, summary, taxonomy/tag, outline, article-checkup,
-discoverability, current-article ALT, and comment-reply result views remain in
-the editor code as compatible support paths, not as default buttons.
+The retired generic title, summary, combined-taxonomy, outline,
+article-checkup, discoverability, and comment-reply result views are removed
+from the editor code with their intents; current-article ALT remains a
+default capability and the checkup detail renders under publish preflight.
 
 The editor panel reads the current draft title, excerpt, content, terms, status,
 and featured image id. It never assigns terms, automatically inserts links,

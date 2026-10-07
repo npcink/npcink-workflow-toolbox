@@ -259,7 +259,19 @@ first scoped version; those actions stay administrator-facing.
 Do not add Toolbox REST routes for publishing, delivery, workflow runs, queues,
 schedulers, approvals, write confirmation, featured image setting, media
 upload/import, SEO mutation, content indexing, or re-indexing without a new
-boundary decision. Write-like outcomes must be prepared as suggestions or Core
+boundary decision.
+
+`/editor/content-support` froze a twelve-intent allowlist in the 2026-10-07
+editor intent convergence: the route-only generic intents (`writing_support`,
+`zhihu_research`, `zhihu_hot_topics`, `article_checkup`,
+`title_suggestions`, `article_outline`, `summary_suggestions`, `taxonomy_tags`,
+`comment_reply_suggestion`, `discoverability`) are retired and return the
+invalid-intent error, per
+[Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
+The admin `/ai/content-support` route keeps its own hosted intent set, and the
+local article-checkup signals continue inside publish preflight as the
+`local_article_checkup` section with a `prose_quality` review row. Restoring a
+retired intent requires a new boundary decision naming its operator surface. Write-like outcomes must be prepared as suggestions or Core
 proposal handoffs, not executed by Toolbox.
 
 The sole media-recognition continuation is a narrow exception to the general

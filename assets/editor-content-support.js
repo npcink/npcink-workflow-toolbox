@@ -1709,13 +1709,10 @@
 	function editorContentSupportSourceRuntime(payload, intent) {
 		const activeIntent = String(intent || '').trim();
 		const sections = payload && payload.sections && typeof payload.sections === 'object' ? payload.sections : {};
-		if (activeIntent === 'comment_reply_suggestion' || sections.comment_reply_suggestion) {
-			return 'comment_reply';
-		}
 		if (activeIntent === 'image_alt_suggestions' || sections.image_alt_suggestions) {
 			return 'media_alt_caption';
 		}
-		if (activeIntent === 'discoverability' || activeIntent === 'publish_preflight' || sections.seo_handoff) {
+		if (activeIntent === 'publish_preflight' || sections.seo_handoff) {
 			return 'seo_metadata';
 		}
 		return 'editor_content_support';
@@ -2067,14 +2064,12 @@
 			suggestion_only: __('Suggestion only', 'npcink-workflow-toolbox'),
 			core_proposal_required: __('Core review required', 'npcink-workflow-toolbox'),
 			content_metadata_delta_handoff: __('Content metadata handoff', 'npcink-workflow-toolbox'),
-			summary_suggestions: __('Summary suggestions', 'npcink-workflow-toolbox'),
 			article_narration: __('Article narration', 'npcink-workflow-toolbox'),
 			article_audio_summary: __('Audio summary', 'npcink-workflow-toolbox'),
 			category_suggestions: __('Category suggestions', 'npcink-workflow-toolbox'),
 			tag_suggestions: __('Tag suggestions', 'npcink-workflow-toolbox'),
 			metadata_suggestions: __('Metadata suggestions', 'npcink-workflow-toolbox'),
 			summary_terms_optimization: __('Metadata optimization', 'npcink-workflow-toolbox'),
-			article_checkup: __('Article checkup', 'npcink-workflow-toolbox'),
 			clarity: __('Clarity', 'npcink-workflow-toolbox'),
 			structure: __('Structure', 'npcink-workflow-toolbox'),
 			fact_gap: __('Fact gap', 'npcink-workflow-toolbox'),
@@ -2083,12 +2078,9 @@
 			semantic_consistency: __('Semantic consistency', 'npcink-workflow-toolbox'),
 			other: __('Other', 'npcink-workflow-toolbox'),
 			publish_preflight: __('Publish preflight', 'npcink-workflow-toolbox'),
-			title_suggestions: __('Title suggestions', 'npcink-workflow-toolbox'),
-			article_outline: __('Outline suggestions', 'npcink-workflow-toolbox'),
 			polish_notes: __('Paragraph review', 'npcink-workflow-toolbox'),
 			discoverability: __('Discoverability suggestions', 'npcink-workflow-toolbox'),
 				image_alt_suggestions: __('Article image ALT (SEO)', 'npcink-workflow-toolbox'),
-			comment_reply_suggestion: __('Comment reply suggestions', 'npcink-workflow-toolbox'),
 			categories: __('Categories', 'npcink-workflow-toolbox'),
 			tags: __('Tags', 'npcink-workflow-toolbox'),
 			featured_image: __('Featured image', 'npcink-workflow-toolbox'),
@@ -2197,41 +2189,14 @@
 		if (value === 'source_adaptation_review') {
 			return __('Draft from source materials', 'npcink-workflow-toolbox');
 		}
-		if (value === 'writing_support') {
-			return __('Find related existing posts', 'npcink-workflow-toolbox');
-		}
-		if (value === 'zhihu_research') {
-			return __('知乎选题研究', 'npcink-workflow-toolbox');
-		}
-		if (value === 'zhihu_hot_topics') {
-			return __('热点选题', 'npcink-workflow-toolbox');
-		}
-		if (value === 'article_checkup') {
-			return __('Article checkup', 'npcink-workflow-toolbox');
-		}
-		if (value === 'title_suggestions') {
-			return __('Title suggestions', 'npcink-workflow-toolbox');
-		}
-		if (value === 'article_outline') {
-			return __('Outline suggestions', 'npcink-workflow-toolbox');
-		}
 		if (value === 'polish_notes') {
 			return __('Review selected paragraph', 'npcink-workflow-toolbox');
-		}
-		if (value === 'discoverability') {
-			return __('Discoverability suggestions', 'npcink-workflow-toolbox');
 		}
 			if (value === 'image_alt_suggestions') {
 				return __('Article image ALT (SEO)', 'npcink-workflow-toolbox');
 			}
-		if (value === 'comment_reply_suggestion') {
-			return __('Comment reply suggestions', 'npcink-workflow-toolbox');
-		}
 		if (value === 'summary_terms_optimization') {
 			return __('Metadata optimization', 'npcink-workflow-toolbox');
-		}
-		if (value === 'summary_suggestions') {
-			return __('AI generate summary', 'npcink-workflow-toolbox');
 		}
 		if (value === 'article_narration') {
 			return __('Article narration', 'npcink-workflow-toolbox');
@@ -2255,41 +2220,14 @@
 		if (value === 'source_adaptation_review') {
 			return __('Builds a reviewable writing pack from URL, manual, or mixed inputs. Reviewed sections may load only into an empty editor; nothing is saved or published automatically.', 'npcink-workflow-toolbox');
 		}
-		if (value === 'writing_support') {
-			return __('Finds similar published content first, then helps you decide how this draft should differ.', 'npcink-workflow-toolbox');
-		}
 		if (value === 'internal_links') {
 			return __('Finds related published articles and identifies which ones have a safe exact placement in the current draft.', 'npcink-workflow-toolbox');
-		}
-		if (value === 'zhihu_research') {
-			return __('解决写作前“不知道用户真正关心什么、反对什么、该从哪个角度切入”的问题。它只返回知乎来源候选，供你人工判断、改写和引用。', 'npcink-workflow-toolbox');
-		}
-		if (value === 'zhihu_hot_topics') {
-			return __('解决每天“不知道写什么”的问题。它读取服务器缓存的知乎热榜，先给出今日可研究的选题池；选题后再由人工判断是否展开研究和写作。', 'npcink-workflow-toolbox');
-		}
-		if (value === 'article_checkup') {
-			return __('Checks the full draft for review items and points you to affected paragraphs. It will not rewrite the article.', 'npcink-workflow-toolbox');
-		}
-		if (value === 'title_suggestions') {
-			return __('Review title options before replacing the post title.', 'npcink-workflow-toolbox');
-		}
-		if (value === 'article_outline') {
-			return __('Use the outline as planning notes; it does not write the article body.', 'npcink-workflow-toolbox');
 		}
 		if (value === 'polish_notes') {
 			return __('Review clarity, fact boundaries, and tone for the selected paragraph. It will not rewrite text.', 'npcink-workflow-toolbox');
 		}
-		if (value === 'discoverability') {
-			return __('Turn SEO, AEO, GEO, and proposal-field suggestions into reviewable optimization tasks and Core handoff candidates.', 'npcink-workflow-toolbox');
-		}
 		if (value === 'image_alt_suggestions') {
 			return __('Review one contextual ALT draft for each image occurrence. Nothing is written from this preview.', 'npcink-workflow-toolbox');
-		}
-		if (value === 'comment_reply_suggestion') {
-			return __('Review reply options before taking any comment action. Toolbox does not publish replies or change comment status.', 'npcink-workflow-toolbox');
-		}
-		if (value === 'summary_suggestions') {
-			return __('AI reads the current draft and returns an editor-ready excerpt candidate.', 'npcink-workflow-toolbox');
 		}
 		if (value === 'article_narration') {
 			return __('Generate a review-only narration candidate from the current article text. Toolbox does not import audio or edit the post.', 'npcink-workflow-toolbox');
@@ -4034,68 +3972,6 @@
 			renderArticleDraftReview(draft, controls)
 		);
 	}
-
-	function extractZhihuResearchItems(section) {
-		if (!section || typeof section !== 'object') {
-			return [];
-		}
-		const results = Array.isArray(section.results) ? section.results : [];
-		return results.map((item, index) => {
-			const source = item && item.source ? formatMetaLabel(item.source) : __('Zhihu', 'npcink-workflow-toolbox');
-			const stats = [
-				item && item.content_type ? formatMetaLabel(item.content_type) : '',
-				item && item.vote_up_count ? sprintf(__('赞同 %s', 'npcink-workflow-toolbox'), item.vote_up_count) : '',
-				item && item.comment_count ? sprintf(__('评论 %s', 'npcink-workflow-toolbox'), item.comment_count) : '',
-				item && item.author_name ? sprintf(__('作者：%s', 'npcink-workflow-toolbox'), item.author_name) : '',
-			].filter(Boolean).join(' · ');
-			const snippet = item && item.snippet ? truncateText(item.snippet, 120) : '';
-			return {
-				name: item && item.title ? item.title : sprintf(__('知乎来源 %d', 'npcink-workflow-toolbox'), index + 1),
-				detail: [
-					snippet ? __('可参考信号：', 'npcink-workflow-toolbox') + snippet : '',
-					stats,
-					__('适合用于选题判断、用户问题提炼、反对意见收集和引用候选；发布前仍需人工核验来源。', 'npcink-workflow-toolbox'),
-				].filter(Boolean).join(' · '),
-				source: source,
-				evidence_refs: item && item.url ? ['zhihu:' + item.url] : ['zhihu:research'],
-				action_policy: 'operator_review_only_no_write',
-			};
-		});
-	}
-
-	function extractZhihuHotTopicItems(section) {
-		if (!section || typeof section !== 'object') {
-			return [];
-		}
-		const pool = section.hot_topic_pool && typeof section.hot_topic_pool === 'object' ? section.hot_topic_pool : {};
-		const poolItems = Array.isArray(pool.items) ? pool.items : [];
-		const results = poolItems.length ? poolItems : (Array.isArray(section.results) ? section.results : []);
-		return results.map((item, index) => {
-			const rank = item && item.rank ? sprintf(__('热榜 #%s', 'npcink-workflow-toolbox'), item.rank) : sprintf(__('热榜 #%s', 'npcink-workflow-toolbox'), index + 1);
-			const stats = [
-				rank,
-				item && item.content_type ? formatMetaLabel(item.content_type) : __('趋势信号', 'npcink-workflow-toolbox'),
-				item && item.vote_up_count ? sprintf(__('赞同 %s', 'npcink-workflow-toolbox'), item.vote_up_count) : '',
-				item && item.comment_count ? sprintf(__('评论 %s', 'npcink-workflow-toolbox'), item.comment_count) : '',
-				item && item.source ? formatMetaLabel(item.source) : '',
-			].filter(Boolean).join(' · ');
-			const signal = item && (item.signal || item.snippet || item.selection_reason) ? truncateText(item.signal || item.snippet || item.selection_reason, 120) : '';
-			const suggestedUse = item && item.suggested_use ? readableItemText(item.suggested_use, '') : '';
-			return {
-				name: item && item.title ? item.title : sprintf(__('热榜选题 %d', 'npcink-workflow-toolbox'), index + 1),
-				detail: [
-					signal ? __('选题信号：', 'npcink-workflow-toolbox') + signal : '',
-					suggestedUse ? __('适合用途：', 'npcink-workflow-toolbox') + suggestedUse : '',
-					stats,
-					__('使用方式：先判断是否贴合本站受众和栏目，再进入人工资料核验与写作准备；这里不生成文章。', 'npcink-workflow-toolbox'),
-				].filter(Boolean).join(' · '),
-				source: 'zhihu_hot_list',
-				evidence_refs: item && item.url ? ['zhihu_hot:' + item.url] : ['zhihu:hot_topics'],
-				action_policy: 'operator_review_only_no_write',
-			};
-		});
-	}
-
 	function hostedWritingSupportItems(section) {
 		if (!section || typeof section !== 'object') {
 			return [];
@@ -4993,33 +4869,18 @@
 
 	function flowAcceptsUserInstruction(intent) {
 		return [
-			'title_suggestions',
-			'summary_suggestions',
 			'article_narration',
 			'article_audio_summary',
 			'tag_suggestions',
 			'category_suggestions',
 			'internal_links',
-				'writing_support',
-				'zhihu_research',
-				'zhihu_hot_topics',
-				'article_checkup',
-				'article_outline',
-				'polish_notes',
-				'discoverability',
-				'comment_reply_suggestion',
-			].indexOf(intent) >= 0;
-		}
+			'polish_notes',
+		].indexOf(intent) >= 0;
+	}
 
 	function flowInstructionPlaceholder(intent) {
 		if (intent === 'source_adaptation_review') {
 			return __('Optional: emphasize a practical tutorial angle, preserve product names, and avoid promotional wording.', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'title_suggestions') {
-			return __('Example: shorter, less marketing, include product name.', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'summary_suggestions') {
-			return __('Example: emphasize workflow value, avoid audience-label openings.', 'npcink-workflow-toolbox');
 		}
 		if (intent === 'article_narration') {
 			return __('Example: pronounce Npcink clearly; keep a steady pace around headings.', 'npcink-workflow-toolbox');
@@ -5033,108 +4894,8 @@
 		if (intent === 'internal_links') {
 			return __('Example: prefer tutorials over announcement posts.', 'npcink-workflow-toolbox');
 		}
-		if (intent === 'article_checkup') {
-			return __('Example: focus on structure and factual claims, not style preference.', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'comment_reply_suggestion') {
-			return __('Paste or select the comment text; add tone guidance if needed.', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'writing_support') {
-			return __('Example: focus on what is already covered, what angle is missing, and what I should do next.', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'zhihu_research') {
-			return __('例如：帮我找真实用户问题、争议点、反对意见和可引用来源。', 'npcink-workflow-toolbox');
-		}
-		if (intent === 'zhihu_hot_topics') {
-			return __('可选：优先筛选 AI、WordPress、内容创作、独立开发相关话题；留空则返回今日热榜选题池。', 'npcink-workflow-toolbox');
-		}
 		return __('Example: more practical, concise, and less promotional.', 'npcink-workflow-toolbox');
 	}
-
-	function titleSuggestionItems(section) {
-		if (!section || typeof section !== 'object') {
-			return [];
-		}
-		if (Array.isArray(section.recommendation_candidates) && section.recommendation_candidates.length) {
-			return section.recommendation_candidates.map((item) => ({
-				name: readableItemText(item.label || item.name || item.id, __('Title option', 'npcink-workflow-toolbox')),
-				detail: [
-					readableItemText(item.reason || item.detail, ''),
-					item.quality_status ? formatMetaLabel(item.quality_status) : '',
-					item.quality_score ? __('Quality score: ', 'npcink-workflow-toolbox') + String(item.quality_score) : '',
-				].filter(Boolean).join(' · '),
-				value: readableItemText(item.value || item.title || item.text, ''),
-				quality_status: item.quality_status,
-				quality_score: item.quality_score,
-				quality_issues: item.quality_issues,
-				action_policy: item.action_policy,
-				target_field: item.target_field,
-			})).filter((item) => item.value);
-		}
-		const output = hostedOutputObject(section);
-		const source = Array.isArray(output.title_options) && output.title_options.length
-			? output.title_options
-			: (Array.isArray(output.titles) && output.titles.length ? output.titles : (Array.isArray(output.suggestions) && output.suggestions.length ? output.suggestions : []));
-		if (source.length) {
-			return source.map((item, index) => {
-				const title = readableItemText(item && (item.title || item.name || item.label || item.value || item.text || item), '');
-				const reason = item && typeof item === 'object' ? readableItemText(item.reason || item.rationale || item.detail, '') : '';
-				return {
-					name: title || __('Title option', 'npcink-workflow-toolbox') + ' ' + String(index + 1),
-					detail: reason,
-					value: title,
-				};
-			}).filter((item) => item.value);
-		}
-		const outputText = String(section.output_text || section.text || '').trim();
-		if (outputText && Object.keys(parseHostedJsonObject(outputText)).length) {
-			return [];
-		}
-		return hostedWritingSupportItems(section);
-	}
-
-	function renderTitleSuggestionSection(items, controls) {
-		const candidates = Array.isArray(items) ? items : [];
-		const status = controls && controls.titleApplyStatus ? controls.titleApplyStatus : null;
-		const activeIntent = controls && controls.intent ? controls.intent : '';
-		const showHeading = activeIntent !== 'title_suggestions';
-		return createElement(
-			'section',
-			{ className: 'npcink-toolbox-editor-support__metadata-compact-section' },
-			showHeading ? createElement('h4', null, __('Title suggestions', 'npcink-workflow-toolbox')) : null,
-			candidates.length
-				? createElement(
-					'ul',
-					{ className: 'npcink-toolbox-editor-support__metadata-compact-list' },
-					candidates.slice(0, 5).map((item, index) => {
-						const titleText = readableItemText(item && (item.value || item.name || item.title || item.label), __('Title option', 'npcink-workflow-toolbox'));
-						const detailText = truncateText(readableItemText(item && (item.detail || item.reason || item.excerpt), ''), 140);
-						return createElement(
-							'li',
-							{ key: String(index) + '-' + titleText },
-							createElement('strong', null, titleText),
-							detailText ? createElement('span', null, detailText) : null,
-							titleText && controls && controls.applyTitle ? createElement(
-								'div',
-								{ className: 'npcink-toolbox-editor-support__candidate-actions' },
-								createElement(
-									Button,
-									{
-										type: 'button',
-										variant: status && status.title === titleText ? 'secondary' : 'primary',
-										onClick: () => controls.applyTitle(titleText),
-									},
-									status && status.title === titleText ? __('Applied', 'npcink-workflow-toolbox') : __('Use this title', 'npcink-workflow-toolbox')
-								)
-							) : null
-						);
-					})
-				)
-				: createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No title suggestions returned.', 'npcink-workflow-toolbox')),
-			status ? createElement(Notice, { status: status.status || 'success', isDismissible: false }, status.message) : null
-		);
-	}
-
 	function discoverabilitySuggestionItems(section) {
 		const suggestions = section && section.candidate_suggestions ? section.candidate_suggestions : {};
 		return Object.keys(suggestions).map((field) => ({
@@ -5758,23 +5519,6 @@
 			createElement('p', { className: 'npcink-toolbox-editor-support__contextual-alt-boundary' }, __('Only the current Gutenberg draft changes. Use WordPress Save draft or Update to persist it; no Core trace or media-library change is created.', 'npcink-workflow-toolbox'))
 		);
 	}
-
-	function commentReplySuggestionItems(section) {
-		if (!section || typeof section !== 'object') {
-			return [];
-		}
-		const items = Array.isArray(section.items) ? section.items : [];
-		return items.map((item, index) => ({
-			name: readableItemText(item && (item.label || item.id), __('Reply option', 'npcink-workflow-toolbox') + ' ' + String(index + 1)),
-			value: readableItemText(item && (item.reply_text || item.value), ''),
-			detail: [
-				item && item.status ? formatMetaLabel(item.status) : '',
-				item && item.action_policy ? formatMetaLabel(item.action_policy) : '',
-				item && item.reason ? item.reason : '',
-			].filter(Boolean).join(' · '),
-		}));
-	}
-
 	function prePublishReviewItems(section) {
 		const items = section && Array.isArray(section.items) ? section.items : [];
 		return items.map((item) => ({
@@ -5822,9 +5566,9 @@
 	function preflightActionIntent(action) {
 		const key = String(action || '').trim();
 		const mapping = {
-			title: 'title_suggestions',
-			excerpt: 'summary_suggestions',
-			summary: 'summary_suggestions',
+			excerpt: 'summary_terms_optimization',
+			summary: 'summary_terms_optimization',
+			prose_quality: 'polish_notes',
 			categories: 'category_suggestions',
 			category_suggestions: 'category_suggestions',
 			tags: 'tag_suggestions',
@@ -5834,30 +5578,22 @@
 			featured_media: 'image_candidates',
 			image_candidates: 'image_candidates',
 			internal_links: 'internal_links',
-			seo_meta: 'discoverability',
-			seo_meta_single_post_handoff: 'discoverability',
 		};
 		return mapping[key] || '';
 	}
 
 	function preflightActionLabel(intent, fallback) {
 		const labels = {
-			title_suggestions: __('Open title suggestions', 'npcink-workflow-toolbox'),
-			summary_suggestions: __('Open summary suggestions', 'npcink-workflow-toolbox'),
 			category_suggestions: __('Open category suggestions', 'npcink-workflow-toolbox'),
 			tag_suggestions: __('Open tag suggestions', 'npcink-workflow-toolbox'),
 			image_candidates: __('Open image candidates', 'npcink-workflow-toolbox'),
 			internal_links: __('Open internal link candidates', 'npcink-workflow-toolbox'),
-			discoverability: __('Open discoverability suggestions', 'npcink-workflow-toolbox'),
+			polish_notes: __('Review selected paragraph', 'npcink-workflow-toolbox'),
 		};
-		return labels[intent] || fallback || __('Open tool', 'npcink-workflow-toolbox');
+		return labels[intent] || formatIntentLabel(intent) || fallback || __('Open tool', 'npcink-workflow-toolbox');
 	}
 
 	function preflightReviewActionLabel(item, intent) {
-		const action = String(item && (item.nextAction || item.id || item.name) ? (item.nextAction || item.id || item.name) : '').toLowerCase();
-		if (intent === 'discoverability' && action.indexOf('seo') >= 0) {
-			return __('Review SEO candidates', 'npcink-workflow-toolbox');
-		}
 		return preflightActionLabel(intent);
 	}
 
@@ -6506,11 +6242,10 @@
 		const candidates = Array.isArray(items) ? items : [];
 		const status = controls && controls.excerptApplyStatus ? controls.excerptApplyStatus : null;
 		const activeIntent = controls && controls.intent ? controls.intent : '';
-		const showHeading = activeIntent !== 'summary_suggestions';
 		return createElement(
 			'section',
 			{ className: 'npcink-toolbox-editor-support__metadata-compact-section' },
-			showHeading ? createElement('h4', null, __('Summary suggestions', 'npcink-workflow-toolbox')) : null,
+			createElement('h4', null, __('Summary suggestions', 'npcink-workflow-toolbox')),
 			candidates.length
 					? createElement(
 						'ul',
@@ -7097,14 +6832,13 @@
 		const summary = section.summary_candidates && typeof section.summary_candidates === 'object' ? section.summary_candidates : {};
 		const summaryText = summary.output_text || '';
 		const activeIntent = metadataHandoffControls && metadataHandoffControls.intent ? metadataHandoffControls.intent : '';
-		const summaryOnlyRun = activeIntent === 'summary_suggestions' || section.candidate_type === 'summary_suggestions';
 		const categoryOnlyRun = activeIntent === 'category_suggestions' || section.candidate_type === 'category_suggestions';
 		const tagOnlyRun = activeIntent === 'tag_suggestions' || section.candidate_type === 'tag_suggestions';
 		const showFullMetadataSurface = activeIntent === 'summary_terms_optimization' || (!activeIntent && fullMetadataRun);
 		if (showFullMetadataSurface) {
 			blocks.push(createElement('h4', { key: 'summary-optimization-title' }, __('Metadata optimization', 'npcink-workflow-toolbox')));
 		}
-		if (!summaryOnlyRun && section.input_scope) {
+		if (section.input_scope) {
 			evidenceBlocks.push(createElement('h4', { key: 'summary-input-scope-title' }, __('Input scope', 'npcink-workflow-toolbox')));
 			evidenceBlocks.push(renderItems([section.input_scope], __('No input scope returned.', 'npcink-workflow-toolbox')));
 		}
@@ -7112,13 +6846,10 @@
 			blocks.push(createElement('p', { key: 'summary-ai-error', className: 'npcink-toolbox-editor-support__muted' }, summary.message || __('AI summary candidates were unavailable.', 'npcink-workflow-toolbox')));
 		}
 
-		if (!categoryOnlyRun && !tagOnlyRun && (summaryItems.length || metadataSectionHasSource(section, 'summary_suggestions') || fullMetadataRun)) {
+		if (!categoryOnlyRun && !tagOnlyRun && (summaryItems.length || fullMetadataRun)) {
 			blocks.push(renderSummarySuggestionSection(summaryItems, metadataHandoffControls));
 		}
 
-		if (summaryOnlyRun) {
-			return createElement('div', { className: 'npcink-toolbox-editor-support__optimization' }, blocks);
-		}
 		if (categoryOnlyRun) {
 			blocks.push(renderCompactMetadataSection(
 				__('Recommended existing categories', 'npcink-workflow-toolbox'),
@@ -7298,28 +7029,9 @@
 				blocks.push(renderItems(extractWritingSupportItems(sections.writing_support), __('No related existing posts were found for this draft.', 'npcink-workflow-toolbox')));
 			}
 
-			if (sections.zhihu_research) {
-				blocks.push(createElement('h4', { key: 'zhihu-research-title' }, __('知乎研究：用户问题和选题角度', 'npcink-workflow-toolbox')));
-				blocks.push(createElement('p', { key: 'zhihu-research-help', className: 'npcink-toolbox-editor-support__muted' }, __('用于写作前判断：用户在问什么、哪些角度更热、有哪些反对意见、哪些来源值得人工引用。Toolbox 不复制原文、不自动改写成文章，也不发布内容。', 'npcink-workflow-toolbox')));
-				blocks.push(renderItems(extractZhihuResearchItems(sections.zhihu_research), __('没有返回可用的知乎研究来源。', 'npcink-workflow-toolbox')));
-			}
 
-			if (sections.zhihu_hot_topics) {
-				blocks.push(createElement('h4', { key: 'zhihu-hot-topics-title' }, __('热点选题：今日选题池', 'npcink-workflow-toolbox')));
-				blocks.push(createElement('p', { key: 'zhihu-hot-topics-help', className: 'npcink-toolbox-editor-support__muted' }, __('用于解决今天写什么：这些是服务器缓存的知乎热榜趋势信号，帮助先挑选值得研究的主题。它不是事实来源，也不会自动生成、改写或发布文章。', 'npcink-workflow-toolbox')));
-				blocks.push(renderItems(extractZhihuHotTopicItems(sections.zhihu_hot_topics), __('没有返回可用的知乎热榜选题。', 'npcink-workflow-toolbox')));
-			}
 
-			if (sections.article_checkup) {
-				blocks.push(createElement('h4', { key: 'article-checkup-title' }, __('Article checkup', 'npcink-workflow-toolbox')));
-				blocks.push(createElement('p', { key: 'article-checkup-help', className: 'npcink-toolbox-editor-support__muted' }, __('Review these full-draft issues manually. Toolbox points to paragraphs and editing direction, but does not rewrite or insert text.', 'npcink-workflow-toolbox')));
-				blocks.push(renderArticleCheckupItems(sections.article_checkup));
-			}
 
-			if (sections.title_suggestions) {
-				blocks.push(renderTitleSuggestionSection(titleSuggestionItems(sections.title_suggestions), metadataHandoffControls));
-				blocks.push(renderHostedAiDiagnostics(sections.title_suggestions));
-			}
 
 			if (sections.audio_generation) {
 				blocks.push(renderAudioGenerationSection(sections.audio_generation, metadataHandoffControls && metadataHandoffControls.audioAdoption, metadataHandoffControls && metadataHandoffControls.audioPlayback, metadataHandoffControls));
@@ -7351,9 +7063,8 @@
 			}
 
 				const hasPreflightReview = Boolean(sections.pre_publish_review);
-				const showImageAltInsideDiscoverability = Boolean(sections.image_alt_suggestions && sections.discoverability && sections.discoverability.candidate_suggestions && metadataHandoffControls && metadataHandoffControls.intent === 'discoverability');
 
-				if (sections.image_alt_suggestions && !showImageAltInsideDiscoverability) {
+				if (sections.image_alt_suggestions) {
 					if (metadataHandoffControls && metadataHandoffControls.intent !== 'image_alt_suggestions') {
 						blocks.push(createElement('h4', { key: 'image-alt-suggestions-title' }, __('Article image text suggestions', 'npcink-workflow-toolbox')));
 					}
@@ -7364,15 +7075,12 @@
 					}
 				}
 
-				if (sections.comment_reply_suggestion) {
-					blocks.push(createElement('h4', { key: 'comment-reply-suggestion-title' }, __('Comment reply suggestions', 'npcink-workflow-toolbox')));
-					blocks.push(createElement('p', { key: 'comment-reply-suggestion-help', className: 'npcink-toolbox-editor-support__muted' }, __('Review-only suggestions. Toolbox does not publish comment replies or change comment status.', 'npcink-workflow-toolbox')));
-					blocks.push(renderItems(commentReplySuggestionItems(sections.comment_reply_suggestion), __('No comment reply suggestions returned.', 'npcink-workflow-toolbox')));
-				}
-
 				if (hasPreflightReview) {
 					blocks.push(renderPreflightSummaryPanel(payload, metadataHandoffControls));
 					blocks.push(renderDiscoverabilityMediaSection(metadataHandoffControls, sections.image_alt_suggestions));
+					if (sections.local_article_checkup) {
+						blocks.push(renderArticleCheckupItems(sections.local_article_checkup));
+					}
 				}
 
 			if (sections.checks && !hasPreflightReview) {
@@ -7434,7 +7142,7 @@
 	}
 
 	function isMetadataIntent(intent) {
-		return ['summary_suggestions', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization'].indexOf(intent) >= 0;
+		return ['category_suggestions', 'tag_suggestions', 'summary_terms_optimization'].indexOf(intent) >= 0;
 	}
 
 	function hasMergeableMetadataResult(result) {
@@ -8015,7 +7723,7 @@
 							category_ids: Array.isArray(runContext.category_ids) ? runContext.category_ids.join(',') : '',
 							tag_ids: Array.isArray(runContext.tag_ids) ? runContext.tag_ids.join(',') : '',
 							media_items: Array.isArray(runContext.media_items) ? runContext.media_items : [],
-							generation_variant: ['title_suggestions', 'article_outline', 'polish_notes', 'article_narration', 'article_audio_summary'].indexOf(intent) >= 0 || shouldForceRegenerate ? String(Date.now()) : '',
+							generation_variant: ['polish_notes', 'article_narration', 'article_audio_summary'].indexOf(intent) >= 0 || shouldForceRegenerate ? String(Date.now()) : '',
 							force_regenerate: shouldForceRegenerate,
 							user_instruction: userInstruction,
 							source_url: intent === 'source_adaptation_review' ? String(sourceArticleUrl || '').trim() : '',
@@ -8054,15 +7762,6 @@
 					}
 					if (isAudioIntent(intent)) {
 						payload.audio_preferences = normalizeAudioPreferences(audioPreferences);
-					}
-					if (intent === 'summary_suggestions') {
-						payload.summary_generation_mode = runOptions.summaryGenerationMode === 'full_context' ? 'full_context' : 'fast_brief';
-					}
-					if (intent === 'title_suggestions') {
-						payload.context_scope = 'full_article';
-						payload.selected_text = '';
-						payload.selected_block_text = '';
-						payload.selected_block_name = '';
 					}
 						let flowResult;
 						flowResult = await postJsonWithTimeout(
@@ -10257,7 +9956,6 @@
 		};
 			const showResultView = supportView === 'result';
 				const rerunInstruction = rerunIntent ? String(flowInstructions[rerunIntent] || '') : '';
-				const canAdvancedSummaryRerun = rerunIntent === 'summary_suggestions';
 				const isAudioRerun = isAudioIntent(rerunIntent);
 				const isCitationRerun = rerunIntent === 'internal_links';
 
@@ -10373,10 +10071,10 @@
 												return;
 											}
 											submitContentImplicitFeedback('run_again', 'edited_before_accept', ['good_but_needs_human_draft']);
-											runFlow(rerunIntent, (rerunIntent === 'summary_suggestions' || isAudioIntent(rerunIntent)) ? { forceRegenerate: true } : undefined);
+											runFlow(rerunIntent, isAudioIntent(rerunIntent) ? { forceRegenerate: true } : undefined);
 										},
 									},
-									running ? __('Running', 'npcink-workflow-toolbox') : (rerunIntent === 'source_adaptation_review' ? (sourceExtractionComplete && !sourceExtractionReady ? __('Source body unavailable', 'npcink-workflow-toolbox') : (sourceExtractionReady ? __('Generate writing pack', 'npcink-workflow-toolbox') : (sourceAdaptationComplete ? __('Re-generate writing pack', 'npcink-workflow-toolbox') : (writingPackInputMode === 'manual_brief' ? __('Generate writing pack', 'npcink-workflow-toolbox') : __('Fetch source', 'npcink-workflow-toolbox'))))) : (isAudioRerun ? __('Regenerate audio', 'npcink-workflow-toolbox') : (rerunIntent === 'summary_suggestions' ? __('Regenerate', 'npcink-workflow-toolbox') : __('Run again', 'npcink-workflow-toolbox'))))
+									running ? __('Running', 'npcink-workflow-toolbox') : (rerunIntent === 'source_adaptation_review' ? (sourceExtractionComplete && !sourceExtractionReady ? __('Source body unavailable', 'npcink-workflow-toolbox') : (sourceExtractionReady ? __('Generate writing pack', 'npcink-workflow-toolbox') : (sourceAdaptationComplete ? __('Re-generate writing pack', 'npcink-workflow-toolbox') : (writingPackInputMode === 'manual_brief' ? __('Generate writing pack', 'npcink-workflow-toolbox') : __('Fetch source', 'npcink-workflow-toolbox'))))) : (isAudioRerun ? __('Regenerate audio', 'npcink-workflow-toolbox') : __('Run again', 'npcink-workflow-toolbox')))
 								),
 								rerunIntent === 'source_adaptation_review' && sourceAdaptationComplete && !sourceWritingPackBlocked ? createElement(
 									Button,
@@ -10392,20 +10090,6 @@
 									},
 									sourceDraftComplete ? __('Re-generate draft preview', 'npcink-workflow-toolbox') : __('Generate draft preview', 'npcink-workflow-toolbox')
 								) : null,
-								canAdvancedSummaryRerun ? createElement(
-									Button,
-									{
-										type: 'button',
-										variant: 'tertiary',
-										isBusy: Boolean(running),
-										disabled: Boolean(running),
-										onClick: () => {
-											submitContentImplicitFeedback('advanced_rerun', 'edited_before_accept', ['good_but_needs_human_draft']);
-											runFlow(rerunIntent, { summaryGenerationMode: 'full_context', forceRegenerate: true });
-										},
-									},
-									__('Advanced rerun', 'npcink-workflow-toolbox')
-								) : null
 							) : null,
 						running ? createElement(
 							'div',

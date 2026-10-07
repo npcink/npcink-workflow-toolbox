@@ -45,7 +45,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		if ( 'format_content' === $intent ) {
 			return Editor_Content_Format::request( $request );
 		}
-		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'writing_support', 'zhihu_research', 'zhihu_hot_topics', 'article_checkup', 'title_suggestions', 'article_outline', 'polish_notes', 'summary_suggestions', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'taxonomy_tags', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'comment_reply_suggestion', 'publish_preflight', 'discoverability' ), true ) ) {
+		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'polish_notes', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'publish_preflight' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_editor_support_intent',
 				__( 'A supported editor content-support intent is required.', 'npcink-workflow-toolbox' ),
@@ -60,12 +60,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				return $writing_pack_context;
 			}
 			$context = $writing_pack_context;
-		}
-		if ( 'title_suggestions' === $intent ) {
-			$context['context_scope']       = 'full_article';
-			$context['selected_text']       = '';
-			$context['selected_block_text'] = '';
-			$context['selected_block_name'] = '';
 		}
 		if ( 'polish_notes' === $intent ) {
 			if ( '' === $this->editor_polish_notes_selected_text( $context ) ) {
@@ -83,7 +77,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		if ( 'image_candidates' === $intent ) {
 			$query = $this->editor_image_support_query( $context );
 		}
-		if ( '' === $query && ! in_array( $intent, array( 'progressive_recommendations', 'zhihu_hot_topics' ), true ) ) {
+		if ( '' === $query && 'progressive_recommendations' !== $intent ) {
 			return new WP_Error(
 				'npcink_toolbox_missing_editor_context',
 				__( 'A title, excerpt, or post content is required for editor content support.', 'npcink-workflow-toolbox' ),
@@ -127,69 +121,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return $this->editor_writing_pack_flow( $request, $context, $result, $intent );
 		}
 
-		if ( 'writing_support' === $intent ) {
-			$result['sections']['writing_support'] = $this->editor_support_section(
-				$this->editor_cached_site_knowledge(
-					array(
-						'query'           => $query,
-						'intent'          => 'writing_support_plan',
-						'current_post_id' => absint( $context['post_id'] ?? 0 ),
-						'max_results'     => 6,
-					)
-				)
-			);
-		}
-
-		if ( 'zhihu_research' === $intent ) {
-			$result['sections']['zhihu_research'] = $this->editor_support_section(
-				$this->editor_cached_cloud_web_search(
-					array(
-						'query'          => $query,
-						'intent'         => 'zhihu_research',
-						'managed_source' => 'zhihu_research',
-						'max_results'    => 5,
-						'recency_days'   => 30,
-					)
-				)
-			);
-		}
-
-		if ( 'zhihu_hot_topics' === $intent ) {
-			$result['sections']['zhihu_hot_topics'] = $this->editor_support_section(
-				$this->editor_cached_cloud_web_search(
-					array(
-						'query'          => '知乎热榜',
-						'intent'         => 'zhihu_hot_topics',
-						'managed_source' => 'zhihu_hot_topics',
-						'max_results'    => 5,
-						'recency_days'   => 1,
-					)
-				)
-			);
-		}
-
-		if ( 'article_checkup' === $intent ) {
-			$result['sections']['article_checkup'] = $this->editor_article_checkup_section( $context );
-		}
-
-		if ( 'taxonomy_tags' === $intent ) {
-			$result['sections']['taxonomy_terms'] = $this->editor_taxonomy_term_candidates( $context, $query );
-		}
-
-		if ( 'title_suggestions' === $intent ) {
-			$result['sections']['title_suggestions'] = $this->editor_hosted_draft_support( $context, 'title_summary' );
-		}
-
-		if ( 'article_outline' === $intent ) {
-			$result['sections']['article_outline'] = $this->editor_hosted_draft_support( $context, 'article_outline' );
-		}
-
 		if ( 'polish_notes' === $intent ) {
 			$result['sections']['polish_notes'] = $this->editor_hosted_draft_support( $context, 'polish_notes' );
-		}
-
-		if ( 'summary_suggestions' === $intent ) {
-			$result['sections']['summary_terms_optimization'] = $this->editor_ai_summary_suggestions( $context, $query );
 		}
 
 		if ( 'article_narration' === $intent ) {
@@ -237,11 +170,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$result['sections']['image_alt_suggestions'] = $this->editor_article_image_alt_suggestions( $context );
 		}
 
-		if ( 'comment_reply_suggestion' === $intent ) {
-			$result['sections']['comment_reply_suggestion'] = $this->editor_comment_reply_suggestions( $context );
-		}
-
-		if ( 'discoverability' === $intent || 'publish_preflight' === $intent ) {
+		if ( 'publish_preflight' === $intent ) {
 			$result['sections']['discoverability'] = $this->editor_support_section(
 				$this->editor_cached_content_discoverability(
 					array(
@@ -250,19 +179,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 						'topic'                   => $query,
 						'excerpt'                 => (string) ( $context['excerpt'] ?? '' ),
 						'content'                 => (string) ( $context['content_text'] ?? '' ),
-						'external_search_intent'  => 'publish_preflight' === $intent ? 'fact_check' : 'writing_context',
+						'external_search_intent'  => 'fact_check',
 						'include_external_search' => true,
 					)
 				)
 			);
-		}
-
-		if ( 'discoverability' === $intent ) {
-			$result['sections']['seo_handoff'] = $this->publish_preflight->seo_handoff_preview( $context, $result['sections']['discoverability'] );
-		}
-
-		if ( 'publish_preflight' === $intent ) {
-			$duplicate_check    = $this->editor_support_section(
+			$local_checkup                         = $this->editor_article_checkup_section( $context );
+			$duplicate_check                       = $this->editor_support_section(
 				$this->editor_cached_site_knowledge(
 					array(
 						'query'           => $query,
@@ -272,9 +195,9 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 					)
 				)
 			);
-			$result['sections'] = array_merge(
+			$result['sections']                    = array_merge(
 				$result['sections'],
-				$this->publish_preflight->build_sections( $context, $result['sections']['discoverability'], $duplicate_check )
+				$this->publish_preflight->build_sections( $context, $result['sections']['discoverability'], $duplicate_check, $local_checkup )
 			);
 		}
 
@@ -759,218 +682,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return rtrim( $trimmed, " \t\n\r\0\x0B,;:-" );
 	}
 
-	private function editor_comment_reply_suggestions( array $context ): array {
-		$comment_context = $this->editor_comment_reply_context( $context );
-		$comment_text    = (string) ( $comment_context['comment_text'] ?? '' );
-		$post_title      = sanitize_text_field( (string) ( $context['title'] ?? '' ) );
-		$post_excerpt    = sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) );
-		$post_summary    = '' !== $post_excerpt ? $post_excerpt : sanitize_textarea_field( wp_trim_words( (string) ( $context['content_text'] ?? '' ), 36, '' ) );
-
-		$base = array(
-			'artifact_type'              => 'comment_reply_suggestion.v1',
-			'candidate_type'             => 'comment_reply_candidates',
-			'write_posture'              => 'suggestion_only',
-			'final_write_path'           => 'core_proposal_required',
-			'direct_wordpress_write'     => false,
-			'comment_publication_policy' => 'operator_review_only_no_comment_publish',
-			'comment_status_unchanged'   => true,
-			'provider_execution'         => 'toolkit_comment_reply_suggestion',
-			'source_policy'              => 'current_article_and_operator_supplied_comment_only',
-			'post_context'               => array(
-				'post_id' => absint( $context['post_id'] ?? 0 ),
-				'title'   => $post_title,
-				'excerpt' => $post_summary,
-			),
-			'comment_context'            => $comment_context,
-		);
-
-		if ( '' === $comment_text ) {
-			return array_merge(
-				$base,
-				array(
-					'status'  => 'needs_comment_context',
-					'message' => __( 'Select or provide a comment before requesting reply suggestions.', 'npcink-workflow-toolbox' ),
-					'items'   => array(),
-				)
-			);
-		}
-
-		$result = $this->editor_toolkit_comment_reply_suggestions(
-			array(
-				'comment_id'     => absint( $comment_context['comment_id'] ?? 0 ),
-				'post_id'        => absint( $context['post_id'] ?? 0 ),
-				'post_title'     => $post_title,
-				'comment_text'   => $comment_text,
-				'comment_author' => sanitize_text_field( (string) ( $comment_context['comment_author'] ?? '' ) ),
-				'comment_status' => sanitize_key( (string) ( $comment_context['comment_status'] ?? '' ) ),
-				'trigger_type'   => 'support_request',
-				'always_suggest' => true,
-			)
-		);
-		if ( is_wp_error( $result ) ) {
-			return array_merge(
-				$base,
-				array(
-					'status'            => 'toolkit_required',
-					'source_ability_id' => 'npcink-abilities-toolkit/build-comment-mention-reply-suggest',
-					'toolkit_required'  => true,
-					'error_code'        => sanitize_key( $result->get_error_code() ),
-					'message'           => sanitize_text_field( $result->get_error_message() ),
-					'items'             => array(),
-				)
-			);
-		}
-
-		$data  = is_array( $result['data'] ?? null ) ? $result['data'] : $result;
-		$items = $this->editor_comment_reply_items_from_toolkit( $data );
-
-		return array_merge(
-			$base,
-			array(
-				'status'                    => 'ready',
-				'source_ability_id'         => 'npcink-abilities-toolkit/build-comment-mention-reply-suggest',
-				'toolkit_artifact'          => $data,
-				'items'                     => $items,
-				'recommendation_candidates' => $this->editor_comment_reply_recommendation_candidates( $items ),
-			)
-		);
-	}
-
-	private function editor_toolkit_comment_reply_suggestions( array $input ) {
-		$ability_id = 'npcink-abilities-toolkit/build-comment-mention-reply-suggest';
-		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) ) {
-			return new WP_Error(
-				'npcink_toolbox_comment_reply_toolkit_unavailable',
-				__( 'Npcink Abilities Toolkit is required to build comment reply suggestions.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$registered = npcink_abilities_toolkit_get_registered();
-		$definition = is_array( $registered[ $ability_id ] ?? null ) ? $registered[ $ability_id ] : array();
-		$callback   = $definition['execute_callback'] ?? null;
-		if ( ! is_callable( $callback ) ) {
-			return new WP_Error(
-				'npcink_toolbox_comment_reply_toolkit_unavailable',
-				__( 'The Toolkit comment reply suggestion ability is not currently callable.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		$result = call_user_func( $callback, $input );
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-		if ( ! is_array( $result ) ) {
-			return new WP_Error(
-				'npcink_toolbox_comment_reply_toolkit_invalid_response',
-				__( 'The Toolkit comment reply suggestion ability returned an invalid response.', 'npcink-workflow-toolbox' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		return $result;
-	}
-
-	private function editor_comment_reply_items_from_toolkit( array $data ): array {
-		$options = is_array( $data['reply_options'] ?? null ) ? $data['reply_options'] : array();
-		if ( empty( $options ) && '' !== trim( (string) ( $data['reply_suggestion'] ?? '' ) ) ) {
-			$options[] = array(
-				'id'         => 'toolkit_reply_suggestion',
-				'label'      => __( 'Reply suggestion', 'npcink-workflow-toolbox' ),
-				'reply_text' => (string) $data['reply_suggestion'],
-				'reason'     => __( 'Generated by the Toolkit comment reply suggestion ability.', 'npcink-workflow-toolbox' ),
-			);
-		}
-
-		$items = array();
-		foreach ( $options as $index => $option ) {
-			if ( ! is_array( $option ) ) {
-				continue;
-			}
-			$reply_text = sanitize_textarea_field( (string) ( $option['reply_text'] ?? $option['value'] ?? '' ) );
-			if ( '' === $reply_text ) {
-				continue;
-			}
-			$items[] = array(
-				'id'            => sanitize_key( (string) ( $option['id'] ?? 'toolkit_reply_' . ( $index + 1 ) ) ),
-				'label'         => sanitize_text_field( (string) ( $option['label'] ?? __( 'Reply suggestion', 'npcink-workflow-toolbox' ) ) ),
-				'reply_text'    => $reply_text,
-				'reason'        => sanitize_textarea_field( (string) ( $option['reason'] ?? '' ) ),
-				'status'        => sanitize_key( (string) ( $option['status'] ?? 'review_required' ) ),
-				'action_policy' => 'operator_review_only_no_comment_publish',
-				'target_field'  => 'comment_reply',
-			);
-		}
-
-		return $items;
-	}
-
-	private function editor_comment_reply_context( array $context ): array {
-		$comment_id = absint( $context['comment_id'] ?? 0 );
-		$text       = sanitize_textarea_field( (string) ( $context['comment_text'] ?? '' ) );
-		$author     = sanitize_text_field( (string) ( $context['comment_author'] ?? '' ) );
-		$status     = '';
-
-		if ( $comment_id > 0
-			&& function_exists( 'get_comment' )
-			&& ( ! function_exists( 'current_user_can' ) || current_user_can( 'moderate_comments' ) ) ) {
-			$comment         = get_comment( $comment_id );
-			$context_post_id = absint( $context['post_id'] ?? 0 );
-			if ( $comment && ( $context_post_id < 1 || absint( $comment->comment_post_ID ?? 0 ) === $context_post_id ) ) {
-				$text   = '' !== $text ? $text : sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $comment->comment_content ?? '' ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) );
-				$author = '' !== $author ? $author : sanitize_text_field( (string) ( $comment->comment_author ?? '' ) );
-				$status = sanitize_key( (string) ( $comment->comment_approved ?? '' ) );
-			}
-		}
-
-		if ( '' === $text ) {
-			$text = sanitize_textarea_field(
-				$this->editor_trim_chars(
-					trim(
-						implode(
-							' ',
-							array_filter(
-								array(
-									(string) ( $context['selected_text_full'] ?? '' ),
-									(string) ( $context['selected_block_text_full'] ?? '' ),
-									(string) ( $context['user_instruction'] ?? '' ),
-								)
-							)
-						)
-					),
-					self::EDITOR_COMMENT_TEXT_MAX_CHARS
-				)
-			);
-		}
-
-		return array(
-			'comment_id'     => $comment_id,
-			'comment_author' => $author,
-			'comment_status' => $status,
-			'comment_text'   => $text,
-			'redaction'      => 'operator_supplied_or_local_comment_text',
-		);
-	}
-
-	private function editor_comment_reply_recommendation_candidates( array $items ): array {
-		$candidates = array();
-		foreach ( $items as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-			$candidates[] = array(
-				'id'            => sanitize_key( (string) ( $item['id'] ?? '' ) ),
-				'kind'          => 'comment_reply',
-				'target_field'  => 'comment_reply',
-				'value'         => sanitize_textarea_field( (string) ( $item['reply_text'] ?? '' ) ),
-				'reason'        => sanitize_textarea_field( (string) ( $item['reason'] ?? '' ) ),
-				'action_policy' => 'operator_review_only_no_comment_publish',
-			);
-		}
-		return $candidates;
-	}
-
 	private function editor_image_visual_context( array $context, string $query ): array {
 		return $this->sanitize_image_visual_context(
 			array(
@@ -1423,8 +1134,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'next_fast_intents'         => array_values(
 				array_filter(
 					array(
-						'' !== trim( (string) ( $context['title'] ?? '' ) ) ? 'title_suggestions' : '',
-						str_word_count( (string) ( $context['content_text'] ?? '' ) ) >= 80 ? 'summary_suggestions' : '',
 						! empty( $category_items ) ? 'category_suggestions' : '',
 						! empty( $tag_items ) ? 'tag_suggestions' : '',
 						empty( $context['featured_media'] ) && ! empty( $media_items ) ? 'image_candidates' : '',
@@ -1917,21 +1626,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		);
 	}
 
-	private function editor_cached_site_knowledge_hit( array $input ): array {
-		$cached = $this->editor_cached_client_hit( 'site_knowledge', $input );
-		if ( is_array( $cached ) ) {
-			return $cached;
-		}
-
-		return array(
-			'status'                 => 'skipped',
-			'cache_status'           => 'miss',
-			'skip_reason'            => 'nonblocking_summary_fast_brief_uses_site_knowledge_cache_hit_only',
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
-		);
-	}
-
 	private function editor_cached_content_discoverability( array $input ) {
 		return $this->editor_cached_client_result(
 			'content_discoverability',
@@ -2012,16 +1706,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return $result;
-	}
-
-	private function editor_cached_client_hit( string $namespace, array $input ): ?array {
-		$cached = get_transient( $this->editor_flow_cache_key( $namespace, $input ) );
-		if ( false !== $cached && is_array( $cached ) ) {
-			$cached['cache_status'] = 'hit';
-			return $cached;
-		}
-
-		return null;
 	}
 
 	private function editor_flow_cache_key( string $namespace, array $input ): string {
@@ -3263,28 +2947,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		);
 	}
 
-	private function editor_summary_vector_context_for_ai( array $summary_context ): array {
-		$items         = $this->editor_related_content_items( $summary_context );
-		$context_items = array();
-
-		foreach ( array_slice( $items, 0, 5 ) as $index => $item ) {
-			$post_id         = absint( $item['post_id'] ?? 0 );
-			$ref_id          = sanitize_key( (string) ( $item['post_id'] ?? ( $item['id'] ?? $index ) ) );
-			$context_items[] = array(
-				'evidence_ref' => 'site_knowledge:' . $ref_id,
-				'post_id'      => $post_id,
-				'title'        => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
-				'score'        => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
-				'excerpt'      => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 42, '' ) ),
-			);
-		}
-
-		return array(
-			'policy' => 'cloud_vector_context_for_fast_summary_brief_only_current_draft_remains_primary_source',
-			'items'  => array_values( array_filter( $context_items, static fn( array $item ): bool => '' !== (string) ( $item['title'] ?? '' ) || '' !== (string) ( $item['excerpt'] ?? '' ) ) ),
-		);
-	}
-
 	private function editor_internal_link_candidates( array $context, string $query ): array {
 		$source_passages          = $this->editor_internal_link_source_passages( $context );
 		$source_knowledge         = $this->editor_support_section(
@@ -3708,84 +3370,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return $matched_text;
-	}
-
-	private function editor_ai_summary_suggestions( array $context, string $query ): array {
-		$summary_mode           = in_array( (string) ( $context['summary_generation_mode'] ?? 'fast_brief' ), array( 'fast_brief', 'full_context' ), true ) ? (string) $context['summary_generation_mode'] : 'fast_brief';
-		$summary_vector_context = array();
-		$timing                 = array(
-			'summary_generation_mode'     => $summary_mode,
-			'site_knowledge_ms'           => 0,
-			'site_knowledge_cache_status' => 'skipped',
-			'site_knowledge_blocking'     => false,
-			'hosted_ai_ms'                => 0,
-			'hosted_ai_cache_status'      => 'unknown',
-			'fast_brief_target_seconds'   => '3_5',
-			'vector_context_included'     => false,
-		);
-		if ( 'fast_brief' === $summary_mode ) {
-			$site_knowledge_started                = microtime( true );
-			$summary_vector_context                = $this->editor_support_section(
-				$this->editor_cached_site_knowledge_hit(
-					array(
-						'query'           => $query,
-						'intent'          => 'summary_context',
-						'current_post_id' => absint( $context['post_id'] ?? 0 ),
-						'max_results'     => 5,
-					)
-				)
-			);
-			$timing['site_knowledge_ms']           = (int) round( ( microtime( true ) - $site_knowledge_started ) * 1000 );
-			$timing['site_knowledge_cache_status'] = sanitize_key( (string) ( $summary_vector_context['cache_status'] ?? 'miss' ) );
-		}
-
-		$summary_vector_context_for_ai     = $this->editor_summary_vector_context_for_ai( $summary_vector_context );
-		$timing['vector_context_included'] = ! empty( $summary_vector_context_for_ai['items'] );
-		$force_regenerate                  = ! empty( $context['force_regenerate'] );
-		$hosted_ai_started                 = microtime( true );
-		$summary_ai                        = $this->editor_support_section(
-			$this->editor_cached_hosted_ai_content_support(
-				array(
-					'intent'                  => 'summary_suggestions',
-					'post_id'                 => absint( $context['post_id'] ?? 0 ),
-					'title'                   => (string) ( $context['title'] ?? '' ),
-					'excerpt'                 => (string) ( $context['excerpt'] ?? '' ),
-					'content'                 => (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ),
-					'user_instruction'        => (string) ( $context['user_instruction'] ?? '' ),
-					'generation_variant'      => (string) ( $context['generation_variant'] ?? '' ),
-					'summary_generation_mode' => $summary_mode,
-					'summary_vector_context'  => $summary_vector_context_for_ai,
-				),
-				$force_regenerate
-			)
-		);
-		$timing['hosted_ai_ms']            = (int) round( ( microtime( true ) - $hosted_ai_started ) * 1000 );
-		$timing['hosted_ai_cache_status']  = sanitize_key( (string) ( $summary_ai['cache_status'] ?? 'unknown' ) );
-
-		return $this->editor_summary_only_suggestion_section( $summary_ai, $context, $timing );
-	}
-
-	private function editor_summary_only_suggestion_section( array $summary_ai, array $context, array $timing = array() ): array {
-		$summary_layers = $this->editor_ai_summary_layer_candidates( $summary_ai, $context );
-
-		return array(
-			'artifact_type'           => 'article_summary_suggestions.v1',
-			'composition_role'        => 'summary_candidates_only',
-			'candidate_type'          => 'summary_suggestions',
-			'candidate_contract'      => 'recommendation_candidate.v1',
-			'write_posture'           => 'suggestion_only',
-			'final_write_path'        => 'editor_apply_preview_save_required',
-			'direct_wordpress_write'  => false,
-			'summary_layers'          => $summary_layers,
-			'summary_candidates'      => $summary_ai,
-			'provider_execution'      => 'hosted_ai',
-			'generation_mode'         => 'ai_summary',
-			'summary_generation_mode' => in_array( (string) ( $context['summary_generation_mode'] ?? 'fast_brief' ), array( 'fast_brief', 'full_context' ), true ) ? (string) $context['summary_generation_mode'] : 'fast_brief',
-			'generation_variant'      => sanitize_text_field( (string) ( $context['generation_variant'] ?? '' ) ),
-			'timing'                  => $timing,
-			'quality_contract'        => is_array( $summary_ai['quality_contract'] ?? null ) ? $summary_ai['quality_contract'] : array(),
-			'review_checklist'        => is_array( $summary_ai['review_checklist'] ?? null ) ? $summary_ai['review_checklist'] : array(),
-		);
 	}
 
 	private function editor_article_audio_generation( array $context, string $intent ): array {
@@ -4421,9 +4005,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$section['provider_execution'] = 'hosted_ai';
 		$section['provider_intent']    = $provider_intent;
 		$section['write_posture']      = 'suggestion_only';
-		if ( 'title_summary' === $provider_intent ) {
-			$section = $this->editor_title_recommendation_section( $section, $context );
-		}
 		if ( 'polish_notes' === $provider_intent ) {
 			if ( ! $this->editor_paragraph_check_has_output( $section ) ) {
 				$section = $this->editor_paragraph_check_local_fallback_section( $section, $content );
@@ -4659,203 +4240,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		);
 	}
 
-	private function editor_title_recommendation_section( array $section, array $context ): array {
-		$candidates = $this->editor_title_recommendation_candidates( $section, $context );
-
-		$section['candidate_contract']        = 'recommendation_candidate.v1';
-		$section['recommendation_candidates'] = $candidates;
-		$section['quality_gate']              = array(
-			'name'           => 'runtime_title_candidate_rerank',
-			'policy'         => 'length_meta_phrase_title_repetition_rerank_and_flag',
-			'minimum_score'  => 0,
-			'candidate_sort' => 'quality_score_desc_then_model_order',
-		);
-		$section['quality_notes']             = $this->editor_recommendation_quality_notes( $candidates );
-
-		return $section;
-	}
-
-	private function editor_title_recommendation_candidates( array $section, array $context ): array {
-		$result      = is_array( $section['result'] ?? null ) ? $section['result'] : array();
-		$output_json = is_array( $section['output_json'] ?? null ) ? $section['output_json'] : array();
-		$output_text = trim( sanitize_textarea_field( (string) ( $section['output_text'] ?? '' ) ) );
-		$decoded     = '' !== $output_text ? $this->editor_decode_ai_summary_output( $output_text ) : array();
-		$raw_items   = array();
-
-		foreach ( array( $result, $output_json, is_array( $decoded ) ? $decoded : array() ) as $source ) {
-			foreach ( $this->editor_title_candidate_values( $source ) as $item ) {
-				$raw_items[] = $item;
-			}
-		}
-
-		if ( empty( $raw_items ) && '' !== $output_text && empty( $decoded ) ) {
-			$raw_items[] = array(
-				'value'  => $output_text,
-				'reason' => '',
-				'order'  => 0,
-			);
-		}
-
-		$candidates = array();
-		$seen       = array();
-		foreach ( $raw_items as $raw_item ) {
-			$value = $this->editor_clean_title_candidate( (string) ( $raw_item['value'] ?? '' ) );
-			if ( '' === $value ) {
-				continue;
-			}
-			$key = strtolower( $value );
-			if ( isset( $seen[ $key ] ) ) {
-				continue;
-			}
-			$seen[ $key ] = true;
-			$quality      = $this->editor_title_candidate_quality( $value, $context );
-			$candidates[] = array(
-				'value'   => $value,
-				'reason'  => sanitize_text_field( (string) ( $raw_item['reason'] ?? '' ) ),
-				'order'   => absint( $raw_item['order'] ?? 0 ),
-				'quality' => $quality,
-			);
-		}
-
-		usort(
-			$candidates,
-			static function ( array $a, array $b ): int {
-				$score_delta = (int) ( $b['quality']['score'] ?? 0 ) <=> (int) ( $a['quality']['score'] ?? 0 );
-				return 0 !== $score_delta ? $score_delta : ( absint( $a['order'] ?? 0 ) <=> absint( $b['order'] ?? 0 ) );
-			}
-		);
-
-		$items = array();
-		foreach ( array_slice( $candidates, 0, 5 ) as $index => $candidate ) {
-			$items[] = $this->editor_recommendation_candidate(
-				array(
-					'id'             => 0 === $index ? 'ai_recommended_title' : 'ai_title_option_' . ( $index + 1 ),
-					'kind'           => 'title',
-					'label'          => 0 === $index ? __( 'AI recommended title', 'npcink-workflow-toolbox' ) : __( 'AI title option', 'npcink-workflow-toolbox' ),
-					'value'          => (string) ( $candidate['value'] ?? '' ),
-					'reason'         => '' !== (string) ( $candidate['reason'] ?? '' ) ? (string) $candidate['reason'] : __( 'Generated by hosted AI from the current title, excerpt, and draft context. Review before applying.', 'npcink-workflow-toolbox' ),
-					'target_field'   => 'post_title',
-					'action_policy'  => 'editor_apply_preview_save_required',
-					'quality_status' => (string) ( $candidate['quality']['status'] ?? 'review' ),
-					'quality_score'  => absint( $candidate['quality']['score'] ?? 0 ),
-					'quality_issues' => is_array( $candidate['quality']['issues'] ?? null ) ? $candidate['quality']['issues'] : array(),
-					'evidence_refs'  => array(),
-				)
-			);
-		}
-
-		return $items;
-	}
-
-	private function editor_title_candidate_values( array $source ): array {
-		$items = array();
-		foreach ( array( 'title_options', 'titles', 'suggestions', 'candidates' ) as $key ) {
-			if ( ! is_array( $source[ $key ] ?? null ) ) {
-				continue;
-			}
-			foreach ( $source[ $key ] as $item ) {
-				$value = is_array( $item )
-					? $this->editor_ai_summary_field( $item, array( 'title', 'value', 'text', 'name', 'label' ) )
-					: trim( sanitize_text_field( (string) $item ) );
-				if ( '' === $value ) {
-					continue;
-				}
-				$items[] = array(
-					'value'  => $value,
-					'reason' => is_array( $item ) ? $this->editor_ai_summary_field( $item, array( 'reason', 'rationale', 'detail' ) ) : '',
-					'order'  => count( $items ),
-				);
-			}
-		}
-
-		foreach ( array( 'title', 'recommended_title', 'seo_title', 'working_title' ) as $key ) {
-			if ( isset( $source[ $key ] ) && ! is_array( $source[ $key ] ) ) {
-				$value = trim( sanitize_text_field( (string) $source[ $key ] ) );
-				if ( '' !== $value ) {
-					$items[] = array(
-						'value'  => $value,
-						'reason' => '',
-						'order'  => count( $items ),
-					);
-				}
-			}
-		}
-
-		foreach ( array( 'result', 'data', 'output' ) as $nested_key ) {
-			if ( is_array( $source[ $nested_key ] ?? null ) ) {
-				foreach ( $this->editor_title_candidate_values( $source[ $nested_key ] ) as $item ) {
-					$items[] = array(
-						'value'  => (string) ( $item['value'] ?? '' ),
-						'reason' => (string) ( $item['reason'] ?? '' ),
-						'order'  => count( $items ),
-					);
-				}
-			}
-		}
-
-		return $items;
-	}
-
-	private function editor_clean_title_candidate( string $title ): string {
-		$value = trim( sanitize_text_field( $title ) );
-		$value = preg_replace( '/^\s*(?:#+|\*+|-+|\d+[\.、)]\s*)\s*/u', '', $value );
-		$value = is_string( $value ) ? trim( $value ) : trim( sanitize_text_field( $title ) );
-		$value = trim( $value, " \t\n\r\0\x0B\"'“”‘’" );
-
-		return sanitize_text_field( $value );
-	}
-
-	private function editor_title_candidate_quality( string $title, array $context ): array {
-		$score         = 100;
-		$issues        = array();
-		$value         = trim( $title );
-		$length        = function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : strlen( $value );
-		$current_title = trim( sanitize_text_field( (string) ( $context['title'] ?? '' ) ) );
-
-		if ( $length < 6 ) {
-			$score   -= 18;
-			$issues[] = __( '标题过短，可能缺少具体对象。', 'npcink-workflow-toolbox' );
-		}
-		if ( $length > 80 ) {
-			$score   -= 28;
-			$issues[] = __( '标题超过 80 个字符，可能不适合编辑器标题字段。', 'npcink-workflow-toolbox' );
-		}
-		if ( '' !== $current_title && strtolower( $value ) === strtolower( $current_title ) ) {
-			$score   -= 14;
-			$issues[] = __( '标题与当前标题完全相同。', 'npcink-workflow-toolbox' );
-		}
-		if ( 1 === preg_match( '/(?:草稿|本文|这篇文章|该文章|this\s+(?:article|post|draft)|标题建议|title suggestion)/iu', $value ) ) {
-			$score   -= 35;
-			$issues[] = __( '包含文章自指或编辑提示词。', 'npcink-workflow-toolbox' );
-		}
-		if ( false !== strpos( $value, '```' ) || false !== strpos( $value, '{' ) || false !== strpos( $value, '}' ) ) {
-			$score   -= 40;
-			$issues[] = __( '包含格式或 JSON 泄漏。', 'npcink-workflow-toolbox' );
-		}
-		if ( 1 === preg_match( '/(?:必看|震惊|最强|最好|终极|保证|100%|排名第一)/u', $value ) ) {
-			$score   -= 18;
-			$issues[] = __( '标题可能过度营销或包含高风险承诺。', 'npcink-workflow-toolbox' );
-		}
-
-		$status = 'good';
-		if ( $score < 70 ) {
-			$status = 'review';
-		}
-		if ( $score < 55 ) {
-			$status = 'weak';
-		}
-
-		if ( empty( $issues ) ) {
-			$issues[] = __( '通过长度、自指套话和基础标题质量检查。', 'npcink-workflow-toolbox' );
-		}
-
-		return array(
-			'score'  => max( 0, min( 100, $score ) ),
-			'status' => $status,
-			'issues' => array_values( array_unique( $issues ) ),
-		);
-	}
-
 	private function editor_recommendation_candidate( array $args ): array {
 		$candidate = array(
 			'contract'               => 'recommendation_candidate.v1',
@@ -4940,25 +4324,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$candidate['incoming_count'] = absint( $args['incoming_count'] ?? 0 );
 
 		return $candidate;
-	}
-
-	private function editor_recommendation_quality_notes( array $items ): array {
-		$notes = array();
-		foreach ( $items as $item ) {
-			$issues  = is_array( $item['quality_issues'] ?? null ) ? $item['quality_issues'] : array();
-			$notes[] = array(
-				'name'   => (string) ( $item['label'] ?? __( 'Recommendation candidate', 'npcink-workflow-toolbox' ) ),
-				'status' => sanitize_key( (string) ( $item['quality_status'] ?? 'review' ) ),
-				'detail' => sprintf(
-					/* translators: 1: quality score, 2: quality notes. */
-					__( 'Quality score %1$d. %2$s', 'npcink-workflow-toolbox' ),
-					absint( $item['quality_score'] ?? 0 ),
-					implode( ' ', array_map( 'sanitize_text_field', $issues ) )
-				),
-			);
-		}
-
-		return $notes;
 	}
 
 	private function editor_fast_category_suggestions( array $context, string $query ): array {
@@ -5110,33 +4475,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'status'     => $status,
 			'confidence' => max( 0.0, min( 1.0, $score / 5 ) ),
 			'issues'     => array_values( array_unique( $quality_issues ) ),
-		);
-	}
-
-	private function editor_metadata_suggestion_section( string $candidate_type, array $context, array $summary_layers, array $categories, array $tags, array $proposed_new_terms, array $taxonomy_terms, array $related_content, array $handoff_preview, array $metadata_delta ): array {
-		return array(
-			'artifact_type'          => 'article_discoverability_optimization.v1',
-			'composition_role'       => 'summary_taxonomy_tag_candidates',
-			'candidate_type'         => sanitize_key( $candidate_type ),
-			'write_posture'          => 'suggestion_only',
-			'final_write_path'       => 'core_proposal_required',
-			'direct_wordpress_write' => false,
-			'input_scope'            => $this->editor_input_scope( $context ),
-			'summary_layers'         => $summary_layers,
-			'category_candidates'    => array_slice( $categories, 0, 5 ),
-			'tag_candidates'         => array_slice( $tags, 0, 8 ),
-			'proposed_new_terms'     => $proposed_new_terms,
-			'taxonomy_terms'         => $taxonomy_terms,
-			'related_content'        => $related_content,
-			'optimization_strategy'  => $this->editor_summary_terms_strategy(),
-			'review_metrics'         => $this->editor_summary_terms_review_metrics(),
-			'handoff_preview'        => $handoff_preview,
-			'content_metadata_delta' => $metadata_delta,
-			'handoff'                => array(
-				'final_writes'           => 'core_proposal_required',
-				'direct_wordpress_write' => false,
-				'core_route'             => '/wp-json/npcink-openclaw-adapter/v1/proposals/from-plan',
-			),
 		);
 	}
 
@@ -5487,524 +4825,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				),
 			),
 		);
-	}
-
-	private function editor_ai_summary_layer_candidates( array $summary_ai, array $context = array() ): array {
-		$result      = is_array( $summary_ai['result'] ?? null ) ? $summary_ai['result'] : array();
-		$output_text = trim( sanitize_textarea_field( (string) ( $summary_ai['output_text'] ?? '' ) ) );
-		$decoded     = '' !== $output_text ? $this->editor_decode_ai_summary_output( $output_text ) : array();
-		$reason      = $this->editor_ai_summary_field( $result, array( 'why_this_works', 'reason', 'rationale' ) );
-		$coverage    = $this->editor_ai_summary_array_field( $result, array( 'coverage_check', 'coverage' ) );
-		$raw_items   = array();
-
-		if ( is_array( $decoded ) && '' === $reason ) {
-			$reason = $this->editor_ai_summary_field( $decoded, array( 'why_this_works', 'reason', 'rationale' ) );
-		}
-		if ( is_array( $decoded ) && empty( $coverage ) ) {
-			$coverage = $this->editor_ai_summary_array_field( $decoded, array( 'coverage_check', 'coverage' ) );
-		}
-
-		$push_candidate = static function ( array &$items, string $value, string $label_key, int $order ) use ( $reason ): void {
-			$value = trim( $value );
-			if ( '' === $value ) {
-				return;
-			}
-			$items[] = array(
-				'value'     => $value,
-				'label_key' => $label_key,
-				'order'     => $order,
-				'reason'    => $reason,
-			);
-		};
-
-		foreach ( array( $result, is_array( $decoded ) ? $decoded : array() ) as $source ) {
-			$push_candidate( $raw_items, $this->editor_ai_summary_field( $source, array( 'recommended_excerpt', 'short_summary', 'excerpt', 'summary' ) ), 'recommended', count( $raw_items ) );
-			$push_candidate( $raw_items, $this->editor_ai_summary_field( $source, array( 'alternate_excerpt', 'standard_summary', 'alternate_summary' ) ), 'alternate', count( $raw_items ) );
-			$push_candidate( $raw_items, $this->editor_ai_summary_field( $source, array( 'third_excerpt', 'second_alternate_excerpt', 'alternate_excerpt_2', 'variant_excerpt' ) ), 'alternate', count( $raw_items ) );
-			foreach ( $this->editor_ai_summary_list_fields( $source ) as $listed_excerpt ) {
-				$push_candidate( $raw_items, $listed_excerpt, 'alternate', count( $raw_items ) );
-			}
-		}
-
-		if ( empty( $raw_items ) && '' !== $output_text ) {
-			$fallback = preg_replace( '/^\s*(?:#+|\*+|-+)?\s*(?:recommended[_ ]excerpt|short[_ ]summary|summary|excerpt|推荐摘要|摘要)\s*[:：-]?\s*/iu', '', $output_text );
-			$push_candidate( $raw_items, sanitize_text_field( wp_html_excerpt( is_string( $fallback ) ? $fallback : $output_text, 180, '' ) ), 'recommended', 0 );
-		}
-
-		$candidates = array();
-		$seen       = array();
-		foreach ( $raw_items as $raw_item ) {
-			$value = $this->editor_clean_ai_summary_excerpt( (string) ( $raw_item['value'] ?? '' ) );
-			if ( ! $this->editor_ai_summary_excerpt_is_reviewable( $value ) ) {
-				continue;
-			}
-			$key = strtolower( $value );
-			if ( isset( $seen[ $key ] ) ) {
-				continue;
-			}
-			$seen[ $key ] = true;
-			$quality      = $this->editor_ai_summary_candidate_quality( $value, $coverage, $context );
-			$candidates[] = array(
-				'value'   => $value,
-				'order'   => absint( $raw_item['order'] ?? 0 ),
-				'reason'  => sanitize_text_field( (string) ( $raw_item['reason'] ?? '' ) ),
-				'quality' => $quality,
-			);
-		}
-
-		usort(
-			$candidates,
-			static function ( array $a, array $b ): int {
-				$score_delta = (int) ( $b['quality']['score'] ?? 0 ) <=> (int) ( $a['quality']['score'] ?? 0 );
-				return 0 !== $score_delta ? $score_delta : ( absint( $a['order'] ?? 0 ) <=> absint( $b['order'] ?? 0 ) );
-			}
-		);
-
-		$items = array();
-		foreach ( array_slice( $candidates, 0, 3 ) as $index => $candidate ) {
-			$is_first = 0 === $index;
-			$items[]  = array(
-				'contract'       => 'recommendation_candidate.v1',
-				'id'             => $is_first ? 'ai_recommended_excerpt' : ( 1 === $index ? 'ai_alternate_excerpt' : 'ai_third_excerpt' ),
-				'kind'           => 'excerpt',
-				'label'          => $is_first ? __( 'AI recommended excerpt', 'npcink-workflow-toolbox' ) : __( 'AI alternate excerpt', 'npcink-workflow-toolbox' ),
-				'limit'          => '50_160_zh_chars',
-				'value'          => sanitize_text_field( (string) ( $candidate['value'] ?? '' ) ),
-				'reason'         => '' !== (string) ( $candidate['reason'] ?? '' ) ? (string) $candidate['reason'] : __( 'Generated by hosted AI from the current title, excerpt, and draft body. Review before applying.', 'npcink-workflow-toolbox' ),
-				'context_use'    => 'draft_grounded_ai_summary',
-				'quality_status' => sanitize_key( (string) ( $candidate['quality']['status'] ?? 'review' ) ),
-				'quality_score'  => absint( $candidate['quality']['score'] ?? 0 ),
-				'quality_issues' => is_array( $candidate['quality']['issues'] ?? null ) ? array_values( array_map( 'sanitize_text_field', $candidate['quality']['issues'] ) ) : array(),
-				'action_policy'  => 'editor_apply_preview_save_required',
-				'target_field'   => 'post_excerpt',
-				'evidence_refs'  => array(),
-			);
-		}
-
-		return array(
-			'candidate_contract'      => 'recommendation_candidate.v1',
-			'candidate_type'          => 'ai_summary_layer_candidates',
-			'write_posture'           => 'suggestion_only',
-			'direct_wordpress_write'  => false,
-			'related_context_summary' => array(),
-			'coverage_check'          => $this->editor_ai_summary_sanitize_array( $coverage ),
-			'quality_gate'            => array(
-				'name'           => 'runtime_summary_candidate_rerank',
-				'policy'         => 'length_meta_phrase_coverage_check_rerank_and_flag',
-				'minimum_score'  => 0,
-				'candidate_sort' => 'quality_score_desc_then_model_order',
-			),
-			'quality_notes'           => $this->editor_ai_summary_quality_notes( $items ),
-			'items'                   => $items,
-		);
-	}
-
-	private function editor_ai_summary_candidate_quality( string $excerpt, array $coverage, array $context ): array {
-		$score  = 100;
-		$issues = array();
-		$value  = trim( $excerpt );
-		$length = function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : strlen( $value );
-		$source = trim(
-			sanitize_textarea_field(
-				(string) ( $context['title'] ?? '' ) . "\n" .
-				(string) ( $context['excerpt'] ?? '' ) . "\n" .
-				wp_strip_all_tags( (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ) )
-			)
-		);
-
-		if ( $length < 70 ) {
-			$score   -= 6;
-			$issues[] = __( '摘要偏短，可能没有覆盖足够信息。', 'npcink-workflow-toolbox' );
-		}
-		if ( 1 === preg_match( '/(?:草稿|本文|这篇文章|该文章|本文说明|本文介绍|这篇草稿|this\s+(?:article|post|draft))/iu', $value ) ) {
-			$score   -= 35;
-			$issues[] = __( '包含草稿或文章自指套话。', 'npcink-workflow-toolbox' );
-		}
-		if ( 1 === preg_match( '/^(?:面向|适合|需要|想要|对于)/u', $value ) ) {
-			$score   -= 4;
-			$issues[] = __( '开头较模板化。', 'npcink-workflow-toolbox' );
-		}
-
-		$core_subject = $this->editor_ai_summary_coverage_text( $coverage['core_subject'] ?? '' );
-		if ( $this->editor_ai_summary_coverage_group_missing( $source, $value, $core_subject ) ) {
-			$score   -= 18;
-			$issues[] = __( '可能缺少核心对象。', 'npcink-workflow-toolbox' );
-		}
-
-		$title_positioning = $this->editor_ai_summary_coverage_text( $coverage['title_positioning'] ?? '' );
-		if ( $this->editor_ai_summary_coverage_group_missing( $source, $value, $title_positioning ) ) {
-			$score   -= 10;
-			$issues[] = __( '可能遗漏标题中的关键定位。', 'npcink-workflow-toolbox' );
-		}
-
-		$missing_groups = 0;
-		foreach ( $this->editor_ai_summary_flatten_strings( $coverage['must_cover_points'] ?? array() ) as $point ) {
-			$terms = $this->editor_ai_summary_keyword_candidates( $point );
-			if ( empty( $terms ) ) {
-				continue;
-			}
-			$source_mentions  = false;
-			$excerpt_mentions = false;
-			foreach ( $terms as $term ) {
-				if ( $this->editor_ai_summary_text_contains( $source, $term ) ) {
-					$source_mentions = true;
-				}
-				if ( $this->editor_ai_summary_text_contains( $value, $term ) ) {
-					$excerpt_mentions = true;
-				}
-			}
-			if ( $source_mentions && ! $excerpt_mentions ) {
-				++$missing_groups;
-			}
-		}
-		if ( $missing_groups > 0 ) {
-			$score   -= min( 24, $missing_groups * 8 );
-			$issues[] = __( '可能遗漏一个或多个必须覆盖点。', 'npcink-workflow-toolbox' );
-		}
-
-		$term_segments           = $this->editor_ai_summary_source_named_term_segments( $source );
-		$available_term_segments = 0;
-		$covered_term_segments   = 0;
-		$all_named_terms         = array();
-		foreach ( $term_segments as $terms ) {
-			if ( empty( $terms ) ) {
-				continue;
-			}
-			$all_named_terms = array_merge( $all_named_terms, $terms );
-			++$available_term_segments;
-			foreach ( $terms as $term ) {
-				if ( $this->editor_ai_summary_text_contains( $value, $term ) ) {
-					++$covered_term_segments;
-					break;
-				}
-			}
-		}
-		if ( $available_term_segments >= 2 && $covered_term_segments < 2 ) {
-			$score   -= 32;
-			$issues[] = __( '可能只覆盖了正文局部工具、方法或流程分支。', 'npcink-workflow-toolbox' );
-		}
-		$all_named_terms = array_values( array_unique( $all_named_terms ) );
-		if ( count( $all_named_terms ) >= 3 && count( $all_named_terms ) <= 5 ) {
-			$missing_named_terms = array();
-			foreach ( $all_named_terms as $term ) {
-				if ( ! $this->editor_ai_summary_text_contains( $value, $term ) ) {
-					$missing_named_terms[] = $term;
-				}
-			}
-			if ( ! empty( $missing_named_terms ) ) {
-				$score   -= min( 36, count( $missing_named_terms ) * 18 );
-				$issues[] = sprintf(
-					/* translators: %s: comma-separated missing named terms. */
-					__( '可能遗漏关键工具或方法：%s。', 'npcink-workflow-toolbox' ),
-					implode( ', ', array_slice( $missing_named_terms, 0, 5 ) )
-				);
-			}
-		}
-
-		$status = 'good';
-		if ( $score < 70 ) {
-			$status = 'review';
-		}
-		if ( $score < 55 ) {
-			$status = 'weak';
-		}
-
-		if ( empty( $issues ) ) {
-			$issues[] = __( '通过长度、自指套话和覆盖检查。', 'npcink-workflow-toolbox' );
-		}
-
-		return array(
-			'score'  => max( 0, min( 100, $score ) ),
-			'status' => $status,
-			'issues' => array_values( array_unique( $issues ) ),
-		);
-	}
-
-	private function editor_ai_summary_quality_notes( array $items ): array {
-		$notes = array();
-		foreach ( $items as $item ) {
-			$issues  = is_array( $item['quality_issues'] ?? null ) ? $item['quality_issues'] : array();
-			$notes[] = array(
-				'name'   => (string) ( $item['label'] ?? __( 'Summary candidate', 'npcink-workflow-toolbox' ) ),
-				'status' => sanitize_key( (string) ( $item['quality_status'] ?? 'review' ) ),
-				'detail' => sprintf(
-					/* translators: 1: quality score, 2: quality notes. */
-					__( 'Quality score %1$d. %2$s', 'npcink-workflow-toolbox' ),
-					absint( $item['quality_score'] ?? 0 ),
-					implode( ' ', array_map( 'sanitize_text_field', $issues ) )
-				),
-			);
-		}
-
-		return $notes;
-	}
-
-	private function editor_ai_summary_array_field( array $source, array $keys ): array {
-		foreach ( $keys as $key ) {
-			if ( is_array( $source[ $key ] ?? null ) ) {
-				return $source[ $key ];
-			}
-		}
-
-		foreach ( array( 'result', 'data', 'summary', 'summary_candidates', 'output' ) as $nested_key ) {
-			if ( is_array( $source[ $nested_key ] ?? null ) ) {
-				$value = $this->editor_ai_summary_array_field( $source[ $nested_key ], $keys );
-				if ( ! empty( $value ) ) {
-					return $value;
-				}
-			}
-		}
-
-		return array();
-	}
-
-	private function editor_ai_summary_sanitize_array( array $value ): array {
-		$clean = array();
-		foreach ( $value as $key => $item ) {
-			$clean_key = is_string( $key ) ? sanitize_key( $key ) : absint( $key );
-			if ( is_array( $item ) ) {
-				$clean[ $clean_key ] = $this->editor_ai_summary_sanitize_array( $item );
-				continue;
-			}
-			$clean[ $clean_key ] = sanitize_text_field( (string) $item );
-		}
-
-		return $clean;
-	}
-
-	private function editor_ai_summary_coverage_text( $value ): string {
-		$parts = $this->editor_ai_summary_flatten_strings( $value );
-		return trim( sanitize_text_field( implode( ' ', array_slice( $parts, 0, 3 ) ) ) );
-	}
-
-	private function editor_ai_summary_flatten_strings( $value ): array {
-		if ( is_scalar( $value ) ) {
-			$text = trim( sanitize_text_field( (string) $value ) );
-			return '' !== $text ? array( $text ) : array();
-		}
-		if ( ! is_array( $value ) ) {
-			return array();
-		}
-
-		$parts = array();
-		foreach ( $value as $item ) {
-			foreach ( $this->editor_ai_summary_flatten_strings( $item ) as $part ) {
-				if ( '' !== $part ) {
-					$parts[] = $part;
-				}
-			}
-		}
-
-		return $parts;
-	}
-
-	private function editor_ai_summary_keyword_candidates( string $value ): array {
-		$text  = preg_replace( '/[，,、；;。.!！？?（）()\[\]【】"“”\'‘’：:]+/u', ' ', $value );
-		$parts = preg_split( '/\s+/u', is_string( $text ) ? $text : $value );
-		$terms = array();
-		foreach ( is_array( $parts ) ? $parts : array() as $part ) {
-			$term = trim( sanitize_text_field( $part ) );
-			if ( '' === $term ) {
-				continue;
-			}
-			$length = function_exists( 'mb_strlen' ) ? mb_strlen( $term, 'UTF-8' ) : strlen( $term );
-			if ( $length < 2 || in_array( $term, array( '以及', '或者', '并且', '主要', '核心', '覆盖', '说明', '介绍', '场景', '步骤', '能力' ), true ) ) {
-				continue;
-			}
-			$terms[] = $term;
-			if ( count( $terms ) >= 4 ) {
-				break;
-			}
-		}
-
-		return array_values( array_unique( $terms ) );
-	}
-
-	private function editor_ai_summary_coverage_group_missing( string $source, string $excerpt, string $coverage_text ): bool {
-		$terms = $this->editor_ai_summary_keyword_candidates( $coverage_text );
-		if ( empty( $terms ) ) {
-			return false;
-		}
-
-		$source_mentions  = false;
-		$excerpt_mentions = false;
-		foreach ( $terms as $term ) {
-			if ( $this->editor_ai_summary_text_contains( $source, $term ) ) {
-				$source_mentions = true;
-			}
-			if ( $this->editor_ai_summary_text_contains( $excerpt, $term ) ) {
-				$excerpt_mentions = true;
-			}
-		}
-
-		return $source_mentions && ! $excerpt_mentions;
-	}
-
-	private function editor_ai_summary_text_contains( string $haystack, string $needle ): bool {
-		$needle = trim( $needle );
-		if ( '' === $needle ) {
-			return false;
-		}
-		if ( function_exists( 'mb_stripos' ) ) {
-			return false !== mb_stripos( $haystack, $needle, 0, 'UTF-8' );
-		}
-
-		return false !== stripos( $haystack, $needle );
-	}
-
-	private function editor_ai_summary_source_named_term_segments( string $source ): array {
-		$plain    = trim( wp_strip_all_tags( $source ) );
-		$segments = array(
-			'lead'   => array(),
-			'middle' => array(),
-			'end'    => array(),
-		);
-		if ( '' === $plain ) {
-			return $segments;
-		}
-
-		$length = strlen( $plain );
-		if ( 1 !== preg_match_all( '/(?<![A-Za-z0-9._+-])([A-Za-z][A-Za-z0-9._+-]{1,})(?![A-Za-z0-9._+-])/u', $plain, $matches, PREG_OFFSET_CAPTURE ) ) {
-			return $segments;
-		}
-
-		foreach ( $matches[1] as $match ) {
-			$term = trim( sanitize_text_field( (string) ( $match[0] ?? '' ) ) );
-			$key  = strtolower( $term );
-			if ( '' === $term || in_array( $key, array( 'http', 'https', 'www', 'com', 'html', 'php', 'js', 'css', 'question', 'answer' ), true ) ) {
-				continue;
-			}
-			if ( 1 === preg_match( '/^[A-Z0-9]{2,5}$/', $term ) ) {
-				continue;
-			}
-			if ( 0 === strpos( $key, 'www.' ) || 1 === preg_match( '/\.(?:com|cn|net|org)$/', $key ) ) {
-				continue;
-			}
-
-			$offset     = max( 0, (int) ( $match[1] ?? 0 ) );
-			$segment_id = 'lead';
-			if ( $offset >= (int) floor( $length * 2 / 3 ) ) {
-				$segment_id = 'end';
-			} elseif ( $offset >= (int) floor( $length / 3 ) ) {
-				$segment_id = 'middle';
-			}
-			if ( ! in_array( $term, $segments[ $segment_id ], true ) ) {
-				$segments[ $segment_id ][] = $term;
-			}
-		}
-
-		return $segments;
-	}
-
-	private function editor_decode_ai_summary_output( string $output_text ): array {
-		$trimmed = trim( $output_text );
-		if ( '' === $trimmed ) {
-			return array();
-		}
-
-		$direct = json_decode( $trimmed, true );
-		if ( is_array( $direct ) ) {
-			return $direct;
-		}
-
-		if ( 1 === preg_match( '/```(?:json)?\s*(\{.*?\})\s*```/is', $trimmed, $matches ) ) {
-			$fenced = json_decode( $matches[1], true );
-			if ( is_array( $fenced ) ) {
-				return $fenced;
-			}
-		}
-
-		$first_brace = strpos( $trimmed, '{' );
-		$last_brace  = strrpos( $trimmed, '}' );
-		if ( false !== $first_brace && false !== $last_brace && $last_brace > $first_brace ) {
-			$embedded = json_decode( substr( $trimmed, $first_brace, $last_brace - $first_brace + 1 ), true );
-			if ( is_array( $embedded ) ) {
-				return $embedded;
-			}
-		}
-
-		return array();
-	}
-
-	private function editor_ai_summary_list_fields( array $source ): array {
-		$values = array();
-		foreach ( array( 'excerpt_candidates', 'summary_candidates', 'candidates', 'alternates' ) as $key ) {
-			if ( ! is_array( $source[ $key ] ?? null ) ) {
-				continue;
-			}
-			foreach ( $source[ $key ] as $item ) {
-				if ( is_array( $item ) ) {
-					$value = $this->editor_ai_summary_field( $item, array( 'recommended_excerpt', 'alternate_excerpt', 'third_excerpt', 'excerpt', 'summary', 'value', 'text' ) );
-				} else {
-					$value = trim( sanitize_textarea_field( (string) $item ) );
-				}
-				if ( '' !== $value && ! in_array( $value, $values, true ) ) {
-					$values[] = $value;
-				}
-			}
-		}
-
-		foreach ( array( 'result', 'data', 'summary', 'output' ) as $nested_key ) {
-			if ( is_array( $source[ $nested_key ] ?? null ) ) {
-				foreach ( $this->editor_ai_summary_list_fields( $source[ $nested_key ] ) as $value ) {
-					if ( '' !== $value && ! in_array( $value, $values, true ) ) {
-						$values[] = $value;
-					}
-				}
-			}
-		}
-
-		return $values;
-	}
-
-	private function editor_ai_summary_field( array $source, array $keys ): string {
-		foreach ( $keys as $key ) {
-			if ( isset( $source[ $key ] ) && ! is_array( $source[ $key ] ) ) {
-				$value = trim( sanitize_textarea_field( (string) $source[ $key ] ) );
-				if ( '' !== $value ) {
-					return $value;
-				}
-			}
-		}
-
-		foreach ( array( 'result', 'data', 'summary', 'summary_candidates', 'output' ) as $nested_key ) {
-			if ( is_array( $source[ $nested_key ] ?? null ) ) {
-				$value = $this->editor_ai_summary_field( $source[ $nested_key ], $keys );
-				if ( '' !== $value ) {
-					return $value;
-				}
-			}
-		}
-
-		return '';
-	}
-
-	private function editor_clean_ai_summary_excerpt( string $excerpt ): string {
-		$value = trim( sanitize_textarea_field( $excerpt ) );
-		if ( '' === $value ) {
-			return '';
-		}
-
-		$cleaned = preg_replace(
-			'/^\s*(?:(?:这篇|该|当前)?草稿|(?:这篇|该)?文章|本文|post|article|draft|this\s+(?:post|article|draft))\s*(?:主张|说明|介绍|讲述|阐述|探讨|分析|指出|强调|聚焦(?:于)?|围绕|旨在|认为|argues|explains|introduces|describes|covers|focuses\s+on)?\s*[:：,，。-]?\s*/iu',
-			'',
-			$value
-		);
-		$value   = is_string( $cleaned ) ? trim( $cleaned ) : $value;
-		$value   = trim( $value, " \t\n\r\0\x0B\"'“”‘’" );
-
-		return sanitize_text_field( $value );
-	}
-
-	private function editor_ai_summary_excerpt_is_reviewable( string $excerpt ): bool {
-		$value = trim( $excerpt );
-		if ( '' === $value ) {
-			return false;
-		}
-
-		$length = function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : strlen( $value );
-
-		return $length >= 50 && $length <= 160;
 	}
 
 	private function editor_summary_terms_strategy(): array {

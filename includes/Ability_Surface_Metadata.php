@@ -24,12 +24,7 @@ final class Ability_Surface_Metadata {
 			'site_knowledge'           => self::definition( __( 'Site Knowledge', 'npcink-workflow-toolbox' ), 'admin_support_context', false, 'cloud_runtime_via_addon', 'search_or_sync_request', 'npcink_supporting_surface' ),
 			'cloud_web_search'         => self::definition( __( 'Cloud Web Search', 'npcink-workflow-toolbox' ), 'route_only_compatibility', false, 'cloud_runtime_via_addon', 'evidence_only', 'npcink_supporting_surface' ),
 			'batch_alt_review_handoff' => self::definition( __( 'Batch ALT Review Handoff', 'npcink-workflow-toolbox' ), 'admin_secondary_handoff', false, 'cloud_runtime_via_addon', 'media_alt_caption_review_plan', 'npcink_supporting_surface' ),
-			'title_suggestions'        => self::definition( __( 'Title suggestions', 'npcink-workflow-toolbox' ), 'editor_route_only_compatibility', false, 'hosted_ai_runtime', 'editor_state_only', 'generic_ai_plugin_overlap_route_only' ),
-			'summary_suggestions'      => self::definition( __( 'Summary suggestions', 'npcink-workflow-toolbox' ), 'editor_route_only_compatibility', false, 'hosted_ai_runtime', 'content_metadata_apply_plan', 'generic_ai_plugin_overlap_route_only' ),
-			'category_tag_suggestions' => self::definition( __( 'Category and tag suggestions', 'npcink-workflow-toolbox' ), 'editor_route_only_compatibility', false, 'toolkit_and_hosted_ai_runtime', 'content_metadata_apply_plan', 'generic_ai_plugin_overlap_route_only' ),
-			'article_checkup'          => self::definition( __( 'Article checkup', 'npcink-workflow-toolbox' ), 'editor_route_only_compatibility', false, 'local_and_hosted_ai_runtime', 'operator_review_only_no_insert', 'generic_ai_plugin_overlap_route_only' ),
 			'image_alt_suggestions'    => self::definition( __( 'Article image ALT (SEO)', 'npcink-workflow-toolbox' ), 'editor_internal_flow', false, 'toolbox_local_with_explicit_cloud_vision', 'current_article_image_alt_context_review', 'npcink_supporting_surface' ),
-			'comment_reply_suggestion' => self::definition( __( 'Comment reply suggestions', 'npcink-workflow-toolbox' ), 'editor_route_only_compatibility', false, 'toolkit_runtime', 'operator_review_only_no_comment_write', 'generic_ai_plugin_overlap_route_only' ),
 		);
 	}
 
