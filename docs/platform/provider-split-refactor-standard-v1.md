@@ -122,6 +122,21 @@ lists, so future services do not recreate the class-not-found CI failure.
    create a dedicated branch in a separate `git worktree` and cherry-pick
    the first commit over; stage per-file (or per-hunk with
    `git apply --cached`) so foreign uncommitted edits stay untouched.
+6. **Never run `phpcbf` on `tests/run.php`.** The standards gate excludes
+   the contract runner for a reason: string-mutating sniffs (the WordPress
+   capitalization rule) rewrite needle CONTENT, not just formatting. On
+   2026-10-07 a phpcbf pass flipped `'wordpress'` to `'WordPress'` inside a
+   passing needle while the source string stayed lowercase, so the suite
+   failed on a needle the source never changed. Fix needles by hand against
+   the real source text.
+7. **Deleting handlers orphans helper families.** When intent retirement or
+   a cluster split removes call sites, the private helpers behind them do
+   not fail any gate — they just stop being reachable. Run a private-method
+   reachability sweep from the public entrypoints and delete every
+   unreachable family in the same change. The 2026-10-07 intent retirement
+   found 24 additional orphaned methods this way after the visible
+   branches were already gone; fixing them one suite failure at a time
+   cost roughly twenty contract runs.
 
 ## Review Gate
 
