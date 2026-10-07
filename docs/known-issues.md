@@ -59,13 +59,6 @@ with the closing commit or PR for one release cycle, then prune.
   qualify for archival under the archive policy in
   [the documentation index](README.md); move them only together with the
   links that reference them.
-
-- **The standalone site-knowledge review UI smoke is red on master**
-  (`composer` script exists but is not in the default gate): it still pins
-  Admin_Page copy ("Review handoff", "Evidence first", "Core review only",
-  "No direct write") that a prior admin-surface cleanup removed. Update the
-  smoke to the current surface or retire it; found during the 2026-10-04
-  REST controller split portability pass.
 - **The extracted editor content-support service is a 6.5k-line single
   unit** (183 methods, PR for the facade closeout): the Rest_Controller
   split moved it wholesale to end the facade bottleneck. Sub-dividing it
@@ -82,6 +75,15 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Recently Closed
 
+- **Site Knowledge review UI smoke repaired and promoted into the default
+  gate** — resolved 2026-10-07: the red assertion pinned four Admin_Page
+  explainer phrases that an earlier admin-surface cleanup moved into the
+  client-side governed-handoff renderer in `assets/admin.js`. The smoke now
+  pins the current renderer copy (governed handoff section, prepared-
+  locally-only and proposal-candidate-only notices, evidence-first next
+  steps, explicit operator buttons), all 23 assertions pass, and
+  `@smoke:site-knowledge-review-ui` joined `composer test:all` so the
+  source-only smoke cannot drift red unnoticed again.
 - **Live editor verification passed for the split bundle** — 2026-10-06:
   the standalone five-plugin site ran the progressive browser smoke in
   full (namespaces loaded, zero console/page errors, no-write assertions

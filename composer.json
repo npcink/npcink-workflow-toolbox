@@ -183,6 +183,7 @@
       "@smoke:nightly-inspection-cloud-batch-merge",
       "@smoke:nightly-inspection-cloud-payload-minimization",
       "@smoke:security-permission-debug",
+      "@smoke:site-knowledge-review-ui",
       "@smoke:nightly-inspection-cloud-ui",
       "@smoke:nightly-inspection-orchestration-boundary",
       "@smoke:site-ops-insights-builder",
