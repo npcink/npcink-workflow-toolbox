@@ -275,6 +275,35 @@ where it does not exist yet, so no CI round can register for its own
 enabling PR. The compensating local pre-publish review round covered it,
 and the first ordinary pull request after the merge runs the full CI loop.
 
+That local round raised seven findings on the new scripts; all seven were
+fixed in the same PR and the fixes are deltas against the
+`npcink-ai-client-adapter` originals, which should re-port them:
+
+- the publisher's open-PR reuse is scoped to the requested `--base`
+  (one head can feed open PRs to different bases);
+- a gate failure now disarms a previously armed auto-merge first
+  (`gh pr merge --disable-auto`): GitHub keeps auto-merge enabled across
+  head pushes and `--match-head-commit` is only checked at request time,
+  so an armed merge could otherwise merge a newer untriaged head once
+  required checks pass;
+- the reuse path re-validates the four shared headings (and the
+  production approval line) against the live pull request body, which can
+  drift from the local `--body-file` between runs;
+- the gate's summary reconciliation now fails closed when the rolling
+  summary's `ocr-summary-run:` tag names a run other than the pinned one
+  (an interleaved comment-triggered round edited it); an absent tag stays
+  allowed because the observed skipped shape ships without one;
+- the gate's completion budget rose to 35 minutes (105 x 20s), past the
+  workflow timeout plus queue time;
+- `--head-sha` accepts 40- or 64-character shas (SHA-256 object format).
+
+The template's `timeout-minutes` also rose from 30 to 45 the same day: the
+in-run triple retry can legitimately need ~33 minutes, and a timeout-killed
+job ends cancelled, which skips the `if: failure()` marker step. The other
+enrolled repositories re-sync their `.github/workflows/ocr-review.yml`
+copies to the updated template at their own pace (their 30-minute copies
+keep today's behavior until then).
+
 The [PR publishing standard](pr-publishing-standard-v1.md) was updated the
 same day: the publisher's pre-push checklist now records the open-PR reuse
 behavior and the gate wait before the auto-merge request.

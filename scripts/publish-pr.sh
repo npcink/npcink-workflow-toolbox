@@ -195,11 +195,14 @@ fi
 
 # An open pull request for this branch is reused, not an error: the AI review
 # triage loop pushes fixes or updates the PR body, then re-runs the publisher
-# to re-verify and finally request auto-merge.
+# to re-verify and finally request auto-merge. Scoped to the requested base:
+# GitHub allows one head branch to feed open PRs to different bases, and a
+# PR targeting another base must not satisfy (or shadow) this publish.
 existing_pr="$(
 	gh pr list \
 		--state open \
 		--head "${branch}" \
+		--base "${base_branch}" \
 		--json url \
 		--jq '.[0].url // empty'
 )"
@@ -356,13 +359,43 @@ case "${pr_number}" in
 	''|*[!0-9]*) fail "could not parse pull request number from ${pr_url}" ;;
 esac
 
+# On reuse, the live pull request body is the artifact that merges, and it
+# can drift from the validated local --body-file between runs (triage edits,
+# gh pr edit). Re-verify the body contract against the live body: the four
+# shared headings, plus the operator approval line for production PRs.
+if [ -n "${existing_pr}" ]; then
+	live_body="$(gh pr view "${pr_number}" --json body --jq '.body // ""')" \
+		|| fail 'could not read the existing pull request body for contract re-verification'
+	for required_heading in Scope Boundary Verification Risk; do
+		printf '%s\n' "${live_body}" | grep -Eiq "^#{1,6}[[:space:]]+.*${required_heading}" \
+			|| fail "the live pull request body is missing the ${required_heading} heading; edit the body with gh pr edit"
+	done
+	if [ "${base_branch}" = 'production' ]; then
+		printf '%s\n' "${live_body}" | grep -Fq 'Approved for production validation by operator.' \
+			|| fail 'the live production pull request body lost the operator approval line; restore it with gh pr edit'
+	fi
+fi
+
+# Disarm an auto-merge armed by an earlier publisher run: GitHub keeps
+# auto-merge enabled across head pushes, and --match-head-commit is only
+# checked when the merge is requested, so a stale armed auto-merge would
+# merge a newer, unverified head once required checks pass. The AI review
+# gate is advisory and never a required check, so it cannot block that.
+disarm_auto_merge() {
+	if gh pr merge "${pr_number}" --disable-auto >/dev/null 2>&1; then
+		echo '[pr-publish] disarmed a previously armed auto-merge on the pull request'
+	else
+		echo '[pr-publish] note: could not disable a previously armed auto-merge (none armed, or the request failed); verify the pull request state manually' >&2
+	fi
+}
+
 # Advisory AI review gate (AI Code Review Standard v1): no auto-merge is
 # requested until OpenCodeReview has delivered a review for this exact
 # head SHA and every delivered finding carries a fix:/accept: triage line
 # in the PR body. The gate re-runs a failed review run once itself; the
 # only way past an undelivered review is --no-review-because, which the
 # gate records in the PR body.
-# Not wrapped in retry_network: the gate already polls for up to twenty
+# Not wrapped in retry_network: the gate already polls for up to thirty-five
 # minutes per completion wait and re-runs a failed review once itself, so
 # an outer retry would multiply the bounded waits.
 review_gate_args=( --pr "${pr_number}" --head-sha "${head_sha}" )
@@ -376,11 +409,15 @@ case "${review_gate_status}" in
 		;;
 	2)
 		# Propagate the gate's exit contract: 2 means actionable triage
-		# pending, not a fatal failure.
+		# pending, not a fatal failure. Disarm first: exit 2 must not
+		# leave a previously armed auto-merge free to merge the
+		# untriaged head.
+		disarm_auto_merge
 		echo "[pr-publish] error: AI review findings pending triage (gate exit 2); auto-merge NOT requested. Complete the triage guidance above, then re-run composer pr:publish." >&2
 		exit 2
 		;;
 	*)
+		disarm_auto_merge
 		fail "AI review gate did not pass (exit ${review_gate_status}); no review was delivered or verification failed closed - re-run composer pr:publish after connectivity/provider recovery (the gate re-runs a failed review itself), or record an exception with --no-review-because."
 		;;
 esac

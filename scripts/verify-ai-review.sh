@@ -118,6 +118,14 @@ gate_failed_counts() {
 	printf '%s\n' "$1" | grep -oE 'Failed to post inline: [0-9]+ comments?' | grep -oE '[0-9]+' | sort -u || true
 }
 
+# Rolling-summary round tag "ocr-summary-run:<run>-<attempt>"; finding
+# rounds carry it, skipped rounds may not. Present-but-mismatched means an
+# interleaved round (e.g. a comment-triggered one) edited the single
+# rolling summary after the verified run was pinned.
+gate_summary_run_tag() {
+	printf '%s\n' "$1" | grep -oE 'ocr-summary-run:[0-9]+-[0-9]+' | head -1 || true
+}
+
 # Inline marker extraction: id, run, attempt, label, path:line per finding.
 gate_marker_tsv() {
 	jq -r -s '
@@ -211,11 +219,13 @@ gate_self_test() {
 	check 'found-N shape count' "$(gate_shape_counts "${found_posted}")" '5'
 	check 'found-N posted count' "$(gate_posted_counts "${found_posted}")" '5'
 	check 'found-N failed count' "$(gate_failed_counts "${found_posted}")" ''
+	check 'summary run tag extracted' "$(gate_summary_run_tag "${found_posted}")" 'ocr-summary-run:37341345875-1'
 
 	local skipped='<!-- ocr-summary -->
 **OpenCodeReview**: Review skipped: no items were selected.'
 	check 'skipped shape count' "$(gate_shape_counts "${skipped}")" ''
 	check 'skipped detected' "$(gate_is_skipped "${skipped}" && echo yes)" 'yes'
+	check 'summary run tag absent on skipped' "$(gate_summary_run_tag "${skipped}")" ''
 
 	local complete='<!-- ocr-summary -->
 **OpenCodeReview**: Review complete: 0 finding(s) across 4 selected item(s).'
@@ -306,9 +316,10 @@ esac
 case "${head_sha}" in
 	''|*[!0-9a-fA-F]*) fail '--head-sha must be a commit sha' ;;
 esac
-case "${head_sha}" in
-	????????????????????????????????????????) ;;
-	*) fail '--head-sha must be a 40-character commit sha' ;;
+# 40 hex characters (SHA-1 object format) or 64 (SHA-256 object format).
+case "${#head_sha}" in
+	40|64) ;;
+	*) fail '--head-sha must be a 40- or 64-character commit sha' ;;
 esac
 # The runs API matches head_sha case-sensitively against the lowercase
 # commit sha, so normalize instead of timing out on an uppercase input.
@@ -324,7 +335,10 @@ github_repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)" \
 	|| fail 'could not resolve the repository from the gh context'
 
 run_poll_seconds=20
-run_poll_max_iterations=60
+# The review workflow's own timeout-minutes is 30, and the completion wait
+# also absorbs queue time before the job starts (plus 45s/90s in-run retry
+# pauses), so 105 x 20s = 35 minutes covers the worst legitimate round.
+run_poll_max_iterations=105
 discovery_poll_seconds=15
 discovery_poll_max=6
 
@@ -544,6 +558,16 @@ if [ -z "${summary_body}" ]; then
 fi
 if [[ "${summary_updated}" < "${run_created}" ]]; then
 	fail "the summary comment body predates run ${run_id}; no summary posted for this run - failing closed"
+fi
+# When the rolling summary carries its round tag, it must name the pinned
+# run and attempt: a mismatch means an interleaved round (typically a
+# comment-triggered one, whose runs-API head is the default branch and so
+# cannot be correlated by head_sha) edited the summary after this run was
+# pinned. An absent tag stays allowed because the observed skipped shape
+# ships without one.
+summary_run_tag="$(gate_summary_run_tag "${summary_body}")"
+if [ -n "${summary_run_tag}" ] && [ "${summary_run_tag}" != "ocr-summary-run:${run_id}-${attempt}" ]; then
+	fail "the rolling summary carries ${summary_run_tag} but run ${run_id} attempt ${attempt} was verified; an interleaved review round edited the summary - failing closed"
 fi
 if gate_is_partial "${summary_body}"; then
 	fail "round ${run_id} is partially complete (a selected item failed its review); re-run composer pr:publish for a full round or record an exception with --no-review-because"
