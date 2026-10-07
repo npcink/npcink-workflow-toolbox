@@ -7,6 +7,7 @@ Start from the active documents below before changing code.
 
 - [Current State](current-state.md)
 - [Known Issues](known-issues.md)
+- [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)
 - [Platform Governance Index](platform/README.md)
 - [Cross-Repo Platform Governance History](platform/cross-repo-platform-governance-history-2026-07-08.md)
 - [Product Positioning](product-positioning.md)

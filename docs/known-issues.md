@@ -15,8 +15,12 @@ with the closing commit or PR for one release cycle, then prune.
 
 - **Sixteen non-default editor intents remain callable** (title, summary,
   category, tag, outline, checkup, discoverability, comment-reply, and
-  related compatibility paths). Converging or retiring them is a mid-term
-  product decision, not a cleanup. Source:
+  related compatibility paths; category/tag were since promoted to default
+  buttons). The convergence inventory and recommendation now live in
+  [Editor Intent Convergence Decision](editor-intent-convergence-decision.md):
+  retire the ten route-only intents, keep the default and toolbar paths.
+  Converging or retiring remains a mid-term product decision, not a
+  cleanup. Source:
   [Pre-Release Hardening Closeout 2026-09-30](pre-release-hardening-closeout-2026-09-30.md).
 - **The editor `整理` (format content) button label is Chinese inside an
   otherwise English UI**; unify label language in a scoped i18n pass.
