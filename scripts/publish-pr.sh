@@ -6,9 +6,11 @@ usage() {
 	cat <<'EOF'
 Usage:
   scripts/publish-pr.sh --title TITLE --body-file PATH [--base BRANCH] [--dry-run]
+                        [--no-review-because REASON]
 
 Publishes the current clean topic branch, creates a pull request from a
-completed body contract, and requests squash auto-merge after required checks.
+completed body contract, and requests squash auto-merge after required checks
+and the advisory AI review delivery + triage gate.
 EOF
 }
 
@@ -27,6 +29,7 @@ title=''
 body_file=''
 base_branch='master'
 dry_run=0
+review_exception=''
 invocation_dir="${PWD}"
 
 while [ "$#" -gt 0 ]; do
@@ -47,6 +50,14 @@ while [ "$#" -gt 0 ]; do
 		--base)
 			[ "$#" -ge 2 ] || fail '--base requires a value'
 			base_branch="$2"
+			shift 2
+			;;
+		--no-review-because)
+			[ "$#" -ge 2 ] || fail '--no-review-because requires a value'
+			case "$2" in
+				*$'\n'*) fail '--no-review-because must be a single line' ;;
+			esac
+			review_exception="$2"
 			shift 2
 			;;
 		--dry-run)
@@ -71,6 +82,9 @@ command -v gh >/dev/null 2>&1 || fail 'GitHub CLI (gh) is required'
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || fail 'run inside a Git worktree'
 cd "${repo_root}"
+
+[ -f scripts/verify-ai-review.sh ] \
+	|| fail 'AI review gate script scripts/verify-ai-review.sh not found'
 
 # Publishing reaches github.com over the network. When a local VPN exposes an
 # HTTP proxy on a moving port, detect the working port instead of failing on
@@ -169,11 +183,19 @@ head_sha="$(git rev-parse HEAD)"
 if [ "${dry_run}" = '1' ]; then
 	quote_command git push -u origin "${branch}"
 	quote_command gh pr create --base "${base_branch}" --head "${branch}" --title "${title}" --body-file "${body_path}"
+	if [ -n "${review_exception}" ]; then
+		quote_command bash scripts/verify-ai-review.sh --pr '<pr-number>' --head-sha "${head_sha}" --no-review-because "${review_exception}"
+	else
+		quote_command bash scripts/verify-ai-review.sh --pr '<pr-number>' --head-sha "${head_sha}"
+	fi
 	quote_command gh pr merge '<created-pr-url>' --auto --squash --match-head-commit "${head_sha}"
 	echo '[pr-publish] dry-run passed'
 	exit 0
 fi
 
+# An open pull request for this branch is reused, not an error: the AI review
+# triage loop pushes fixes or updates the PR body, then re-runs the publisher
+# to re-verify and finally request auto-merge.
 existing_pr="$(
 	gh pr list \
 		--state open \
@@ -181,7 +203,10 @@ existing_pr="$(
 		--json url \
 		--jq '.[0].url // empty'
 )"
-[ -z "${existing_pr}" ] || fail "an open pull request already exists: ${existing_pr}"
+if [ -n "${existing_pr}" ]; then
+	echo "[pr-publish] reusing open pull request: ${existing_pr}"
+	echo '[pr-publish] note: --body-file and --title are not re-applied to an existing pull request; edit the body/title with gh pr edit (e.g. triage lines)'
+fi
 
 # Direct git pushes can fail for a long time on some paths to github.com
 # while api.github.com stays reachable, and some local proxy nodes answer
@@ -315,15 +340,52 @@ PY
 }
 
 push_and_verify
-pr_url="$(
-	retry_network gh pr create \
-		--base "${base_branch}" \
-		--head "${branch}" \
-		--title "${title}" \
-		--body-file "${body_path}"
-)"
+if [ -z "${existing_pr}" ]; then
+	pr_url="$(
+		retry_network gh pr create \
+			--base "${base_branch}" \
+			--head "${branch}" \
+			--title "${title}" \
+			--body-file "${body_path}"
+	)"
+else
+	pr_url="${existing_pr}"
+fi
+pr_number="${pr_url##*/}"
+case "${pr_number}" in
+	''|*[!0-9]*) fail "could not parse pull request number from ${pr_url}" ;;
+esac
+
+# Advisory AI review gate (AI Code Review Standard v1): no auto-merge is
+# requested until OpenCodeReview has delivered a review for this exact
+# head SHA and every delivered finding carries a fix:/accept: triage line
+# in the PR body. The gate re-runs a failed review run once itself; the
+# only way past an undelivered review is --no-review-because, which the
+# gate records in the PR body.
+# Not wrapped in retry_network: the gate already polls for up to twenty
+# minutes per completion wait and re-runs a failed review once itself, so
+# an outer retry would multiply the bounded waits.
+review_gate_args=( --pr "${pr_number}" --head-sha "${head_sha}" )
+if [ -n "${review_exception}" ]; then
+	review_gate_args+=( --no-review-because "${review_exception}" )
+fi
+review_gate_status=0
+bash scripts/verify-ai-review.sh "${review_gate_args[@]}" || review_gate_status=$?
+case "${review_gate_status}" in
+	0)
+		;;
+	2)
+		# Propagate the gate's exit contract: 2 means actionable triage
+		# pending, not a fatal failure.
+		echo "[pr-publish] error: AI review findings pending triage (gate exit 2); auto-merge NOT requested. Complete the triage guidance above, then re-run composer pr:publish." >&2
+		exit 2
+		;;
+	*)
+		fail "AI review gate did not pass (exit ${review_gate_status}); no review was delivered or verification failed closed - re-run composer pr:publish after connectivity/provider recovery (the gate re-runs a failed review itself), or record an exception with --no-review-because."
+		;;
+esac
 
 retry_network gh pr merge "${pr_url}" --auto --squash --match-head-commit "${head_sha}"
 
 echo "[pr-publish] pull_request=${pr_url}"
-echo '[pr-publish] auto_merge=squash_requested'
+echo '[pr-publish] ai_review_gate=passed'

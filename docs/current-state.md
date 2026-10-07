@@ -54,8 +54,12 @@ Last reviewed: 2026-10-07.
 - Static analysis (required in CI): `composer lint:standards`,
   `composer analyse:php` (level 5 + baseline; regenerate the baseline only
   when a split moves findings, counts must not grow).
-- Advisory AI review (before publish): `ocr review --from origin/master
-  --to HEAD`
+- Advisory AI review (mechanized at the publisher since 2026-10-07):
+  `composer pr:publish` waits for the delivered OpenCodeReview CI round
+  and a `fix:`/`accept:` triage line per finding in the PR body's
+  `## AI Review Triage` section; exceptions go through
+  `-- --no-review-because`. A local `ocr review --from origin/master
+  --to HEAD` round is optional extra signal.
 - Environment-dependent smokes (browser/Cloud/local site) live outside
   `test:all`; see `docs/development-workflow.md` before running them.
   Never pipe a gate through `grep`/`tail` — check the composer exit code.

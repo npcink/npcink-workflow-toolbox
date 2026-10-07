@@ -246,6 +246,39 @@ flag):
   repositories adopt the same publisher pattern at their own pace; until
   then their AGENTS.md local-gate wording stands.
 
+## Enrollment And Publisher Gate - 2026-10-07
+
+`npcink-workflow-toolbox` (this repository) enrolled in Layer 2 and adopted
+the publisher delivery + triage gate, the second repository after the pilot
+`npcink-ai-client-adapter`:
+
+- `.github/workflows/ocr-review.yml` copied verbatim from the canonical
+  template (ubuntu-26.04, commit-SHA action pin, in-run triple retry,
+  failure marker, `issues: write`).
+- `scripts/verify-ai-review.sh` ported verbatim from
+  `npcink-ai-client-adapter`; its producer-contract self-test joined
+  `composer test:all` as `test:ai-review-gate`.
+- `scripts/publish-pr.sh` now invokes the gate after pull-request creation
+  and before requesting squash auto-merge, adds `--no-review-because`, and
+  reuses an open pull request for the same branch instead of failing (the
+  triage loop re-runs the publisher after fixes or body edits). The
+  `publisher_sha256` in `pr-publishing-repositories.json` was regenerated
+  for that change, and the PR template gained the `## AI Review Triage`
+  section.
+- The 2026-09-29 rollout delivered this standard and template here with the
+  AGENTS.md local gate only; from 2026-10-07 the delivery-confirmation rule
+  is mechanized at this repository's publisher too.
+
+The enrollment pull request itself merges under `--no-review-because`:
+`pull_request_target` executes the workflow file from the base branch,
+where it does not exist yet, so no CI round can register for its own
+enabling PR. The compensating local pre-publish review round covered it,
+and the first ordinary pull request after the merge runs the full CI loop.
+
+The [PR publishing standard](pr-publishing-standard-v1.md) was updated the
+same day: the publisher's pre-push checklist now records the open-PR reuse
+behavior and the gate wait before the auto-merge request.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
@@ -326,8 +359,10 @@ adoption decision record.
   had at least one delivered review round (posted review comments, not merely
   a green or missing check). A failed run leaves a marker comment; retry with
   a `/open-code-review` comment or record in the pull request why the change
-  merges unreviewed. On `npcink-ai-client-adapter` this rule is mechanized at
-  the publisher since 2026-10-06 (see Template Update - 2026-10-06).
+  merges unreviewed. On `npcink-ai-client-adapter` (since 2026-10-06) and
+  `npcink-workflow-toolbox` (since 2026-10-07) this rule is mechanized at
+  the publisher (see Template Update - 2026-10-06 and Enrollment And
+  Publisher Gate - 2026-10-07).
 - Rollback. Remove the repository's workflow file and delete its secrets; the
   local CLI is independent (`npm uninstall -g @alibaba-group/open-code-review`).
 
@@ -347,11 +382,11 @@ ocr session list                            # resume long reviews with --resume
 
 Cadence for solo AI-assisted development: on repositories with the
 publisher delivery + triage gate (`npcink-ai-client-adapter` since
-2026-10-06), the mandated check happens at `composer pr:publish` - the
-publisher waits for the delivered review and verified triage before
-requesting auto-merge, so no separate local pass is required. A local
-`ocr review --from origin/master --to HEAD` round before opening the
-pull request remains optional extra signal there, `ocr review` on
-uncommitted work stays useful before staging, and repositories without
-the publisher gate keep the pre-publish local pass mandated in their
-AGENTS.md.
+2026-10-06, `npcink-workflow-toolbox` since 2026-10-07), the mandated
+check happens at `composer pr:publish` - the publisher waits for the
+delivered review and verified triage before requesting auto-merge, so no
+separate local pass is required. A local `ocr review --from origin/master
+--to HEAD` round before opening the pull request remains optional extra
+signal there, `ocr review` on uncommitted work stays useful before
+staging, and repositories without the publisher gate keep the pre-publish
+local pass mandated in their AGENTS.md.
