@@ -211,6 +211,9 @@ final class Rest_Controller extends Rest_Controller_Support {
 		if ( preg_match( '#^/nightly-inspection/cloud-batch/[A-Za-z0-9._:-]+(?:/result|/retry)?$#', $route ) ) {
 			return 'cap.toolbox.nightly_inspection';
 		}
+		if ( preg_match( '#^/media-derivative-local-review/art_[0-9a-f]{32}$#', $route ) ) {
+			return 'cap.toolbox.workflow_suggest';
+		}
 		if ( preg_match( '#^/media-optimization-batches(?:/current|/media_opt_[A-Za-z0-9]+(?:/confirm|/items/[0-9]+/(?:complete|restore))?)?$#', $route ) ) {
 			return 'cap.toolbox.image_adoption';
 		}
@@ -247,7 +250,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/media-derivative-handoff'                => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-preview'                => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-optimization-payload'   => 'cap.toolbox.workflow_suggest',
-			'/media-derivative-local-review/(?P<artifact_id>art_[0-9a-f]{32})' => 'cap.toolbox.workflow_suggest',
 			'/nightly-inspection/cloud-runtime-entitlement' => 'cap.toolbox.nightly_inspection',
 			'/nightly-inspection/cloud-batch'          => 'cap.toolbox.nightly_inspection',
 			'/nightly-inspection/cloud-batch/recent'   => 'cap.toolbox.nightly_inspection',

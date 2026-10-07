@@ -53,11 +53,6 @@ with the closing commit or PR for one release cycle, then prune.
   progressive, draft flows) are deferred until product work touches them,
   per the just-in-time refactoring decision. `admin.js` (~8.2k) and
   `Admin_Page.php` (~4.5k) are similarly deferred.
-- **`Rest_Controller::rest_route_scope()` coverage is asserted one-way**:
-  a route registered but missing from the scope map silently degrades to
-  coarse `manage_options` instead of failing the gate. A static contract
-  asserting full scope-map coverage for every registered route is owed.
-  Source: the 2026-10-03 systematic review.
 - **Dated closeout records at the `docs/` root** (June-July 2026 records
   such as the WordPress.org release readiness, site-check, operator-path,
   cross-repo 2026-07-08 series, and five-plugin hardening closeouts)
@@ -100,6 +95,19 @@ with the closing commit or PR for one release cycle, then prune.
   comment moderation, flagged media) alongside the Rest_Controller
   restructure, editor JS part-file split, and required static analysis
   gates.
+- **`Rest_Controller::rest_route_scope()` full-coverage contract** —
+  resolved 2026-10-07: `tests/run.php` now simulates runtime scope
+  resolution (regex branches, literal routes, and the exact map) against a
+  representative concrete path for every registered route, fails on any
+  silent `cap.toolbox.admin` fallback, and requires the resolved scope to
+  match `docs/route-boundary-table.json`. The first run exposed one real
+  defect: the local-review route's scope-map key used the registered
+  pattern (with the `(?P<artifact_id>...)` named group), which never
+  matches the concrete runtime path `WP_REST_Request::get_route()`
+  returns, so the route silently ran on the fallback scope; it now
+  resolves through a runtime regex branch to its documented
+  `cap.toolbox.workflow_suggest` scope (same `manage_options` default
+  capability, corrected scope string for the host permission filter).
 
 - **No live-site smoke against the split editor bundle** — resolved
   2026-10-06: the standalone five-plugin site above now runs the editor

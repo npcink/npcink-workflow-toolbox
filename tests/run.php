@@ -1804,6 +1804,69 @@ foreach ( $route_boundary_scopes as $route => $scope ) {
 	$route_literal = str_replace( "/local-admin-consent/featured-image", "/local-admin-consent' . '/featured-image", $route );
 	toolbox_assert( false !== strpos( $rest, "'{$route_literal}'" ) && false !== strpos( $rest, "=> '{$scope}'" ), 'REST scope map includes route scope from the boundary table: ' . $route );
 }
+
+$route_scope_method_start = strpos( $rest, 'private function rest_route_scope' );
+$route_scope_method_end   = false !== $route_scope_method_start ? strpos( $rest, "\n\t}\n", $route_scope_method_start ) : false;
+$route_scope_method       = false !== $route_scope_method_start && false !== $route_scope_method_end ? substr( $rest, $route_scope_method_start, $route_scope_method_end - $route_scope_method_start ) : '';
+toolbox_assert( '' !== $route_scope_method, 'REST route scope resolver source is present for the full-coverage contract.' );
+$route_scope_method = str_replace( "'/local-admin-consent' . '/featured-image'", "'/local-admin-consent/featured-image'", $route_scope_method );
+$route_scope_regex_rules = array();
+$route_scope_literal_map = array();
+$route_scope_exact_map   = array();
+if ( preg_match_all( "/preg_match\(\s*'#([^']+)#'\s*,\s*\\\$route\s*\)[^}]*?return\s+'(cap\.toolbox\.[a-z_]+(?:\.[a-z_]+)*)';/s", $route_scope_method, $scope_regex_matches ) ) {
+	foreach ( $scope_regex_matches[1] as $scope_regex_index => $scope_regex_pattern ) {
+		$route_scope_regex_rules[] = array( $scope_regex_pattern, $scope_regex_matches[2][ $scope_regex_index ] );
+	}
+}
+if ( preg_match_all( "/in_array\(\s*\\\$route,\s*array\(\s*'([^']+)'\s*,\s*'([^']+)'\s*\),\s*true\s*\)[^}]*?return\s+'(cap\.toolbox\.[a-z_]+(?:\.[a-z_]+)*)';/s", $route_scope_method, $scope_literal_matches ) ) {
+	foreach ( $scope_literal_matches[3] as $scope_literal_index => $scope_literal_scope ) {
+		$route_scope_literal_map[ $scope_literal_matches[1][ $scope_literal_index ] ] = $scope_literal_scope;
+		$route_scope_literal_map[ $scope_literal_matches[2][ $scope_literal_index ] ] = $scope_literal_scope;
+	}
+}
+if ( preg_match_all( "/'([^']+)'\s*=>\s*'(cap\.toolbox\.[a-z_]+(?:\.[a-z_]+)*)'/", $route_scope_method, $scope_exact_matches ) ) {
+	foreach ( $scope_exact_matches[1] as $scope_exact_index => $scope_exact_route ) {
+		$route_scope_exact_map[ $scope_exact_route ] = $scope_exact_matches[2][ $scope_exact_index ];
+	}
+}
+toolbox_assert( ! empty( $route_scope_regex_rules ) && ! empty( $route_scope_exact_map ), 'REST route scope full-coverage contract parses regex, literal, and exact scope rules from the resolver.' );
+$route_scope_param_samples = array(
+	'batch_id'      => 'media_opt_Ab12Cd',
+	'attachment_id' => '42',
+	'run_id'        => 'run.A1-b2:C3',
+	'artifact_id'   => 'art_' . str_repeat( 'a', 32 ),
+);
+$route_scope_resolved_count = 0;
+foreach ( $registered_rest_routes as $scope_coverage_route ) {
+	$runtime_scope_route = (string) preg_replace_callback(
+		'/\(\?P<(\w+)>[^)]*\)/',
+		static function ( $scope_param_match ) use ( $route_scope_param_samples ): string {
+			return $route_scope_param_samples[ $scope_param_match[1] ] ?? 'sample_value';
+		},
+		$scope_coverage_route
+	);
+	$route_scope_covered   = false;
+	$resolved_route_scope = 'cap.toolbox.admin';
+	foreach ( $route_scope_regex_rules as $route_scope_regex_rule ) {
+		if ( 1 === preg_match( '#' . $route_scope_regex_rule[0] . '#', $runtime_scope_route ) ) {
+			$route_scope_covered   = true;
+			$resolved_route_scope = $route_scope_regex_rule[1];
+			break;
+		}
+	}
+	if ( ! $route_scope_covered && isset( $route_scope_literal_map[ $runtime_scope_route ] ) ) {
+		$route_scope_covered   = true;
+		$resolved_route_scope = $route_scope_literal_map[ $runtime_scope_route ];
+	}
+	if ( ! $route_scope_covered && isset( $route_scope_exact_map[ $runtime_scope_route ] ) ) {
+		$route_scope_covered   = true;
+		$resolved_route_scope = $route_scope_exact_map[ $runtime_scope_route ];
+	}
+	toolbox_assert( $route_scope_covered, 'REST route scope coverage is explicit for the runtime path of every registered route (no silent cap.toolbox.admin fallback): ' . $scope_coverage_route );
+	toolbox_assert( ( $route_boundary_scopes[ $scope_coverage_route ] ?? '' ) === $resolved_route_scope, 'Runtime REST scope resolution matches the documented boundary scope: ' . $scope_coverage_route );
+	++$route_scope_resolved_count;
+}
+toolbox_assert( count( $registered_rest_routes ) === $route_scope_resolved_count, 'REST route scope full-coverage contract ran against every registered route.' );
 $readme_route_doc       = (string) file_get_contents( $root . '/README.md' );
 $boundary_route_doc     = (string) file_get_contents( $root . '/docs/boundary.md' );
 $architecture_route_doc = (string) file_get_contents( $root . '/docs/architecture.md' );
