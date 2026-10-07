@@ -664,7 +664,11 @@
 	// actions surface permission errors for editor-role users by design;
 	// the plain copy states the seam and the nothing-written posture while
 	// the original REST denial stays on the error object for the
-	// technical-detail folds admins read.
+	// technical-detail folds admins read. Only scope denials
+	// (rest_forbidden from permission_callback) are rewritten: core
+	// authentication failures such as rest_cookie_invalid_nonce also use
+	// HTTP 403, and their raw copy (reload / sign in again) stays correct
+	// for every audience.
 	function normalizeRestErrorForAudience(error, httpStatus) {
 		if (!error || typeof error !== 'object') {
 			return error;
@@ -672,12 +676,19 @@
 		if (httpStatus && error.http_status === undefined) {
 			error.http_status = httpStatus;
 		}
-		if (httpStatus === 403 || error.code === 'rest_forbidden') {
-			error.code = error.code || 'rest_forbidden';
+		if (error.code === 'rest_forbidden') {
 			error.original_message = error.original_message || error.message || '';
 			error.message = __('This action needs a site administrator. Nothing was written.', 'npcink-workflow-toolbox');
 		}
 		return error;
+	}
+
+	async function parseJsonResponse(response) {
+		const body = await response.json().catch(() => ({}));
+		if (!response.ok) {
+			throw normalizeRestErrorForAudience(body, response.status);
+		}
+		return body;
 	}
 
 	async function postJsonToUrl(url, payload) {
@@ -689,11 +700,7 @@
 			},
 			body: JSON.stringify(payload || {}),
 		});
-		const body = await response.json().catch(() => ({}));
-		if (!response.ok) {
-			throw normalizeRestErrorForAudience(body, response.status);
-		}
-		return body;
+		return parseJsonResponse(response);
 	}
 
 	async function postJson(path, payload) {
@@ -727,11 +734,7 @@
 				body: JSON.stringify(payload || {}),
 				signal: controller.signal,
 			});
-			const body = await response.json().catch(() => ({}));
-			if (!response.ok) {
-				throw normalizeRestErrorForAudience(body, response.status);
-			}
-			return body;
+			return await parseJsonResponse(response);
 		} catch (error) {
 			if (error && error.name === 'AbortError') {
 				if (externalSignal && externalSignal.__toolboxSuperseded) {
