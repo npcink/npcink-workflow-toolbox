@@ -171,7 +171,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		if ( 'publish_preflight' === $intent ) {
-			$result['sections']['discoverability']       = $this->editor_support_section(
+			$result['sections']['discoverability'] = $this->editor_support_section(
 				$this->editor_cached_content_discoverability(
 					array(
 						'post_id'                 => absint( $context['post_id'] ?? 0 ),
@@ -184,8 +184,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 					)
 				)
 			);
-			$local_checkup                               = $this->editor_article_checkup_section( $context );
-			$duplicate_check                             = $this->editor_support_section(
+			$local_checkup                         = $this->editor_article_checkup_section( $context );
+			$duplicate_check                       = $this->editor_support_section(
 				$this->editor_cached_site_knowledge(
 					array(
 						'query'           => $query,
@@ -195,8 +195,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 					)
 				)
 			);
-			$result['sections']['local_article_checkup'] = $local_checkup;
-			$result['sections']                          = array_merge(
+			$result['sections']                    = array_merge(
 				$result['sections'],
 				$this->publish_preflight->build_sections( $context, $result['sections']['discoverability'], $duplicate_check, $local_checkup )
 			);
