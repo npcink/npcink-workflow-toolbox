@@ -6053,6 +6053,10 @@ msgstr ""
 msgid "Request cancelled. Nothing was written."
 msgstr ""
 
+#: assets/editor-content-support.js:670
+msgid "This action needs a site administrator. Nothing was written."
+msgstr ""
+
 #: assets/editor-content-support.js:720
 msgid "This request was replaced by a newer one. Nothing was written."
 msgstr ""

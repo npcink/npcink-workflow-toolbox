@@ -76,8 +76,10 @@ Last reviewed: 2026-10-07.
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
 5. PHPStan baseline ratchet (136 findings; shrinks with cluster splits).
-6. `plainTextFromHtml` innerHTML hardening; guided onboarding tour;
-   "Core proposal" terminology standard cross-repo rollout.
+6. `plainTextFromHtml` innerHTML hardening; guided onboarding tour
+   (design proposed, awaiting the operator trial —
+   `docs/onboarding-tour-design-v1.md`); "Core proposal" terminology
+   standard cross-repo rollout.
 
 Full list with sources: `docs/known-issues.md`.
 

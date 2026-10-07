@@ -9448,6 +9448,9 @@ msgstr "取消"
 msgid "Request cancelled. Nothing was written."
 msgstr "请求已取消，未写入任何内容。"
 
+msgid "This action needs a site administrator. Nothing was written."
+msgstr "此操作需要站点管理员。未写入任何内容。"
+
 msgid "The request timed out. Nothing was written; try again when you are ready."
 msgstr "请求超时，未写入任何内容；准备好后可重试。"
 
