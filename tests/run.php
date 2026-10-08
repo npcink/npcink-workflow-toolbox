@@ -1509,6 +1509,15 @@ toolbox_assert(
 	&& 2 === substr_count( $editor_js, 'parseJsonResponse(response);' ),
 	'Both editor REST wrappers share one response parser that normalizes scope denials for the acting audience: plain administrator copy keyed on rest_forbidden only (core cookie/nonce 403s keep their raw copy), with the original message and http status preserved on the error object; the server-side scope boundary stays authoritative (ADR-018).'
 );
+
+$site_helper_source = strstr( file_get_contents( $root . '/includes/Provider_Hosted_AI_Service.php' ), 'function run_hosted_ai_site_helper' );
+toolbox_assert(
+	false === strpos( $site_helper_source, "'http_timeout_seconds'" )
+	&& false === strpos( $site_helper_source, "'connect_timeout_seconds'" )
+	&& false !== strpos( $site_helper_source, "'taxonomy_tag_sample'    => \$taxonomy_tag_sample" )
+	&& false !== strpos( $site_helper_source, "'internal_link_sample'   => \$internal_link_sample" ),
+	'The site-helper runtime payload keeps the sampled taxonomy and internal-link posts inside source and sends no schema-rejected http timeout fields (live 422 fixed 2026-10-08).'
+);
 toolbox_assert( false !== strpos( $editor_js, "handoff_type: 'content_metadata_delta_handoff'" ) && false !== strpos( $editor_js, "source_item_id: 'summary_terms_optimization'" ) && false !== strpos( $editor_js, "handoff_type: 'seo_meta_handoff_preview'" ) && false !== strpos( $editor_js, "source_item_id: 'seo_handoff'" ), 'Editor handoff receipts identify metadata and SEO source review items.' );
 toolbox_assert( false !== strpos( $editor_js, 'renderCompactMetadataSection' ) && false !== strpos( $editor_js, 'mergeContentSupportResult' ) && false !== strpos( $editor_js, 'Category suggestions' ) && false !== strpos( $editor_js, 'Tag suggestions' ), 'Editor Content Support keeps split metadata results compact and mergeable.' );
 toolbox_assert( false !== strpos( $editor_js, 'metadataSectionHasSource' ) && false !== strpos( $editor_js, 'item && item.value' ) && false !== strpos( $editor_js, 'metadataHandoffHasChoices' ) && false !== strpos( $editor_js, "['summary_terms_optimization', 'category_suggestions', 'tag_suggestions']" ), 'Editor Content Support keeps metadata Core handoff available for the full metadata flow and focused term shortcuts.' );
