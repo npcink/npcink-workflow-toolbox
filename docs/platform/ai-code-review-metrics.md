@@ -93,3 +93,34 @@ without recorded per-thread replies, so the 5.8:1 ratio describes only
 the threads where the protocol applied. Those rounds were dispositioned
 outside the thread record; this baseline records the gap rather than
 assuming either outcome for the un-replied remainder.
+
+### 2026-10 window 2 - 0.5.9 release cycle (npcink-abilities-toolkit, #211-#216)
+
+Window: 2026-10-07 (#211, advisory workflow re-syncs) through 2026-10-08
+(#216, 0.5.9 publication closeout).
+
+| Metric | Value |
+| --- | --- |
+| Delivery rate | 6/6 merged (100%) |
+| Findings | 6 inline comments |
+| Triage | 3 fixed : 3 declined (1:1) |
+
+Findings by severity: maintainability 6 (all low).
+
+Predictive-value case: three of the six findings on #213 flagged the same
+defect class — scenario-card strings rendered through dynamic `esc_html__()`
+calls, invisible to extraction tooling. The thread was initially declined as
+a deliberate render-layer design, then validated as a real defect within 24
+hours when the packaged-plugin Plugin Check gate rejected the identical
+pattern with ERROR-level
+`WordPress.WP.I18n.NonSingularStringLiteralText` findings during 0.5.9
+release verification; the shipped fix adopted the reviewer's extraction
+concern through a literal translation map
+(`Admin\Scenario_Translations`). The advisory review surfaced a WordPress.org
+review rule before the official gate ran.
+
+The three declines (contract-data localization posture twice, one
+harness-only URL fallback) carry evidence-backed rationale in the thread
+record; one fixed thread was a partial accept (brand heading kept, wrapped
+in the existing plugin-name msgid). Zero-finding windows on #214, #215
+(release preparation), and #216.
