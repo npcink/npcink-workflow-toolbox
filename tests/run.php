@@ -1205,7 +1205,7 @@ toolbox_assert(
 	&& false !== strpos( $rest_controller, "'/review-tally/mark'" )
 	&& false !== strpos( $rest_controller, "'/review-tally/summary'" )
 	&& false !== strpos( (string) file_get_contents( $root . '/includes/Plugin.php' ), 'npcink_toolbox_review_tally' )
-	&& false !== strpos( (string) file_get_contents( $root . '/includes/Settings.php' ), 'array_slice( $marks, -500 )' ),
+	&& false !== strpos( (string) file_get_contents( $root . '/includes/Settings.php' ), 'array_slice( $marks, -2000 )' ),
 	'Review-set adoption tally: the five review-set result panels carry local accept/ignore marks through the workflow_suggest-scoped tally routes, stored as a bounded marks log in the Toolbox settings option (no suggestion content, no WordPress writes).'
 );
 $text_utils_part_source = (string) file_get_contents( $root . '/assets/editor-content-support/text-utils.js' );
