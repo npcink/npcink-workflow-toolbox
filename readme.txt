@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.5.2
+Stable tag: 0.5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,21 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.5.3 =
+
+* Added the review-set adoption tally: every review-set result panel
+  carries local Accept/Ignore +1 buttons with a Last-7-days line, so the
+  batch-apply decision data builds itself during normal use (Toolbox
+  settings counts only; no suggestion content is stored).
+* Hardened editor plain-text extraction to the inert DOMParser path
+  (inline handlers and resource fetches in block HTML can no longer
+  execute during text extraction).
+* Guarded the advisory review workflow against missing LLM configuration
+  and fixed the form that briefly stopped all review rounds.
+* Restructured the editor content-support service into five cohesive
+  units behind one facade (paragraph check, audio text, flow cache,
+  taxonomy shaping) with unchanged behavior.
 
 = 0.5.2 =
 
