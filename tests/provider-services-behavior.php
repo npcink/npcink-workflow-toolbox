@@ -509,6 +509,8 @@ require_once dirname( __DIR__ ) . '/includes/Editor_Content_Format.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Paragraph_Check.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Audio_Text.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Local_Admin_Consent.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Media_Optimization_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Flow_Plan_Bridges.php';

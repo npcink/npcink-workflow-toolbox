@@ -252,9 +252,23 @@ final class Rest_Editor_Paragraph_Check {
 
 
 	public static function editor_text_has_structural_glue( string $text ): bool {
-		return $this->editor_text_has_heading_label_glue( $text )
-			|| $this->editor_text_has_phrase_cluster_glue( $text )
-			|| $this->editor_text_has_alnum_cjk_glue( $text );
+		return self::editor_text_has_heading_label_glue( $text )
+			|| self::editor_text_has_phrase_cluster_glue( $text )
+			|| self::editor_text_has_alnum_cjk_glue( $text );
 	}
 
+	public static function editor_text_has_heading_label_glue( string $text ): bool {
+		return 1 === preg_match( '/(核心要点|评估维度|主要差异|适用建议|常见问题|方案\s*[A-Za-zＡ-Ｚ])(?=[\p{Han}A-Za-z0-9])/u', $text );
+	}
+
+
+	public static function editor_text_has_phrase_cluster_glue( string $text ): bool {
+		return 1 === preg_match( '/可维护性编辑体验响应式表现治理边界/u', $text )
+			|| 1 === preg_match( '/(可维护性|编辑体验|响应式表现|治理边界)(可维护性|编辑体验|响应式表现|治理边界)(可维护性|编辑体验|响应式表现|治理边界)/u', $text );
+	}
+
+
+	public static function editor_text_has_alnum_cjk_glue( string $text ): bool {
+		return 1 === preg_match( '/(?:[A-Za-z0-9][\x{4e00}-\x{9fff}]|[\x{4e00}-\x{9fff}][A-Za-z0-9]{2,})/u', $text );
+	}
 }

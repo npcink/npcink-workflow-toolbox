@@ -151,7 +151,7 @@ function toolbox_read_editor_content_support_assets( string $root ): string {
  * so a listed cluster service must never register routes itself.
  */
 function toolbox_read_rest_controller_sources( string $root ): string {
-	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php', 'Rest_Editor_Content_Support.php', 'Rest_Editor_Paragraph_Check.php' );
+	$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php', 'Rest_Editor_Content_Support.php', 'Rest_Editor_Paragraph_Check.php', 'Rest_Editor_Audio_Text.php' );
 	$source                = '';
 	foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 		$rest_controller_file_contents = file_get_contents( $root . '/includes/' . $rest_controller_file );

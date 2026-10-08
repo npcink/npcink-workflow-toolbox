@@ -209,7 +209,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_post_context( WP_REST_Request $request ): array {
 		$content_raw         = (string) $request->get_param( 'content' );
-		$audio_preferences   = $this->editor_audio_preferences_from_request( $request );
+		$audio_preferences   = Rest_Editor_Audio_Text::editor_audio_preferences_from_request( $request );
 		$content             = trim( wp_strip_all_tags( $content_raw ) );
 		$selected_text       = trim( wp_strip_all_tags( (string) $request->get_param( 'selected_text' ) ) );
 		$selected_block_text = trim( wp_strip_all_tags( (string) $request->get_param( 'selected_block_text' ) ) );
@@ -231,12 +231,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'title'                      => sanitize_text_field( (string) $request->get_param( 'title' ) ),
 			'excerpt'                    => sanitize_textarea_field( (string) $request->get_param( 'excerpt' ) ),
 			'content_text'               => wp_trim_words( $content, 220, '' ),
-			'content_full_text'          => sanitize_textarea_field( $this->editor_trim_chars( $content, self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS ) ),
-			'content_audio_text'         => sanitize_textarea_field( $this->editor_trim_chars( $this->editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), self::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
+			'content_full_text'          => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $content, self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS ) ),
+			'content_audio_text'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( Rest_Editor_Audio_Text::editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), self::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
 			'selected_text'              => wp_trim_words( sanitize_textarea_field( $selected_text ), 110, '' ),
 			'selected_block_text'        => wp_trim_words( sanitize_textarea_field( $selected_block_text ), 110, '' ),
-			'selected_text_full'         => sanitize_textarea_field( $this->editor_trim_chars( $selected_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
-			'selected_block_text_full'   => sanitize_textarea_field( $this->editor_trim_chars( $selected_block_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
+			'selected_text_full'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $selected_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
+			'selected_block_text_full'   => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $selected_block_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
 			'selected_block_name'        => sanitize_text_field( (string) $request->get_param( 'selected_block_name' ) ),
 			'user_instruction'           => wp_trim_words( sanitize_textarea_field( $user_instruction ), 60, '' ),
 			'audio_preferences'          => $audio_preferences,
@@ -254,34 +254,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'content_blocks'             => $this->editor_content_blocks_from_request( $request ),
 			'comment_id'                 => absint( $request->get_param( 'comment_id' ) ),
 			'comment_author'             => sanitize_text_field( (string) $request->get_param( 'comment_author' ) ),
-			'comment_text'               => sanitize_textarea_field( $this->editor_trim_chars( trim( wp_strip_all_tags( (string) $request->get_param( 'comment_text' ) ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) ),
+			'comment_text'               => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( trim( wp_strip_all_tags( (string) $request->get_param( 'comment_text' ) ) ), self::EDITOR_COMMENT_TEXT_MAX_CHARS ) ),
 		);
-	}
-
-	private function editor_audio_preferences_from_request( WP_REST_Request $request ): array {
-		$raw = $request->get_param( 'audio_preferences' );
-		if ( ! is_array( $raw ) ) {
-			$raw = array();
-		}
-
-		$defaults    = array(
-			'tone'     => 'calm',
-			'pace'     => 'normal',
-			'handling' => 'skip_code',
-			'focus'    => 'product_names',
-		);
-		$allowed     = array(
-			'tone'     => array( 'calm', 'formal', 'casual', 'expressive' ),
-			'pace'     => array( 'normal', 'slow', 'fast' ),
-			'handling' => array( 'skip_code', 'read_code', 'skip_tables' ),
-			'focus'    => array( 'product_names', 'numbers', 'headings' ),
-		);
-		$preferences = array();
-		foreach ( $defaults as $key => $default ) {
-			$value               = sanitize_key( (string) ( $raw[ $key ] ?? $default ) );
-			$preferences[ $key ] = in_array( $value, $allowed[ $key ], true ) ? $value : $default;
-		}
-		return $preferences;
 	}
 
 	private function editor_content_blocks_from_request( WP_REST_Request $request ): array {
@@ -295,7 +269,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				continue;
 			}
 			$client_id = sanitize_text_field( (string) ( $block['client_id'] ?? '' ) );
-			$text      = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1600 ) );
+			$text      = sanitize_textarea_field( Rest_Editor_Audio_Text::trim( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1600 ) );
 			if ( '' !== $client_id && '' !== $text ) {
 				$items[] = array(
 					'client_id'  => $client_id,
@@ -305,31 +279,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			}
 		}
 		return $items;
-	}
-
-	private function editor_audio_text_from_raw_content( string $content, array $audio_preferences ): string {
-		$source   = $content;
-		$handling = sanitize_key( (string) ( $audio_preferences['handling'] ?? 'skip_code' ) );
-		if ( 'skip_code' === $handling ) {
-			$source = preg_replace( '/<!--\s*wp:code\b.*?<!--\s*\/wp:code\s*-->/is', ' ', $source );
-			$source = preg_replace( '/<pre\b[^>]*>.*?<\/pre>/is', ' ', $source );
-			$source = preg_replace( '/<code\b[^>]*>.*?<\/code>/is', ' ', $source );
-		}
-		if ( 'skip_tables' === $handling ) {
-			$source = preg_replace( '/<!--\s*wp:table\b.*?<!--\s*\/wp:table\s*-->/is', ' ', $source );
-			$source = preg_replace( '/<table\b[^>]*>.*?<\/table>/is', ' ', $source );
-		}
-		return trim( wp_strip_all_tags( (string) $source ) );
-	}
-
-	private function editor_trim_chars( string $value, int $max_chars ): string {
-		$value     = trim( $value );
-		$max_chars = max( 1, $max_chars );
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			return mb_strlen( $value, 'UTF-8' ) > $max_chars ? mb_substr( $value, 0, $max_chars, 'UTF-8' ) : $value;
-		}
-
-		return strlen( $value ) > $max_chars ? substr( $value, 0, $max_chars ) : $value;
 	}
 
 	private function editor_media_items_from_request( WP_REST_Request $request ): array {
@@ -554,7 +503,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		foreach ( $candidates as $candidate ) {
 			$candidate = trim( preg_replace( '/\s+/u', ' ', (string) $candidate ) ?: '' );
 			if ( '' !== $candidate ) {
-				return $this->editor_trim_chars( $candidate, 120 );
+				return Rest_Editor_Audio_Text::trim( $candidate, 120 );
 			}
 		}
 
@@ -674,7 +623,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			return '';
 		}
 
-		$trimmed = $this->editor_trim_chars( $summary, 120 );
+		$trimmed = Rest_Editor_Audio_Text::trim( $summary, 120 );
 		if ( $trimmed !== $summary && preg_match( '/\s/u', $trimmed ) ) {
 			$trimmed = preg_replace( '/\s+\S*$/u', '', $trimmed ) ?: $trimmed;
 		}
@@ -3142,7 +3091,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			if ( ! is_array( $block ) ) {
 				continue;
 			}
-			$text = trim( sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1200 ) ) );
+			$text = trim( sanitize_textarea_field( Rest_Editor_Audio_Text::trim( wp_strip_all_tags( (string) ( $block['text'] ?? '' ) ), 1200 ) ) );
 			if ( '' === $text ) {
 				continue;
 			}
@@ -3400,10 +3349,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 					$force_regenerate
 				)
 			);
-			$script                          = $this->editor_audio_summary_script_text( $summary_ai );
+			$script                          = Rest_Editor_Audio_Text::editor_audio_summary_script_text( $summary_ai );
 			$script_source['summary_script'] = $summary_ai;
 		} else {
-			$script                       = $this->editor_audio_source_text( $source_text );
+			$script                       = Rest_Editor_Audio_Text::editor_audio_source_text( $source_text );
 			$script_source['source_mode'] = 'article_text';
 		}
 
@@ -3463,44 +3412,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				),
 			),
 		);
-	}
-
-	private function editor_audio_source_text( string $text ): string {
-		$plain = trim( wp_strip_all_tags( $text ) );
-		if ( '' === $plain ) {
-			return '';
-		}
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			return mb_strlen( $plain, 'UTF-8' ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? mb_substr( $plain, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS, 'UTF-8' ) : $plain;
-		}
-		return strlen( $plain ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? substr( $plain, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS ) : $plain;
-	}
-
-	private function editor_audio_summary_script_text( array $summary_ai ): string {
-		$output_json = is_array( $summary_ai['output_json'] ?? null ) ? $summary_ai['output_json'] : array();
-		$parts       = array();
-		foreach ( array( 'opening', 'script', 'closing' ) as $key ) {
-			$value = trim( sanitize_textarea_field( (string) ( $output_json[ $key ] ?? '' ) ) );
-			if ( '' !== $value ) {
-				$parts[] = $value;
-			}
-		}
-		if ( is_array( $output_json['key_points'] ?? null ) ) {
-			foreach ( array_slice( $output_json['key_points'], 0, 5 ) as $point ) {
-				$value = trim( sanitize_textarea_field( (string) $point ) );
-				if ( '' !== $value ) {
-					$parts[] = $value;
-				}
-			}
-		}
-		$script = trim( implode( "\n\n", array_values( array_unique( $parts ) ) ) );
-		if ( '' === $script ) {
-			$script = trim( sanitize_textarea_field( (string) ( $summary_ai['output_text'] ?? '' ) ) );
-		}
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			return mb_strlen( $script, 'UTF-8' ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? mb_substr( $script, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS, 'UTF-8' ) : $script;
-		}
-		return strlen( $script ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? substr( $script, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS ) : $script;
 	}
 
 	private function editor_article_checkup_section( array $context ): array {
@@ -3679,13 +3590,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	private function editor_article_checkup_structure_glue_issues( string $paragraph, int $paragraph_number, string $location ): array {
 		$signals = array();
 
-		if ( $this->editor_text_has_heading_label_glue( $paragraph ) ) {
+		if ( Rest_Editor_Paragraph_Check::editor_text_has_heading_label_glue( $paragraph ) ) {
 			$signals[] = __( '标题式标签直接黏在正文前', 'npcink-workflow-toolbox' );
 		}
-		if ( $this->editor_text_has_phrase_cluster_glue( $paragraph ) ) {
+		if ( Rest_Editor_Paragraph_Check::editor_text_has_phrase_cluster_glue( $paragraph ) ) {
 			$signals[] = __( '短语组之间缺少分隔', 'npcink-workflow-toolbox' );
 		}
-		if ( $this->editor_text_has_alnum_cjk_glue( $paragraph ) ) {
+		if ( Rest_Editor_Paragraph_Check::editor_text_has_alnum_cjk_glue( $paragraph ) ) {
 			$signals[] = __( '字母、数字或方案标签与中文黏连', 'npcink-workflow-toolbox' );
 		}
 
@@ -3925,26 +3836,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return 1 === preg_match( '/(^|\n)\s*(#{2,6}\s+|[一二三四五六七八九十]+[、.．]|\\d+[.．、]|[（(][一二三四五六七八九十\\d]+[）)])|<h[1-6][^>]*>/iu', $text );
 	}
 
-	private function editor_text_has_heading_label_glue( string $text ): bool {
-		return 1 === preg_match( '/(核心要点|评估维度|主要差异|适用建议|常见问题|方案\s*[A-Za-zＡ-Ｚ])(?=[\p{Han}A-Za-z0-9])/u', $text );
-	}
-
-	private function editor_text_has_phrase_cluster_glue( string $text ): bool {
-		return 1 === preg_match( '/可维护性编辑体验响应式表现治理边界/u', $text )
-			|| 1 === preg_match( '/(可维护性|编辑体验|响应式表现|治理边界)(可维护性|编辑体验|响应式表现|治理边界)(可维护性|编辑体验|响应式表现|治理边界)/u', $text );
-	}
-
-	private function editor_text_has_alnum_cjk_glue( string $text ): bool {
-		return 1 === preg_match( '/(?:[A-Za-z0-9][\x{4e00}-\x{9fff}]|[\x{4e00}-\x{9fff}][A-Za-z0-9]{2,})/u', $text );
-	}
-
 	private function editor_article_checkup_issue( string $id, string $type, string $severity, string $location, string $evidence, string $issue, string $edit_direction ): array {
 		return array(
 			'id'             => sanitize_key( $id ),
 			'type'           => sanitize_key( $type ),
 			'severity'       => sanitize_key( $severity ),
 			'location'       => sanitize_text_field( $location ),
-			'evidence'       => sanitize_text_field( $this->editor_trim_chars( $evidence, 120 ) ),
+			'evidence'       => sanitize_text_field( Rest_Editor_Audio_Text::trim( $evidence, 120 ) ),
 			'issue'          => sanitize_text_field( $issue ),
 			'edit_direction' => sanitize_textarea_field( $edit_direction ),
 			'action_policy'  => 'operator_review_only_no_insert',
@@ -4070,7 +3968,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$source_match  = $args['source_match'];
 			$client_id     = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
 			$matched_text  = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
-			$expected_text = sanitize_textarea_field( $this->editor_trim_chars( wp_strip_all_tags( (string) ( $source_match['expected_text'] ?? '' ) ), 1600 ) );
+			$expected_text = sanitize_textarea_field( Rest_Editor_Audio_Text::trim( wp_strip_all_tags( (string) ( $source_match['expected_text'] ?? '' ) ), 1600 ) );
 			if ( '' !== $client_id && '' !== $matched_text && '' !== $expected_text ) {
 				$candidate['source_match'] = array(
 					'block_client_id' => $client_id,
@@ -4967,10 +4865,10 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'block_name'       => sanitize_text_field( (string) ( $item['block_name'] ?? '' ) ),
 			'occurrence_index' => absint( $item['occurrence_index'] ?? 0 ),
 			'context_heading'  => sanitize_text_field( (string) ( $item['context_heading'] ?? '' ) ),
-			'context_before'   => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_before'] ?? '' ), 240 ) ),
-			'context_after'    => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_after'] ?? '' ), 240 ) ),
-			'context_caption'  => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_caption'] ?? '' ), 220 ) ),
-			'context_summary'  => sanitize_textarea_field( $this->editor_trim_chars( (string) ( $item['context_summary'] ?? '' ), 360 ) ),
+			'context_before'   => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( (string) ( $item['context_before'] ?? '' ), 240 ) ),
+			'context_after'    => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( (string) ( $item['context_after'] ?? '' ), 240 ) ),
+			'context_caption'  => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( (string) ( $item['context_caption'] ?? '' ), 220 ) ),
+			'context_summary'  => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( (string) ( $item['context_summary'] ?? '' ), 360 ) ),
 			'decorative'       => ! empty( $item['decorative'] ),
 			'target_scope'     => 'post_block_alt',
 		);

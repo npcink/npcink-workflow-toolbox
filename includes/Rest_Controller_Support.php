@@ -109,4 +109,14 @@ abstract class Rest_Controller_Support {
 			),
 		);
 	}
+
+	protected function editor_trim_chars( string $value, int $max_chars ): string {
+		$value     = trim( $value );
+		$max_chars = max( 1, $max_chars );
+		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
+			return mb_strlen( $value, 'UTF-8' ) > $max_chars ? mb_substr( $value, 0, $max_chars, 'UTF-8' ) : $value;
+		}
+
+		return strlen( $value ) > $max_chars ? substr( $value, 0, $max_chars ) : $value;
+	}
 }
