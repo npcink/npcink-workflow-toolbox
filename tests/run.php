@@ -1197,6 +1197,17 @@ sort( $internal_links_exported_sorted );
 sort( $internal_links_destructured_sorted );
 sort( $internal_links_expected_sorted );
 toolbox_assert( $internal_links_expected_sorted === $internal_links_exported_sorted && $internal_links_expected_sorted === $internal_links_destructured_sorted, 'The main bundle destructures exactly the frozen internal-links namespace export list, including every helper the main bundle still calls.' );
+toolbox_assert(
+	false !== strpos( $admin_js, 'maybeAttachReviewTally' )
+	&& false !== strpos( $admin_js, "'review-tally/mark'" )
+	&& false !== strpos( $admin_js, "'review-tally/summary'" )
+	&& false !== strpos( $admin_js, 'Local counts only. No content is written.' )
+	&& false !== strpos( $rest_controller, "'/review-tally/mark'" )
+	&& false !== strpos( $rest_controller, "'/review-tally/summary'" )
+	&& false !== strpos( (string) file_get_contents( $root . '/includes/Plugin.php' ), 'npcink_toolbox_review_tally' )
+	&& false !== strpos( (string) file_get_contents( $root . '/includes/Settings.php' ), 'array_slice( $marks, -500 )' ),
+	'Review-set adoption tally: the five review-set result panels carry local accept/ignore marks through the workflow_suggest-scoped tally routes, stored as a bounded marks log in the Toolbox settings option (no suggestion content, no WordPress writes).'
+);
 $text_utils_part_source = (string) file_get_contents( $root . '/assets/editor-content-support/text-utils.js' );
 toolbox_assert(
 	false !== strpos( $text_utils_part_source, 'window.DOMParser' )

@@ -221,6 +221,8 @@ first scoped version; those actions stay administrator-facing.
 - `/site-media/index-batch`
 - `/agent-feedback`
 - `/agent-feedback/summary`
+- `/review-tally/mark`
+- `/review-tally/summary`
 - `/ai/content-support`
 - `/ai/site-helpers`
 - `/ai/image-generation`

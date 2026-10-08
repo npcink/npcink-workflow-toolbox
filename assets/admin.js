@@ -414,7 +414,79 @@
 			result.appendChild(meta);
 		}
 
+		maybeAttachReviewTally(form, result);
+
 		return result;
+	}
+
+	const REVIEW_TALLY_FORM_SETS = [
+		['data-toolbox-comment-moderation-review', 'comment_moderation'],
+		['data-toolbox-taxonomy-tag-review', 'taxonomy_tag'],
+		['data-toolbox-internal-link-review', 'internal_link'],
+		['data-toolbox-flagged-media-review', 'flagged_media'],
+		['data-toolbox-media-alt-caption-review', 'media_alt'],
+	];
+	let reviewTallySummaryPromise = null;
+
+	function reviewTallySummary() {
+		if (!reviewTallySummaryPromise) {
+			reviewTallySummaryPromise = fetch(joinRestUrl(config.restUrl, 'review-tally/summary'), {
+				headers: { 'X-WP-Nonce': config.nonce || '' },
+			}).then((response) => (response.ok ? response.json() : null)).catch(() => null);
+		}
+		return reviewTallySummaryPromise;
+	}
+
+	function reviewTallyLine(summary, setKey) {
+		const set = summary && summary.sets && summary.sets[setKey] ? summary.sets[setKey] : { accepted: 0, ignored: 0 };
+		return t('Last 7 days') + ': ' + Number(set.accepted || 0) + ' ' + t('accepted') + ' / ' + Number(set.ignored || 0) + ' ' + t('ignored');
+	}
+
+	function maybeAttachReviewTally(form, result) {
+		const match = REVIEW_TALLY_FORM_SETS.find(([attr]) => form.hasAttribute(attr));
+		if (!match || !result) {
+			return;
+		}
+		const setKey = match[1];
+		if (result.querySelector('.npcink-toolbox__review-tally')) {
+			return;
+		}
+		const bar = el('div', 'npcink-toolbox__review-tally');
+		const acceptButton = el('button', 'button button-small');
+		acceptButton.type = 'button';
+		acceptButton.textContent = t('Accept +1');
+		const ignoreButton = el('button', 'button button-small');
+		ignoreButton.type = 'button';
+		ignoreButton.textContent = t('Ignore +1');
+		const line = el('span', 'npcink-toolbox__review-tally-summary');
+		const note = el('span', 'npcink-toolbox__review-tally-note');
+		note.textContent = t('Local counts only. No content is written.');
+		bar.appendChild(acceptButton);
+		bar.appendChild(ignoreButton);
+		bar.appendChild(line);
+		bar.appendChild(note);
+		result.appendChild(bar);
+
+		function paint(summary) {
+			line.textContent = reviewTallyLine(summary, setKey);
+		}
+		reviewTallySummary().then(paint);
+
+		function mark(decision, button) {
+			button.disabled = true;
+			fetch(joinRestUrl(config.restUrl, 'review-tally/mark'), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': config.nonce || '' },
+				body: JSON.stringify({ review_set: setKey, decision }),
+			}).then((response) => (response.ok ? response.json() : null)).then((summary) => {
+				reviewTallySummaryPromise = Promise.resolve(summary);
+				paint(summary);
+			}).catch(() => {}).finally(() => {
+				button.disabled = false;
+			});
+		}
+		acceptButton.addEventListener('click', () => mark('accepted', acceptButton));
+		ignoreButton.addEventListener('click', () => mark('ignored', ignoreButton));
 	}
 
 	function renderTextResult(form, value, kind) {
@@ -594,6 +666,7 @@
 		if (error && typeof error === 'object') {
 			result.appendChild(createRawDetails(error, 'Error payload'));
 		}
+		maybeAttachReviewTally(form, result);
 	}
 
 	function renderCoreHandoffStatusError(statusNode, error, fallback, receiptContext, rawTitle) {

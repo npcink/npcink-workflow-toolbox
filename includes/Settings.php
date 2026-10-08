@@ -10,6 +10,14 @@ namespace Npcink_Toolbox;
 defined( 'ABSPATH' ) || exit;
 
 final class Settings {
+
+	public const REVIEW_TALLY_SETS = array(
+		'media_alt'          => 'media_alt_caption_review_set.v1',
+		'taxonomy_tag'       => 'taxonomy_tag_review_set.v1',
+		'internal_link'      => 'internal_link_review_set.v1',
+		'comment_moderation' => 'comment_moderation_review_set.v1',
+		'flagged_media'      => 'flagged_media_review_set.v1',
+	);
 	public function register(): void {
 		register_setting(
 			'npcink_toolbox',
@@ -893,5 +901,68 @@ final class Settings {
 		}
 
 		return '' !== trim( (string) $value );
+	}
+
+	/**
+	 * Review-set adoption tally: the operator's own accept/ignore counts per
+	 * review set, feeding the batch-apply decision gate. Counts and bounded
+	 * timestamps only - no suggestion content, no Cloud data, no WordPress
+	 * content writes.
+	 */
+	public function get_review_tally(): array {
+		$value = get_option( Plugin::REVIEW_TALLY_OPTION_NAME, array() );
+		return is_array( $value ) ? $value : array();
+	}
+
+	public function record_review_tally_mark( string $review_set, string $decision ): array {
+		if ( ! array_key_exists( $review_set, self::REVIEW_TALLY_SETS ) ) {
+			return array();
+		}
+		if ( ! in_array( $decision, array( 'accepted', 'ignored' ), true ) ) {
+			return array();
+		}
+		$tally          = $this->get_review_tally();
+		$marks          = is_array( $tally['marks'] ?? null ) ? $tally['marks'] : array();
+		$marks[]        = array(
+			'set'       => $review_set,
+			'decision'  => $decision,
+			'timestamp' => time(),
+		);
+		$tally['marks'] = array_slice( $marks, -500 );
+		update_option( Plugin::REVIEW_TALLY_OPTION_NAME, $tally, false );
+		return $tally;
+	}
+
+	public function review_tally_summary( int $days = 7 ): array {
+		$tally   = $this->get_review_tally();
+		$marks   = is_array( $tally['marks'] ?? null ) ? $tally['marks'] : array();
+		$cutoff  = time() - ( $days * DAY_IN_SECONDS );
+		$summary = array(
+			'window_days' => $days,
+			'total'       => array(
+				'accepted' => 0,
+				'ignored'  => 0,
+			),
+			'sets'        => array(),
+		);
+		foreach ( array_keys( self::REVIEW_TALLY_SETS ) as $set_key ) {
+			$summary['sets'][ $set_key ] = array(
+				'accepted' => 0,
+				'ignored'  => 0,
+			);
+		}
+		foreach ( $marks as $mark ) {
+			if ( ! is_array( $mark ) || (int) ( $mark['timestamp'] ?? 0 ) < $cutoff ) {
+				continue;
+			}
+			$set      = sanitize_key( (string) ( $mark['set'] ?? '' ) );
+			$decision = sanitize_key( (string) ( $mark['decision'] ?? '' ) );
+			if ( ! isset( $summary['sets'][ $set ] ) || ! in_array( $decision, array( 'accepted', 'ignored' ), true ) ) {
+				continue;
+			}
+			++$summary['sets'][ $set ][ $decision ];
+			++$summary['total'][ $decision ];
+		}
+		return $summary;
 	}
 }

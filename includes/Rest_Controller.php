@@ -94,6 +94,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->get( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/result', 'nightly_inspection_cloud_batch_result' );
 		$this->post( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/result', 'nightly_inspection_cloud_batch_result' );
 		$this->post( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/retry', 'nightly_inspection_cloud_batch_retry' );
+		$this->post( '/review-tally/mark', 'review_tally_mark' );
+		$this->get( '/review-tally/summary', 'review_tally_summary' );
 
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
@@ -234,6 +236,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/agent-feedback/summary'                  => 'cap.toolbox.feedback.read',
 			'/ai/content-support'                      => 'cap.toolbox.workflow_suggest',
 			'/ai/site-helpers'                         => 'cap.toolbox.workflow_suggest',
+			'/review-tally/mark'                       => 'cap.toolbox.workflow_suggest',
+			'/review-tally/summary'                    => 'cap.toolbox.workflow_suggest',
 			'/ai/image-generation'                     => 'cap.toolbox.image_source',
 			'/flows/article-plan'                      => 'cap.toolbox.workflow_suggest',
 			'/flows/image-candidate-adoption-plan'     => 'cap.toolbox.workflow_suggest',
@@ -327,6 +331,33 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function nightly_inspection_cloud_batch_result( WP_REST_Request $request ) {
 		return $this->nightly_bridges->nightly_inspection_cloud_batch_result( $request );
+	}
+
+	public function review_tally_mark( WP_REST_Request $request ) {
+		$review_set = sanitize_key( (string) $request->get_param( 'review_set' ) );
+		$decision   = sanitize_key( (string) $request->get_param( 'decision' ) );
+		if ( ! array_key_exists( $review_set, Settings::REVIEW_TALLY_SETS ) ) {
+			return new WP_Error(
+				'npcink_toolbox_review_tally_unknown_set',
+				__( 'A supported review set is required.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+		if ( ! in_array( $decision, array( 'accepted', 'ignored' ), true ) ) {
+			return new WP_Error(
+				'npcink_toolbox_review_tally_invalid_decision',
+				__( 'The tally decision must be accepted or ignored.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+		$this->settings->record_review_tally_mark( $review_set, $decision );
+		return rest_ensure_response( $this->settings->review_tally_summary() );
+	}
+
+	public function review_tally_summary( WP_REST_Request $request ) {
+		$requested_days = absint( $request->get_param( 'days' ) );
+		$days           = $requested_days ? max( 1, min( 90, $requested_days ) ) : 7;
+		return rest_ensure_response( $this->settings->review_tally_summary( $days ) );
 	}
 
 	public function nightly_inspection_cloud_batch_retry( WP_REST_Request $request ) {

@@ -412,6 +412,8 @@ and `/agent-feedback`, which accept
 - `POST /wp-json/npcink-toolbox/v1/site-media/index-batch`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback/summary`
+- `POST /wp-json/npcink-toolbox/v1/review-tally/mark`
+- `GET /wp-json/npcink-toolbox/v1/review-tally/summary`
 - `POST /wp-json/npcink-toolbox/v1/ai/content-support`
 - `POST /wp-json/npcink-toolbox/v1/ai/site-helpers`
 - `POST /wp-json/npcink-toolbox/v1/ai/image-generation`
