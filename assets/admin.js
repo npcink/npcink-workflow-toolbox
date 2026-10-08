@@ -432,8 +432,15 @@
 		if (!reviewTallySummaryPromise) {
 			reviewTallySummaryPromise = fetch(joinRestUrl(config.restUrl, 'review-tally/summary'), {
 				headers: { 'X-WP-Nonce': config.nonce || '' },
-			}).then((response) => (response.ok ? response.json() : null)).catch(() => {
-				// A failed read is not cached: the next attached bar retries.
+			}).then((response) => (response.ok ? response.json() : null)).then((summary) => {
+				// Neither a rejected fetch nor a non-ok response is cached:
+				// the next attached bar retries instead of showing a stale
+				// zero count that the decision gate could mistake for data.
+				if (!summary) {
+					reviewTallySummaryPromise = null;
+				}
+				return summary;
+			}).catch(() => {
 				reviewTallySummaryPromise = null;
 				return null;
 			});
