@@ -530,7 +530,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			? $this->client->build_internal_link_review_set( $internal_link_sample )
 			: array();
 
-		$source                     = array(
+		$source              = array(
 			'focus'                  => wp_trim_words( $focus, 80, '' ),
 			'site_snapshot'          => 'content_snapshot_suggestions' === $intent ? $this->client->collect_hosted_ai_site_snapshot() : array(),
 			'media_snapshot'         => 'media_alt_suggestions' === $intent ? $media_snapshot : array(),
@@ -541,15 +541,15 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			'internal_link_sample'   => $internal_link_sample,
 			'source_policy'          => sanitize_key( (string) ( $input['source_policy'] ?? ( 'media_alt_suggestions' === $intent ? ( $media_snapshot['snapshot_policy'] ?? 'current_article_media_metadata_only' ) : ( 'comment_moderation_suggestions' === $intent ? 'pending_hold_approved_would_be_public_fields_only' : ( 'flagged_media_suggestions' === $intent ? 'recent_media_metadata_only_no_pixels' : 'bounded_public_content_opportunity_sample_only' ) ) ) ) ),
 		);
-		$prompt                     = $this->hosted_ai_site_helper_prompt( $intent, $source, $context );
-		$data_classification        = in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ? 'pii' : 'public_site_content';
-		$runtime_payload = array(
-			'ability_name'            => 'npcink-toolbox/ai-site-helper',
-			'contract_version'        => 'hosted_ai_site_helper.v1',
-			'profile_id'              => 'text.ai',
-			'execution_kind'          => 'text',
-			'execution_pattern'       => 'inline',
-			'input'                   => array(
+		$prompt              = $this->hosted_ai_site_helper_prompt( $intent, $source, $context );
+		$data_classification = in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ? 'pii' : 'public_site_content';
+		$runtime_payload     = array(
+			'ability_name'        => 'npcink-toolbox/ai-site-helper',
+			'contract_version'    => 'hosted_ai_site_helper.v1',
+			'profile_id'          => 'text.ai',
+			'execution_kind'      => 'text',
+			'execution_pattern'   => 'inline',
+			'input'               => array(
 				'messages'         => array(
 					array(
 						'role'    => 'system',
@@ -566,12 +566,12 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				),
 				'quality_contract' => $quality_contract,
 			),
-			'data_classification'     => $data_classification,
-			'storage_mode'            => $this->runtime_payload_storage_mode( $data_classification ),
-			'retention_ttl'           => 86400,
-			'timeout_seconds'         => 30,
-			'retry_max'               => 0,
-			'policy'                  => array(
+			'data_classification' => $data_classification,
+			'storage_mode'        => $this->runtime_payload_storage_mode( $data_classification ),
+			'retention_ttl'       => 86400,
+			'timeout_seconds'     => 30,
+			'retry_max'           => 0,
+			'policy'              => array(
 				'allow_fallback' => false,
 			),
 		);
