@@ -1512,7 +1512,8 @@ toolbox_assert(
 
 $site_helper_source = strstr( file_get_contents( $root . '/includes/Provider_Hosted_AI_Service.php' ), 'function run_hosted_ai_site_helper' );
 toolbox_assert(
-	false === strpos( $site_helper_source, "'http_timeout_seconds'" )
+	is_string( $site_helper_source )
+	&& false === strpos( $site_helper_source, "'http_timeout_seconds'" )
 	&& false === strpos( $site_helper_source, "'connect_timeout_seconds'" )
 	&& false !== strpos( $site_helper_source, "'taxonomy_tag_sample'    => \$taxonomy_tag_sample" )
 	&& false !== strpos( $site_helper_source, "'internal_link_sample'   => \$internal_link_sample" ),
