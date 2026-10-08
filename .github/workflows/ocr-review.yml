@@ -68,7 +68,7 @@ jobs:
     # 45 minutes covers the retry design's worst case: up to three review
     # attempts (the standard records 8.5-10 minute rounds and 600s provider
     # timeouts) plus the 45s/90s pauses and checkout. A timeout-killed job
-    # ends cancelled, which skips the if: failure() marker step below, so
+    # may end cancelled, which skips the if: failure() marker step below, so
     # the ceiling must exceed the legitimate worst case.
     timeout-minutes: 45
     # PR events, or human-authored comments starting with the trigger keyword.
@@ -90,6 +90,15 @@ jobs:
         )
       )
     steps:
+      - name: Refuse a misconfigured enrollment
+        # Layer 2 steps 2-3 are prerequisites: without all four values the
+        # three review attempts below burn their retries on guaranteed
+        # provider failures that look exactly like an outage.
+        if: ${{ secrets.OCR_LLM_URL == '' || secrets.OCR_LLM_AUTH_TOKEN == '' || vars.OCR_LLM_MODEL == '' || vars.OCR_LLM_USE_ANTHROPIC == '' }}
+        run: |
+          echo "::error::OpenCodeReview is misconfigured for this repository: OCR_LLM_URL and OCR_LLM_AUTH_TOKEN secrets plus OCR_LLM_MODEL and OCR_LLM_USE_ANTHROPIC variables must all be set (AI Code Review Standard v1, Layer 2 steps 2-3)."
+          exit 1
+
       - name: Get PR context
         id: pr-context
         if: github.event_name == 'issue_comment'
