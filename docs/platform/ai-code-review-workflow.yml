@@ -93,11 +93,20 @@ jobs:
       - name: Refuse a misconfigured enrollment
         # Layer 2 steps 2-3 are prerequisites: without all four values the
         # three review attempts below burn their retries on guaranteed
-        # provider failures that look exactly like an outage.
-        if: ${{ secrets.OCR_LLM_URL == '' || secrets.OCR_LLM_AUTH_TOKEN == '' || vars.OCR_LLM_MODEL == '' || vars.OCR_LLM_USE_ANTHROPIC == '' }}
+        # provider failures that look exactly like an outage. Values are
+        # checked in run: because the secrets context is not available in
+        # step-level if conditionals - the previous if-form failed the
+        # whole workflow at start for every event.
+        env:
+          OCR_LLM_URL: ${{ secrets.OCR_LLM_URL }}
+          OCR_LLM_AUTH_TOKEN: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
+          OCR_LLM_MODEL: ${{ vars.OCR_LLM_MODEL }}
+          OCR_LLM_USE_ANTHROPIC: ${{ vars.OCR_LLM_USE_ANTHROPIC }}
         run: |
-          echo "::error::OpenCodeReview is misconfigured for this repository: OCR_LLM_URL and OCR_LLM_AUTH_TOKEN secrets plus OCR_LLM_MODEL and OCR_LLM_USE_ANTHROPIC variables must all be set (AI Code Review Standard v1, Layer 2 steps 2-3)."
-          exit 1
+          if [ -z "$OCR_LLM_URL" ] || [ -z "$OCR_LLM_AUTH_TOKEN" ] || [ -z "$OCR_LLM_MODEL" ] || [ -z "$OCR_LLM_USE_ANTHROPIC" ]; then
+            echo "::error::OpenCodeReview is misconfigured for this repository: OCR_LLM_URL and OCR_LLM_AUTH_TOKEN secrets plus OCR_LLM_MODEL and OCR_LLM_USE_ANTHROPIC variables must all be set (AI Code Review Standard v1, Layer 2 steps 2-3)."
+            exit 1
+          fi
 
       - name: Get PR context
         id: pr-context
