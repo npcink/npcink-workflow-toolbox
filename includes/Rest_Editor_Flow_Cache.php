@@ -18,6 +18,8 @@ namespace Npcink_Toolbox;
 
 defined( 'ABSPATH' ) || exit;
 
+use WP_Error;
+
 abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 
 	protected const EDITOR_FLOW_CACHE_TTL = 300;
@@ -133,10 +135,133 @@ abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 		return 'npcink_toolbox_editor_' . sanitize_key( $namespace ) . '_' . md5( $json );
 	}
 
-	/**
-	 * Validates one public source URL before Cloud research is requested.
-	 *
-	 * @param string $value Raw URL.
-	 * @return string|WP_Error
-	 */
+	public static function editor_input_scope( array $context ): array {
+		$scope     = sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) );
+		$selection = trim( (string) ( $context['selected_text'] ?? '' ) . ' ' . (string) ( $context['selected_block_text'] ?? '' ) );
+		if ( 'auto' === $scope ) {
+			$scope = '' !== $selection ? 'selected_text' : ( '' !== trim( (string) ( $context['content_text'] ?? '' ) ) ? 'full_article' : 'topic_only' );
+		}
+
+		$labels = array(
+			'selected_text' => __( 'Selected text or supplied snippet', 'npcink-workflow-toolbox' ),
+			'full_article'  => __( 'Full article context', 'npcink-workflow-toolbox' ),
+			'topic_only'    => __( 'Topic or short brief', 'npcink-workflow-toolbox' ),
+		);
+
+		$fields = array();
+		foreach ( array( 'title', 'excerpt', 'content_text', 'selected_text', 'selected_block_text', 'post_id' ) as $field ) {
+			if ( ! empty( $context[ $field ] ) ) {
+				$fields[] = $field;
+			}
+		}
+
+		return array(
+			'id'                     => $scope,
+			'label'                  => $labels[ $scope ] ?? __( 'Current context', 'npcink-workflow-toolbox' ),
+			'source_fields'          => $fields,
+			'operator_selected_mode' => sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) ),
+			'detail'                 => __( 'This scope controls ranking context only. Toolbox still returns suggestions and does not write WordPress data.', 'npcink-workflow-toolbox' ),
+		);
+	}
+
+
+	public static function editor_related_content_items( array $related_content ): array {
+		$items = is_array( $related_content['results'] ?? null )
+			? $related_content['results']
+			: ( is_array( $related_content['items'] ?? null ) ? $related_content['items'] : array() );
+
+		return array_values(
+			array_filter(
+				$items,
+				static fn( $item ): bool => is_array( $item )
+			)
+		);
+	}
+
+
+	public static function editor_recommendation_candidate( array $args ): array {
+		$candidate = array(
+			'contract'               => 'recommendation_candidate.v1',
+			'id'                     => sanitize_key( (string) ( $args['id'] ?? 'candidate' ) ),
+			'kind'                   => sanitize_key( (string) ( $args['kind'] ?? 'generic' ) ),
+			'label'                  => sanitize_text_field( (string) ( $args['label'] ?? __( 'Recommendation candidate', 'npcink-workflow-toolbox' ) ) ),
+			'value'                  => sanitize_text_field( (string) ( $args['value'] ?? '' ) ),
+			'reason'                 => sanitize_text_field( (string) ( $args['reason'] ?? '' ) ),
+			'confidence'             => is_numeric( $args['confidence'] ?? null ) ? max( 0, min( 1, (float) $args['confidence'] ) ) : null,
+			'quality_status'         => sanitize_key( (string) ( $args['quality_status'] ?? 'review' ) ),
+			'quality_score'          => absint( $args['quality_score'] ?? 0 ),
+			'quality_issues'         => is_array( $args['quality_issues'] ?? null ) ? array_values( array_map( 'sanitize_text_field', $args['quality_issues'] ) ) : array(),
+			'action_policy'          => sanitize_key( (string) ( $args['action_policy'] ?? 'suggestion_only' ) ),
+			'target_field'           => sanitize_key( (string) ( $args['target_field'] ?? '' ) ),
+			'write_posture'          => 'suggestion_only',
+			'direct_wordpress_write' => false,
+			'evidence_refs'          => is_array( $args['evidence_refs'] ?? null ) ? array_values( array_map( 'sanitize_text_field', $args['evidence_refs'] ) ) : array(),
+		);
+
+		if ( '' !== (string) ( $args['source_candidate_ref'] ?? '' ) ) {
+			$candidate['source_candidate_ref'] = sanitize_text_field( (string) $args['source_candidate_ref'] );
+		}
+		if ( '' !== (string) ( $args['candidate_source'] ?? '' ) ) {
+			$candidate['candidate_source'] = sanitize_key( (string) $args['candidate_source'] );
+		}
+		if ( in_array( (string) ( $args['candidate_relevance'] ?? '' ), array( 'strong', 'review', 'weak' ), true ) ) {
+			$candidate['candidate_relevance'] = (string) $args['candidate_relevance'];
+		}
+		if ( is_array( $args['target_ref'] ?? null ) ) {
+			$target_ref              = $args['target_ref'];
+			$candidate['target_ref'] = array(
+				'post_id'   => absint( $target_ref['post_id'] ?? 0 ),
+				'title'     => sanitize_text_field( (string) ( $target_ref['title'] ?? '' ) ),
+				'url'       => esc_url_raw( (string) ( $target_ref['url'] ?? '' ) ),
+				'status'    => sanitize_key( (string) ( $target_ref['status'] ?? '' ) ),
+				'post_type' => sanitize_key( (string) ( $target_ref['post_type'] ?? '' ) ),
+			);
+		}
+		if ( '' !== (string) ( $args['anchor_or_context'] ?? '' ) ) {
+			$candidate['anchor_or_context'] = sanitize_text_field( (string) $args['anchor_or_context'] );
+		}
+		if ( array_key_exists( 'can_apply_to_editor', $args ) ) {
+			$candidate['can_apply_to_editor'] = true === $args['can_apply_to_editor'];
+		}
+		if ( '' !== (string) ( $args['anchor_quality_status'] ?? '' ) ) {
+			$candidate['anchor_quality_status'] = sanitize_key( (string) $args['anchor_quality_status'] );
+		}
+		if ( '' !== (string) ( $args['evidence_note'] ?? '' ) ) {
+			$candidate['evidence_note'] = sanitize_text_field( (string) $args['evidence_note'] );
+		}
+		if ( '' !== (string) ( $args['owner_label'] ?? '' ) ) {
+			$candidate['owner_label'] = sanitize_key( (string) $args['owner_label'] );
+		}
+		if ( '' !== (string) ( $args['next_safe_action'] ?? '' ) ) {
+			$candidate['next_safe_action'] = sanitize_key( (string) $args['next_safe_action'] );
+		}
+		if ( is_array( $args['source_match'] ?? null ) ) {
+			$source_match  = $args['source_match'];
+			$client_id     = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
+			$matched_text  = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
+			$expected_text = sanitize_textarea_field( Rest_Editor_Audio_Text::trim( wp_strip_all_tags( (string) ( $source_match['expected_text'] ?? '' ) ), 1600 ) );
+			if ( '' !== $client_id && '' !== $matched_text && '' !== $expected_text ) {
+				$candidate['source_match'] = array(
+					'block_client_id' => $client_id,
+					'block_name'      => sanitize_text_field( (string) ( $source_match['block_name'] ?? '' ) ),
+					'matched_text'    => $matched_text,
+					'text_offset'     => absint( $source_match['text_offset'] ?? 0 ),
+					'expected_text'   => $expected_text,
+					'match_basis'     => sanitize_key( (string) ( $source_match['match_basis'] ?? '' ) ),
+				);
+			}
+		}
+		if ( '' !== (string) ( $args['priority_reason'] ?? '' ) ) {
+			$candidate['priority_reason'] = sanitize_text_field( (string) $args['priority_reason'] );
+		}
+		if ( is_array( $args['link_graph_issues'] ?? null ) ) {
+			$candidate['link_graph_issues'] = array_values( array_filter( array_map( 'sanitize_key', $args['link_graph_issues'] ) ) );
+		}
+		if ( is_array( $args['shared_terms'] ?? null ) ) {
+			$candidate['shared_terms'] = array_slice( array_values( array_filter( array_map( 'sanitize_text_field', $args['shared_terms'] ) ) ), 0, 3 );
+		}
+		$candidate['incoming_count'] = absint( $args['incoming_count'] ?? 0 );
+
+		return $candidate;
+	}
 }

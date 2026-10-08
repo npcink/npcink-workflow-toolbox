@@ -73,14 +73,16 @@ with the closing commit or PR for one release cycle, then prune.
   [the documentation index](README.md) and move them only together with
   the links that reference them.
 - **The extracted editor content-support service is being sub-divided**
-  under the split standard with the amended 2026-10-08 cadence: the
-  paragraph-check cluster (Rest_Editor_Paragraph_Check, static) and the
-  audio-text cluster (Rest_Editor_Audio_Text, static) landed 2026-10-08,
-  taking the service from ~5.4k to ~5.1k lines with the shared trim
-  helper promoted to the Rest_Controller_Support base. The remaining
-  entangled AI-flow clusters (taxonomy, summary, writing-pack,
-  progressive) share cached-context helpers and need the standard's
-  inheritance pattern for the shared cache layer before they can move.
+  under the split standard with the amended 2026-10-08 cadence. Landed
+  2026-10-08: paragraph-check and audio-text static clusters (session 1),
+  then the shared flow-cache base (Rest_Editor_Flow_Cache, chained
+  through Rest_Controller_Support, carrying the transient cache, the
+  cross-cluster input-scope/related-items/recommendation-candidate
+  statics) plus the taxonomy-shaping cluster (session 2) - the service
+  sits at ~4.6k lines. Remaining: summary, writing-pack, progressive,
+  and media/ALT clusters now inherit the cache base and can move with
+  the same pattern; the taxonomy term-candidates assembler stays with
+  the service until its cached-flow wiring is re-examined.
 - **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
   findings live in `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster

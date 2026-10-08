@@ -143,6 +143,7 @@ function npcink_toolbox_local_review_assert( bool $condition, string $message ):
 eval( 'namespace Npcink_Toolbox; class Plugin { public const REST_NAMESPACE = "npcink-toolbox/v1"; }' );
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Flow_Cache.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Taxonomy_Shaping.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Paragraph_Check.php';

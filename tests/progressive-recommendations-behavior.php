@@ -454,6 +454,7 @@ require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Flow_Cache.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Taxonomy_Shaping.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Paragraph_Check.php';
