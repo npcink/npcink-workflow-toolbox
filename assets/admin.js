@@ -427,14 +427,23 @@
 		['data-toolbox-media-alt-caption-review', 'media_alt'],
 	];
 	let reviewTallySummaryPromise = null;
+	const reviewTallyBars = [];
 
 	function reviewTallySummary() {
 		if (!reviewTallySummaryPromise) {
 			reviewTallySummaryPromise = fetch(joinRestUrl(config.restUrl, 'review-tally/summary'), {
 				headers: { 'X-WP-Nonce': config.nonce || '' },
-			}).then((response) => (response.ok ? response.json() : null)).catch(() => null);
+			}).then((response) => (response.ok ? response.json() : null)).catch(() => {
+				// A failed read is not cached: the next attached bar retries.
+				reviewTallySummaryPromise = null;
+				return null;
+			});
 		}
 		return reviewTallySummaryPromise;
+	}
+
+	function paintReviewTallyBars(summary) {
+		reviewTallyBars.forEach((paint) => paint(summary));
 	}
 
 	function reviewTallyLine(summary, setKey) {
@@ -470,18 +479,26 @@
 		function paint(summary) {
 			line.textContent = reviewTallyLine(summary, setKey);
 		}
+		reviewTallyBars.push(paint);
 		reviewTallySummary().then(paint);
 
 		function mark(decision, button) {
 			button.disabled = true;
+			line.textContent = '';
 			fetch(joinRestUrl(config.restUrl, 'review-tally/mark'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': config.nonce || '' },
 				body: JSON.stringify({ review_set: setKey, decision }),
 			}).then((response) => (response.ok ? response.json() : null)).then((summary) => {
+				if (!summary) {
+					line.textContent = t('Could not save the tally mark. Try again.');
+					return;
+				}
 				reviewTallySummaryPromise = Promise.resolve(summary);
-				paint(summary);
-			}).catch(() => {}).finally(() => {
+				paintReviewTallyBars(summary);
+			}).catch(() => {
+				line.textContent = t('Could not save the tally mark. Try again.');
+			}).finally(() => {
 				button.disabled = false;
 			});
 		}
