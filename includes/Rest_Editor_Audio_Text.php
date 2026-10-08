@@ -75,10 +75,7 @@ final class Rest_Editor_Audio_Text {
 		if ( '' === $plain ) {
 			return '';
 		}
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			return mb_strlen( $plain, 'UTF-8' ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? mb_substr( $plain, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS, 'UTF-8' ) : $plain;
-		}
-		return strlen( $plain ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? substr( $plain, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS ) : $plain;
+		return self::editor_trim_chars( $plain, self::EDITOR_AUDIO_TEXT_MAX_CHARS );
 	}
 
 
@@ -103,10 +100,7 @@ final class Rest_Editor_Audio_Text {
 		if ( '' === $script ) {
 			$script = trim( sanitize_textarea_field( (string) ( $summary_ai['output_text'] ?? '' ) ) );
 		}
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
-			return mb_strlen( $script, 'UTF-8' ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? mb_substr( $script, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS, 'UTF-8' ) : $script;
-		}
-		return strlen( $script ) > self::EDITOR_AUDIO_TEXT_MAX_CHARS ? substr( $script, 0, self::EDITOR_AUDIO_TEXT_MAX_CHARS ) : $script;
+		return self::editor_trim_chars( $script, self::EDITOR_AUDIO_TEXT_MAX_CHARS );
 	}
 
 	private static function editor_trim_chars( string $value, int $max_chars ): string {
