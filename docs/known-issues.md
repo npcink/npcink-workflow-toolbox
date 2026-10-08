@@ -79,10 +79,13 @@ with the closing commit or PR for one release cycle, then prune.
   through Rest_Controller_Support, carrying the transient cache, the
   cross-cluster input-scope/related-items/recommendation-candidate
   statics) plus the taxonomy-shaping cluster (session 2) - the service
-  sits at ~4.6k lines. Remaining: summary, writing-pack, progressive,
-  and media/ALT clusters now inherit the cache base and can move with
-  the same pattern; the taxonomy term-candidates assembler stays with
-  the service until its cached-flow wiring is re-examined.
+  sits at ~4.3k lines after session 3 extracted the summary-terms
+  cluster (strategy/metrics tables, Core-handoff candidates, term
+  evidence, Toolkit taxonomy adapters, and the related-post-terms
+  context helper - Rest_Editor_Summary_Terms). Remaining:
+  writing-pack, progressive, and media/ALT clusters plus the summary and
+  taxonomy cached-flow orchestrators, all inheriting the cache base and
+  movable with the same pattern.
 - **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
   findings live in `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster
