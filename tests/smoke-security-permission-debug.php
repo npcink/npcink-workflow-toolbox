@@ -117,6 +117,8 @@ require_once $root . '/tests/load-provider-client.php';
 require_once $root . '/includes/Rest_Controller_Support.php';
 require_once $root . '/includes/Rest_Surface_Bridges.php';
 require_once $root . '/includes/Rest_Editor_Content_Support.php';
+require_once $root . '/includes/Rest_Editor_Paragraph_Check.php';
+require_once $root . '/includes/Rest_Editor_Audio_Text.php';
 require_once $root . '/includes/Rest_Local_Admin_Consent.php';
 require_once $root . '/includes/Rest_Media_Optimization_Bridges.php';
 require_once $root . '/includes/Rest_Flow_Plan_Bridges.php';
