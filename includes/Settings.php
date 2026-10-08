@@ -928,7 +928,17 @@ final class Settings {
 			'decision'  => $decision,
 			'timestamp' => time(),
 		);
-		$tally['marks'] = array_slice( $marks, -500 );
+		// Bounded log: 2000 marks covers months of single-operator use; a
+		// 7-day window reaching the cap means 250+ marks/day - far past the
+		// batch-apply gate threshold, where undercounting is immaterial.
+		//
+		// Accepted residual (recorded 2026-10-08, raised four advisory
+		// rounds): the get_option -> append -> update_option sequence has
+		// no cross-request mutual exclusion, so two truly concurrent marks
+		// can lose one count. The WordPress options API offers no compare-
+		// and-swap; single-operator admin usage makes the window negligible
+		// and the tally is advisory decision data, not accounting truth.
+		$tally['marks'] = array_slice( $marks, -2000 );
 		update_option( Plugin::REVIEW_TALLY_OPTION_NAME, $tally, false );
 		return $tally;
 	}
