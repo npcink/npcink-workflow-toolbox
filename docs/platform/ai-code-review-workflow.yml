@@ -94,9 +94,9 @@ jobs:
         # Layer 2 steps 2-3 are prerequisites: without all four values the
         # three review attempts below burn their retries on guaranteed
         # provider failures that look exactly like an outage. Values are
-        # checked in run: because the secrets context is not available in
-        # step-level if conditionals - the previous if-form failed the
-        # whole workflow at start for every event.
+        # checked in run: the previous if-form failed the whole workflow
+        # at start for every event in observed behavior (zero-job runs,
+        # no review rounds registering) until this env form replaced it.
         env:
           OCR_LLM_URL: ${{ secrets.OCR_LLM_URL }}
           OCR_LLM_AUTH_TOKEN: ${{ secrets.OCR_LLM_AUTH_TOKEN }}

@@ -50,12 +50,15 @@ five-plugin site.
 9. **Review-set adoption data (feeds the batch-apply decision).** Open
    each admin review-set panel (Media ALT, Taxonomy/Tag, Internal-Link,
    Comment Moderation, Flagged Media), run one bounded sample, and ask:
-   "of these suggestions, which would you actually accept?" Record the
-   accepted count per set and the operator's rough weekly volume of
-   review-set suggestions. A stable two-digit weekly accepted total is
-   the signal to open the media ALT adoption-loop arc (the cross-repo
-   governed path already exists: `media_alt_apply_plan.v1`); below that,
-   the review-set family stays review-only steady state.
+   "of these suggestions, which would you actually accept?" As of
+   2026-10-08 each result panel carries local accept/ignore tally buttons
+   (Toolbox-settings counts only; no suggestion content is stored), so
+   the weekly volume builds itself during normal use - read the
+   `Last 7 days` line per panel instead of counting by hand. A stable
+   two-digit weekly accepted total is the signal to open the media ALT
+   adoption-loop arc (the cross-repo governed path already exists:
+   `media_alt_apply_plan.v1`); below that, the review-set family stays
+   review-only steady state.
 10. **Owner-matrix and permission copy.** On the Site Knowledge status
     panel, confirm the owner matrix shows the full row set (source
     content, delivery bridge, index execution and lifecycle, freshness

@@ -908,7 +908,16 @@
       "Keep the reviewed preview, resolve the Core handoff error, then submit again. Existing successful Core proposals are not resubmitted.": ["请保留已审阅的预览，解决 Core 交接错误后再重新提交。已成功的 Core 提案不会重复提交。"],
       "Check that Npcink Cloud is connected, then start the optimization again. Already completed images in this batch are kept.": ["请确认 Npcink Cloud 已连接，然后重新开始优化。本批次中已完成的图片会保留。"],
       "Review the failed rows, then choose Retry failed previews again or deselect those rows. Successful previews remain unchanged.": ["请检查失败的行，然后选择再次重试失败预览或取消选中这些行。成功的预览保持不变。"],
-      "Keep the current selection, resolve the reported issue, then use the same preview action again. Toolbox will not retry automatically.": ["请保持当前选择，解决报告的问题后重新执行同一预览操作。Toolbox 不会自动重试。"]
+      "Keep the current selection, resolve the reported issue, then use the same preview action again. Toolbox will not retry automatically.": ["请保持当前选择，解决报告的问题后重新执行同一预览操作。Toolbox 不会自动重试。"],
+      "Accept +1": ["接受 +1"],
+      "Ignore +1": ["忽略 +1"],
+      "Last 7 days": ["近 7 天"],
+      "accepted": ["已接受"],
+      "ignored": ["已忽略"],
+      "Local counts only. No content is written.": ["仅本地计数，不写入任何内容。"],
+      "Could not save the tally mark. Try again.": ["无法保存计数标记，请重试。"],
+      "Counts unavailable. Try reloading.": ["计数不可用，请刷新重试。"],
+      "Last %d days": ["近 %d 天"]
     }
   }
 }

@@ -291,6 +291,8 @@ registered.
   and the rebuildable media projection)
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback`
 - `POST /wp-json/npcink-toolbox/v1/agent-feedback/summary`
+- `POST /wp-json/npcink-toolbox/v1/review-tally/mark` (operator's local accept/ignore count per review set; Toolbox settings only, no suggestion content or WordPress writes)
+- `GET /wp-json/npcink-toolbox/v1/review-tally/summary` (7-day accept/ignore counts per review set and total)
 - `POST /wp-json/npcink-toolbox/v1/ai/content-support`
 - `POST /wp-json/npcink-toolbox/v1/ai/site-helpers`
 - `POST /wp-json/npcink-toolbox/v1/ai/image-generation` (legacy hosted image

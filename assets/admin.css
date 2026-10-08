@@ -4250,3 +4250,25 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__media-canary-feedback-status.is-warning {
 	color: #b32d2e;
 }
+
+.npcink-toolbox__review-tally {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 8px;
+	margin: 10px 0 0;
+	padding: 8px 10px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-left: 4px solid #72aee6;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
+.npcink-toolbox__review-tally-summary {
+	font-weight: 600;
+}
+
+.npcink-toolbox__review-tally-note {
+	color: #50575e;
+}
