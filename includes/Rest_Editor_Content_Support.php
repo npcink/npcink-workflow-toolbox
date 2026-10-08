@@ -22,16 +22,14 @@ use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
-final class Rest_Editor_Content_Support extends Rest_Controller_Support {
+final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000;
 	private const EDITOR_SELECTED_TEXT_MAX_CHARS        = 2000;
 	private const EDITOR_COMMENT_TEXT_MAX_CHARS         = 1200;
-	private const EDITOR_FLOW_CACHE_TTL                 = 300;
 	private const EDITOR_PROGRESSIVE_TARGET_MS          = 2500;
 	private const EDITOR_PROGRESSIVE_CANDIDATE_LIMIT    = 8;
 
-	private Provider_Client $client;
 	private Publish_Preflight_Service $publish_preflight;
 
 	public function __construct( Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
@@ -1563,114 +1561,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 		return $candidates;
 	}
-
-	private function editor_cached_site_knowledge( array $input ) {
-		return $this->editor_cached_client_result(
-			'site_knowledge',
-			$input,
-			function () use ( $input ) {
-				return $this->client->search_site_knowledge( $input );
-			}
-		);
-	}
-
-	private function editor_cached_content_discoverability( array $input ) {
-		return $this->editor_cached_client_result(
-			'content_discoverability',
-			$input,
-			function () use ( $input ) {
-				return $this->client->build_content_discoverability_brief( $input );
-			}
-		);
-	}
-
-	private function editor_cached_hosted_ai_content_support( array $input, bool $force_refresh = false ) {
-		return $this->editor_cached_client_result(
-			'hosted_ai_content_support',
-			$input,
-			function () use ( $input ) {
-				return $this->client->run_hosted_ai_content_support( $input );
-			},
-			$force_refresh
-		);
-	}
-
-	private function editor_cached_audio_generation( array $input, bool $force_refresh = false ) {
-		return $this->editor_cached_client_result(
-			'audio_generation',
-			$input,
-			function () use ( $input ) {
-				return $this->client->run_audio_generation( $input );
-			},
-			$force_refresh
-		);
-	}
-
-	private function editor_cached_cloud_web_search( array $input, bool $force_refresh = false ) {
-		return $this->editor_cached_client_result(
-			'cloud_web_search',
-			$input,
-			function () use ( $input ) {
-				return $this->client->test_cloud_web_search( $input );
-			},
-			$force_refresh,
-			function ( array $result ) use ( $input ): bool {
-				return $this->editor_source_extraction_cacheable( $input, $result );
-			},
-			true
-		);
-	}
-
-	private function editor_source_extraction_cacheable( array $input, array $result ): bool {
-		if ( 'source_extraction_preview' !== sanitize_key( (string) ( $input['intent'] ?? '' ) ) ) {
-			return true;
-		}
-
-		return 'ready' === sanitize_key( (string) ( $result['status'] ?? '' ) )
-			&& 'matched' === sanitize_key( (string) ( $result['url_match'] ?? '' ) )
-			&& ! empty( $result['results'][0]['reader_excerpt'] ?? '' );
-	}
-
-	private function editor_cached_client_result( string $namespace, array $input, callable $callback, bool $force_refresh = false, ?callable $should_cache = null, bool $replace_cache_on_force = false ) {
-		$cache_key = $this->editor_flow_cache_key( $namespace, $input );
-		$cached    = $force_refresh ? false : get_transient( $cache_key );
-		if ( false !== $cached && is_array( $cached ) ) {
-			if ( null === $should_cache || $should_cache( $cached ) ) {
-				$cached['cache_status'] = 'hit';
-				return $cached;
-			}
-			delete_transient( $cache_key );
-		}
-
-		$result = $callback();
-		if ( ! is_wp_error( $result ) && is_array( $result ) ) {
-			$result['cache_status'] = $force_refresh ? 'bypass' : 'miss';
-			$cacheable              = null === $should_cache || $should_cache( $result );
-			if ( $cacheable && ( ! $force_refresh || $replace_cache_on_force ) ) {
-				set_transient( $cache_key, $result, self::EDITOR_FLOW_CACHE_TTL );
-			} elseif ( $force_refresh && $replace_cache_on_force ) {
-				delete_transient( $cache_key );
-			}
-		}
-
-		return $result;
-	}
-
-	private function editor_flow_cache_key( string $namespace, array $input ): string {
-		$json = wp_json_encode( $input );
-		if ( ! is_string( $json ) ) {
-			$json = serialize( $input );
-		}
-
-		return 'npcink_toolbox_editor_' . sanitize_key( $namespace ) . '_' . md5( $json );
-	}
-
-	/**
-	 * Validates one public source URL before Cloud research is requested.
-	 *
-	 * @param string $value Raw URL.
-	 * @return string|WP_Error
-	 */
 
 	private function editor_source_adaptation_url( string $value ) {
 		$value = trim( $value );
