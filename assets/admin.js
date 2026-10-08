@@ -461,7 +461,9 @@
 
 	function reviewTallyLine(summary, setKey) {
 		const set = summary && summary.sets && summary.sets[setKey] ? summary.sets[setKey] : { accepted: 0, ignored: 0 };
-		return t('Last 7 days') + ': ' + Number(set.accepted || 0) + ' ' + t('accepted') + ' / ' + Number(set.ignored || 0) + ' ' + t('ignored');
+		const windowDays = summary && summary.window_days ? Number(summary.window_days) : 7;
+		const label = 7 === windowDays ? t('Last 7 days') : t('Last %d days').replace('%d', String(windowDays));
+		return label + ': ' + Number(set.accepted || 0) + ' ' + t('accepted') + ' / ' + Number(set.ignored || 0) + ' ' + t('ignored');
 	}
 
 	function maybeAttachReviewTally(form, result) {
