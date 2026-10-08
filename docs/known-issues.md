@@ -79,8 +79,10 @@ with the closing commit or PR for one release cycle, then prune.
   through Rest_Controller_Support, carrying the transient cache, the
   cross-cluster input-scope/related-items/recommendation-candidate
   statics) plus the taxonomy-shaping cluster (session 2) - the service
-  sits at ~4.3k lines after session 3 extracted the summary-terms
-  cluster (strategy/metrics tables, Core-handoff candidates, term
+  sits at ~4.1k lines after session 3 (summary-terms) and session 4
+  (writing-pack shaping: required fields, hosted output, field merging,
+  payload/list normalization, related articles, request brief -
+  Rest_Editor_Writing_Pack_Shaping) extracted their clusters (strategy/metrics tables, Core-handoff candidates, term
   evidence, Toolkit taxonomy adapters, and the related-post-terms
   context helper - Rest_Editor_Summary_Terms). Remaining:
   writing-pack, progressive, and media/ALT clusters plus the summary and

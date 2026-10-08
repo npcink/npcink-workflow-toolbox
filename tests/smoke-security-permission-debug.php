@@ -119,6 +119,7 @@ require_once $root . '/includes/Rest_Surface_Bridges.php';
 require_once $root . '/includes/Rest_Editor_Flow_Cache.php';
 require_once $root . '/includes/Rest_Editor_Taxonomy_Shaping.php';
 require_once $root . '/includes/Rest_Editor_Summary_Terms.php';
+require_once $root . '/includes/Rest_Editor_Writing_Pack_Shaping.php';
 require_once $root . '/includes/Rest_Editor_Content_Support.php';
 require_once $root . '/includes/Rest_Editor_Paragraph_Check.php';
 require_once $root . '/includes/Rest_Editor_Audio_Text.php';
@@ -297,7 +298,7 @@ $provider_source       = '';
 foreach ( $provider_source_files as $provider_source_file ) {
 	$provider_source .= "\n" . (string) file_get_contents( $provider_source_file );
 }
-$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php', 'Rest_Editor_Flow_Cache.php', 'Rest_Editor_Content_Support.php', 'Rest_Editor_Taxonomy_Shaping.php', 'Rest_Editor_Summary_Terms.php', 'Rest_Editor_Paragraph_Check.php', 'Rest_Editor_Audio_Text.php' );
+$rest_controller_files = array( 'Rest_Controller.php', 'Rest_Nightly_Inspection_Bridges.php', 'Rest_Controller_Support.php', 'Rest_Web_Search_Bridges.php', 'Rest_Site_Knowledge_Bridges.php', 'Rest_Media_Derivative_Previews.php', 'Rest_Flow_Plan_Bridges.php', 'Rest_Media_Optimization_Bridges.php', 'Rest_Surface_Bridges.php', 'Rest_Local_Admin_Consent.php', 'Rest_Editor_Flow_Cache.php', 'Rest_Editor_Content_Support.php', 'Rest_Editor_Taxonomy_Shaping.php', 'Rest_Editor_Summary_Terms.php', 'Rest_Editor_Writing_Pack_Shaping.php', 'Rest_Editor_Paragraph_Check.php', 'Rest_Editor_Audio_Text.php' );
 $rest_source     = '';
 foreach ( $rest_controller_files as $rest_controller_file_index => $rest_controller_file ) {
 	$rest_source .= ( 0 === $rest_controller_file_index ? '' : "\n" ) . (string) file_get_contents( $root . '/includes/' . $rest_controller_file );

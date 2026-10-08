@@ -824,7 +824,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		$context['source_stage']              = in_array( $source_stage, array( 'extract', 'adapt', 'research_plan', 'draft' ), true ) ? $source_stage : $default_stage;
 		$context['source_stage_requested']    = $context['source_stage'];
 		$context['input_mode']                = $input_mode;
-		$context['editorial_brief']           = $this->editor_writing_pack_request_brief( $request->get_param( 'editorial_brief' ) );
+		$context['editorial_brief']           = Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_request_brief( $request->get_param( 'editorial_brief' ) );
 		$context['reviewed_writing_pack']     = $request->get_param( 'reviewed_writing_pack' );
 		$context['writing_pack_confirmation'] = $request->get_param( 'writing_pack_confirmation' );
 		$context['draft_review_feedback']     = 'draft' === $context['source_stage']
@@ -1738,27 +1738,6 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		return $char_count >= 600 && is_int( $sentence_count ) && $sentence_count >= 3;
 	}
 
-	private function editor_writing_pack_request_brief( $raw ): array {
-		if ( is_string( $raw ) && '' !== trim( $raw ) ) {
-			$decoded = json_decode( $raw, true );
-			$raw     = is_array( $decoded ) ? $decoded : array();
-		}
-		$raw    = is_array( $raw ) ? $raw : array();
-		$result = array();
-		foreach ( array( 'audience', 'article_goal', 'reader_problem', 'unique_angle', 'reader_promise', 'content_type', 'operator_instruction' ) as $field ) {
-			$result[ $field ] = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $raw[ $field ] ?? '' ) ) ), 120, '' );
-		}
-		foreach ( array( 'focus_points', 'title_directions', 'outline' ) as $field ) {
-			$value = $raw[ $field ] ?? array();
-			if ( is_string( $value ) ) {
-				$value = preg_split( '/\r\n|\r|\n/', $value );
-			}
-			$result[ $field ] = $this->editor_writing_pack_list( is_array( $value ) ? $value : array(), 12 );
-		}
-
-		return $result;
-	}
-
 	private function editor_draft_review_feedback_request( $raw ): array {
 		if ( is_string( $raw ) && '' !== trim( $raw ) ) {
 			$decoded = json_decode( $raw, true );
@@ -1954,8 +1933,8 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$decoded          = json_decode( $raw_confirmation, true );
 			$raw_confirmation = is_array( $decoded ) ? $decoded : array();
 		}
-		$pack         = $this->editor_writing_pack_payload_value( is_array( $raw_pack ) ? $raw_pack : array() );
-		$confirmation = $this->editor_writing_pack_payload_value( is_array( $raw_confirmation ) ? $raw_confirmation : array() );
+		$pack         = Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_payload_value( is_array( $raw_pack ) ? $raw_pack : array() );
+		$confirmation = Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_payload_value( is_array( $raw_confirmation ) ? $raw_confirmation : array() );
 		if ( ! is_array( $pack ) || 'article_writing_pack.v1' !== (string) ( $pack['artifact_type'] ?? '' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_writing_pack_review_invalid_artifact',
@@ -2001,11 +1980,11 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				__( 'This writing pack cannot generate a draft because the source body or required writing evidence is insufficient.', 'npcink-workflow-toolbox' ),
 				array(
 					'status'           => 400,
-					'blocking_reasons' => $this->editor_writing_pack_list( $admission['blocking_reasons'] ?? array(), 12 ),
+					'blocking_reasons' => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $admission['blocking_reasons'] ?? array(), 12 ),
 				)
 			);
 		}
-		$missing = $this->editor_writing_pack_required_fields( $pack );
+		$missing = Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_required_fields( $pack );
 		if ( ! empty( $missing ) ) {
 			return new WP_Error(
 				'npcink_toolbox_writing_pack_review_incomplete',
@@ -2034,46 +2013,8 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		);
 	}
 
-	private function editor_writing_pack_required_fields( array $pack ): array {
-		$required = array(
-			'inputs.editorial_brief.audience'     => $pack['inputs']['editorial_brief']['audience']['value'] ?? '',
-			'inputs.editorial_brief.article_goal' => $pack['inputs']['editorial_brief']['article_goal']['value'] ?? '',
-			'inputs.editorial_brief.focus_points' => $pack['inputs']['editorial_brief']['focus_points']['value'] ?? array(),
-			'site_adaptation.unique_angle'        => $pack['site_adaptation']['unique_angle']['value'] ?? '',
-			'writing_plan.outline'                => $pack['writing_plan']['outline'] ?? array(),
-		);
-		if ( in_array( (string) ( $pack['input_mode'] ?? '' ), array( 'url_reference', 'mixed' ), true ) ) {
-			$required['research_basis.fact_ledger'] = $pack['research_basis']['fact_ledger'] ?? array();
-			$required['inputs.source_materials']    = $pack['inputs']['source_materials'] ?? array();
-		}
-		$missing = array();
-		foreach ( $required as $path => $value ) {
-			if ( ! $this->editor_writing_pack_has_value( $value ) ) {
-				$missing[] = $path;
-			}
-		}
-
-		return $missing;
-	}
-
-	private function editor_writing_pack_has_value( $value ): bool {
-		if ( is_scalar( $value ) ) {
-			return '' !== trim( (string) $value );
-		}
-		if ( ! is_array( $value ) ) {
-			return false;
-		}
-		foreach ( $value as $item ) {
-			if ( $this->editor_writing_pack_has_value( $item ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private function editor_article_draft_preview( array $pack, array $review, array $raw ): array {
-		$output   = $this->editor_writing_pack_hosted_output( $raw );
+		$output   = Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_hosted_output( $raw );
 		$sections = array();
 		foreach ( array_slice( is_array( $output['sections'] ?? null ) ? $output['sections'] : array(), 0, 20 ) as $index => $section ) {
 			$section = is_array( $section ) ? $section : array( 'body' => $section );
@@ -2084,7 +2025,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				$sections[] = array(
 					'heading'              => $heading,
 					'body'                 => $body,
-					'supporting_fact_refs' => $this->editor_writing_pack_list( $section['supporting_fact_refs'] ?? array(), 12 ),
+					'supporting_fact_refs' => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $section['supporting_fact_refs'] ?? array(), 12 ),
 				);
 			}
 		}
@@ -2097,8 +2038,8 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'title'                           => sanitize_text_field( (string) ( $output['title'] ?? '' ) ),
 			'excerpt'                         => wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $output['excerpt'] ?? '' ) ) ), 120, '' ),
 			'sections'                        => $sections,
-			'verification_notes'              => $this->editor_writing_pack_list( $output['verification_notes'] ?? array(), 20 ),
-			'source_attribution_notes'        => $this->editor_writing_pack_list( $output['source_attribution_notes'] ?? array(), 12 ),
+			'verification_notes'              => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $output['verification_notes'] ?? array(), 20 ),
+			'source_attribution_notes'        => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $output['source_attribution_notes'] ?? array(), 12 ),
 			'writing_pack_id'                 => sanitize_text_field( (string) ( $pack['writing_pack_id'] ?? '' ) ),
 			'writing_pack_review_fingerprint' => sanitize_text_field( (string) ( $review['review_fingerprint'] ?? '' ) ),
 			'write_posture'                   => 'suggestion_only',
@@ -2143,7 +2084,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 	}
 
 	private function editor_article_writing_pack( array $context, array $source, array $knowledge, array $review, string $source_text ): array {
-		$output           = $this->editor_writing_pack_hosted_output( $review );
+		$output           = Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_hosted_output( $review );
 		$editorial        = is_array( $output['editorial_direction'] ?? null ) ? $output['editorial_direction'] : $output;
 		$research         = is_array( $output['research_basis'] ?? null ) ? $output['research_basis'] : $output;
 		$adaptation       = is_array( $output['site_adaptation'] ?? null ) ? $output['site_adaptation'] : $output;
@@ -2172,7 +2113,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				'resolved_url'           => esc_url_raw( (string) ( $source['resolved_url'] ?? '' ) ),
 				'title'                  => sanitize_text_field( (string) ( $source['title'] ?? '' ) ),
 				'content_hash'           => sanitize_text_field( (string) ( $source['content_hash'] ?? '' ) ),
-				'coverage'               => $this->editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
+				'coverage'               => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
 				'content_trust'          => sanitize_key( (string) ( $source['content_trust'] ?? 'untrusted_external_source' ) ),
 				'url_match'              => sanitize_key( (string) ( $source['url_match'] ?? '' ) ),
 				'continuation_requested' => true,
@@ -2187,10 +2128,10 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'inputs'                 => array(
 				'source_materials'    => $source_materials,
 				'editorial_brief'     => array(
-					'audience'             => $this->editor_writing_pack_resolved_field( $brief['audience'] ?? '', $editorial['audience'] ?? $editorial['inferred_audience'] ?? '' ),
-					'article_goal'         => $this->editor_writing_pack_resolved_field( $brief['article_goal'] ?? '', $editorial['article_goal'] ?? '' ),
-					'reader_problem'       => $this->editor_writing_pack_resolved_field( $brief['reader_problem'] ?? '', $editorial['reader_problem'] ?? '' ),
-					'focus_points'         => $this->editor_writing_pack_resolved_field( $brief['focus_points'] ?? array(), $this->editor_writing_pack_list( $editorial['focus_points'] ?? $output['adaptation_directions'] ?? array(), 8 ) ),
+					'audience'             => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['audience'] ?? '', $editorial['audience'] ?? $editorial['inferred_audience'] ?? '' ),
+					'article_goal'         => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['article_goal'] ?? '', $editorial['article_goal'] ?? '' ),
+					'reader_problem'       => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['reader_problem'] ?? '', $editorial['reader_problem'] ?? '' ),
+					'focus_points'         => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['focus_points'] ?? array(), Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $editorial['focus_points'] ?? $output['adaptation_directions'] ?? array(), 8 ) ),
 					'operator_instruction' => array(
 						'value'              => $operator_instruction,
 						'source'             => '' !== $operator_instruction ? 'operator' : 'not_supplied',
@@ -2204,28 +2145,28 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				),
 			),
 			'research_basis'         => array(
-				'source_summary'     => $manual_only ? array() : $this->editor_writing_pack_list( $research['source_summary'] ?? $research['source_summary_zh'] ?? $output['source_summary_zh'] ?? array(), 6 ),
-				'fact_ledger'        => $manual_only ? array() : $this->editor_writing_pack_list( $research['fact_ledger'] ?? array(), 16 ),
-				'source_coverage'    => $this->editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
-				'verification_items' => $this->editor_writing_pack_list( $research['verification_items'] ?? $output['facts_to_verify'] ?? array(), 12 ),
+				'source_summary'     => $manual_only ? array() : Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $research['source_summary'] ?? $research['source_summary_zh'] ?? $output['source_summary_zh'] ?? array(), 6 ),
+				'fact_ledger'        => $manual_only ? array() : Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $research['fact_ledger'] ?? array(), 16 ),
+				'source_coverage'    => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_payload_value( $source['coverage'] ?? array() ),
+				'verification_items' => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $research['verification_items'] ?? $output['facts_to_verify'] ?? array(), 12 ),
 			),
 			'site_adaptation'        => array(
-				'related_articles'   => $this->editor_writing_pack_related_articles( $knowledge ),
-				'overlap_map'        => $this->editor_writing_pack_list( $adaptation['overlap_map'] ?? array(), 10 ),
-				'site_style_signals' => $this->editor_writing_pack_list( $adaptation['site_style_signals'] ?? $output['site_style_signals'] ?? array(), 8 ),
-				'unique_angle'       => $this->editor_writing_pack_resolved_field( $brief['unique_angle'] ?? '', $adaptation['unique_angle'] ?? $output['unique_angle'] ?? '' ),
+				'related_articles'   => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_related_articles( $knowledge ),
+				'overlap_map'        => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $adaptation['overlap_map'] ?? array(), 10 ),
+				'site_style_signals' => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $adaptation['site_style_signals'] ?? $output['site_style_signals'] ?? array(), 8 ),
+				'unique_angle'       => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['unique_angle'] ?? '', $adaptation['unique_angle'] ?? $output['unique_angle'] ?? '' ),
 			),
 			'writing_plan'           => array(
-				'title_directions' => $this->editor_writing_pack_list( ! empty( $brief['title_directions'] ) ? $brief['title_directions'] : ( $plan['title_directions'] ?? array() ), 6 ),
-				'reader_promise'   => $this->editor_writing_pack_resolved_field( $brief['reader_promise'] ?? '', $plan['reader_promise'] ?? '' ),
-				'content_type'     => $this->editor_writing_pack_resolved_field( $brief['content_type'] ?? '', $plan['content_type'] ?? '' ),
-				'outline'          => $this->editor_writing_pack_list( ! empty( $brief['outline'] ) ? $brief['outline'] : ( $plan['outline'] ?? $output['suggested_outline'] ?? array() ), 12 ),
-				'cta_direction'    => $this->editor_writing_pack_inferred_field( $plan['cta_direction'] ?? '' ),
+				'title_directions' => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( ! empty( $brief['title_directions'] ) ? $brief['title_directions'] : ( $plan['title_directions'] ?? array() ), 6 ),
+				'reader_promise'   => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['reader_promise'] ?? '', $plan['reader_promise'] ?? '' ),
+				'content_type'     => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_resolved_field( $brief['content_type'] ?? '', $plan['content_type'] ?? '' ),
+				'outline'          => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( ! empty( $brief['outline'] ) ? $brief['outline'] : ( $plan['outline'] ?? $output['suggested_outline'] ?? array() ), 12 ),
+				'cta_direction'    => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_inferred_field( $plan['cta_direction'] ?? '' ),
 			),
 			'risk_review'            => array(
-				'fact_risks'       => $this->editor_writing_pack_list( $risk['fact_risks'] ?? $output['facts_to_verify'] ?? array(), 12 ),
-				'rights_risks'     => $this->editor_writing_pack_list( $risk['rights_risks'] ?? $output['copyright_and_attribution'] ?? array(), 12 ),
-				'similarity_risks' => $this->editor_writing_pack_list( $risk['similarity_risks'] ?? array(), 10 ),
+				'fact_risks'       => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $risk['fact_risks'] ?? $output['facts_to_verify'] ?? array(), 12 ),
+				'rights_risks'     => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $risk['rights_risks'] ?? $output['copyright_and_attribution'] ?? array(), 12 ),
+				'similarity_risks' => Rest_Editor_Writing_Pack_Shaping::editor_writing_pack_list( $risk['similarity_risks'] ?? array(), 10 ),
 			),
 			'generation_admission'   => array(
 				'status'                     => empty( $blocking_reasons ) ? 'needs_review' : 'blocked',
@@ -2282,101 +2223,6 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		$pack['generated_at']        = gmdate( 'c' );
 
 		return $pack;
-	}
-
-	private function editor_writing_pack_hosted_output( array $review ): array {
-		if ( is_array( $review['output_json'] ?? null ) ) {
-			return $review['output_json'];
-		}
-		$result = is_array( $review['result'] ?? null ) ? $review['result'] : array();
-		if ( is_array( $result['output_json'] ?? null ) ) {
-			return $result['output_json'];
-		}
-
-		return array();
-	}
-
-	private function editor_writing_pack_inferred_field( $value ): array {
-		if ( is_array( $value ) && array_key_exists( 'value', $value ) ) {
-			$value = $value['value'];
-		}
-		return array(
-			'value'              => $this->editor_writing_pack_payload_value( $value ),
-			'source'             => 'ai_inferred_from_source_and_site_context',
-			'operator_confirmed' => false,
-		);
-	}
-
-	private function editor_writing_pack_resolved_field( $operator_value, $inferred_value ): array {
-		$has_operator_value = is_array( $operator_value ) ? ! empty( $operator_value ) : '' !== trim( (string) $operator_value );
-		if ( $has_operator_value ) {
-			return array(
-				'value'              => $this->editor_writing_pack_payload_value( $operator_value ),
-				'source'             => 'operator_supplied_brief',
-				'operator_confirmed' => true,
-			);
-		}
-
-		return $this->editor_writing_pack_inferred_field( $inferred_value );
-	}
-
-	private function editor_writing_pack_list( $value, int $limit ): array {
-		$is_list = is_array( $value ) && ( array() === $value || array_keys( $value ) === range( 0, count( $value ) - 1 ) );
-		$items   = $is_list ? $value : ( null === $value || '' === $value ? array() : array( $value ) );
-		$result  = array();
-		foreach ( array_slice( $items, 0, max( 1, min( 20, $limit ) ) ) as $item ) {
-			$sanitized = $this->editor_writing_pack_payload_value( $item );
-			if ( null !== $sanitized && '' !== $sanitized && array() !== $sanitized ) {
-				$result[] = $sanitized;
-			}
-		}
-
-		return $result;
-	}
-
-	private function editor_writing_pack_payload_value( $value, int $depth = 0 ) {
-		if ( $depth > 6 || null === $value ) {
-			return null;
-		}
-		if ( is_bool( $value ) || is_int( $value ) || is_float( $value ) ) {
-			return $value;
-		}
-		if ( is_string( $value ) ) {
-			return wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( $value ) ), 180, '' );
-		}
-		if ( ! is_array( $value ) ) {
-			return null;
-		}
-
-		$result = array();
-		foreach ( array_slice( $value, 0, 20, true ) as $key => $item ) {
-			$clean_key = is_int( $key ) ? $key : sanitize_key( (string) $key );
-			if ( '' === (string) $clean_key && ! is_int( $clean_key ) ) {
-				continue;
-			}
-			$clean_value = $this->editor_writing_pack_payload_value( $item, $depth + 1 );
-			if ( null !== $clean_value ) {
-				$result[ $clean_key ] = $clean_value;
-			}
-		}
-
-		return $result;
-	}
-
-	private function editor_writing_pack_related_articles( array $knowledge ): array {
-		$items  = Rest_Editor_Flow_Cache::editor_related_content_items( $knowledge );
-		$result = array();
-		foreach ( array_slice( $items, 0, 6 ) as $index => $item ) {
-			$result[] = array(
-				'post_id'      => absint( $item['post_id'] ?? $item['id'] ?? 0 ),
-				'title'        => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
-				'url'          => esc_url_raw( (string) ( $item['url'] ?? $item['permalink'] ?? '' ) ),
-				'score'        => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
-				'evidence_ref' => 'site_knowledge:' . sanitize_key( (string) ( $item['post_id'] ?? $item['id'] ?? $index ) ),
-			);
-		}
-
-		return $result;
 	}
 
 	private function editor_image_recommendation_section( array $section ): array {
