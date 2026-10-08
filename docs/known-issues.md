@@ -72,13 +72,15 @@ with the closing commit or PR for one release cycle, then prune.
   qualify each under the archive policy in
   [the documentation index](README.md) and move them only together with
   the links that reference them.
-- **The extracted editor content-support service is a 6.5k-line single
-  unit** (183 methods, PR for the facade closeout): the Rest_Controller
-  split moved it wholesale to end the facade bottleneck. Sub-dividing it
-  into cohesive editor sub-services (audio, taxonomy, media/ALT,
-  progressive, writing-pack/draft) follows the same standard in later
-  sessions, after the editor-content-support.js clusters establish the
-  JED translation policy.
+- **The extracted editor content-support service is being sub-divided**
+  under the split standard with the amended 2026-10-08 cadence: the
+  paragraph-check cluster (Rest_Editor_Paragraph_Check, static) and the
+  audio-text cluster (Rest_Editor_Audio_Text, static) landed 2026-10-08,
+  taking the service from ~5.4k to ~5.1k lines with the shared trim
+  helper promoted to the Rest_Controller_Support base. The remaining
+  entangled AI-flow clusters (taxonomy, summary, writing-pack,
+  progressive) share cached-context helpers and need the standard's
+  inheritance pattern for the shared cache layer before they can move.
 - **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
   findings live in `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster

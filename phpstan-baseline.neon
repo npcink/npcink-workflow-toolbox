@@ -370,7 +370,7 @@ parameters:
 			message: '#^Call to function is_array\(\) with array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
-			path: includes/Rest_Editor_Content_Support.php
+			path: includes/Rest_Editor_Paragraph_Check.php
 
 		-
 			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\<int, array\<string, string\>\|int\>\>\.$#'
@@ -388,7 +388,7 @@ parameters:
 			message: '#^Offset ''detail'' on array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
-			path: includes/Rest_Editor_Content_Support.php
+			path: includes/Rest_Editor_Paragraph_Check.php
 
 		-
 			message: '#^Offset ''type'' on array\{id\: non\-falsy\-string, type\: ''external_source…''\|''target_post'', label\: mixed\}\|array\{id\: non\-falsy\-string, type\: ''related_content'', label\: mixed, score\: float\|null\} on left side of \?\? always exists and is not nullable\.$#'
