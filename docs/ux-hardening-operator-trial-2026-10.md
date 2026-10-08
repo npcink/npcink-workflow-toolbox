@@ -113,3 +113,38 @@ stay open for the operator.
   browser smokes (`smoke-ux-hardening-browser`,
   `smoke-core-handoff-receipt-ui`) in `composer test:all`; the operator
   session should still walk them for wording judgment.
+
+### Cloud-connected full pass - 2026-10-08
+
+The trial ran on the operator's Cloud-connected local site (magick-ai,
+Toolbox symlinked at the 0.5.1+ working tree) instead of waiting for the
+operator session. It caught two stacked production defects and collected
+the step-9 data:
+
+- **Defect 1 (fixed)**: every Cloud-dependent review set returned live
+  HTTP 422 - Cloud's converged schema rejects the never-contracted
+  `http_timeout_seconds`/`connect_timeout_seconds` fields the site-helper
+  payload carried. Removed from this payload.
+- **Defect 2 (fixed)**: the sparse-post samples were computed AFTER the
+  prompt source was assembled, so taxonomy and internal-link requests
+  shipped an empty sample and Cloud correctly refused to invent
+  suggestions. The samples now build before source and travel inside it.
+  Both fixes verified live: taxonomy then returned per-post tag tables
+  and internal-link returned anchor-text pairs.
+- **Step 9 data (20-post bounded samples, real Cloud runs)**: taxonomy -
+  20/20 sampled posts received suggestions, ~415 tag tokens; internal
+  link - 50 link-pair suggestions with Chinese anchor candidates and
+  confidence; comment moderation - 0 pending comments on the site (clean
+  empty-sample posture, correct); flagged media - not run (needs stored
+  safety projections); media ALT - local mode verified earlier with a
+  clean empty state. Weekly accepted-volume judgment stays with the
+  operator; the sets demonstrably produce reviewable volume now.
+- **Step 10 (closed live)**: an `edit_posts` author on the real site sees
+  the Content Support sidebar, runs allowed flows, and a gated handoff
+  route returns HTTP 403 `rest_forbidden` with the localized raw denial -
+  exactly the input the 0.5.1 audience normalization rewrites to the
+  plain administrator copy (catalog entry verified in Chinese). The
+  final click-through needs a term-row selection the automated pass did
+  not complete; the chain is otherwise verified end to end.
+- Steps 2-8 remain covered by the existing smokes; wording judgment
+  remains the operator's.
