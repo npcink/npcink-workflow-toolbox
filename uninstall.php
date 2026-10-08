@@ -15,6 +15,7 @@ function npcink_toolbox_uninstall_current_site(): void {
 			'npcink_toolbox_content_context',
 			'npcink_toolbox_media_optimization_settings',
 			'npcink_toolbox_watermark_templates',
+			'npcink_toolbox_review_tally',
 			'npcink_toolbox_zhihu_hot_topic_pool_backup_v1',
 			'npcink_toolbox_media_optimization_batches',
 			'npcink_toolbox_media_recognition_continuation',
