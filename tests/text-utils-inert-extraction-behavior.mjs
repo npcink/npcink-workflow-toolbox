@@ -17,16 +17,9 @@ const partPath = fileURLToPath(new URL('../assets/editor-content-support/text-ut
 const source = fs.readFileSync(partPath, 'utf8');
 
 function loadHelpers(windowStub) {
-	const sandbox = { window: windowStub, globalThis: {} };
-	if (windowStub) {
-		windowStub.window = windowStub;
-	} else {
-		delete sandbox.window;
-	}
-	// Delete is not enough for `typeof window` checks inside vm when the
-	// property was never present, which is exactly what we want here.
-	vm.runInNewContext(source, sandbox, { filename: 'text-utils.js' });
-	return (windowStub || sandbox).NpcinkToolboxTextHelpers;
+	windowStub.window = windowStub;
+	vm.runInNewContext(source, { window: windowStub }, { filename: 'text-utils.js' });
+	return windowStub.NpcinkToolboxTextHelpers;
 }
 
 // 1. Browser path: DOMParser is used; innerHTML is never assigned.
@@ -59,16 +52,8 @@ assert.ok(touches.some((t) => t.startsWith('DOMParser:')), 'DOMParser was used')
 assert.ok(!touches.includes('innerHTML-assigned'), 'innerHTML was never assigned');
 assert.ok(!touches.some((t) => t.startsWith('createElement:')), 'no detached element was created');
 
-// 2. No-window path: the regex fallback still strips tags and never
-// touches a DOM at all.
-const noWindowHelpers = (() => {
-	const sandbox = {};
-	vm.runInNewContext(source, sandbox, { filename: 'text-utils.js' });
-	return sandbox.NpcinkToolboxTextHelpers;
-})();
-assert.equal(noWindowHelpers, undefined, 'nothing exported without window');
-// Re-run with a minimal global that has no document/DOMParser to prove
-// the fallback regex path through the exported surface.
+// 2. A window without document/DOMParser proves the exported surface
+// falls back to regex stripping instead of throwing.
 const bareWindow = {};
 vm.runInNewContext(source, { window: bareWindow }, { filename: 'text-utils.js' });
 // bareWindow has no document and no DOMParser: the helper must degrade

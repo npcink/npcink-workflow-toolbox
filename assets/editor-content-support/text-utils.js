@@ -28,6 +28,8 @@
 			const parsed = new window.DOMParser().parseFromString(source, 'text/html');
 			return String(parsed.body.textContent || '').replace(/\s+/g, ' ').trim();
 		}
+		// Best-effort tag stripping for environments without DOMParser:
+		// malformed markup with '>' inside attribute values can leak tag text.
 		return source.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 	}
 
