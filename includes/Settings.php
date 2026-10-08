@@ -921,9 +921,9 @@ final class Settings {
 		if ( ! in_array( $decision, array( 'accepted', 'ignored' ), true ) ) {
 			return array();
 		}
-		$tally          = $this->get_review_tally();
-		$marks          = is_array( $tally['marks'] ?? null ) ? $tally['marks'] : array();
-		$marks[]        = array(
+		$tally   = $this->get_review_tally();
+		$marks   = is_array( $tally['marks'] ?? null ) ? $tally['marks'] : array();
+		$marks[] = array(
 			'set'       => $review_set,
 			'decision'  => $decision,
 			'timestamp' => time(),
