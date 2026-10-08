@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.5.1
+Stable tag: 0.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -228,6 +228,17 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.5.2 =
+
+* Fixed the four Cloud-dependent review sets (taxonomy and tag, internal
+  link, comment moderation, flagged media) against the current Npcink
+  Cloud runtime: the site-helper payload no longer sends timeout fields
+  the converged Cloud schema rejects, and the sparse-post samples now
+  reach the request instead of shipping empty (Cloud previously refused
+  to invent suggestions from nothing, and the schema rejection returned
+  an error on every run).
+* Release packaging no longer includes the PHPStan baseline file.
 
 = 0.5.1 =
 
