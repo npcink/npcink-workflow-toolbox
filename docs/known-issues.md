@@ -49,7 +49,9 @@ with the closing commit or PR for one release cycle, then prune.
   Check render cluster from `Admin_Page.php` into
   `Admin_Page_Site_Ops_Panel` (4,620 -> 2,762 facade lines) with portable
   admin-page assertion sources. Still owed, deferred until product work
-  touches them per the just-in-time refactoring decision: the remaining
+  per the just-in-time refactoring decision as amended 2026-10-08
+  (acceleration agreement: a product session may carry one cluster
+  extraction, or one dedicated split session may run per week): the remaining
   `editor-content-support.js` clusters (image candidates, preflight,
   progressive, draft flows), `includes/Rest_Editor_Content_Support.php`
   (~6.5k), `assets/admin.js` (~8.2k), and the remaining `Admin_Page.php`

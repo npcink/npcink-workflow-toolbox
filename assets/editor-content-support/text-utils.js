@@ -20,11 +20,16 @@
 		if (!source) {
 			return '';
 		}
-		if (typeof window !== 'undefined' && window.document) {
-			const container = window.document.createElement('div');
-			container.innerHTML = source;
-			return String(container.textContent || container.innerText || '').replace(/\s+/g, ' ').trim();
+		// DOMParser documents are inert by specification: no script
+		// execution and no resource fetches, unlike innerHTML on a
+		// detached div, where inline handlers and image loads in block
+		// HTML can still fire while the text is extracted.
+		if (typeof window !== 'undefined' && typeof window.DOMParser === 'function') {
+			const parsed = new window.DOMParser().parseFromString(source, 'text/html');
+			return String(parsed.body.textContent || '').replace(/\s+/g, ' ').trim();
 		}
+		// Best-effort tag stripping for environments without DOMParser:
+		// malformed markup with '>' inside attribute values can leak tag text.
 		return source.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 	}
 

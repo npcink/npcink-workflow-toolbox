@@ -1198,6 +1198,12 @@ sort( $internal_links_destructured_sorted );
 sort( $internal_links_expected_sorted );
 toolbox_assert( $internal_links_expected_sorted === $internal_links_exported_sorted && $internal_links_expected_sorted === $internal_links_destructured_sorted, 'The main bundle destructures exactly the frozen internal-links namespace export list, including every helper the main bundle still calls.' );
 $text_utils_part_source = (string) file_get_contents( $root . '/assets/editor-content-support/text-utils.js' );
+toolbox_assert(
+	false !== strpos( $text_utils_part_source, 'window.DOMParser' )
+	&& false === strpos( $text_utils_part_source, 'innerHTML = source' )
+	&& false === strpos( $text_utils_part_source, "createElement( 'div' )" ),
+	'Editor plain-text extraction parses through the inert DOMParser path - innerHTML on a detached div executes inline handlers and fetches resources inside block HTML.'
+);
 $text_utils_exported    = array();
 if ( preg_match( '/window\.NpcinkToolboxTextHelpers = Object\.freeze\(\{(.*?)\n\t\t\}\);/s', $text_utils_part_source, $text_utils_export_match ) ) {
 	preg_match_all( '/\n\t\t\t([\w$]+),/', $text_utils_export_match[1], $text_utils_export_names );
