@@ -5,9 +5,11 @@
  * verbatim from Rest_Editor_Content_Support as the second cohesive
  * sub-service of the queued editor split (Provider Split Refactor
  * Standard v1). The preferences and text-shaping methods keep
- * WP_REST_Request/string/array inputs; the shared trim helper is
- * inherited from Rest_Controller_Support via a thin instance wrapper
- * because the base method is protected and needle-pinned as such.
+ * WP_REST_Request/string/array inputs. This class owns the shared
+ * editor trim helper for the whole split (service callers route
+ * through Rest_Editor_Audio_Text::trim), and the service's own
+ * EDITOR_AUDIO_TEXT_MAX_CHARS constant was removed in favor of this
+ * class's copy so the cap has exactly one definition.
  *
  * Suggestion-only by contract: outputs feed review artifacts and
  * narration previews; nothing here writes posts, media, or settings.
@@ -23,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class Rest_Editor_Audio_Text {
 
-	private const EDITOR_AUDIO_TEXT_MAX_CHARS = 5000;
+	public const EDITOR_AUDIO_TEXT_MAX_CHARS = 5000;
 
 	public static function editor_audio_preferences_from_request( WP_REST_Request $request ): array {
 		$raw = $request->get_param( 'audio_preferences' );

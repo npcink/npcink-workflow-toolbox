@@ -25,7 +25,6 @@ defined( 'ABSPATH' ) || exit;
 final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000;
-	private const EDITOR_AUDIO_TEXT_MAX_CHARS           = 5000;
 	private const EDITOR_SELECTED_TEXT_MAX_CHARS        = 2000;
 	private const EDITOR_COMMENT_TEXT_MAX_CHARS         = 1200;
 	private const EDITOR_FLOW_CACHE_TTL                 = 300;
@@ -232,7 +231,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'excerpt'                    => sanitize_textarea_field( (string) $request->get_param( 'excerpt' ) ),
 			'content_text'               => wp_trim_words( $content, 220, '' ),
 			'content_full_text'          => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $content, self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS ) ),
-			'content_audio_text'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( Rest_Editor_Audio_Text::editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), self::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
+			'content_audio_text'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( Rest_Editor_Audio_Text::editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), Rest_Editor_Audio_Text::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
 			'selected_text'              => wp_trim_words( sanitize_textarea_field( $selected_text ), 110, '' ),
 			'selected_block_text'        => wp_trim_words( sanitize_textarea_field( $selected_block_text ), 110, '' ),
 			'selected_text_full'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $selected_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
