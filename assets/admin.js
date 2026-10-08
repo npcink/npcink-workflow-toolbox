@@ -493,8 +493,15 @@
 		result.appendChild(bar);
 
 		line.textContent = t('Counts unavailable. Try reloading.');
-		reviewTallySummary().then((summary) => {
-			line.textContent = summary ? reviewTallyLine(summary, setKey) : t('Counts unavailable. Try reloading.');
+		const initialSummaryPromise = reviewTallySummary();
+		initialSummaryPromise.then((summary) => {
+			// A mark may have completed while this fetch was pending and
+			// already painted fresh counts; a stale read must not overwrite
+			// them, so only paint if the shared cache still holds this
+			// promise's result.
+			if (reviewTallySummaryPromise === initialSummaryPromise) {
+				line.textContent = summary ? reviewTallyLine(summary, setKey) : t('Counts unavailable. Try reloading.');
+			}
 		});
 
 		function mark(decision) {
