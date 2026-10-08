@@ -36,7 +36,7 @@ jobs:
         run: composer validate --no-check-publish
 
       - name: Cache Composer downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: composer-${{ runner.os }}-php8.0-${{ hashFiles('composer.lock') }}
@@ -69,7 +69,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
