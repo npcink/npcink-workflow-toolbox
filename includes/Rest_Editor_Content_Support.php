@@ -22,16 +22,14 @@ use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
-final class Rest_Editor_Content_Support extends Rest_Controller_Support {
+final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000;
 	private const EDITOR_SELECTED_TEXT_MAX_CHARS        = 2000;
 	private const EDITOR_COMMENT_TEXT_MAX_CHARS         = 1200;
-	private const EDITOR_FLOW_CACHE_TTL                 = 300;
 	private const EDITOR_PROGRESSIVE_TARGET_MS          = 2500;
 	private const EDITOR_PROGRESSIVE_CANDIDATE_LIMIT    = 8;
 
-	private Provider_Client $client;
 	private Publish_Preflight_Service $publish_preflight;
 
 	public function __construct( Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
@@ -719,35 +717,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return wp_trim_words( $query, 80, '' );
 	}
 
-	private function editor_input_scope( array $context ): array {
-		$scope     = sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) );
-		$selection = trim( (string) ( $context['selected_text'] ?? '' ) . ' ' . (string) ( $context['selected_block_text'] ?? '' ) );
-		if ( 'auto' === $scope ) {
-			$scope = '' !== $selection ? 'selected_text' : ( '' !== trim( (string) ( $context['content_text'] ?? '' ) ) ? 'full_article' : 'topic_only' );
-		}
-
-		$labels = array(
-			'selected_text' => __( 'Selected text or supplied snippet', 'npcink-workflow-toolbox' ),
-			'full_article'  => __( 'Full article context', 'npcink-workflow-toolbox' ),
-			'topic_only'    => __( 'Topic or short brief', 'npcink-workflow-toolbox' ),
-		);
-
-		$fields = array();
-		foreach ( array( 'title', 'excerpt', 'content_text', 'selected_text', 'selected_block_text', 'post_id' ) as $field ) {
-			if ( ! empty( $context[ $field ] ) ) {
-				$fields[] = $field;
-			}
-		}
-
-		return array(
-			'id'                     => $scope,
-			'label'                  => $labels[ $scope ] ?? __( 'Current context', 'npcink-workflow-toolbox' ),
-			'source_fields'          => $fields,
-			'operator_selected_mode' => sanitize_key( (string) ( $context['context_scope'] ?? 'auto' ) ),
-			'detail'                 => __( 'This scope controls ranking context only. Toolbox still returns suggestions and does not write WordPress data.', 'npcink-workflow-toolbox' ),
-		);
-	}
-
 	private function editor_image_support_query( array $context ): string {
 		$instruction = trim( sanitize_textarea_field( (string) ( $context['user_instruction'] ?? '' ) ) );
 		$selection   = trim(
@@ -1041,8 +1010,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$preflight_candidates     = $this->editor_preflight_recommendation_candidates( $preflight_checks );
 		$taxonomy_recommendations = '' !== trim( $query )
 			? array_merge(
-				$this->editor_taxonomy_recommendation_candidates( 'category_suggestions', $category_items, array(), $this->empty_proposed_new_terms_review() ),
-				$this->editor_taxonomy_recommendation_candidates( 'tag_suggestions', array(), $tag_items, $this->empty_proposed_new_terms_review() )
+				Rest_Editor_Taxonomy_Shaping::editor_taxonomy_recommendation_candidates( 'category_suggestions', $category_items, array(), $this->empty_proposed_new_terms_review() ),
+				Rest_Editor_Taxonomy_Shaping::editor_taxonomy_recommendation_candidates( 'tag_suggestions', array(), $tag_items, $this->empty_proposed_new_terms_review() )
 			)
 			: array();
 		$recommendations          = array_merge(
@@ -1460,7 +1429,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			}
 			$match_score   = (int) ( $item['score'] ?? 0 );
 			$quality_score = min( 95, 55 + $match_score * 8 );
-			$candidates[]  = $this->editor_recommendation_candidate(
+			$candidates[]  = Rest_Editor_Flow_Cache::editor_recommendation_candidate(
 				array(
 					'id'                   => 'media_library_' . $attachment_id,
 					'kind'                 => 'image',
@@ -1543,7 +1512,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			$id           = sanitize_key( (string) ( $item['id'] ?? 'preflight' ) );
 			$status       = sanitize_key( (string) ( $item['status'] ?? 'warning' ) );
 			$score        = 'error' === $status ? 35 : 55;
-			$candidates[] = $this->editor_recommendation_candidate(
+			$candidates[] = Rest_Editor_Flow_Cache::editor_recommendation_candidate(
 				array(
 					'id'             => 'preflight_' . $id,
 					'kind'           => 'preflight',
@@ -1563,114 +1532,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 		return $candidates;
 	}
-
-	private function editor_cached_site_knowledge( array $input ) {
-		return $this->editor_cached_client_result(
-			'site_knowledge',
-			$input,
-			function () use ( $input ) {
-				return $this->client->search_site_knowledge( $input );
-			}
-		);
-	}
-
-	private function editor_cached_content_discoverability( array $input ) {
-		return $this->editor_cached_client_result(
-			'content_discoverability',
-			$input,
-			function () use ( $input ) {
-				return $this->client->build_content_discoverability_brief( $input );
-			}
-		);
-	}
-
-	private function editor_cached_hosted_ai_content_support( array $input, bool $force_refresh = false ) {
-		return $this->editor_cached_client_result(
-			'hosted_ai_content_support',
-			$input,
-			function () use ( $input ) {
-				return $this->client->run_hosted_ai_content_support( $input );
-			},
-			$force_refresh
-		);
-	}
-
-	private function editor_cached_audio_generation( array $input, bool $force_refresh = false ) {
-		return $this->editor_cached_client_result(
-			'audio_generation',
-			$input,
-			function () use ( $input ) {
-				return $this->client->run_audio_generation( $input );
-			},
-			$force_refresh
-		);
-	}
-
-	private function editor_cached_cloud_web_search( array $input, bool $force_refresh = false ) {
-		return $this->editor_cached_client_result(
-			'cloud_web_search',
-			$input,
-			function () use ( $input ) {
-				return $this->client->test_cloud_web_search( $input );
-			},
-			$force_refresh,
-			function ( array $result ) use ( $input ): bool {
-				return $this->editor_source_extraction_cacheable( $input, $result );
-			},
-			true
-		);
-	}
-
-	private function editor_source_extraction_cacheable( array $input, array $result ): bool {
-		if ( 'source_extraction_preview' !== sanitize_key( (string) ( $input['intent'] ?? '' ) ) ) {
-			return true;
-		}
-
-		return 'ready' === sanitize_key( (string) ( $result['status'] ?? '' ) )
-			&& 'matched' === sanitize_key( (string) ( $result['url_match'] ?? '' ) )
-			&& ! empty( $result['results'][0]['reader_excerpt'] ?? '' );
-	}
-
-	private function editor_cached_client_result( string $namespace, array $input, callable $callback, bool $force_refresh = false, ?callable $should_cache = null, bool $replace_cache_on_force = false ) {
-		$cache_key = $this->editor_flow_cache_key( $namespace, $input );
-		$cached    = $force_refresh ? false : get_transient( $cache_key );
-		if ( false !== $cached && is_array( $cached ) ) {
-			if ( null === $should_cache || $should_cache( $cached ) ) {
-				$cached['cache_status'] = 'hit';
-				return $cached;
-			}
-			delete_transient( $cache_key );
-		}
-
-		$result = $callback();
-		if ( ! is_wp_error( $result ) && is_array( $result ) ) {
-			$result['cache_status'] = $force_refresh ? 'bypass' : 'miss';
-			$cacheable              = null === $should_cache || $should_cache( $result );
-			if ( $cacheable && ( ! $force_refresh || $replace_cache_on_force ) ) {
-				set_transient( $cache_key, $result, self::EDITOR_FLOW_CACHE_TTL );
-			} elseif ( $force_refresh && $replace_cache_on_force ) {
-				delete_transient( $cache_key );
-			}
-		}
-
-		return $result;
-	}
-
-	private function editor_flow_cache_key( string $namespace, array $input ): string {
-		$json = wp_json_encode( $input );
-		if ( ! is_string( $json ) ) {
-			$json = serialize( $input );
-		}
-
-		return 'npcink_toolbox_editor_' . sanitize_key( $namespace ) . '_' . md5( $json );
-	}
-
-	/**
-	 * Validates one public source URL before Cloud research is requested.
-	 *
-	 * @param string $value Raw URL.
-	 * @return string|WP_Error
-	 */
 
 	private function editor_source_adaptation_url( string $value ) {
 		$value = trim( $value );
@@ -2503,7 +2364,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_writing_pack_related_articles( array $knowledge ): array {
-		$items  = $this->editor_related_content_items( $knowledge );
+		$items  = Rest_Editor_Flow_Cache::editor_related_content_items( $knowledge );
 		$result = array();
 		foreach ( array_slice( $items, 0, 6 ) as $index => $item ) {
 			$result[] = array(
@@ -2659,7 +2520,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			'write_posture'          => 'suggestion_only',
 			'final_write_path'       => 'core_proposal_required',
 			'direct_wordpress_write' => false,
-			'input_scope'            => $this->editor_input_scope( $context ),
+			'input_scope'            => Rest_Editor_Flow_Cache::editor_input_scope( $context ),
 			'summary_candidates'     => $summary_ai,
 			'summary_layers'         => $summary_layers,
 			'category_candidates'    => array_slice( $categories, 0, 5 ),
@@ -2726,7 +2587,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			),
 			'diagnosis'              => array(
 				'summary_quality'   => $this->editor_summary_quality( $context ),
-				'taxonomy_quality'  => $this->editor_taxonomy_quality( $context, $categories, $tags, $proposed_new_terms ),
+				'taxonomy_quality'  => Rest_Editor_Taxonomy_Shaping::editor_taxonomy_quality( $context, $categories, $tags, $proposed_new_terms ),
 				'hypotheses'        => array(
 					__( 'A clearer excerpt can improve archive, social, and answer-summary presentation without rewriting the article body.', 'npcink-workflow-toolbox' ),
 					__( 'Existing WordPress terms should be reused; new vocabulary belongs in a later taxonomy governance workflow.', 'npcink-workflow-toolbox' ),
@@ -2822,37 +2683,8 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return strlen( $excerpt ) < 80 ? 'weak' : 'acceptable';
 	}
 
-	private function editor_taxonomy_quality( array $context, array $categories, array $tags, array $proposed_new_terms ): string {
-		$current_categories = is_array( $context['category_ids'] ?? null ) ? array_filter( array_map( 'absint', $context['category_ids'] ) ) : array();
-		$current_tags       = is_array( $context['tag_ids'] ?? null ) ? array_filter( array_map( 'absint', $context['tag_ids'] ) ) : array();
-		if ( empty( $current_categories ) && empty( $current_tags ) ) {
-			return 'missing';
-		}
-		if ( ! empty( $proposed_new_terms['items'] ) || 12 < count( $current_tags ) ) {
-			return 'noisy';
-		}
-		if ( empty( $categories ) && empty( $tags ) ) {
-			return 'acceptable';
-		}
-
-		return 'weak';
-	}
-
-	private function editor_related_content_items( array $related_content ): array {
-		$items = is_array( $related_content['results'] ?? null )
-			? $related_content['results']
-			: ( is_array( $related_content['items'] ?? null ) ? $related_content['items'] : array() );
-
-		return array_values(
-			array_filter(
-				$items,
-				static fn( $item ): bool => is_array( $item )
-			)
-		);
-	}
-
 	private function editor_related_content_summary( array $related_content ): array {
-		$items        = $this->editor_related_content_items( $related_content );
+		$items        = Rest_Editor_Flow_Cache::editor_related_content_items( $related_content );
 		$evidence_ids = array();
 		$titles       = array();
 
@@ -2875,7 +2707,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 	}
 
 	private function editor_related_content_context_for_ai( array $related_content ): array {
-		$items         = $this->editor_related_content_items( $related_content );
+		$items         = Rest_Editor_Flow_Cache::editor_related_content_items( $related_content );
 		$context_items = array();
 
 		foreach ( array_slice( $items, 0, 6 ) as $item ) {
@@ -2965,7 +2797,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 		$items                                 = is_array( $artifact['items'] ?? null ) ? $artifact['items'] : array();
 		$items                                 = $this->editor_internal_link_merge_cloud_relevance( $items, $related_content_evidence );
-		$artifact['input_scope']               = $this->editor_input_scope( $context );
+		$artifact['input_scope']               = Rest_Editor_Flow_Cache::editor_input_scope( $context );
 		$artifact['source_ability_id']         = 'npcink-abilities-toolkit/resolve-internal-link-targets';
 		$artifact['source_knowledge']          = $source_knowledge;
 		$artifact['candidate_source']          = $source_status;
@@ -3056,7 +2888,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_internal_link_related_content_evidence( array $source_knowledge ): array {
 		$evidence = array();
-		foreach ( array_slice( $this->editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
+		foreach ( array_slice( Rest_Editor_Flow_Cache::editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
 			$post_id             = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
 			$candidate_relevance = sanitize_key( (string) ( $item['candidate_relevance'] ?? '' ) );
 			if ( ! in_array( $candidate_relevance, array( 'strong', 'review', 'weak' ), true ) ) {
@@ -3247,7 +3079,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 				$quality_issues[] = __( '目标必须是本站已发布的文章或页面；当前候选只能复制或打开检查。', 'npcink-workflow-toolbox' );
 			}
 
-			$candidates[] = $this->editor_recommendation_candidate(
+			$candidates[] = Rest_Editor_Flow_Cache::editor_recommendation_candidate(
 				array(
 					'id'                    => 'internal_link_' . ( $index + 1 ),
 					'kind'                  => 'internal_link',
@@ -3907,92 +3739,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		return $section;
 	}
 
-	private function editor_recommendation_candidate( array $args ): array {
-		$candidate = array(
-			'contract'               => 'recommendation_candidate.v1',
-			'id'                     => sanitize_key( (string) ( $args['id'] ?? 'candidate' ) ),
-			'kind'                   => sanitize_key( (string) ( $args['kind'] ?? 'generic' ) ),
-			'label'                  => sanitize_text_field( (string) ( $args['label'] ?? __( 'Recommendation candidate', 'npcink-workflow-toolbox' ) ) ),
-			'value'                  => sanitize_text_field( (string) ( $args['value'] ?? '' ) ),
-			'reason'                 => sanitize_text_field( (string) ( $args['reason'] ?? '' ) ),
-			'confidence'             => is_numeric( $args['confidence'] ?? null ) ? max( 0, min( 1, (float) $args['confidence'] ) ) : null,
-			'quality_status'         => sanitize_key( (string) ( $args['quality_status'] ?? 'review' ) ),
-			'quality_score'          => absint( $args['quality_score'] ?? 0 ),
-			'quality_issues'         => is_array( $args['quality_issues'] ?? null ) ? array_values( array_map( 'sanitize_text_field', $args['quality_issues'] ) ) : array(),
-			'action_policy'          => sanitize_key( (string) ( $args['action_policy'] ?? 'suggestion_only' ) ),
-			'target_field'           => sanitize_key( (string) ( $args['target_field'] ?? '' ) ),
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
-			'evidence_refs'          => is_array( $args['evidence_refs'] ?? null ) ? array_values( array_map( 'sanitize_text_field', $args['evidence_refs'] ) ) : array(),
-		);
-
-		if ( '' !== (string) ( $args['source_candidate_ref'] ?? '' ) ) {
-			$candidate['source_candidate_ref'] = sanitize_text_field( (string) $args['source_candidate_ref'] );
-		}
-		if ( '' !== (string) ( $args['candidate_source'] ?? '' ) ) {
-			$candidate['candidate_source'] = sanitize_key( (string) $args['candidate_source'] );
-		}
-		if ( in_array( (string) ( $args['candidate_relevance'] ?? '' ), array( 'strong', 'review', 'weak' ), true ) ) {
-			$candidate['candidate_relevance'] = (string) $args['candidate_relevance'];
-		}
-		if ( is_array( $args['target_ref'] ?? null ) ) {
-			$target_ref              = $args['target_ref'];
-			$candidate['target_ref'] = array(
-				'post_id'   => absint( $target_ref['post_id'] ?? 0 ),
-				'title'     => sanitize_text_field( (string) ( $target_ref['title'] ?? '' ) ),
-				'url'       => esc_url_raw( (string) ( $target_ref['url'] ?? '' ) ),
-				'status'    => sanitize_key( (string) ( $target_ref['status'] ?? '' ) ),
-				'post_type' => sanitize_key( (string) ( $target_ref['post_type'] ?? '' ) ),
-			);
-		}
-		if ( '' !== (string) ( $args['anchor_or_context'] ?? '' ) ) {
-			$candidate['anchor_or_context'] = sanitize_text_field( (string) $args['anchor_or_context'] );
-		}
-		if ( array_key_exists( 'can_apply_to_editor', $args ) ) {
-			$candidate['can_apply_to_editor'] = true === $args['can_apply_to_editor'];
-		}
-		if ( '' !== (string) ( $args['anchor_quality_status'] ?? '' ) ) {
-			$candidate['anchor_quality_status'] = sanitize_key( (string) $args['anchor_quality_status'] );
-		}
-		if ( '' !== (string) ( $args['evidence_note'] ?? '' ) ) {
-			$candidate['evidence_note'] = sanitize_text_field( (string) $args['evidence_note'] );
-		}
-		if ( '' !== (string) ( $args['owner_label'] ?? '' ) ) {
-			$candidate['owner_label'] = sanitize_key( (string) $args['owner_label'] );
-		}
-		if ( '' !== (string) ( $args['next_safe_action'] ?? '' ) ) {
-			$candidate['next_safe_action'] = sanitize_key( (string) $args['next_safe_action'] );
-		}
-		if ( is_array( $args['source_match'] ?? null ) ) {
-			$source_match  = $args['source_match'];
-			$client_id     = sanitize_text_field( (string) ( $source_match['block_client_id'] ?? '' ) );
-			$matched_text  = sanitize_text_field( (string) ( $source_match['matched_text'] ?? '' ) );
-			$expected_text = sanitize_textarea_field( Rest_Editor_Audio_Text::trim( wp_strip_all_tags( (string) ( $source_match['expected_text'] ?? '' ) ), 1600 ) );
-			if ( '' !== $client_id && '' !== $matched_text && '' !== $expected_text ) {
-				$candidate['source_match'] = array(
-					'block_client_id' => $client_id,
-					'block_name'      => sanitize_text_field( (string) ( $source_match['block_name'] ?? '' ) ),
-					'matched_text'    => $matched_text,
-					'text_offset'     => absint( $source_match['text_offset'] ?? 0 ),
-					'expected_text'   => $expected_text,
-					'match_basis'     => sanitize_key( (string) ( $source_match['match_basis'] ?? '' ) ),
-				);
-			}
-		}
-		if ( '' !== (string) ( $args['priority_reason'] ?? '' ) ) {
-			$candidate['priority_reason'] = sanitize_text_field( (string) $args['priority_reason'] );
-		}
-		if ( is_array( $args['link_graph_issues'] ?? null ) ) {
-			$candidate['link_graph_issues'] = array_values( array_filter( array_map( 'sanitize_key', $args['link_graph_issues'] ) ) );
-		}
-		if ( is_array( $args['shared_terms'] ?? null ) ) {
-			$candidate['shared_terms'] = array_slice( array_values( array_filter( array_map( 'sanitize_text_field', $args['shared_terms'] ) ) ), 0, 3 );
-		}
-		$candidate['incoming_count'] = absint( $args['incoming_count'] ?? 0 );
-
-		return $candidate;
-	}
-
 	private function editor_fast_category_suggestions( array $context, string $query ): array {
 		$taxonomy_terms = $this->editor_taxonomy_term_candidates( $context, $query );
 		$items          = is_array( $taxonomy_terms['items'] ?? null ) ? $taxonomy_terms['items'] : array();
@@ -4003,7 +3749,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 			)
 		);
 
-		return $this->editor_taxonomy_only_suggestion_section(
+		return Rest_Editor_Taxonomy_Shaping::editor_taxonomy_only_suggestion_section(
 			'category_suggestions',
 			$categories,
 			array(),
@@ -4024,124 +3770,13 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		);
 		$proposed_new_terms = $this->empty_proposed_new_terms_review();
 
-		return $this->editor_taxonomy_only_suggestion_section(
+		return Rest_Editor_Taxonomy_Shaping::editor_taxonomy_only_suggestion_section(
 			'tag_suggestions',
 			array(),
 			$tags,
 			$proposed_new_terms,
 			$taxonomy_terms,
 			$context
-		);
-	}
-
-	private function editor_taxonomy_only_suggestion_section( string $candidate_type, array $categories, array $tags, array $proposed_new_terms, array $taxonomy_terms, array $context ): array {
-		return array(
-			'artifact_type'             => 'article_taxonomy_suggestions.v1',
-			'composition_role'          => 'taxonomy_candidates_only',
-			'candidate_type'            => sanitize_key( $candidate_type ),
-			'candidate_contract'        => 'recommendation_candidate.v1',
-			'write_posture'             => 'suggestion_only',
-			'final_write_path'          => 'core_proposal_required',
-			'direct_wordpress_write'    => false,
-			'input_scope'               => $this->editor_input_scope( $context ),
-			'category_candidates'       => array_slice( $categories, 0, 5 ),
-			'tag_candidates'            => array_slice( $tags, 0, 8 ),
-			'proposed_new_terms'        => $proposed_new_terms,
-			'taxonomy_terms'            => $taxonomy_terms,
-			'recommendation_candidates' => $this->editor_taxonomy_recommendation_candidates( $candidate_type, $categories, $tags, $proposed_new_terms ),
-			'quality_gate'              => array(
-				'name'           => 'runtime_taxonomy_candidate_rerank',
-				'policy'         => 'existing_terms_first_current_draft_match_then_related_history',
-				'candidate_sort' => 'score_desc_then_existing_term_order',
-			),
-			'selection_policy'          => array(
-				'prefer_existing_terms'    => true,
-				'new_terms_deferred'       => true,
-				'no_toolbox_term_creation' => true,
-				'accepted_write_path'      => 'core_proposal_required',
-			),
-		);
-	}
-
-	private function editor_taxonomy_recommendation_candidates( string $candidate_type, array $categories, array $tags, array $proposed_new_terms ): array {
-		$items  = 'category_suggestions' === $candidate_type ? array_slice( $categories, 0, 5 ) : array_slice( $tags, 0, 8 );
-		$result = array();
-		foreach ( $items as $index => $item ) {
-			$taxonomy = sanitize_key( (string) ( $item['taxonomy'] ?? '' ) );
-			$term_id  = absint( $item['term_id'] ?? 0 );
-			$name     = sanitize_text_field( (string) ( $item['name'] ?? '' ) );
-			if ( '' === $name || 0 >= $term_id ) {
-				continue;
-			}
-			$quality  = $this->editor_taxonomy_candidate_quality( $item );
-			$result[] = $this->editor_recommendation_candidate(
-				array(
-					'id'             => ( 'category' === $taxonomy ? 'category_' : 'tag_' ) . $term_id,
-					'kind'           => 'category' === $taxonomy ? 'category' : 'tag',
-					'label'          => 'category' === $taxonomy ? __( 'Existing category', 'npcink-workflow-toolbox' ) : __( 'Existing tag', 'npcink-workflow-toolbox' ),
-					'value'          => $name,
-					'reason'         => sanitize_text_field( (string) ( $item['reason'] ?? '' ) ),
-					'confidence'     => $quality['confidence'],
-					'target_field'   => 'category' === $taxonomy ? 'category' : 'post_tag',
-					'action_policy'  => 'core_proposal_required',
-					'quality_status' => $quality['status'],
-					'quality_score'  => $quality['score'],
-					'quality_issues' => $quality['issues'],
-					'evidence_refs'  => is_array( $item['evidence_refs'] ?? null ) ? $item['evidence_refs'] : array(),
-				)
-			);
-		}
-
-		return $result;
-	}
-
-	private function editor_taxonomy_candidate_quality( array $item ): array {
-		$score           = is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : 0.0;
-		$match_signals   = is_array( $item['match_signals'] ?? null ) ? $item['match_signals'] : array();
-		$related_context = is_array( $item['related_context'] ?? null ) ? $item['related_context'] : array();
-		$quality_score   = max( 0, min( 100, 45 + (int) round( $score * 10 ) ) );
-		$quality_issues  = array();
-		if ( in_array( 'current_draft_match', $match_signals, true ) ) {
-			$quality_issues[] = __( '匹配当前草稿中的标题、摘要或正文词。', 'npcink-workflow-toolbox' );
-		}
-		if ( in_array( 'title_term_name_match', $match_signals, true ) ) {
-			$quality_issues[] = __( '词条名称在标题中完整出现，优先级更高。', 'npcink-workflow-toolbox' );
-		}
-		if ( in_array( 'slug_alias_match', $match_signals, true ) ) {
-			$quality_issues[] = __( '词条 slug 或别名与当前编辑上下文匹配。', 'npcink-workflow-toolbox' );
-		}
-		if ( in_array( 'related_site_knowledge_term', $match_signals, true ) ) {
-			$quality_issues[] = __( '历史相关文章使用过该词汇，可作为站内词库证据。', 'npcink-workflow-toolbox' );
-		}
-		if ( in_array( 'description_only_match', $match_signals, true ) ) {
-			$quality_score   -= 20;
-			$quality_issues[] = __( '仅描述字段匹配，避免把弱说明文字当作强分类依据。', 'npcink-workflow-toolbox' );
-		}
-		if ( in_array( 'low_specificity_match', $match_signals, true ) ) {
-			$quality_score   -= 15;
-			$quality_issues[] = __( '只有一个较弱 token 匹配，需人工确认是否为标题党或泛化词。', 'npcink-workflow-toolbox' );
-		}
-		if ( empty( $quality_issues ) ) {
-			$quality_issues[] = __( '仅作为现有 WordPress 词条候选，采用人工审查。', 'npcink-workflow-toolbox' );
-		}
-		if ( 0 === absint( $related_context['source_count'] ?? 0 ) && ! in_array( 'current_draft_match', $match_signals, true ) ) {
-			$quality_score   -= 15;
-			$quality_issues[] = __( '缺少当前草稿或历史文章的强匹配证据。', 'npcink-workflow-toolbox' );
-		}
-
-		$status = 'good';
-		if ( $quality_score < 70 ) {
-			$status = 'review';
-		}
-		if ( $quality_score < 55 ) {
-			$status = 'weak';
-		}
-
-		return array(
-			'score'      => max( 0, min( 100, $quality_score ) ),
-			'status'     => $status,
-			'confidence' => max( 0.0, min( 1.0, $score / 5 ) ),
-			'issues'     => array_values( array_unique( $quality_issues ) ),
 		);
 	}
 
@@ -4171,7 +3806,7 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 
 	private function editor_related_content_term_evidence( array $related_content ): array {
 		$evidence = array();
-		foreach ( array_slice( $this->editor_related_content_items( $related_content ), 0, 20 ) as $index => $item ) {
+		foreach ( array_slice( Rest_Editor_Flow_Cache::editor_related_content_items( $related_content ), 0, 20 ) as $index => $item ) {
 			$post_id = absint( $item['post_id'] ?? 0 );
 			if ( 0 >= $post_id ) {
 				continue;
@@ -4613,12 +4248,12 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		$taxonomy_terms['ranking_context']['related_term_policy'] = 'ranking_evidence_only_no_term_creation_or_assignment';
 		$review_set_result                                        = $this->editor_toolkit_taxonomy_review_set( $input );
 		if ( is_wp_error( $review_set_result ) ) {
-			$taxonomy_terms['taxonomy_tag_review_set'] = $this->editor_taxonomy_review_set_from_suggestions( $taxonomy_terms, $review_set_result );
+			$taxonomy_terms['taxonomy_tag_review_set'] = Rest_Editor_Taxonomy_Shaping::editor_taxonomy_review_set_from_suggestions( $taxonomy_terms, $review_set_result );
 		} else {
 			$review_set_data                           = is_array( $review_set_result['data'] ?? null ) ? $review_set_result['data'] : $review_set_result;
 			$taxonomy_terms['taxonomy_tag_review_set'] = is_array( $review_set_data ) && 'taxonomy_tag_review_set' === (string) ( $review_set_data['artifact_type'] ?? '' )
 				? $review_set_data
-				: $this->editor_taxonomy_review_set_from_suggestions(
+				: Rest_Editor_Taxonomy_Shaping::editor_taxonomy_review_set_from_suggestions(
 					$taxonomy_terms,
 					new WP_Error(
 						'npcink_toolbox_taxonomy_review_set_invalid_artifact',
@@ -4701,90 +4336,6 @@ final class Rest_Editor_Content_Support extends Rest_Controller_Support {
 		}
 
 		return $result;
-	}
-
-	private function editor_taxonomy_review_set_from_suggestions( array $taxonomy_terms, WP_Error $fallback_reason ): array {
-		$items            = is_array( $taxonomy_terms['items'] ?? null ) ? array_values( array_filter( $taxonomy_terms['items'], 'is_array' ) ) : array();
-		$review_set_limit = 8;
-		$selected         = array();
-		$blocked          = array();
-
-		foreach ( $items as $item ) {
-			$quality = $this->editor_taxonomy_candidate_quality( $item );
-			$row     = array(
-				'candidate_id'               => ( 'category' === (string) ( $item['taxonomy'] ?? '' ) ? 'category_' : 'tag_' ) . absint( $item['term_id'] ?? 0 ),
-				'candidate_contract'         => 'taxonomy_tag_review_candidate.v1',
-				'taxonomy'                   => sanitize_key( (string) ( $item['taxonomy'] ?? '' ) ),
-				'term_id'                    => absint( $item['term_id'] ?? 0 ),
-				'name'                       => sanitize_text_field( (string) ( $item['name'] ?? '' ) ),
-				'slug'                       => sanitize_title( (string) ( $item['slug'] ?? '' ) ),
-				'score'                      => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : 0.0,
-				'quality'                    => $quality,
-				'reason'                     => sanitize_text_field( (string) ( $item['reason'] ?? '' ) ),
-				'evidence_refs'              => is_array( $item['evidence_refs'] ?? null ) ? array_values( array_map( 'sanitize_text_field', $item['evidence_refs'] ) ) : array(),
-				'proposed_action'            => 'append_existing_term',
-				'needs_operator_review'      => true,
-				'direct_wordpress_write'     => false,
-				'term_creation_allowed'      => false,
-				'term_assignment_authorized' => false,
-			);
-			if ( '' === $row['name'] || 0 >= $row['term_id'] ) {
-				$row['blocked_reason'] = 'invalid_existing_term_candidate';
-				$blocked[]             = $row;
-				continue;
-			}
-			if ( 'weak' === (string) $quality['status'] ) {
-				$row['blocked_reason'] = 'weak_taxonomy_evidence';
-				$blocked[]             = $row;
-				continue;
-			}
-			if ( count( $selected ) >= $review_set_limit ) {
-				$row['blocked_reason'] = 'review_set_limit_reached';
-				$blocked[]             = $row;
-				continue;
-			}
-			$row['review_status'] = 'good' === (string) $quality['status'] ? 'ready_for_review' : 'review_recommended';
-			$selected[]           = $row;
-		}
-
-		return array(
-			'contract_version'            => 'taxonomy_tag_review_set.v1',
-			'artifact_type'               => 'taxonomy_tag_review_set',
-			'mode'                        => 'governed_review_set',
-			'write_posture'               => 'suggestion_only',
-			'final_write_path'            => 'core_proposal_required',
-			'direct_wordpress_write'      => false,
-			'proposal_created'            => false,
-			'execution_created'           => false,
-			'commit_execution'            => false,
-			'source_ability_id'           => 'npcink-abilities-toolkit/suggest-post-taxonomy-terms',
-			'preferred_source_ability_id' => 'npcink-abilities-toolkit/build-taxonomy-tag-review-set',
-			'runtime_owner'               => 'npcink-workflow-toolbox',
-			'fallback_reason'             => sanitize_key( $fallback_reason->get_error_code() ),
-			'fallback_message'            => sanitize_text_field( $fallback_reason->get_error_message() ),
-			'review_set_limit'            => $review_set_limit,
-			'eligibility_summary'         => array(
-				'scanned'  => count( $items ),
-				'selected' => count( $selected ),
-				'blocked'  => count( $blocked ),
-			),
-			'selected_items'              => $selected,
-			'blocked_items'               => $blocked,
-			'safety'                      => array(
-				'term_creation_allowed'    => false,
-				'term_assignment_allowed'  => false,
-				'proposal_created'         => false,
-				'direct_wordpress_write'   => false,
-				'provider_runtime_used'    => false,
-				'cloud_runtime_dependency' => false,
-			),
-			'handoff'                     => array(
-				'accepted_selection_target' => 'npcink-abilities-toolkit/build-content-metadata-apply-plan',
-				'term_assignment_target'    => 'npcink-abilities-toolkit/set-post-terms',
-				'final_write_path'          => 'core_proposal_required',
-				'operator_review_required'  => true,
-			),
-		);
 	}
 
 	private function editor_contextual_match_score( string $candidate_text, array $context, string $query ): int {
