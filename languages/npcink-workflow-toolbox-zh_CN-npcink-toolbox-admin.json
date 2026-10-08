@@ -915,7 +915,8 @@
       "accepted": ["已接受"],
       "ignored": ["已忽略"],
       "Local counts only. No content is written.": ["仅本地计数，不写入任何内容。"],
-      "Could not save the tally mark. Try again.": ["无法保存计数标记，请重试。"]
+      "Could not save the tally mark. Try again.": ["无法保存计数标记，请重试。"],
+      "Counts unavailable. Try reloading.": ["计数不可用，请刷新重试。"]
     }
   }
 }

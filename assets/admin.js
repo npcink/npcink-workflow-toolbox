@@ -427,7 +427,6 @@
 		['data-toolbox-media-alt-caption-review', 'media_alt'],
 	];
 	let reviewTallySummaryPromise = null;
-	const reviewTallyBars = [];
 
 	function reviewTallySummary() {
 		if (!reviewTallySummaryPromise) {
@@ -443,7 +442,14 @@
 	}
 
 	function paintReviewTallyBars(summary) {
-		reviewTallyBars.forEach((paint) => paint(summary));
+		// Paint from live DOM state (no closure registry to leak when
+		// result nodes are re-rendered).
+		document.querySelectorAll('.npcink-toolbox__review-tally[data-review-set]').forEach((bar) => {
+			const line = bar.querySelector('.npcink-toolbox__review-tally-summary');
+			if (line) {
+				line.textContent = summary ? reviewTallyLine(summary, bar.getAttribute('data-review-set')) : t('Counts unavailable. Try reloading.');
+			}
+		});
 	}
 
 	function reviewTallyLine(summary, setKey) {
@@ -461,6 +467,7 @@
 			return;
 		}
 		const bar = el('div', 'npcink-toolbox__review-tally');
+		bar.setAttribute('data-review-set', setKey);
 		const acceptButton = el('button', 'button button-small');
 		acceptButton.type = 'button';
 		acceptButton.textContent = t('Accept +1');
@@ -476,14 +483,16 @@
 		bar.appendChild(note);
 		result.appendChild(bar);
 
-		function paint(summary) {
-			line.textContent = reviewTallyLine(summary, setKey);
-		}
-		reviewTallyBars.push(paint);
-		reviewTallySummary().then(paint);
+		line.textContent = t('Counts unavailable. Try reloading.');
+		reviewTallySummary().then((summary) => {
+			line.textContent = summary ? reviewTallyLine(summary, setKey) : t('Counts unavailable. Try reloading.');
+		});
 
-		function mark(decision, button) {
-			button.disabled = true;
+		function mark(decision) {
+			// Both buttons lock for the whole flight: a concurrent click on
+			// the sibling would append a second server-side mark.
+			acceptButton.disabled = true;
+			ignoreButton.disabled = true;
 			line.textContent = '';
 			fetch(joinRestUrl(config.restUrl, 'review-tally/mark'), {
 				method: 'POST',
@@ -499,11 +508,12 @@
 			}).catch(() => {
 				line.textContent = t('Could not save the tally mark. Try again.');
 			}).finally(() => {
-				button.disabled = false;
+				acceptButton.disabled = false;
+				ignoreButton.disabled = false;
 			});
 		}
-		acceptButton.addEventListener('click', () => mark('accepted', acceptButton));
-		ignoreButton.addEventListener('click', () => mark('ignored', ignoreButton));
+		acceptButton.addEventListener('click', () => mark('accepted'));
+		ignoreButton.addEventListener('click', () => mark('ignored'));
 	}
 
 	function renderTextResult(form, value, kind) {
