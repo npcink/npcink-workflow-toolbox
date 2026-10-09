@@ -146,7 +146,7 @@ Enrolled-copy re-sync to the updated template (same-day round):
 | `npcink-ai-client-adapter` | #65 | merged |
 | `npcink-cloud-addon` | #210 | merged |
 | `npcink-eval-lab` | #102 | merged |
-| `npcink-ai-cloud` | #1060 | open: pre-existing `backend-targeted (contract-3)` failure on master since 2026-10-02's last green full CI (diagnosis in the pull request; unrelated to the one-file workflow diff) |
+| `npcink-ai-cloud` | #1060 | merged 2026-10-05; the master `backend-targeted (contract-3)` red was superseded by the aggregate `backend` gate design - resolved with #1078 (adjudicated 2026-10-09, see the 2026-10-08 round row) |
 | `npcink-device-inventory` | #7 | open: `npm audit --audit-level=high` turned red on the unchanged dependency tree after a new advisory (green at enrollment #6 on 2026-09-29; diagnosis in the pull request) |
 
 Every delivered review round was triaged - fixed, or declined with the
@@ -261,7 +261,7 @@ unplanned review loop on the re-ported scripts:
 | `npcink-cloud-addon` | #242 | merged |
 | `npcink-eval-lab` | #104 | merged (copy also moved to `ubuntu-26.04` from the lagged `ubuntu-latest`) |
 | `npcink-device-inventory` | #11 | open: pre-existing `npm audit --audit-level=high` red in the `ele-rs` desktop tree (unchanged dependencies, documented since 2026-10-04); diagnosis on the pull request |
-| `npcink-ai-cloud` | #1078 | open: branch protection requires a literal `backend` check name that never reports on PR events (the sharded `backend-targeted` checks all pass); same protection mismatch as the 2026-10-04 round (#1060); repo-owner decision |
+| `npcink-ai-cloud` | #1078 | merged 2026-10-08; adjudicated 2026-10-09: ci.yml now carries an aggregate `backend` job (`if: always()`, gating on classification) that reports on PR events and satisfies the protection rule's literal check name - verified green on #1090/#1091. The aggregate design is the standing answer; no further owner action required |
 
 Hardening deltas from the re-port review loop (both gated copies now
 carry them): the disarm state read captures stdout separately so a
