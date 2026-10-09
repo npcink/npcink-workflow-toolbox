@@ -92,10 +92,17 @@ with the closing commit or PR for one release cycle, then prune.
   cluster (session 5: recommendation-set envelope, content
   fingerprint/context contracts, local taxonomy profile, pure
   media/preflight candidate shapers, weighted token-match scoring -
-  Rest_Editor_Progressive_Recommendations). The service sits at ~3.6k
-  lines. Remaining: the media/ALT cluster plus the summary and taxonomy
-  cached-flow orchestrators, all inheriting the cache base and movable
-  with the same pattern.
+  Rest_Editor_Progressive_Recommendations). Landed 2026-10-09: the
+  media/ALT cluster (session 6) as the first instance service extending
+  the cache base (Rest_Editor_Media_Alt: request media-items snapshot,
+  attachment metadata + sanitization, contextual image ALT flow with
+  explicit-consent visual evidence, visual context normalization,
+  bounded image-source support query, Toolkit image-candidate review
+  projection, and the media brief handler behind a one-line facade
+  delegate; editor_media_library_candidates intentionally stays in the
+  service per session 5's boundary). The service sits at ~3.0k lines.
+  Remaining: the summary and taxonomy cached-flow orchestrators,
+  inheriting the cache base and movable with the same pattern.
 - **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
   findings live in `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster

@@ -34,7 +34,10 @@ Last reviewed: 2026-10-07.
   `Admin_Page_Site_Ops_Panel.php` holds the extracted Site Check render
   cluster (parent class).
 - `includes/Rest_Editor_Content_Support.php` — editor content-support
-  service (~6.5k lines, 183 methods; sub-division owed).
+  service (~3.0k lines) plus seven static sibling clusters and the
+  `Rest_Editor_Media_Alt` instance service over the shared
+  `Rest_Editor_Flow_Cache` base; only the summary/taxonomy cached-flow
+  orchestrators remain inside the facade.
 - `assets/editor-content-support.js` — editor bundle (10.6k lines) plus
   pure part files under `assets/editor-content-support/` behind frozen
   `window.NpcinkToolbox*` namespaces.
@@ -68,8 +71,8 @@ Last reviewed: 2026-10-07.
 
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
    draft) still inside the 10.6k main bundle.
-2. `Rest_Editor_Content_Support.php` sub-division (6.5k/183 methods),
-   after the JS clusters set the JED translation policy.
+2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
+   only the summary/taxonomy cached-flow orchestrators remain).
 3. `assets/admin.js` (8.2k) and remaining `Admin_Page.php` clusters
    (review-set tools, media derivative controls, content context form).
 4. Editor intent convergence shipped 2026-10-07: twelve-intent editor
