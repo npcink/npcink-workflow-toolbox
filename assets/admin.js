@@ -8278,6 +8278,235 @@
 		});
 	}
 
+	// --- Onboarding tour (client-only; docs/onboarding-tour-design-v1.md) ---
+	// Local guidance surface: client-only by design; tour state lives only
+	// in localStorage and the module never opens a network connection.
+	const TOUR_STATE_KEY = 'npcinkToolboxAdminTour.v1';
+	const TOUR_STEPS = [
+		{
+			anchorId: 'npcink-toolbox-tour-getting-started',
+			copy: t('Toolbox returns suggestions and review-only artifacts; nothing is written to WordPress without your review or a governed Core handoff.'),
+			prepare: openOverviewTab,
+		},
+		{
+			anchorId: 'npcink-toolbox-tour-cloud-status',
+			copy: t('Hosted AI runs need the Cloud Addon connected; everything else works without it.'),
+			prepare: openOverviewSystemStatus,
+		},
+		{
+			anchorId: 'npcink-toolbox-tour-batch-optimize',
+			copy: t('Image Handling holds the one bounded flow with local write authority; originals stay restorable.'),
+			prepare: openImageHandlingTools,
+		},
+		{
+			anchorId: 'npcink-toolbox-tour-system-status',
+			copy: t('Readiness and defaults stay visible without becoming a runtime.'),
+			prepare: openOverviewSystemStatus,
+		},
+		{
+			anchorId: 'npcink-toolbox-tour-getting-started',
+			copy: t('Open any post to see the Npcink Content Support sidebar: suggestions only, and publishing stays native WordPress.'),
+			prepare: openOverviewTab,
+		},
+	];
+	let tourCard = null;
+	let tourCardCopy = null;
+	let tourCardBack = null;
+	let tourStepIndex = 0;
+	let tourKeyListener = null;
+	let tourTrigger = null;
+
+	function tourState() {
+		try {
+			return window.localStorage.getItem(TOUR_STATE_KEY) || '';
+		} catch (error) {
+			return '';
+		}
+	}
+
+	function setTourState(value) {
+		try {
+			window.localStorage.setItem(TOUR_STATE_KEY, value);
+		} catch (error) {
+			// localStorage can be unavailable; the tour then simply stays restartable.
+		}
+	}
+
+	function tourStepLabel(stepNumber) {
+		const pattern = t('Step %1$d of %2$d');
+		if (typeof i18n.sprintf === 'function') {
+			return i18n.sprintf(pattern, stepNumber, TOUR_STEPS.length);
+		}
+		return String(pattern).replace('%1$d', String(stepNumber)).replace('%2$d', String(TOUR_STEPS.length));
+	}
+
+	function openOverviewTab() {
+		activateTopTab('start', true);
+	}
+
+	function openSystemStatusDetails() {
+		const details = document.querySelector('.npcink-toolbox__start-advanced');
+		if (details) {
+			details.open = true;
+		}
+	}
+
+	function openImageHandlingTools() {
+		activateTopTab('tools', true);
+		const workspace = document.querySelector('[data-toolbox-tools]');
+		if (workspace) {
+			if (!activateToolPanel('media-batch-optimize', false, workspace)) {
+				activateToolGroup('media', false, workspace);
+			}
+		}
+	}
+
+	function openOverviewSystemStatus() {
+		activateTopTab('start', true);
+		openSystemStatusDetails();
+	}
+
+	function buildTourCard() {
+		const card = el('div', 'npcink-toolbox__result-notice npcink-toolbox__tour-notice');
+		card.setAttribute('role', 'status');
+		card.setAttribute('aria-live', 'polite');
+		card.setAttribute('tabindex', '-1');
+		const copy = el('span', 'npcink-toolbox__tour-copy');
+		card.appendChild(copy);
+		const actions = el('div', 'npcink-toolbox__inline-actions');
+		const back = el('button', 'button-link npcink-toolbox__tour-back');
+		back.type = 'button';
+		back.textContent = t('Back');
+		back.addEventListener('click', function () {
+			moveTour(-1);
+		});
+		const next = el('button', 'button-link npcink-toolbox__tour-next');
+		next.type = 'button';
+		next.textContent = t('Next');
+		next.addEventListener('click', function () {
+			moveTour(1);
+		});
+		const skip = el('button', 'button-link npcink-toolbox__tour-skip');
+		skip.type = 'button';
+		skip.textContent = t('Skip tour');
+		skip.addEventListener('click', function () {
+			endTour('skipped');
+		});
+		actions.appendChild(back);
+		actions.appendChild(next);
+		actions.appendChild(skip);
+		card.appendChild(actions);
+		return { card: card, copy: copy, back: back };
+	}
+
+	function moveTour(direction) {
+		const nextIndex = tourStepIndex + direction;
+		if (nextIndex < 0) {
+			return;
+		}
+		if (nextIndex >= TOUR_STEPS.length) {
+			endTour('done');
+			return;
+		}
+		tourStepIndex = nextIndex;
+		renderTourStep();
+	}
+
+	function renderTourStep() {
+		const step = TOUR_STEPS[tourStepIndex] || null;
+		if (!step) {
+			endTour('done');
+			return;
+		}
+		const anchor = document.getElementById(step.anchorId);
+		if (!anchor) {
+			// A missing anchor (filtered status row, hidden tool card) degrades
+			// by skipping that step instead of silently ending the tour. Checked
+			// before prepare() so a skipped step never fires its side effects.
+			moveTour(1);
+			return;
+		}
+		if (typeof step.prepare === 'function') {
+			step.prepare();
+		}
+		if (!tourCard) {
+			const built = buildTourCard();
+			tourCard = built.card;
+			tourCardCopy = built.copy;
+			tourCardBack = built.back;
+		}
+		tourCardCopy.textContent = tourStepLabel(tourStepIndex + 1) + ' — ' + step.copy;
+		tourCardBack.disabled = 0 === tourStepIndex;
+		anchor.parentNode.insertBefore(tourCard, anchor);
+		anchor.scrollIntoView({ block: 'center' });
+		tourCard.focus();
+	}
+
+	function endTour(state) {
+		if (tourKeyListener) {
+			document.removeEventListener('keydown', tourKeyListener);
+			tourKeyListener = null;
+		}
+		if (tourCard && tourCard.parentNode) {
+			tourCard.parentNode.removeChild(tourCard);
+		}
+		tourCard = null;
+		tourCardCopy = null;
+		tourCardBack = null;
+		setTourState(state);
+		syncTourEntryLinks();
+		if (tourTrigger && document.contains(tourTrigger) && !tourTrigger.hidden) {
+			tourTrigger.focus();
+		} else {
+			const restart = document.getElementById('npcink-toolbox-tour-restart');
+			if (restart && !restart.hidden) {
+				restart.focus();
+			}
+		}
+		tourTrigger = null;
+	}
+
+	function startTour(trigger) {
+		if (tourCard || tourKeyListener) {
+			return;
+		}
+		tourTrigger = trigger instanceof HTMLElement ? trigger : null;
+		tourStepIndex = 0;
+		tourKeyListener = function (event) {
+			if ('Escape' === event.key) {
+				endTour('skipped');
+			}
+		};
+		document.addEventListener('keydown', tourKeyListener);
+		renderTourStep();
+	}
+
+	function syncTourEntryLinks() {
+		const entry = document.getElementById('npcink-toolbox-tour-start');
+		const restart = document.getElementById('npcink-toolbox-tour-restart');
+		const finished = 'done' === tourState() || 'skipped' === tourState();
+		if (entry) {
+			entry.hidden = finished;
+		}
+		if (restart) {
+			restart.hidden = !finished;
+		}
+	}
+
+	function initOnboardingTour() {
+		syncTourEntryLinks();
+		[document.getElementById('npcink-toolbox-tour-start'), document.getElementById('npcink-toolbox-tour-restart')].forEach(function (link) {
+			if (!link) {
+				return;
+			}
+			link.addEventListener('click', function (event) {
+				event.preventDefault();
+				startTour(event.currentTarget);
+			});
+		});
+	}
+	// --- End of onboarding tour ---
+
 	initCopyJsonButtons();
 	initTopTabs();
 	initToolSwitcher();
@@ -8293,6 +8522,7 @@
 	initMediaDerivativeControls();
 	initMediaAltCaptionControls();
 	initUrlState();
+	initOnboardingTour();
 
 	document.addEventListener('submit', function (event) {
 		const form = event.target;

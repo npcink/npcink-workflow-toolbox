@@ -687,28 +687,34 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			),
 		);
 		?>
-		<section class="npcink-toolbox__card" aria-label="<?php esc_attr_e( 'Getting started', 'npcink-workflow-toolbox' ); ?>">
-			<div class="npcink-toolbox__section-heading">
-				<div>
-					<h3><?php esc_html_e( 'Getting started', 'npcink-workflow-toolbox' ); ?></h3>
-					<p><?php esc_html_e( 'Three steps to your first AI-assisted task. Nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
+			<section class="npcink-toolbox__card" id="npcink-toolbox-tour-getting-started" aria-label="<?php esc_attr_e( 'Getting started', 'npcink-workflow-toolbox' ); ?>">
+				<div class="npcink-toolbox__section-heading">
+					<div>
+						<h3><?php esc_html_e( 'Getting started', 'npcink-workflow-toolbox' ); ?></h3>
+						<p><?php esc_html_e( 'Three steps to your first AI-assisted task. Nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
+					</div>
+					<div class="npcink-toolbox__inline-actions">
+						<a id="npcink-toolbox-tour-restart" class="button-link" href="#" hidden><?php esc_html_e( 'Restart tour', 'npcink-workflow-toolbox' ); ?></a>
+					</div>
 				</div>
-			</div>
-			<ol style="margin:0;padding-left:20px;display:grid;gap:10px;">
-				<?php foreach ( $steps as $step ) : ?>
-					<li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;">
-						<span>
-							<strong><?php echo esc_html( $step['title'] . ': ' . $step['label'] ); ?></strong>
-							<?php if ( $step['done'] ) : ?>
-								<span style="color:#00a32a;font-weight:600;"> — <?php esc_html_e( 'Done', 'npcink-workflow-toolbox' ); ?></span>
-							<?php endif; ?>
-							<br /><span class="description"><?php echo esc_html( $step['help'] ); ?></span>
-						</span>
-						<a class="button" href="<?php echo esc_url( $step['url'] ); ?>"><?php echo esc_html( $step['action'] ); ?></a>
-					</li>
-				<?php endforeach; ?>
-			</ol>
-		</section>
+				<ol style="margin:0;padding-left:20px;display:grid;gap:10px;">
+					<?php foreach ( $steps as $step ) : ?>
+						<li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;">
+							<span>
+								<strong><?php echo esc_html( $step['title'] . ': ' . $step['label'] ); ?></strong>
+								<?php if ( $step['done'] ) : ?>
+									<span style="color:#00a32a;font-weight:600;"> — <?php esc_html_e( 'Done', 'npcink-workflow-toolbox' ); ?></span>
+								<?php endif; ?>
+								<br /><span class="description"><?php echo esc_html( $step['help'] ); ?></span>
+							</span>
+							<a class="button" href="<?php echo esc_url( $step['url'] ); ?>"><?php echo esc_html( $step['action'] ); ?></a>
+						</li>
+					<?php endforeach; ?>
+				</ol>
+				<p style="margin:12px 0 0;">
+					<a id="npcink-toolbox-tour-start" class="button-link" href="#"><?php esc_html_e( 'Take the 2-minute tour', 'npcink-workflow-toolbox' ); ?></a>
+				</p>
+			</section>
 		<?php
 	}
 
@@ -720,25 +726,26 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			)
 		);
 		?>
-		<section class="npcink-toolbox__ability-health" aria-label="<?php esc_attr_e( 'Workflow readiness summary', 'npcink-workflow-toolbox' ); ?>">
+			<section class="npcink-toolbox__ability-health" id="npcink-toolbox-tour-system-status" aria-label="<?php esc_attr_e( 'Workflow readiness summary', 'npcink-workflow-toolbox' ); ?>">
 			<div class="npcink-toolbox__section-heading npcink-toolbox__section-heading--compact">
 				<div>
 					<h3><?php esc_html_e( 'Workflow readiness', 'npcink-workflow-toolbox' ); ?></h3>
 					<p><?php esc_html_e( 'Read-only status for setup and support. It does not change WordPress content.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
 			</div>
-			<div class="npcink-toolbox__start-status-list">
-				<?php
-				foreach ( $rows as $row ) {
-					$this->render_start_status_row(
-						(string) ( $row['label'] ?? '' ),
-						(string) ( $row['status'] ?? 'neutral' ),
-						(string) ( $row['status_text'] ?? '' ),
-						(string) ( $row['description'] ?? '' )
-					);
-				}
-				?>
-			</div>
+				<div class="npcink-toolbox__start-status-list">
+					<?php
+					foreach ( $rows as $row ) {
+						$this->render_start_status_row(
+							(string) ( $row['label'] ?? '' ),
+							(string) ( $row['status'] ?? 'neutral' ),
+							(string) ( $row['status_text'] ?? '' ),
+							(string) ( $row['description'] ?? '' ),
+							'cloud_runtime' === (string) ( $row['id'] ?? '' ) ? 'npcink-toolbox-tour-cloud-status' : ''
+						);
+					}
+					?>
+				</div>
 		</section>
 		<?php
 	}
@@ -1195,9 +1202,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
-	private function render_start_status_row( string $title, string $status, string $label, string $description ): void {
+	private function render_start_status_row( string $title, string $status, string $label, string $description, string $anchor_id = '' ): void {
 		?>
-		<div class="npcink-toolbox__start-status-row is-<?php echo esc_attr( $status ); ?>">
+		<div class="npcink-toolbox__start-status-row is-<?php echo esc_attr( $status ); ?>"<?php echo '' !== $anchor_id ? ' id="' . esc_attr( $anchor_id ) . '"' : ''; ?>>
 			<div>
 				<span><?php echo esc_html( $title ); ?></span>
 				<strong><?php echo esc_html( $label ); ?></strong>
@@ -2640,7 +2647,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			$this->render_media_recognition_recovery();
 		}
 		?>
-		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative <?php echo $active ? '' : 'hidden'; ?>>
+		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch" id="npcink-toolbox-tour-batch-optimize" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative <?php echo $active ? '' : 'hidden'; ?>>
 			<h2><?php echo esc_html( $title ); ?></h2>
 			<p><?php echo esc_html( $description ); ?></p>
 			<?php $this->render_media_derivative_batch_controls( $toolbox_policy ); ?>
