@@ -387,37 +387,27 @@ accounted for by record), 146 inline findings, 52 fixes against
 
 Layer 3 moved from "deliberately deferred" to a defined optional
 pre-publish evidence lane for large Toolbox pull requests (see Layer 3
-above). Configuration validated end to end:
+above). Configuration validated end to end, in three steps:
 
-- Dry-run through the `eval:project:review:triad` composer wrapper
-  covers all three profiles (`gpt55`, `grok43`, `deepseek`).
-- Provider reality on the operator key: the MQZJ gateway currently
-  serves exactly one upstream model (`/v1/models` lists `gpt-5.5`
-  only) and routes that name to a deepseek-family reasoning upstream
-  (the response `model` field names it). `grok43` therefore returns
-  HTTP 503 today and `deepseek` needs its own key; the triad runs
-  single-lane until the operator adds lanes.
-- Failure mode found and fixed (`npcink-eval-lab` #105):
-  reasoning-style upstreams can spend the whole 3000-token completion
-  budget on hidden reasoning before emitting any JSON, so every
-  provider-backed run died with "Provider response did not include
-  message content" (reproduced directly: `completion_tokens=3000`, all
-  reasoning tokens, empty content). `run-triad.php` gained a
-  `max_tokens` override (clamped 1000-32000; 0 keeps the per-profile
-  default) and the composer wrapper passes
-  `PROJECT_REVIEW_MAX_TOKENS` through; 12000 is the validated budget
-  for the current upstream.
-- First provider-backed round (toolbox HEAD `a47f4580`, the onboarding
-  tour, `profiles=gpt55 max_tokens=12000`): delivered six advisory
-  findings - two important (the tour's PHP-to-JS anchor-id coupling is
-  implicit; the new coverage is static-string pinning rather than
-  behavioral) and four suggestions (reindentation consistency in the
-  reworked card, doc status wording, hand-applied pot ordering, and
-  inert `href="#"` anchors before JS binds). Recorded as post-merge
-  validation evidence: the two important findings restate accepted
-  shapes (the anchor ids are exactly what the static contracts pin,
-  and contract-first coverage is this repository's testing choice), so
-  no follow-up was demanded.
+- Initial single-lane validation: dry-run through the
+  `eval:project:review:triad` composer wrapper; the operator MQZJ key
+  then served exactly one upstream model (`gpt-5.5`, gateway-routed to
+  a deepseek-family reasoning upstream), and the reasoning-budget
+  failure mode was found and fixed (`npcink-eval-lab` #105:
+  `max_tokens` override after reproduction showed
+  `completion_tokens=3000`, all reasoning, empty content). The first
+  provider-backed round on the onboarding-tour HEAD (`a47f4580`)
+  delivered six advisory findings, recorded as post-merge evidence.
+- Same-day consolidation onto one Qianwen compatible-mode key serving
+  three families (`npcink-eval-lab` #106-#109): `glm-5.3`,
+  `deepseek-v4.1-flash`, and `qwen3.8-max` all validated on JSON-mode
+  probes; the full trio on toolbox HEAD at `max_tokens=16000`
+  delivered complete reviews from all three families (8 findings
+  each). glm-5.3 alone consumed ~12000 completion tokens on hidden
+  reasoning before emitting JSON, so its per-profile default is 16000;
+  the curl timeout rose 120s to 300s for the heavier reasoners; the
+  gpt55/grok43/MQZJ lanes keep their profiles but currently hold no
+  local credentials.
 
 ## Scope
 
@@ -471,22 +461,28 @@ deliberately, the same way any other CI dependency is bumped.
 Large Toolbox pull requests - cluster splits, multi-module refactors,
 release trains, or any diff the operator judges high-risk - may run the
 `npcink-eval-lab` project-review triad as an optional second-opinion
-evidence pass before `composer pr:publish`:
+evidence pass before `composer pr:publish`. The standing configuration
+(since npcink-eval-lab #109) is one Qianwen compatible-mode key serving
+three model families:
 
 ```bash
 cd ~/gitee/npcink-eval-lab
+COMPOSER_PROCESS_TIMEOUT=900 \
 PROJECT_REVIEW_PROJECT=../npcink-workflow-toolbox \
 PROJECT_REVIEW_MODE=head \
-PROJECT_REVIEW_PROFILES=gpt55 \
-PROJECT_REVIEW_MAX_TOKENS=12000 \
+PROJECT_REVIEW_PROFILES=glm,deepseek,qwen \
+PROJECT_REVIEW_MAX_TOKENS=16000 \
 composer eval:project:review:triad
 ```
 
 - `mode=head` reviews the HEAD commit patch; `mode=working_diff`
   reviews uncommitted work before staging. Profiles and budgets follow
   the eval-lab env contract (`.env.evaluation.local`, operator-typed
-  keys only; reasoning-style upstreams need a raised `max_tokens` - see
-  the 2026-10-09 record below).
+  keys only). Three sequential reasoning rounds exceed composer's
+  default 300s process timeout, hence the `COMPOSER_PROCESS_TIMEOUT`
+  prefix (or invoke the PHP script directly); the validated budget is
+  16000 (glm-5.3 alone reasons ~12000 tokens before emitting JSON -
+  see the 2026-10-09 record below).
 - The triad is evidence, never a gate: it must not block publish and
   does not replace or weaken the OpenCodeReview delivery + triage gate
   at the publisher. Read its findings as a second opinion; when they
