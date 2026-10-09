@@ -8389,7 +8389,6 @@
 		const skip = el('button', 'button-link npcink-toolbox__tour-skip');
 		skip.type = 'button';
 		skip.textContent = t('Skip tour');
-		skip.type = 'button';
 		skip.addEventListener('click', function () {
 			endTour('skipped');
 		});
@@ -8416,7 +8415,7 @@
 	function renderTourStep() {
 		const step = TOUR_STEPS[tourStepIndex] || null;
 		if (!step) {
-			endTour('skipped');
+			endTour('done');
 			return;
 		}
 		if (typeof step.prepare === 'function') {
@@ -8424,7 +8423,9 @@
 		}
 		const anchor = document.getElementById(step.anchorId);
 		if (!anchor) {
-			endTour('skipped');
+			// A missing anchor (filtered status row, hidden tool card) degrades
+			// by skipping that step instead of silently ending the tour.
+			moveTour(1);
 			return;
 		}
 		if (!tourCard) {
