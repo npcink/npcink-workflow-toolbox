@@ -50,6 +50,7 @@ Start from the active documents below before changing code.
 - [Static Analysis Standard v1](platform/static-analysis-standard-v1.md)
 - [AI Code Review Workflow](platform/ai-code-review-workflow.yml)
 - [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
+- [God-Class Split Session Handoff](god-class-split-session-handoff.md)
 - [Pull Request Publishing Standard v1](platform/pr-publishing-standard-v1.md)
 - [PR Publishing Repositories](platform/pr-publishing-repositories.json)
 - [GitHub Publishing Runbook](github-publishing-runbook.md)
