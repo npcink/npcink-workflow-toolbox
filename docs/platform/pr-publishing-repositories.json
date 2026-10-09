@@ -1,6 +1,6 @@
 {
   "schema_version": "npcink_pr_publishing_repositories.v1",
-  "publisher_sha256": "732983c862f9afaade18f6f5c14bd6ef127fcfb111a7dbc77bb040e6c7b7de3b",
+  "publisher_sha256": "1b91659fcb99070cf3bc6b2184c8c4da0bdec47f658a3fcac8c190f2d5be763a",
   "required_sections": [
     "Scope",
     "Boundary",

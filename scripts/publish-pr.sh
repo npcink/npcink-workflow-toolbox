@@ -474,7 +474,7 @@ esac
 # merged as ec6a2a4f carrying another session's commit message after a
 # shared-worktree publish). The live title is read because a reused open PR
 # may have been retitled by the triage loop's `gh pr edit`.
-merge_title="$(gh pr view "${pr_number}" --json title --jq '.title')"
+merge_title="$(retry_network gh pr view "${pr_number}" --json title --jq '.title')"
 [ -n "${merge_title}" ] || fail 'could not read the live pull request title for the merge subject'
 retry_network gh pr merge "${pr_url}" --auto --squash --subject "${merge_title} (#${pr_number})" --match-head-commit "${head_sha}"
 
