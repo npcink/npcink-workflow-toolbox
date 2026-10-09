@@ -75,19 +75,23 @@ with the closing commit or PR for one release cycle, then prune.
 - **The extracted editor content-support service is being sub-divided**
   under the split standard with the amended 2026-10-08 cadence. Landed
   2026-10-08: paragraph-check and audio-text static clusters (session 1),
-  then the shared flow-cache base (Rest_Editor_Flow_Cache, chained
-  through Rest_Controller_Support, carrying the transient cache, the
+  the shared flow-cache base (Rest_Editor_Flow_Cache, chained through
+  Rest_Controller_Support, carrying the transient cache, the
   cross-cluster input-scope/related-items/recommendation-candidate
-  statics) plus the taxonomy-shaping cluster (session 2) - the service
-  sits at ~4.1k lines after session 3 (summary-terms) and session 4
-  (writing-pack shaping: required fields, hosted output, field merging,
-  payload/list normalization, related articles, request brief -
-  Rest_Editor_Writing_Pack_Shaping) extracted their clusters (strategy/metrics tables, Core-handoff candidates, term
-  evidence, Toolkit taxonomy adapters, and the related-post-terms
-  context helper - Rest_Editor_Summary_Terms). Remaining:
-  writing-pack, progressive, and media/ALT clusters plus the summary and
-  taxonomy cached-flow orchestrators, all inheriting the cache base and
-  movable with the same pattern.
+  statics) plus the taxonomy-shaping cluster (session 2), summary-terms
+  (session 3: strategy/metrics tables, Core-handoff candidates, term
+  evidence, Toolkit taxonomy adapters, the related-post-terms context
+  helper - Rest_Editor_Summary_Terms), writing-pack shaping (session 4:
+  required fields, hosted output, field merging, payload/list
+  normalization, related articles, request brief -
+  Rest_Editor_Writing_Pack_Shaping), and the progressive recommendation
+  cluster (session 5: recommendation-set envelope, content
+  fingerprint/context contracts, local taxonomy profile, pure
+  media/preflight candidate shapers, weighted token-match scoring -
+  Rest_Editor_Progressive_Recommendations). The service sits at ~3.6k
+  lines. Remaining: the media/ALT cluster plus the summary and taxonomy
+  cached-flow orchestrators, all inheriting the cache base and movable
+  with the same pattern.
 - **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
   findings live in `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster

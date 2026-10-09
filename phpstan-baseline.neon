@@ -412,7 +412,7 @@ parameters:
 			message: '#^Property WP_Term\:\:\$count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
-			path: includes/Rest_Editor_Content_Support.php
+			path: includes/Rest_Editor_Progressive_Recommendations.php
 
 		-
 			message: '#^Property WP_Term\:\:\$name \(string\) on left side of \?\? is not nullable\.$#'

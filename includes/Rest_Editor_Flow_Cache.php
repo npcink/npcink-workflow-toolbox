@@ -22,7 +22,7 @@ use WP_Error;
 
 abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 
-	protected const EDITOR_FLOW_CACHE_TTL = 300;
+	public const EDITOR_FLOW_CACHE_TTL = 300;
 
 	protected Provider_Client $client;
 
