@@ -7,6 +7,37 @@ This standard records the method and lessons from the 2026-09-30 split of
 per-cluster service classes behind a facade, with unchanged public
 signatures and zero behavior change (PR #156).
 
+## Editor Split Sessions Addendum - 2026-10-08
+
+Four sessions extracted seven clusters from `Rest_Editor_Content_Support`
+(5398 -> 4136 lines) under this standard. Session-specific lessons that
+generalize:
+
+- **Load order is a hard dependency.** With no autoloader, an abstract
+  base class file must be required BEFORE any child whose `extends`
+  resolves at require time (the flow-cache base一度 loaded after the
+  service - fatal on every plugin load until the review round caught
+  it). Base first, static sub-services next, the facade service last.
+- **Wire every list, not just the obvious ones.** Beyond the aggregation
+  helper, this repo keeps a second source list in tests (the
+  route-registration foreach), a runtime require block in the security
+  smoke, and four behavior-test loaders. A moved class missing from any
+  of them either fails loudly (good) or escapes the no-route-registration
+  constraint (bad - the review round caught exactly this once).
+- **phpstan-baseline.neon entries are path-pinned.** When methods move,
+  re-path their baseline entries by block-walking the neon (message +
+  path travel together); one entry per moved finding class, and verify
+  against the actual analyser output because some findings in the same
+  family belong to methods that stayed.
+- **Dependency scans must be block-precise.** Line-range greps
+  overestimated two writing-pack methods' cached dependencies; the
+  per-method block extraction regex is the authority for what is pure
+  enough to move.
+- **eval-lab offline quality gate as the accelerated pre-publish
+  evidence:** one command, no provider keys, run before every split
+  publish (npcink-eval-lab project-review/run-quality-gate.php; its one
+  recurring sk-marker flag is the redaction test's own fixtures).
+
 ## When To Use
 
 Apply this standard before splitting any class whose methods are pinned by
