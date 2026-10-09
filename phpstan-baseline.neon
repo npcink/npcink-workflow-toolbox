@@ -367,40 +367,10 @@ parameters:
 			path: includes/Rest_Controller.php
 
 		-
-			message: '#^Call to function is_array\(\) with array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/Rest_Editor_Paragraph_Check.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\<int, array\<string, string\>\|int\>\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/Rest_Editor_Content_Support.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Rest_Editor_Content_Support\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/Rest_Editor_Content_Support.php
-
-		-
-			message: '#^Offset ''detail'' on array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: includes/Rest_Editor_Paragraph_Check.php
-
-		-
 			message: '#^Offset ''type'' on array\{id\: non\-falsy\-string, type\: ''external_source…''\|''target_post'', label\: mixed\}\|array\{id\: non\-falsy\-string, type\: ''related_content'', label\: mixed, score\: float\|null\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: includes/Rest_Editor_Content_Support.php
-
-		-
-			message: '#^Parameter \#1 \$array \(list\<array\{term_id\: mixed, taxonomy\: mixed, name\: mixed\}\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: includes/Rest_Editor_Summary_Terms.php
 
 		-
 			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
@@ -409,10 +379,58 @@ parameters:
 			path: includes/Rest_Editor_Content_Support.php
 
 		-
+			message: '#^Method Npcink_Toolbox\\Rest_Editor_Media_Alt\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\<int, array\<string, string\>\|int\>\>\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/Rest_Editor_Media_Alt.php
+
+		-
+			message: '#^Method Npcink_Toolbox\\Rest_Editor_Media_Alt\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\>\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/Rest_Editor_Media_Alt.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: includes/Rest_Editor_Media_Alt.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''recognition_required'' and ''recognition_required'' will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: includes/Rest_Editor_Media_Alt.php
+
+		-
+			message: '#^Ternary operator condition is always false\.$#'
+			identifier: ternary.alwaysFalse
+			count: 2
+			path: includes/Rest_Editor_Media_Alt.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/Rest_Editor_Paragraph_Check.php
+
+		-
+			message: '#^Offset ''detail'' on array\{name\: mixed, detail\: string, action_policy\: ''operator_review…'', evidence_refs\: array\{''current_selection…''\}\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: includes/Rest_Editor_Paragraph_Check.php
+
+		-
 			message: '#^Property WP_Term\:\:\$count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: includes/Rest_Editor_Progressive_Recommendations.php
+
+		-
+			message: '#^Parameter \#1 \$array \(list\<array\{term_id\: mixed, taxonomy\: mixed, name\: mixed\}\>\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: includes/Rest_Editor_Summary_Terms.php
 
 		-
 			message: '#^Property WP_Term\:\:\$name \(string\) on left side of \?\? is not nullable\.$#'
@@ -425,24 +443,6 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 1
 			path: includes/Rest_Editor_Summary_Terms.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: includes/Rest_Editor_Content_Support.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between ''recognition_required'' and ''recognition_required'' will always evaluate to true\.$#'
-			identifier: identical.alwaysTrue
-			count: 1
-			path: includes/Rest_Editor_Content_Support.php
-
-		-
-			message: '#^Ternary operator condition is always false\.$#'
-			identifier: ternary.alwaysFalse
-			count: 2
-			path: includes/Rest_Editor_Content_Support.php
 
 		-
 			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
