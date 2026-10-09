@@ -9442,6 +9442,12 @@ msgstr "快速上手"
 msgid "Three steps to your first AI-assisted task. Nothing is written without your review."
 msgstr "三步完成你的第一个 AI 辅助任务。未经你审阅不会写入任何内容。"
 
+msgid "Take the 2-minute tour"
+msgstr "参加 2 分钟导览"
+
+msgid "Restart tour"
+msgstr "重新开始导览"
+
 msgid "Cancel"
 msgstr "取消"
 

@@ -1,9 +1,9 @@
 # Onboarding Tour Design v1
 
-Status: proposed. Acceptance loop: the operator trial
-([ux-hardening-operator-trial-2026-10.md](ux-hardening-operator-trial-2026-10.md),
-step 1 and the new step 9). Nothing here is committed implementation scope
-until the trial picks it up in its own session with a boundary check.
+Status: implemented 2026-10-09 (accepted product design; the operator
+trial questions below remain the acceptance loop for the shipped tour).
+Entry link, restart link, five anchors, the localStorage key, and the
+client-only constraint are pinned by static contracts in `tests/run.php`.
 
 ## Problem
 
@@ -75,7 +75,7 @@ Presentation:
 Localization: all copy through `t()` with the admin script text domain;
 new strings follow the standard catalog rebuild order.
 
-## Static Contracts (when implemented)
+## Static Contracts (implemented 2026-10-09)
 
 - `tests/run.php` pins: the tour entry link id, the localStorage key
   string, the five-step anchor ids, and that no tour code touches
@@ -90,5 +90,9 @@ new strings follow the standard catalog rebuild order.
 
 ## Decision
 
-Implement in a dedicated session after the trial answers the questions
-above; the three-step card remains the shipped default until then.
+Implemented 2026-10-09 in a dedicated session after product acceptance;
+the three-step card remains the shipped default surface, with the tour as
+its optional text-link companion. Step-3 copy names the Image Handling
+surface and keeps the ADR-015 reference out of operator copy per the
+admin UI design standard's wording rules. The trial questions above are
+the acceptance loop for the shipped tour.

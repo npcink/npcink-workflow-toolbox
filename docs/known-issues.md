@@ -22,11 +22,15 @@ with the closing commit or PR for one release cycle, then prune.
   access.** Tracked with the audit trail in
   [Scoped Editor Permissions Lessons 2026-09](scoped-editor-permissions-lessons-2026-09.md);
   the object-level audits live there, not here.
-- **Full guided fresh-install onboarding tour has a proposed design**
-  ([Onboarding Tour Design v1](onboarding-tour-design-v1.md)) awaiting the
-  operator trial; the shipped surface remains notices plus a three-step
-  card until the trial answers the entry questions. Source: [UX Hardening
-  Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md).
+- **Guided fresh-install onboarding tour is implemented and awaiting
+  operator-trial answers** ([Onboarding Tour Design
+  v1](onboarding-tour-design-v1.md), shipped 2026-10-09): text-link entry
+  on the getting-started card, five anchored notice steps, client-only
+  `localStorage` state, no routes/writes/dependencies. Open: the trial
+  questions (did operators start/finish, which copy was misread, can they
+  name one suggestion-only guarantee) still run in the next operator
+  trial. Source: [UX Hardening Development Lessons
+  2026-10](ux-hardening-development-lessons-2026-10.md).
 - **Cross-plugin "Core proposal" terminology** waits on the Operator
   Terminology Standard being accepted in all five repos. Source:
   [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md).

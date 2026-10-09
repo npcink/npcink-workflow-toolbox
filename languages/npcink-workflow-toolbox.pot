@@ -835,6 +835,14 @@ msgstr ""
 msgid "Three steps to your first AI-assisted task. Nothing is written without your review."
 msgstr ""
 
+#: includes/Admin_Page.php:697
+msgid "Restart tour"
+msgstr ""
+
+#: includes/Admin_Page.php:715
+msgid "Take the 2-minute tour"
+msgstr ""
+
 #: includes/Admin_Page.php:703
 #: assets/editor-content-support.js:6453
 msgid "Done"
