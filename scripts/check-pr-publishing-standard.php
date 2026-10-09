@@ -87,7 +87,8 @@ foreach (
 		'git status --porcelain',
 		'git merge-base --is-ancestor "origin/${base_branch}" HEAD',
 		'--body-file "${body_path}"',
-		'--auto --squash --match-head-commit "${head_sha}"',
+		'--auto --squash --subject "${merge_title} (#${pr_number})" --match-head-commit "${head_sha}"',
+		"gh pr view \"\${pr_number}\" --json title",
 		'Approved for production validation by operator.',
 	) as $marker
 ) {

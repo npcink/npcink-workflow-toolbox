@@ -189,7 +189,7 @@ if [ "${dry_run}" = '1' ]; then
 	else
 		quote_command bash scripts/verify-ai-review.sh --pr '<pr-number>' --head-sha "${head_sha}"
 	fi
-	quote_command gh pr merge '<created-pr-url>' --auto --squash --match-head-commit "${head_sha}"
+	quote_command gh pr merge '<created-pr-url>' --auto --squash --subject '<title> (#<pr-number>)' --match-head-commit "${head_sha}"
 	echo '[pr-publish] dry-run passed'
 	exit 0
 fi
@@ -468,7 +468,15 @@ case "${review_gate_status}" in
 		;;
 esac
 
-retry_network gh pr merge "${pr_url}" --auto --squash --match-head-commit "${head_sha}"
+# The squash subject is pinned to "<title> (#<number>)" so the merged commit
+# message always derives from the pull request's own live title, never from
+# repository squash defaults or fallback tooling state (2026-10-09: PR #238
+# merged as ec6a2a4f carrying another session's commit message after a
+# shared-worktree publish). The live title is read because a reused open PR
+# may have been retitled by the triage loop's `gh pr edit`.
+merge_title="$(gh pr view "${pr_number}" --json title --jq '.title')"
+[ -n "${merge_title}" ] || fail 'could not read the live pull request title for the merge subject'
+retry_network gh pr merge "${pr_url}" --auto --squash --subject "${merge_title} (#${pr_number})" --match-head-commit "${head_sha}"
 
 echo "[pr-publish] pull_request=${pr_url}"
 echo '[pr-publish] ai_review_gate=passed'

@@ -112,6 +112,18 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Recently Closed
 
+- **Master-history anomaly on `ec6a2a4f` (PR #238, 2026-10-09) — recorded,
+  not actionable.** The squash merge of the docs-only triad PR #238 carries
+  the wrong commit message ("refactor: extract the media/ALT cluster into
+  Rest_Editor_Media_Alt (#238)", another concurrent session's branch message)
+  after a shared-worktree publish; the merged content is correct and the
+  real media/ALT split is PR #239 (`b7735c2b`). Rewriting pushed master
+  history was rejected; the publishing standard now pins the squash subject
+  to the PR title and requires publishing from the topic branch's own
+  worktree (see
+  [Pull Request Publishing Standard v1](platform/pr-publishing-standard-v1.md),
+  Multi-Worktree Safety).
+
 - **Site Knowledge status owner-matrix rows and the author/admin error
   audience split** — resolved 2026-10-07: the admin Site Knowledge status
   renderer now shows every ownership row Cloud reports (adding

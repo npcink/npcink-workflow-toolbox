@@ -10,8 +10,9 @@ signatures and zero behavior change (PR #156).
 ## Editor Split Sessions Addendum - 2026-10-08
 
 Four sessions extracted seven clusters from `Rest_Editor_Content_Support`
-(5398 -> 4136 lines) under this standard. Session-specific lessons that
-generalize:
+(5398 -> 4136 lines) under this standard; session 6 (2026-10-09, the media/ALT
+cluster, PR #239) took the facade to 3008 lines. Session-specific lessons
+that generalize:
 
 - **Load order is a hard dependency.** With no autoloader, an abstract
   base class file must be required BEFORE any child whose `extends`
@@ -37,6 +38,22 @@ generalize:
   evidence:** one command, no provider keys, run before every split
   publish (npcink-eval-lab project-review/run-quality-gate.php; its one
   recurring sk-marker flag is the redaction test's own fixtures).
+- **Client-closing clusters become instance services over the base**
+  (session 6, media/ALT). Pure method families still extract as static
+  classes, but a cluster whose methods close over `$this->client` (or use
+  inherited instance helpers) extracts as a `final class ... extends
+  <SharedBase>` whose constructor stores the `Provider_Client` reference;
+  the facade holds one service property, instantiates it in its
+  constructor, keeps one-line delegates for public handlers, and calls
+  moved helpers through the property. Cross-cluster calls stay
+  facade-mediated; the service never registers routes.
+- **Span needles re-point into the destination file, preserving order**
+  (session 6). When a span's endpoint method moves but its neighbour
+  stays in the facade, re-point the endpoint to the next declaration that
+  moved with it — keeping both endpoints inside one file and in the
+  original order — and keep the coverage comment in the commit message
+  (the alt-flow span re-targeted from `editor_support_query` to
+  `editor_image_support_query` with identical six-method coverage).
 
 ## When To Use
 

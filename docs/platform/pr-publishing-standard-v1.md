@@ -119,6 +119,22 @@ uses a separate clean worktree, while `master` may be checked out elsewhere.
 Deleting or switching a branch from the PR command can therefore fail after
 the PR has otherwise merged successfully.
 
+**Publish only from the topic branch's own worktree.** The publisher resolves
+the branch, head SHA, and title from the ambient worktree HEAD. When multiple
+AI sessions share one worktree, running the publisher while another session's
+branch is checked out publishes the wrong branch or leaks the wrong commit
+message into the merge. Before publishing, confirm `git branch --show-current`
+is the intended topic branch; when a concurrent session is active, create a
+dedicated `git worktree` for the branch and publish from there.
+
+**The squash subject is pinned to `<title> (#<number>)`.** The merge request
+always passes `--subject`, so the merged commit message derives from the
+publish run's own inputs, never from repository squash defaults or fallback
+tooling state. Incident of record (2026-10-09): PR #238 (a docs-only change)
+merged as `ec6a2a4f` carrying a different session's refactor commit message
+after a shared-worktree publish; content was correct, the message was not,
+and the mismatch is permanent master-history noise.
+
 Post-merge branch and worktree cleanup is a separate, read-before-delete
 operation:
 
