@@ -8355,7 +8355,9 @@
 		activateTopTab('tools', true);
 		const workspace = document.querySelector('[data-toolbox-tools]');
 		if (workspace) {
-			activateToolGroup('media', false, workspace);
+			if (!activateToolPanel('media-batch-optimize', false, workspace)) {
+				activateToolGroup('media', false, workspace);
+			}
 		}
 	}
 
@@ -8372,17 +8374,21 @@
 		const copy = el('span', 'npcink-toolbox__tour-copy');
 		card.appendChild(copy);
 		const actions = el('div', 'npcink-toolbox__inline-actions');
-		const back = el('button', 'button-link npcink-toolbox__tour-back', 'Back');
+		const back = el('button', 'button-link npcink-toolbox__tour-back');
 		back.type = 'button';
+		back.textContent = t('Back');
 		back.addEventListener('click', function () {
 			moveTour(-1);
 		});
-		const next = el('button', 'button-link npcink-toolbox__tour-next', 'Next');
+		const next = el('button', 'button-link npcink-toolbox__tour-next');
 		next.type = 'button';
+		next.textContent = t('Next');
 		next.addEventListener('click', function () {
 			moveTour(1);
 		});
-		const skip = el('button', 'button-link npcink-toolbox__tour-skip', 'Skip tour');
+		const skip = el('button', 'button-link npcink-toolbox__tour-skip');
+		skip.type = 'button';
+		skip.textContent = t('Skip tour');
 		skip.type = 'button';
 		skip.addEventListener('click', function () {
 			endTour('skipped');
