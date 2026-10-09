@@ -61,7 +61,8 @@ Operational lessons recorded for future rollouts:
 Deliberately deferred: Gitee-hosted repositories (GitHub Actions cannot run;
 the machine-level CLI still serves them), lower-activity GitHub repositories
 (`npcink-ad`, `npcink-pay-refund`, `npcink-site-toolbox`, and similar), and
-the optional eval-lab triad comparison in Layer 3.
+the OCR-versus-triad comparison pilot in Layer 3 (the triad evidence lane
+itself is defined since the 2026-10-09 record below).
 
 ## Verification Record - 2026-09-29
 
@@ -382,6 +383,42 @@ pilot baseline (npcink-abilities-toolkit, pull requests #141-#210,
 accounted for by record), 146 inline findings, 52 fixes against
 9 declines.
 
+## Eval-lab Triad Layer - 2026-10-09
+
+Layer 3 moved from "deliberately deferred" to a defined optional
+pre-publish evidence lane for large Toolbox pull requests (see Layer 3
+above). Configuration validated end to end:
+
+- Dry-run through the `eval:project:review:triad` composer wrapper
+  covers all three profiles (`gpt55`, `grok43`, `deepseek`).
+- Provider reality on the operator key: the MQZJ gateway currently
+  serves exactly one upstream model (`/v1/models` lists `gpt-5.5`
+  only) and routes that name to a deepseek-family reasoning upstream
+  (the response `model` field names it). `grok43` therefore returns
+  HTTP 503 today and `deepseek` needs its own key; the triad runs
+  single-lane until the operator adds lanes.
+- Failure mode found and fixed (`npcink-eval-lab` #105):
+  reasoning-style upstreams can spend the whole 3000-token completion
+  budget on hidden reasoning before emitting any JSON, so every
+  provider-backed run died with "Provider response did not include
+  message content" (reproduced directly: `completion_tokens=3000`, all
+  reasoning tokens, empty content). `run-triad.php` gained a
+  `max_tokens` override (clamped 1000-32000; 0 keeps the per-profile
+  default) and the composer wrapper passes
+  `PROJECT_REVIEW_MAX_TOKENS` through; 12000 is the validated budget
+  for the current upstream.
+- First provider-backed round (toolbox HEAD `a47f4580`, the onboarding
+  tour, `profiles=gpt55 max_tokens=12000`): delivered six advisory
+  findings - two important (the tour's PHP-to-JS anchor-id coupling is
+  implicit; the new coverage is static-string pinning rather than
+  behavioral) and four suggestions (reindentation consistency in the
+  reworked card, doc status wording, hand-applied pot ordering, and
+  inert `href="#"` anchors before JS binds). Recorded as post-merge
+  validation evidence: the two important findings restate accepted
+  shapes (the anchor ids are exactly what the static contracts pin,
+  and contract-first coverage is this repository's testing choice), so
+  no follow-up was demanded.
+
 ## Scope
 
 This standard covers the same repositories as the PR publishing standard
@@ -429,12 +466,36 @@ document. Enrolling a repository means:
 The template pins `alibaba/open-code-review@v1.12.10`. Bump the pin
 deliberately, the same way any other CI dependency is bumped.
 
-### Layer 3 - Evaluation evidence (optional)
+### Layer 3 - Eval-lab triad pre-publish evidence (optional)
 
-A pilot comparison against the existing `npcink-eval-lab` `project-review`
-triad may be recorded there, following its decision-driven evaluation rules.
-That evidence is optional for rollout; this platform standard is the
-adoption decision record.
+Large Toolbox pull requests - cluster splits, multi-module refactors,
+release trains, or any diff the operator judges high-risk - may run the
+`npcink-eval-lab` project-review triad as an optional second-opinion
+evidence pass before `composer pr:publish`:
+
+```bash
+cd ~/gitee/npcink-eval-lab
+PROJECT_REVIEW_PROJECT=../npcink-workflow-toolbox \
+PROJECT_REVIEW_MODE=head \
+PROJECT_REVIEW_PROFILES=gpt55 \
+PROJECT_REVIEW_MAX_TOKENS=12000 \
+composer eval:project:review:triad
+```
+
+- `mode=head` reviews the HEAD commit patch; `mode=working_diff`
+  reviews uncommitted work before staging. Profiles and budgets follow
+  the eval-lab env contract (`.env.evaluation.local`, operator-typed
+  keys only; reasoning-style upstreams need a raised `max_tokens` - see
+  the 2026-10-09 record below).
+- The triad is evidence, never a gate: it must not block publish and
+  does not replace or weaken the OpenCodeReview delivery + triage gate
+  at the publisher. Read its findings as a second opinion; when they
+  inform a change, record the outcome in the pull request body the same
+  way local `ocr review` findings are handled.
+- Output stays local to the eval-lab checkout
+  (`project-review/generated/project-boundary-review-triad.{json,md}`).
+  Never paste provider keys or raw provider payloads into a pull
+  request.
 
 ## Rules
 
