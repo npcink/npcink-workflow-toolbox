@@ -8418,15 +8418,16 @@
 			endTour('done');
 			return;
 		}
-		if (typeof step.prepare === 'function') {
-			step.prepare();
-		}
 		const anchor = document.getElementById(step.anchorId);
 		if (!anchor) {
 			// A missing anchor (filtered status row, hidden tool card) degrades
-			// by skipping that step instead of silently ending the tour.
+			// by skipping that step instead of silently ending the tour. Checked
+			// before prepare() so a skipped step never fires its side effects.
 			moveTour(1);
 			return;
+		}
+		if (typeof step.prepare === 'function') {
+			step.prepare();
 		}
 		if (!tourCard) {
 			const built = buildTourCard();
@@ -8466,7 +8467,7 @@
 	}
 
 	function startTour(trigger) {
-		if (tourCard) {
+		if (tourCard || tourKeyListener) {
 			return;
 		}
 		tourTrigger = trigger instanceof HTMLElement ? trigger : null;
@@ -8494,20 +8495,15 @@
 
 	function initOnboardingTour() {
 		syncTourEntryLinks();
-		const entry = document.getElementById('npcink-toolbox-tour-start');
-		const restart = document.getElementById('npcink-toolbox-tour-restart');
-		if (entry) {
-			entry.addEventListener('click', function (event) {
+		[document.getElementById('npcink-toolbox-tour-start'), document.getElementById('npcink-toolbox-tour-restart')].forEach(function (link) {
+			if (!link) {
+				return;
+			}
+			link.addEventListener('click', function (event) {
 				event.preventDefault();
 				startTour(event.currentTarget);
 			});
-		}
-		if (restart) {
-			restart.addEventListener('click', function (event) {
-				event.preventDefault();
-				startTour(event.currentTarget);
-			});
-		}
+		});
 	}
 	// --- End of onboarding tour ---
 
