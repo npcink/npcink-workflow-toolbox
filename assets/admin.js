@@ -8286,11 +8286,12 @@
 		{
 			anchorId: 'npcink-toolbox-tour-getting-started',
 			copy: t('Toolbox returns suggestions and review-only artifacts; nothing is written to WordPress without your review or a governed Core handoff.'),
+			prepare: openOverviewTab,
 		},
 		{
 			anchorId: 'npcink-toolbox-tour-cloud-status',
 			copy: t('Hosted AI runs need the Cloud Addon connected; everything else works without it.'),
-			prepare: openSystemStatusDetails,
+			prepare: openOverviewSystemStatus,
 		},
 		{
 			anchorId: 'npcink-toolbox-tour-batch-optimize',
@@ -8305,6 +8306,7 @@
 		{
 			anchorId: 'npcink-toolbox-tour-getting-started',
 			copy: t('Open any post to see the Npcink Content Support sidebar: suggestions only, and publishing stays native WordPress.'),
+			prepare: openOverviewTab,
 		},
 	];
 	let tourCard = null;
@@ -8312,6 +8314,7 @@
 	let tourCardBack = null;
 	let tourStepIndex = 0;
 	let tourKeyListener = null;
+	let tourTrigger = null;
 
 	function tourState() {
 		try {
@@ -8335,6 +8338,10 @@
 			return i18n.sprintf(pattern, stepNumber, TOUR_STEPS.length);
 		}
 		return String(pattern).replace('%1$d', String(stepNumber)).replace('%2$d', String(TOUR_STEPS.length));
+	}
+
+	function openOverviewTab() {
+		activateTopTab('start', true);
 	}
 
 	function openSystemStatusDetails() {
@@ -8440,12 +8447,22 @@
 		tourCardBack = null;
 		setTourState(state);
 		syncTourEntryLinks();
+		if (tourTrigger && document.contains(tourTrigger) && !tourTrigger.hidden) {
+			tourTrigger.focus();
+		} else {
+			const restart = document.getElementById('npcink-toolbox-tour-restart');
+			if (restart && !restart.hidden) {
+				restart.focus();
+			}
+		}
+		tourTrigger = null;
 	}
 
-	function startTour() {
+	function startTour(trigger) {
 		if (tourCard) {
 			return;
 		}
+		tourTrigger = trigger instanceof HTMLElement ? trigger : null;
 		tourStepIndex = 0;
 		tourKeyListener = function (event) {
 			if ('Escape' === event.key) {
@@ -8475,13 +8492,13 @@
 		if (entry) {
 			entry.addEventListener('click', function (event) {
 				event.preventDefault();
-				startTour();
+				startTour(event.currentTarget);
 			});
 		}
 		if (restart) {
 			restart.addEventListener('click', function (event) {
 				event.preventDefault();
-				startTour();
+				startTour(event.currentTarget);
 			});
 		}
 	}
