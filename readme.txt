@@ -92,6 +92,11 @@ closed.
    Cloud-managed search, image-source, site knowledge, hosted AI, or Pro Cloud
    Runtime features.
 
+Upgrade note: the editor Content Support sidebar now loads only on post and
+page editors. Sites that used it on a custom post type can restore it by
+adding the post type through the `npcink_toolbox_editor_supported_post_types`
+filter.
+
 == External Services ==
 
 Npcink Workflow Toolbox can contact external services only after an

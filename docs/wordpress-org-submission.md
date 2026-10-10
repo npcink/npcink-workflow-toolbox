@@ -88,6 +88,14 @@ Use the release zip generated from the intended release commit:
 composer package:release
 ```
 
+Packaging also runs `scripts/minify-assets.sh` on the packaged copy, so
+the zip ships `.min.js`/`.min.css` siblings for the admin and editor
+bundles next to the readable sources (the release zip measured ~1.04MB of
+assets shrinking to ~636KB minified). The step requires `node` (terser
+and clean-css-cli are fetched via npx and not committed); if it fails,
+fix the tooling before submitting rather than shipping unminified assets
+silently.
+
 For a mixed worktree, generate the release package from a clean worktree or release tag so unrelated local edits do not enter the zip.
 
 The accepted submission package path is:

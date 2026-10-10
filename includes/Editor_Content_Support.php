@@ -24,22 +24,30 @@ final class Editor_Content_Support {
 		if ( ! Rest_Controller::user_can_use_editor_support() ) {
 			return;
 		}
+		if ( ! $this->is_supported_editor_post_type() ) {
+			return;
+		}
 
-		$style_version  = $this->asset_version( 'assets/editor-content-support.css' );
-		$script_version = $this->asset_version( 'assets/editor-content-support.js' );
+		$style_path  = $this->asset_path( 'assets/editor-content-support.css' );
+		$script_path = $this->asset_path( 'assets/editor-content-support.js' );
 
 		wp_enqueue_style(
 			'npcink-toolbox-editor-content-support',
-			NPCINK_TOOLBOX_URL . 'assets/editor-content-support.css',
+			NPCINK_TOOLBOX_URL . $style_path,
 			array(),
-			$style_version
+			$this->asset_version( $style_path )
 		);
+
+		$format_path         = $this->asset_path( 'assets/editor-content-format.js' );
+		$text_utils_path     = $this->asset_path( 'assets/editor-content-support/text-utils.js' );
+		$internal_links_path = $this->asset_path( 'assets/editor-content-support/internal-links.js' );
+		$audio_part_path     = $this->asset_path( 'assets/editor-content-support/audio-preferences.js' );
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-format',
-			NPCINK_TOOLBOX_URL . 'assets/editor-content-format.js',
+			NPCINK_TOOLBOX_URL . $format_path,
 			array( 'wp-api-fetch', 'wp-blocks', 'wp-components', 'wp-data', 'wp-editor', 'wp-element', 'wp-block-editor', 'wp-i18n' ),
-			$this->asset_version( 'assets/editor-content-format.js' ),
+			$this->asset_version( $format_path ),
 			true
 		);
 		wp_set_script_translations(
@@ -50,25 +58,25 @@ final class Editor_Content_Support {
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-text-utils',
-			NPCINK_TOOLBOX_URL . 'assets/editor-content-support/text-utils.js',
+			NPCINK_TOOLBOX_URL . $text_utils_path,
 			array(),
-			$this->asset_version( 'assets/editor-content-support/text-utils.js' ),
+			$this->asset_version( $text_utils_path ),
 			true
 		);
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-internal-links',
-			NPCINK_TOOLBOX_URL . 'assets/editor-content-support/internal-links.js',
+			NPCINK_TOOLBOX_URL . $internal_links_path,
 			array( 'npcink-toolbox-editor-content-support-text-utils' ),
-			$this->asset_version( 'assets/editor-content-support/internal-links.js' ),
+			$this->asset_version( $internal_links_path ),
 			true
 		);
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-audio',
-			NPCINK_TOOLBOX_URL . 'assets/editor-content-support/audio-preferences.js',
+			NPCINK_TOOLBOX_URL . $audio_part_path,
 			array( 'wp-i18n', 'wp-element', 'wp-components' ),
-			$this->asset_version( 'assets/editor-content-support/audio-preferences.js' ),
+			$this->asset_version( $audio_part_path ),
 			true
 		);
 		wp_set_script_translations(
@@ -79,9 +87,9 @@ final class Editor_Content_Support {
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support',
-			NPCINK_TOOLBOX_URL . 'assets/editor-content-support.js',
+			NPCINK_TOOLBOX_URL . $script_path,
 			array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
-			$script_version,
+			$this->asset_version( $script_path ),
 			true
 		);
 		wp_set_script_translations(
@@ -109,6 +117,32 @@ final class Editor_Content_Support {
 
 	private function show_runtime_diagnostics(): bool {
 		return $this->settings->raw_responses_enabled();
+	}
+
+	/**
+	 * The content-support sidebar ships for article-editing post types only;
+	 * hosts can extend the allowlist (for example custom article post types)
+	 * through this filter. Screens without a post type (widgets, site editor)
+	 * never load the bundle.
+	 */
+	private function is_supported_editor_post_type(): bool {
+		$screen    = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$post_type = ( $screen && ! empty( $screen->post_type ) ) ? sanitize_key( (string) $screen->post_type ) : '';
+		if ( '' === $post_type ) {
+			return false;
+		}
+
+		$supported = apply_filters( 'npcink_toolbox_editor_supported_post_types', array( 'post', 'page' ) );
+		return in_array( $post_type, (array) $supported, true );
+	}
+
+	private function asset_path( string $relative_path ): string {
+		$min_path = (string) preg_replace( '/\.(js|css)$/i', '.min.$1', $relative_path );
+		if ( ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! file_exists( NPCINK_TOOLBOX_DIR . $min_path ) ) {
+			return $relative_path;
+		}
+
+		return $min_path;
 	}
 
 	private function asset_version( string $relative_path ): string {
