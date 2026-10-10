@@ -26,9 +26,21 @@ final class Media_Recognition_Continuation {
 	}
 
 	public function register_hooks(): void {
-		add_action( 'init', array( $this, 'ensure_schedule' ) );
+		if ( self::is_maintenance_request() ) {
+			add_action( 'init', array( $this, 'ensure_schedule' ) );
+		}
 		add_action( self::CRON_HOOK, array( $this, 'process' ) );
 		add_action( 'npcink_abilities_toolkit_media_file_version_changed', array( $this, 'queue_changed_attachment' ), 10, 2 );
+	}
+
+	/**
+	 * Continuations only ever resume from admin, REST, or cron contexts;
+	 * front-end traffic skips the schedule check's option read entirely.
+	 */
+	private static function is_maintenance_request(): bool {
+		return ( function_exists( 'is_admin' ) && is_admin() )
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() );
 	}
 
 	public static function deactivate(): void {

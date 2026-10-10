@@ -19,10 +19,21 @@ final class Site_Knowledge_Auto_Sync {
 	}
 
 	/**
-	 * Retires the legacy Toolbox fallback by clearing its local scheduled work.
+	 * Retires the legacy Toolbox fallback by clearing its local scheduled
+	 * work. The legacy work only ever ran from admin, cron, or REST
+	 * contexts, so front-end traffic skips the retirement queries entirely.
 	 */
 	public function register_hooks(): void {
+		if ( ! self::is_maintenance_request() ) {
+			return;
+		}
 		self::clear_legacy_state();
+	}
+
+	private static function is_maintenance_request(): bool {
+		return ( function_exists( 'is_admin' ) && is_admin() )
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() );
 	}
 
 	/**
@@ -38,8 +49,6 @@ final class Site_Knowledge_Auto_Sync {
 	 * @return array<string,mixed>
 	 */
 	public static function health_snapshot(): array {
-		self::clear_legacy_state();
-
 		if ( self::cloud_addon_bridge_available() ) {
 			return self::cloud_addon_bridge_health_snapshot();
 		}

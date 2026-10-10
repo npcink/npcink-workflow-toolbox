@@ -22,8 +22,20 @@ final class Media_Fingerprint_Scan {
 
 	public function register_hooks(): void {
 		add_filter( 'cron_schedules', array( $this, 'register_schedule' ) );
-		add_action( 'init', array( $this, 'maybe_schedule' ) );
+		if ( self::is_maintenance_request() ) {
+			add_action( 'init', array( $this, 'maybe_schedule' ) );
+		}
 		add_action( self::HOOK, array( $this, 'run' ) );
+	}
+
+	/**
+	 * The weekly scan is only scheduled from admin, REST, or cron contexts;
+	 * front-end traffic skips the schedule check's option reads entirely.
+	 */
+	private static function is_maintenance_request(): bool {
+		return ( function_exists( 'is_admin' ) && is_admin() )
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() );
 	}
 
 	public static function deactivate(): void {
