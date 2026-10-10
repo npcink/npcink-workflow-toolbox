@@ -571,6 +571,13 @@ final class Rest_Editor_Media_Alt extends Rest_Editor_Flow_Cache {
 				array( 'status' => 404 )
 			);
 		}
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'npcink_toolbox_post_forbidden',
+				__( 'You are not allowed to use this post for the media brief flow.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 403 )
+			);
+		}
 
 		$context = wp_json_encode(
 			array(

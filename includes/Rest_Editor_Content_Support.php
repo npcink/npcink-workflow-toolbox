@@ -51,7 +51,15 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			);
 		}
 
-		$context = $this->editor_post_context( $request );
+		$context         = $this->editor_post_context( $request );
+		$context_post_id = absint( $context['post_id'] ?? 0 );
+		if ( $context_post_id > 0 && ! current_user_can( 'edit_post', $context_post_id ) ) {
+			return new WP_Error(
+				'npcink_toolbox_editor_post_context_forbidden',
+				__( 'You are not allowed to use this post as editor content-support context.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 403 )
+			);
+		}
 		if ( 'source_adaptation_review' === $intent ) {
 			$writing_pack_context = $this->editor_writing_pack_context( $request, $context );
 			if ( is_wp_error( $writing_pack_context ) ) {
