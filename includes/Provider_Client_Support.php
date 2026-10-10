@@ -483,7 +483,7 @@ abstract class Provider_Client_Support {
 		$normalized = array();
 		foreach ( $items as $item ) {
 			if ( ! is_array( $item ) ) {
-				$scalar       = (string) $item;
+				$scalar       = trim( (string) $item );
 				$dangerous    = (bool) preg_match( '/^(?:javascript|vbscript|data)\s*:/i', $scalar );
 				$normalized[] = $dangerous ? '' : $scalar;
 				continue;
