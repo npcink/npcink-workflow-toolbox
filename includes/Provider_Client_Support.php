@@ -483,8 +483,8 @@ abstract class Provider_Client_Support {
 	 * empty. A depth greater than 1 recurses into nested array values with
 	 * the same rules, bounding how deep Cloud shapes are walked.
 	 */
-	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' ), int $depth = 1 ): array {
-		$fields     = $fields ?: array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' );
+	protected function sanitize_item_url_fields( array $items, int $depth = 1, ?array $fields = null ): array {
+		$fields     = is_array( $fields ) ? $fields : array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' );
 		$normalized = array();
 		foreach ( $items as $key => $item ) {
 			if ( ! is_array( $item ) ) {
@@ -517,7 +517,7 @@ abstract class Provider_Client_Support {
 			if ( $depth > 1 ) {
 				foreach ( $item as $child_key => $child_value ) {
 					if ( is_array( $child_value ) ) {
-						$item[ $child_key ] = $this->sanitize_item_url_fields( $child_value, $fields, $depth - 1 );
+						$item[ $child_key ] = $this->sanitize_item_url_fields( $child_value, $depth - 1, $fields );
 					}
 				}
 			}
