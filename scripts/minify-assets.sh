@@ -59,6 +59,12 @@ minify_cleanup_on_failure() {
 }
 trap minify_cleanup_on_failure EXIT
 
+if command -v sha256sum >/dev/null 2>&1; then
+	sha256_tool=(sha256sum)
+else
+	sha256_tool=(shasum -a 256)
+fi
+
 for bundle in "${js_bundles[@]}"; do
 	src="$TARGET_DIR/$bundle"
 	out="$TARGET_DIR/${bundle%.js}.min.js"
@@ -76,7 +82,7 @@ for bundle in "${js_bundles[@]}"; do
 	fi
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
-	echo "[minify] $bundle: ${before} -> ${after} bytes ($(shasum -a 256 "$out" | cut -d" " -f1))"
+	echo "[minify] $bundle: ${before} -> ${after} bytes ($("${sha256_tool[@]}" "$out" | cut -d" " -f1))"
 done
 
 for bundle in "${css_bundles[@]}"; do
@@ -96,7 +102,7 @@ for bundle in "${css_bundles[@]}"; do
 	fi
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
-	echo "[minify] $bundle: ${before} -> ${after} bytes ($(shasum -a 256 "$out" | cut -d" " -f1))"
+	echo "[minify] $bundle: ${before} -> ${after} bytes ($("${sha256_tool[@]}" "$out" | cut -d" " -f1))"
 done
 
 trap - EXIT
