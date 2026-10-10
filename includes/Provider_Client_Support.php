@@ -473,16 +473,19 @@ abstract class Provider_Client_Support {
 	/**
 	 * Rewrites known URL fields on a list of Cloud-supplied items to http(s)
 	 * only, so a tainted Cloud response cannot plant javascript: (or other
-	 * scheme) URLs into admin or editor render surfaces. Scalar items are
-	 * sanitized in place (not dropped) so previously accepted handoff shapes
-	 * keep working; a URL field whose value fails scheme validation is
-	 * removed from the item rather than left empty.
+	 * scheme) URLs into admin or editor render surfaces. Scalar items keep
+	 * their shape — opaque references such as 'attachment:<id>' are
+	 * legitimate evidence forms — and are only neutralized when they carry
+	 * an executable scheme; a URL field whose value fails scheme validation
+	 * is removed from the item rather than left empty.
 	 */
 	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url' ) ): array {
 		$normalized = array();
 		foreach ( $items as $item ) {
 			if ( ! is_array( $item ) ) {
-				$normalized[] = esc_url_raw( (string) $item, array( 'http', 'https' ) );
+				$scalar       = (string) $item;
+				$dangerous    = (bool) preg_match( '/^(?:javascript|vbscript|data)\s*:/i', $scalar );
+				$normalized[] = $dangerous ? '' : $scalar;
 				continue;
 			}
 			foreach ( $fields as $field ) {
