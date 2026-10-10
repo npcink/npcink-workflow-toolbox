@@ -21,6 +21,7 @@ final class Media_Optimization_Batches {
 	private const MAX_BATCHES         = 20;
 	private const MAX_ITEMS           = 1000;
 	private const CHUNK_SIZE          = 10;
+	private const CREATE_HASH_LIMIT   = 50;
 
 	/** @return array<string,mixed>|WP_Error */
 	public function build_manifest( array $input ) {
@@ -38,7 +39,8 @@ final class Media_Optimization_Batches {
 			return $this->error( 'npcink_toolbox_media_batch_size_invalid', 'The media optimization manifest must contain between 1 and 1000 images.', 400 );
 		}
 
-		$items = array();
+		$items                  = array();
+		$hashed_preflight_count = 0;
 		foreach ( $candidates as $candidate ) {
 			$candidate     = is_array( $candidate ) ? $candidate : array();
 			$attachment_id = absint( $candidate['attachment_id'] ?? 0 );
@@ -46,7 +48,18 @@ final class Media_Optimization_Batches {
 			if ( $attachment_id <= 0 || isset( $items[ $attachment_id ] ) || ! $this->can_edit_image( $attachment_id ) || '' === $fingerprint ) {
 				return $this->error( 'npcink_toolbox_media_batch_item_invalid', 'A media optimization manifest item is invalid or duplicated.', 409 );
 			}
-			if ( ! hash_equals( $fingerprint, $this->current_fingerprint( $attachment_id ) ) ) {
+			/*
+			 * Full-file sha256 pre-flight is bounded: the first items are
+			 * hashed exactly; the rest get only a declared-size stat check.
+			 * Drift the cheap pass misses is still caught per item by the
+			 * fingerprint re-verification before each adoption.
+			 */
+			if ( $hashed_preflight_count < self::CREATE_HASH_LIMIT ) {
+				if ( ! hash_equals( $fingerprint, $this->current_fingerprint( $attachment_id ) ) ) {
+					return $this->error( 'npcink_toolbox_media_batch_source_drift', 'An image changed while the optimization list was being prepared.', 409 );
+				}
+				++$hashed_preflight_count;
+			} elseif ( ! $this->source_size_matches( $attachment_id, absint( $candidate['filesize_bytes'] ?? 0 ) ) ) {
 				return $this->error( 'npcink_toolbox_media_batch_source_drift', 'An image changed while the optimization list was being prepared.', 409 );
 			}
 			$items[ $attachment_id ] = array(
@@ -389,6 +402,26 @@ final class Media_Optimization_Batches {
 		}
 		$hash = hash_file( 'sha256', $path );
 		return is_string( $hash ) ? 'sha256:' . strtolower( $hash ) : '';
+	}
+
+	/**
+	 * Cheap drift check for items past the hashed pre-flight limit: compares
+	 * the manifest's declared byte size against the file on disk. Items with
+	 * no declared size always pass here; the per-item fingerprint check
+	 * before adoption remains the authoritative gate.
+	 */
+	private function source_size_matches( int $attachment_id, int $declared_bytes ): bool {
+		if ( $declared_bytes <= 0 ) {
+			return true;
+		}
+
+		$path = (string) get_attached_file( $attachment_id );
+		if ( '' === $path || ! is_readable( $path ) ) {
+			return false;
+		}
+
+		$size = filesize( $path );
+		return is_int( $size ) && $size === $declared_bytes;
 	}
 
 	private function normalize_fingerprint( string $value ): string {

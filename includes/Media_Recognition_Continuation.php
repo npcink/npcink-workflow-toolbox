@@ -27,9 +27,11 @@ final class Media_Recognition_Continuation {
 
 	public function register_hooks(): void {
 		add_action( 'init', array( $this, 'ensure_schedule' ) );
+		add_action( 'rest_api_init', array( $this, 'ensure_schedule' ) );
 		add_action( self::CRON_HOOK, array( $this, 'process' ) );
 		add_action( 'npcink_abilities_toolkit_media_file_version_changed', array( $this, 'queue_changed_attachment' ), 10, 2 );
 	}
+
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( self::CRON_HOOK );
@@ -38,6 +40,10 @@ final class Media_Recognition_Continuation {
 
 	/** Restores one missing wakeup for an active continuation. */
 	public function ensure_schedule(): void {
+		if ( ! Toolbox_Request_Context::is_maintenance_request() ) {
+			return;
+		}
+
 		$state = $this->status();
 		if (
 			! in_array( $state['state'], array( 'queued', 'processing', 'retrying' ), true )

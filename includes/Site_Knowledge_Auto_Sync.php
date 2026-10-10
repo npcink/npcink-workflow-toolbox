@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 final class Site_Knowledge_Auto_Sync {
 	private const LEGACY_QUEUE_OPTION   = 'npcink_toolbox_site_knowledge_auto_sync_queue';
 	private const LEGACY_CRON_HOOK      = 'npcink_toolbox_process_site_knowledge_auto_sync';
+
+	private static bool $legacy_state_retired = false;
 	private const LEGACY_RECONCILE_HOOK = 'npcink_toolbox_reconcile_site_knowledge_auto_sync';
 
 	public function __construct( Provider_Client $client ) {
@@ -19,11 +21,25 @@ final class Site_Knowledge_Auto_Sync {
 	}
 
 	/**
-	 * Retires the legacy Toolbox fallback by clearing its local scheduled work.
+	 * Retires the legacy Toolbox fallback by clearing its local scheduled
+	 * work. The legacy work only ever ran from admin, cron, or REST
+	 * contexts, so front-end traffic skips the retirement queries entirely.
+	 * The guard runs inside the callback (and also on rest_api_init)
+	 * because REST_REQUEST is not yet defined at hook-registration time.
 	 */
 	public function register_hooks(): void {
+		add_action( 'init', array( $this, 'retire_legacy_state' ) );
+		add_action( 'rest_api_init', array( $this, 'retire_legacy_state' ) );
+	}
+
+	public function retire_legacy_state(): void {
+		if ( self::$legacy_state_retired || ! Toolbox_Request_Context::is_maintenance_request() ) {
+			return;
+		}
+		self::$legacy_state_retired = true;
 		self::clear_legacy_state();
 	}
+
 
 	/**
 	 * Clears legacy Toolbox fallback hooks and buffered delivery state.
@@ -38,8 +54,6 @@ final class Site_Knowledge_Auto_Sync {
 	 * @return array<string,mixed>
 	 */
 	public static function health_snapshot(): array {
-		self::clear_legacy_state();
-
 		if ( self::cloud_addon_bridge_available() ) {
 			return self::cloud_addon_bridge_health_snapshot();
 		}
