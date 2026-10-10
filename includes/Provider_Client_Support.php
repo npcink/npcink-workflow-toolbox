@@ -470,6 +470,72 @@ abstract class Provider_Client_Support {
 	}
 
 
+	/**
+	 * Rewrites known URL fields on a list of Cloud-supplied items to http(s)
+	 * only, so a tainted Cloud response cannot plant javascript: (or other
+	 * scheme) URLs into admin or editor render surfaces. Keys are preserved
+	 * so both list-shaped payloads and associative maps (the agent handoff)
+	 * survive unchanged; scalar values keep their shape — opaque references
+	 * such as 'attachment:<id>' are legitimate evidence forms — and are only
+	 * dropped when they carry an executable scheme (probed after stripping
+	 * ASCII control characters); a URL field whose value fails scheme
+	 * validation or is not scalar is removed from the item rather than left
+	 * empty. A depth greater than 1 recurses into nested array values with
+	 * the same rules, bounding how deep Cloud shapes are walked.
+	 */
+	protected function sanitize_item_url_fields( array $items, int $depth = 1, ?array $fields = null ): array {
+		$fields     = is_array( $fields ) ? $fields : array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' );
+		$normalized = array();
+		foreach ( $items as $key => $item ) {
+			if ( ! is_array( $item ) ) {
+				$probe     = (string) preg_replace( '/[\x00-\x1f]+/', '', trim( (string) $item ) );
+				$dangerous = (bool) preg_match( '/^(?:javascript|vbscript|data):/i', $probe );
+				if ( ! $dangerous ) {
+					$normalized[ $key ] = is_string( $item ) ? trim( $item ) : $item;
+				}
+				continue;
+			}
+			foreach ( $item as $field => $field_value ) {
+				$is_url_field = in_array( (string) $field, $fields, true )
+					|| ( is_string( $field ) && 1 === preg_match( '/(?:^|_)url$|^link$|^permalink$/', $field ) );
+				if ( ! $is_url_field ) {
+					continue;
+				}
+				if ( ! is_scalar( $field_value ) ) {
+					unset( $item[ $field ] );
+					continue;
+				}
+				$raw_value = trim( (string) $field_value );
+				if ( 'audio_url' === $field && 0 === stripos( $raw_value, 'data:audio/' ) ) {
+					$item[ $field ] = $raw_value;
+					continue;
+				}
+				$sanitized = esc_url_raw( $raw_value, array( 'http', 'https' ) );
+				if ( '' === $sanitized ) {
+					$field_probe = (string) preg_replace( '/[\x00-\x1f]+/', '', $raw_value );
+					if ( 1 === preg_match( '/^[a-z][a-z0-9+.-]*:/i', $field_probe ) ) {
+						unset( $item[ $field ] );
+						continue;
+					}
+					$item[ $field ] = $raw_value;
+					continue;
+				}
+				$item[ $field ] = $sanitized;
+			}
+			if ( $depth > 1 ) {
+				foreach ( $item as $child_key => $child_value ) {
+					if ( is_array( $child_value ) ) {
+						$item[ $child_key ] = $this->sanitize_item_url_fields( $child_value, $depth - 1, $fields );
+					}
+				}
+			}
+			$normalized[ $key ] = $item;
+		}
+
+		return $normalized;
+	}
+
+
 	protected function bounded_text( string $value, int $max_chars ): string {
 		$value     = sanitize_textarea_field( $value );
 		$max_chars = max( 1, $max_chars );
