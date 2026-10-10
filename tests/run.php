@@ -725,7 +725,7 @@ $retired_redirect     = 'redirect_' . 'legacy_menu_slug';
 toolbox_assert( false === strpos( $admin_page, $retired_toolbox_slug ) && false === strpos( $admin_page, $retired_menu_const ) && false === strpos( $admin_page, $retired_redirect ), 'Admin page does not keep retired Toolbox menu slug compatibility.' );
 toolbox_assert( false === strpos( $admin_page, '$_GET[' ), 'Admin page avoids direct $_GET reads.' );
 toolbox_assert( false !== strpos( $admin_page, "wp_set_script_translations(\n\t\t\t'npcink-toolbox-admin'" ) && false !== strpos( $admin_page, "NPCINK_TOOLBOX_DIR . 'languages'" ), 'Admin page registers the Toolbox script translation path.' );
-toolbox_assert( false !== strpos( $admin_page, "'npcink-toolbox-admin',\n\t\t\tNPCINK_TOOLBOX_URL . 'assets/admin.js',\n\t\t\tarray( 'wp-i18n' )" ), 'Admin script declares the wp-i18n dependency so admin translations load reliably.' );
+toolbox_assert( false !== strpos( $admin_page, "'npcink-toolbox-admin',\n\t\t\tNPCINK_TOOLBOX_URL . \$script_path,\n\t\t\tarray( 'wp-i18n' )" ) && false !== strpos( $admin_page, "\$script_path = \$this->asset_path( 'assets/admin.js' );" ), 'Admin script declares the wp-i18n dependency so admin translations load reliably.' );
 toolbox_assert( false !== strpos( $admin_page, 'add_menu_page' ) && false !== strpos( $admin_page, 'render_suite_overview' ) && false !== strpos( $admin_page, 'dashicons-superhero' ), 'Toolbox owns the shared Npcink AI navigation shell and suite overview.' );
 toolbox_assert( false !== strpos( $admin_page, '<thead>' ) && false !== strpos( $admin_page, "esc_html_e( 'Surface'" ) && false !== strpos( $admin_page, 'render_suite_overview_row' ), 'Suite overview table declares column headers for screen-reader table navigation.' );
 toolbox_assert( false !== strpos( $admin_page, 'function render_getting_started_steps' ) && false !== strpos( $admin_page, 'render_getting_started_steps( $content_context )' ) && false !== strpos( $admin_page, 'Connect Npcink Cloud' ) && false !== strpos( $admin_page, 'Fill the site profile' ) && false !== strpos( $admin_page, 'Try your first image task' ) && false !== strpos( $admin_page, 'cloud_addon_details_url()' ), 'Overview renders a three-step getting-started card only while Cloud is not connected, with actionable links.' );
@@ -835,7 +835,8 @@ toolbox_assert( false === strpos( $admin_page, 'data-toolbox-site-knowledge-sear
 toolbox_assert( false !== strpos( $admin_page, "'tab'  => 'details'" ) && false !== strpos( $admin_page, "'page' => 'npcink-cloud-addon'" ) && false === strpos( $admin_page, 'data-toolbox-cloud-check-group-target="site-knowledge-status"' ), 'Site Knowledge setup and refresh operations move to Cloud Addon without duplicate Toolbox diagnostics.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-cloud-check-panel="image"' ) && false === strpos( $admin_page, 'Image source check' ) && false === strpos( $admin_page, 'Run image source check' ), 'Image-source smoke checks move out of Toolbox.' );
 toolbox_assert( false === strpos( $admin_page, 'AI image generation check' ) && false === strpos( $admin_page, 'data-toolbox-endpoint="ai/image-generation"' ) && false === strpos( $admin_page, 'Run AI image check' ), 'AI image generation smoke checks move out of Toolbox.' );
-toolbox_assert( false !== strpos( $admin_page, 'asset_version' ) && false !== strpos( $admin_page, 'filemtime' ), 'Admin page cache-busts admin assets during active development.' );
+$asset_paths_trait_source = (string) file_get_contents( $root . '/includes/Toolbox_Asset_Paths.php' );
+toolbox_assert( false !== strpos( $asset_paths_trait_source, 'asset_version' ) && false !== strpos( $asset_paths_trait_source, 'filemtime' ) && false !== strpos( $admin_page, 'use Toolbox_Asset_Paths;' ), 'Admin page cache-busts admin assets during active development through the shared Toolbox_Asset_Paths trait.' );
 toolbox_assert( false === strpos( $admin_page, 'data-toolbox-cloud-check-group-target="image-derivative-preview"' ) && false === strpos( $admin_page, 'data-toolbox-media-derivative-preview-only' ), 'Preview-only media derivative diagnostics are removed from Cloud Checks.' );
 toolbox_assert( false === strpos( $admin_page, '<option value="tavily">' ) && false === strpos( $admin_page, '<option value="bocha">' ) && false === strpos( $admin_page, '<option value="apify">' ) && false === strpos( $admin_page, 'Enhance returned pages with Jina Reader' ), 'Cloud Search checks use Cloud auto execution without provider or Jina controls.' );
 toolbox_assert( false === strpos( $admin_page, 'npcink-toolbox__connector-status' ) && false === strpos( $admin_page, 'Connector status catalog' ), 'Connector panels go directly from tabs into verification tools.' );
@@ -1136,7 +1137,9 @@ $editor_support_part_sources = toolbox_read_editor_content_support_parts( $root 
 foreach ( toolbox_editor_content_support_part_names( $root ) as $editor_part_policy_name ) {
 	$editor_part_policy_source = (string) file_get_contents( $root . '/assets/editor-content-support/' . $editor_part_policy_name );
 	$editor_part_policy_handle = '';
-	preg_match( "#'([^']+)',\s*NPCINK_TOOLBOX_URL \. 'assets/editor-content-support/" . $editor_part_policy_name . "'#", $editor_support, $editor_part_policy_handle_match );
+	preg_match( "#\\\$([a-z_]+)[ ]*=[ ]*\\\$this->asset_path\( 'assets/editor-content-support/" . $editor_part_policy_name . "' \)#", $editor_support, $editor_part_policy_var_match );
+	toolbox_assert( ! empty( $editor_part_policy_var_match[1] ), "The part {$editor_part_policy_name} is enqueued through a resolved asset_path variable, so handle resolution cannot drift to an empty string." );
+	preg_match( "#'([^']+)',\s*NPCINK_TOOLBOX_URL \. \\\$" . (string) ( $editor_part_policy_var_match[1] ?? 'never_used' ) . ",#", $editor_support, $editor_part_policy_handle_match );
 	$editor_part_policy_handle = (string) ( $editor_part_policy_handle_match[1] ?? '' );
 	if ( false === strpos( $editor_part_policy_source, '__(' ) ) {
 		toolbox_assert( false === strpos( $editor_part_policy_source, 'apiFetch' ) && false === strpos( $editor_support, "wp_set_script_translations(\n\t\t\t'" . $editor_part_policy_handle . "'" ), "The pure part {$editor_part_policy_name} stays translation-free with no requests and no script translations, per the editor part JED policy." );
@@ -1243,7 +1246,7 @@ toolbox_assert( false !== strpos( $editor_support_assets, 'internal_link_rejecte
 toolbox_assert( false !== strpos( $composer, 'test:internal-link-editor-js' ) && false !== strpos( $composer, 'tests/internal-link-editor-behavior.mjs' ), 'Composer exposes focused internal-link editor behavior coverage.' );
 toolbox_assert( false !== strpos( $composer, 'eval:internal-link-batch:export' ) && false !== strpos( $composer, 'eval:internal-link-batch:verify' ) && false !== strpos( $composer, 'tests/export-internal-link-batch-adversarial.mjs' ) && false !== strpos( $composer, 'task=link_recommendation_adversarial' ), 'Composer exposes the Toolbox-owned internal-link batch preflight artifact and eval-lab verifier.' );
 toolbox_assert( false !== strpos( $editor_support, "'wp-hooks'" ), 'Post editor content support declares the hooks dependency for BlockEdit toolbar registration.' );
-toolbox_assert( false !== strpos( $editor_support, 'asset_version' ) && false !== strpos( $editor_support, 'filemtime' ), 'Post editor content support cache-busts editor assets during active development.' );
+toolbox_assert( false !== strpos( $asset_paths_trait_source, 'asset_version' ) && false !== strpos( $asset_paths_trait_source, 'filemtime' ) && false !== strpos( $editor_support, 'use Toolbox_Asset_Paths;' ), 'Post editor content support cache-busts editor assets during active development through the shared Toolbox_Asset_Paths trait.' );
 toolbox_assert( false !== strpos( $editor_support, 'NpcinkToolboxEditorSupport' ) && false !== strpos( $editor_support, "wp_create_nonce( 'wp_rest' )" ) && false !== strpos( $editor_support, "'coreRestUrl'" ), 'Post editor content support localizes REST configuration, Core route hints, and nonce.' );
 toolbox_assert( false === strpos( $editor_support, 'PUBLISH_EXECUTION_META_KEY' ) && false === strpos( $editor_support, '_npcink_toolbox_publish_execution_intents' ) && false === strpos( $editor_support, 'register_publish_execution_meta' ), 'Post editor content support has no private publish-execution metadata.' );
 toolbox_assert( false === strpos( $editor_rest_source, '/editor/reviewed-action-intents' ) && false === strpos( $editor_rest_source, 'editor_publish_execution_intents' ), 'REST controller has no reviewed-action intent route or publish-time executor state.' );
@@ -1784,6 +1787,31 @@ toolbox_assert( false !== strpos( $editor_js, 'Source details' ) && false === st
 
 $editor_entrypoint = file_get_contents( $root . '/includes/Editor_Content_Support.php' );
 toolbox_assert( false !== strpos( $editor_entrypoint, 'adapterRestUrl' ) && false !== strpos( $editor_entrypoint, 'npcink-openclaw-adapter/v1' ), 'Editor Content Support localizes the Adapter REST base for governed adoption execution.' );
+$editor_post_type_guard_pos = strpos( $editor_entrypoint, '! $this->is_supported_editor_post_type()' );
+toolbox_assert( false !== strpos( $editor_entrypoint, 'is_supported_editor_post_type' ) && false !== strpos( $editor_entrypoint, "apply_filters( 'npcink_toolbox_editor_supported_post_types', array( 'post', 'page' ) )" ) && false !== strpos( $editor_entrypoint, 'get_current_screen' ) && false !== $editor_post_type_guard_pos && $editor_post_type_guard_pos < strpos( $editor_entrypoint, 'wp_enqueue_style' ), 'The editor content-support bundle enqueues only on allowlisted post-type editors (post/page by default, filter-extendable) instead of every block editor screen, with the guard running before any enqueue.' );
+toolbox_assert( false !== strpos( $asset_paths_trait_source, 'trait Toolbox_Asset_Paths' ) && false !== strpos( $asset_paths_trait_source, 'private function asset_path( string $relative_path ): string' ) && false !== strpos( $asset_paths_trait_source, "'.min.\$1'" ) && false !== strpos( $asset_paths_trait_source, 'SCRIPT_DEBUG' ) && false !== strpos( $editor_entrypoint, 'use Toolbox_Asset_Paths;' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Admin_Page.php' ), 'use Toolbox_Asset_Paths;' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Article_Audio_Playback.php' ), 'use Toolbox_Asset_Paths;' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Article_Audio_Playback.php' ), "\$style_path = \$this->asset_path( 'assets/article-audio-playback.css' );" ), 'Editor, admin, and front-end audio enqueues share one Toolbox_Asset_Paths trait that prefers shipped .min asset siblings unless SCRIPT_DEBUG is on, falling back to the readable sources in development checkouts.' );
+$minify_script = (string) file_get_contents( $root . '/scripts/minify-assets.sh' );
+toolbox_assert( false !== strpos( $minify_script, 'terser@5.39.2' ) && false !== strpos( $minify_script, 'clean-css-cli@5.6.3' ) && 2 === substr_count( $minify_script, 'minified output is empty or not smaller; refusing' ) && 2 === substr_count( $minify_script, 'after == 0 || after > before' ) && false !== strpos( $minify_script, 'removed partially written .min siblings after failure' ) && false !== strpos( $minify_script, 'an explicit TARGET_DIR (the packaged plugin copy) is required' ) && false !== strpos( $composer, 'bash scripts/minify-assets.sh build/npcink-workflow-toolbox' ), 'The release package minifies assets through pinned-version tooling in scripts/minify-assets.sh wired into composer package:release, requires an explicit target directory, refuses any bundle whose minified output is empty or did not shrink, and cleans partially written .min siblings when a run fails.' );
+$asset_bundle_disk_paths = array_merge(
+	glob( $root . '/assets/*.js' ) ?: array(),
+	glob( $root . '/assets/*.css' ) ?: array(),
+	glob( $root . '/assets/editor-content-support/*.js' ) ?: array()
+);
+$unminified_asset_bundles = array_values( array_filter(
+	$asset_bundle_disk_paths,
+	static fn( string $bundle_path ): bool => false === strpos( $bundle_path, '.min.' )
+) );
+$minify_js_bundles_block  = (bool) preg_match( '/js_bundles=\((.*?)\)/s', $minify_script, $minify_js_bundles_match ) ? (string) $minify_js_bundles_match[1] : '';
+$minify_css_bundles_block = (bool) preg_match( '/css_bundles=\((.*?)\)/s', $minify_script, $minify_css_bundles_match ) ? (string) $minify_css_bundles_match[1] : '';
+toolbox_assert( array() === array_values( array_filter(
+	$unminified_asset_bundles,
+	static function ( string $bundle_path ) use ( $minify_js_bundles_block, $minify_css_bundles_block, $root ): bool {
+		$relative = '"' . substr( $bundle_path, strlen( $root . '/' ) ) . '"';
+		$block    = '.js' === substr( $bundle_path, -3 ) ? $minify_js_bundles_block : $minify_css_bundles_block;
+		return false === strpos( $block, $relative );
+	}
+) ), 'Every asset bundle on disk appears in the matching js_bundles or css_bundles array of the release minifier, so a newly added asset or a misplaced entry fails the gate.' );
+toolbox_assert( false !== strpos( (string) file_get_contents( $root . '/docs/current-state.md' ), 'npcink_toolbox_editor_supported_post_types' ) && false !== strpos( (string) file_get_contents( $root . '/docs/wordpress-org-submission.md' ), 'scripts/minify-assets.sh' ) && false !== strpos( (string) file_get_contents( $root . '/readme.txt' ), 'npcink_toolbox_editor_supported_post_types' ), 'Docs and the readme record the editor post-type allowlist filter and the release-time asset minification step.' );
 toolbox_assert( false !== strpos( $editor_css, 'npcink-toolbox-editor-support__diagnostics' ), 'Editor Content Support CSS styles Cloud image-source diagnostics.' );
 
 toolbox_assert( false !== strpos( $admin_css, '.npcink-toolbox__usage-list' ), 'Admin CSS styles Site Knowledge usage scenarios as compact utility rows.' );

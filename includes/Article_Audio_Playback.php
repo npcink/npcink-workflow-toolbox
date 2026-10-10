@@ -9,7 +9,12 @@ namespace Npcink_Toolbox;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/Toolbox_Asset_Paths.php';
+
 final class Article_Audio_Playback {
+
+	use Toolbox_Asset_Paths;
+
 	public const META_URL                 = '_npcink_toolbox_article_audio_url';
 	public const META_ATTACHMENT_ID       = '_npcink_toolbox_article_audio_attachment_id';
 	public const META_TITLE               = '_npcink_toolbox_article_audio_title';
@@ -52,11 +57,13 @@ final class Article_Audio_Playback {
 			return;
 		}
 
+		$style_path = $this->asset_path( 'assets/article-audio-playback.css' );
+
 		wp_enqueue_style(
 			'npcink-toolbox-article-audio',
-			NPCINK_TOOLBOX_URL . 'assets/article-audio-playback.css',
+			NPCINK_TOOLBOX_URL . $style_path,
 			array(),
-			$this->asset_version( 'assets/article-audio-playback.css' )
+			$this->asset_version( $style_path )
 		);
 	}
 
@@ -344,11 +351,5 @@ final class Article_Audio_Playback {
 		$seconds = $total_seconds % 60;
 
 		return sprintf( '%d:%02d', $minutes, $seconds );
-	}
-
-	private function asset_version( string $relative_path ): string {
-		$path     = NPCINK_TOOLBOX_DIR . ltrim( $relative_path, '/' );
-		$modified = file_exists( $path ) ? filemtime( $path ) : false;
-		return NPCINK_TOOLBOX_VERSION . ( $modified ? '-' . (string) $modified : '' );
 	}
 }

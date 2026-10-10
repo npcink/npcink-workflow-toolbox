@@ -14,7 +14,12 @@ use Npcink\LocalAutomationRuntime\NightlyInspection\Snapshot_Collector;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/Toolbox_Asset_Paths.php';
+
 final class Admin_Page extends Admin_Page_Site_Ops_Panel {
+
+	use Toolbox_Asset_Paths;
+
 	private const PARENT_MENU_SLUG = 'npcink-ai';
 	private const MENU_CAPABILITY  = 'manage_options';
 
@@ -144,21 +149,21 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			return;
 		}
 
-		$style_version  = $this->asset_version( 'assets/admin.css' );
-		$script_version = $this->asset_version( 'assets/admin.js' );
+		$style_path  = $this->asset_path( 'assets/admin.css' );
+		$script_path = $this->asset_path( 'assets/admin.js' );
 
 		wp_enqueue_style(
 			'npcink-toolbox-admin',
-			NPCINK_TOOLBOX_URL . 'assets/admin.css',
+			NPCINK_TOOLBOX_URL . $style_path,
 			array(),
-			$style_version
+			$this->asset_version( $style_path )
 		);
 
 		wp_enqueue_script(
 			'npcink-toolbox-admin',
-			NPCINK_TOOLBOX_URL . 'assets/admin.js',
+			NPCINK_TOOLBOX_URL . $script_path,
 			array( 'wp-i18n' ),
-			$script_version,
+			$this->asset_version( $script_path ),
 			true
 		);
 		wp_set_script_translations(
@@ -191,11 +196,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		);
 	}
 
-	private function asset_version( string $relative_path ): string {
-		$path     = NPCINK_TOOLBOX_DIR . ltrim( $relative_path, '/' );
-		$modified = file_exists( $path ) ? filemtime( $path ) : false;
-		return NPCINK_TOOLBOX_VERSION . ( $modified ? '-' . (string) $modified : '' );
-	}
 
 	private function toolbox_admin_url( array $args = array() ): string {
 		return add_query_arg(
