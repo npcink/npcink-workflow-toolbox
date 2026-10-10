@@ -500,8 +500,13 @@ abstract class Provider_Client_Support {
 						unset( $item[ $field ] );
 						continue;
 					}
-					$sanitized = esc_url_raw( (string) $item[ $field ], array( 'http', 'https' ) );
-					if ( '' === $sanitized && '' !== (string) $item[ $field ] ) {
+					$raw_value = trim( (string) $item[ $field ] );
+					if ( 'audio_url' === $field && 0 === stripos( $raw_value, 'data:audio/' ) ) {
+						$item[ $field ] = $raw_value;
+						continue;
+					}
+					$sanitized = esc_url_raw( $raw_value, array( 'http', 'https' ) );
+					if ( '' === $sanitized && '' !== $raw_value ) {
 						unset( $item[ $field ] );
 						continue;
 					}
