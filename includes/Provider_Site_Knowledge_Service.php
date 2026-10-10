@@ -156,7 +156,8 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 
 		$results        = is_array( $result['results'] ?? null ) ? $this->sanitize_payload( $result['results'] ) : array();
 		$results        = $this->filter_current_public_site_knowledge_results( $results );
-		$agent_handoff  = is_array( $result['agent_handoff'] ?? null ) ? $this->sanitize_payload( $result['agent_handoff'] ) : array();
+		$results        = $this->sanitize_item_url_fields( $results );
+		$agent_handoff  = is_array( $result['agent_handoff'] ?? null ) ? $this->sanitize_item_url_fields( $this->sanitize_payload( $result['agent_handoff'] ) ) : array();
 		$cloud_boundary = $this->normalize_site_knowledge_cloud_boundary( $result, $response, $runtime_payload );
 
 		$payload = $this->with_output_contract(
@@ -169,7 +170,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 				'run_id'               => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
 				'results'              => $results,
 				'coverage'             => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
-				'media_evidence_items' => is_array( $result['media_evidence_items'] ?? null ) ? $this->sanitize_payload( $result['media_evidence_items'] ) : array(),
+				'media_evidence_items' => is_array( $result['media_evidence_items'] ?? null ) ? $this->sanitize_item_url_fields( $this->sanitize_payload( $result['media_evidence_items'] ) ) : array(),
 				'sync'                 => is_array( $result['sync'] ?? null ) ? $this->sanitize_payload( $result['sync'] ) : array(),
 				'progress'             => is_array( $result['progress'] ?? null ) ? $this->sanitize_payload( $result['progress'] ) : array(),
 				'active_run'           => is_array( $result['active_run'] ?? null ) ? $this->sanitize_payload( $result['active_run'] ) : array(),

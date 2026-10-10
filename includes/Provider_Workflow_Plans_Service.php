@@ -828,6 +828,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		if ( empty( $evidence_refs ) && is_array( $handoff['proposal_input']['evidence_refs'] ?? null ) ) {
 			$evidence_refs = array_values( $handoff['proposal_input']['evidence_refs'] );
 		}
+		$evidence_refs = $this->sanitize_item_url_fields( $evidence_refs );
 		if ( empty( $evidence_refs ) ) {
 			return new WP_Error(
 				'npcink_toolbox_site_knowledge_review_evidence_required',
@@ -835,6 +836,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				array( 'status' => 400 )
 			);
 		}
+		$proposal_input['evidence_refs'] = $evidence_refs;
 
 		$blocked_outputs = is_array( $proposal_input['blocked_outputs'] ?? null ) ? array_values( $proposal_input['blocked_outputs'] ) : array();
 		$workflow        = sanitize_key( (string) ( $handoff['workflow'] ?? ( $proposal_input['workflow'] ?? 'site_knowledge_review' ) ) );

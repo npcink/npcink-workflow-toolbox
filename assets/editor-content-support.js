@@ -1007,7 +1007,7 @@
 				createElement('summary', null, __('Technical details', 'npcink-workflow-toolbox')),
 				renderItems(technicalItems, __('No technical receipt details returned.', 'npcink-workflow-toolbox'))
 			),
-			receipt.core_url ? createElement(
+			receipt.core_url && isHttpUrl(receipt.core_url) ? createElement(
 				'a',
 				{
 					className: 'npcink-toolbox-editor-support__core-record-link',
@@ -3038,7 +3038,7 @@
 					{ className: 'npcink-toolbox-editor-support__info-list' },
 					sourceDetailRows
 				) : null,
-				sourceUrl ? createElement('a', { href: sourceUrl, target: '_blank', rel: 'noreferrer' }, __('Open source', 'npcink-workflow-toolbox')) : null,
+				sourceUrl && isHttpUrl(sourceUrl) ? createElement('a', { href: sourceUrl, target: '_blank', rel: 'noreferrer' }, __('Open source', 'npcink-workflow-toolbox')) : null,
 				attributionLabel ? createElement('small', null, attributionLabel) : null
 			)
 		);
@@ -3940,7 +3940,7 @@
 					{ key: item.key },
 					createElement('strong', null, item.title),
 					createElement('p', null, item.reason),
-					item.url ? createElement('a', { href: item.url, target: '_blank', rel: 'noopener noreferrer' }, __('Open article', 'npcink-workflow-toolbox')) : null
+					item.url && isHttpUrl(item.url) ? createElement('a', { href: item.url, target: '_blank', rel: 'noopener noreferrer' }, __('Open article', 'npcink-workflow-toolbox')) : null
 				))
 			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No related site articles were found.', 'npcink-workflow-toolbox'))
 		);
@@ -4705,13 +4705,13 @@
 		return items.filter((item) => item && typeof item === 'object');
 	}
 
-	function isHttpAudioUrl(url) {
+	function isHttpUrl(url) {
 		return /^https?:\/\//i.test(String(url || '').trim());
 	}
 
 	function audioPreviewSrc(item) {
 		const url = String(item && (item.url || item.audio_url) ? (item.url || item.audio_url) : '').trim();
-		if (isHttpAudioUrl(url) || /^data:audio\//i.test(url)) {
+		if (isHttpUrl(url) || /^data:audio\//i.test(url)) {
 			return url;
 		}
 		const b64 = String(item && item.b64_json ? item.b64_json : '').trim();
@@ -4862,7 +4862,7 @@
 					createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__audio-actions' },
-						url ? createElement('a', { href: url, target: '_blank', rel: 'noreferrer', className: 'npcink-toolbox-editor-support__audio-open-link' }, __('Open audio', 'npcink-workflow-toolbox')) : null,
+						url && isHttpUrl(url) ? createElement('a', { href: url, target: '_blank', rel: 'noreferrer', className: 'npcink-toolbox-editor-support__audio-open-link' }, __('Open audio', 'npcink-workflow-toolbox')) : null,
 						url && audioAdoptionControls ? createElement(
 							Button,
 							{
@@ -8228,7 +8228,7 @@
 				setAudioAdoptionError(__('This audio candidate has no playable URL to review.', 'npcink-workflow-toolbox'));
 				return;
 			}
-			if (!isHttpAudioUrl(planInput.audio_url)) {
+			if (!isHttpUrl(planInput.audio_url)) {
 				setAudioAdoptionError(__('This audio candidate can be previewed, but it has no downloadable http(s) URL for local media import.', 'npcink-workflow-toolbox'));
 				return;
 			}
@@ -8400,7 +8400,11 @@
 				setInternalLinkStatus({ status: 'error', message: __('This candidate has no article URL to open.', 'npcink-workflow-toolbox') });
 				return;
 			}
-				submitContentImplicitFeedback('internal_link_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('internal_links', candidate && candidate.id));
+			if (!isHttpUrl(url)) {
+				setInternalLinkStatus({ status: 'error', message: __('This candidate has an unsafe article URL.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			submitContentImplicitFeedback('internal_link_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('internal_links', candidate && candidate.id));
 			window.open(url, '_blank', 'noopener,noreferrer');
 		}
 
@@ -8408,6 +8412,10 @@
 			const url = String(candidate && candidate.targetUrl ? candidate.targetUrl : '').trim();
 			if (!url) {
 				setRelatedContentStatus({ status: 'error', message: __('This article has no URL to open.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			if (!isHttpUrl(url)) {
+				setRelatedContentStatus({ status: 'error', message: __('This article has an unsafe URL.', 'npcink-workflow-toolbox') });
 				return;
 			}
 			const feedbackOptions = recommendationActionFeedbackOptions('related_content', '');

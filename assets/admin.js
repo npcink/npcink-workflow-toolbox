@@ -288,7 +288,14 @@
 		return '';
 	}
 
+	function isHttpUrl(url) {
+		return /^https?:\/\//i.test(String(url || '').trim());
+	}
+
 	function createLink(url, label) {
+		if (!isHttpUrl(url)) {
+			return el('span', '', label || url);
+		}
 		const link = el('a', '', label || url);
 		link.href = url;
 		link.target = '_blank';

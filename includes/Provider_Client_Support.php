@@ -470,6 +470,56 @@ abstract class Provider_Client_Support {
 	}
 
 
+	/**
+	 * Rewrites known URL fields on a list of Cloud-supplied items to http(s)
+	 * only, so a tainted Cloud response cannot plant javascript: (or other
+	 * scheme) URLs into admin or editor render surfaces. Keys are preserved
+	 * so both list-shaped payloads and associative maps (the agent handoff)
+	 * survive unchanged; scalar values keep their shape — opaque references
+	 * such as 'attachment:<id>' are legitimate evidence forms — and are only
+	 * dropped when they carry an executable scheme (probed after stripping
+	 * ASCII control characters); a URL field whose value fails scheme
+	 * validation or is not scalar is removed from the item rather than left
+	 * empty.
+	 */
+	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' ) ): array {
+		$normalized = array();
+		foreach ( $items as $key => $item ) {
+			if ( ! is_array( $item ) ) {
+				$scalar    = trim( (string) $item );
+				$probe     = (string) preg_replace( '/[\x00-\x20]+/', '', $scalar );
+				$dangerous = (bool) preg_match( '/^(?:javascript|vbscript|data):/i', $probe );
+				if ( ! $dangerous ) {
+					$normalized[ $key ] = $scalar;
+				}
+				continue;
+			}
+			foreach ( $fields as $field ) {
+				if ( array_key_exists( $field, $item ) ) {
+					if ( ! is_scalar( $item[ $field ] ) ) {
+						unset( $item[ $field ] );
+						continue;
+					}
+					$raw_value = trim( (string) $item[ $field ] );
+					if ( 'audio_url' === $field && 0 === stripos( $raw_value, 'data:audio/' ) ) {
+						$item[ $field ] = $raw_value;
+						continue;
+					}
+					$sanitized = esc_url_raw( $raw_value, array( 'http', 'https' ) );
+					if ( '' === $sanitized && '' !== $raw_value ) {
+						unset( $item[ $field ] );
+						continue;
+					}
+					$item[ $field ] = $sanitized;
+				}
+			}
+			$normalized[ $key ] = $item;
+		}
+
+		return $normalized;
+	}
+
+
 	protected function bounded_text( string $value, int $max_chars ): string {
 		$value     = sanitize_textarea_field( $value );
 		$max_chars = max( 1, $max_chars );
