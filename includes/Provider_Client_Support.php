@@ -484,6 +484,7 @@ abstract class Provider_Client_Support {
 	 * the same rules, bounding how deep Cloud shapes are walked.
 	 */
 	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' ), int $depth = 1 ): array {
+		$fields     = $fields ?: array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' );
 		$normalized = array();
 		foreach ( $items as $key => $item ) {
 			if ( ! is_array( $item ) ) {
