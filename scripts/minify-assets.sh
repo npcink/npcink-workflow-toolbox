@@ -45,6 +45,17 @@ css_bundles=(
 
 total_before=0
 total_after=0
+written_outputs=()
+
+# A failed run must not leave a partially minified target directory behind:
+# every .min sibling written so far is removed unless the run completes.
+minify_cleanup_on_failure() {
+	if (( ${#written_outputs[@]} )); then
+		rm -f -- "${written_outputs[@]}"
+		echo "[minify] removed partially written .min siblings after failure" >&2
+	fi
+}
+trap minify_cleanup_on_failure EXIT
 
 for bundle in "${js_bundles[@]}"; do
 	src="$TARGET_DIR/$bundle"
@@ -56,6 +67,11 @@ for bundle in "${js_bundles[@]}"; do
 	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
+	if (( after >= before )); then
+		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
+		exit 1
+	fi
+	written_outputs+=("$out")
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
 	echo "[minify] $bundle: ${before} -> ${after} bytes"
@@ -71,14 +87,15 @@ for bundle in "${css_bundles[@]}"; do
 	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
+	if (( after >= before )); then
+		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
+		exit 1
+	fi
+	written_outputs+=("$out")
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
 	echo "[minify] $bundle: ${before} -> ${after} bytes"
 done
 
-if (( total_after >= total_before )); then
-	echo "[minify] minified output is not smaller than the sources; refusing" >&2
-	exit 1
-fi
-
+trap - EXIT
 echo "[minify] total: ${total_before} -> ${total_after} bytes"

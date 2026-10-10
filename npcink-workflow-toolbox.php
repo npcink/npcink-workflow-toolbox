@@ -20,6 +20,7 @@ define( 'NPCINK_TOOLBOX_FILE', __FILE__ );
 define( 'NPCINK_TOOLBOX_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NPCINK_TOOLBOX_URL', plugin_dir_url( __FILE__ ) );
 
+require_once NPCINK_TOOLBOX_DIR . 'includes/Toolbox_Asset_Paths.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Settings.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Operation_Classifier.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Cloud_Image_Artifact_Transport.php';

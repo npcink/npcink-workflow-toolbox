@@ -14,7 +14,12 @@ use Npcink\LocalAutomationRuntime\NightlyInspection\Snapshot_Collector;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/Toolbox_Asset_Paths.php';
+
 final class Admin_Page extends Admin_Page_Site_Ops_Panel {
+
+	use Toolbox_Asset_Paths;
+
 	private const PARENT_MENU_SLUG = 'npcink-ai';
 	private const MENU_CAPABILITY  = 'manage_options';
 
@@ -191,20 +196,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		);
 	}
 
-	private function asset_path( string $relative_path ): string {
-		$min_path = (string) preg_replace( '/\.(js|css)$/i', '.min.$1', $relative_path );
-		if ( ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! file_exists( NPCINK_TOOLBOX_DIR . $min_path ) ) {
-			return $relative_path;
-		}
-
-		return $min_path;
-	}
-
-	private function asset_version( string $relative_path ): string {
-		$path     = NPCINK_TOOLBOX_DIR . ltrim( $relative_path, '/' );
-		$modified = file_exists( $path ) ? filemtime( $path ) : false;
-		return NPCINK_TOOLBOX_VERSION . ( $modified ? '-' . (string) $modified : '' );
-	}
 
 	private function toolbox_admin_url( array $args = array() ): string {
 		return add_query_arg(

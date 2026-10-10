@@ -9,7 +9,12 @@ namespace Npcink_Toolbox;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/Toolbox_Asset_Paths.php';
+
 final class Article_Audio_Playback {
+
+	use Toolbox_Asset_Paths;
+
 	public const META_URL                 = '_npcink_toolbox_article_audio_url';
 	public const META_ATTACHMENT_ID       = '_npcink_toolbox_article_audio_attachment_id';
 	public const META_TITLE               = '_npcink_toolbox_article_audio_title';
@@ -346,20 +351,5 @@ final class Article_Audio_Playback {
 		$seconds = $total_seconds % 60;
 
 		return sprintf( '%d:%02d', $minutes, $seconds );
-	}
-
-	private function asset_path( string $relative_path ): string {
-		$min_path = (string) preg_replace( '/\.(js|css)$/i', '.min.$1', $relative_path );
-		if ( ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! file_exists( NPCINK_TOOLBOX_DIR . $min_path ) ) {
-			return $relative_path;
-		}
-
-		return $min_path;
-	}
-
-	private function asset_version( string $relative_path ): string {
-		$path     = NPCINK_TOOLBOX_DIR . ltrim( $relative_path, '/' );
-		$modified = file_exists( $path ) ? filemtime( $path ) : false;
-		return NPCINK_TOOLBOX_VERSION . ( $modified ? '-' . (string) $modified : '' );
 	}
 }
