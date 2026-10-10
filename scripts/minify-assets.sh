@@ -76,7 +76,10 @@ for bundle in "${js_bundles[@]}"; do
 	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
-	if (( after == 0 || after > before )); then
+	# Same near-tie tolerance as the CSS loop: tiny modules can minify to a
+	# tie through banner/semicolon overhead; empty or meaningfully larger
+	# output still refuses.
+	if (( after == 0 || after > before + 64 )); then
 		echo "[minify] $bundle: minified output is empty or not smaller; refusing" >&2
 		exit 1
 	fi
