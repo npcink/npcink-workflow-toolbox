@@ -488,11 +488,10 @@ abstract class Provider_Client_Support {
 		$normalized = array();
 		foreach ( $items as $key => $item ) {
 			if ( ! is_array( $item ) ) {
-				$scalar    = trim( (string) $item );
-				$probe     = (string) preg_replace( '/[\x00-\x20]+/', '', $scalar );
+				$probe     = (string) preg_replace( '/[\x00-\x1f]+/', '', (string) $item );
 				$dangerous = (bool) preg_match( '/^(?:javascript|vbscript|data):/i', $probe );
 				if ( ! $dangerous ) {
-					$normalized[ $key ] = $scalar;
+					$normalized[ $key ] = is_string( $item ) ? trim( $item ) : $item;
 				}
 				continue;
 			}
