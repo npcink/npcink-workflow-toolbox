@@ -511,8 +511,13 @@ abstract class Provider_Client_Support {
 					continue;
 				}
 				$sanitized = esc_url_raw( $raw_value, array( 'http', 'https' ) );
-				if ( '' === $sanitized && '' !== $raw_value ) {
-					unset( $item[ $field ] );
+				if ( '' === $sanitized ) {
+					$field_probe = (string) preg_replace( '/[\x00-\x1f]+/', '', $raw_value );
+					if ( 1 === preg_match( '/^[a-z][a-z0-9+.-]*:/i', $field_probe ) ) {
+						unset( $item[ $field ] );
+						continue;
+					}
+					$item[ $field ] = $raw_value;
 					continue;
 				}
 				$item[ $field ] = $sanitized;
