@@ -4709,13 +4709,9 @@
 		return /^https?:\/\//i.test(String(url || '').trim());
 	}
 
-	function isHttpAudioUrl(url) {
-		return isHttpUrl(url);
-	}
-
 	function audioPreviewSrc(item) {
 		const url = String(item && (item.url || item.audio_url) ? (item.url || item.audio_url) : '').trim();
-		if (isHttpAudioUrl(url) || /^data:audio\//i.test(url)) {
+		if (isHttpUrl(url) || /^data:audio\//i.test(url)) {
 			return url;
 		}
 		const b64 = String(item && item.b64_json ? item.b64_json : '').trim();
@@ -8232,7 +8228,7 @@
 				setAudioAdoptionError(__('This audio candidate has no playable URL to review.', 'npcink-workflow-toolbox'));
 				return;
 			}
-			if (!isHttpAudioUrl(planInput.audio_url)) {
+			if (!isHttpUrl(planInput.audio_url)) {
 				setAudioAdoptionError(__('This audio candidate can be previewed, but it has no downloadable http(s) URL for local media import.', 'npcink-workflow-toolbox'));
 				return;
 			}
@@ -8408,7 +8404,7 @@
 				setInternalLinkStatus({ status: 'error', message: __('This candidate has an unsafe article URL.', 'npcink-workflow-toolbox') });
 				return;
 			}
-				submitContentImplicitFeedback('internal_link_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('internal_links', candidate && candidate.id));
+			submitContentImplicitFeedback('internal_link_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], recommendationActionFeedbackOptions('internal_links', candidate && candidate.id));
 			window.open(url, '_blank', 'noopener,noreferrer');
 		}
 

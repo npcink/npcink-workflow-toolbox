@@ -293,12 +293,13 @@
 	}
 
 	function createLink(url, label) {
-		const link = el('a', '', label || url);
-		if (isHttpUrl(url)) {
-			link.href = url;
-			link.target = '_blank';
-			link.rel = 'noreferrer';
+		if (!isHttpUrl(url)) {
+			return el('span', '', label || url);
 		}
+		const link = el('a', '', label || url);
+		link.href = url;
+		link.target = '_blank';
+		link.rel = 'noreferrer';
 		return link;
 	}
 
