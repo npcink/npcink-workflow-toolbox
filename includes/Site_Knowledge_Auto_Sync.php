@@ -31,17 +31,12 @@ final class Site_Knowledge_Auto_Sync {
 	}
 
 	public function retire_legacy_state(): void {
-		if ( ! self::is_maintenance_request() ) {
+		if ( ! Toolbox_Request_Context::is_maintenance_request() ) {
 			return;
 		}
 		self::clear_legacy_state();
 	}
 
-	private static function is_maintenance_request(): bool {
-		return ( function_exists( 'is_admin' ) && is_admin() )
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() );
-	}
 
 	/**
 	 * Clears legacy Toolbox fallback hooks and buffered delivery state.

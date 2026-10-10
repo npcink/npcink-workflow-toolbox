@@ -32,17 +32,6 @@ final class Media_Recognition_Continuation {
 		add_action( 'npcink_abilities_toolkit_media_file_version_changed', array( $this, 'queue_changed_attachment' ), 10, 2 );
 	}
 
-	/**
-	 * Continuations only ever resume from admin, REST, or cron contexts;
-	 * front-end traffic skips the schedule check's option read entirely.
-	 * The guard runs inside the callback (and also on rest_api_init)
-	 * because REST_REQUEST is not yet defined at hook-registration time.
-	 */
-	private static function is_maintenance_request(): bool {
-		return ( function_exists( 'is_admin' ) && is_admin() )
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() );
-	}
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( self::CRON_HOOK );
@@ -51,7 +40,7 @@ final class Media_Recognition_Continuation {
 
 	/** Restores one missing wakeup for an active continuation. */
 	public function ensure_schedule(): void {
-		if ( ! self::is_maintenance_request() ) {
+		if ( ! Toolbox_Request_Context::is_maintenance_request() ) {
 			return;
 		}
 

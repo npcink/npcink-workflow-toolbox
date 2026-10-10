@@ -27,17 +27,6 @@ final class Media_Fingerprint_Scan {
 		add_action( self::HOOK, array( $this, 'run' ) );
 	}
 
-	/**
-	 * The weekly scan is only scheduled from admin, REST, or cron contexts;
-	 * front-end traffic skips the schedule check's option reads entirely.
-	 * The guard runs inside the callback (and also on rest_api_init)
-	 * because REST_REQUEST is not yet defined at hook-registration time.
-	 */
-	private static function is_maintenance_request(): bool {
-		return ( function_exists( 'is_admin' ) && is_admin() )
-			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() );
-	}
 
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( self::HOOK );
@@ -52,7 +41,7 @@ final class Media_Fingerprint_Scan {
 	}
 
 	public function maybe_schedule(): void {
-		if ( ! self::is_maintenance_request() ) {
+		if ( ! Toolbox_Request_Context::is_maintenance_request() ) {
 			return;
 		}
 		if ( ! $this->enabled() ) {
