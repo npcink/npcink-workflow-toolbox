@@ -96,7 +96,9 @@ for bundle in "${css_bundles[@]}"; do
 	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
-	if (( after == 0 || after > before )); then
+	# Tiny or already-optimized CSS can minify to a near-tie; tolerate a small
+	# growth while still refusing empty or meaningfully larger output.
+	if (( after == 0 || after > before + 64 )); then
 		echo "[minify] $bundle: minified output is empty or not smaller; refusing" >&2
 		exit 1
 	fi
