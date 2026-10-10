@@ -17,8 +17,13 @@ Last reviewed: 2026-10-07.
   Cloud suggestion, review-only admin panel, fail-closed, pii no-store.
 - Default surfaces: editor **Npcink Content Support** sidebar (writing
   pack, preflight, category/tag, internal links, contextual ALT, image
-  candidates), hidden **Site Check** compatibility route, admin **Image
-  Handling** (Batch Optimize first), Overview + Site Profile tabs.
+  candidates) on `post`/`page` editors only (extend via the
+  `npcink_toolbox_editor_supported_post_types` filter), hidden
+  **Site Check** compatibility route, admin **Image Handling**
+  (Batch Optimize first), Overview + Site Profile tabs. Release packages
+  ship `.min` asset siblings (`composer package:release` runs
+  `scripts/minify-assets.sh`); checkouts without them enqueue the
+  readable sources.
 - Sibling family: `npcink-governance-core`, `npcink-abilities-toolkit`,
   `npcink-ai-client-adapter`, `npcink-cloud-addon`, `npcink-ai-cloud`,
   dev-only `npcink-eval-lab`.
