@@ -22,8 +22,15 @@ final class Site_Knowledge_Auto_Sync {
 	 * Retires the legacy Toolbox fallback by clearing its local scheduled
 	 * work. The legacy work only ever ran from admin, cron, or REST
 	 * contexts, so front-end traffic skips the retirement queries entirely.
+	 * The guard runs inside the callback (and also on rest_api_init)
+	 * because REST_REQUEST is not yet defined at hook-registration time.
 	 */
 	public function register_hooks(): void {
+		add_action( 'init', array( $this, 'retire_legacy_state' ) );
+		add_action( 'rest_api_init', array( $this, 'retire_legacy_state' ) );
+	}
+
+	public function retire_legacy_state(): void {
 		if ( ! self::is_maintenance_request() ) {
 			return;
 		}
