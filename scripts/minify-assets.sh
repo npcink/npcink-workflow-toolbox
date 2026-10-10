@@ -65,13 +65,13 @@ for bundle in "${js_bundles[@]}"; do
 		exit 1
 	fi
 	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
+	written_outputs+=("$out")
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
 	if (( after > before )); then
 		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
 		exit 1
 	fi
-	written_outputs+=("$out")
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
 	echo "[minify] $bundle: ${before} -> ${after} bytes"
@@ -85,13 +85,13 @@ for bundle in "${css_bundles[@]}"; do
 		exit 1
 	fi
 	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
+	written_outputs+=("$out")
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
 	if (( after > before )); then
 		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
 		exit 1
 	fi
-	written_outputs+=("$out")
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
 	echo "[minify] $bundle: ${before} -> ${after} bytes"
