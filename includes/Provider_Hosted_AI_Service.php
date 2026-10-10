@@ -68,6 +68,13 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				array( 'status' => 400 )
 			);
 		}
+		if ( $post_id > 0 && ! current_user_can( 'edit_post', $post_id ) ) {
+			return new WP_Error(
+				'npcink_toolbox_hosted_ai_post_forbidden',
+				__( 'You are not allowed to use this post as hosted AI content-support context.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 403 )
+			);
+		}
 
 		$context         = $is_fast_summary ? array() : $this->settings->get_content_context_for_ability();
 		$related_context = is_array( $input['related_content_context'] ?? null ) ? $this->sanitize_payload( $input['related_content_context'] ) : array();

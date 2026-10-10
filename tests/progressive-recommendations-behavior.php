@@ -409,6 +409,18 @@ function get_posts( array $args ): array {
 	);
 }
 
+$GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'manage_options', 'edit_posts', 'edit_post', 'upload_files' );
+$GLOBALS['npcink_toolbox_simulated_editable_post_ids'] = array( 31, 123 );
+
+function current_user_can( string $capability, $object_id = null ): bool {
+	$granted = $GLOBALS['npcink_toolbox_simulated_capabilities'] ?? array( 'manage_options', 'edit_posts', 'edit_post' );
+	if ( 'edit_post' === $capability ) {
+		$editable = $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] ?? array( 31 );
+		return in_array( 'edit_posts', $granted, true ) && in_array( (int) $object_id, $editable, true );
+	}
+	return in_array( $capability, $granted, true );
+}
+
 function get_post( int $post_id ) {
 	if ( 31 === $post_id ) {
 		return (object) array( 'ID' => 31, 'post_type' => 'attachment', 'post_title' => 'AI workflow diagram', 'post_excerpt' => 'Recommendation workflow', 'post_content' => 'Fast recommendation pipeline' );
