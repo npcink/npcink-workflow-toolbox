@@ -16,12 +16,19 @@ defined( 'ABSPATH' ) || exit;
 
 trait Toolbox_Asset_Paths {
 
+	private static array $resolved_asset_paths = array();
+
 	private function asset_path( string $relative_path ): string {
-		$min_path = (string) preg_replace( '/\.(js|css)$/i', '.min.$1', $relative_path );
-		if ( ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! file_exists( NPCINK_TOOLBOX_DIR . $min_path ) ) {
-			return $relative_path;
+		if ( array_key_exists( $relative_path, self::$resolved_asset_paths ) ) {
+			return self::$resolved_asset_paths[ $relative_path ];
 		}
 
+		$min_path = (string) preg_replace( '/\.(js|css)$/i', '.min.$1', $relative_path );
+		if ( ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! file_exists( NPCINK_TOOLBOX_DIR . $min_path ) ) {
+			$min_path = $relative_path;
+		}
+
+		self::$resolved_asset_paths[ $relative_path ] = $min_path;
 		return $min_path;
 	}
 

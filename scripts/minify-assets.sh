@@ -76,7 +76,7 @@ for bundle in "${js_bundles[@]}"; do
 	fi
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
-	echo "[minify] $bundle: ${before} -> ${after} bytes"
+	echo "[minify] $bundle: ${before} -> ${after} bytes ($(shasum -a 256 "$out" | cut -d" " -f1))"
 done
 
 for bundle in "${css_bundles[@]}"; do
@@ -96,7 +96,7 @@ for bundle in "${css_bundles[@]}"; do
 	fi
 	total_before=$((total_before + before))
 	total_after=$((total_after + after))
-	echo "[minify] $bundle: ${before} -> ${after} bytes"
+	echo "[minify] $bundle: ${before} -> ${after} bytes ($(shasum -a 256 "$out" | cut -d" " -f1))"
 done
 
 trap - EXIT
