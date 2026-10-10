@@ -488,7 +488,7 @@ abstract class Provider_Client_Support {
 		$normalized = array();
 		foreach ( $items as $key => $item ) {
 			if ( ! is_array( $item ) ) {
-				$probe     = (string) preg_replace( '/[\x00-\x1f]+/', '', (string) $item );
+				$probe     = (string) preg_replace( '/[\x00-\x1f]+/', '', trim( (string) $item ) );
 				$dangerous = (bool) preg_match( '/^(?:javascript|vbscript|data):/i', $probe );
 				if ( ! $dangerous ) {
 					$normalized[ $key ] = is_string( $item ) ? trim( $item ) : $item;
