@@ -38,11 +38,16 @@ final class Editor_Content_Support {
 			$this->asset_version( $style_path )
 		);
 
+		$format_path         = $this->asset_path( 'assets/editor-content-format.js' );
+		$text_utils_path     = $this->asset_path( 'assets/editor-content-support/text-utils.js' );
+		$internal_links_path = $this->asset_path( 'assets/editor-content-support/internal-links.js' );
+		$audio_part_path     = $this->asset_path( 'assets/editor-content-support/audio-preferences.js' );
+
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-format',
-			NPCINK_TOOLBOX_URL . $this->asset_path( 'assets/editor-content-format.js' ),
+			NPCINK_TOOLBOX_URL . $format_path,
 			array( 'wp-api-fetch', 'wp-blocks', 'wp-components', 'wp-data', 'wp-editor', 'wp-element', 'wp-block-editor', 'wp-i18n' ),
-			$this->asset_version( $this->asset_path( 'assets/editor-content-format.js' ) ),
+			$this->asset_version( $format_path ),
 			true
 		);
 		wp_set_script_translations(
@@ -53,25 +58,25 @@ final class Editor_Content_Support {
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-text-utils',
-			NPCINK_TOOLBOX_URL . $this->asset_path( 'assets/editor-content-support/text-utils.js' ),
+			NPCINK_TOOLBOX_URL . $text_utils_path,
 			array(),
-			$this->asset_version( $this->asset_path( 'assets/editor-content-support/text-utils.js' ) ),
+			$this->asset_version( $text_utils_path ),
 			true
 		);
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-internal-links',
-			NPCINK_TOOLBOX_URL . $this->asset_path( 'assets/editor-content-support/internal-links.js' ),
+			NPCINK_TOOLBOX_URL . $internal_links_path,
 			array( 'npcink-toolbox-editor-content-support-text-utils' ),
-			$this->asset_version( $this->asset_path( 'assets/editor-content-support/internal-links.js' ) ),
+			$this->asset_version( $internal_links_path ),
 			true
 		);
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-audio',
-			NPCINK_TOOLBOX_URL . $this->asset_path( 'assets/editor-content-support/audio-preferences.js' ),
+			NPCINK_TOOLBOX_URL . $audio_part_path,
 			array( 'wp-i18n', 'wp-element', 'wp-components' ),
-			$this->asset_version( $this->asset_path( 'assets/editor-content-support/audio-preferences.js' ) ),
+			$this->asset_version( $audio_part_path ),
 			true
 		);
 		wp_set_script_translations(

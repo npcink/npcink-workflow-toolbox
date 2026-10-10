@@ -52,11 +52,13 @@ final class Article_Audio_Playback {
 			return;
 		}
 
+		$style_path = $this->asset_path( 'assets/article-audio-playback.css' );
+
 		wp_enqueue_style(
 			'npcink-toolbox-article-audio',
-			NPCINK_TOOLBOX_URL . 'assets/article-audio-playback.css',
+			NPCINK_TOOLBOX_URL . $style_path,
 			array(),
-			$this->asset_version( 'assets/article-audio-playback.css' )
+			$this->asset_version( $style_path )
 		);
 	}
 
@@ -344,6 +346,15 @@ final class Article_Audio_Playback {
 		$seconds = $total_seconds % 60;
 
 		return sprintf( '%d:%02d', $minutes, $seconds );
+	}
+
+	private function asset_path( string $relative_path ): string {
+		$min_path = (string) preg_replace( '/\.(js|css)$/i', '.min.$1', $relative_path );
+		if ( ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! file_exists( NPCINK_TOOLBOX_DIR . $min_path ) ) {
+			return $relative_path;
+		}
+
+		return $min_path;
 	}
 
 	private function asset_version( string $relative_path ): string {

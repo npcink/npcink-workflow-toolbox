@@ -7,14 +7,21 @@
 # unless SCRIPT_DEBUG is on, and fall back to the readable source when the
 # .min file is absent (development checkouts).
 #
-# Requires node; terser and clean-css-cli are fetched through npx and are not
-# committed to the repository.
+# Requires node; terser and clean-css-cli are fetched through npx (pinned
+# exact versions for reproducible, supply-chain-bounded output) and are not
+# committed to the repository. The release workstation requirement is
+# documented in docs/wordpress-org-submission.md.
 #
-# Usage: scripts/minify-assets.sh [TARGET_DIR]
+# Usage: scripts/minify-assets.sh TARGET_DIR   (explicit directory required)
 
 set -euo pipefail
 
-TARGET_DIR="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+TARGET_DIR="${1:-}"
+
+if [[ -z "$TARGET_DIR" || ! -d "$TARGET_DIR" ]]; then
+	echo "[minify] an explicit TARGET_DIR (the packaged plugin copy) is required" >&2
+	exit 2
+fi
 
 command -v node >/dev/null 2>&1 || {
 	echo "[minify] node is required to minify release assets" >&2
@@ -33,6 +40,7 @@ js_bundles=(
 css_bundles=(
 	"assets/admin.css"
 	"assets/editor-content-support.css"
+	"assets/article-audio-playback.css"
 )
 
 total_before=0
@@ -45,7 +53,7 @@ for bundle in "${js_bundles[@]}"; do
 		echo "[minify] missing bundle: $src" >&2
 		exit 1
 	fi
-	npx --yes terser@5 --compress --mangle --ecma 2022 -o "$out" -- "$src"
+	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
 	total_before=$((total_before + before))
@@ -60,7 +68,7 @@ for bundle in "${css_bundles[@]}"; do
 		echo "[minify] missing bundle: $src" >&2
 		exit 1
 	fi
-	npx --yes clean-css-cli@5 -o "$out" "$src"
+	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
 	total_before=$((total_before + before))
