@@ -482,7 +482,7 @@ abstract class Provider_Client_Support {
 	 * validation or is not scalar is removed from the item rather than left
 	 * empty.
 	 */
-	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url' ) ): array {
+	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' ) ): array {
 		$normalized = array();
 		foreach ( $items as $key => $item ) {
 			if ( ! is_array( $item ) ) {
