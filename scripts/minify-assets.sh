@@ -7,10 +7,12 @@
 # unless SCRIPT_DEBUG is on, and fall back to the readable source when the
 # .min file is absent (development checkouts).
 #
-# Requires node; terser and clean-css-cli are fetched through npx (pinned
-# exact versions for reproducible, supply-chain-bounded output) and are not
-# committed to the repository. The release workstation requirement is
-# documented in docs/wordpress-org-submission.md.
+# Requires node; terser and clean-css-cli are fetched through npx at exact
+# pinned versions and are not committed to the repository. Version pinning
+# bounds which release can run but the artifacts still come from the npm
+# registry at release time: a registry compromise would reach the packaged
+# zip. That residual trust assumption is recorded here and in
+# docs/wordpress-org-submission.md; run releases from a trusted network.
 #
 # Usage: scripts/minify-assets.sh TARGET_DIR   (explicit directory required)
 
