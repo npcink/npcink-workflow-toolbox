@@ -47,6 +47,7 @@ Start from the active documents below before changing code.
 - [AI Code Review Standard v1](platform/ai-code-review-standard-v1.md)
 - [AI Code Review Effectiveness Metrics](platform/ai-code-review-metrics.md)
 - [Git Transport Fallback Playbook v1](platform/git-transport-fallback-playbook-v1.md)
+- [Cloud Intent Scheduling Brief - 2026-10-10](platform/cloud-intent-scheduling-brief-2026-10-10.md)
 - [Static Analysis Standard v1](platform/static-analysis-standard-v1.md)
 - [AI Code Review Workflow](platform/ai-code-review-workflow.yml)
 - [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
