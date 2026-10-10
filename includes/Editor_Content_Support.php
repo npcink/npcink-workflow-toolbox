@@ -138,6 +138,7 @@ final class Editor_Content_Support {
 		}
 
 		$supported = apply_filters( 'npcink_toolbox_editor_supported_post_types', array( 'post', 'page' ) );
-		return in_array( $post_type, (array) $supported, true );
+		$supported = array_map( 'sanitize_key', array_map( 'strval', (array) $supported ) );
+		return in_array( $post_type, $supported, true );
 	}
 }
