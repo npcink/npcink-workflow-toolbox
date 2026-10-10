@@ -156,6 +156,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 
 		$results        = is_array( $result['results'] ?? null ) ? $this->sanitize_payload( $result['results'] ) : array();
 		$results        = $this->filter_current_public_site_knowledge_results( $results );
+		$results        = $this->sanitize_item_url_fields( $results );
 		$agent_handoff  = is_array( $result['agent_handoff'] ?? null ) ? $this->sanitize_payload( $result['agent_handoff'] ) : array();
 		$cloud_boundary = $this->normalize_site_knowledge_cloud_boundary( $result, $response, $runtime_payload );
 

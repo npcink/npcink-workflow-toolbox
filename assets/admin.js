@@ -288,11 +288,17 @@
 		return '';
 	}
 
+	function isHttpUrl(url) {
+		return /^https?:\/\//i.test(String(url || '').trim());
+	}
+
 	function createLink(url, label) {
 		const link = el('a', '', label || url);
-		link.href = url;
-		link.target = '_blank';
-		link.rel = 'noreferrer';
+		if (isHttpUrl(url)) {
+			link.href = url;
+			link.target = '_blank';
+			link.rel = 'noreferrer';
+		}
 		return link;
 	}
 

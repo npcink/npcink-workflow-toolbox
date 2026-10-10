@@ -470,6 +470,28 @@ abstract class Provider_Client_Support {
 	}
 
 
+	/**
+	 * Rewrites known URL fields on a list of Cloud-supplied items to http(s)
+	 * only, so a tainted Cloud response cannot plant javascript: (or other
+	 * scheme) URLs into admin or editor render surfaces.
+	 */
+	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url' ) ): array {
+		$normalized = array();
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) ) {
+				foreach ( $fields as $field ) {
+					if ( array_key_exists( $field, $item ) ) {
+						$item[ $field ] = esc_url_raw( (string) $item[ $field ], array( 'http', 'https' ) );
+					}
+				}
+				$normalized[] = $item;
+			}
+		}
+
+		return $normalized;
+	}
+
+
 	protected function bounded_text( string $value, int $max_chars ): string {
 		$value     = sanitize_textarea_field( $value );
 		$max_chars = max( 1, $max_chars );
