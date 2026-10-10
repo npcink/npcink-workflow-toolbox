@@ -493,6 +493,10 @@ abstract class Provider_Client_Support {
 			}
 			foreach ( $fields as $field ) {
 				if ( array_key_exists( $field, $item ) ) {
+					if ( ! is_scalar( $item[ $field ] ) ) {
+						unset( $item[ $field ] );
+						continue;
+					}
 					$sanitized = esc_url_raw( (string) $item[ $field ], array( 'http', 'https' ) );
 					if ( '' === $sanitized && '' !== (string) $item[ $field ] ) {
 						unset( $item[ $field ] );
