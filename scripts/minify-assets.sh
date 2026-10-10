@@ -66,12 +66,12 @@ for bundle in "${js_bundles[@]}"; do
 		echo "[minify] missing bundle: $src" >&2
 		exit 1
 	fi
+		written_outputs+=("$out")
 	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
-	written_outputs+=("$out")
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
-	if (( after > before )); then
-		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
+	if (( after == 0 || after > before )); then
+		echo "[minify] $bundle: minified output is empty or not smaller; refusing" >&2
 		exit 1
 	fi
 	total_before=$((total_before + before))
@@ -86,12 +86,12 @@ for bundle in "${css_bundles[@]}"; do
 		echo "[minify] missing bundle: $src" >&2
 		exit 1
 	fi
+		written_outputs+=("$out")
 	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
-	written_outputs+=("$out")
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
-	if (( after > before )); then
-		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
+	if (( after == 0 || after > before )); then
+		echo "[minify] $bundle: minified output is empty or not smaller; refusing" >&2
 		exit 1
 	fi
 	total_before=$((total_before + before))

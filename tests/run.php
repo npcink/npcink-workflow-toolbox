@@ -1784,7 +1784,7 @@ toolbox_assert( false !== strpos( $editor_entrypoint, 'is_supported_editor_post_
 $asset_paths_trait = (string) file_get_contents( $root . '/includes/Toolbox_Asset_Paths.php' );
 toolbox_assert( false !== strpos( $asset_paths_trait, 'trait Toolbox_Asset_Paths' ) && false !== strpos( $asset_paths_trait, 'private function asset_path( string $relative_path ): string' ) && false !== strpos( $asset_paths_trait, "'.min.\$1'" ) && false !== strpos( $asset_paths_trait, 'SCRIPT_DEBUG' ) && false !== strpos( $editor_entrypoint, 'use Toolbox_Asset_Paths;' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Admin_Page.php' ), 'use Toolbox_Asset_Paths;' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Article_Audio_Playback.php' ), 'use Toolbox_Asset_Paths;' ) && false !== strpos( (string) file_get_contents( $root . '/includes/Article_Audio_Playback.php' ), "\$style_path = \$this->asset_path( 'assets/article-audio-playback.css' );" ), 'Editor, admin, and front-end audio enqueues share one Toolbox_Asset_Paths trait that prefers shipped .min asset siblings unless SCRIPT_DEBUG is on, falling back to the readable sources in development checkouts.' );
 $minify_script = (string) file_get_contents( $root . '/scripts/minify-assets.sh' );
-toolbox_assert( false !== strpos( $minify_script, 'terser@5.39.2' ) && false !== strpos( $minify_script, 'clean-css-cli@5.6.3' ) && 2 === substr_count( $minify_script, 'minified output is not smaller; refusing' ) && false !== strpos( $minify_script, 'removed partially written .min siblings after failure' ) && false !== strpos( $minify_script, 'an explicit TARGET_DIR (the packaged plugin copy) is required' ) && false !== strpos( $composer, 'bash scripts/minify-assets.sh build/npcink-workflow-toolbox' ), 'The release package minifies assets through pinned-version tooling in scripts/minify-assets.sh wired into composer package:release, requires an explicit target directory, refuses any bundle whose minified output did not shrink, and cleans partially written .min siblings when a run fails.' );
+toolbox_assert( false !== strpos( $minify_script, 'terser@5.39.2' ) && false !== strpos( $minify_script, 'clean-css-cli@5.6.3' ) && 2 === substr_count( $minify_script, 'minified output is empty or not smaller; refusing' ) && 2 === substr_count( $minify_script, 'after == 0 || after > before' ) && false !== strpos( $minify_script, 'removed partially written .min siblings after failure' ) && false !== strpos( $minify_script, 'an explicit TARGET_DIR (the packaged plugin copy) is required' ) && false !== strpos( $composer, 'bash scripts/minify-assets.sh build/npcink-workflow-toolbox' ), 'The release package minifies assets through pinned-version tooling in scripts/minify-assets.sh wired into composer package:release, requires an explicit target directory, refuses any bundle whose minified output is empty or did not shrink, and cleans partially written .min siblings when a run fails.' );
 $asset_bundle_disk_paths = array_merge(
 	glob( $root . '/assets/*.js' ) ?: array(),
 	glob( $root . '/assets/*.css' ) ?: array(),
@@ -1794,10 +1794,16 @@ $unminified_asset_bundles = array_values( array_filter(
 	$asset_bundle_disk_paths,
 	static fn( string $bundle_path ): bool => false === strpos( $bundle_path, '.min.' )
 ) );
+$minify_js_bundles_block  = (bool) preg_match( '/js_bundles=\((.*?)\)/s', $minify_script, $minify_js_bundles_match ) ? (string) $minify_js_bundles_match[1] : '';
+$minify_css_bundles_block = (bool) preg_match( '/css_bundles=\((.*?)\)/s', $minify_script, $minify_css_bundles_match ) ? (string) $minify_css_bundles_match[1] : '';
 toolbox_assert( array() === array_values( array_filter(
 	$unminified_asset_bundles,
-	static fn( string $bundle_path ): bool => false === strpos( $minify_script, '"' . substr( $bundle_path, strlen( $root . '/' ) ) . '"' )
-) ), 'Every asset bundle on disk appears in the release minifier list, so a newly added asset fails the gate until it is registered for minification.' );
+	static function ( string $bundle_path ) use ( $minify_js_bundles_block, $minify_css_bundles_block, $root ): bool {
+		$relative = '"' . substr( $bundle_path, strlen( $root . '/' ) ) . '"';
+		$block    = '.js' === substr( $bundle_path, -3 ) ? $minify_js_bundles_block : $minify_css_bundles_block;
+		return false === strpos( $block, $relative );
+	}
+) ), 'Every asset bundle on disk appears in the matching js_bundles or css_bundles array of the release minifier, so a newly added asset or a misplaced entry fails the gate.' );
 toolbox_assert( false !== strpos( (string) file_get_contents( $root . '/docs/current-state.md' ), 'npcink_toolbox_editor_supported_post_types' ) && false !== strpos( (string) file_get_contents( $root . '/docs/wordpress-org-submission.md' ), 'scripts/minify-assets.sh' ) && false !== strpos( (string) file_get_contents( $root . '/readme.txt' ), 'npcink_toolbox_editor_supported_post_types' ), 'Docs and the readme record the editor post-type allowlist filter and the release-time asset minification step.' );
 toolbox_assert( false !== strpos( $editor_css, 'npcink-toolbox-editor-support__diagnostics' ), 'Editor Content Support CSS styles Cloud image-source diagnostics.' );
 
