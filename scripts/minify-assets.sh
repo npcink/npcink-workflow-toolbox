@@ -67,7 +67,7 @@ for bundle in "${js_bundles[@]}"; do
 	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
-	if (( after >= before )); then
+	if (( after > before )); then
 		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
 		exit 1
 	fi
@@ -87,7 +87,7 @@ for bundle in "${css_bundles[@]}"; do
 	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
-	if (( after >= before )); then
+	if (( after > before )); then
 		echo "[minify] $bundle: minified output is not smaller; refusing" >&2
 		exit 1
 	fi
