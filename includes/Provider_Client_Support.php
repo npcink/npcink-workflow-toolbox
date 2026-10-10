@@ -480,9 +480,10 @@ abstract class Provider_Client_Support {
 	 * dropped when they carry an executable scheme (probed after stripping
 	 * ASCII control characters); a URL field whose value fails scheme
 	 * validation or is not scalar is removed from the item rather than left
-	 * empty.
+	 * empty. A depth greater than 1 recurses into nested array values with
+	 * the same rules, bounding how deep Cloud shapes are walked.
 	 */
-	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' ) ): array {
+	protected function sanitize_item_url_fields( array $items, array $fields = array( 'url', 'source_url', 'permalink', 'link', 'thumbnail_url', 'core_url', 'audio_url' ), int $depth = 1 ): array {
 		$normalized = array();
 		foreach ( $items as $key => $item ) {
 			if ( ! is_array( $item ) ) {
@@ -511,6 +512,13 @@ abstract class Provider_Client_Support {
 						continue;
 					}
 					$item[ $field ] = $sanitized;
+				}
+			}
+			if ( $depth > 1 ) {
+				foreach ( $item as $child_key => $child_value ) {
+					if ( is_array( $child_value ) ) {
+						$item[ $child_key ] = $this->sanitize_item_url_fields( $child_value, $fields, $depth - 1 );
+					}
 				}
 			}
 			$normalized[ $key ] = $item;
