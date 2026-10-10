@@ -66,7 +66,7 @@ for bundle in "${js_bundles[@]}"; do
 		echo "[minify] missing bundle: $src" >&2
 		exit 1
 	fi
-		written_outputs+=("$out")
+	written_outputs+=("$out")
 	npx --yes terser@5.39.2 --compress --mangle --ecma 2022 -o "$out" -- "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
@@ -86,7 +86,7 @@ for bundle in "${css_bundles[@]}"; do
 		echo "[minify] missing bundle: $src" >&2
 		exit 1
 	fi
-		written_outputs+=("$out")
+	written_outputs+=("$out")
 	npx --yes clean-css-cli@5.6.3 -o "$out" "$src"
 	before=$(wc -c <"$src" | tr -d ' ')
 	after=$(wc -c <"$out" | tr -d ' ')
