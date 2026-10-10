@@ -495,24 +495,27 @@ abstract class Provider_Client_Support {
 				}
 				continue;
 			}
-			foreach ( $fields as $field ) {
-				if ( array_key_exists( $field, $item ) ) {
-					if ( ! is_scalar( $item[ $field ] ) ) {
-						unset( $item[ $field ] );
-						continue;
-					}
-					$raw_value = trim( (string) $item[ $field ] );
-					if ( 'audio_url' === $field && 0 === stripos( $raw_value, 'data:audio/' ) ) {
-						$item[ $field ] = $raw_value;
-						continue;
-					}
-					$sanitized = esc_url_raw( $raw_value, array( 'http', 'https' ) );
-					if ( '' === $sanitized && '' !== $raw_value ) {
-						unset( $item[ $field ] );
-						continue;
-					}
-					$item[ $field ] = $sanitized;
+			foreach ( $item as $field => $field_value ) {
+				$is_url_field = in_array( (string) $field, $fields, true )
+					|| ( is_string( $field ) && 1 === preg_match( '/(?:^|_)url$|^link$|^permalink$/', $field ) );
+				if ( ! $is_url_field ) {
+					continue;
 				}
+				if ( ! is_scalar( $field_value ) ) {
+					unset( $item[ $field ] );
+					continue;
+				}
+				$raw_value = trim( (string) $field_value );
+				if ( 'audio_url' === $field && 0 === stripos( $raw_value, 'data:audio/' ) ) {
+					$item[ $field ] = $raw_value;
+					continue;
+				}
+				$sanitized = esc_url_raw( $raw_value, array( 'http', 'https' ) );
+				if ( '' === $sanitized && '' !== $raw_value ) {
+					unset( $item[ $field ] );
+					continue;
+				}
+				$item[ $field ] = $sanitized;
 			}
 			if ( $depth > 1 ) {
 				foreach ( $item as $child_key => $child_value ) {
