@@ -483,9 +483,12 @@ abstract class Provider_Client_Support {
 		$normalized = array();
 		foreach ( $items as $item ) {
 			if ( ! is_array( $item ) ) {
-				$scalar       = trim( (string) $item );
-				$dangerous    = (bool) preg_match( '/^(?:javascript|vbscript|data)\s*:/i', $scalar );
-				$normalized[] = $dangerous ? '' : $scalar;
+				$scalar    = trim( (string) $item );
+				$probe     = (string) preg_replace( '/[\x00-\x20]+/', '', $scalar );
+				$dangerous = (bool) preg_match( '/^(?:javascript|vbscript|data):/i', $probe );
+				if ( ! $dangerous ) {
+					$normalized[] = $scalar;
+				}
 				continue;
 			}
 			foreach ( $fields as $field ) {
