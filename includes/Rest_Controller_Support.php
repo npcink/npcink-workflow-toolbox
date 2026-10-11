@@ -220,9 +220,25 @@ abstract class Rest_Controller_Support {
 			}
 			$normalized = array();
 			foreach ( $data as $key => $value ) {
-				if ( in_array( sanitize_key( (string) $key ), array( 'status', 'provider_status', 'http_code', 'reason', 'request_id', 'cloud_error_code' ), true ) ) {
-					$normalized[ sanitize_key( (string) $key ) ] = is_numeric( $value ) ? (int) $value : ( is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '' );
+				$key = sanitize_key( (string) $key );
+				if ( ! in_array( $key, array( 'status', 'provider_status', 'http_code', 'reason', 'request_id', 'cloud_error_code' ), true ) ) {
+					continue;
 				}
+				if ( ! is_scalar( $value ) ) {
+					// A non-scalar value carries no honest diagnostic; drop
+					// the key instead of fabricating an empty string.
+					continue;
+				}
+				if ( is_numeric( $value ) ) {
+					$normalized[ $key ] = (int) $value;
+					continue;
+				}
+				// WP_REST_Server uses the status value as the HTTP code, so
+				// only a numeric status may survive sanitization.
+				if ( 'status' === $key || 'http_code' === $key ) {
+					continue;
+				}
+				$normalized[ $key ] = sanitize_text_field( (string) $value );
 			}
 			if ( array() !== $normalized ) {
 				// Errors without an explicit status serialize as HTTP 500 by
