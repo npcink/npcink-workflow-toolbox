@@ -69,6 +69,206 @@ abstract class Rest_Controller_Support {
 		);
 	}
 
+	/**
+	 * Forwards an allow-listed request body to a provider call. Unknown
+	 * top-level fields are rejected before anything reaches the provider
+	 * (the media-derivative strict-input precedent), provider WP_Error
+	 * data passes through the safe-diagnostics allow-list before it is
+	 * returned, and coalesced routes share one short per-user transient
+	 * unless a refresh token (refresh_variant / regeneration_mode) is
+	 * supplied, bounding rapid-fire duplicate spend from relaxed-scope
+	 * editor surfaces.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @param string[]        $allowed_fields Top-level fields the provider surface accepts.
+	 * @param callable        $invoker Receives the filtered params array, returns the provider result.
+	 * @param string          $cache_namespace Transient namespace used when coalescing.
+	 * @param bool            $coalesce Whether identical payloads coalesce behind a per-user transient.
+	 * @return mixed REST-ready response.
+	 */
+	protected function forward_provider_request( WP_REST_Request $request, array $allowed_fields, callable $invoker, string $cache_namespace, bool $coalesce = false, ?callable $cacheable = null ) {
+		// Only the request body participates: get_params() merges URL and
+		// query parameters, and core clients append _locale/_envelope keys
+		// that must not trip the strict allow-list.
+		$params = $request->get_json_params();
+		$body   = (string) $request->get_body();
+		if ( ! is_array( $params ) ) {
+			// A JSON body without the application/json content type still
+			// deserves object parsing, and a scalar JSON body (5, true, "x")
+			// must not reach array_keys below; anything non-empty that does
+			// not decode to an object fails with a clear 400 instead of
+			// forwarding an empty payload to the provider.
+			$body_params = $request->get_body_params();
+			$params      = is_array( $body_params ) && array() !== $body_params ? $body_params : array();
+			if ( array() === $params && '' !== $body ) {
+				$decoded = json_decode( $body, true );
+				$params  = is_array( $decoded ) ? $decoded : array();
+				if ( array() === $params ) {
+					return new WP_Error(
+						'npcink_toolbox_invalid_request_body',
+						__( 'The request body is not a valid JSON object.', 'npcink-workflow-toolbox' ),
+						array( 'status' => 400 )
+					);
+				}
+			}
+		} elseif ( array() === $params && '' !== $body ) {
+			// An empty JSON object follows the same consistent path as a
+			// body that does not decode to an object.
+			return new WP_Error(
+				'npcink_toolbox_invalid_request_body',
+				__( 'The request body is not a valid JSON object.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+		if ( array() !== array_diff( array_keys( $params ), $allowed_fields ) ) {
+			return new WP_Error(
+				'npcink_toolbox_unsupported_provider_field',
+				__( 'This request contains fields the provider call does not accept.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Fields belong in the JSON body; a query-string copy of an
+		// allow-listed field would otherwise be silently dropped, so fail
+		// loudly instead of degrading the request.
+		$query_params = $request->get_query_params();
+		if ( array() !== array_intersect( array_keys( is_array( $query_params ) ? $query_params : array() ), $allowed_fields ) ) {
+			return new WP_Error(
+				'npcink_toolbox_provider_field_in_query',
+				__( 'Provider request fields must be sent in the request body, not the query string.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$filtered = array();
+		foreach ( $allowed_fields as $field ) {
+			if ( array_key_exists( $field, $params ) ) {
+				$filtered[ $field ] = $params[ $field ];
+			}
+		}
+
+		$cache_key = '';
+		$refresh   = false;
+		if ( $coalesce ) {
+			foreach ( array( $filtered['refresh_variant'] ?? '', $filtered['regeneration_mode'] ?? '' ) as $refresh_token ) {
+				if ( is_scalar( $refresh_token ) && '' !== trim( (string) $refresh_token ) ) {
+					$refresh = true;
+					break;
+				}
+			}
+			$key_source = $filtered;
+			unset( $key_source['refresh_variant'], $key_source['regeneration_mode'] );
+			$encoded = wp_json_encode( $key_source );
+			if ( is_string( $encoded ) ) {
+				$cache_key = 'npcink_toolbox_provider_' . sanitize_key( $cache_namespace ) . '_' . md5( (string) get_current_user_id() . $encoded );
+				if ( ! $refresh ) {
+					$cached = get_transient( $cache_key );
+					if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
+						unset( $cached['__provider_coalesced'] );
+						return rest_ensure_response( $cached );
+					}
+				}
+			}
+		}
+
+		$result = $invoker( $filtered );
+		if ( is_wp_error( $result ) ) {
+			if ( $refresh && '' !== $cache_key ) {
+				// A refresh that errored must still invalidate the stale
+				// entry, or the next plain request replays it.
+				delete_transient( $cache_key );
+			}
+			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
+		}
+		if ( '' !== $cache_key ) {
+			$should_cache = is_array( $result ) && ! isset( $result['code'] ) && ( null === $cacheable || $cacheable( $result ) );
+			if ( $should_cache ) {
+				// A refresh run overwrites the entry so the next plain request
+				// sees the fresh result; degenerate results (error-shaped or
+				// empty per the caller's predicate) and oversized payloads
+				// (base64 preview bodies) skip coalescing rather than being
+				// replayed or bloating wp_options.
+				$cache_copy                         = $result;
+				$cache_copy['__provider_coalesced'] = true;
+				$encoded_result                     = wp_json_encode( $cache_copy );
+				if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
+					set_transient( $cache_key, $cache_copy, 60 );
+					return rest_ensure_response( $result );
+				}
+			}
+			if ( $refresh ) {
+				// A refresh whose result cannot be cached must at least
+				// invalidate the stale entry, or the next plain request
+				// replays the pre-refresh result.
+				delete_transient( $cache_key );
+			}
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Rebuilds a provider WP_Error with its data reduced to the
+	 * safe-diagnostics allow-list, so addon error details cannot leak
+	 * unbounded fields into REST responses. Every error code keeps its
+	 * message; scalar values are normalized (numbers cast to int, other
+	 * scalars sanitized as text). By design, non-numeric scalar error
+	 * data (string payloads attached without a status) and non-scalar
+	 * values under allow-listed keys are dropped rather than passed
+	 * through verbatim — first-party call sites attach array data.
+	 *
+	 * @param WP_Error $error Provider error.
+	 * @return WP_Error
+	 */
+	public static function sanitize_provider_error_data( WP_Error $error ): WP_Error {
+		$safe = new WP_Error();
+		foreach ( $error->get_error_codes() as $code ) {
+			$safe->add( $code, $error->get_error_message( $code ) );
+			$data = $error->get_error_data( $code );
+			if ( ! is_array( $data ) ) {
+				// The core add_data( 400 ) convention carries the HTTP status
+				// as a scalar; keep it instead of dropping it.
+				if ( is_numeric( $data ) ) {
+					$safe->add_data( array( 'status' => (int) $data ), $code );
+				}
+				continue;
+			}
+			$normalized = array();
+			foreach ( $data as $key => $value ) {
+				$key = sanitize_key( (string) $key );
+				if ( ! in_array( $key, array( 'status', 'provider_status', 'http_code', 'reason', 'request_id', 'cloud_error_code' ), true ) ) {
+					continue;
+				}
+				if ( ! is_scalar( $value ) ) {
+					// A non-scalar value carries no honest diagnostic; drop
+					// the key instead of fabricating an empty string.
+					continue;
+				}
+				if ( is_numeric( $value ) ) {
+					$normalized[ $key ] = (int) $value;
+					continue;
+				}
+				// WP_REST_Server uses the status value as the HTTP code, so
+				// only a numeric status may survive sanitization.
+				if ( 'status' === $key || 'http_code' === $key ) {
+					continue;
+				}
+				$normalized[ $key ] = sanitize_text_field( (string) $value );
+			}
+			if ( array() !== $normalized ) {
+				// Errors without an explicit status serialize as HTTP 500 by
+				// default; state that intent instead of relying on the
+				// fallback silently.
+				if ( ! array_key_exists( 'status', $normalized ) ) {
+					$normalized['status'] = 500;
+				}
+				$safe->add_data( $normalized, $code );
+			}
+		}
+
+		return $safe;
+	}
+
 
 	protected function sanitize_image_visual_context( array $context ): array {
 		$mode = sanitize_key( (string) ( $context['image_mode'] ?? $context['image_use'] ?? '' ) );

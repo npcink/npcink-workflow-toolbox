@@ -412,9 +412,13 @@ function get_posts( array $args ): array {
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'manage_options', 'edit_posts', 'edit_post', 'upload_files' );
 $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] = array( 31, 123 );
 
+function get_current_user_id(): int {
+	return 1;
+}
+
 function current_user_can( string $capability, $object_id = null ): bool {
 	$granted = $GLOBALS['npcink_toolbox_simulated_capabilities'] ?? array( 'manage_options', 'edit_posts', 'edit_post' );
-	if ( 'edit_post' === $capability ) {
+	if ( 'edit_post' === $capability || 'read_post' === $capability ) {
 		$editable = $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] ?? array( 31 );
 		return in_array( 'edit_posts', $granted, true ) && in_array( (int) $object_id, $editable, true );
 	}

@@ -100,25 +100,71 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 			return $query;
 		}
 
-		return rest_ensure_response(
-			$this->client->image_candidates(
-				$query,
-				array(
-					'orientation'          => sanitize_key( (string) $request->get_param( 'orientation' ) ),
-					'color'                => sanitize_key( (string) $request->get_param( 'color' ) ),
-					'provider'             => sanitize_key( (string) $request->get_param( 'provider' ) ),
-					'per_page'             => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
-					'latency_mode'         => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
-					'include_ai_generated' => ! empty( $request->get_param( 'include_ai_generated' ) ),
-					'generation_prompt'    => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
-					'generated_image_url'  => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
-					'model'                => sanitize_text_field( (string) $request->get_param( 'model' ) ),
-					'manual_query'         => $query,
-					'refresh_variant'      => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
-					'visual_context'       => $this->image_visual_context_from_request( $request, $query ),
-				)
-			)
+		$args = array(
+			'orientation'          => sanitize_key( (string) $request->get_param( 'orientation' ) ),
+			'color'                => sanitize_key( (string) $request->get_param( 'color' ) ),
+			'provider'             => sanitize_key( (string) $request->get_param( 'provider' ) ),
+			'per_page'             => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
+			'latency_mode'         => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
+			'include_ai_generated' => ! empty( $request->get_param( 'include_ai_generated' ) ),
+			'generation_prompt'    => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
+			'generated_image_url'  => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
+			'model'                => sanitize_text_field( (string) $request->get_param( 'model' ) ),
+			'manual_query'         => $query,
+			'refresh_variant'      => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
+			'visual_context'       => $this->image_visual_context_from_request( $request, $query ),
 		);
+
+		// Identical author/contributor searches coalesce behind a short
+		// per-user transient: an explicit refresh variant skips the read
+		// but overwrites the entry, an unencodable payload skips
+		// coalescing, and oversized payloads skip the database write.
+		$cache_key = '';
+		$key_args  = $args;
+		$refresh   = is_scalar( $key_args['refresh_variant'] ?? '' ) && '' !== trim( (string) $key_args['refresh_variant'] );
+		unset( $key_args['refresh_variant'] );
+		if ( isset( $key_args['visual_context']['refresh_variant'] ) ) {
+			// image_visual_context_from_request() mirrors the refresh token
+			// into the visual context; the key must hash it out too, or a
+			// refresh writes a one-time dead key instead of overwriting.
+			unset( $key_args['visual_context']['refresh_variant'] );
+		}
+		$encoded = wp_json_encode( $key_args );
+		if ( is_string( $encoded ) ) {
+			$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . $encoded );
+			if ( ! $refresh ) {
+				$cached = get_transient( $cache_key );
+				if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
+					unset( $cached['__provider_coalesced'] );
+					return rest_ensure_response( $cached );
+				}
+			}
+		}
+
+		$result = $this->client->image_candidates( $query, $args );
+		if ( is_wp_error( $result ) ) {
+			if ( $refresh && '' !== $cache_key ) {
+				delete_transient( $cache_key );
+			}
+			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
+		}
+		if ( '' !== $cache_key ) {
+			$should_cache = is_array( $result ) && ! isset( $result['code'] ) && ! empty( $result['images'] );
+			if ( $should_cache ) {
+				$cache_copy                         = $result;
+				$cache_copy['__provider_coalesced'] = true;
+				$encoded_result                     = wp_json_encode( $cache_copy );
+				if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
+					set_transient( $cache_key, $cache_copy, 60 );
+					return rest_ensure_response( $result );
+				}
+			}
+			if ( $refresh ) {
+				delete_transient( $cache_key );
+			}
+		}
+
+		return rest_ensure_response( $result );
 	}
 
 	public function site_media_index_batch( WP_REST_Request $request ) {

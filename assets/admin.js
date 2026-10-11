@@ -1050,6 +1050,8 @@
 					prompt_reviewed_by_operator: true,
 					media_title: payload.query || payload.primary_query || '',
 					media_description: payload.message || '',
+					// Cache-buster for the sixty-second server coalescing window; non-empty only on this explicit admin re-request.
+					refresh_variant: 'admin_' + Date.now(),
 					handoff
 				});
 				appendAiGenerationResult(container, response);

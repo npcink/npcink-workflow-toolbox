@@ -332,7 +332,7 @@ final class Rest_Editor_Summary_Terms {
 
 
 	public static function editor_related_post_terms_for_context( int $post_id ): array {
-		if ( 0 >= $post_id || ! function_exists( 'get_the_terms' ) ) {
+		if ( 0 >= $post_id || ! function_exists( 'get_the_terms' ) || ! current_user_can( 'read_post', $post_id ) ) {
 			return array();
 		}
 

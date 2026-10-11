@@ -104,7 +104,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'sections'                => array(),
 			'remote_execution_policy' => array(
 				'cache_ttl_seconds'     => self::EDITOR_FLOW_CACHE_TTL,
-				'cache_scope'           => 'site_transient_by_intent_query_and_post_context',
+				'cache_scope'           => 'site_transient_by_intent_query_post_context_and_user',
 				'workflow_runtime'      => false,
 				'direct_async_queue'    => false,
 				'progressive_target_ms' => Rest_Editor_Progressive_Recommendations::EDITOR_PROGRESSIVE_TARGET_MS,
@@ -1931,9 +1931,10 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$anchor                 = sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) );
 			$url                    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
 			$target_post_id         = absint( $item['target_post_id'] ?? 0 );
-			$target_status          = $target_post_id > 0 ? sanitize_key( (string) get_post_status( $target_post_id ) ) : '';
-			$target_type            = $target_post_id > 0 ? sanitize_key( (string) get_post_type( $target_post_id ) ) : '';
-			$verified_url           = $target_post_id > 0 ? esc_url_raw( (string) get_permalink( $target_post_id ) ) : '';
+			$target_readable        = $target_post_id > 0 && current_user_can( 'read_post', $target_post_id );
+			$target_status          = $target_readable ? sanitize_key( (string) get_post_status( $target_post_id ) ) : '';
+			$target_type            = $target_readable ? sanitize_key( (string) get_post_type( $target_post_id ) ) : '';
+			$verified_url           = $target_readable ? esc_url_raw( (string) get_permalink( $target_post_id ) ) : '';
 			$target_is_public_local = 'publish' === $target_status && in_array( $target_type, array( 'post', 'page' ), true ) && '' !== $verified_url;
 			if ( $target_is_public_local ) {
 				$url = $verified_url;

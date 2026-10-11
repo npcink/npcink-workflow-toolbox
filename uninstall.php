@@ -31,21 +31,30 @@ function npcink_toolbox_uninstall_current_site(): void {
 	delete_transient( 'npcink_toolbox_zhihu_hot_topic_pool_v2' );
 
 	global $wpdb;
-	$transient_prefixes = array(
+	$transient_prefixes   = array(
 		$wpdb->esc_like( '_transient_npcink_toolbox_editor_' ) . '%',
 		$wpdb->esc_like( '_transient_timeout_npcink_toolbox_editor_' ) . '%',
+		$wpdb->esc_like( '_transient_npcink_toolbox_provider_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_npcink_toolbox_provider_' ) . '%',
+		$wpdb->esc_like( '_transient_npcink_toolbox_site_knowledge_rows_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_npcink_toolbox_site_knowledge_rows_' ) . '%',
 	);
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must enumerate dynamic, expiring transient keys before removing them through WordPress APIs.
-	$editor_cache_options = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-			$transient_prefixes[0],
-			$transient_prefixes[1]
-		)
-	);
+	$editor_cache_options = array();
+	foreach ( $transient_prefixes as $transient_prefix ) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must enumerate dynamic, expiring transient keys before removing them through WordPress APIs.
+		$editor_cache_options = array_merge(
+			$editor_cache_options,
+			$wpdb->get_col(
+				$wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $transient_prefix )
+			)
+		);
+	}
 	foreach ( $editor_cache_options as $option_name ) {
 		delete_option( (string) $option_name );
 	}
+
+	// Media fingerprint memo post meta (mtime+size keyed sha256 cache).
+	delete_post_meta_by_key( '_npcink_toolbox_media_fingerprint_cache' );
 
 	foreach (
 		array(

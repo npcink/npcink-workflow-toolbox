@@ -839,32 +839,6 @@ final class Settings {
 		);
 	}
 
-	private function get_secret( string $option_key, string $constant_name, string $env_name ): string {
-		if ( defined( $constant_name ) && '' !== (string) constant( $constant_name ) ) {
-			return (string) constant( $constant_name );
-		}
-
-		$env_key = getenv( $env_name );
-		if ( is_string( $env_key ) && '' !== $env_key ) {
-			return $env_key;
-		}
-
-		return (string) $this->get( $option_key );
-	}
-
-	private function sanitize_secret_input( array $input, array $current, string $key, bool $clear ): string {
-		if ( $clear ) {
-			return '';
-		}
-
-		$new_key = isset( $input[ $key ] ) ? trim( (string) $input[ $key ] ) : '';
-		if ( '' !== $new_key ) {
-			return sanitize_text_field( $new_key );
-		}
-
-		return (string) ( $current[ $key ] ?? '' );
-	}
-
 	private function sanitize_context_list( $value ): array {
 		if ( is_array( $value ) ) {
 			$items = $value;

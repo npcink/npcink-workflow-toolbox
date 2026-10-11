@@ -285,22 +285,6 @@ abstract class Provider_Client_Support {
 	}
 
 
-	protected function sanitize_provider_error_data( $data ): array {
-		if ( ! is_array( $data ) ) {
-			return array();
-		}
-
-		$allowed = array();
-		foreach ( array( 'status', 'provider_status', 'http_code', 'reason', 'request_id' ) as $key ) {
-			if ( isset( $data[ $key ] ) ) {
-				$allowed[ $key ] = is_numeric( $data[ $key ] ) ? (int) $data[ $key ] : sanitize_text_field( (string) $data[ $key ] );
-			}
-		}
-
-		return $allowed;
-	}
-
-
 	protected function hosted_ai_normalized_text( string $content ): string {
 		$text = wp_strip_all_tags( $content );
 		$text = preg_replace( '/[ \t]+/u', ' ', $text );
@@ -701,6 +685,65 @@ abstract class Provider_Client_Support {
 		return true;
 	}
 
+	/**
+	 * Media file sha256 memo keyed on filemtime plus size: unchanged files
+	 * are never re-hashed across weekly scans and recognition batches
+	 * (the post meta cache is cleaned by uninstall.php). Returns the bare
+	 * lowercase hash, or '' when hashing fails.
+	 */
+	private function cached_media_fingerprint( int $attachment_id, string $real_path, int $file_size ): string {
+		static $memo = array();
+
+		$memo_key = $attachment_id . ':' . $real_path;
+		if ( isset( $memo[ $memo_key ] ) ) {
+			return $memo[ $memo_key ];
+		}
+
+		$mtime  = is_readable( $real_path ) ? filemtime( $real_path ) : false;
+		$cached = function_exists( 'get_post_meta' ) ? get_post_meta( $attachment_id, '_npcink_toolbox_media_fingerprint_cache', true ) : '';
+		$stamp  = is_array( $cached ) ? $cached : array();
+		/*
+		 * The memo trusts mtime+size only once the modification is at
+		 * least two seconds old: a same-second replacement with a
+		 * byte-identical size (programmatic regeneration, restored
+		 * backups) would otherwise reuse the previous hash.
+		 */
+		$fresh = is_int( $mtime )
+			&& $mtime < ( time() - 1 )
+			&& (int) ( $stamp['mtime'] ?? 0 ) === $mtime
+			&& (int) ( $stamp['size'] ?? 0 ) === $file_size
+			&& is_string( $stamp['sha256'] ?? null )
+			&& '' !== $stamp['sha256']
+			&& 1 === preg_match( '/^[0-9a-f]{64}$/', $stamp['sha256'] );
+		if ( $fresh ) {
+			$memo[ $memo_key ] = strtolower( (string) $stamp['sha256'] );
+			return $memo[ $memo_key ];
+		}
+
+		$hash = hash_file( 'sha256', $real_path );
+		if ( ! is_string( $hash ) || '' === $hash ) {
+			$memo[ $memo_key ] = '';
+			return '';
+		}
+
+		$hash = strtolower( $hash );
+		if ( is_int( $mtime ) && function_exists( 'update_post_meta' ) ) {
+			update_post_meta(
+				$attachment_id,
+				'_npcink_toolbox_media_fingerprint_cache',
+				array(
+					'sha256' => $hash,
+					'mtime'  => $mtime,
+					'size'   => $file_size,
+				)
+			);
+		}
+
+		$memo[ $memo_key ] = $hash;
+
+		return $memo[ $memo_key ];
+	}
+
 	protected function local_media_visual_source( int $attachment_id ): array {
 		if ( 0 >= $attachment_id || ! function_exists( 'get_attached_file' ) || ! function_exists( 'wp_upload_dir' ) ) {
 			return array();
@@ -726,8 +769,8 @@ abstract class Provider_Client_Support {
 		if ( ! is_string( $original_mime_type ) || ! in_array( $original_mime_type, array( 'image/avif', 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
 			return array();
 		}
-		$fingerprint = hash_file( 'sha256', $real_path );
-		if ( ! is_string( $fingerprint ) || '' === $fingerprint ) {
+		$fingerprint = $this->cached_media_fingerprint( $attachment_id, $real_path, (int) $file_size );
+		if ( '' === $fingerprint ) {
 			return array();
 		}
 		$source_path = $real_path;
