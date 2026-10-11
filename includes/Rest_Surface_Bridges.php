@@ -143,6 +143,9 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 
 		$result = $this->client->image_candidates( $query, $args );
 		if ( is_wp_error( $result ) ) {
+			if ( $refresh && '' !== $cache_key ) {
+				delete_transient( $cache_key );
+			}
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
 		if ( '' !== $cache_key ) {

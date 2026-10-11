@@ -173,6 +173,11 @@ abstract class Rest_Controller_Support {
 
 		$result = $invoker( $filtered );
 		if ( is_wp_error( $result ) ) {
+			if ( $refresh && '' !== $cache_key ) {
+				// A refresh that errored must still invalidate the stale
+				// entry, or the next plain request replays it.
+				delete_transient( $cache_key );
+			}
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
 		if ( '' !== $cache_key ) {
