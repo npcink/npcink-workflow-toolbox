@@ -92,10 +92,11 @@ abstract class Rest_Controller_Support {
 		// that must not trip the strict allow-list.
 		$params = $request->get_json_params();
 		$body   = (string) $request->get_body();
-		if ( null === $params ) {
+		if ( ! is_array( $params ) ) {
 			// A JSON body without the application/json content type still
-			// deserves object parsing; anything non-empty that does not
-			// decode to an object fails with a clear 400 instead of
+			// deserves object parsing, and a scalar JSON body (5, true, "x")
+			// must not reach array_keys below; anything non-empty that does
+			// not decode to an object fails with a clear 400 instead of
 			// forwarding an empty payload to the provider.
 			$body_params = $request->get_body_params();
 			$params      = is_array( $body_params ) && array() !== $body_params ? $body_params : array();
