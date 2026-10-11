@@ -148,8 +148,8 @@ abstract class Rest_Controller_Support {
 		}
 
 		$cache_key = '';
+		$refresh   = false;
 		if ( $coalesce ) {
-			$refresh = false;
 			foreach ( array( $filtered['refresh_variant'] ?? '', $filtered['regeneration_mode'] ?? '' ) as $refresh_token ) {
 				if ( is_scalar( $refresh_token ) && '' !== trim( (string) $refresh_token ) ) {
 					$refresh = true;
@@ -175,17 +175,27 @@ abstract class Rest_Controller_Support {
 		if ( is_wp_error( $result ) ) {
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
-		if ( '' !== $cache_key && is_array( $result ) && ! isset( $result['code'] ) && ( null === $cacheable || $cacheable( $result ) ) ) {
-			// A refresh run overwrites the entry so the next plain request
-			// sees the fresh result; degenerate results (error-shaped or
-			// empty per the caller's predicate) and oversized payloads
-			// (base64 preview bodies) skip coalescing rather than being
-			// replayed or bloating wp_options.
-			$cache_copy                         = $result;
-			$cache_copy['__provider_coalesced'] = true;
-			$encoded_result                     = wp_json_encode( $cache_copy );
-			if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
-				set_transient( $cache_key, $cache_copy, 60 );
+		if ( '' !== $cache_key ) {
+			$should_cache = is_array( $result ) && ! isset( $result['code'] ) && ( null === $cacheable || $cacheable( $result ) );
+			if ( $should_cache ) {
+				// A refresh run overwrites the entry so the next plain request
+				// sees the fresh result; degenerate results (error-shaped or
+				// empty per the caller's predicate) and oversized payloads
+				// (base64 preview bodies) skip coalescing rather than being
+				// replayed or bloating wp_options.
+				$cache_copy                         = $result;
+				$cache_copy['__provider_coalesced'] = true;
+				$encoded_result                     = wp_json_encode( $cache_copy );
+				if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
+					set_transient( $cache_key, $cache_copy, 60 );
+					return rest_ensure_response( $result );
+				}
+			}
+			if ( $refresh ) {
+				// A refresh whose result cannot be cached must at least
+				// invalidate the stale entry, or the next plain request
+				// replays the pre-refresh result.
+				delete_transient( $cache_key );
 			}
 		}
 

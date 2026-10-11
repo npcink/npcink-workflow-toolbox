@@ -145,12 +145,19 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 		if ( is_wp_error( $result ) ) {
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
-		if ( '' !== $cache_key && is_array( $result ) && ! isset( $result['code'] ) && ! empty( $result['images'] ) ) {
-			$cache_copy                         = $result;
-			$cache_copy['__provider_coalesced'] = true;
-			$encoded_result                     = wp_json_encode( $cache_copy );
-			if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
-				set_transient( $cache_key, $cache_copy, 60 );
+		if ( '' !== $cache_key ) {
+			$should_cache = is_array( $result ) && ! isset( $result['code'] ) && ! empty( $result['images'] );
+			if ( $should_cache ) {
+				$cache_copy                         = $result;
+				$cache_copy['__provider_coalesced'] = true;
+				$encoded_result                     = wp_json_encode( $cache_copy );
+				if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
+					set_transient( $cache_key, $cache_copy, 60 );
+					return rest_ensure_response( $result );
+				}
+			}
+			if ( $refresh ) {
+				delete_transient( $cache_key );
 			}
 		}
 

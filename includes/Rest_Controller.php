@@ -73,6 +73,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		'quality_contract',
 		'source_policy',
 		'attachment_ids',
+		'media_snapshot',
 		'media_filter',
 		'media_scope',
 	);
