@@ -92,8 +92,17 @@ abstract class Rest_Controller_Support {
 		// that must not trip the strict allow-list.
 		$params = $request->get_json_params();
 		if ( ! is_array( $params ) ) {
-			$body_params = $request->get_body_params();
-			$params      = is_array( $body_params ) ? $body_params : array();
+			$body_params  = $request->get_body_params();
+			$params       = is_array( $body_params ) ? $body_params : array();
+			$content_type = $request->get_content_type();
+			$is_json      = is_array( $content_type ) && false !== stripos( (string) ( $content_type['value'] ?? '' ), 'json' );
+			if ( array() === $params && '' !== (string) $request->get_body() && $is_json ) {
+				return new WP_Error(
+					'npcink_toolbox_invalid_provider_json',
+					__( 'The request body is not valid JSON.', 'npcink-workflow-toolbox' ),
+					array( 'status' => 400 )
+				);
+			}
 		}
 		if ( array() !== array_diff( array_keys( $params ), $allowed_fields ) ) {
 			return new WP_Error(
@@ -165,6 +174,12 @@ abstract class Rest_Controller_Support {
 				}
 			}
 			if ( array() !== $normalized ) {
+				// Errors without an explicit status serialize as HTTP 500 by
+				// default; state that intent instead of relying on the
+				// fallback silently.
+				if ( ! array_key_exists( 'status', $normalized ) ) {
+					$normalized['status'] = 500;
+				}
 				$safe->add_data( $normalized, $code );
 			}
 		}
