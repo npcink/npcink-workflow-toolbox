@@ -123,6 +123,12 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 		$key_args  = $args;
 		$refresh   = is_scalar( $key_args['refresh_variant'] ?? '' ) && '' !== trim( (string) $key_args['refresh_variant'] );
 		unset( $key_args['refresh_variant'] );
+		if ( isset( $key_args['visual_context']['refresh_variant'] ) ) {
+			// image_visual_context_from_request() mirrors the refresh token
+			// into the visual context; the key must hash it out too, or a
+			// refresh writes a one-time dead key instead of overwriting.
+			unset( $key_args['visual_context']['refresh_variant'] );
+		}
 		$encoded = wp_json_encode( $key_args );
 		if ( is_string( $encoded ) ) {
 			$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . $encoded );
