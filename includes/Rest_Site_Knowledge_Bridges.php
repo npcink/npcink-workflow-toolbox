@@ -138,7 +138,12 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 		}
 
 		if ( array() !== $rows ) {
-			set_transient( $key, $rows, 300 );
+			// Large sites (~1000 posts) can exceed a comfortable single
+			// wp_options row; fall back to per-request resolution there.
+			$encoded_rows = wp_json_encode( $rows );
+			if ( is_string( $encoded_rows ) && strlen( $encoded_rows ) <= 102400 ) {
+				set_transient( $key, $rows, 300 );
+			}
 		}
 
 		return $rows;
