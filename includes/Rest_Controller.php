@@ -356,7 +356,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	public function ai_image_generation( WP_REST_Request $request ) {
 		return $this->forward_provider_request(
 			$request,
-			array( 'prompt', 'prompt_source_locale', 'prompt_translation_mode', 'provider_prompt_reviewed_by_operator', 'prompt_reviewed_by_operator', 'aspect_ratio', 'resolution', 'response_format', 'n', 'purpose', 'review', 'regeneration_mode', 'refresh_variant', 'media_context', 'post_context', 'handoff', 'alt', 'alt_text', 'media_alt', 'media_description', 'media_title' ),
+			array( 'prompt', 'prompt_source_locale', 'prompt_translation_mode', 'provider_prompt_reviewed_by_operator', 'prompt_reviewed_by_operator', 'aspect_ratio', 'resolution', 'response_format', 'n', 'purpose', 'review', 'regeneration_mode', 'refresh_variant', 'media_context', 'post_context', 'handoff', 'title', 'alt', 'alt_text', 'media_alt', 'media_description', 'media_title' ),
 			fn( array $params ) => $this->client->run_ai_image_generation( $params ),
 			'ai_image_generation',
 			true,
