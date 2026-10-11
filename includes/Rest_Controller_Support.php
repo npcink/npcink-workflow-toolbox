@@ -128,6 +128,18 @@ abstract class Rest_Controller_Support {
 			);
 		}
 
+		// Fields belong in the JSON body; a query-string copy of an
+		// allow-listed field would otherwise be silently dropped, so fail
+		// loudly instead of degrading the request.
+		$query_params = $request->get_query_params();
+		if ( array() !== array_intersect( array_keys( is_array( $query_params ) ? $query_params : array() ), $allowed_fields ) ) {
+			return new WP_Error(
+				'npcink_toolbox_provider_field_in_query',
+				__( 'Provider request fields must be sent in the request body, not the query string.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		$filtered = array();
 		foreach ( $allowed_fields as $field ) {
 			if ( array_key_exists( $field, $params ) ) {

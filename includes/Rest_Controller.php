@@ -35,8 +35,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 		'cap.toolbox.feedback.write' => 'edit_posts',
 	);
 
-	/** Top-level request-body fields the hosted-AI surfaces consume; shared by /ai/content-support and /ai/site-helper. */
-	private const HOSTED_AI_ALLOWED_FIELDS = array(
+	/** Request-body fields /ai/content-support consumes (Provider_Hosted_AI_Service::run_hosted_ai_content_support). */
+	private const HOSTED_AI_CONTENT_SUPPORT_FIELDS = array(
 		'intent',
 		'title',
 		'excerpt',
@@ -54,22 +54,27 @@ final class Rest_Controller extends Rest_Controller_Support {
 		'source_url',
 		'source_reader_status',
 		'input_mode',
-		'attachment_ids',
-		'comment_sample_size',
-		'internal_link_sample_size',
-		'taxonomy_sample_size',
-		'max_items',
-		'media_filter',
-		'media_sample_size',
-		'media_scope',
-		'media_snapshot',
+	);
+
+	/** Request-body fields /ai/site-helper consumes (run_hosted_ai_site_helper plus its media samplers and admin review-set forms). */
+	private const HOSTED_AI_SITE_HELPER_FIELDS = array(
+		'intent',
+		'post_id',
+		'focus',
 		'image_context_evidence',
-		'quality_contract',
+		'max_items',
 		'review_set_limit',
 		'sample_size',
 		'scan_limit',
+		'comment_sample_size',
+		'internal_link_sample_size',
+		'taxonomy_sample_size',
+		'media_sample_size',
+		'quality_contract',
 		'source_policy',
-		'focus',
+		'attachment_ids',
+		'media_filter',
+		'media_scope',
 	);
 
 	public function __construct( Settings $settings, Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
@@ -338,7 +343,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	public function hosted_ai_content_support( WP_REST_Request $request ) {
 		return $this->forward_provider_request(
 			$request,
-			self::HOSTED_AI_ALLOWED_FIELDS,
+			self::HOSTED_AI_CONTENT_SUPPORT_FIELDS,
 			fn( array $params ) => $this->client->run_hosted_ai_content_support( $params ),
 			'hosted_ai_content_support'
 		);
@@ -347,7 +352,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	public function hosted_ai_site_helper( WP_REST_Request $request ) {
 		return $this->forward_provider_request(
 			$request,
-			self::HOSTED_AI_ALLOWED_FIELDS,
+			self::HOSTED_AI_SITE_HELPER_FIELDS,
 			fn( array $params ) => $this->client->run_hosted_ai_site_helper( $params ),
 			'hosted_ai_site_helper'
 		);
