@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-07.
+Last reviewed: 2026-10-11.
 
 ## Product Snapshot
 
@@ -74,16 +74,21 @@ Last reviewed: 2026-10-07.
 
 ## Open Debt (top items)
 
-1. Editor JS clusters (image candidates, audio, preflight, progressive,
+1. Security/performance review deferred findings (2026-10-11): nine
+   accepted low-severity items whose priority fixes shipped as PRs
+   #242-#245; see
+   `docs/security-performance-hardening-2026-10.md` before touching the
+   image-source routes, the flow cache, or the release asset pipeline.
+2. Editor JS clusters (image candidates, audio, preflight, progressive,
    draft) still inside the 10.6k main bundle.
-2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
+3. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
    only the summary/taxonomy cached-flow orchestrators remain).
-3. `assets/admin.js` (8.2k) and remaining `Admin_Page.php` clusters
+4. `assets/admin.js` (8.2k) and remaining `Admin_Page.php` clusters
    (review-set tools, media derivative controls, content context form).
-4. Editor intent convergence shipped 2026-10-07: twelve-intent editor
+5. Editor intent convergence shipped 2026-10-07: twelve-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
-5. PHPStan baseline ratchet (136 findings; shrinks with cluster splits).
+6. PHPStan baseline ratchet (136 findings; shrinks with cluster splits).
 6. `plainTextFromHtml` innerHTML hardening; guided onboarding tour
    (design proposed, awaiting the operator trial —
    `docs/onboarding-tour-design-v1.md`); "Core proposal" terminology

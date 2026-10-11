@@ -73,6 +73,7 @@ Start from the active documents below before changing code.
 - [UX Hardening Development Lessons 2026-10](ux-hardening-development-lessons-2026-10.md)
 - [Onboarding Tour Design v1](onboarding-tour-design-v1.md)
 - [Development Lessons And Closeout 2026-10](development-lessons-2026-10.md)
+- [Security And Performance Hardening Closeout 2026-10](security-performance-hardening-2026-10.md)
 
 ## Product Surfaces
 

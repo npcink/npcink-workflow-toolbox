@@ -44,7 +44,17 @@ with the closing commit or PR for one release cycle, then prune.
   the helper predates the text-utils split (moved verbatim). Hardening
   (DOMParser-based extraction or attribute stripping) is deferred to a
   dedicated behavior-change session; flagged by the 2026-10 split-session
-  advisory review.
+  advisory review. (Superseded: the 2026-10-08 acceleration batch landed
+  the DOMParser extraction — see Recently Closed.)
+- **Security/performance review deferred findings (2026-10-11).** Nine
+  accepted low-severity items from the four-agent audit whose priority
+  fixes all shipped (PRs #242-#245): image-source route allow-listing
+  and coalescing, flow-cache user dimension, editor evidence post-status
+  reads, dead secret/error-sanitizer helpers, the stale version constant,
+  sequential Cloud chain budgets, the Site Knowledge 1000-post status
+  bridge, bootstrap autoload weight, and weekly-scan fingerprint
+  memoization. Each item names its owner surface in
+  [Security And Performance Hardening Closeout 2026-10](security-performance-hardening-2026-10.md).
 - **Structure: staged splits; remaining clusters deferred to
   just-in-time.** The editor-content-support split landed three parts
   (text-utils, internal-links, audio-preferences) behind the JED
@@ -111,6 +121,23 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **`plainTextFromHtml` innerHTML hardening — closed 2026-10-08 (PR
+  #222)**, recorded here because the open entry above had not been
+  retired. The helper now extracts text through
+  `window.DOMParser().parseFromString(source, 'text/html')` (inert by
+  specification: no script execution, no resource fetches), with a
+  tag-stripping fallback for environments without DOMParser; the
+  node behavior test `test:text-utils-inert-extraction` in `test:all`
+  fails loudly if `innerHTML` extraction ever returns.
+
+- **Security/performance review priority items — closed 2026-10-11 (PRs
+  #242-#245, master 68ab2c4d).** Object-level `edit_post` guards on every
+  post-context read; Cloud URL scheme normalization at the provider
+  boundary plus JS `isHttpUrl` gates on every dynamic href; editor bundle
+  post-type gating with minified release assets; and per-request
+  maintenance/batching cost bounds. Record with standing rules:
+  [Security And Performance Hardening Closeout 2026-10](security-performance-hardening-2026-10.md).
 
 - **Master-history anomaly on `ec6a2a4f` (PR #238, 2026-10-09) — recorded,
   not actionable.** The squash merge of the docs-only triad PR #238 carries
