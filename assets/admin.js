@@ -1050,6 +1050,7 @@
 					prompt_reviewed_by_operator: true,
 					media_title: payload.query || payload.primary_query || '',
 					media_description: payload.message || '',
+					refresh_variant: 'admin_' + Date.now(),
 					handoff
 				});
 				appendAiGenerationResult(container, response);

@@ -151,11 +151,16 @@ abstract class Rest_Controller_Support {
 			$safe->add( $code, $error->get_error_message( $code ) );
 			$data = $error->get_error_data( $code );
 			if ( ! is_array( $data ) ) {
+				// The core add_data( 400 ) convention carries the HTTP status
+				// as a scalar; keep it instead of dropping it.
+				if ( is_numeric( $data ) ) {
+					$safe->add_data( array( 'status' => (int) $data ), $code );
+				}
 				continue;
 			}
 			$normalized = array();
 			foreach ( $data as $key => $value ) {
-				if ( in_array( sanitize_key( (string) $key ), array( 'status', 'provider_status', 'http_code', 'reason', 'request_id' ), true ) ) {
+				if ( in_array( sanitize_key( (string) $key ), array( 'status', 'provider_status', 'http_code', 'reason', 'request_id', 'cloud_error_code' ), true ) ) {
 					$normalized[ sanitize_key( (string) $key ) ] = is_numeric( $value ) ? (int) $value : ( is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '' );
 				}
 			}
