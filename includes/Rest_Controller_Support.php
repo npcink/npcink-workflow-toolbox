@@ -91,15 +91,15 @@ abstract class Rest_Controller_Support {
 		// query parameters, and core clients append _locale/_envelope keys
 		// that must not trip the strict allow-list.
 		$params = $request->get_json_params();
-		if ( ! is_array( $params ) ) {
+		$body   = (string) $request->get_body();
+		if ( null === $params ) {
+			// A JSON body without the application/json content type still
+			// deserves object parsing; anything non-empty that does not
+			// decode to an object fails with a clear 400 instead of
+			// forwarding an empty payload to the provider.
 			$body_params = $request->get_body_params();
 			$params      = is_array( $body_params ) && array() !== $body_params ? $body_params : array();
-			$body        = (string) $request->get_body();
 			if ( array() === $params && '' !== $body ) {
-				// A JSON body without the application/json content type still
-				// deserves object parsing; anything non-empty that does not
-				// decode to an object fails with a clear 400 instead of
-				// forwarding an empty payload to the provider.
 				$decoded = json_decode( $body, true );
 				$params  = is_array( $decoded ) ? $decoded : array();
 				if ( array() === $params ) {
@@ -110,6 +110,14 @@ abstract class Rest_Controller_Support {
 					);
 				}
 			}
+		} elseif ( array() === $params && '' !== $body ) {
+			// An empty JSON object follows the same consistent path as a
+			// body that does not decode to an object.
+			return new WP_Error(
+				'npcink_toolbox_invalid_request_body',
+				__( 'The request body is not a valid JSON object.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
 		}
 		if ( array() !== array_diff( array_keys( $params ), $allowed_fields ) ) {
 			return new WP_Error(
