@@ -702,7 +702,14 @@ abstract class Provider_Client_Support {
 		$mtime  = is_readable( $real_path ) ? filemtime( $real_path ) : false;
 		$cached = function_exists( 'get_post_meta' ) ? get_post_meta( $attachment_id, '_npcink_toolbox_media_fingerprint_cache', true ) : '';
 		$stamp  = is_array( $cached ) ? $cached : array();
-		$fresh  = is_int( $mtime )
+		/*
+		 * The memo trusts mtime+size only once the modification is at
+		 * least two seconds old: a same-second replacement with a
+		 * byte-identical size (programmatic regeneration, restored
+		 * backups) would otherwise reuse the previous hash.
+		 */
+		$fresh = is_int( $mtime )
+			&& $mtime < ( time() - 1 )
 			&& (int) ( $stamp['mtime'] ?? 0 ) === $mtime
 			&& (int) ( $stamp['size'] ?? 0 ) === $file_size
 			&& is_string( $stamp['sha256'] ?? null )
