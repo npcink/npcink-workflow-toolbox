@@ -1,8 +1,14 @@
 # WordPress.org Submission Pack
 
-Status: published. Version 0.4.0 was released to WordPress.org SVN as
-revision 3730454 on 2026-10-06 (five-review-set arc, REST controller
-restructure, editor JS part-file split, static analysis required gates).
+Status: published. Version 0.6.0 was released to WordPress.org SVN as
+revision 3739544 on 2026-10-11 (security and performance hardening:
+object-level post-context authorization, Cloud URL scheme
+normalization, editor post-type gating, first minified-asset package).
+The WordPress.org API reports stable 0.6.0 and the live zip carries the
+nine .min asset siblings with the sha256 audit log below. Version 0.4.0
+was released as revision 3730454 on 2026-10-06 (five-review-set arc,
+REST controller restructure, editor JS part-file split, static
+analysis required gates).
 Version 0.3.0 was released as revision 3723781 on 2026-10-02; the publication and verification record is
 [`WordPress.org 0.3.0 Publication Closeout - 2026-10-02`](archive/2026-10/wordpress-org-publication-0-3-0-closeout-2026-10-02.md).
 The 0.1.1 approval, publication, and zh_CN translation history is
@@ -17,7 +23,7 @@ The post-approval publication and zh_CN translation closeout is recorded in
 
 - Plugin name: Npcink Workflow Toolbox
 - Suggested slug: npcink-workflow-toolbox
-- Version: 0.3.0
+- Version: 0.6.0
 - Requires at least: 6.9
 - Tested up to: 7.1
 - Requires PHP: 8.0
@@ -129,3 +135,28 @@ WP_CLI=/tmp/wp-cli.phar WP_CLI_PHP=/opt/homebrew/bin/php \
 WP_PATH="/Users/muze/Local Sites/magick-ai/app/public" \
 WP_DB_SOCKET="$SOCK" composer plugin-check:release
 ```
+
+## 0.6.0 Release Record (2026-10-11, SVN r3739544)
+
+- Version PR #248 (header + constant + readme changelog, version
+  assertions now compare the constant against the parsed header).
+- `composer package:release` produced the first minified package:
+  assets 1,042,163 -> 638,240 bytes with the per-bundle sha256 audit
+  log in the build output; nine `.min` siblings verified inside the
+  accepted zip.
+- Plugin Check passed without errors on the five-plugin site
+  (`~/wp-sites/npcink-five`, socket
+  `~/Library/Application Support/Local/run/s63K4c8XP/mysql/mysqld.sock`);
+  the only warnings are the pre-existing uninstall direct-query notices.
+- Browser verification on the packaged build: the post editor loads all
+  five editor scripts and the stylesheet from their `.min` siblings
+  (SCRIPT_DEBUG off), the content-support sidebar mounts with the
+  namespace present and zero console errors; the site editor loads no
+  Toolbox bundle (post-type gating negative case); the admin page loads
+  `admin.min.js`/`admin.min.css` and renders.
+- The live API reports stable 0.6.0 and the downloaded
+  `npcink-workflow-toolbox.0.6.0.zip` carries the `.min` set and the
+  0.6.0 header.
+- Trunk note: tags/0.5.3 predated the Summary_Terms/Writing_Pack/
+  Progressive/Media_Alt editor splits, so this trunk update adds those
+  include files alongside the 0.6.0 changes.
