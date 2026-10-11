@@ -69,6 +69,94 @@ abstract class Rest_Controller_Support {
 		);
 	}
 
+	/**
+	 * Forwards an allow-listed request body to a provider call. Unknown
+	 * top-level fields are rejected before anything reaches the provider
+	 * (the media-derivative strict-input precedent), provider WP_Error
+	 * data passes through the safe-diagnostics allow-list before it is
+	 * returned, and coalesced routes share one short per-user transient
+	 * unless a refresh token (refresh_variant / regeneration_mode) is
+	 * supplied, bounding rapid-fire duplicate spend from relaxed-scope
+	 * editor surfaces.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @param string[]        $allowed_fields Top-level fields the provider surface accepts.
+	 * @param callable        $invoker Receives the filtered params array, returns the provider result.
+	 * @param string          $cache_namespace Transient namespace used when coalescing.
+	 * @param bool            $coalesce Whether identical payloads coalesce behind a per-user transient.
+	 * @return mixed REST-ready response.
+	 */
+	protected function forward_provider_request( WP_REST_Request $request, array $allowed_fields, callable $invoker, string $cache_namespace, bool $coalesce = false ) {
+		$params = $request->get_params();
+		$params = is_array( $params ) ? $params : array();
+		if ( array() !== array_diff( array_keys( $params ), $allowed_fields ) ) {
+			return new WP_Error(
+				'npcink_toolbox_unsupported_provider_field',
+				__( 'This request contains fields the provider call does not accept.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$filtered = array();
+		foreach ( $allowed_fields as $field ) {
+			if ( array_key_exists( $field, $params ) ) {
+				$filtered[ $field ] = $params[ $field ];
+			}
+		}
+
+		$cache_key = '';
+		if ( $coalesce ) {
+			$refresh = '' !== trim( (string) ( $filtered['refresh_variant'] ?? '' ) ) || '' !== trim( (string) ( $filtered['regeneration_mode'] ?? '' ) );
+			if ( ! $refresh ) {
+				$cache_key = 'npcink_toolbox_provider_' . sanitize_key( $cache_namespace ) . '_' . md5( (string) get_current_user_id() . wp_json_encode( $filtered ) );
+				$cached    = get_transient( $cache_key );
+				if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
+					unset( $cached['__provider_coalesced'] );
+					return rest_ensure_response( $cached );
+				}
+			}
+		}
+
+		$result = $invoker( $filtered );
+		if ( is_wp_error( $result ) ) {
+			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
+		}
+		if ( '' !== $cache_key && is_array( $result ) ) {
+			set_transient( $cache_key, array_merge( $result, array( '__provider_coalesced' => true ) ), 60 );
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Rebuilds a provider WP_Error with its data reduced to the
+	 * safe-diagnostics allow-list, so addon error details cannot leak
+	 * unbounded fields into REST responses.
+	 *
+	 * @param WP_Error $error Provider error.
+	 * @return WP_Error
+	 */
+	public static function sanitize_provider_error_data( WP_Error $error ): WP_Error {
+		$safe = new WP_Error( $error->get_error_code(), $error->get_error_message() );
+		foreach ( $error->get_error_codes() as $code ) {
+			$data = $error->get_error_data( $code );
+			if ( ! is_array( $data ) ) {
+				continue;
+			}
+			$normalized = array();
+			foreach ( $data as $key => $value ) {
+				if ( in_array( sanitize_key( (string) $key ), array( 'status', 'provider_status', 'http_code', 'reason', 'request_id' ), true ) ) {
+					$normalized[ sanitize_key( (string) $key ) ] = is_scalar( $value ) ? $value : '';
+				}
+			}
+			if ( array() !== $normalized ) {
+				$safe->add_data( $normalized, $code );
+			}
+		}
+
+		return $safe;
+	}
+
 
 	protected function sanitize_image_visual_context( array $context ): array {
 		$mode = sanitize_key( (string) ( $context['image_mode'] ?? $context['image_use'] ?? '' ) );

@@ -299,18 +299,31 @@ final class Rest_Controller extends Rest_Controller_Support {
 	}
 
 	public function hosted_ai_content_support( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-		return rest_ensure_response( $this->client->run_hosted_ai_content_support( is_array( $params ) ? $params : array() ) );
+		return $this->forward_provider_request(
+			$request,
+			array( 'intent', 'title', 'excerpt', 'content', 'post_id', 'user_instruction', 'generation_variant', 'summary_generation_mode', 'summary_vector_context', 'writing_pack', 'writing_pack_review', 'draft_review_feedback', 'editorial_brief', 'related_content_context', 'source_url', 'source_reader_status', 'input_mode', 'attachment_ids', 'comment_sample_size', 'internal_link_sample_size', 'taxonomy_sample_size', 'max_items', 'media_filter', 'media_sample_size', 'media_scope', 'media_snapshot', 'image_context_evidence', 'quality_contract', 'review_set_limit', 'sample_size', 'scan_limit', 'source_policy', 'focus' ),
+			fn( array $params ) => $this->client->run_hosted_ai_content_support( $params ),
+			'hosted_ai_content_support'
+		);
 	}
 
 	public function hosted_ai_site_helper( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-		return rest_ensure_response( $this->client->run_hosted_ai_site_helper( is_array( $params ) ? $params : array() ) );
+		return $this->forward_provider_request(
+			$request,
+			array( 'intent', 'title', 'excerpt', 'content', 'post_id', 'user_instruction', 'generation_variant', 'summary_generation_mode', 'summary_vector_context', 'writing_pack', 'writing_pack_review', 'draft_review_feedback', 'editorial_brief', 'related_content_context', 'source_url', 'source_reader_status', 'input_mode', 'attachment_ids', 'comment_sample_size', 'internal_link_sample_size', 'taxonomy_sample_size', 'max_items', 'media_filter', 'media_sample_size', 'media_scope', 'media_snapshot', 'image_context_evidence', 'quality_contract', 'review_set_limit', 'sample_size', 'scan_limit', 'source_policy', 'focus' ),
+			fn( array $params ) => $this->client->run_hosted_ai_site_helper( $params ),
+			'hosted_ai_site_helper'
+		);
 	}
 
 	public function ai_image_generation( WP_REST_Request $request ) {
-		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
-		return rest_ensure_response( $this->client->run_ai_image_generation( is_array( $params ) ? $params : array() ) );
+		return $this->forward_provider_request(
+			$request,
+			array( 'prompt', 'prompt_source_locale', 'prompt_translation_mode', 'provider_prompt_reviewed_by_operator', 'prompt_reviewed_by_operator', 'aspect_ratio', 'resolution', 'response_format', 'n', 'purpose', 'review', 'regeneration_mode', 'media_context', 'post_context', 'handoff', 'alt', 'alt_text', 'media_alt', 'media_description', 'media_title' ),
+			fn( array $params ) => $this->client->run_ai_image_generation( $params ),
+			'ai_image_generation',
+			true
+		);
 	}
 
 	public function nightly_inspection_cloud_batch( WP_REST_Request $request ) {

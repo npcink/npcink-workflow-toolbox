@@ -46,14 +46,15 @@ with the closing commit or PR for one release cycle, then prune.
   dedicated behavior-change session; flagged by the 2026-10 split-session
   advisory review. (Superseded: the 2026-10-08 acceleration batch landed
   the DOMParser extraction — see Recently Closed.)
-- **Security/performance review deferred findings (2026-10-11).** Nine
-  accepted low-severity items from the four-agent audit whose priority
-  fixes all shipped (PRs #242-#245): image-source route allow-listing
-  and coalescing, flow-cache user dimension, editor evidence post-status
-  reads, dead secret/error-sanitizer helpers, the stale version constant,
-  sequential Cloud chain budgets, the Site Knowledge 1000-post status
-  bridge, bootstrap autoload weight, and weekly-scan fingerprint
-  memoization. Each item names its owner surface in
+- **Security/performance review deferred findings (2026-10-11) — closed
+  same day by PR #247.** Seven of the nine accepted low-severity items
+  shipped (route allow-listing and spend coalescing, flow-cache user
+  dimension, evidence `read_post` gates, dead helpers removed and the
+  error sanitizer wired, version constant, Site Knowledge row caching,
+  fingerprint memoization); the remaining two (sequential Cloud chains,
+  bootstrap autoload weight) are analyzed-accepted with recorded reasons —
+  the local chain lever belongs to npcink-cloud-addon, and lazy bootstrap
+  wiring is deferred to the just-in-time cluster splits. Full record:
   [Security And Performance Hardening Closeout 2026-10](security-performance-hardening-2026-10.md).
 - **Structure: staged splits; remaining clusters deferred to
   just-in-time.** The editor-content-support split landed three parts

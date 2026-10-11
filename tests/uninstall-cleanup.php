@@ -22,6 +22,11 @@ function wp_clear_scheduled_hook( string $hook ): int {
 	return 1;
 }
 
+function delete_post_meta_by_key( string $meta_key ): bool {
+	$GLOBALS['npcink_uninstall_post_meta'][] = $meta_key;
+	return true;
+}
+
 function is_multisite(): bool {
 	return false;
 }

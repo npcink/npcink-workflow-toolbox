@@ -132,7 +132,7 @@ abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 			$json = serialize( $input );
 		}
 
-		return 'npcink_toolbox_editor_' . sanitize_key( $namespace ) . '_' . md5( $json );
+		return 'npcink_toolbox_editor_' . sanitize_key( $namespace ) . '_' . md5( (string) get_current_user_id() . '|' . $json );
 	}
 
 	public static function editor_input_scope( array $context ): array {

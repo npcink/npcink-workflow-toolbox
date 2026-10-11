@@ -34,18 +34,29 @@ function npcink_toolbox_uninstall_current_site(): void {
 	$transient_prefixes = array(
 		$wpdb->esc_like( '_transient_npcink_toolbox_editor_' ) . '%',
 		$wpdb->esc_like( '_transient_timeout_npcink_toolbox_editor_' ) . '%',
+		$wpdb->esc_like( '_transient_npcink_toolbox_provider_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_npcink_toolbox_provider_' ) . '%',
+		$wpdb->esc_like( '_transient_npcink_toolbox_site_knowledge_rows_' ) . '%',
+		$wpdb->esc_like( '_transient_timeout_npcink_toolbox_site_knowledge_rows_' ) . '%',
 	);
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must enumerate dynamic, expiring transient keys before removing them through WordPress APIs.
 	$editor_cache_options = $wpdb->get_col(
 		$wpdb->prepare(
-			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
 			$transient_prefixes[0],
-			$transient_prefixes[1]
+			$transient_prefixes[1],
+			$transient_prefixes[2],
+			$transient_prefixes[3],
+			$transient_prefixes[4],
+			$transient_prefixes[5]
 		)
 	);
 	foreach ( $editor_cache_options as $option_name ) {
 		delete_option( (string) $option_name );
 	}
+
+	// Media fingerprint memo post meta (mtime+size keyed sha256 cache).
+	delete_post_meta_by_key( '_npcink_toolbox_media_fingerprint_cache' );
 
 	foreach (
 		array(

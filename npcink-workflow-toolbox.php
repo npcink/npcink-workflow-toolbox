@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NPCINK_TOOLBOX_VERSION', '0.4.0' );
+define( 'NPCINK_TOOLBOX_VERSION', '0.5.3' );
 define( 'NPCINK_TOOLBOX_FILE', __FILE__ );
 define( 'NPCINK_TOOLBOX_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NPCINK_TOOLBOX_URL', plugin_dir_url( __FILE__ ) );

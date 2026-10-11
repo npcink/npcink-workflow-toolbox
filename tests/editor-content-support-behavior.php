@@ -523,6 +523,10 @@ function wp_html_excerpt( string $str, int $count, string $more = '' ): string {
 $GLOBALS['npcink_toolbox_simulated_capabilities'] = array( 'manage_options', 'edit_posts', 'edit_post', 'upload_files', 'moderate_comments' );
 $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] = array( 31 );
 
+function get_current_user_id(): int {
+	return 1;
+}
+
 function current_user_can( string $capability, $object_id = null ): bool {
 	$granted = $GLOBALS['npcink_toolbox_simulated_capabilities'] ?? array( 'manage_options', 'edit_posts', 'edit_post' );
 	if ( 'edit_post' === $capability ) {

@@ -100,25 +100,42 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 			return $query;
 		}
 
-		return rest_ensure_response(
-			$this->client->image_candidates(
-				$query,
-				array(
-					'orientation'          => sanitize_key( (string) $request->get_param( 'orientation' ) ),
-					'color'                => sanitize_key( (string) $request->get_param( 'color' ) ),
-					'provider'             => sanitize_key( (string) $request->get_param( 'provider' ) ),
-					'per_page'             => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
-					'latency_mode'         => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
-					'include_ai_generated' => ! empty( $request->get_param( 'include_ai_generated' ) ),
-					'generation_prompt'    => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
-					'generated_image_url'  => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
-					'model'                => sanitize_text_field( (string) $request->get_param( 'model' ) ),
-					'manual_query'         => $query,
-					'refresh_variant'      => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
-					'visual_context'       => $this->image_visual_context_from_request( $request, $query ),
-				)
-			)
+		$args = array(
+			'orientation'          => sanitize_key( (string) $request->get_param( 'orientation' ) ),
+			'color'                => sanitize_key( (string) $request->get_param( 'color' ) ),
+			'provider'             => sanitize_key( (string) $request->get_param( 'provider' ) ),
+			'per_page'             => (int) ( $request->get_param( 'per_page' ) ?: 8 ),
+			'latency_mode'         => sanitize_key( (string) $request->get_param( 'latency_mode' ) ),
+			'include_ai_generated' => ! empty( $request->get_param( 'include_ai_generated' ) ),
+			'generation_prompt'    => sanitize_textarea_field( (string) $request->get_param( 'generation_prompt' ) ),
+			'generated_image_url'  => esc_url_raw( (string) $request->get_param( 'generated_image_url' ) ),
+			'model'                => sanitize_text_field( (string) $request->get_param( 'model' ) ),
+			'manual_query'         => $query,
+			'refresh_variant'      => sanitize_text_field( (string) $request->get_param( 'refresh_variant' ) ),
+			'visual_context'       => $this->image_visual_context_from_request( $request, $query ),
 		);
+
+		// Identical author/contributor searches coalesce behind a short
+		// per-user transient; an explicit refresh variant bypasses it.
+		$cache_key = '';
+		if ( '' === $args['refresh_variant'] ) {
+			$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . wp_json_encode( $args ) );
+			$cached    = get_transient( $cache_key );
+			if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
+				unset( $cached['__provider_coalesced'] );
+				return rest_ensure_response( $cached );
+			}
+		}
+
+		$result = $this->client->image_candidates( $query, $args );
+		if ( is_wp_error( $result ) ) {
+			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
+		}
+		if ( '' !== $cache_key && is_array( $result ) ) {
+			set_transient( $cache_key, array_merge( $result, array( '__provider_coalesced' => true ) ), 60 );
+		}
+
+		return rest_ensure_response( $result );
 	}
 
 	public function site_media_index_batch( WP_REST_Request $request ) {

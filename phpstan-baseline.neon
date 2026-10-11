@@ -355,12 +355,6 @@ parameters:
 			path: includes/Provider_Workflow_Plans_Service.php
 
 		-
-			message: '#^Call to function method_exists\(\) with WP_REST_Request and ''get_params'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 3
-			path: includes/Rest_Controller.php
-
-		-
 			message: '#^Property Npcink_Toolbox\\Rest_Controller\:\:\$publish_preflight is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -501,20 +495,8 @@ parameters:
 		-
 			message: '#^Method Npcink_Toolbox\\Rest_Surface_Bridges\:\:image_candidates\(\) should return WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
-			count: 2
+			count: 3
 			path: includes/Rest_Surface_Bridges.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Settings\:\:get_secret\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Settings.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Settings\:\:sanitize_secret_input\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Settings.php
 
 		-
 			message: '#^Offset ''type'' on array\{id\: mixed, label\: non\-empty\-string, type\: ''image''\|''text'', text\: non\-empty\-string, attachment_id\: mixed, position\: mixed, opacity\: mixed, scale\: mixed, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'

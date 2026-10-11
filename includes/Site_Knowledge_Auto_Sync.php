@@ -10,11 +10,11 @@ namespace Npcink_Toolbox;
 defined( 'ABSPATH' ) || exit;
 
 final class Site_Knowledge_Auto_Sync {
-	private const LEGACY_QUEUE_OPTION   = 'npcink_toolbox_site_knowledge_auto_sync_queue';
-	private const LEGACY_CRON_HOOK      = 'npcink_toolbox_process_site_knowledge_auto_sync';
+	private const LEGACY_QUEUE_OPTION = 'npcink_toolbox_site_knowledge_auto_sync_queue';
+	private const LEGACY_CRON_HOOK    = 'npcink_toolbox_process_site_knowledge_auto_sync';
 
 	private static bool $legacy_state_retired = false;
-	private const LEGACY_RECONCILE_HOOK = 'npcink_toolbox_reconcile_site_knowledge_auto_sync';
+	private const LEGACY_RECONCILE_HOOK       = 'npcink_toolbox_reconcile_site_knowledge_auto_sync';
 
 	public function __construct( Provider_Client $client ) {
 		unset( $client );

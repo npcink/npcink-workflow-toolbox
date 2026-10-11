@@ -92,21 +92,56 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 		}
 		$indexed_ids = array_fill_keys( array_map( 'absint', is_array( $coverage['indexed_post_ids'] ?? null ) ? $coverage['indexed_post_ids'] : array() ), true );
 		$statuses    = array();
+		foreach ( $this->cached_article_rows_base( $public_post_ids ) as $row ) {
+			$row['status'] = isset( $indexed_ids[ $row['post_id'] ] ) ? 'indexed' : 'not_indexed';
+			$statuses[]    = $row;
+		}
+
+		return $statuses;
+	}
+
+	/**
+	 * Local article row facts (id, title, url, modified) behind a short
+	 * transient keyed on the post count plus the newest modified time, so
+	 * per-status-request title/permalink resolution for up to a thousand
+	 * posts only re-runs when the local set actually changed. The Cloud
+	 * indexed/not-indexed verdict is layered on fresh per request.
+	 *
+	 * @param int[] $public_post_ids Published post/page ids, newest modification first.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function cached_article_rows_base( array $public_post_ids ): array {
+		if ( array() === $public_post_ids || ! function_exists( 'get_post' ) ) {
+			return array();
+		}
+
+		$newest = get_post( $public_post_ids[0] );
+		$stamp  = $newest ? (string) $newest->post_modified_gmt : '';
+		$key    = 'npcink_toolbox_site_knowledge_rows_' . md5( count( $public_post_ids ) . '|' . $stamp );
+		$cached = get_transient( $key );
+		if ( is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$rows = array();
 		foreach ( $public_post_ids as $post_id ) {
 			$post = get_post( $post_id );
 			if ( ! $post ) {
 				continue;
 			}
-			$statuses[] = array(
+			$rows[] = array(
 				'post_id'      => $post_id,
 				'title'        => sanitize_text_field( get_the_title( $post ) ),
 				'url'          => esc_url_raw( get_permalink( $post ) ),
 				'modified_gmt' => sanitize_text_field( (string) $post->post_modified_gmt ),
-				'status'       => isset( $indexed_ids[ $post_id ] ) ? 'indexed' : 'not_indexed',
 			);
 		}
 
-		return $statuses;
+		if ( array() !== $rows ) {
+			set_transient( $key, $rows, 300 );
+		}
+
+		return $rows;
 	}
 
 	public function site_knowledge_sync( WP_REST_Request $request ) {

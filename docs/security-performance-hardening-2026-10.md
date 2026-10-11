@@ -49,35 +49,52 @@ action list and every priority item shipped the same day.
   the per-item fingerprint re-verification before each adoption stays
   authoritative.
 
-## Deferred audit findings (open low-severity items)
+## Deferred audit findings (closed 2026-10-11, PR #247)
 
-Accepted for later small sessions; each names its owner surface:
+Seven fixed and two analyzed-accepted in the same-day follow-up:
 
-- Bridge-level input allow-listing and response coalescing for the two
-  `edit_posts` image-source routes (`/image-candidates`,
-  `/ai/image-generation`) — quota cost sits with Cloud, but author-role
-  users can drive uncapped calls.
-- The editor flow cache is site-scoped with no user dimension
-  (`Rest_Editor_Flow_Cache::editor_flow_cache_key`); identical inputs
-  share cached Cloud results across users.
-- `internal_links` / summary flows expose post status/type/terms for
-  cloud-evidence post ids without a `read_post` check (ids originate from
-  Cloud evidence, not direct requests).
-- Dead code: `Settings::get_secret()` / `sanitize_secret_input()` (zero
-  callers) and `Provider_Client_Support::sanitize_provider_error_data()`
-  (defined, never called).
-- `NPCINK_TOOLBOX_VERSION` constant ('0.4.0') lags the plugin header
-  ('0.5.3'); asset cache-busting is mostly covered by filemtime, but the
-  fallback path serves a stale version string.
-- Sequential Cloud chains inside one editor REST request (writing pack:
-  up to four hops; declared timeout sum ~110-170s) — split into
-  operator-triggered stages or tighten the long-form budget.
-- Site Knowledge status bridge queries 1000 posts and resolves
-  title/permalink per post per request (`Rest_Site_Knowledge_Bridges`).
-- 67 `require_once` at bootstrap with no autoloader; admin-only classes
-  parse on front-end requests.
-- Weekly media fingerprint scan re-hashes up to 100 unchanged files per
-  run; a `filemtime+filesize` memo would avoid rehashing.
+- **Fixed — provider input allow-listing and spend coalescing.** The three
+  raw-passthrough facade routes (`/ai/content-support`, `/ai/site-helper`,
+  `/ai/image-generation`) forward through one `forward_provider_request()`
+  helper that rejects unknown top-level fields (the media-derivative
+  strict-input precedent) and reduces provider WP_Error data to the
+  safe-diagnostics allow-list. `/ai/image-generation` and
+  `/image-candidates` coalesce identical payloads behind a sixty-second
+  per-user transient with a refresh-variant bypass, bounding rapid-fire
+  duplicate spend from the relaxed editor scopes.
+- **Fixed — flow cache user dimension.** `editor_flow_cache_key` hashes the
+  acting user id into the transient key; identical contexts no longer share
+  Cloud results across users.
+- **Fixed — evidence post reads gated.** Internal-link target facts
+  (status/type/permalink) and summary existing-terms now require
+  `read_post` for the acting user before reading.
+- **Fixed — dead code removed.** `Settings::get_secret()` and
+  `sanitize_secret_input()` are gone; the previously unwired
+  `sanitize_provider_error_data()` moved to `Rest_Controller_Support` and
+  is actually called by the forwarding helper.
+- **Fixed — version constant.** `NPCINK_TOOLBOX_VERSION` tracks the plugin
+  header ('0.5.3').
+- **Fixed — Site Knowledge status rows.** Local article facts (title/url/
+  modified) cache behind a modified-stamp transient while the Cloud
+  indexed verdict stays fresh per request.
+- **Fixed — fingerprint memo.** `cached_media_fingerprint()` memoizes the
+  file sha256 on filemtime+size post meta (uninstall removes it), so the
+  weekly scan and recognition batches never re-hash unchanged files.
+- **Analyzed-accepted — sequential Cloud chains.** The declared
+  `timeout_seconds` values are Cloud-side payload budgets, not local wait
+  budgets (this plugin makes zero outbound HTTP calls); the writing-pack
+  flow is already stage-gated with early returns, every hop already sits
+  behind the 300s flow cache, and blocked paths short-circuit. The
+  remaining local lever — the addon's actual HTTP timeout — is owned by
+  npcink-cloud-addon and tracked there, not here.
+- **Analyzed-accepted — bootstrap autoload weight.** A classmap autoloader
+  alone changes nothing while `Plugin::instance()` still constructs the
+  full service graph on `plugins_loaded`; true lazy wiring must defer the
+  REST/abilities/media surfaces behind `rest_api_init` (REST_REQUEST is
+  undefined until parse_request) and is an architectural change to
+  Plugin.php with cross-repo hook-timing verification — disproportionate
+  to a low-severity finding whose cost is largely absorbed by opcache.
+  Revisit with the planned just-in-time cluster splits.
 
 ## Standing rules from this session
 
