@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.5.3
+Stable tag: 0.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -233,6 +233,28 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.6.0 =
+
+* Security: every post-context read now requires edit_post permission
+  for the acting user before the title, status, excerpt, or content is
+  packaged for the Cloud, at the media-brief, editor content-support,
+  and hosted-AI layers.
+* Security: URLs returned by the Cloud are normalized to http(s) at the
+  provider boundary, and every admin/editor link sink validates the
+  protocol before rendering a clickable link.
+* Performance: the editor content-support bundle loads only on post and
+  page editors (extendable through the
+  npcink_toolbox_editor_supported_post_types filter), and release
+  packages ship minified assets (roughly forty percent smaller).
+* Performance: editor Cloud-result caching is per user, front-end
+  traffic no longer pays maintenance queries, media optimization batch
+  creation bounds its fingerprint pre-flight, and unchanged media files
+  are never re-hashed between scans.
+* Provider routes accept only their documented request fields, image
+  generation and image-source searches coalesce identical repeat
+  requests for sixty seconds per user, and provider error responses
+  expose only allow-listed diagnostic data.
 
 = 0.5.3 =
 
