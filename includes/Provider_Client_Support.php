@@ -715,6 +715,7 @@ abstract class Provider_Client_Support {
 
 		$hash = hash_file( 'sha256', $real_path );
 		if ( ! is_string( $hash ) || '' === $hash ) {
+			$memo[ $memo_key ] = '';
 			return '';
 		}
 

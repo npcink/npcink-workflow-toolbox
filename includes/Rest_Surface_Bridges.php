@@ -116,14 +116,18 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 		);
 
 		// Identical author/contributor searches coalesce behind a short
-		// per-user transient; an explicit refresh variant bypasses it.
+		// per-user transient; an explicit refresh variant bypasses it, and
+		// an unencodable payload skips coalescing rather than colliding.
 		$cache_key = '';
 		if ( '' === $args['refresh_variant'] ) {
-			$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . wp_json_encode( $args ) );
-			$cached    = get_transient( $cache_key );
-			if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
-				unset( $cached['__provider_coalesced'] );
-				return rest_ensure_response( $cached );
+			$encoded = wp_json_encode( $args );
+			if ( is_string( $encoded ) ) {
+				$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . $encoded );
+				$cached    = get_transient( $cache_key );
+				if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
+					unset( $cached['__provider_coalesced'] );
+					return rest_ensure_response( $cached );
+				}
 			}
 		}
 

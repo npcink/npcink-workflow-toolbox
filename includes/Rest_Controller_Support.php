@@ -87,8 +87,14 @@ abstract class Rest_Controller_Support {
 	 * @return mixed REST-ready response.
 	 */
 	protected function forward_provider_request( WP_REST_Request $request, array $allowed_fields, callable $invoker, string $cache_namespace, bool $coalesce = false ) {
-		$params = $request->get_params();
-		$params = is_array( $params ) ? $params : array();
+		// Only the request body participates: get_params() merges URL and
+		// query parameters, and core clients append _locale/_envelope keys
+		// that must not trip the strict allow-list.
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$body_params = $request->get_body_params();
+			$params      = is_array( $body_params ) ? $body_params : array();
+		}
 		if ( array() !== array_diff( array_keys( $params ), $allowed_fields ) ) {
 			return new WP_Error(
 				'npcink_toolbox_unsupported_provider_field',
@@ -107,8 +113,9 @@ abstract class Rest_Controller_Support {
 		$cache_key = '';
 		if ( $coalesce ) {
 			$refresh = '' !== trim( (string) ( $filtered['refresh_variant'] ?? '' ) ) || '' !== trim( (string) ( $filtered['regeneration_mode'] ?? '' ) );
-			if ( ! $refresh ) {
-				$cache_key = 'npcink_toolbox_provider_' . sanitize_key( $cache_namespace ) . '_' . md5( (string) get_current_user_id() . wp_json_encode( $filtered ) );
+			$encoded = $refresh ? false : wp_json_encode( $filtered );
+			if ( is_string( $encoded ) ) {
+				$cache_key = 'npcink_toolbox_provider_' . sanitize_key( $cache_namespace ) . '_' . md5( (string) get_current_user_id() . $encoded );
 				$cached    = get_transient( $cache_key );
 				if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
 					unset( $cached['__provider_coalesced'] );
@@ -131,14 +138,17 @@ abstract class Rest_Controller_Support {
 	/**
 	 * Rebuilds a provider WP_Error with its data reduced to the
 	 * safe-diagnostics allow-list, so addon error details cannot leak
-	 * unbounded fields into REST responses.
+	 * unbounded fields into REST responses. Every error code keeps its
+	 * message; scalar values are normalized (numbers cast to int, other
+	 * scalars sanitized as text).
 	 *
 	 * @param WP_Error $error Provider error.
 	 * @return WP_Error
 	 */
 	public static function sanitize_provider_error_data( WP_Error $error ): WP_Error {
-		$safe = new WP_Error( $error->get_error_code(), $error->get_error_message() );
+		$safe = new WP_Error();
 		foreach ( $error->get_error_codes() as $code ) {
+			$safe->add( $code, $error->get_error_message( $code ) );
 			$data = $error->get_error_data( $code );
 			if ( ! is_array( $data ) ) {
 				continue;
@@ -146,7 +156,7 @@ abstract class Rest_Controller_Support {
 			$normalized = array();
 			foreach ( $data as $key => $value ) {
 				if ( in_array( sanitize_key( (string) $key ), array( 'status', 'provider_status', 'http_code', 'reason', 'request_id' ), true ) ) {
-					$normalized[ sanitize_key( (string) $key ) ] = is_scalar( $value ) ? $value : '';
+					$normalized[ sanitize_key( (string) $key ) ] = is_numeric( $value ) ? (int) $value : ( is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '' );
 				}
 			}
 			if ( array() !== $normalized ) {

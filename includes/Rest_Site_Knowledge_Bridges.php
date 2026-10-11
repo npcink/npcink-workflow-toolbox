@@ -117,7 +117,7 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 
 		$newest = get_post( $public_post_ids[0] );
 		$stamp  = $newest ? (string) $newest->post_modified_gmt : '';
-		$key    = 'npcink_toolbox_site_knowledge_rows_' . md5( count( $public_post_ids ) . '|' . $stamp );
+		$key    = 'npcink_toolbox_site_knowledge_rows_' . md5( count( $public_post_ids ) . '|' . $stamp . '|' . md5( implode( ',', $public_post_ids ) ) );
 		$cached = get_transient( $key );
 		if ( is_array( $cached ) ) {
 			return $cached;

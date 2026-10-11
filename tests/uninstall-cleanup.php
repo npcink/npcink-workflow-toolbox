@@ -6,6 +6,7 @@ define( 'WP_UNINSTALL_PLUGIN', true );
 $GLOBALS['npcink_uninstall_options']    = array();
 $GLOBALS['npcink_uninstall_transients'] = array();
 $GLOBALS['npcink_uninstall_hooks']      = array();
+$GLOBALS['npcink_uninstall_post_meta']  = array();
 
 function delete_option( string $name ): bool {
 	$GLOBALS['npcink_uninstall_options'][] = $name;
@@ -86,6 +87,10 @@ $missing_options = array_diff( $required_options, $GLOBALS['npcink_uninstall_opt
 $missing_hooks   = array_diff( $required_hooks, $GLOBALS['npcink_uninstall_hooks'] );
 if ( array() !== $missing_options || array() !== $missing_hooks || array( 'npcink_toolbox_zhihu_hot_topic_pool_v2' ) !== $GLOBALS['npcink_uninstall_transients'] ) {
 	fwrite( STDERR, 'FAIL: Uninstall left Toolbox-owned state behind.' . PHP_EOL );
+	exit( 1 );
+}
+if ( array( '_npcink_toolbox_media_fingerprint_cache' ) !== $GLOBALS['npcink_uninstall_post_meta'] ) {
+	fwrite( STDERR, 'FAIL: Uninstall did not remove the media fingerprint memo meta.' . PHP_EOL );
 	exit( 1 );
 }
 
