@@ -121,14 +121,18 @@ abstract class Rest_Controller_Support {
 
 		$cache_key = '';
 		if ( $coalesce ) {
-			$refresh = '' !== trim( (string) ( $filtered['refresh_variant'] ?? '' ) ) || '' !== trim( (string) ( $filtered['regeneration_mode'] ?? '' ) );
-			$encoded = $refresh ? false : wp_json_encode( $filtered );
+			$refresh    = '' !== trim( (string) ( $filtered['refresh_variant'] ?? '' ) ) || '' !== trim( (string) ( $filtered['regeneration_mode'] ?? '' ) );
+			$key_source = $filtered;
+			unset( $key_source['refresh_variant'], $key_source['regeneration_mode'] );
+			$encoded = wp_json_encode( $key_source );
 			if ( is_string( $encoded ) ) {
 				$cache_key = 'npcink_toolbox_provider_' . sanitize_key( $cache_namespace ) . '_' . md5( (string) get_current_user_id() . $encoded );
-				$cached    = get_transient( $cache_key );
-				if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
-					unset( $cached['__provider_coalesced'] );
-					return rest_ensure_response( $cached );
+				if ( ! $refresh ) {
+					$cached = get_transient( $cache_key );
+					if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
+						unset( $cached['__provider_coalesced'] );
+						return rest_ensure_response( $cached );
+					}
 				}
 			}
 		}
@@ -138,7 +142,15 @@ abstract class Rest_Controller_Support {
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
 		if ( '' !== $cache_key && is_array( $result ) ) {
-			set_transient( $cache_key, array_merge( $result, array( '__provider_coalesced' => true ) ), 60 );
+			// A refresh run overwrites the entry so the next plain request
+			// sees the fresh result; oversized payloads (base64 preview
+			// bodies) skip coalescing rather than bloating wp_options.
+			$cache_copy                         = $result;
+			$cache_copy['__provider_coalesced'] = true;
+			$encoded_result                     = wp_json_encode( $cache_copy );
+			if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
+				set_transient( $cache_key, $cache_copy, 60 );
+			}
 		}
 
 		return rest_ensure_response( $result );
@@ -149,7 +161,10 @@ abstract class Rest_Controller_Support {
 	 * safe-diagnostics allow-list, so addon error details cannot leak
 	 * unbounded fields into REST responses. Every error code keeps its
 	 * message; scalar values are normalized (numbers cast to int, other
-	 * scalars sanitized as text).
+	 * scalars sanitized as text). By design, non-numeric scalar error
+	 * data (string payloads attached without a status) and non-scalar
+	 * values under allow-listed keys are dropped rather than passed
+	 * through verbatim — first-party call sites attach array data.
 	 *
 	 * @param WP_Error $error Provider error.
 	 * @return WP_Error

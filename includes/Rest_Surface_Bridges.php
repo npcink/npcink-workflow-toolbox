@@ -116,14 +116,18 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 		);
 
 		// Identical author/contributor searches coalesce behind a short
-		// per-user transient; an explicit refresh variant bypasses it, and
-		// an unencodable payload skips coalescing rather than colliding.
+		// per-user transient: an explicit refresh variant skips the read
+		// but overwrites the entry, an unencodable payload skips
+		// coalescing, and oversized payloads skip the database write.
 		$cache_key = '';
-		if ( '' === $args['refresh_variant'] ) {
-			$encoded = wp_json_encode( $args );
-			if ( is_string( $encoded ) ) {
-				$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . $encoded );
-				$cached    = get_transient( $cache_key );
+		$key_args  = $args;
+		$refresh   = '' !== (string) $key_args['refresh_variant'];
+		unset( $key_args['refresh_variant'] );
+		$encoded = wp_json_encode( $key_args );
+		if ( is_string( $encoded ) ) {
+			$cache_key = 'npcink_toolbox_provider_image_source_' . md5( (string) get_current_user_id() . $encoded );
+			if ( ! $refresh ) {
+				$cached = get_transient( $cache_key );
 				if ( is_array( $cached ) && isset( $cached['__provider_coalesced'] ) ) {
 					unset( $cached['__provider_coalesced'] );
 					return rest_ensure_response( $cached );
@@ -136,7 +140,12 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
 		if ( '' !== $cache_key && is_array( $result ) ) {
-			set_transient( $cache_key, array_merge( $result, array( '__provider_coalesced' => true ) ), 60 );
+			$cache_copy                         = $result;
+			$cache_copy['__provider_coalesced'] = true;
+			$encoded_result                     = wp_json_encode( $cache_copy );
+			if ( is_string( $encoded_result ) && strlen( $encoded_result ) <= 102400 ) {
+				set_transient( $cache_key, $cache_copy, 60 );
+			}
 		}
 
 		return rest_ensure_response( $result );
