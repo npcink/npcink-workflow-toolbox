@@ -121,7 +121,7 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 		// coalescing, and oversized payloads skip the database write.
 		$cache_key = '';
 		$key_args  = $args;
-		$refresh   = '' !== (string) $key_args['refresh_variant'];
+		$refresh   = is_scalar( $key_args['refresh_variant'] ?? '' ) && '' !== trim( (string) $key_args['refresh_variant'] );
 		unset( $key_args['refresh_variant'] );
 		$encoded = wp_json_encode( $key_args );
 		if ( is_string( $encoded ) ) {
@@ -139,7 +139,7 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 		if ( is_wp_error( $result ) ) {
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
-		if ( '' !== $cache_key && is_array( $result ) ) {
+		if ( '' !== $cache_key && is_array( $result ) && ! isset( $result['code'] ) && ! empty( $result['images'] ) ) {
 			$cache_copy                         = $result;
 			$cache_copy['__provider_coalesced'] = true;
 			$encoded_result                     = wp_json_encode( $cache_copy );

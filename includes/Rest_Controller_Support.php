@@ -86,7 +86,7 @@ abstract class Rest_Controller_Support {
 	 * @param bool            $coalesce Whether identical payloads coalesce behind a per-user transient.
 	 * @return mixed REST-ready response.
 	 */
-	protected function forward_provider_request( WP_REST_Request $request, array $allowed_fields, callable $invoker, string $cache_namespace, bool $coalesce = false ) {
+	protected function forward_provider_request( WP_REST_Request $request, array $allowed_fields, callable $invoker, string $cache_namespace, bool $coalesce = false, ?callable $cacheable = null ) {
 		// Only the request body participates: get_params() merges URL and
 		// query parameters, and core clients append _locale/_envelope keys
 		// that must not trip the strict allow-list.
@@ -121,7 +121,13 @@ abstract class Rest_Controller_Support {
 
 		$cache_key = '';
 		if ( $coalesce ) {
-			$refresh    = '' !== trim( (string) ( $filtered['refresh_variant'] ?? '' ) ) || '' !== trim( (string) ( $filtered['regeneration_mode'] ?? '' ) );
+			$refresh = false;
+			foreach ( array( $filtered['refresh_variant'] ?? '', $filtered['regeneration_mode'] ?? '' ) as $refresh_token ) {
+				if ( is_scalar( $refresh_token ) && '' !== trim( (string) $refresh_token ) ) {
+					$refresh = true;
+					break;
+				}
+			}
 			$key_source = $filtered;
 			unset( $key_source['refresh_variant'], $key_source['regeneration_mode'] );
 			$encoded = wp_json_encode( $key_source );
@@ -141,10 +147,12 @@ abstract class Rest_Controller_Support {
 		if ( is_wp_error( $result ) ) {
 			return rest_ensure_response( self::sanitize_provider_error_data( $result ) );
 		}
-		if ( '' !== $cache_key && is_array( $result ) ) {
+		if ( '' !== $cache_key && is_array( $result ) && ! isset( $result['code'] ) && ( null === $cacheable || $cacheable( $result ) ) ) {
 			// A refresh run overwrites the entry so the next plain request
-			// sees the fresh result; oversized payloads (base64 preview
-			// bodies) skip coalescing rather than bloating wp_options.
+			// sees the fresh result; degenerate results (error-shaped or
+			// empty per the caller's predicate) and oversized payloads
+			// (base64 preview bodies) skip coalescing rather than being
+			// replayed or bloating wp_options.
 			$cache_copy                         = $result;
 			$cache_copy['__provider_coalesced'] = true;
 			$encoded_result                     = wp_json_encode( $cache_copy );
