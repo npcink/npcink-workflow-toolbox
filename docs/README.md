@@ -75,6 +75,8 @@ Start from the active documents below before changing code.
 - [Development Lessons And Closeout 2026-10](development-lessons-2026-10.md)
 - [Security And Performance Hardening Closeout 2026-10](security-performance-hardening-2026-10.md)
 - [Session Handoff 2026-10-11 — Hardening, Release, Next Phase](session-handoff-2026-10-11-hardening-release-next-phase.md)
+- [Session Handoff 2026-10-12 — UX Audit Findings](session-handoff-2026-10-12-ux-audit-findings.md)
+- [Session Handoff 2026-10-12 — Batch AI Review Sets](session-handoff-2026-10-12-batch-ai-review-sets.md)
 
 ## Product Surfaces
 

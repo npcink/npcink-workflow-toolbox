@@ -21,9 +21,18 @@ with the closing commit or PR for one release cycle, then prune.
   S2 server-side URL-rewrite follow-up, and the PHPStan ratchet.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
-- **The editor `整理` (format content) button label is Chinese inside an
-  otherwise English UI**; unify label language in a scoped i18n pass.
-  Source: [Pre-Release Hardening Closeout 2026-09-30](pre-release-hardening-closeout-2026-09-30.md).
+- **User-facing UX audit (2026-10-12): prioritized fix list awaiting
+  execution.** A read-only, user-perspective sweep of the editor sidebar,
+  the admin pages, and the first-run/disconnected journey confirmed the
+  fail-closed posture is strong but found four systemic patterns
+  (dependency failures surface at click time with non-actionable copy,
+  browser-bound batch optimization with count-only failure reporting,
+  silent truncation and clamping, mixed-language UI) plus one open
+  product decision: Site Check has no navigation entry although
+  `docs/boundary.md` calls it the everyday site-maintenance entry.
+  Nothing is implemented yet. Findings with file:line evidence,
+  verification status, TODO order, and boundary notes live in
+  [Session Handoff 2026-10-12](session-handoff-2026-10-12-ux-audit-findings.md).
 - **Cross-repo: Cloud Addon quota/attribution follow-ups for editor image
   access.** Tracked with the audit trail in
   [Scoped Editor Permissions Lessons 2026-09](scoped-editor-permissions-lessons-2026-09.md);
@@ -120,14 +129,22 @@ with the closing commit or PR for one release cycle, then prune.
   service per session 5's boundary). The service sits at ~3.0k lines.
   Remaining: the summary and taxonomy cached-flow orchestrators,
   inheriting the cache base and movable with the same pattern.
-- **PHPStan baseline ratchet** (2026-10-06): the 134 remaining level-5
-  findings live in `phpstan-baseline.neon` after the phpcbf pass and
+- **PHPStan baseline ratchet** (2026-10-06): the 126 remaining level-5
+  findings across 90 baseline patterns live in `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster
   split or cleanup removes a finding class, regenerate the baseline and
   the ratchet holds. The 16 unused-method candidates remain in the
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **The editor `整理` (format content) button label — closed as already
+  fixed by PR #170's i18n pass.** The 2026-09-30 Open entry predated that
+  pass; verified 2026-10-12 that no `整理` occurrence remains in any
+  PHP/JS source (the label lives only in the zh_CN catalog, so the
+  English UI renders English; `tests/run.php` already asserts the
+  source-clean state). Retired from Open during the UX audit handoff
+  session.
 
 - **`plainTextFromHtml` innerHTML hardening — closed 2026-10-08 (PR
   #222)**, recorded here because the open entry above had not been

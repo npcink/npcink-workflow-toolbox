@@ -5,12 +5,17 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-11.
+Last reviewed: 2026-10-12.
 
 **Next session: read
 [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md)
-after this page** — it records what just shipped, the exact next actions in
-priority order, and the environment facts (sockets, test site, gotchas).
+and
+[Session Handoff 2026-10-12 — UX Audit Findings](session-handoff-2026-10-12-ux-audit-findings.md)
+after this page** — the first records what just shipped, the next actions
+in priority order, and the environment facts (sockets, test site,
+gotchas); the second carries the user-perspective UX audit findings and
+the fix TODO order (uncommitted working-tree docs at the time of
+writing).
 
 ## Product Snapshot
 
@@ -95,13 +100,19 @@ priority order, and the environment facts (sockets, test site, gotchas).
 4. Editor intent convergence shipped 2026-10-07: twelve-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
-5. PHPStan baseline ratchet (136 findings; shrinks with cluster splits).
+5. PHPStan baseline ratchet (126 findings across 90 baseline patterns; shrinks with cluster splits).
 6. Guided onboarding tour awaiting the operator trial answers
    (`docs/onboarding-tour-design-v1.md`); "Core proposal" terminology
    standard cross-repo rollout. (The 2026-10-11 security/performance
    review items all closed — see
    `docs/security-performance-hardening-2026-10.md` before touching the
    image-source routes, the flow cache, or the release asset pipeline.)
+7. User-facing UX audit (2026-10-12): four systemic experience patterns
+   (click-time dependency failures, browser-bound batch with count-only
+   failure reporting, silent truncation/clamping, mixed-language UI)
+   plus the Site Check entry product decision await execution; findings
+   with file:line evidence and TODO order live in
+   [Session Handoff 2026-10-12](session-handoff-2026-10-12-ux-audit-findings.md).
 
 Full list with sources: `docs/known-issues.md`.
 
