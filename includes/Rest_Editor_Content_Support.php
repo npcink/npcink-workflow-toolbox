@@ -1753,7 +1753,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		$by_url     = array();
 		foreach ( $evidence as $evidence_item ) {
 			$post_id = absint( $evidence_item['post_id'] ?? 0 );
-			$url     = esc_url_raw( (string) ( $evidence_item['url'] ?? '' ) );
+			$url     = $this->editor_internal_link_safe_candidate_url( $evidence_item );
 			if ( $post_id > 0 ) {
 				$by_post_id[ $post_id ] = $evidence_item;
 			}
@@ -1764,7 +1764,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 		foreach ( $items as &$item ) {
 			$post_id = absint( $item['target_post_id'] ?? 0 );
-			$url     = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
+			$url     = $this->editor_internal_link_safe_candidate_url( $item );
 			$match   = $post_id > 0 && isset( $by_post_id[ $post_id ] )
 				? $by_post_id[ $post_id ]
 				: ( '' !== $url && isset( $by_url[ $url ] ) ? $by_url[ $url ] : array() );
@@ -1780,6 +1780,38 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		return $items;
 	}
 
+	/**
+	 * Resolve a Toolkit candidate URL through the supported response shapes.
+	 *
+	 * Candidates are suggestions only, but every URL that reaches the editor
+	 * must be an http(s) URL before the local published-post verification runs.
+	 *
+	 * @param array<string,mixed> $item Candidate or evidence item.
+	 * @return string
+	 */
+	private function editor_internal_link_safe_candidate_url( array $item ): string {
+		$values = array(
+			$item['target_url'] ?? null,
+			$item['url'] ?? null,
+			$item['permalink'] ?? null,
+			$item['link'] ?? null,
+			is_array( $item['source'] ?? null ) ? ( $item['source']['target_url'] ?? null ) : null,
+			is_array( $item['source'] ?? null ) ? ( $item['source']['url'] ?? null ) : null,
+		);
+
+		foreach ( $values as $value ) {
+			if ( ! is_scalar( $value ) ) {
+				continue;
+			}
+			$url = esc_url_raw( trim( (string) $value ), array( 'http', 'https' ) );
+			if ( '' !== $url ) {
+				return $url;
+			}
+		}
+
+		return '';
+	}
+
 	private function editor_internal_link_related_content_evidence( array $source_knowledge ): array {
 		$evidence = array();
 		foreach ( array_slice( Rest_Editor_Flow_Cache::editor_related_content_items( $source_knowledge ), 0, 8 ) as $index => $item ) {
@@ -1791,7 +1823,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$evidence[] = array(
 				'post_id'             => $post_id,
 				'title'               => sanitize_text_field( (string) ( $item['title'] ?? $item['name'] ?? '' ) ),
-				'url'                 => esc_url_raw( (string) ( $item['url'] ?? ( $item['permalink'] ?? ( $item['link'] ?? ( $item['source_url'] ?? '' ) ) ) ) ),
+				'url'                 => $this->editor_internal_link_safe_candidate_url( $item ),
 				'anchor_or_context'   => sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) ),
 				'excerpt'             => sanitize_textarea_field( wp_trim_words( wp_strip_all_tags( (string) ( $item['excerpt'] ?? $item['snippet'] ?? $item['content_excerpt'] ?? '' ) ), 55, '' ) ),
 				'score'               => is_numeric( $item['score'] ?? null ) ? (float) $item['score'] : null,
@@ -1803,7 +1835,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		return array_values(
 			array_filter(
 				$evidence,
-				static fn( array $item ): bool => '' !== (string) ( $item['title'] ?? '' ) || '' !== (string) ( $item['url'] ?? '' ) || 0 < absint( $item['post_id'] ?? 0 )
+				static fn( array $item ): bool => '' !== (string) $item['title'] || '' !== (string) $item['url'] || 0 < absint( $item['post_id'] )
 			)
 		);
 	}
@@ -1929,7 +1961,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		foreach ( array_slice( $items, 0, 8 ) as $index => $item ) {
 			$title                  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
 			$anchor                 = sanitize_text_field( (string) ( $item['anchor_or_context'] ?? ( $item['suggested_anchor_text'] ?? '' ) ) );
-			$url                    = esc_url_raw( (string) ( $item['target_url'] ?? '' ) );
+			$url                    = $this->editor_internal_link_safe_candidate_url( $item );
 			$target_post_id         = absint( $item['target_post_id'] ?? 0 );
 			$target_readable        = $target_post_id > 0 && current_user_can( 'read_post', $target_post_id );
 			$target_status          = $target_readable ? sanitize_key( (string) get_post_status( $target_post_id ) ) : '';
