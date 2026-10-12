@@ -2554,6 +2554,17 @@
 	transition: opacity 120ms ease, transform 120ms ease, background 120ms ease;
 }
 
+.npcink-toolbox-editor-support__image-attribution {
+	display: block;
+	padding: 4px 6px 6px;
+	color: #646970;
+	font-size: 11px;
+	line-height: 1.35;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .npcink-toolbox-editor-support__image-card:hover .npcink-toolbox-editor-support__image-zoom,
 .npcink-toolbox-editor-support__image-card:focus-within .npcink-toolbox-editor-support__image-zoom,
 .npcink-toolbox-editor-support__image-zoom:focus {

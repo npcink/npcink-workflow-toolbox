@@ -1289,7 +1289,11 @@
       "Source: %s": ["来源：%s"],
       "Action: %s": ["动作：%s"],
       "Select image candidate %1$d: %2$s": ["选择图片候选 %1$d：%2$s"],
-      "Select image candidate %d": ["选择图片候选 %d"]
+      "Select image candidate %d": ["选择图片候选 %d"],
+      "Photo by %s": ["摄影师：%s"],
+      "Try again": ["重试"],
+      "The previous image is no longer in the refreshed results. Its SEO fields were discarded; select a candidate to continue.": ["之前的图片已不在刷新后的结果中。其 SEO 字段已丢弃，请选择候选图片继续。"],
+      "The selected image and its SEO fields were cleared for the new hosted-image request.": ["已为新的托管图片请求清除当前图片及其 SEO 字段。"]
     }
   }
 }

@@ -9500,3 +9500,19 @@ msgstr ""
 #, js-format
 msgid "Select image candidate %d"
 msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Photo by %s"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Try again"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The previous image is no longer in the refreshed results. Its SEO fields were discarded; select a candidate to continue."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The selected image and its SEO fields were cleared for the new hosted-image request."
+msgstr ""
