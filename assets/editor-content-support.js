@@ -1373,7 +1373,7 @@
 				const detail = [
 					readableItemText(item.value, ''),
 					readableItemText(item.reason || item.detail || item.excerpt || item.source_url || item.status || item.taxonomy || item.provider, ''),
-					Array.isArray(item.matched_tokens) && item.matched_tokens.length ? __('Matched: ', 'npcink-workflow-toolbox') + item.matched_tokens.slice(0, 5).join(', ') : '',
+					Array.isArray(item.matched_tokens) && item.matched_tokens.length ? sprintf(__('Matched: %s', 'npcink-workflow-toolbox'), item.matched_tokens.slice(0, 5).join(', ')) : '',
 				].filter(Boolean).join(' · ');
 				return createElement(
 					'li',
@@ -1383,8 +1383,8 @@
 					createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__candidate-meta' },
-						createElement('span', null, __('Source: ', 'npcink-workflow-toolbox') + recommendationCandidateSourceLabel(item)),
-						createElement('span', null, __('Action: ', 'npcink-workflow-toolbox') + recommendationCandidateActionClassLabel(item))
+						createElement('span', null, sprintf(__('Source: %s', 'npcink-workflow-toolbox'), recommendationCandidateSourceLabel(item))),
+						createElement('span', null, sprintf(__('Action: %s', 'npcink-workflow-toolbox'), recommendationCandidateActionClassLabel(item)))
 					)
 				);
 			}),
@@ -2674,7 +2674,9 @@
 							role: 'button',
 							tabIndex: 0,
 							'aria-pressed': selected ? 'true' : 'false',
-							'aria-label': __('Select image candidate', 'npcink-workflow-toolbox') + ' ' + String(index + 1) + (image.alt_description || image.description ? ': ' + String(image.alt_description || image.description) : ''),
+							'aria-label': image.alt_description || image.description
+								? sprintf(__('Select image candidate %1$d: %2$s', 'npcink-workflow-toolbox'), index + 1, String(image.alt_description || image.description))
+								: sprintf(__('Select image candidate %d', 'npcink-workflow-toolbox'), index + 1),
 							onClick: () => onSelectImage(image),
 							onKeyDown: (event) => {
 								if (event.key === 'Enter' || event.key === ' ') {
@@ -6329,22 +6331,22 @@
 
 	function internalLinkBatchReasonLabel(reason) {
 		const labels = {
-			selection_limit_exceeded: __('超过一次最多 8 条的限制', 'npcink-workflow-toolbox'),
-			invalid_internal_url: __('目标不是本站有效链接', 'npcink-workflow-toolbox'),
-			target_not_public: __('目标不是本站已发布文章或页面', 'npcink-workflow-toolbox'),
-			duplicate_target: __('多条建议指向同一目标', 'npcink-workflow-toolbox'),
-			overlap_conflict: __('正文匹配范围互相重叠', 'npcink-workflow-toolbox'),
-			fallback_must_not_be_labeled_vector: __('候选缺少 Cloud 向量证据，只能人工复制或打开', 'npcink-workflow-toolbox'),
-			missing_exact_source_match: __('找不到精确正文短语', 'npcink-workflow-toolbox'),
-			stale_editor_block: __('正文在获取建议后已变化', 'npcink-workflow-toolbox'),
-			generic_anchor: __('锚文本过于泛化', 'npcink-workflow-toolbox'),
+			selection_limit_exceeded: __('The selection exceeds the limit of 8 links.', 'npcink-workflow-toolbox'),
+			invalid_internal_url: __('The target is not a valid site link.', 'npcink-workflow-toolbox'),
+			target_not_public: __('The target is not a published post or page on this site.', 'npcink-workflow-toolbox'),
+			duplicate_target: __('Multiple suggestions point to the same target.', 'npcink-workflow-toolbox'),
+			overlap_conflict: __('The matched text ranges overlap.', 'npcink-workflow-toolbox'),
+			fallback_must_not_be_labeled_vector: __('Cloud vector evidence is missing; copy or open the article for manual review.', 'npcink-workflow-toolbox'),
+			missing_exact_source_match: __('No exact phrase was found in the draft.', 'npcink-workflow-toolbox'),
+			stale_editor_block: __('The draft changed after these suggestions were retrieved.', 'npcink-workflow-toolbox'),
+			generic_anchor: __('The anchor text is too generic.', 'npcink-workflow-toolbox'),
 			code_block_match_not_eligible: __('Code blocks stay unchanged; cite the article from nearby explanatory text.', 'npcink-workflow-toolbox'),
-			range_already_linked: __('该短语已经包含链接', 'npcink-workflow-toolbox'),
-			target_already_linked: __('当前文章已经链接到该目标', 'npcink-workflow-toolbox'),
-			article_link_density_reached: __('当前文章已达到内链密度上限', 'npcink-workflow-toolbox'),
-			block_link_density_reached: __('该段落已有两条链接', 'npcink-workflow-toolbox'),
+			range_already_linked: __('This phrase already contains a link.', 'npcink-workflow-toolbox'),
+			target_already_linked: __('The current article already links to this target.', 'npcink-workflow-toolbox'),
+			article_link_density_reached: __('The current article has reached its internal-link limit.', 'npcink-workflow-toolbox'),
+			block_link_density_reached: __('This paragraph already contains two links.', 'npcink-workflow-toolbox'),
 		};
-		return labels[reason] || __('未通过安全校验', 'npcink-workflow-toolbox');
+		return labels[reason] || __('The safety checks did not pass.', 'npcink-workflow-toolbox');
 	}
 
 	function internalLinkCandidateReason(item) {
@@ -6521,9 +6523,9 @@
 				batchResult && Array.isArray(batchResult.items) && batchResult.items.some((item) => item.outcome === 'rejected') ? createElement(
 					'ul',
 					{ className: 'npcink-toolbox-editor-support__internal-link-results' },
-					batchResult.items.filter((item) => item.outcome === 'rejected').map((item) => createElement('li', { key: item.id }, sprintf(__('建议 %1$s 未应用：%2$s', 'npcink-workflow-toolbox'), item.id, (item.reason_codes || []).map(internalLinkBatchReasonLabel).join('，'))))
+					batchResult.items.filter((item) => item.outcome === 'rejected').map((item) => createElement('li', { key: item.id }, sprintf(__('Suggestion %1$s was not applied: %2$s', 'npcink-workflow-toolbox'), item.id, (item.reason_codes || []).map(internalLinkBatchReasonLabel).join(', '))))
 				) : null,
-				actionControls.undo ? createElement(Button, { type: 'button', variant: 'secondary', onClick: actionControls.undo }, __('撤销本次内链应用', 'npcink-workflow-toolbox')) : null
+				actionControls.undo ? createElement(Button, { type: 'button', variant: 'secondary', onClick: actionControls.undo }, __('Undo this internal-link batch', 'npcink-workflow-toolbox')) : null
 			);
 	}
 
