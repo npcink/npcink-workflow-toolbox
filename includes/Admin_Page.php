@@ -1172,6 +1172,16 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<input type="number" min="1" max="50" step="1" name="<?php echo esc_attr( Plugin::OPTION_NAME ); ?>[nightly_inspection_media_limit]" value="<?php echo esc_attr( (string) $settings['nightly_inspection_media_limit'] ); ?>" />
 					</label>
 				</div>
+				<p class="description">
+					<?php
+					printf(
+						/* translators: 1: post/page limit, 2: media limit. */
+						esc_html__( 'Saved values shown above are the values used by the preview: %1$d posts/pages and %2$d media items. Each value is constrained to the 1–50 range.', 'npcink-workflow-toolbox' ),
+						(int) $settings['nightly_inspection_post_limit'],
+						(int) $settings['nightly_inspection_media_limit']
+					);
+					?>
+				</p>
 				<?php submit_button( __( 'Save local fallback', 'npcink-workflow-toolbox' ) ); ?>
 			</form>
 			<?php if ( array() !== $latest_preview ) : ?>
@@ -1771,7 +1781,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 							(string) $tool['title'],
 							(string) $tool['description'],
 							(string) $tool['id'],
-							$active_tool_id === (string) $tool['id']
+							$active_tool_id === (string) $tool['id'],
+							$cloud_ready
 						);
 						continue;
 					}
@@ -2593,7 +2604,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		return 35;
 	}
 
-	private function render_media_derivative_batch_controls( array $toolbox_policy ): void {
+	private function render_media_derivative_batch_controls( array $toolbox_policy, bool $cloud_ready = true ): void {
 		?>
 		<div class="npcink-toolbox__batch-panel">
 			<h3><?php esc_html_e( 'Optimize Media Library images', 'npcink-workflow-toolbox' ); ?></h3>
@@ -2623,7 +2634,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<label><span><?php esc_html_e( 'To', 'npcink-workflow-toolbox' ); ?></span><input type="date" name="batch_date_to" /></label>
 			</div>
 			<div class="npcink-toolbox__inline-actions">
-				<button type="button" class="button button-primary" data-toolbox-build-media-batch-plan><?php esc_html_e( 'Check optimizable images', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button button-primary" data-toolbox-build-media-batch-plan <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Check optimizable images', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="button button-primary" data-toolbox-submit-media-batch-proposals disabled hidden><?php esc_html_e( 'Start optimization', 'npcink-workflow-toolbox' ); ?></button>
 			</div>
 			<div data-toolbox-media-resize-choice hidden>
@@ -2641,16 +2652,29 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
-	private function render_media_derivative_batch_tool( string $endpoint, string $title, string $description, string $tool_id, bool $active = false ): void {
+	private function render_media_derivative_batch_tool( string $endpoint, string $title, string $description, string $tool_id, bool $active = false, bool $cloud_ready = true ): void {
 		$toolbox_policy = $this->get_media_derivative_toolbox_policy();
 		if ( $active ) {
 			$this->render_media_recognition_recovery();
 		}
 		?>
-		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch" id="npcink-toolbox-tour-batch-optimize" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative <?php echo $active ? '' : 'hidden'; ?>>
+		<form class="npcink-toolbox__card npcink-toolbox__card--media-batch" id="npcink-toolbox-tour-batch-optimize" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-derivative data-toolbox-cloud-ready="<?php echo $cloud_ready ? '1' : '0'; ?>" <?php echo $active ? '' : 'hidden'; ?>>
 			<h2><?php echo esc_html( $title ); ?></h2>
 			<p><?php echo esc_html( $description ); ?></p>
-			<?php $this->render_media_derivative_batch_controls( $toolbox_policy ); ?>
+			<?php if ( ! $cloud_ready ) : ?>
+				<div class="npcink-toolbox__result-notice is-warning" data-toolbox-media-cloud-preflight>
+					<strong><?php esc_html_e( 'Cloud Addon is required before media optimization can run.', 'npcink-workflow-toolbox' ); ?></strong>
+					<span><?php echo esc_html( $this->cloud_runtime_unavailable_reason_label() ); ?></span>
+					<p style="margin:8px 0 0;">
+						<?php if ( $this->is_suite_submenu_registered( 'npcink-cloud-addon' ) ) : ?>
+							<a class="button" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ); ?></a>
+						<?php else : ?>
+							<a class="button" href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>"><?php esc_html_e( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ); ?></a>
+						<?php endif; ?>
+					</p>
+				</div>
+			<?php endif; ?>
+			<?php $this->render_media_derivative_batch_controls( $toolbox_policy, $cloud_ready ); ?>
 			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
 		</form>
 		<?php
