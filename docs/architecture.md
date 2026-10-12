@@ -761,9 +761,10 @@ executor. This summary is not a generic Abilities Explorer, provider picker,
 request log, or connector approval surface. It does not create proposals or
 writes. Single-post article
 support stays in the post editor sidebar and is not rendered as an Overview
-work block. The visible top-level admin tabs after Overview are **Site Profile**
-and **Image Handling**. **Site Check** is temporarily hidden from the normal
-operator UI while its product loop is reassessed; the stable
+work block. The visible top-level admin tabs after Overview are **Site Profile**,
+**Site Check**, and **Image Handling**. Site Check is the fourth top-level tab, and
+Overview remains the default landing page;
+the stable
 `operations-insights` compatibility route still builds a local
 `site_ops_insight_pack.v1` from bounded public content, approved comment signal
 counts, media metadata, taxonomy summaries, Site Context readiness, and Cloud
@@ -783,8 +784,8 @@ Nightly Inspection fallback preview settings live in the low-frequency
 manual report. The former Advanced directory is not rendered as a separate top-level tab, and the `toolbox_tab=advanced` and `toolbox_tab=morning-brief` aliases have been removed; use `toolbox_tab=operations-insights` with `site_check_tab=scheduled-review` instead. Cloud run status, result reads, recent runs,
 and recovery live in Cloud Addon Runtime Runs. They do not live inside Cloud
 Checks. That keeps recurring inspection preview and Cloud run recovery separate
-from ordinary connection diagnostics without restoring a default Site Check
-entry. All Site Knowledge operator management lives in `npcink-cloud-addon`,
+from ordinary connection diagnostics without changing the default Overview
+landing page. All Site Knowledge operator management lives in `npcink-cloud-addon`,
 including connection, refresh, indexing, retrieval acceptance, and deep
 delivery detail. Toolbox only consumes Site Knowledge results inside its other
 workflows.

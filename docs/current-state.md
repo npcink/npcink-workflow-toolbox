@@ -31,8 +31,8 @@ writing).
   pack, preflight, category/tag, internal links, contextual ALT, image
   candidates) on `post`/`page` editors only (extend via the
   `npcink_toolbox_editor_supported_post_types` filter), hidden
-  **Site Check** compatibility route, admin **Image Handling**
-  (Batch Optimize first), Overview + Site Profile tabs. Release packages
+  visible **Site Check** tab (with the compatibility route retained), admin **Image Handling**
+  (Batch Optimize first), Overview + Site Profile + Site Check tabs. Release packages
   ship `.min` asset siblings (`composer package:release` runs
   `scripts/minify-assets.sh`); checkouts without them enqueue the
   readable sources.
@@ -110,7 +110,7 @@ writing).
 7. User-facing UX audit (2026-10-12): four systemic experience patterns
    (click-time dependency failures, browser-bound batch with count-only
    failure reporting, silent truncation/clamping, mixed-language UI)
-   plus the Site Check entry product decision await execution; findings
+   plus the Site Check direct-visibility product decision (2026-10-12, Overview remains default); findings
    with file:line evidence and TODO order live in
    [Session Handoff 2026-10-12](session-handoff-2026-10-12-ux-audit-findings.md).
 

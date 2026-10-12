@@ -88,25 +88,15 @@ test:all`；建议五插件站做一次断连冒烟（停用 Cloud Addon → 批
 边界：不放宽任何 REST capability/scope（放宽需对象级审计并记入 PR body，
 本 TODO 不预期涉及）；十二意图编辑器 allowlist 已冻结，勿加新意图。
 
-### TODO-2 Site Check 入口（先请用户拍板，再动工）
+### TODO-2 Site Check 入口（已按方案 A 完成，2026-10-12）
 
-- 现状：导航只有 3 个标签按钮（`Admin_Page.php:563-567` ✅），但 allowlist
-  含 `operations-insights`（`:592-598`）且面板有渲染（`:577-579`），只差
-  一个按钮；所有进入 URL 均为面板自指（`Admin_Page_Site_Ops_Panel.php:30-55`、
-  `Admin_Page.php:980-993`）；评论审查/taxonomy/内链审查工具在面板内
-  （`:968-970`）。
-- 隐藏是历史决策：`includes/Ability_Surface_Metadata.php:22`
-  （`admin_hidden_compatibility`、`default_visible=false`）、
-  `docs/full-site-insights-operator-loop.md:13-14`。动工前先读这两处 +
-  `docs/archive/2026-07/site-check-visibility-reassessment-2026-07-10.md`。
-- 张力：`docs/boundary.md`（Cloud Diagnostics Ownership 节）把 Site Check
-  定义为 "**the everyday site-maintenance entry**"、operator-facing
-  decision router——合同与现状不一致，需要用户拍板：
-  - 方案 A：加第四个标签按钮（渲染逻辑就绪，改动最小）；
-  - 方案 B：把 0.3.0/0.4.0 审查工具提级为一级入口；
-  - 方案 C：维持隐藏，仅修 deep-link 可发现性。
-- 若决策改变可见性，需同步更新 boundary.md 的 Site Check 段或补一条
-  boundary note/小 ADR，避免合同与产品意图漂移。
+- Site Check 现在作为第四个顶层标签显示；Overview 仍是默认入口。
+- `toolbox_tab=operations-insights` 深链、只读扫描、可选 Cloud detail、Core
+  handoff 与无写入边界均保持不变。
+- `Ability_Surface_Metadata` 已改为 `admin_site_check` / `default_visible=true`；
+  2026-07 隐藏决策文档、架构说明、当前状态和静态契约已同步记录这次修订。
+- 浏览器 smoke 应确认第四个标签可见、兼容深链仍可用，并确认不会自动调用
+  Cloud detail、Core proposal 或执行路由。
 
 ### TODO-3 批量优化失败明细 + 取消按钮（UI 层，一个 PR）
 

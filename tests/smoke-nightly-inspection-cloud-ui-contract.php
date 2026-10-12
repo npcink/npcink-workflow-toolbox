@@ -106,7 +106,7 @@ foreach (
 	$assert_contains( $admin_page, $required_admin_text, 'Scheduled Review admin panel routes Cloud run detail and recovery to Cloud Addon Runtime Runs.' );
 }
 
-$assert_not_contains( $admin_page, 'data-toolbox-tab-target="operations-insights"', 'Scheduled Review remains reachable through the Site Check compatibility panel without restoring a top-level Site Check tab.' );
+$assert_contains( $admin_page, 'data-toolbox-tab-target="operations-insights"', 'Scheduled Review remains reachable through the visible Site Check tab and its compatibility deep link.' );
 
 foreach (
 	array(

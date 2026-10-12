@@ -86,7 +86,7 @@ vector provider settings, and vector lifecycle controls do not belong in
 Toolbox.
 
 The admin page should default to Overview. The visible top-level tabs are
-Overview, Site Profile, and Image Handling; Site Check, Site Knowledge, and
+Overview, Site Profile, Site Check, and Image Handling; Site Knowledge and
 Morning Brief remain hidden compatibility/deep-link panels. Overview should not
 render a single-post article-support work block.
 Article-specific jobs use the editor Content Support sidebar:
@@ -96,8 +96,9 @@ default menu. Summary, category, tag, outline, discoverability,
 article-checkup, and current-article ALT remain compatible route or rendering
 paths, so `writing_support` remains
 route-compatible but is not a default editor button.
-Site Check is temporarily hidden from the default operator UI while its
-problem statement, action model, and acceptance loop are reassessed. The stable `operations-insights` deep link remains capability-gated for compatibility and still opens the same panel. It
+Site Check is directly visible as the fourth top-level tab while Overview
+remains the default operator entry. The stable `operations-insights` deep link
+remains capability-gated for compatibility and still opens the same panel. It
 builds a manual local `site_ops_insight_pack.v1` from bounded public content,
 approved-comment signal counts, media metadata, taxonomy summaries, Site
 Context readiness, and Cloud availability, then presents the current run as a
