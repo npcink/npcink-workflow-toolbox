@@ -1,7 +1,17 @@
 # Site Check Visibility Reassessment - 2026-07-10
 
-Status: accepted visibility decision; product re-entry is pending a new
-operator-loop review.
+Status: superseded 2026-10-12 by the direct-default-visible revision below.
+The read-only and handoff boundaries remain authoritative.
+
+## Superseding revision — 2026-10-12
+
+Site Check is restored as the fourth visible top-level Toolbox tab. Overview
+remains the default landing page, and the stable `toolbox_tab=operations-insights`
+route remains capability-gated for deep links. This is a product navigation
+decision only: the existing bounded local scan, optional manually triggered
+Cloud detail, no-proposal/no-write posture, and all permission boundaries stay
+unchanged. The prior re-entry criteria are retained as quality guidance for
+the visible operator loop; they are no longer a gate for rendering the tab.
 
 ## Decision
 
