@@ -5432,6 +5432,14 @@ msgstr ""
 msgid "Npcink Cloud Addon is required for media derivative preview transport."
 msgstr ""
 
+#: includes/Admin_Page.php:2666
+msgid "Cloud Addon is required before media optimization can run."
+msgstr ""
+
+#: includes/Admin_Page.php:1179
+msgid "Saved values shown above are the values used by the preview: %1$d posts/pages and %2$d media items. Each value is constrained to the 1–50 range."
+msgstr ""
+
 #: includes/Rest_Media_Derivative_Previews.php:746
 msgid "Media derivative local review descriptor facts are invalid."
 msgstr ""

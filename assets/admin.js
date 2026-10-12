@@ -264,6 +264,38 @@
 		return text && text !== 'Array' ? text : t(fallback || 'Request failed.');
 	}
 
+	function beginToolboxInFlight(form, operation) {
+		if (!form || form.__npcinkToolboxInFlight) {
+			return false;
+		}
+		const buttons = Array.from(form.querySelectorAll('button')).map((button) => ({
+			button,
+			disabled: button.disabled,
+		}));
+		form.__npcinkToolboxInFlight = { operation: String(operation || 'request'), buttons };
+		form.setAttribute('data-toolbox-in-flight', String(operation || 'request'));
+		buttons.forEach((entry) => {
+			if (entry.button instanceof HTMLButtonElement) {
+				entry.button.disabled = true;
+			}
+		});
+		return true;
+	}
+
+	function endToolboxInFlight(form) {
+		const state = form && form.__npcinkToolboxInFlight;
+		if (!state) {
+			return;
+		}
+		(state.buttons || []).forEach((entry) => {
+			if (entry.button instanceof HTMLButtonElement) {
+				entry.button.disabled = Boolean(entry.disabled);
+			}
+		});
+		delete form.__npcinkToolboxInFlight;
+		form.removeAttribute('data-toolbox-in-flight');
+	}
+
 	function errorContainsCode(value, code, seen) {
 		if (!value || typeof value !== 'object') {
 			return false;
@@ -2199,6 +2231,7 @@
 		appendMeta(meta, t('Sampled'), summary.sampled_count);
 		appendMeta(meta, t('Classified'), summary.selected_count);
 		appendMeta(meta, t('Blocked'), summary.blocked_count);
+		appendMeta(meta, t('Pending not sampled'), Math.max(0, Number(summary.pending_total || 0) - Number(summary.sampled_count || 0)));
 		appendMeta(meta, t('Cloud'), reviewSet.cloud_status ? formatLabel(reviewSet.cloud_status) : '');
 		section.appendChild(meta);
 
@@ -2249,6 +2282,9 @@
 			if (blocked.length) {
 				const blockedSection = createSection(t('Needs manual review'));
 				const list = el('div', 'npcink-toolbox__batch-list');
+				if (blocked.length > 10) {
+					blockedSection.appendChild(el('p', 'description', t('Showing the first 10 blocked comments; ') + String(blocked.length - 10) + t(' more remain in the sampled set.')));
+				}
 				blocked.slice(0, 10).forEach((item) => {
 					if (!item || typeof item !== 'object') {
 						return;
@@ -2334,6 +2370,9 @@
 			if (blocked.length) {
 				const blockedSection = createSection(t('Needs manual review'));
 				const list = el('div', 'npcink-toolbox__batch-list');
+				if (blocked.length > 10) {
+					blockedSection.appendChild(el('p', 'description', t('Showing the first 10 blocked media items; ') + String(blocked.length - 10) + t(' more remain in the sampled set.')));
+				}
 				blocked.slice(0, 10).forEach((item) => {
 					if (!item || typeof item !== 'object') {
 						return;
@@ -4349,6 +4388,10 @@
 		if (blockedItems.length || skipped.length) {
 			const details = el('details', 'npcink-toolbox__result-details');
 			details.appendChild(el('summary', '', 'Blocked or skipped media'));
+			const blockedTotal = Math.max(blockedItems.length, skipped.length);
+			if (blockedTotal > 20) {
+				details.appendChild(el('p', 'description', t('Showing the first 20 blocked items; ') + String(blockedTotal - 20) + t(' more are available in the downloaded plan payload.')));
+			}
 			const skippedList = el('div', 'npcink-toolbox__batch-list');
 			(blockedItems.length ? blockedItems : skipped).slice(0, 20).forEach((item) => {
 				const row = el('div', 'npcink-toolbox__batch-row is-skipped');
@@ -5004,33 +5047,40 @@
 		if (!endpoint || !config.restUrl) {
 			return;
 		}
-
-		renderTextResult(form, config.labels && config.labels.running ? config.labels.running : 'Running...', 'pending');
-
-		const response = await fetch(config.restUrl.replace(/\/$/, '') + '/' + endpoint, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': config.nonce || '',
-			},
-			body: JSON.stringify(serialize(form)),
-		});
-
-		const payload = await response.json();
-		if (!response.ok) {
-			throw Object.assign({ status: response.status }, payload || {});
-		}
-
-		if (payload && payload.text) {
-			let text = payload.text;
-			if (payload.annotations && payload.annotations.length) {
-				text += '\n\nAnnotations:\n' + JSON.stringify(payload.annotations, null, 2);
-			}
-			renderTextResult(form, text, 'ok');
+		if (!beginToolboxInFlight(form, 'tool')) {
 			return;
 		}
 
-		renderStructuredResult(form, payload);
+		try {
+			renderTextResult(form, config.labels && config.labels.running ? config.labels.running : 'Running...', 'pending');
+
+			const response = await fetch(config.restUrl.replace(/\/$/, '') + '/' + endpoint, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': config.nonce || '',
+				},
+				body: JSON.stringify(serialize(form)),
+			});
+
+			const payload = await response.json();
+			if (!response.ok) {
+				throw Object.assign({ status: response.status }, payload || {});
+			}
+
+			if (payload && payload.text) {
+				let text = payload.text;
+				if (payload.annotations && payload.annotations.length) {
+					text += '\n\nAnnotations:\n' + JSON.stringify(payload.annotations, null, 2);
+				}
+				renderTextResult(form, text, 'ok');
+				return;
+			}
+
+			renderStructuredResult(form, payload);
+		} finally {
+			endToolboxInFlight(form);
+		}
 	}
 
 	async function waitForMediaDerivativeResult(runId, onProgress) {
@@ -5304,12 +5354,19 @@
 		if (!config.restUrl) {
 			throw { message: t('Npcink Toolbox REST URL is unavailable.') };
 		}
+		if (!beginToolboxInFlight(form, 'media-batch-plan')) {
+			return;
+		}
 
-		await ensureMediaOptimizationCloudReady(form);
-		const input = mediaDerivativeBatchPlanInput(form);
-		renderTextResult(form, t('Building media derivative batch plan...'), 'pending');
-		const planEnvelope = await postJson(config.restUrl, 'media-optimization-manifest', input);
-		await completeMediaDerivativeBatchPlan(form, planEnvelope);
+		try {
+			await ensureMediaOptimizationCloudReady(form);
+			const input = mediaDerivativeBatchPlanInput(form);
+			renderTextResult(form, t('Building media derivative batch plan...'), 'pending');
+			const planEnvelope = await postJson(config.restUrl, 'media-optimization-manifest', input);
+			await completeMediaDerivativeBatchPlan(form, planEnvelope);
+		} finally {
+			endToolboxInFlight(form);
+		}
 	}
 
 	async function ensureMediaOptimizationCloudReady(form) {
@@ -5320,12 +5377,35 @@
 		try {
 			const health = await getJson(config.restUrl, 'media-optimization-health');
 			if (health && health.ready === true) return health;
-			const reason = health && health.blocked_reason ? String(health.blocked_reason) : t('Cloud service is unavailable.');
-			throw { code: 'toolbox_media_cloud_unavailable', message: reason + ' ' + t('Connect Npcink Cloud and try again.') };
+			const blockedReason = health && health.blocked_reason ? String(health.blocked_reason) : 'cloud_runtime_unavailable';
+			const advice = mediaOptimizationCloudAdvice(blockedReason);
+			throw {
+				code: 'toolbox_media_cloud_unavailable',
+				blocked_reason: blockedReason,
+				next_action: health && health.next_action ? String(health.next_action) : 'check_cloud_connection',
+				message: advice + ' ' + t('Connect Npcink Cloud and try again.'),
+			};
 		} catch (error) {
 			if (error && error.code === 'toolbox_media_cloud_unavailable') throw error;
-			throw { code: 'toolbox_media_cloud_unavailable', message: t('Cloud service is unavailable.') + ' ' + t('Connect Npcink Cloud and try again.') };
+			throw Object.assign({}, error || {}, {
+				code: error && error.code ? error.code : 'toolbox_media_cloud_unavailable',
+				message: mediaOptimizationCloudAdvice(error && error.code ? error.code : 'cloud_runtime_unavailable') + ' ' + t('Connect Npcink Cloud and try again.'),
+			});
 		}
+	}
+
+	function mediaOptimizationCloudAdvice(reason) {
+		reason = String(reason || '').toLowerCase();
+		if (reason.indexOf('not_installed') >= 0) {
+			return t('Install the Cloud Addon plugin, then return here to check media optimization again.');
+		}
+		if (reason.indexOf('not_connected') >= 0 || reason.indexOf('connection') >= 0) {
+			return t('Open Cloud Addon settings, save and verify the connection, then check media optimization again.');
+		}
+		if (reason.indexOf('capability') >= 0 || reason.indexOf('feature') >= 0 || reason.indexOf('unsupported') >= 0) {
+			return t('Cloud Addon is connected, but the media optimization capability is unavailable. Update or enable that capability, then retry.');
+		}
+		return t('Cloud media optimization is unavailable. Check Cloud Addon transport status, then retry.');
 	}
 
 	function representativeMediaCandidates(candidates) {
@@ -5365,6 +5445,7 @@
 		appendMeta(meta, t('Images found'), Number(planSummary.candidate_count || summary.total || 0));
 		appendMeta(meta, t('Estimated saving'), mediaOptimizationBytes(estimatedMediaOptimizationSavings(plan, sampleStates)));
 		appendMeta(meta, t('Skipped during check'), Number(planSummary.skipped_count || 0));
+		appendMeta(meta, t('Preview sample'), String(asArray(sampleStates).length) + ' / 6');
 		appendMeta(meta, t('Maximum batch size'), 1000);
 		host.appendChild(meta);
 		host.appendChild(el('p', 'description', t('Estimated saving is extrapolated from the small sample checked above; the real result may differ.')));

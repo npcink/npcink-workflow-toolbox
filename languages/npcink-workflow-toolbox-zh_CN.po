@@ -8834,6 +8834,12 @@ msgstr "Cloud 服务不可用。"
 msgid "Connect Npcink Cloud and try again."
 msgstr "请连接 Npcink Cloud 后重试。"
 
+msgid "Cloud Addon is required before media optimization can run."
+msgstr "运行媒体优化前需要 Cloud Addon。"
+
+msgid "Saved values shown above are the values used by the preview: %1$d posts/pages and %2$d media items. Each value is constrained to the 1–50 range."
+msgstr "上方显示的保存值就是预览实际使用的值：%1$d 篇文章/页面和 %2$d 个媒体项目。每个值都会限制在 1–50 范围内。"
+
 msgid "Contract"
 msgstr "契约"
 
