@@ -7,10 +7,17 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-10-11.
 
+**Next session: read
+[Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md)
+after this page** — it records what just shipped, the exact next actions in
+priority order, and the environment facts (sockets, test site, gotchas).
+
 ## Product Snapshot
 
-- **0.4.0 is live on WordPress.org** (slug `npcink-workflow-toolbox`, SVN
-  revision 3730454).
+- **0.6.0 is live on WordPress.org** (slug `npcink-workflow-toolbox`, SVN
+  revision 3739544); the API reports stable 0.6.0 and the live zip carries
+  the nine minified asset siblings. 0.6.0 shipped the 2026-10-11
+  security/performance hardening arc (PRs #242–#247).
 - The five-review-set arc is complete and shipped: Media ALT (0.2.0),
   Comment Moderation and Flagged Media (0.3.0), Taxonomy/Tag and
   Internal-Link (0.4.0). All share one pattern: bounded sampling (<=50),
@@ -74,6 +81,11 @@ Last reviewed: 2026-10-11.
 
 ## Open Debt (top items)
 
+0. Next-phase actions live in the
+   [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md):
+   real hold-comment calibration for Cloud scheduling (highest value), the
+   ③ media-ALT adoption gate (needs ~1 week of production use), and the
+   carried cluster splits.
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
    draft) still inside the 10.6k main bundle.
 2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
