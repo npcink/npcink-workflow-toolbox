@@ -939,7 +939,19 @@
       "Hosted AI runs need the Cloud Addon connected; everything else works without it.": ["托管 AI 运行需要先连接 Cloud Addon；其余功能无需连接即可使用。"],
       "Image Handling holds the one bounded flow with local write authority; originals stay restorable.": ["图像处理承载唯一拥有本地写入权限的有界流程；原图始终可恢复。"],
       "Readiness and defaults stay visible without becoming a runtime.": ["就绪状态与默认配置保持可见，不会变成运行时。"],
-      "Open any post to see the Npcink Content Support sidebar: suggestions only, and publishing stays native WordPress.": ["打开任意文章即可看到 Npcink Content Support 侧栏：仅提供建议，发布仍由原生 WordPress 完成。"]
+      "Open any post to see the Npcink Content Support sidebar: suggestions only, and publishing stays native WordPress.": ["打开任意文章即可看到 Npcink Content Support 侧栏：仅提供建议，发布仍由原生 WordPress 完成。"],
+      "Items needing attention": ["需要处理的项目"],
+      "Optimization failed while processing this image.": ["处理此图片时优化失败。"],
+      "Cloud did not find a safe saving threshold for this image.": ["Cloud 未为此图片找到安全的节省门槛。"],
+      "The source image changed after the plan was built.": ["生成计划后源图片发生了变化。"],
+      "This image needs review before it can be retried.": ["此图片需要审阅后才能重试。"],
+      "Retry this image or continue the batch after checking Cloud readiness.": ["确认 Cloud 已就绪后，可重试此图片或继续批次。"],
+      "No replacement was applied. Leave it skipped or rebuild the plan after changing the optimization settings.": ["未应用替换。可以保留跳过状态，或修改优化设置后重新生成计划。"],
+      "Rebuild the exact batch plan before retrying this image.": ["重试此图片前，请重新生成精确的批次计划。"],
+      "Refresh the batch history and retry this image when it is ready.": ["刷新批次历史，准备好后重试此图片。"],
+      "Optimization cancelled. Completed items were kept; continue when ready.": ["优化已取消，已完成的项目会保留；准备好后可继续。"],
+      "Cancel optimization": ["取消优化"],
+      "Cancelling optimization...": ["正在取消优化……"]
     }
   }
 }

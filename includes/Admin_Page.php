@@ -2637,6 +2637,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<div class="npcink-toolbox__inline-actions">
 				<button type="button" class="button button-primary" data-toolbox-build-media-batch-plan <?php echo disabled( ! $cloud_ready, true, false ); ?>><?php esc_html_e( 'Check optimizable images', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="button button-primary" data-toolbox-submit-media-batch-proposals disabled hidden><?php esc_html_e( 'Start optimization', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button" data-toolbox-cancel-media-batch hidden><?php esc_html_e( 'Cancel optimization', 'npcink-workflow-toolbox' ); ?></button>
 			</div>
 			<div data-toolbox-media-resize-choice hidden>
 				<strong><?php esc_html_e( 'Large images found', 'npcink-workflow-toolbox' ); ?></strong>

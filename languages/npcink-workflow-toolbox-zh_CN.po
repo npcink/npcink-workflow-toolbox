@@ -9615,3 +9615,7 @@ msgstr "选择图片候选 %1$d：%2$s"
 #, js-format
 msgid "Select image candidate %d"
 msgstr "选择图片候选 %d"
+
+#: includes/Admin_Page.php
+msgid "Cancel optimization"
+msgstr "取消优化"
