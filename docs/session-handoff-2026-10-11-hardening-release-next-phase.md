@@ -74,7 +74,7 @@ batch-apply loop is worth building, based on real acceptance volume.
   only. One commit, one cluster.
 - Then: editor JS remaining clusters, `Rest_Editor_Content_Support` cached-flow
   orchestrators, `assets/admin.js` (8.2k), remaining `Admin_Page.php` clusters.
-- PHPStan baseline ratchet (~130 findings) shrinks with each split; regenerate
+- PHPStan baseline ratchet (126 findings across 90 baseline patterns) shrinks with each split; regenerate
   the baseline only when a split moves findings and counts must not grow.
 - Split standard: `docs/platform/provider-split-refactor-standard-v1.md` and
   the just-in-time cadence in `docs/god-class-split-session-handoff.md`.
