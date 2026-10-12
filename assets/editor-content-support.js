@@ -763,13 +763,17 @@
 		}
 	}
 
-	async function postImageCandidatesFastFirst(payload) {
+	async function postImageCandidatesFastFirst(payload, externalSignal) {
+		if (!externalSignal) {
+			return postJson('image-candidates', payload);
+		}
 		return postJsonWithTimeout(
 			'image-candidates',
 			payload,
 			IMAGE_SOURCE_FAST_TIMEOUT_MS,
 			__('Cloud image search is taking too long. Try a shorter query or refresh again.', 'npcink-workflow-toolbox'),
-			'npcink_toolbox_image_source_timeout'
+			'npcink_toolbox_image_source_timeout',
+			externalSignal
 		);
 	}
 
@@ -1511,7 +1515,8 @@
 	}
 
 	function imageAttributionLabel(image) {
-		const raw = String((image && (image.attribution || image.attribution_text)) || '')
+		const photographer = image && (image.photographer || image.photographer_name || (image.user && image.user.name) || '');
+		const raw = String((image && (image.attribution || image.attribution_text)) || (photographer ? sprintf(__('Photo by %s', 'npcink-workflow-toolbox'), photographer) : ''))
 			.replace(/https?:\/\/\S+/gi, '')
 			.replace(/\s+/g, ' ')
 			.trim();
@@ -1531,6 +1536,10 @@
 
 	function imageDownloadUrl(image) {
 		return image.download_url || image.regular_url || image.small_url || image.url || imagePreviewUrl(image);
+	}
+
+	function imageDownloadLocation(image) {
+		return String((image && (image.download_location || (image.links && image.links.download_location))) || '').trim();
 	}
 
 	function imageStableKey(image, index) {
@@ -2647,24 +2656,16 @@
 			);
 		}
 
-		const resultMode = String((imageResultSource(payload || {}).provider_mode || imageResultSource(payload || {}).resolved_provider || '')).toLowerCase();
-		const fixedSourceSlots = resultMode !== 'site_media' && resultMode !== 'ai_generated';
-		const visibleImages = fixedSourceSlots ? images.slice(0, 9) : images;
+		const visibleImages = images.slice(0, 9);
 		return createElement(
 			'div',
 			{ className: 'npcink-toolbox-editor-support__image-grid' },
-				Array.from({ length: fixedSourceSlots ? 9 : visibleImages.length }, (_, index) => visibleImages[index] || null).map((image, index) => {
-					if (!image) {
-						return createElement('div', {
-							className: 'npcink-toolbox-editor-support__image-card is-loading',
-							key: 'loading-' + String(index),
-							'aria-hidden': 'true',
-						}, createElement('div', { className: 'npcink-toolbox-editor-support__image-placeholder' }));
-					}
+			visibleImages.map((image, index) => {
 					const previewUrl = imagePreviewUrl(image);
 					const fullPreviewUrl = imageFullPreviewUrl(image);
 					const candidateKey = imageStableKey(image, index);
 					const selected = selectedImage && imageStableKey(selectedImage, index) === candidateKey;
+					const attributionLabel = imageAttributionLabel(image);
 
 					return createElement(
 						'article',
@@ -2707,7 +2708,8 @@
 								},
 							},
 							createElement('span', { className: 'dashicons dashicons-search', 'aria-hidden': 'true' })
-						) : null
+								) : null,
+							attributionLabel ? createElement('small', { className: 'npcink-toolbox-editor-support__image-attribution' }, attributionLabel) : null
 					);
 				})
 			);
@@ -2754,11 +2756,12 @@
 		);
 	}
 
-	function renderImageLoadingGrid() {
+	function renderImageLoadingGrid(count) {
+		const slotCount = Math.max(1, Math.min(IMAGE_CANDIDATE_TARGET_COUNT, parseInt(count || '1', 10) || 1));
 		return createElement(
 			'div',
 			{ className: 'npcink-toolbox-editor-support__image-grid is-loading-grid', 'aria-label': __('Loading image candidates', 'npcink-workflow-toolbox') },
-			Array.from({ length: IMAGE_CANDIDATE_TARGET_COUNT }, (_, index) => createElement(
+			Array.from({ length: slotCount }, (_, index) => createElement(
 				'div',
 				{ className: 'npcink-toolbox-editor-support__image-card is-loading', key: 'loading-' + String(index), 'aria-hidden': 'true' },
 				createElement('div', { className: 'npcink-toolbox-editor-support__image-placeholder' })
@@ -7283,6 +7286,7 @@
 			// leave the sidebar stuck on a spinner: every run gets a cancellable signal
 			// and a generous default timeout.
 			const activeContentRequestRef = useRef(null);
+			const imageSelectionDiscardedRef = useRef(false);
 			function beginContentRequest() {
 				if (activeContentRequestRef.current && typeof activeContentRequestRef.current.abort === 'function') {
 					// The new run supersedes the old one; its abort is not a user cancel and
@@ -7296,13 +7300,32 @@
 				activeContentRequestRef.current = controller;
 				return controller ? controller.signal : undefined;
 			}
-			function endContentRequest() {
-				activeContentRequestRef.current = null;
+			function endContentRequest(signal) {
+				if (!signal || !activeContentRequestRef.current || activeContentRequestRef.current.signal === signal) {
+					activeContentRequestRef.current = null;
+				}
 			}
 			function cancelActiveContentRequest() {
 				if (activeContentRequestRef.current && typeof activeContentRequestRef.current.abort === 'function') {
 					activeContentRequestRef.current.abort();
 				}
+			}
+			function imageSeoHasOperatorInput(seo) {
+				return Boolean(seo && ['alt', 'title', 'description'].some((field) => String(seo[field] || '').trim()));
+			}
+			function clearSelectedImageForNewRequest(message) {
+				const shouldExplain = Boolean(selectedImage && imageSeoHasOperatorInput(selectedImageSeo));
+				setSelectedImage(null);
+				setSelectedImageSeo(null);
+				if (shouldExplain && message) {
+					setImageSelectionError(message);
+				}
+			}
+			function discardSelectedImageAfterRefresh() {
+				imageSelectionDiscardedRef.current = true;
+				setSelectedImage(null);
+				setSelectedImageSeo(null);
+				setImageSelectionError(__('The previous image is no longer in the refreshed results. Its SEO fields were discarded; select a candidate to continue.', 'npcink-workflow-toolbox'));
 			}
 			imageSearchModeRef.current = imageSearchMode;
 			const [imageMode, setImageMode] = useState('featured');
@@ -7314,6 +7337,7 @@
 		const [selectedImageSeo, setSelectedImageSeo] = useState(null);
 		const [imagePreviewLightbox, setImagePreviewLightbox] = useState(null);
 		const [imageSelectionError, setImageSelectionError] = useState('');
+		const [imageRetryAction, setImageRetryAction] = useState('search');
 		const [imageRegenerationRunning, setImageRegenerationRunning] = useState('');
 		const [metadataHandoffSelection, setMetadataHandoffSelection] = useState({});
 		const [metadataHandoffRunning, setMetadataHandoffRunning] = useState(false);
@@ -7497,12 +7521,26 @@
 
 			useEffect(() => {
 				const images = extractImageCandidates(imageResult);
-				if (!imageModalOpen || imageRunning || !images.length) {
+				if (!imageModalOpen || imageRunning || imageCompletionRunning) {
+					return;
+				}
+				if (!images.length) {
+					if (selectedImage && imageResult) {
+						discardSelectedImageAfterRefresh();
+					}
 					return;
 				}
 				const currentKey = selectedImage ? imageStableKey(selectedImage, 0) : '';
 				const currentStillVisible = currentKey && images.some((image, index) => imageStableKey(image, index) === currentKey);
 				if (currentStillVisible) {
+					return;
+				}
+				if (selectedImage) {
+					discardSelectedImageAfterRefresh();
+					return;
+				}
+				if (imageSelectionDiscardedRef.current) {
+					imageSelectionDiscardedRef.current = false;
 					return;
 				}
 				const firstImage = images[0];
@@ -7511,7 +7549,7 @@
 				setSelectedImage(firstImage);
 				setSelectedImageSeo(buildImageSeoFields(firstImage, seoContext));
 				setImageSelectionError('');
-			}, [imageResult, imageModalOpen, imageRunning, selectedImage, imagePicker, imageMode, postContext]);
+			}, [imageResult, imageModalOpen, imageRunning, imageCompletionRunning, selectedImage, imagePicker, imageMode, postContext]);
 
 				useEffect(() => {
 					function handleParagraphImageRequest(event) {
@@ -8445,7 +8483,7 @@
 					return mode === 'generate' ? imageGenerationResult : (mode === 'library' ? imageLibraryResult : imageSourceResult);
 				}
 
-				function completeImageSourceCandidates(requestPayload, cacheKey, initialResult, requestSeq) {
+				async function completeImageSourceCandidates(requestPayload, cacheKey, initialResult, requestSeq, externalSignal) {
 					if (!imageCandidateResultNeedsCompletion(initialResult)) {
 						if (extractImageCandidates(initialResult).length >= IMAGE_CANDIDATE_TARGET_COUNT) {
 							writeCachedImageResult(cacheKey, initialResult);
@@ -8454,27 +8492,29 @@
 						return;
 					}
 					setImageCompletionRunning(true);
-					postJson('image-candidates', Object.assign({}, requestPayload, {
+					try {
+						const completeResult = await postImageCandidatesFastFirst(Object.assign({}, requestPayload, {
 						latency_mode: 'complete',
-					})).then((completeResult) => {
+						}), externalSignal);
 						if (imageSourceRequestSeqRef.current !== requestSeq) {
 							return;
 						}
 						const mergedResult = mergeImageCandidateResults(initialResult, completeResult);
 						writeCachedImageResult(cacheKey, mergedResult);
 						setImageResultForSearchMode('source', mergedResult);
-					}).catch(() => {
+					} catch (error) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							writeCachedImageResult(cacheKey, initialResult);
 						}
-					}).finally(() => {
+					} finally {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageCompletionRunning(false);
 						}
-					});
+					}
 				}
 
 		async function runAutoImageRecommendations(modeOverride, contextOverride, pickerOverride, forceRefresh) {
+			setImageRetryAction('search');
 			const activePicker = normalizeImagePickerOptions(pickerOverride || imagePicker || { mode: imageMode });
 			const activeImageMode = modeOverride || activePicker.mode;
 			const imageContext = imagePickerRequestContext(postContext, activePicker, contextOverride || activePicker.context);
@@ -8520,7 +8560,7 @@
 					setImageCompletionRunning(false);
 					setImageError('');
 					setImageGuidance('');
-					setImageResultForSearchMode(targetSearchMode, null, true);
+					setImageResultForSearchMode(targetSearchMode, imageResultForSearchMode(targetSearchMode) || null, true);
 			setImagePreviewLightbox(null);
 			setImageSelectionError('');
 				try {
@@ -8536,7 +8576,8 @@
 						refresh_variant: refreshVariant,
 						visual_context: buildImageVisualContext(postContext, activeImageMode, operatorInstruction, imagePickerContextOverride(activePicker), activePicker.imageUse, refreshVariant),
 					};
-					let result = await postImageCandidatesFastFirst(requestPayload);
+					const requestSignal = beginContentRequest();
+					let result = await postImageCandidatesFastFirst(requestPayload, requestSignal);
 					const fallbackQueries = targetSearchMode === 'source' && !extractImageCandidates(result).length
 						? imageAutoFallbackQueries(result, query, activePicker).slice(0, IMAGE_SOURCE_AUTO_FALLBACK_MAX_ATTEMPTS)
 						: [];
@@ -8555,7 +8596,7 @@
 							refresh_variant: refreshVariant,
 							visual_context: buildImageVisualContext(postContext, activeImageMode, fallbackQuery, imagePickerContextOverride(activePicker), activePicker.imageUse, refreshVariant),
 						};
-						const fallbackResult = await postImageCandidatesFastFirst(fallbackPayload);
+						const fallbackResult = await postImageCandidatesFastFirst(fallbackPayload, requestSignal);
 						if (extractImageCandidates(fallbackResult).length) {
 							result = fallbackResult;
 							requestPayload = fallbackPayload;
@@ -8567,8 +8608,12 @@
 						}
 						const displayedResult = withMediaQualitySession(result, qualitySessionId);
 						setImageResultForSearchMode(targetSearchMode, displayedResult);
+						if (targetSearchMode === 'source' && imageCandidateResultNeedsCompletion(displayedResult)) {
+							setImageCompletionRunning(true);
+						}
+					setImageRunning('');
 						if (targetSearchMode === 'source') {
-							completeImageSourceCandidates(requestPayload, cacheKey, displayedResult, requestSeq);
+							await completeImageSourceCandidates(requestPayload, cacheKey, displayedResult, requestSeq, requestSignal);
 						} else {
 							writeCachedImageResult(cacheKey, displayedResult);
 						}
@@ -8585,6 +8630,9 @@
 						);
 					} catch (requestError) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
+							if (requestError && (requestError.code === 'npcink_toolbox_request_cancelled' || requestError.code === 'npcink_toolbox_request_superseded')) {
+								return;
+							}
 							setImageError(formatImageErrorMessage(requestError, __('Cloud image recommendation failed.', 'npcink-workflow-toolbox')));
 							submitImplicitAgentFeedback(
 								editorMediaSearchFeedbackPayload(
@@ -8601,10 +8649,12 @@
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageRunning('');
 						}
+					endContentRequest(requestSignal);
 				}
 			}
 
 		async function runImageSearch(event, suggestedQuery, forceRefresh) {
+			setImageRetryAction('search');
 			if (event && event.preventDefault) {
 				event.preventDefault();
 			}
@@ -8648,11 +8698,12 @@
 					}
 					const requestSeq = imageSourceRequestSeqRef.current + 1;
 					imageSourceRequestSeqRef.current = requestSeq;
+					setImageRetryAction('search');
 					setImageRunning('search');
 					setImageCompletionRunning(false);
 					setImageError('');
 					setImageGuidance('');
-					setImageResultForSearchMode(targetSearchMode, null, true);
+					setImageResultForSearchMode(targetSearchMode, imageResultForSearchMode(targetSearchMode) || null, true);
 			setImagePreviewLightbox(null);
 			setImageSelectionError('');
 				try {
@@ -8666,14 +8717,19 @@
 						refresh_variant: refreshVariant,
 						visual_context: buildImageVisualContext(postContext, activePicker.mode, query, imagePickerContextOverride(activePicker), activePicker.imageUse, refreshVariant),
 					};
-					const result = await postImageCandidatesFastFirst(requestPayload);
+					const requestSignal = beginContentRequest();
+					const result = await postImageCandidatesFastFirst(requestPayload, requestSignal);
 					if (imageSourceRequestSeqRef.current !== requestSeq) {
 						return;
 					}
 					const displayedResult = withMediaQualitySession(result, qualitySessionId);
 					setImageResultForSearchMode(targetSearchMode, displayedResult);
+					if (targetSearchMode === 'source' && imageCandidateResultNeedsCompletion(displayedResult)) {
+						setImageCompletionRunning(true);
+					}
+					setImageRunning('');
 					if (targetSearchMode === 'source') {
-						completeImageSourceCandidates(requestPayload, cacheKey, displayedResult, requestSeq);
+					await completeImageSourceCandidates(requestPayload, cacheKey, displayedResult, requestSeq, requestSignal);
 					} else {
 						writeCachedImageResult(cacheKey, displayedResult);
 					}
@@ -8690,6 +8746,9 @@
 					);
 					} catch (requestError) {
 						if (imageSourceRequestSeqRef.current === requestSeq) {
+							if (requestError && (requestError.code === 'npcink_toolbox_request_cancelled' || requestError.code === 'npcink_toolbox_request_superseded')) {
+								return;
+							}
 							setImageError(formatImageErrorMessage(requestError, __('Cloud image search failed.', 'npcink-workflow-toolbox')));
 							if (targetSearchMode === 'source' || targetSearchMode === 'library') {
 								submitImplicitAgentFeedback(
@@ -8711,10 +8770,12 @@
 						if (imageSourceRequestSeqRef.current === requestSeq) {
 							setImageRunning('');
 						}
+					endContentRequest(requestSignal);
 				}
 			}
 
 		async function runMediaBrief() {
+			setImageRetryAction('brief');
 			const postId = parseInt(postContext.post_id || '0', 10) || 0;
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
 			const targetSearchMode = activePicker.allowGeneration && imageSearchModeRef.current === 'generate' ? 'generate' : 'source';
@@ -8777,6 +8838,7 @@
 		}
 
 		async function runAiImageGeneration(event, promptOverride) {
+			setImageRetryAction('generate');
 			if (event && event.preventDefault) {
 				event.preventDefault();
 			}
@@ -8813,8 +8875,7 @@
 			setImageGuidance(override.guidance || '');
 			if (!preserveExistingCandidates) {
 				setImageResultForSearchMode('generate', null, true);
-				setSelectedImage(null);
-				setSelectedImageSeo(null);
+				clearSelectedImageForNewRequest(__('The selected image and its SEO fields were cleared for the new hosted-image request.', 'npcink-workflow-toolbox'));
 				setImagePreviewLightbox(null);
 				setImageSelectionError('');
 			}
@@ -8940,8 +9001,7 @@
 			setImageQuery(reviewedPrompt);
 			setAiImageProviderPrompt(pair.providerPrompt);
 			setAiImageDisplayPromptBaseline(reviewedPrompt);
-			setSelectedImage(null);
-			setSelectedImageSeo(null);
+			clearSelectedImageForNewRequest(__('The selected image and its SEO fields were cleared for the new hosted-image request.', 'npcink-workflow-toolbox'));
 			setImagePreviewLightbox(null);
 			setImageSelectionError('');
 			setImageGuidance('');
@@ -9023,6 +9083,7 @@
 		function selectImageCandidate(image) {
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
 			const seoContext = imagePickerRequestContext(postContext, activePicker);
+			imageSelectionDiscardedRef.current = false;
 			setSelectedImage(image);
 			setSelectedImageSeo(buildImageSeoFields(image, seoContext));
 			setImageSelectionError('');
@@ -9044,9 +9105,15 @@
 
 			const activePicker = normalizeImagePickerOptions(imagePicker || { mode: imageMode });
 			const seoContext = imagePickerRequestContext(postContext, activePicker);
-			const seo = Object.assign({}, buildImageSeoFields(selectedImage, seoContext), selectedImageSeo || {});
+			const attribution = imageAttributionLabel(selectedImage);
+			const imageCandidate = Object.assign({}, selectedImage, {
+				attribution: selectedImage.attribution || attribution,
+				attribution_text: selectedImage.attribution_text || attribution,
+				download_location: imageDownloadLocation(selectedImage),
+			});
+			const seo = Object.assign({}, buildImageSeoFields(imageCandidate, seoContext), selectedImageSeo || {}, attribution ? { attribution_text: attribution } : {});
 			const detail = {
-				image_candidate: selectedImage,
+				image_candidate: imageCandidate,
 				media_seo: seo,
 				image_mode: activePicker.imageUse,
 				picker_mode: activePicker.mode,
@@ -9615,7 +9682,8 @@
 					: (images.length ? __('Retry image search', 'npcink-workflow-toolbox') : __('Search image sources', 'npcink-workflow-toolbox')));
 			const inspectorSeoContext = imagePickerRequestContext(postContext, activePicker);
 			const selectedImageStillVisible = selectedImage && images.some((image, index) => imageStableKey(image, index) === imageStableKey(selectedImage, index));
-			const selectedImageForInspector = selectedImageStillVisible ? selectedImage : null;
+		const imageSearchBusy = imageRunning === 'search' || imageRunning === 'auto';
+		const selectedImageForInspector = selectedImage && (imageSearchBusy || imageCompletionRunning || selectedImageStillVisible) ? selectedImage : null;
 			const inspectorSeo = selectedImageForInspector ? Object.assign({}, buildImageSeoFields(selectedImageForInspector, inspectorSeoContext), selectedImageSeo || {}) : null;
 			const imagePromptId = 'npcink-toolbox-editor-support-image-prompt';
 			const canGenerateAiImage = activeSearchMode === 'generate' && Boolean(imageQueryText) && !Boolean(imageRunning);
@@ -9630,7 +9698,25 @@
 			const imageCompletionNotice = activeSearchMode === 'source' && imageCompletionRunning && images.length < IMAGE_CANDIDATE_TARGET_COUNT
 				? createElement('div', { className: 'npcink-toolbox-editor-support__running npcink-toolbox-editor-support__image-completion-running' }, createElement(Spinner, null), createElement('span', null, __('Loading more image candidates...', 'npcink-workflow-toolbox')))
 				: null;
-			const imageSearchBusy = imageRunning === 'search' || imageRunning === 'auto';
+		const retryImageRequest = () => {
+			if (imageRetryAction === 'brief') {
+				return runMediaBrief();
+			}
+			if (imageRetryAction === 'generate') {
+				return runAiImageGeneration();
+			}
+			return runImageSearch(null, imageQuery, true);
+		};
+		const closeImageModal = () => {
+			imageSourceRequestSeqRef.current += 1;
+			if (imageRunning || imageCompletionRunning) {
+				cancelActiveContentRequest();
+			}
+			setImageModalOpen(false);
+			setImageRunning('');
+			setImageCompletionRunning(false);
+			setImagePreviewLightbox(null);
+		};
 			const imageModeControl = createElement(
 				'div',
 				{ className: 'npcink-toolbox-editor-support__image-mode', role: 'group', 'aria-label': __('Image candidate mode', 'npcink-workflow-toolbox') },
@@ -9816,16 +9902,25 @@
 				Modal,
 				{
 					title: activePicker.title,
-					onRequestClose: () => {
-						setImageModalOpen(false);
-						setImagePreviewLightbox(null);
-					},
+					onRequestClose: closeImageModal,
 					className: 'npcink-toolbox-editor-support__image-modal',
 				},
 					createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__image-modal-body' },
-						imageError ? createElement(Notice, { status: 'error', isDismissible: false }, imageError) : null,
+						imageError ? createElement(
+							Notice,
+							{ status: 'error', isDismissible: false },
+							createElement('span', null, imageError),
+							createElement(Button, {
+								type: 'button',
+								variant: 'secondary',
+								size: 'compact',
+								disabled: Boolean(imageRunning),
+								onClick: retryImageRequest,
+							}, __('Try again', 'npcink-workflow-toolbox'))
+						) : null,
+						imageSelectionError && !selectedImageForInspector ? createElement(Notice, { status: 'warning', isDismissible: false }, imageSelectionError) : null,
 					createElement(
 						'div',
 						{ className: 'npcink-toolbox-editor-support__image-workspace' },
@@ -9839,7 +9934,7 @@
 									variant: 'tertiary',
 									onClick: () => cancelActiveContentRequest(),
 								}, __('Cancel', 'npcink-workflow-toolbox')) : null) : null,
-								imageSearchBusy && activeSearchMode !== 'generate' ? renderImageLoadingGrid() : null,
+								imageSearchBusy && activeSearchMode !== 'generate' ? renderImageLoadingGrid(images.length || 1) : null,
 								visibleImageResult && !imageSearchBusy ? renderImageCandidateCards(images, visibleImageResult, selectedImage, selectImageCandidate, setImagePreviewLightbox, useSuggestedImageQuery, activePicker) : null,
 								!imageRunning ? imageCompletionNotice : null
 							),
