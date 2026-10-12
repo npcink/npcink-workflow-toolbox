@@ -13,6 +13,12 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Open
 
+- **Next-phase actions for the following session** are consolidated in the
+  [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md):
+  real hold-comment calibration feeding Cloud intent scheduling (highest
+  value; framework ready in eval-lab #110), the ③ media-ALT adoption gate
+  (needs ~1 week of production use), the internal-link cluster split with its
+  S2 server-side URL-rewrite follow-up, and the PHPStan ratchet.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **The editor `整理` (format content) button label is Chinese inside an
