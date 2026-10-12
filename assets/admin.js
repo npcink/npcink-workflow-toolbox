@@ -5529,11 +5529,31 @@
 		return Math.max(0, Math.round(bytes)) + ' B';
 	}
 
+	function mediaOptimizationFailureLabel(reason) {
+		const labels = {
+			processing_failed: t('Optimization failed while processing this image.'),
+			cloud_not_qualified: t('Cloud did not find a safe saving threshold for this image.'),
+			source_fingerprint_changed: t('The source image changed after the plan was built.'),
+		};
+		return labels[String(reason || '')] || t('This image needs review before it can be retried.');
+	}
+
+	function mediaOptimizationRecoveryLabel(reason) {
+		const recovery = {
+			processing_failed: t('Retry this image or continue the batch after checking Cloud readiness.'),
+			cloud_not_qualified: t('No replacement was applied. Leave it skipped or rebuild the plan after changing the optimization settings.'),
+			source_fingerprint_changed: t('Rebuild the exact batch plan before retrying this image.'),
+		};
+		return recovery[String(reason || '')] || t('Refresh the batch history and retry this image when it is ready.');
+	}
+
 	function renderMediaOptimizationHistory(form, batch) {
 		const host = form.querySelector('[data-toolbox-media-batch-history]');
 		if (!host || !batch || !batch.batch_id) return;
 		const previous = host.querySelector('[data-toolbox-media-history-summary]');
 		if (previous) previous.remove();
+		const previousAttention = host.querySelector('[data-toolbox-media-history-attention]');
+		if (previousAttention) previousAttention.remove();
 		const summary = asObject(batch.summary);
 		const block = el('div', 'npcink-toolbox__media-history-summary');
 		block.setAttribute('data-toolbox-media-history-summary', '');
@@ -5576,6 +5596,23 @@
 			block.appendChild(actions);
 		}
 		host.appendChild(block);
+		const attentionItems = asArray(batch.items).filter((item) => item && (item.status === 'failed' || (item.status === 'skipped' && item.error_code && item.error_code !== 'not_selected')));
+		if (attentionItems.length) {
+			const attention = el('div', 'npcink-toolbox__media-history-attention');
+			attention.setAttribute('data-toolbox-media-history-attention', '');
+			attention.appendChild(el('h4', '', t('Items needing attention')));
+			const list = el('ul', 'npcink-toolbox__media-history-failures');
+			attentionItems.forEach((item) => {
+				const reason = String(item.error_code || '');
+				const row = el('li', 'npcink-toolbox__media-history-failure');
+				row.appendChild(el('strong', '', String(item.title || ('Image #' + item.attachment_id))));
+				row.appendChild(el('span', '', mediaOptimizationFailureLabel(reason)));
+				row.appendChild(el('small', 'description', mediaOptimizationRecoveryLabel(reason)));
+				list.appendChild(row);
+			});
+			attention.appendChild(list);
+			host.appendChild(attention);
+		}
 	}
 
 	async function restoreMediaOptimizationItem(form, attachmentId) {
@@ -5770,6 +5807,13 @@
 			return;
 		}
 		form.setAttribute('data-toolbox-media-batch-running', '1');
+		form.__npcinkMediaBatchCancelRequested = false;
+		const cancelButton = form.querySelector('[data-toolbox-cancel-media-batch]');
+		if (cancelButton instanceof HTMLButtonElement) {
+			cancelButton.hidden = false;
+			cancelButton.disabled = false;
+			cancelButton.textContent = t('Cancel optimization');
+		}
 		try {
 			await ensureMediaOptimizationCloudReady(form);
 			batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/confirm', {
@@ -5783,10 +5827,12 @@
 			const pending = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && selectedIds.has(mediaBatchAttachmentId(item)));
 			const deselected = asArray(batch.items).filter((item) => !['completed', 'skipped'].includes(String(item.status || '')) && !selectedIds.has(mediaBatchAttachmentId(item)));
 			for (let index = 0; index < deselected.length; index += 1) {
+				if (form.__npcinkMediaBatchCancelRequested) break;
 				batch = await postJson(config.restUrl, 'media-optimization-batches/' + encodeURIComponent(batch.batch_id) + '/items/' + encodeURIComponent(String(deselected[index].attachment_id)) + '/complete', { status: 'skipped', reason: 'not_selected' });
 				form.__npcinkMediaOptimizationBatch = batch;
 			}
 			for (let index = 0; index < pending.length; index += 1) {
+				if (form.__npcinkMediaBatchCancelRequested) break;
 				const item = pending[index];
 				if (progress) progress.textContent = t('Optimizing ') + String(index + 1) + t(' of ') + String(pending.length) + ' (' + String(pending.length ? Math.round(((index + 1) / pending.length) * 100) : 100) + '%)...';
 				let completion;
@@ -5820,9 +5866,17 @@
 				if (batch.status === 'paused') break;
 			}
 			renderMediaOptimizationHistory(form, batch);
-			renderTextResult(form, batch.status === 'completed' ? t('Optimization complete. Originals remain available for restore.') : t('Optimization paused. Completed items were kept; continue when ready.'), batch.status === 'completed' ? 'ok' : 'warning');
+			if (form.__npcinkMediaBatchCancelRequested) {
+				renderTextResult(form, t('Optimization cancelled. Completed items were kept; continue when ready.'), 'warning');
+			} else {
+				renderTextResult(form, batch.status === 'completed' ? t('Optimization complete. Originals remain available for restore.') : t('Optimization paused. Completed items were kept; continue when ready.'), batch.status === 'completed' ? 'ok' : 'warning');
+			}
 		} finally {
 			form.removeAttribute('data-toolbox-media-batch-running');
+			if (cancelButton instanceof HTMLButtonElement) {
+				cancelButton.hidden = true;
+				cancelButton.disabled = false;
+			}
 		}
 	}
 
@@ -8268,6 +8322,17 @@
 					submitMediaDerivativeBatchProposals(form).catch((error) => {
 						renderMediaDerivativeFailure(form, error, 'media-batch');
 					});
+					return;
+				}
+
+				const cancelMediaBatchButton = event.target.closest('[data-toolbox-cancel-media-batch]');
+				if (cancelMediaBatchButton && form.contains(cancelMediaBatchButton)) {
+					event.preventDefault();
+					form.__npcinkMediaBatchCancelRequested = true;
+					if (cancelMediaBatchButton instanceof HTMLButtonElement) {
+						cancelMediaBatchButton.disabled = true;
+						cancelMediaBatchButton.textContent = t('Cancelling optimization...');
+					}
 					return;
 				}
 
