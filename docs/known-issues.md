@@ -15,23 +15,21 @@ with the closing commit or PR for one release cycle, then prune.
 
 - **Next-phase actions for the following session** are consolidated in the
   [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md):
-  real hold-comment calibration feeding Cloud intent scheduling (highest
-  value; framework ready in eval-lab #110), the ③ media-ALT adoption gate
-  (needs ~1 week of production use), the internal-link cluster split with its
-  S2 server-side URL-rewrite follow-up, and the PHPStan ratchet.
+  browser verification of PRs #257–#263, real hold-comment calibration
+  feeding Cloud intent scheduling (highest value; framework ready in eval-lab
+  #110), the ③ media-ALT adoption gate (needs ~1 week of production use),
+  the internal-link cluster split with its S2 server-side URL-rewrite
+  follow-up, and the PHPStan ratchet.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
-- **User-facing UX audit (2026-10-12): prioritized fix list awaiting
-  execution.** A read-only, user-perspective sweep of the editor sidebar,
-  the admin pages, and the first-run/disconnected journey confirmed the
-  fail-closed posture is strong but found four systemic patterns
-  (dependency failures surface at click time with non-actionable copy,
-  browser-bound batch optimization with count-only failure reporting,
-  silent truncation and clamping, mixed-language UI) plus one open
-  product decision: Site Check has no navigation entry although
-  `docs/boundary.md` calls it the everyday site-maintenance entry.
-  Nothing is implemented yet. Findings with file:line evidence,
-  verification status, TODO order, and boundary notes live in
+- **User-facing UX audit (2026-10-12) is in closeout.** The audit found four
+  systemic patterns (dependency failures, browser-bound batch feedback,
+  silent truncation/clamping, and mixed-language UI) plus the Site Check
+  visibility decision. PRs #257–#263 delivered the dependency readiness and
+  actionable copy, Site Check navigation, batch failure/cancellation feedback,
+  internal-link/editor translation fixes, and editor image-sidebar feedback.
+  Remaining work is browser verification, residual i18n cleanup, and the
+  low-priority interaction polish recorded in the
   [Session Handoff 2026-10-12](session-handoff-2026-10-12-ux-audit-findings.md).
 - **Cross-repo: Cloud Addon quota/attribution follow-ups for editor image
   access.** Tracked with the audit trail in
@@ -129,14 +127,22 @@ with the closing commit or PR for one release cycle, then prune.
   service per session 5's boundary). The service sits at ~3.0k lines.
   Remaining: the summary and taxonomy cached-flow orchestrators,
   inheriting the cache base and movable with the same pattern.
-- **PHPStan baseline ratchet** (2026-10-06): the 126 remaining level-5
-  findings across 90 baseline patterns live in `phpstan-baseline.neon` after the phpcbf pass and
+- **PHPStan baseline ratchet** (2026-10-06; tooling refreshed in PR #262): the
+  121 remaining level-5 findings across 86 baseline patterns live in
+  `phpstan-baseline.neon` after the phpcbf pass and
   promotion to required. The baseline exists to shrink: when a cluster
   split or cleanup removes a finding class, regenerate the baseline and
   the ratchet holds. The 16 unused-method candidates remain in the
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **UX audit primary fixes — closed 2026-10-13 (PRs #257–#263).** Cloud
+  readiness and dependency copy, Site Check default visibility, batch failure
+  details and cancellation, internal-link/editor translation fixes, editor
+  image-sidebar feedback, and the Dependabot/PHPStan maintenance refresh are
+  merged. Browser smoke verification and the residual debt remain tracked in
+  the open entries above.
 
 - **The editor `整理` (format content) button label — closed as already
   fixed by PR #170's i18n pass.** The 2026-09-30 Open entry predated that

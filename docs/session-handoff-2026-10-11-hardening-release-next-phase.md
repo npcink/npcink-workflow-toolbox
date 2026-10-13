@@ -25,9 +25,29 @@ this file → the specific doc for the area you touch.
 stable 0.6.0 and the live zip carries nine `.min` asset siblings. Master at the
 time of writing: `c24fb892`.
 
+## Follow-up delivery after this handoff
+
+The subsequent UX and maintenance arc is merged on `origin/master`:
+
+| PR | Title | Effect |
+| --- | --- | --- |
+| #256 | restore milestone one quality gates | restored the complete local quality gate set |
+| #257 | surface cloud readiness and batch feedback | added preflight visibility, in-flight protection, and bounded-value disclosure |
+| #258 | make site check a visible admin tab | made Site Check the fourth tab while keeping Overview as default |
+| #259 | harden internal-link URLs and editor translations | closed the shipped internal-link URL and translation fixes |
+| #260 | expose media batch failures and cancellation | added per-item failure detail and foreground cancellation |
+| #261 | improve editor image sidebar feedback | added the image-sidebar feedback and attribution improvements |
+| #262 | update dependency and static analysis toolchain | completed the independent Dependabot/PHPStan maintenance batch |
+| #263 | make dependency failures actionable | added audience-aware, actionable dependency error copy |
+
 ## Where to continue (in priority order)
 
-### 1. Real hold-comment calibration → Cloud scheduling evidence (highest value)
+### 1. Browser verification, then real hold-comment calibration (highest value)
+
+First run the UX browser smokes for PRs #257–#263 on the five-plugin site. The
+required commands and environment are recorded in the 2026-10-12 UX handoff.
+After the smokes pass, complete the real hold-comment calibration below before
+any Cloud scheduling productization.
 
 The comment-moderation intent is the assessed highest daily-value Cloud
 scheduling item, and the only missing input is **real, operator-labeled hold
@@ -74,7 +94,7 @@ batch-apply loop is worth building, based on real acceptance volume.
   only. One commit, one cluster.
 - Then: editor JS remaining clusters, `Rest_Editor_Content_Support` cached-flow
   orchestrators, `assets/admin.js` (8.2k), remaining `Admin_Page.php` clusters.
-- PHPStan baseline ratchet (126 findings across 90 baseline patterns) shrinks with each split; regenerate
+- PHPStan baseline ratchet (121 findings across 86 baseline patterns) shrinks with each split; regenerate
   the baseline only when a split moves findings and counts must not grow.
 - Split standard: `docs/platform/provider-split-refactor-standard-v1.md` and
   the just-in-time cadence in `docs/god-class-split-session-handoff.md`.

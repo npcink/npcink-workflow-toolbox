@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-12.
+Last reviewed: 2026-10-13.
 
 **Next session: read
 [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md)
@@ -30,8 +30,8 @@ writing).
 - Default surfaces: editor **Npcink Content Support** sidebar (writing
   pack, preflight, category/tag, internal links, contextual ALT, image
   candidates) on `post`/`page` editors only (extend via the
-  `npcink_toolbox_editor_supported_post_types` filter), hidden
-  visible **Site Check** tab (with the compatibility route retained), admin **Image Handling**
+  `npcink_toolbox_editor_supported_post_types` filter), visible **Site Check**
+  tab (Overview remains the default; compatibility route retained), admin **Image Handling**
   (Batch Optimize first), Overview + Site Profile + Site Check tabs. Release packages
   ship `.min` asset siblings (`composer package:release` runs
   `scripts/minify-assets.sh`); checkouts without them enqueue the
@@ -86,11 +86,10 @@ writing).
 
 ## Open Debt (top items)
 
-0. Next-phase actions live in the
-   [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md):
-   real hold-comment calibration for Cloud scheduling (highest value), the
-   ③ media-ALT adoption gate (needs ~1 week of production use), and the
-   carried cluster splits.
+0. The UX delivery arc in PRs #257–#263 is merged. The remaining next-phase
+   actions are browser verification of those changes, real hold-comment
+   calibration for Cloud scheduling (highest value), the ③ media-ALT adoption
+   gate (needs ~1 week of production use), and the carried cluster splits.
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
    draft) still inside the 10.6k main bundle.
 2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
@@ -100,19 +99,18 @@ writing).
 4. Editor intent convergence shipped 2026-10-07: twelve-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
-5. PHPStan baseline ratchet (126 findings across 90 baseline patterns; shrinks with cluster splits).
+5. PHPStan baseline ratchet (121 findings across 86 baseline patterns; shrinks with cluster splits).
 6. Guided onboarding tour awaiting the operator trial answers
    (`docs/onboarding-tour-design-v1.md`); "Core proposal" terminology
    standard cross-repo rollout. (The 2026-10-11 security/performance
    review items all closed — see
    `docs/security-performance-hardening-2026-10.md` before touching the
    image-source routes, the flow cache, or the release asset pipeline.)
-7. User-facing UX audit (2026-10-12): four systemic experience patterns
-   (click-time dependency failures, browser-bound batch with count-only
-   failure reporting, silent truncation/clamping, mixed-language UI)
-   plus the Site Check direct-visibility product decision (2026-10-12, Overview remains default); findings
-   with file:line evidence and TODO order live in
-   [Session Handoff 2026-10-12](session-handoff-2026-10-12-ux-audit-findings.md).
+7. The 2026-10-12 user-facing UX audit is now in closeout: dependency
+   readiness/copy, Site Check visibility, batch failure/cancellation feedback,
+   internal-link/editor translation fixes, and editor image-sidebar feedback
+   shipped in PRs #257–#263. The handoff still records the browser smokes,
+   residual i18n cleanup, and low-priority interaction polish.
 
 Full list with sources: `docs/known-issues.md`.
 
