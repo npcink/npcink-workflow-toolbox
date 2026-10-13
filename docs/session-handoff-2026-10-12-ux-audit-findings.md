@@ -46,38 +46,38 @@ Read order: `AGENTS.md` → `docs/current-state.md` →
 | P4 | 语言混杂 | 仪表盘小工具全中文 msgid、admin.js 进度文案在 t() 外拼接、内链拒绝理由 13 中 1 英 |
 | D1 | Site Check 无入口 | boundary.md 称之为"日常站点维护入口"，但导航没有按钮；0.3.0/0.4.0 审查工具全部藏在手输 URL 才能到达的页面里 |
 
-## 3. 待办清单（按优先级）
+## 3. 交付状态（2026-10-13）
+
+本次审查提出的主要 UX 问题已经随后的 PR 完成：
+
+- P1 依赖预检与可行动错误文案：PR #257、#263；
+- P2/P3 批量失败明细、取消、截断披露和运行中锁：PR #257、#260；
+- P4 内链与编辑器翻译修复：PR #259；
+- D1 Site Check 第四个顶层标签：PR #258，Overview 仍是默认入口；
+- 编辑器图片侧栏骨架、取消、重试、字段保留和 Unsplash 署名：PR #261；
+- Dependabot/PHPStan 工具链维护：PR #262。
+
+以下待办保留为后续验收、残余 i18n 清理和低优先级交互改进，已完成项不应重新实现。
+
+## 4. 待办清单（按优先级）
 
 与 2026-10-11 交接的关系：其 ①（真实待审评论校准）②（③号门读数）都在等
 生产数据，本清单不冲突；其 ③"internal-link cluster split 优先"可吸收本清单
 TODO-4.3 一并执行。
 
-### TODO-1 失败可见性小会话（最高性价比，一个 PR 量级）
+### TODO-1 失败可见性小会话（已完成；等待浏览器验收）
 
-1. **批量优化面板渲染时预检 Cloud**：`render_media_derivative_batch_tool()`
-   未接收 `$cloud_ready`（`Admin_Page.php:2644` ✅ 亲自核实签名），而 ALT
-   工具（`:2198` 签名 + `:2203-2205` inline notice ✅）和
-   `render_content_support_flow_tool`（`:2274` + `:2320` 提交按钮禁用 ✅）
-   都已有该模式；调用方 `render_tool_cards( $cloud_ready, 'image' )`
-   （`:1552`）手里就有这个值——加参数 + 渲染 notice 即可。
-2. **依赖类 503 文案包装**：`includes/Media_Optimization_Batches.php:373-376`、
-   `includes/Rest_Editor_Summary_Terms.php:262-268`、
-   `includes/Provider_Hosted_AI_Service.php:171/629` + editor JS 透传
-   （`editor-content-support.js:666-684` 只改写 `rest_forbidden`）。统一为
-   可行动文案：区分"未安装/未启用"、附设置页链接、按受众分流（作者收到
-   "请联系管理员"，管理员收到"去连接"）。这是把 ADR-018 的作者/管理员受众
-   拆分从权限错误**扩展到依赖错误**。
-3. **admin 侧防双击锁**：`runTool()` 全程不禁用提交按钮
-   （`admin.js:5002-5034` ✅ 亲自核实，仅 `:5008` 一行 "Running..." 文字）；
-   `buildMediaDerivativeBatchPlan` 同样无守卫（`:5303-5313`，每次点击重跑
-   最多 6 次付费 Cloud 取样并新建批次记录 `:5550`）。对照组已有正确做法：
-   ALT handoff 按钮 `:2618` 有锁、批量循环 `:5683` 有 `data-running` 属性。
-4. **截断披露四处**：媒体库多选静默截 50（`Admin_Page.php:235` ✅ /
-   `admin.js:36`）；blocked 列表静默截 10、无 "+N more"（`admin.js:2252`、
-   `2337`）；评论积压余量不披露（`admin.js:2198-2200`、`2289-2292`；服务端
-   钳制 `Provider_Comment_Moderation_Service.php:127`）；设置静默钳制改
-   `add_settings_error()`（`includes/Settings.php:580-581`、`644-645`、
-   `253-273`——该文件无一处调用）。
+PR #257 和 #263 已交付 Cloud 预检、依赖状态区分、可行动文案、统一运行中锁和采样/截断披露。保留原始问题定位如下，供浏览器验收和回归定位使用：
+
+1. **批量优化面板渲染时预检 Cloud**：已将 `$cloud_ready` 传入
+   `render_media_derivative_batch_tool()`，并沿用现有 inline notice 模式。
+2. **依赖类 503 文案包装**：已在媒体批量、编辑器 summary/hosted-AI 路径统一
+   未安装、未连接、能力不可用的可行动文案，并保留原机器码和 HTTP 状态，按
+   作者/管理员受众分流。
+3. **admin 侧防双击锁**：`runTool()` 与批量计划生成已使用统一 in-flight
+   状态，成功、失败和取消路径都会释放锁。
+4. **截断披露四处**：媒体采样、blocked 截断、评论采样余量和设置钳制的实际
+   值已经在界面中披露。
 
 验收：新增公共文案全部加 `tests/run.php` 静态契约 needles（needle 钉精确源
 串）；admin.js 新字符串进 admin JED（单行数组、2 空格缩进、贴邻插入、禁
@@ -88,22 +88,24 @@ test:all`；建议五插件站做一次断连冒烟（停用 Cloud Addon → 批
 边界：不放宽任何 REST capability/scope（放宽需对象级审计并记入 PR body，
 本 TODO 不预期涉及）；十二意图编辑器 allowlist 已冻结，勿加新意图。
 
-### TODO-2 Site Check 入口（已按方案 A 完成，2026-10-12）
+### TODO-2 Site Check 入口（已完成，PR #258）
 
 - Site Check 现在作为第四个顶层标签显示；Overview 仍是默认入口。
 - `toolbox_tab=operations-insights` 深链、只读扫描、可选 Cloud detail、Core
   handoff 与无写入边界均保持不变。
 - `Ability_Surface_Metadata` 已改为 `admin_site_check` / `default_visible=true`；
   2026-07 隐藏决策文档、架构说明、当前状态和静态契约已同步记录这次修订。
-- 浏览器 smoke 应确认第四个标签可见、兼容深链仍可用，并确认不会自动调用
+- 浏览器 smoke 仍应确认第四个标签可见、兼容深链仍可用，并确认不会自动调用
   Cloud detail、Core proposal 或执行路由。
 
-### TODO-3 批量优化失败明细 + 取消按钮（UI 层，一个 PR）
+### TODO-3 批量优化失败明细 + 取消按钮（已完成，PR #260；等待浏览器验收）
 
-- 现状：失败项只报计数，per-item `reason` 存机器码
+失败附件、可读原因、取消动作和现有 beforeunload 守卫已经交付。保留边界和验证要求如下：
+
+- 历史基线（已由 PR #260 关闭）：失败项只报计数，per-item `reason` 存机器码
   （`admin.js:5719` `'processing_failed'`、`'cloud_not_qualified'`）从不
   渲染；历史区只列可恢复的成功项（`:5460-5465`、`:5479`）。
-- 做：失败项清单（哪些附件、人话化的原因映射）渲染进历史区；运行中取消
+- 交付内容：失败项清单（哪些附件、人话化的原因映射）渲染进历史区；运行中取消
   按钮（挂到 `:5683` 的 `data-toolbox-media-batch-running` 附近）。
 - 硬边界：ADR-015 + boundary.md Plugin-Admin Batch Boundary——**仅前台、
   现场管理员、可恢复前台执行记录**；禁止后台 worker/队列/Cron/agent 触发。
@@ -112,7 +114,7 @@ test:all`；建议五插件站做一次断连冒烟（停用 Cloud Addon → 批
   本 TODO 只做 UI 侧能做的部分，并作为该跨仓项的输入。
 - beforeunload 守卫已有（`admin.js:8002-8008`），勿重复加。
 
-### TODO-4 i18n 清理（受 Translation Source Language Policy 约束：逐文件迁移、禁 JED 批量再生成；part 文件不带翻译除非 per-handle JED 契约）
+### TODO-4 i18n 清理（部分完成，继续按 cluster 推进；受 Translation Source Language Policy 约束：逐文件迁移、禁 JED 批量再生成；part 文件不带翻译除非 per-handle JED 契约）
 
 优先级顺序：
 
@@ -135,9 +137,12 @@ test:all`；建议五插件站做一次断连冒烟（停用 Cloud Addon → 批
 `tests/run.php:1364` 已断言源码不含该串）。known-issues 的过期条目本次已
 移入 Recently Closed。
 
-### TODO-5 编辑器侧边栏修复（1-2 个 PR）
+### TODO-5 编辑器侧边栏修复（主要项已完成，PR #261；等待浏览器验收）
 
-1. **骨架屏按实际数量**：`editor-content-support.js:2652-2662` 固定 9 格、
+PR #261 已覆盖骨架屏、关闭取消、SEO 字段保留、错误重试和 Unsplash 署名。以下条目保留为验收定位清单：
+
+1. **历史问题（已由 PR #261 关闭）：骨架屏按实际数量**：
+   `editor-content-support.js:2652-2662` 固定 9 格、
    缺位补 `is-loading`，`assets/editor-content-support.css:2525-2533` 无限
    动画——4 个结果的搜索会显示 5 个永远"加载中"的格子。
 2. **取消传播到弹窗关闭**：`onRequestClose`（`:9817-9820`）不调用
@@ -158,7 +163,7 @@ test:all`；建议五插件站做一次断连冒烟（停用 Cloud Addon → 批
 `test:editor-js-undefined` 审计门；editor bundle 新字符串进 po/mo/pot + JED
 双目录。
 
-### TODO-6 低优先批次（搭车做）
+### TODO-6 低优先批次（继续排队，搭车做）
 
 - 无 `aria-live`/`aria-busy`（全 bundle）；灯箱无 Escape/焦点管理
   （`editor-content-support.js:2722-2752`）。
