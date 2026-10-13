@@ -1798,8 +1798,35 @@ msgstr "托管 AI 内容支持需要标题、简报、草稿文本或文章 ID�
 msgid "The hosted AI runtime payload was not valid."
 msgstr "托管 AI 运行时载荷无效。"
 
-msgid "Connect Npcink Cloud before using hosted AI tools."
-msgstr "使用托管 AI 工具前请先连接 Npcink Cloud。"
+msgid "Npcink Abilities Toolkit is not installed. Install and activate it, then try again."
+msgstr "Npcink Abilities Toolkit 未安装。请安装并启用它后重试。"
+
+msgid "Npcink Abilities Toolkit is not installed. Ask a site administrator to install and activate it, then try again."
+msgstr "Npcink Abilities Toolkit 未安装。请联系站点管理员安装并启用它后重试。"
+
+msgid "The required Toolkit ability is unavailable. Update or enable it, then try again."
+msgstr "所需的 Toolkit 能力不可用。请更新或启用它后重试。"
+
+msgid "The required Toolkit ability is unavailable. Ask a site administrator to update or enable it, then try again."
+msgstr "所需的 Toolkit 能力不可用。请联系站点管理员更新或启用它后重试。"
+
+msgid "Npcink Cloud Addon is not installed. Install and activate it, then try again."
+msgstr "Npcink Cloud Addon 未安装。请安装并启用它后重试。"
+
+msgid "Npcink Cloud Addon is not installed. Ask a site administrator to install and activate it, then try again."
+msgstr "Npcink Cloud Addon 未安装。请联系站点管理员安装并启用它后重试。"
+
+msgid "Npcink Cloud Addon is not connected. Open its settings, verify the connection, then try again."
+msgstr "Npcink Cloud Addon 未连接。请打开其设置并验证连接后重试。"
+
+msgid "Npcink Cloud Addon is not connected. Ask a site administrator to verify the connection, then try again."
+msgstr "Npcink Cloud Addon 未连接。请联系站点管理员验证连接后重试。"
+
+msgid "The hosted AI capability is unavailable. Update or enable it in Cloud Addon, then try again."
+msgstr "托管 AI 能力不可用。请在 Cloud Addon 中更新或启用该能力后重试。"
+
+msgid "The hosted AI capability is unavailable. Ask a site administrator to update or enable it, then try again."
+msgstr "托管 AI 能力不可用。请联系站点管理员更新或启用该能力后重试。"
 
 msgid "A supported AI site-helper intent is required."
 msgstr "需要受支持的 AI 站点助手意图。"
@@ -1807,8 +1834,6 @@ msgstr "需要受支持的 AI 站点助手意图。"
 msgid "The AI site-helper runtime payload was not valid."
 msgstr "AI 站点助手运行时载荷无效。"
 
-msgid "Connect Npcink Cloud before using AI site helpers."
-msgstr "使用 AI 站点助手前请先连接 Npcink Cloud。"
 
 msgid "An attachment_id is required to build a media derivative handoff."
 msgstr "生成媒体衍生交接需要 attachment_id。"

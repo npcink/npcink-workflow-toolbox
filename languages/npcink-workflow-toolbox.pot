@@ -4182,8 +4182,28 @@ msgstr ""
 msgid "The hosted AI runtime payload was not valid."
 msgstr ""
 
-#: includes/Provider_Hosted_AI_Service.php:164
-msgid "Connect Npcink Cloud before using hosted AI tools."
+#: includes/Provider_Hosted_AI_Service.php:648
+msgid "Npcink Cloud Addon is not installed. Install and activate it, then try again."
+msgstr ""
+
+#: includes/Provider_Hosted_AI_Service.php:649
+msgid "Npcink Cloud Addon is not installed. Ask a site administrator to install and activate it, then try again."
+msgstr ""
+
+#: includes/Provider_Hosted_AI_Service.php:654
+msgid "Npcink Cloud Addon is not connected. Open its settings, verify the connection, then try again."
+msgstr ""
+
+#: includes/Provider_Hosted_AI_Service.php:655
+msgid "Npcink Cloud Addon is not connected. Ask a site administrator to verify the connection, then try again."
+msgstr ""
+
+#: includes/Provider_Hosted_AI_Service.php:659
+msgid "The hosted AI capability is unavailable. Update or enable it in Cloud Addon, then try again."
+msgstr ""
+
+#: includes/Provider_Hosted_AI_Service.php:660
+msgid "The hosted AI capability is unavailable. Ask a site administrator to update or enable it, then try again."
 msgstr ""
 
 #: includes/Provider_Hosted_AI_Service.php:454
@@ -4194,9 +4214,6 @@ msgstr ""
 msgid "The AI site-helper runtime payload was not valid."
 msgstr ""
 
-#: includes/Provider_Hosted_AI_Service.php:622
-msgid "Connect Npcink Cloud before using AI site helpers."
-msgstr ""
 
 #: includes/Provider_Image_Source_Service.php:115
 msgid "The image-source runtime payload was not valid."
@@ -5303,25 +5320,26 @@ msgstr ""
 msgid "The Toolkit taxonomy review-set ability returned an invalid artifact."
 msgstr ""
 
-#: includes/Rest_Editor_Content_Support.php:4973
-msgid "Npcink Abilities Toolkit is required to build taxonomy review sets."
+#: includes/Rest_Editor_Summary_Terms.php:336
+msgid "Npcink Abilities Toolkit is not installed. Install and activate it, then try again."
 msgstr ""
 
-#: includes/Rest_Editor_Content_Support.php:4984
-msgid "The Toolkit taxonomy review-set ability is not currently callable."
+#: includes/Rest_Editor_Summary_Terms.php:337
+msgid "Npcink Abilities Toolkit is not installed. Ask a site administrator to install and activate it, then try again."
+msgstr ""
+
+#: includes/Rest_Editor_Summary_Terms.php:341
+msgid "The required Toolkit ability is unavailable. Update or enable it, then try again."
+msgstr ""
+
+#: includes/Rest_Editor_Summary_Terms.php:342
+msgid "The required Toolkit ability is unavailable. Ask a site administrator to update or enable it, then try again."
 msgstr ""
 
 #: includes/Rest_Editor_Content_Support.php:4996
 msgid "The Toolkit taxonomy review-set ability returned an invalid response."
 msgstr ""
 
-#: includes/Rest_Editor_Content_Support.php:5009
-msgid "Npcink Abilities Toolkit is required to build taxonomy suggestions."
-msgstr ""
-
-#: includes/Rest_Editor_Content_Support.php:5020
-msgid "The Toolkit taxonomy suggestion ability is not currently callable."
-msgstr ""
 
 #: includes/Rest_Editor_Content_Support.php:5032
 msgid "The Toolkit taxonomy suggestion ability returned an invalid response."

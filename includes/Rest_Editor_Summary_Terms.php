@@ -262,7 +262,7 @@ final class Rest_Editor_Summary_Terms {
 		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_taxonomy_review_set_toolkit_unavailable',
-				__( 'Npcink Abilities Toolkit is required to build taxonomy review sets.', 'npcink-workflow-toolbox' ),
+				self::toolkit_taxonomy_dependency_message( false ),
 				array( 'status' => 503 )
 			);
 		}
@@ -273,7 +273,7 @@ final class Rest_Editor_Summary_Terms {
 		if ( ! is_callable( $callback ) ) {
 			return new WP_Error(
 				'npcink_toolbox_taxonomy_review_set_toolkit_unavailable',
-				__( 'The Toolkit taxonomy review-set ability is not currently callable.', 'npcink-workflow-toolbox' ),
+				self::toolkit_taxonomy_dependency_message( true ),
 				array( 'status' => 503 )
 			);
 		}
@@ -299,7 +299,7 @@ final class Rest_Editor_Summary_Terms {
 		if ( ! function_exists( 'npcink_abilities_toolkit_get_registered' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_taxonomy_toolkit_unavailable',
-				__( 'Npcink Abilities Toolkit is required to build taxonomy suggestions.', 'npcink-workflow-toolbox' ),
+				self::toolkit_taxonomy_dependency_message( false ),
 				array( 'status' => 503 )
 			);
 		}
@@ -310,7 +310,7 @@ final class Rest_Editor_Summary_Terms {
 		if ( ! is_callable( $callback ) ) {
 			return new WP_Error(
 				'npcink_toolbox_taxonomy_toolkit_unavailable',
-				__( 'The Toolkit taxonomy suggestion ability is not currently callable.', 'npcink-workflow-toolbox' ),
+				self::toolkit_taxonomy_dependency_message( true ),
 				array( 'status' => 503 )
 			);
 		}
@@ -328,6 +328,18 @@ final class Rest_Editor_Summary_Terms {
 		}
 
 		return $result;
+	}
+
+	private static function toolkit_taxonomy_dependency_message( bool $ability_registered ): string {
+		if ( ! $ability_registered ) {
+			return current_user_can( 'manage_options' )
+				? __( 'Npcink Abilities Toolkit is not installed. Install and activate it, then try again.', 'npcink-workflow-toolbox' )
+				: __( 'Npcink Abilities Toolkit is not installed. Ask a site administrator to install and activate it, then try again.', 'npcink-workflow-toolbox' );
+		}
+
+		return current_user_can( 'manage_options' )
+			? __( 'The required Toolkit ability is unavailable. Update or enable it, then try again.', 'npcink-workflow-toolbox' )
+			: __( 'The required Toolkit ability is unavailable. Ask a site administrator to update or enable it, then try again.', 'npcink-workflow-toolbox' );
 	}
 
 

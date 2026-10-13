@@ -168,7 +168,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_content_support_runtime' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_hosted_ai_cloud_unavailable',
-				__( 'Connect Npcink Cloud before using hosted AI tools.', 'npcink-workflow-toolbox' ),
+				$this->hosted_ai_dependency_message(),
 				array( 'status' => 503 )
 			);
 		}
@@ -626,7 +626,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_site_helper_runtime' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_hosted_ai_site_helper_cloud_unavailable',
-				__( 'Connect Npcink Cloud before using AI site helpers.', 'npcink-workflow-toolbox' ),
+				$this->hosted_ai_dependency_message(),
 				array( 'status' => 503 )
 			);
 		}
@@ -639,6 +639,25 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		}
 
 		return $this->normalize_hosted_ai_site_helper_response( is_array( $response ) ? $response : array(), $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample, $flagged_media_sample );
+	}
+
+	private function hosted_ai_dependency_message(): string {
+		$reason = $this->settings->cloud_runtime_unavailable_reason();
+		if ( 'cloud_addon_not_installed' === $reason ) {
+			return current_user_can( 'manage_options' )
+				? __( 'Npcink Cloud Addon is not installed. Install and activate it, then try again.', 'npcink-workflow-toolbox' )
+				: __( 'Npcink Cloud Addon is not installed. Ask a site administrator to install and activate it, then try again.', 'npcink-workflow-toolbox' );
+		}
+
+		if ( 'cloud_addon_not_connected' === $reason ) {
+			return current_user_can( 'manage_options' )
+				? __( 'Npcink Cloud Addon is not connected. Open its settings, verify the connection, then try again.', 'npcink-workflow-toolbox' )
+				: __( 'Npcink Cloud Addon is not connected. Ask a site administrator to verify the connection, then try again.', 'npcink-workflow-toolbox' );
+		}
+
+		return current_user_can( 'manage_options' )
+			? __( 'The hosted AI capability is unavailable. Update or enable it in Cloud Addon, then try again.', 'npcink-workflow-toolbox' )
+			: __( 'The hosted AI capability is unavailable. Ask a site administrator to update or enable it, then try again.', 'npcink-workflow-toolbox' );
 	}
 
 
