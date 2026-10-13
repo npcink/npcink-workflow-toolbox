@@ -23,7 +23,10 @@ Final WordPress writes must flow through Toolkit ability callbacks after Core
 approval, Core preflight, and Adapter handoff of host approval context.
 
 Flagged media removal follows the same path: Toolbox emits the review-only
-`flagged_media_review_set.v1`, Core records and preflights a
+`flagged_media_review_set.v1`. A client explicitly calls Toolkit
+`build-flagged-media-removal-plan` with the reviewed operator choice and submits
+it through Adapter `/proposals/from-plan`; the current Toolbox UI creates no
+proposal automatically. Core records and preflights a
 `flagged_media_removal_plan.v1` proposal, Adapter forwards the approved
 `delete-attachment` input, and Toolkit owns the deletion callback plus the
 governed backup manifest and restore contract. The illegal-content branch

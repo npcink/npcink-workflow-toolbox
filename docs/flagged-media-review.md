@@ -58,10 +58,16 @@ Toolkit. The Adapter exposes the explicit post-Core execution profile.
 
 ## Governed Deletion Handoff
 
-The accepted handoff is:
+The explicit SDK/ability handoff is available to clients loading the updated
+Toolkit, Core and Adapter contracts. The current Toolbox UI remains review-only;
+it does not automatically turn review sets into plans or proposals.
+
+An operator supplies the reviewed attachment, branch, reason and request key:
 
 ```text
-Toolbox flagged_media_review_set.v1
+Toolbox flagged_media_review_set.v1 (review evidence)
+  -> operator-selected Toolkit build-flagged-media-removal-plan
+  -> Adapter POST /proposals/from-plan
   -> Core flagged_media_removal_plan.v1 proposal
   -> Core approval and commit preflight
   -> Adapter delete-attachment execution profile
