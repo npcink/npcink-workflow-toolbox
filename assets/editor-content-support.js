@@ -7092,7 +7092,7 @@
 
 				const hasPreflightReview = Boolean(sections.pre_publish_review);
 
-				if (sections.image_alt_suggestions) {
+				if (sections.image_alt_suggestions && !hasPreflightReview) {
 					if (metadataHandoffControls && metadataHandoffControls.intent !== 'image_alt_suggestions') {
 						blocks.push(createElement('h4', { key: 'image-alt-suggestions-title' }, __('Article image text suggestions', 'npcink-workflow-toolbox')));
 					}
