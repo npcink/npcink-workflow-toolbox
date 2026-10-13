@@ -346,6 +346,7 @@ $cross_repo_contract_stage_closeout   = file_get_contents( $root . '/docs/archiv
 $toolbox_contract_reuse_readiness_doc = file_get_contents( $root . '/docs/archive/2026-07/toolbox-contract-reuse-readiness-2026-07-08.md' );
 $platform_governance_index_doc        = file_get_contents( $root . '/docs/platform/README.md' );
 $platform_governance_history_doc      = file_get_contents( $root . '/docs/platform/cross-repo-platform-governance-history-2026-07-08.md' );
+$flagged_media_review_doc              = file_get_contents( $root . '/docs/flagged-media-review.md' );
 $platform_history_readme_doc          = file_get_contents( $root . '/README.md' );
 $platform_history_docs_index_doc      = file_get_contents( $root . '/docs/README.md' );
 $readme                               = $platform_history_readme_doc;
@@ -381,6 +382,9 @@ foreach ( array( 'Centralize Navigation, Not Authority', 'Default To Suggestion 
 }
 foreach ( array( 'Core preflight', 'host approval context', 'The historical Toolbox Local Admin Consent write path', 'ADR-017', 'Adapter/Core/Toolkit', 'metadata apply', 'SEO mutation', 'media import', 'settings mutation', 'batch operation', 'second ability registry, workflow registry, approval store' ) as $required_cross_repo_boundary_text ) {
 	toolbox_assert( false !== strpos( $cross_repo_boundary_doc, $required_cross_repo_boundary_text ), 'Cross-repo boundary matrix preserves boundary: ' . $required_cross_repo_boundary_text );
+}
+foreach ( array( 'flagged_media_removal_plan.v1', 'delete-attachment', 'governed backup manifest', 'restore-media-backup', 'not a workflow runtime' ) as $required_flagged_media_handoff_text ) {
+	toolbox_assert( false !== $flagged_media_review_doc && false !== strpos( $flagged_media_review_doc, $required_flagged_media_handoff_text ), 'Flagged media handoff preserves boundary: ' . $required_flagged_media_handoff_text );
 }
 foreach ( array( 'reusable static workflow definitions', 'canonical or reusable workflow definitions', 'Consumes Toolkit workflow definitions where a reusable flow exists' ) as $required_cross_repo_workflow_owner_text ) {
 	toolbox_assert( false !== strpos( $cross_repo_boundary_doc, $required_cross_repo_workflow_owner_text ), 'Cross-repo boundary matrix preserves canonical workflow definition ownership: ' . $required_cross_repo_workflow_owner_text );

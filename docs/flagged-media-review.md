@@ -11,14 +11,14 @@ operator artifact. Toolbox samples bounded recent media-library metadata (no
 pixels), asks the Cloud hosted AI runtime which sampled attachments carry a
 flagged content-safety status in the Cloud media projection, and renders the
 result as a review-only list inside Image Handling. The operator handles the
-actual media decisions through native WordPress or, later, the governed
-deletion path.
+actual media decisions through native WordPress or the governed
+Adapter/Core/Toolkit deletion path described below.
 
 This is not a media writer. Toolbox does not delete, trash, detach, edit, or
 replace flagged media from this artifact, and it does not claim to view image
-pixels locally. Deletion is explicitly out of scope for this stage; the
-deletion policy branches below are the input for the future Toolkit/Core
-governed path, not an implemented behavior.
+pixels locally. Deletion remains outside Toolbox and is implemented only
+through the explicit Toolkit `delete-attachment` ability after Core proposal,
+approval, and commit preflight.
 
 ## Data Boundary
 
@@ -38,8 +38,8 @@ governed path, not an implemented behavior.
 ## Deletion Policy Branches
 
 These branches define the review-time choice recorded for a confirmed flagged
-attachment and are the specification input for the future Toolkit deletion
-ability and Core policy. Toolbox itself implements neither branch.
+attachment and are consumed by the Toolkit deletion ability and Core policy.
+Toolbox itself implements neither branch.
 
 - Branch A — confirmed illegal content: no backup, no local copy, and no
   Cloud artifact retention of the material. Direct delete plus an audit record
@@ -52,8 +52,27 @@ ability and Core policy. Toolbox itself implements neither branch.
   only through a Core proposal.
 
 The branch is chosen by the reviewing operator. Toolbox records the choice
-only as review input; policy enforcement, audit truth, and restore ownership
-belong to Core and Toolkit.
+only as review input; policy enforcement and audit truth belong to Core, while
+the deletion callback, backup manifest, and restore ownership belong to
+Toolkit. The Adapter exposes the explicit post-Core execution profile.
+
+## Governed Deletion Handoff
+
+The accepted handoff is:
+
+```text
+Toolbox flagged_media_review_set.v1
+  -> Core flagged_media_removal_plan.v1 proposal
+  -> Core approval and commit preflight
+  -> Adapter delete-attachment execution profile
+  -> Toolkit delete-attachment callback
+```
+
+`illegal_content_no_backup` creates no backup artifact. `governed_with_backup`
+creates a governed backup manifest in Toolkit before deletion and allows
+`restore-media-backup` to recreate the attachment after deletion. This path is
+bounded to one attachment per proposal item; it is not a workflow runtime,
+queue, or bulk execution console.
 
 ## Contract
 
