@@ -277,7 +277,7 @@ final class Rest_Editor_Media_Alt extends Rest_Editor_Flow_Cache {
 
 	/**
 	 * @param array<int,array<string,mixed>> $items Article image occurrences.
-	 * @return array<int,array<string,mixed>> Evidence indexed by attachment id.
+	 * @return array{items: array<int,array{source: string, visual_summary: string}>, recognition_required_attachment_ids: array<int,int>} Evidence indexed by attachment id.
 	 */
 
 	public function editor_article_image_visual_evidence( array $items, bool $allow_recognition ): array {
@@ -310,7 +310,10 @@ final class Rest_Editor_Media_Alt extends Rest_Editor_Flow_Cache {
 		}
 
 		if ( empty( $request_items ) ) {
-			return array();
+			return array(
+				'items'                               => array(),
+				'recognition_required_attachment_ids' => array(),
+			);
 		}
 
 		$evidence = $this->client->resolve_media_image_context_evidence(
@@ -336,7 +339,10 @@ final class Rest_Editor_Media_Alt extends Rest_Editor_Flow_Cache {
 			$allow_recognition
 		);
 		if ( empty( $evidence ) ) {
-			return array( 'items' => array() );
+			return array(
+				'items'                               => array(),
+				'recognition_required_attachment_ids' => array(),
+			);
 		}
 
 		$indexed = array();

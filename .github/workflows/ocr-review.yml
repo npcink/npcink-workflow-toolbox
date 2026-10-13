@@ -111,7 +111,7 @@ jobs:
       - name: Get PR context
         id: pr-context
         if: github.event_name == 'issue_comment'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             // Resolve PR base/head for issue_comment events, which carry no
@@ -138,10 +138,10 @@ jobs:
       - name: Run OpenCodeReview (attempt 1 of 3)
         id: ocr_review_1
         continue-on-error: true
-        # alibaba/open-code-review v1.12.10 (tag object b465046, commit
-        # 579b931; pinned by commit SHA because the action receives the LLM
-        # auth token - bump deliberately and record the new tag->commit pair).
-        uses: alibaba/open-code-review@579b9319151aa734f2d25df6e59efa59eec5a577
+        # alibaba/open-code-review v1.12.13 (tag commit fabbdb2; pinned by
+        # commit SHA because the action receives the LLM auth token - bump
+        # deliberately and record the new tag->commit pair).
+        uses: alibaba/open-code-review@fabbdb296b0d97e2140ada8d54ca7d6d6d1d7ad4
         with:
           llm_url: ${{ secrets.OCR_LLM_URL }}
           llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
@@ -160,7 +160,7 @@ jobs:
         id: ocr_review_2
         if: steps.ocr_review_1.outcome == 'failure'
         continue-on-error: true
-        uses: alibaba/open-code-review@579b9319151aa734f2d25df6e59efa59eec5a577
+        uses: alibaba/open-code-review@fabbdb296b0d97e2140ada8d54ca7d6d6d1d7ad4
         with:
           llm_url: ${{ secrets.OCR_LLM_URL }}
           llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
@@ -177,7 +177,7 @@ jobs:
       - name: Run OpenCodeReview (attempt 3 of 3)
         id: ocr_review_3
         if: steps.ocr_review_2.outcome == 'failure'
-        uses: alibaba/open-code-review@579b9319151aa734f2d25df6e59efa59eec5a577
+        uses: alibaba/open-code-review@fabbdb296b0d97e2140ada8d54ca7d6d6d1d7ad4
         with:
           llm_url: ${{ secrets.OCR_LLM_URL }}
           llm_auth_token: ${{ secrets.OCR_LLM_AUTH_TOKEN }}
@@ -196,7 +196,7 @@ jobs:
         # single existing marker comment (found by its tag) instead of
         # adding one comment per failed attempt.
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber =
@@ -253,7 +253,7 @@ jobs:
         # stale "no review delivered" notice). Remove it so the pull request
         # state stays truthful; matched only on the bot's own tagged comment.
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber =
