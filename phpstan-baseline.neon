@@ -373,33 +373,9 @@ parameters:
 			path: includes/Rest_Editor_Content_Support.php
 
 		-
-			message: '#^Method Npcink_Toolbox\\Rest_Editor_Media_Alt\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\<int, array\<string, string\>\|int\>\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/Rest_Editor_Media_Alt.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Rest_Editor_Media_Alt\:\:editor_article_image_visual_evidence\(\) should return array\<int, array\<string, mixed\>\> but returns array\<string, array\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/Rest_Editor_Media_Alt.php
-
-		-
 			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
-			path: includes/Rest_Editor_Media_Alt.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between ''recognition_required'' and ''recognition_required'' will always evaluate to true\.$#'
-			identifier: identical.alwaysTrue
-			count: 1
-			path: includes/Rest_Editor_Media_Alt.php
-
-		-
-			message: '#^Ternary operator condition is always false\.$#'
-			identifier: ternary.alwaysFalse
-			count: 2
 			path: includes/Rest_Editor_Media_Alt.php
 
 		-
