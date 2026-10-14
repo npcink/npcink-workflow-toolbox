@@ -109,6 +109,8 @@ $before_attachment_id = absint( get_post_thumbnail_id( $post_id ) );
 $attachment_id        = toolbox_local_featured_smoke_create_attachment();
 
 $request = new WP_REST_Request( 'POST', '/npcink-toolbox/v1/local-admin-consent/featured-image' );
+$smoke_had_logged_in_cookie      = defined( 'LOGGED_IN_COOKIE' ) && array_key_exists( LOGGED_IN_COOKIE, $_COOKIE );
+$smoke_previous_logged_in_cookie = $smoke_had_logged_in_cookie ? $_COOKIE[ LOGGED_IN_COOKIE ] : null;
 // Model the same present-admin browser request required by the route guard.
 if ( defined( 'LOGGED_IN_COOKIE' ) ) {
 	$_COOKIE[ LOGGED_IN_COOKIE ] = 'smoke-present-admin';
@@ -127,7 +129,17 @@ $request->set_body_params(
 	)
 );
 
-$response = rest_do_request( $request );
+try {
+	$response = rest_do_request( $request );
+} finally {
+	if ( defined( 'LOGGED_IN_COOKIE' ) ) {
+		if ( $smoke_had_logged_in_cookie ) {
+			$_COOKIE[ LOGGED_IN_COOKIE ] = $smoke_previous_logged_in_cookie;
+		} else {
+			unset( $_COOKIE[ LOGGED_IN_COOKIE ] );
+		}
+	}
+}
 $status   = absint( $response->get_status() );
 $data     = $response->get_data();
 

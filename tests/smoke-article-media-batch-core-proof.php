@@ -169,6 +169,8 @@ toolbox_article_media_batch_smoke_assert( class_exists( 'WP_REST_Request' ) && f
 toolbox_article_media_batch_smoke_assert( toolbox_article_media_batch_smoke_admin_user_id() > 0, 'A local administrator is available.' );
 toolbox_article_media_batch_smoke_assert( class_exists( '\Npcink_Toolbox\Provider_Client' ) && class_exists( '\Npcink_Toolbox\Settings' ), 'Toolbox provider client classes are loaded.' );
 toolbox_article_media_batch_smoke_assert( function_exists( 'npcink_abilities_toolkit_get_registered' ) && function_exists( 'wp_get_ability' ), 'WordPress Abilities API registries are available.' );
+$definitions = npcink_abilities_toolkit_get_registered();
+$definitions = is_array( $definitions ) ? $definitions : array();
 
 foreach (
 	array(
@@ -180,6 +182,10 @@ foreach (
 	) as $ability_id
 ) {
 	toolbox_article_media_batch_smoke_assert( is_object( wp_get_ability( $ability_id ) ), "{$ability_id} is registered." );
+	toolbox_article_media_batch_smoke_assert(
+		isset( $definitions[ $ability_id ] ) && is_array( $definitions[ $ability_id ] ) && is_callable( $definitions[ $ability_id ]['execute_callback'] ?? null ),
+		"{$ability_id} is available through the Toolkit registry."
+	);
 }
 
 $run_id = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'article_media_batch_', true );
