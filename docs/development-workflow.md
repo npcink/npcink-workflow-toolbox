@@ -82,8 +82,17 @@ entrypoints, rerun the three-lane classification regression on the local
 2. **Local Admin Consent featured image.** Run:
 
    ```bash
-   WP_CLI_BIN=/opt/homebrew/bin/wp composer smoke:local-featured-image
+   WP_PATH="/path/to/local/site/app/public" \
+   WP_CLI_BIN=/opt/homebrew/bin/wp \
+   WP_CLI_PHP="/path/to/local/php" \
+   WP_DB_SOCKET="/path/to/active/mysql/mysqld.sock" \
+   composer smoke:local-featured-image
    ```
+
+   The PHP and MySQL socket overrides are needed when the LocalWP defaults in
+   `composer.json` point at an older runtime. The smoke fixture supplies the
+   `wp_rest` nonce, same-origin header, and logged-in cookie required by the
+   present-admin route guard.
 
    Expected result: no Core proposal is created; the run records one
    `local_admin_consent.requested` event and one
