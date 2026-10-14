@@ -189,6 +189,7 @@ Start from the active documents below before changing code.
 - [ADR-017: Retire Single-Image Local Write Exceptions](decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 - [ADR-018: Scoped Editor Permissions For The Content-Support Sidebar](decisions/ADR-018-editor-scoped-permissions.md)
 - [ADR-019: Toolbox Owns Local Media Recognition Continuation](decisions/ADR-019-media-recognition-continuation-owner.md)
+- [ADR-020: Use One Local OCR Configuration With A GitHub CI Mirror](decisions/ADR-020-local-ocr-configuration-source.md)
 
 ## Archived Closeouts
 

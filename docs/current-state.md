@@ -80,6 +80,12 @@ writing).
   `## AI Review Triage` section; exceptions go through
   `-- --no-review-because`. A local `ocr review --from origin/master
   --to HEAD` round is optional extra signal.
+- Local OCR wrappers: `composer ocr:config-check` compares local provider/model
+  metadata with the GitHub Actions mirror without exposing secret values;
+  `composer ocr:local` runs the bounded local review. CI remains the exact-head
+  publish gate. On 2026-10-14 the local preview passed, but the Qwen review
+  timed out after 13m43s with zero tokens and zero findings; this is recorded
+  as provider timeout evidence rather than a code finding.
 - Environment-dependent smokes (browser/Cloud/local site) live outside
   `test:all`; see `docs/development-workflow.md` before running them.
   Never pipe a gate through `grep`/`tail` — check the composer exit code.

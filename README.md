@@ -183,6 +183,7 @@ the [documentation index](docs/README.md). Start with:
 - [ADR-014: Current-Article Multi-Link Editor Transaction](docs/decisions/ADR-014-current-article-multi-link-editor-transaction.md)
 - [ADR-017: Retire Single-Image Local Write Exceptions](docs/decisions/ADR-017-retire-single-image-local-write-exceptions.md)
 - [ADR-018: Scoped Editor Permissions For The Content-Support Sidebar](docs/decisions/ADR-018-editor-scoped-permissions.md)
+- [ADR-020: Local OCR Configuration Source](docs/decisions/ADR-020-local-ocr-configuration-source.md)
 
 The documentation index also tracks key detail records that static contracts
 expect to stay discoverable from the root README:

@@ -456,6 +456,40 @@ document. Enrolling a repository means:
 The template pins `alibaba/open-code-review@v1.12.10`. Bump the pin
 deliberately, the same way any other CI dependency is bumped.
 
+### Local-first configuration and CI mirror - 2026-10-13
+
+The maintainer's local OpenCodeReview configuration is the source of truth for
+local review. Use the Toolbox wrappers from the repository root:
+
+```bash
+composer ocr:config-check
+composer ocr:local
+```
+
+`ocr:local` reads the active provider and model from
+`~/.opencodereview/config.json` (or `OCR_CONFIG_PATH`) and runs a bounded
+`origin/master..HEAD` review. It never prints provider keys. The local review
+is an early signal; it does not replace the exact-head GitHub delivery gate in
+the publisher.
+
+GitHub Actions cannot read the maintainer's filesystem, so `OCR_LLM_MODEL`,
+`OCR_LLM_USE_ANTHROPIC`, `OCR_LLM_URL`, and `OCR_LLM_AUTH_TOKEN` remain a
+separate CI mirror. `ocr:config-check` compares the non-secret model/flag
+metadata and reports the two secret names and update timestamps without
+reading or printing their values. After a local credential or endpoint
+rotation, synchronize the GitHub secrets explicitly and rerun the check.
+
+This arrangement intentionally does not introduce a self-hosted runner or a
+new provider-secret store. A GitHub Runner network failure still blocks the
+publisher until CI connectivity is restored or a documented review exception
+is recorded.
+
+Operational evidence on 2026-10-14: the local preview selected four source
+files successfully, but the Qwen review group and per-file fallbacks all
+timed out after 13m43s with zero provider tokens and zero findings. The result
+was retained under `/tmp` for diagnosis; this does not count as a delivered
+review and does not change the CI gate.
+
 ### Layer 3 - Eval-lab triad pre-publish evidence (optional)
 
 Large Toolbox pull requests - cluster splits, multi-module refactors,

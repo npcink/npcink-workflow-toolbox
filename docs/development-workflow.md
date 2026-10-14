@@ -104,6 +104,29 @@ This gate is not a new product feature. Do not add summary/category/tag
 generation, a second write path, a local queue, workflow runtime, Cloud
 WordPress writes, or Core final execution to satisfy it.
 
+## Local OpenCodeReview Lane
+
+Use the local machine configuration for an early review before publishing:
+
+```bash
+composer ocr:config-check
+composer ocr:local
+```
+
+The command reads `~/.opencodereview/config.json`, or the path supplied through
+`OCR_CONFIG_PATH`, and keeps provider credentials out of output and source
+control. The default review is the bounded `origin/master..HEAD` range; pass
+explicit `ocr review` flags after `composer ocr:local --` when a different
+range or format is needed.
+
+The local lane does not replace the publisher's exact-head GitHub review gate.
+GitHub Actions has an isolated filesystem, so its model variable and secrets
+are a separately synchronized mirror. `composer ocr:config-check` validates
+the model/flag values and secret presence, and shows only secret update
+timestamps. It cannot compare secret contents because GitHub never returns
+them. After rotating the local endpoint or key, update the GitHub secrets and
+rerun the check before publishing.
+
 ## Commit Scope Gate
 
 Before staging, inspect the worktree:
