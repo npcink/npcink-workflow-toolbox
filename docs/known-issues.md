@@ -15,10 +15,14 @@ with the closing commit or PR for one release cycle, then prune.
 
 - **Next-phase actions for the following session** are consolidated in the
   [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md):
-  browser verification of PRs #257–#263, real hold-comment calibration
-  feeding Cloud intent scheduling (highest value; framework ready in eval-lab
-  #110), the ③ media-ALT adoption gate (needs ~1 week of production use),
-  the PHPStan ratchet.
+  real hold-comment calibration feeding Cloud intent scheduling (highest value;
+  framework ready in eval-lab #110), the ③ media-ALT adoption gate (needs
+  ~1 week of production use), the PHPStan ratchet, and the remaining cluster
+  splits. Site Check browser verification is green, and the internal-link
+  review-only no-write/fail-closed assertions are green; the full internal-link
+  smoke remains blocked because the local Cloud Addon returns HTTP 502 for
+  candidate evidence, so the candidate/Apply path needs a healthy Cloud
+  runtime before it can be accepted.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **User-facing UX audit (2026-10-12) is in closeout.** The audit found four
