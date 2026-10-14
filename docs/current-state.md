@@ -51,7 +51,7 @@ writing).
   `Admin_Page_Site_Ops_Panel.php` holds the extracted Site Check render
   cluster (parent class).
 - `includes/Rest_Editor_Content_Support.php` — editor content-support
-  service (~3.0k lines) plus seven static sibling clusters and the
+  service (~3.0k lines) plus eight static sibling clusters and the
   `Rest_Editor_Media_Alt` instance service over the shared
   `Rest_Editor_Flow_Cache` base; only the summary/taxonomy cached-flow
   orchestrators remain inside the facade.

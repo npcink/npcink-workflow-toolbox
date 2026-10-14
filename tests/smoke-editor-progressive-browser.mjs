@@ -257,6 +257,7 @@ const baseUrl = env('WP_BASE_URL', 'https://npcink.local').replace(/\/$/, '');
 const requestedPostId = process.env.POST_ID || '';
 const internalLinkBatchSmoke = process.env.NPCINK_INTERNAL_LINK_BATCH_SMOKE === '1';
 const requireInternalLinkApply = process.env.NPCINK_INTERNAL_LINK_REQUIRE_APPLY === '1';
+const allowUnconfiguredCloud = process.env.NPCINK_INTERNAL_LINK_ALLOW_UNCONFIGURED_CLOUD === '1';
 const nativeSaveSmoke = process.env.NPCINK_INTERNAL_LINK_NATIVE_SAVE_SMOKE === '1';
 const fixtureSourcePostId = parseInt(env('NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID', '0'), 10) || 0;
 let activePostId = requestedPostId;
@@ -299,8 +300,13 @@ try {
 		if (message.type() === 'error') consoleErrors.push(message.text());
 	});
 	page.on('pageerror', (error) => consoleErrors.push(error.message || String(error)));
-	page.on('response', (response) => {
-		if (response.status() >= 400) networkErrors.push({ status: response.status(), url: response.url() });
+	page.on('response', async (response) => {
+		if (response.status() >= 400) {
+			const entry = { status: response.status(), url: response.url(), code: '' };
+			networkErrors.push(entry);
+			const data = await response.json().catch(() => ({}));
+			entry.code = typeof data.code === 'string' ? data.code : '';
+		}
 	});
 	page.on('request', (request) => {
 		const url = request.url();
@@ -472,7 +478,18 @@ try {
 			const screenshotPath = `${artifactDir}/editor-internal-link-batch-${activePostId}.png`;
 			await page.screenshot({ path: screenshotPath, fullPage: true });
 			const toolboxNetworkErrors = networkErrors.filter((entry) => /npcink-toolbox|npcink-cloud-addon/i.test(entry.url));
-			assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
+			const cloudUnavailable = internalLinkSection.retrieval_status === 'cloud_unavailable'
+				|| internalLinkSection.candidate_source === 'cloud_unavailable';
+			if (allowUnconfiguredCloud && cloudUnavailable && applicableCount === 0) {
+				const expectedErrors = toolboxNetworkErrors.filter((entry) => entry.status === 400
+					&& entry.code === 'cloud_runtime_unconfigured'
+					&& new URL(entry.url).pathname === '/wp-json/npcink-toolbox/v1/agent-feedback');
+				assert(expectedErrors.length === toolboxNetworkErrors.length, 'Unconfigured-Cloud acceptance permits only the exact feedback transport configuration error.');
+				assert(wpPostContent(activePostId) === databaseContentBefore, 'Cloud-unavailable review leaves WordPress content unchanged.');
+				pass('Fail-closed acceptance only: Cloud retrieval, feedback ingestion, and editor Apply remain unverified.');
+			} else {
+				assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
+			}
 			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
 				post_id: parseInt(activePostId, 10),
 				http_status: internalLinkResponse.status(),

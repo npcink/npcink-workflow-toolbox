@@ -18,8 +18,7 @@ with the closing commit or PR for one release cycle, then prune.
   browser verification of PRs #257–#263, real hold-comment calibration
   feeding Cloud intent scheduling (highest value; framework ready in eval-lab
   #110), the ③ media-ALT adoption gate (needs ~1 week of production use),
-  the internal-link cluster split with its S2 server-side URL-rewrite
-  follow-up, and the PHPStan ratchet.
+  the PHPStan ratchet.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **User-facing UX audit (2026-10-12) is in closeout.** The audit found four
@@ -136,6 +135,13 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **Internal-link candidate cluster and S2 URL fallback — closed 2026-10-14.**
+  Candidate shaping, Toolkit delegation, graph evidence, and exact-anchor
+  validation now live in `Rest_Editor_Internal_Links`; server-side URL
+  normalization accepts the Toolkit artifact `target_ref.url`,
+  `source_candidate_ref`, and nested `source.target_url`/`source.url` shapes
+  before local published-post verification.
 
 - **UX audit primary fixes — closed 2026-10-13 (PRs #257–#263).** Cloud
   readiness and dependency copy, Site Check default visibility, batch failure

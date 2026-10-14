@@ -482,6 +482,7 @@ require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Writing_Pack_Shaping.ph
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Progressive_Recommendations.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Media_Alt.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Internal_Links.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Paragraph_Check.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Audio_Text.php';
@@ -646,6 +647,8 @@ $links = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'inter
 npcink_toolbox_editor_flow_assert( isset( $links['data'] ), 'Internal links return a flow response even without the Toolkit resolver.' );
 npcink_toolbox_editor_flow_assert_flow_contract( $links['data'], 'internal_links', 'Internal links' );
 npcink_toolbox_editor_flow_assert( isset( $links['data']['sections']['internal_links'] ) && is_array( $links['data']['sections']['internal_links'] ), 'Internal links fill their section without a fatal.' );
+npcink_toolbox_editor_flow_assert( 'https://example.test/toolkit-target/' === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_safe_candidate_url( array( 'source' => array( 'target_url' => 'https://example.test/toolkit-target/' ) ) ), 'Internal-link service resolves the Toolkit artifact source.target_url fallback on the server.' );
+npcink_toolbox_editor_flow_assert( 'https://example.test/toolkit-url/' === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_safe_candidate_url( array( 'source' => array( 'url' => 'https://example.test/toolkit-url/' ) ) ), 'Internal-link service resolves the Toolkit artifact source.url fallback on the server.' );
 
 // 7. Image candidates fail closed when Cloud transport is unavailable.
 $images = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'image_candidates' ) + $npcink_toolbox_editor_flow_draft );

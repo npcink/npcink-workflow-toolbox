@@ -72,6 +72,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Summary_Terms.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Writing_Pack_Shaping.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Progressive_Recommendations.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Media_Alt.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Internal_Links.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Content_Support.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Content_Format.php';

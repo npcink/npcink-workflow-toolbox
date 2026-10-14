@@ -469,6 +469,12 @@ NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/
 composer smoke:editor-internal-link-batch-browser
 ```
 
+On a local site without a configured Cloud runtime, add
+`NPCINK_INTERNAL_LINK_ALLOW_UNCONFIGURED_CLOUD=1`. That mode accepts only the
+exact `cloud_runtime_unconfigured` feedback response, proves the editor and
+database remain unchanged, and reports the run as fail-closed acceptance; it
+does not claim Cloud retrieval, ranking, feedback ingestion, or Apply coverage.
+
 Set `NPCINK_INTERNAL_LINK_REQUIRE_APPLY=1` for a content-rich article that must
 produce at least one exact eligible source match. The smoke records HTTP status,
 retrieval status, candidate source/count, applicable/applied/rejected counts,
