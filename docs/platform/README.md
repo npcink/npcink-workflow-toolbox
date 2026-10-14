@@ -88,6 +88,7 @@ Start here before multi-repository design or implementation:
 - [AI Change Envelope Template](../ai-change-envelope-template.md)
 - [Pull Request Publishing Standard v1](pr-publishing-standard-v1.md)
 - [AI Code Review Standard v1](ai-code-review-standard-v1.md)
+- [ADR-020: Local OCR Configuration Source](../decisions/ADR-020-local-ocr-configuration-source.md)
 - [AI Code Review Effectiveness Metrics](ai-code-review-metrics.md) — monthly three-number record (delivery rate, findings by severity, triage ratio) with the hand-collection recipe; keeps the advisory review's worth answerable from evidence.
 - [Git Transport Fallback Playbook v1](git-transport-fallback-playbook-v1.md) — how to keep publishing branches, pull requests, and merges when github.com git transports fail while api.github.com stays reachable: diagnosis matrix, Git Data API replay, server-side merges, and the local worktree protocol.
 - [Cloud Intent Scheduling Brief - 2026-10-10](cloud-intent-scheduling-brief-2026-10-10.md) — the confirmed scheduling input for the two Cloud-hosted intents (comment moderation classification first, flagged media safety status as a rider), with response shapes, hard rules, pre-launch calibration thresholds, and acceptance definitions; authoritative contracts stay in the Toolbox review-set docs it links.

@@ -41,6 +41,8 @@
     "test:cloud-gate-evidence": "php tests/cross-repo-cloud-gate-behavior.php",
     "test:quality-matrix-paths": "php tests/cross-repo-quality-matrix-path-behavior.php",
     "test:ai-review-gate": "bash scripts/verify-ai-review.sh --self-test",
+    "ocr:local": "bash scripts/ocr-local.sh",
+    "ocr:config-check": "bash scripts/check-ocr-config.sh",
     "test:quiet": "php tests/run.php --quiet",
     "test:editor": "php tests/run.php --quiet --filter=Editor",
     "test:translations": "php tests/run.php --quiet --filter=translation",
