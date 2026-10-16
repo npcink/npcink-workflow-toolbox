@@ -47,6 +47,15 @@ Relevanssi、ElasticPress、WP Vector Search、SemantiQ Search、LOOM 和 Semant
 历史会话报告的验证包括 `composer test:all`、PHPStan、PHPCS、内链 JS 行为测试和
 `git diff --check`；当前分支 HEAD 为 `216e102`（`test: accept current internal-link empty state copy`），工作树在本次文档编辑前保持干净。
 
+### 1.4 2026-10-16 阶段 0 实测
+
+- 本地五插件站通过 PHP 内置服务器运行在 `http://127.0.0.1:8090`，首页返回 HTTP 200；五个 Npcink 插件均已激活。
+- 公网 Cloud `https://cloud.npc.ink/health/live` 返回 HTTP 200，说明 Cloud 公网存活；这不等于当前 WordPress 站点已授权。
+- 本地 Cloud Addon 只读状态为 `configured=false`、`verified=false`、`site_knowledge_delivery_enabled=false`，因此编辑器真实内链请求显示 Site Knowledge temporarily unavailable，候选为空。
+- `composer smoke:editor-internal-link-batch-browser` 在关闭未配置 Cloud 例外时按预期失败于 Cloud/Addon 错误；它没有进入真实候选、排序或 Apply 验证。配置完成后必须用同一 smoke 重跑，并确认 `related_content` 与 `internal_links` 都有 Cloud 证据。
+
+在本地 Addon 完成 Portal 授权或高级恢复配置、连接验证并开启 Site Knowledge delivery 前，不得冻结生产排序 baseline，也不得把空候选写成排序质量结论。
+
 ## 2. 当前项目事实
 
 ### 2.1 所有权和写入边界
