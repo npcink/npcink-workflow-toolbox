@@ -468,7 +468,7 @@ try {
 					fail('The content-rich article did not return an exact source match required for Apply.');
 				}
 				pass('Review-only acceptance allows no Apply when the response has no exact source match.');
-				const emptyStateCount = await page.locator('text=/No internal link candidates returned|没有安全、具体且可匹配的锚文本|只能复制链接或打开文章检查|暂未找到/').count();
+				const emptyStateCount = await page.locator('text=/No internal link candidates returned|没有安全、具体且可匹配的锚文本|只能复制链接或打开文章检查|暂未找到|暂无可直接插入项/').count();
 				assert(emptyStateCount > 0 || candidateCount === 0, 'Weak or empty internal-link results show a bounded Chinese empty/review-only state.');
 				assert(await page.getByRole('button', { name: /应用所选内链|Apply selected internal links/i }).isDisabled().catch(() => true), 'Batch Apply stays unavailable without an exact source match.');
 			}
