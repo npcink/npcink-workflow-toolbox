@@ -77,6 +77,7 @@ Start from the active documents below before changing code.
 - [Session Handoff 2026-10-11 — Hardening, Release, Next Phase](session-handoff-2026-10-11-hardening-release-next-phase.md)
 - [Session Handoff 2026-10-12 — UX Audit Findings](session-handoff-2026-10-12-ux-audit-findings.md)
 - [Session Handoff 2026-10-12 — Batch AI Review Sets](session-handoff-2026-10-12-batch-ai-review-sets.md)
+- [Session Handoff 2026-10-16 — Internal-Link And Related-Content History](session-handoff-2026-10-16-internal-link-related-content-history.md)
 
 ## Product Surfaces
 
@@ -135,6 +136,7 @@ Start from the active documents below before changing code.
 - [Media ALT Governed Write Implementation Gate](media-alt-governed-write-implementation-gate.md)
 - [Media Governance Development Lessons 2026-09](platform/media-governance-development-lessons-2026-09.md)
 - [Site Check Operator Loop](full-site-insights-operator-loop.md)
+- [AI 站点体检与效果验证：讨论归纳及分阶段规划](ai-site-check-effect-verification-plan-2026-10-14.md) — proposed plan, not an implemented runtime or write path.
 - [Site Check Decision Entry Closeout](archive/2026-06/site-check-decision-entry-closeout-2026-06-30.md)
 - [Site Check Visibility Reassessment](archive/2026-07/site-check-visibility-reassessment-2026-07-10.md)
 - [Comment Moderation Review Set](comment-moderation-review-set.md)

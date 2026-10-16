@@ -279,6 +279,7 @@ add_filter(
 		);
 		if ( 'internal_links' === $intent ) {
 			$captured_internal_link_source_passages = is_array( $runtime_payload['input']['source_passages'] ?? null ) ? $runtime_payload['input']['source_passages'] : array();
+			$item['title']              = $internal_link_phrase;
 			$item['anchor_or_context'] = 0 < count( preg_grep( '/文章内容/u', $captured_internal_link_source_passages ) ) ? '文章内容' : $internal_link_phrase;
 		}
 		return array(
@@ -351,7 +352,7 @@ toolbox_editor_review_smoke_assert( 'recommendation_candidate.v1' === (string) (
 toolbox_editor_review_smoke_assert( ! empty( $internal_projection ), 'Internal-link section returns recommendation candidate projections.' );
 toolbox_editor_review_smoke_assert( 'recommendation_candidate.v1' === (string) ( $internal_projection[0]['contract'] ?? '' ), 'Internal-link projection uses recommendation_candidate.v1.' );
 toolbox_editor_review_smoke_assert( 'internal_link' === (string) ( $internal_projection[0]['kind'] ?? '' ), 'Internal-link projection keeps the internal_link candidate kind.' );
-toolbox_editor_review_smoke_assert( 'operator_confirmed_visible_editor_apply' === (string) ( $internal_projection[0]['action_policy'] ?? '' ), 'Internal-link projection requires an operator-confirmed visible editor apply.' );
+toolbox_editor_review_smoke_assert( 'operator_confirmed_visible_editor_apply' === (string) ( $target_projection[0]['action_policy'] ?? '' ), 'Internal-link projection requires an operator-confirmed visible editor apply for the public target.' );
 toolbox_editor_review_smoke_assert( 'human_editor' === (string) ( $internal_links['owner_label'] ?? '' ), 'Internal-link section names the human editor as the placement owner.' );
 toolbox_editor_review_smoke_assert( 'review_and_apply_to_visible_editor' === (string) ( $internal_links['next_safe_action'] ?? '' ), 'Internal-link section exposes the reviewed visible-editor action.' );
 toolbox_editor_review_smoke_assert( 'current_article_multi_link_result.v1' === (string) ( $internal_transaction['schema'] ?? '' ) && 8 === (int) ( $internal_transaction['max_selected'] ?? 0 ), 'Internal-link section exposes the bounded current-article transaction contract.' );

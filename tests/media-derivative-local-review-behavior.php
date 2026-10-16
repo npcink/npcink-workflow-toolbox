@@ -149,6 +149,7 @@ require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Writing_Pack_Shaping.ph
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Progressive_Recommendations.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Media_Alt.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Surface_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Internal_Links.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Content_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Paragraph_Check.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Audio_Text.php';

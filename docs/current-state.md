@@ -51,7 +51,7 @@ writing).
   `Admin_Page_Site_Ops_Panel.php` holds the extracted Site Check render
   cluster (parent class).
 - `includes/Rest_Editor_Content_Support.php` — editor content-support
-  service (~3.0k lines) plus seven static sibling clusters and the
+  service (~3.0k lines) plus eight static sibling clusters and the
   `Rest_Editor_Media_Alt` instance service over the shared
   `Rest_Editor_Flow_Cache` base; only the summary/taxonomy cached-flow
   orchestrators remain inside the facade.
@@ -65,6 +65,9 @@ writing).
   `cloud-bridge-contract-table.json`, `fixed-button-contract-table.json` —
   machine-readable contract truth.
 - `docs/known-issues.md` — the single open-debt ledger.
+- [AI Site Check and Effect Verification Plan](ai-site-check-effect-verification-plan-2026-10-14.md)
+  — discussion record and proposed phased plan for read-only analysis,
+  reviewed methods, and black-box rechecks; no new runtime or write authority.
 
 ## Verification
 
@@ -86,16 +89,25 @@ writing).
   publish gate. On 2026-10-14 the local preview passed, but the Qwen review
   timed out after 13m43s with zero tokens and zero findings; this is recorded
   as provider timeout evidence rather than a code finding.
+- Browser closeout on 2026-10-14: `smoke-site-ops-insights-browser` passed
+  against `https://magick-ai.local` with the fourth Site Check tab, all
+  read-only sub-tabs, narrow-layout checks, and no Cloud/Core execution calls.
+  The internal-link review-only smoke passed its no-write and fail-closed
+  assertions before stopping at the expected environment boundary; the full
+  smoke remains blocked because Cloud-backed candidate evidence returned HTTP
+  502 `cloud_runtime_request_failed` from the local Addon.
 - Environment-dependent smokes (browser/Cloud/local site) live outside
   `test:all`; see `docs/development-workflow.md` before running them.
   Never pipe a gate through `grep`/`tail` — check the composer exit code.
 
 ## Open Debt (top items)
 
-0. The UX delivery arc in PRs #257–#263 is merged. The remaining next-phase
-   actions are browser verification of those changes, real hold-comment
-   calibration for Cloud scheduling (highest value), the ③ media-ALT adoption
-   gate (needs ~1 week of production use), and the carried cluster splits.
+0. The UX delivery arc in PRs #257–#263 is merged. Browser verification is
+   complete for Site Check and review-only internal-link behavior; a local
+   Cloud Addon HTTP 502 still blocks a candidate-evidence/Apply-path check.
+   Remaining next-phase actions are real hold-comment calibration for Cloud
+   scheduling (highest value), the ③ media-ALT adoption gate (needs ~1 week
+   of production use), the PHPStan ratchet, and the carried cluster splits.
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
    draft) still inside the 10.6k main bundle.
 2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
