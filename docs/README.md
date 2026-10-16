@@ -77,6 +77,7 @@ Start from the active documents below before changing code.
 - [Session Handoff 2026-10-11 — Hardening, Release, Next Phase](session-handoff-2026-10-11-hardening-release-next-phase.md)
 - [Session Handoff 2026-10-12 — UX Audit Findings](session-handoff-2026-10-12-ux-audit-findings.md)
 - [Session Handoff 2026-10-12 — Batch AI Review Sets](session-handoff-2026-10-12-batch-ai-review-sets.md)
+- [Session Handoff 2026-10-16 — Internal-Link And Related-Content History](session-handoff-2026-10-16-internal-link-related-content-history.md)
 
 ## Product Surfaces
 
