@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-13.
+Last reviewed: 2026-10-17.
 
 **Next session: read
 [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md)
@@ -96,10 +96,11 @@ writing).
   matcher CPU bottleneck on the actual M4-backed Addon route. Related-content
   and internal-link queries passed three consecutive rounds; editor
   review/copy, disposable-draft Apply/Undo, and native-save feedback passed.
-  Natural samples can still be review-only because Toolkit currently matches
-  target titles or author selections, not Cloud anchor hints. See
+  Toolkit now consumes verified Cloud anchor hints (Toolkit PR #262).
+  The editor projects live Apply safety, including existing links and stale text,
+  into readiness without changing the frozen ranking baseline. See
   [Ranking Baseline v1](recommendation-ranking-baseline-v1.md) for the separate
-  ranking versions, bounded metadata, evidence, and remaining contract gap.
+  ranking versions, bounded metadata, evidence, and current limitations.
 - Environment-dependent smokes (browser/Cloud/local site) live outside
   `test:all`; see `docs/development-workflow.md` before running them.
   Never pipe a gate through `grep`/`tail` — check the composer exit code.
@@ -108,8 +109,9 @@ writing).
 
 0. The UX delivery arc in PRs #257–#263 is merged. Browser verification is
    complete for Site Check. Recommendation stage 0 now passes through the
-   actual M4-backed Cloud route; the remaining natural-article Apply limitation
-   is Toolkit anchor-hint consumption, documented in Ranking Baseline v1.
+   actual M4-backed Cloud route. Toolkit anchor-hint consumption is fixed by
+   Toolkit PR #262; live editor
+   readiness now reuses Apply checks as documented in Ranking Baseline v1.
    Remaining next-phase actions are real hold-comment calibration for Cloud
    scheduling (highest value), the ③ media-ALT adoption gate (needs ~1 week
    of production use), the PHPStan ratchet, and the carried cluster splits.

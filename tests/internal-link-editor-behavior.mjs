@@ -254,11 +254,11 @@ const feedbackContext = helpers.recommendationFeedbackContext({
 			recommendation_candidates: [
 				{
 					id: 'feedback-alpha',
-					anchor_or_context: '内容工作流',
+					anchor_or_context: 'Alpha',
 					can_apply_to_editor: true,
 					candidate_source: 'cloud_vector',
 					target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: 'https://example.test/alpha/' },
-					source_match: { block_client_id: 'batch-block', matched_text: '内容工作流' },
+					source_match: alphaCandidate.sourceMatch,
 				},
 				{
 					id: 'feedback-weak',
@@ -272,7 +272,7 @@ const feedbackContext = helpers.recommendationFeedbackContext({
 			],
 		},
 	},
-}, 'internal_links');
+}, 'internal_links', [batchBlock], richText);
 assert.equal(feedbackContext.candidateCount, 2);
 assert.equal(feedbackContext.applicableCount, 1);
 for (const [candidateSource, retrievalStatus, expectedCount] of [
@@ -288,11 +288,11 @@ for (const [candidateSource, retrievalStatus, expectedCount] of [
 		recommendation_candidates: [{
 			id: 'cached-eligibility', can_apply_to_editor: true,
 			candidate_source: candidateSource,
-			anchor_or_context: '内容工作流',
+			anchor_or_context: 'Alpha',
 			target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: 'https://example.test/alpha/' },
-			source_match: { block_client_id: 'batch-block', matched_text: '内容工作流' },
+			source_match: alphaCandidate.sourceMatch,
 		}],
-	} } }, 'internal_links');
+	} } }, 'internal_links', [batchBlock], richText);
 	assert.equal(context.candidateCount, 1, 'Reference candidates remain available');
 	assert.equal(context.applicableCount, expectedCount, 'Cached Apply flags cannot override retrieval evidence');
 }
@@ -334,6 +334,47 @@ assert.equal(overLimitResult.items[0].reason_codes[0], 'selection_limit_exceeded
 const fallbackResult = helpers.prepareInternalLinkBatchApplication([{ ...alphaCandidate, candidateSource: 'local_fallback', retrievalStatus: 'no_cloud_evidence' }], [batchBlock], richText);
 assert.equal(fallbackResult.applied_count, 0);
 assert.equal(fallbackResult.items[0].reason_codes[0], 'fallback_must_not_be_labeled_vector');
+
+// The visible readiness projection must reuse Apply, including format-only edits.
+const liveCandidate = { ...alphaCandidate, candidateRank: 6, scoreBucket: 'high' };
+const linkedLiveBlock = { ...batchBlock, attributes: { content: '<a href="https://outside.test/reference">Alpha</a> connects Beta clearly.' } };
+const liveCases = [
+ { blocks: [batchBlock], candidate: liveCandidate, reason: '' },
+ { blocks: [linkedLiveBlock], candidate: liveCandidate, reason: 'range_already_linked' },
+ { blocks: [batchBlock, { clientId: 'existing-target', attributes: { content: '<a href="https://example.test/alpha/#part">Existing reference</a>' } }], candidate: liveCandidate, reason: 'target_already_linked' },
+ { blocks: [{ ...batchBlock, attributes: { content: 'Alpha now connects Beta clearly.' } }], candidate: liveCandidate, reason: 'stale_editor_block' },
+ { blocks: [batchBlock], candidate: { ...liveCandidate, sourceMatch: { ...liveCandidate.sourceMatch, block_name: 'core/code' } }, reason: 'code_block_match_not_eligible' },
+ { blocks: [batchBlock], candidate: { ...liveCandidate, targetUrl: 'https://outside.test/target' }, reason: 'invalid_internal_url' },
+ { blocks: [batchBlock], candidate: { ...liveCandidate, candidateSource: 'local_fallback', retrievalStatus: 'no_cloud_evidence' }, reason: 'fallback_must_not_be_labeled_vector' },
+ { blocks: [batchBlock, ...densityBlocks.slice(1)], candidate: liveCandidate, reason: 'article_link_density_reached' },
+ { blocks: [longBlock], candidate: { ...liveCandidate, ...longCandidate, anchorText: 'Workflow' }, reason: 'block_link_density_reached' },
+];
+for (const { blocks: liveBlocks, candidate: current, reason } of liveCases) {
+ const before = JSON.stringify({ liveBlocks, current });
+ const readiness = helpers.internalLinkCandidateEligibility(current, liveBlocks, richText);
+ const actual = helpers.prepareInternalLinkBatchApplication([current], liveBlocks, richText);
+ assert.equal(readiness.canApply, actual.applied_count === 1, 'Readiness agrees with Apply: ' + reason);
+ assert.equal(readiness.reasonCodes[0] || '', reason);
+ assert.equal(JSON.stringify({ liveBlocks, current }), before, 'Readiness never edits blocks, rank or candidate order');
+}
+assert.equal(helpers.internalLinkCandidateEligibility({ ...liveCandidate, candidateRelevance: 'weak' }, [batchBlock], richText).canApply, false);
+assert.equal(helpers.internalLinkCandidateEligibility({ ...liveCandidate, targetPostType: 'attachment' }, [batchBlock], richText).canApply, false);
+assert.equal(helpers.internalLinkCandidateEligibility(liveCandidate, [batchBlock], undefined).canApply, false);
+assert.equal(helpers.internalLinkCandidateEligibility(liveCandidate, [linkedLiveBlock], richText).canApply, false);
+assert.equal(helpers.internalLinkCandidateEligibility(liveCandidate, [batchBlock], richText).canApply, true, 'Undoing a format-only link restores readiness');
+const livePayload = { sections: { internal_links: {
+ ranking_version: 'internal_links.v1', candidate_source: 'cloud_vector', retrieval_status: 'cloud_vector_evidence',
+ recommendation_candidates: [{ id: 'alpha', label: 'Alpha target', anchor_or_context: 'Alpha', can_apply_to_editor: true,
+  target_ref: { post_id: 3001, status: 'publish', post_type: 'post', url: liveCandidate.targetUrl }, source_match: liveCandidate.sourceMatch }],
+} } };
+assert.equal(helpers.recommendationFeedbackContext(livePayload, 'internal_links', [batchBlock], richText).applicableCount, 1);
+assert.equal(helpers.recommendationFeedbackContext(livePayload, 'internal_links', [linkedLiveBlock], richText).applicableCount, 0);
+const liveImpression = helpers.recommendationImpressionFeedbackPayload(livePayload, 'internal_links', 'live-session', [linkedLiveBlock], richText);
+assert.ok(liveImpression.source_reason_codes.includes('applicable_count_0'));
+assert.equal(liveImpression.ranking_version, 'internal_links.v1');
+assert.equal(liveImpression.evidence_ref_ids.length, 0);
+assert.equal(/"(?:content|anchor_text|source_match|blocks)"\s*:/.test(JSON.stringify(liveImpression)), false, 'Readiness telemetry stays metadata-only');
+console.log('PASS: live readiness, existing links, editor changes, rank preservation and impression denominator');
 
 console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');
 

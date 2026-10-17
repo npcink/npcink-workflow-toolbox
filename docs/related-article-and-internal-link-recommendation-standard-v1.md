@@ -373,9 +373,15 @@ gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共
 - 没有 `source_match` 时不显示 Apply，只允许复制链接或打开目标文章；
 - 同时要求 `candidate_source=cloud_vector` 和
   `retrieval_status=cloud_vector_evidence`；精确锚点本身不能让 local fallback
-  或 Cloud unavailable 候选变为可应用。REST 的 `can_apply_to_editor`、按钮和
-  impression 中的 applicable 分母必须一致，旧缓存中的可应用标记不能越过证据检查；
+  或 Cloud unavailable 候选变为可应用。REST 的 `can_apply_to_editor` 是基于请求快照的
+  资格上限，浏览器还必须对当前 Gutenberg 富文本运行同一个 Apply engine 的纯预检。
+  “可插入”分组、按钮、有效选择和 impression 的 applicable 分母采用该实时结果；
+  已有链接范围、已链接目标、链接密度、过期正文及其他拒绝结果只保留复制/打开，
+  并展示已有拒绝原因。单纯改变链接格式也必须触发状态刷新；旧缓存标记不能越过检查；
 - Toolbox 只做安全校验和编辑器事务，不重新实现语义关键词推荐算法。
+  预检不改变候选、去重、排序、rank、Top K 或 ranking_version，不把当前块树放进请求或反馈。
+  每条“可插入”表示它可独立应用；多选仍须在点击时重新检查重复目标、重叠范围及合并后密度，
+  并按 ADR-014 返回逐条部分成功/拒绝结果。列表状态不是跳过最终检查的授权。
 
 资格回归包括 `node tests/internal-link-editor-behavior.mjs`，以及本地 WordPress 的
 `wp eval-file tests/smoke-editor-internal-link-eligibility.php`（只读现有公开文章）。
@@ -390,13 +396,23 @@ gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共
 2. 获取 Cloud vector 候选并选择具有精确 `source_match` 的建议；
 3. Apply 后读取数据库，证明 `post_content` 尚未变化；
 4. 由浏览器显式触发 WordPress 原生保存；
-5. 保存成功后再次读取数据库，证明正文此时才变化；
+5. 保存成功后再次读取数据库，证明正文此时才变化且与已审阅的编辑器内容完全一致；
 6. 记录 `internal_link_saved_unchanged` 或
    `internal_link_saved_edited`，并验证它与原 impression 使用同一个
    `recommendation_session`；
 7. 删除临时草稿和登录 helper，不保留正文快照。
 
 Autosave、Toolbox REST 请求和 Apply 本身都不能被计为保存确认。
+复制真实正文时使用 WordPress 要求的 slashing，并在打开编辑器前核对副本正文逐字一致。
+可用真实站点环境下，浏览器 gate 支持
+`POST_ID=18817 NPCINK_INTERNAL_LINK_REQUIRE_APPLY=1 NPCINK_INTERNAL_LINK_LIVE_STATE_SMOKE=1 composer smoke:editor-internal-link-batch-browser`，
+同时检查自然已有链接、同目标重复链接、纯格式编辑后的实时状态、Apply 和 Undo。
+省略 `POST_ID` 并设置 `NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID=18817`、
+`NPCINK_INTERNAL_LINK_NATIVE_SAVE_SMOKE=1` 可验证逐字复制的临时草稿原生保存。
+两种模式均需按开发流程配置 `WP_BASE_URL`、WP-CLI、数据库 socket 和 Node 依赖环境。
+
+Undo 比较完整 Gutenberg 块与属性，并核对数据库未改；旧文章列表/图片/标题的
+惰性格式迁移可能改变序列化 HTML，不能仅据旧 HTML 不同就判定正文恢复失败。
 
 ## 12. 快速排障清单
 

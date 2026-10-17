@@ -18,6 +18,7 @@
 		dedupeInternalLinkCandidates,
 		prepareInternalLinkApplication,
 		prepareInternalLinkBatchApplication,
+		internalLinkCandidateEligibility,
 		internalLinkSelectedText,
 		canUndoInternalLink,
 		canUndoInternalLinkBatch,
@@ -1800,11 +1801,12 @@
 		});
 	}
 
-	function recommendationFeedbackContext(payload, intent) {
+	function recommendationFeedbackContext(payload, intent, editorBlocks = [], richTextApi) {
 		const sections = payload && payload.sections && typeof payload.sections === 'object' ? payload.sections : {};
 		const section = sections[intent] && typeof sections[intent] === 'object' ? sections[intent] : {};
 		const candidates = intent === 'related_content' ? relatedContentCandidateItems(section).slice(0, 8) : internalLinkCandidateItems(section);
-		const applicableCount = candidates.filter((candidate) => candidate && candidate.canApplyToEditor && candidate.candidateRelevance !== 'weak' && candidate.sourceMatch).length;
+		const applicableCount = intent === 'internal_links'
+			? candidates.filter((candidate) => internalLinkCandidateEligibility(candidate, editorBlocks, richTextApi).canApply).length : 0;
 		const retrievalStatus = sanitizeFeedbackAction(section.retrieval_status || section.source_status || 'unknown');
 		const candidateSource = sanitizeFeedbackAction(section.candidate_source || 'unknown');
 		const reasonCodes = [
@@ -1833,10 +1835,10 @@
 		return metadata;
 	}
 
-	function recommendationImpressionFeedbackPayload(payload, intent, sessionId) {
+	function recommendationImpressionFeedbackPayload(payload, intent, sessionId, editorBlocks = [], richTextApi) {
 		const normalizedIntent = String(intent || '').trim() === 'related_content' ? 'related_content' : 'internal_links';
 		const action = normalizedIntent === 'related_content' ? 'related_content_impression' : 'internal_link_impression';
-		const context = recommendationFeedbackContext(payload, normalizedIntent);
+		const context = recommendationFeedbackContext(payload, normalizedIntent, editorBlocks, richTextApi);
 		const eventPayload = editorContentImplicitFeedbackPayload(payload || {}, normalizedIntent, action, 'ignored', [], '', {
 			sourceObjectType: 'recommendation_session',
 			sourceObjectId: sessionId,
@@ -6398,18 +6400,11 @@
 		const selected = actionControls.selected || {};
 		const excludedCandidates = candidates.filter((item) => item.candidateRelevance === 'weak');
 		const visibleCandidates = candidates.filter((item) => excludedCandidates.indexOf(item) < 0).slice(0, 8);
-		const canApplyCandidate = (item) => Boolean(
-			item.canApplyToEditor
-			&& item.candidateRelevance !== 'weak'
-			&& item.sourceMatch
-			&& item.sourceMatch.block_client_id
-			&& item.sourceMatch.matched_text
-			&& item.targetStatus === 'publish'
-			&& ['post', 'page'].indexOf(item.targetPostType) >= 0
-		);
+		const eligibility = new Map(candidates.map((item) => [item, internalLinkCandidateEligibility(item, actionControls.blocks || [], richText)]));
+		const canApplyCandidate = (item) => eligibility.get(item).canApply;
 		const applicableCandidates = visibleCandidates.filter(canApplyCandidate);
 		const referenceCandidates = visibleCandidates.filter((item) => !canApplyCandidate(item));
-		const selectedCandidates = visibleCandidates.filter((item) => selected[String(item.id || '')]);
+		const selectedCandidates = applicableCandidates.filter((item) => selected[String(item.id || '')]);
 		const selectionFull = selectedCandidates.length >= 8;
 		const batchMode = Boolean(actionControls.batchMode);
 		const batchResult = actionControls.result && typeof actionControls.result === 'object' ? actionControls.result : null;
@@ -6432,7 +6427,7 @@
 			const sourcePreview = internalLinkSourcePreview(item && item.sourceMatch);
 			return createElement(
 				'li',
-				{ key, className: 'npcink-toolbox-editor-support__internal-link-item' + (selected[itemId] ? ' is-selected' : '') + (canSelect ? ' is-applicable' : ' is-reference-only') },
+				{ key, 'data-candidate-rank': item.candidateRank, className: 'npcink-toolbox-editor-support__internal-link-item' + (canSelect && selected[itemId] ? ' is-selected' : '') + (canSelect ? ' is-applicable' : ' is-reference-only') },
 				createElement(
 					'div',
 					{ className: 'npcink-toolbox-editor-support__internal-link-main' },
@@ -6464,7 +6459,8 @@
 						sourcePreview.after,
 						sourcePreview.clippedAfter ? '...' : ''
 					) : null,
-					reason ? createElement('p', null, reason) : null
+					reason ? createElement('p', null, reason) : null,
+					!canSelect && eligibility.get(item).reasonCodes.length ? createElement('p', { className: 'npcink-toolbox-editor-support__candidate-policy' }, internalLinkBatchReasonLabel(eligibility.get(item).reasonCodes[0])) : null
 				),
 				createElement(
 					'div',
@@ -7290,6 +7286,11 @@
 
 	function ContentSupportControls() {
 		const postContext = usePostContext();
+		// Keep live rich-text blocks local; request context contains only the bounded text projection.
+		const internalLinkBlocks = useSelect((select) => {
+			const selector = select('core/block-editor');
+			return selector && selector.getBlocks ? selector.getBlocks() : [];
+		}, []);
 		const [running, setRunning] = useState('');
 		const [result, setResult] = useState(null);
 		const [error, setError] = useState('');
@@ -7470,7 +7471,9 @@
 				submitImplicitAgentFeedback(recommendationImpressionFeedbackPayload(
 					result,
 					recommendationIntent,
-					sessionId
+					sessionId,
+					internalLinkBlocks,
+					richText
 				));
 			}, [result, activeFlowIntent, supportView]);
 
@@ -10050,6 +10053,7 @@
 					runningIntent: running,
 					mediaItems: Array.isArray(postContext.media_items) ? postContext.media_items : [],
 				internalLinks: {
+					blocks: internalLinkBlocks,
 					running: internalLinkRunning,
 					status: internalLinkStatus,
 					copy: copyInternalLinkCandidate,
