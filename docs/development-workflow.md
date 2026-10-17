@@ -495,6 +495,15 @@ then reads WordPress again through WP-CLI to prove `post_content` was not
 persisted. Short or weak-candidate articles may finish in the Chinese
 review-only/empty state, but must never enable Apply without an exact match.
 
+Recommendation POSTs made by this harness are annotated with
+`source_reason_codes=developer_smoke` in the test transport. Exclude these
+events from human adoption or gold-set metrics. Configured-Cloud runs require
+an accepted receipt and event identity for every recommendation event, and
+record version, rank/bucket when applicable, retrieval source, rerank state,
+and session correlation without article or anchor text in feedback. Undo
+compares WordPress block serialization and block identities; it does not JSON
+serialize RichTextData's potentially cyclic formatting caches.
+
 To prove the final native-save boundary without modifying a published article,
 reuse the same harness with a disposable draft copied from a known content-rich
 source post:

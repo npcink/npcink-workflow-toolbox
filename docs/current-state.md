@@ -101,6 +101,10 @@ writing).
   into readiness without changing the frozen ranking baseline. See
   [Ranking Baseline v1](recommendation-ranking-baseline-v1.md) for the separate
   ranking versions, bounded metadata, evidence, and current limitations.
+  The [12-article developer regression](archive/2026-10/recommendation-real-article-regression-2026-10-17.md)
+  extends both recommendation families, fixes related-content status/source
+  feedback projection, and records relevance/anchor-quality debt without
+  changing ranking. Developer receipts are not human adoption evidence.
 - Environment-dependent smokes (browser/Cloud/local site) live outside
   `test:all`; see `docs/development-workflow.md` before running them.
   Never pipe a gate through `grep`/`tail` — check the composer exit code.

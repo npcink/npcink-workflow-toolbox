@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import { editorBlockSnapshot } from './editor-block-snapshot.mjs';
 
 import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
 
@@ -379,10 +380,12 @@ console.log('PASS: live readiness, existing links, editor changes, rank preserva
 console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');
 
 const relatedMetadataPayload = { sections: { related_content: {
- ranking_version: 'related_content.v1', retrieval_source: 'cloud_vector', rerank_applied: false,
+ status: 'ready', ranking_version: 'related_content.v1', retrieval_source: 'cloud_vector', rerank_applied: false,
  results: [{ post_id: 4, title: 'One', url: 'https://example.test/one', score_bucket: 'high' }, { post_id: 9, title: 'Two', url: 'https://example.test/two', score_bucket: 'medium' }],
 } } };
 const relatedContext = helpers.recommendationFeedbackContext(relatedMetadataPayload, 'related_content');
+assert.ok(relatedContext.reasonCodes.includes('retrieval_ready'), 'Provider ready status survives the related-content feedback projection');
+assert.ok(relatedContext.reasonCodes.includes('source_cloud_vector'), 'Known metadata retrieval source must not become source_unknown');
 assert.equal(relatedContext.candidateCount, 2, 'Related impressions count their own result shape');
 assert.equal(relatedContext.applicableCount, 0);
 const relatedImpression = helpers.recommendationImpressionFeedbackPayload(relatedMetadataPayload, 'related_content', 'related-session');
@@ -404,3 +407,26 @@ const positionEvent = { handoff_id: 'same-session-copy', ranking_version: 'inter
 assert.notEqual(helpers.implicitAgentFeedbackKey(positionEvent), helpers.implicitAgentFeedbackKey({ ...positionEvent, candidate_rank: 6 }), 'Distinct candidate positions are not deduplicated together');
 assert.equal(helpers.implicitAgentFeedbackKey(positionEvent), helpers.implicitAgentFeedbackKey({ ...positionEvent }), 'Repeated clicks on the same candidate remain deduplicated');
 assert.notEqual(helpers.implicitAgentFeedbackKey({ handoff_id: 'same-session-save', source_reason_codes: ['candidate_rank_2'] }), helpers.implicitAgentFeedbackKey({ handoff_id: 'same-session-save', source_reason_codes: ['candidate_rank_6'] }));
+
+// RichTextData may hold cyclic caches: snapshot the WordPress serialization, not those caches.
+const cyclicRichText = { toHTMLString: () => '<strong><em>Real article text</em></strong>' };
+cyclicRichText.children = { strong: { children: { em: cyclicRichText } } };
+const cyclicBlock = { clientId: 'real-rich-text', name: 'core/paragraph', attributes: { content: cyclicRichText }, innerBlocks: [] };
+const snapshotWp = { data: { select: () => ({ getBlocks: () => [cyclicBlock] }) }, blocks: { serialize: (blocks) => blocks[0].attributes.content.toHTMLString() } };
+assert.throws(() => JSON.stringify(cyclicBlock), /circular/i);
+const cyclicSnapshot = editorBlockSnapshot(snapshotWp);
+assert.equal(cyclicSnapshot.serialized, '<strong><em>Real article text</em></strong>');
+assert.equal(cyclicSnapshot.identities[0].clientId, 'real-rich-text');
+assert.doesNotThrow(() => JSON.stringify(cyclicSnapshot));
+console.log('PASS: editor Undo snapshots preserve serialized content and identities with cyclic RichTextData');
+
+const changedIdentity = { ...cyclicBlock, clientId: 'changed-block' };
+const changedWp = { ...snapshotWp, data: { select: () => ({ getBlocks: () => [changedIdentity] }) } };
+assert.notDeepEqual(editorBlockSnapshot(changedWp).identities, cyclicSnapshot.identities);
+const serializedChangedWp = { ...snapshotWp, blocks: { serialize: () => '<em>Changed article text</em>' } };
+assert.notEqual(editorBlockSnapshot(serializedChangedWp).serialized, cyclicSnapshot.serialized);
+const explicitRelatedContext = helpers.recommendationFeedbackContext({ sections: { related_content: { status: 'ready', source_status: 'no_cloud_evidence', candidate_source: 'local_fallback', retrieval_source: 'cloud_vector', results: [] } } }, 'related_content');
+assert.ok(explicitRelatedContext.reasonCodes.includes('retrieval_no_cloud_evidence'));
+assert.ok(explicitRelatedContext.reasonCodes.includes('source_local_fallback'), 'Explicit evidence wins over fallback metadata');
+const unknownRelatedContext = helpers.recommendationFeedbackContext({ sections: { related_content: { results: [] } } }, 'related_content');
+assert.ok(unknownRelatedContext.reasonCodes.includes('retrieval_unknown') && unknownRelatedContext.reasonCodes.includes('source_unknown'), 'Absent evidence remains unknown');

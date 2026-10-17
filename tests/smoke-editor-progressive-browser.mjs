@@ -7,6 +7,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { editorBlockSnapshot } from './editor-block-snapshot.mjs';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -199,9 +200,18 @@ async function waitForFeedbackAction(requests, action, timeoutMs = 10000) {
 function assertMetadataOnlyFeedback(payload, label) {
 	const serialized = JSON.stringify(payload || {});
 	assert(payload && payload.redaction_status === 'metadata_only', `${label} declares metadata-only redaction.`);
-	assert(payload.ranking_version === 'internal_links.v1', `${label} carries the frozen ranking version.`);
+	const version = String(payload.source_action_id || '').startsWith('related_content_') ? 'related_content.v1' : 'internal_links.v1';
+	assert(payload.ranking_version === version, `${label} carries the frozen ranking version.`);
+	assert(['cloud_vector', 'cloud_vector_rerank', 'local_fallback', 'no_evidence', 'unavailable', 'unknown'].includes(payload.retrieval_source), `${label} carries a bounded retrieval source.`);
+	assert(!Object.hasOwn(payload, 'rerank_applied') || typeof payload.rerank_applied === 'boolean', `${label} preserves a boolean or absent rerank observation.`);
+	if (/(?:_copy|_open|_applied_to_editor)$/.test(payload.source_action_id)) {
+		assert(Number.isInteger(payload.candidate_rank) && payload.candidate_rank >= 1 && payload.candidate_rank <= 8, `${label} carries a bounded candidate rank.`);
+		assert(['low', 'medium', 'high', 'unknown'].includes(payload.score_bucket), `${label} carries a bounded score bucket.`);
+	}
+	if (/_impression$/.test(payload.source_action_id)) assert(!Object.hasOwn(payload, 'candidate_rank'), `${label} has no fabricated candidate rank.`);
+	assert(payload.source_object_type === 'recommendation_session' && Boolean(payload.source_object_id), `${label} preserves session identity.`);
 	assert(Array.isArray(payload.evidence_ref_ids) && payload.evidence_ref_ids.length === 0, `${label} omits content and candidate evidence references.`);
-	assert(!/"(?:content|post_content|anchor|anchor_text|source_match|provider_output)"\s*:/i.test(serialized) && String(payload.operator_note || '') === '', `${label} carries no raw content, anchor, source-match, note, or Provider fields.`);
+	assert(!/"(?:content|post_content|anchor|anchor_text|source_match|provider_output|prompt|title|url|source_excerpt|score|quality_score)"\s*:/i.test(serialized) && String(payload.operator_note || '') === '', `${label} carries no raw content, anchor, source-match, note, or Provider fields.`);
 }
 
 function forbiddenRequests(requests) {
@@ -300,6 +310,20 @@ try {
 	const requests = [];
 	const consoleErrors = [];
 	const networkErrors = [];
+	const developerFeedback = [];
+	const feedbackReceipts = [];
+	await page.route('**/npcink-toolbox/v1/agent-feedback', async (route) => {
+		const request = route.request();
+		if (request.method() !== 'POST') return route.continue();
+		const payload = request.postDataJSON();
+		if (!/^(?:internal_link|related_content)_/.test(payload.source_action_id || '')) return route.continue();
+		assertMetadataOnlyFeedback(payload, 'Observed ' + payload.source_action_id);
+		// Test transport annotation only: never count developer traffic as human adoption.
+		payload.source_reason_codes = [...new Set(['developer_smoke', ...(payload.source_reason_codes || [])])];
+		assert(payload.source_reason_codes.length <= 12, 'The developer marker does not truncate feedback metadata.');
+		developerFeedback.push(payload);
+		await route.continue({ postData: JSON.stringify(payload) });
+	});
 	page.on('console', (message) => {
 		if (message.type() === 'error') consoleErrors.push(message.text());
 	});
@@ -309,6 +333,10 @@ try {
 		if (code !== 'net::ERR_ABORTED') networkErrors.push({ status: 0, url: request.url(), code });
 	});
 	page.on('response', async (response) => {
+		if (response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/npcink-toolbox/v1/agent-feedback')) {
+			const receipt = await response.json().catch(() => ({}));
+			feedbackReceipts.push({ status: response.status(), accepted: receipt.accepted_for_eval === true, event_id: receipt.feedback_event_id || '' });
+		}
 		if (response.status() >= 400) {
 			const entry = { status: response.status(), url: response.url(), code: '' };
 			networkErrors.push(entry);
@@ -366,7 +394,7 @@ try {
 		if (internalLinkBatchSmoke) {
 			assert(Boolean(activePostId), 'Internal-link browser smoke has a real post id.');
 			const databaseContentBefore = wpPostContent(activePostId);
-			const editorBlocksBefore = await page.evaluate(() => JSON.stringify(window.wp.data.select('core/block-editor').getBlocks()));
+			const editorBlocksBefore = await page.evaluate(editorBlockSnapshot);
 			let editorContentBefore = await page.evaluate(() => {
 				const selector = window.wp.data.select('core/editor');
 				return selector && typeof selector.getEditedPostContent === 'function' ? selector.getEditedPostContent() : '';
@@ -560,12 +588,14 @@ try {
 					await page.waitForSelector('text=/本次应用的内链已从当前编辑器撤销/', { timeout: 10000 });
 					const editorContentAfterUndo = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
 					const undoComparison = await page.evaluate(({ before, after, blocksBefore }) => ({
-						blocks_equal: JSON.stringify(window.wp.data.select('core/block-editor').getBlocks()) === blocksBefore,
+						blocks_equal: window.wp.blocks.serialize(window.wp.data.select('core/block-editor').getBlocks()) === blocksBefore.serialized,
 						raw_equal: before === after,
 						canonical_equal: window.wp.blocks.serialize(window.wp.blocks.parse(before)) === window.wp.blocks.serialize(window.wp.blocks.parse(after)),
 					}), { before: editorContentBefore, after: editorContentAfterUndo, blocksBefore: editorBlocksBefore });
+					const blocksAfterUndo = await page.evaluate(editorBlockSnapshot);
+					undoComparison.identities_equal = JSON.stringify(blocksAfterUndo.identities) === JSON.stringify(editorBlocksBefore.identities);
 					console.log(`INFO: internal_link_undo_comparison=${JSON.stringify(undoComparison)}`);
-					assert(undoComparison.blocks_equal, 'Explicit Undo restores the visible Gutenberg editor state.');
+					assert(undoComparison.blocks_equal && undoComparison.identities_equal, 'Explicit Undo restores the visible Gutenberg editor state.');
 					await page.waitForFunction((ranks) => ranks.every((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-applicable')), checkedRanks);
 					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Undo does not persist post_content.');
 					undoPerformed = true;
@@ -598,12 +628,20 @@ try {
 				assert(!cloudUnavailable, 'Configured-Cloud acceptance requires available Cloud retrieval; HTTP 200 alone cannot pass.');
 				assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
 			}
+			if (!cloudUnavailable) {
+				const receiptDeadline = Date.now() + 10000;
+				while (feedbackReceipts.length < developerFeedback.length && Date.now() < receiptDeadline) await new Promise((resolve) => setTimeout(resolve, 100));
+				assert(developerFeedback.length > 0 && feedbackReceipts.length === developerFeedback.length, 'Every developer-marked recommendation event has a Cloud receipt.');
+				assert(feedbackReceipts.every((receipt) => receipt.status === 200 && receipt.accepted && receipt.event_id), 'Cloud accepts every metadata-only event and returns its identity.');
+			}
 			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
 				post_id: parseInt(activePostId, 10),
 				http_status: internalLinkResponse.status(),
 				retrieval_status: internalLinkSection.retrieval_status || '',
 				candidate_source: internalLinkSection.candidate_source || '',
 				candidate_count: candidateCount,
+				feedback_events: developerFeedback.map((payload) => ({ action: payload.source_action_id, session_id: payload.source_object_id, ranking_version: payload.ranking_version, candidate_rank: payload.candidate_rank, score_bucket: payload.score_bucket, retrieval_source: payload.retrieval_source, rerank_applied: payload.rerank_applied, reason_codes: payload.source_reason_codes })),
+				feedback_receipts: feedbackReceipts,
 				anchors: candidateReview.map((candidate) => ({ anchor_text: candidate.anchor_text, has_source_match: candidate.has_source_match })),
 				cloud_anchor_evidence: cloudAnchorEvidence,
 				applicable_count: applicableCount,
