@@ -18,11 +18,21 @@ with the closing commit or PR for one release cycle, then prune.
   real hold-comment calibration feeding Cloud intent scheduling (highest value;
   framework ready in eval-lab #110), the ③ media-ALT adoption gate (needs
   ~1 week of production use), the PHPStan ratchet, and the remaining cluster
-  splits. Site Check browser verification is green, and the internal-link
-  review-only no-write/fail-closed assertions are green; the full internal-link
-  smoke remains blocked because the local Cloud Addon returns HTTP 502 for
-  candidate evidence, so the candidate/Apply path needs a healthy Cloud
-  runtime before it can be accepted.
+  splits. Site Check browser verification is green. The former Cloud HTTP 502
+  internal-link blocker was resolved during recommendation stage 0; real
+  candidate retrieval, Apply/Undo, and disposable-draft native save now pass.
+  See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md).
+- **Recommendation relevance and anchor naturalness still need a human gold
+  set (Cloud ranking owner).** The 2026-10-17 twelve-article developer
+  regression found weak related results for the short promotion and broad
+  CMS/theme matches, plus exact but unnatural anchors such as `的HTML`,
+  `有一定的`, and `售价：49美元`. Physical Apply safety does not establish
+  editorial quality. Keep `related_content.v1` / `internal_links.v1` frozen;
+  label source/target/anchor triples before proposing a versioned ranking
+  change. Developer events, including earlier unmarked smoke traffic, must
+  be excluded from human adoption metrics; the current Cloud summary still
+  includes developer traffic. Owner: Cloud evaluation, with Toolbox real
+  editor regression. Source: [Real Article Regression 2026-10-17](archive/2026-10/recommendation-real-article-regression-2026-10-17.md).
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **User-facing UX audit (2026-10-12) is in closeout.** The audit found four

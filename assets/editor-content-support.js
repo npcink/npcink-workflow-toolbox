@@ -1807,8 +1807,8 @@
 		const candidates = intent === 'related_content' ? relatedContentCandidateItems(section).slice(0, 8) : internalLinkCandidateItems(section);
 		const applicableCount = intent === 'internal_links'
 			? candidates.filter((candidate) => internalLinkCandidateEligibility(candidate, editorBlocks, richTextApi).canApply).length : 0;
-		const retrievalStatus = sanitizeFeedbackAction(section.retrieval_status || section.source_status || 'unknown');
-		const candidateSource = sanitizeFeedbackAction(section.candidate_source || 'unknown');
+		const retrievalStatus = sanitizeFeedbackAction(section.retrieval_status || section.source_status || section.status || 'unknown');
+		const candidateSource = sanitizeFeedbackAction(section.candidate_source || section.retrieval_source || 'unknown');
 		const reasonCodes = [
 			recommendationCountBucket('candidate_count', candidates.length),
 			'retrieval_' + retrievalStatus,
