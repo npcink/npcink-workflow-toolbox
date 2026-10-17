@@ -13,6 +13,25 @@
 	'use strict';
 
 	const { plainTextFromHtml, truncateText } = (typeof window !== 'undefined' && window.NpcinkToolboxTextHelpers) || {};
+	const anchorEligibilityVersion = 'internal_link_anchor_eligibility.v2';
+
+	// Bounded fragment checks, not general Chinese segmentation or target relevance.
+	function internalLinkAnchorBoundaryReason(text, range) {
+		const anchor = text.slice(range.start, range.end);
+		const before = text.slice(0, range.start);
+		const after = text.slice(range.end);
+		if (/(?:个人|私人|独立)$/u.test(anchor) && /^\s*(?:网站|博客|主页|站点|空间|账号|账户|品牌|项目)/u.test(after)) {
+			return 'anchor_incomplete_compound';
+		}
+		if (/^的\s*[A-Za-z][A-Za-z0-9+#._\s-]*$/u.test(anchor) || /^[A-Za-z][A-Za-z0-9+#._\s-]*的$/u.test(anchor)) {
+			return 'anchor_dependent_fragment';
+		}
+		if ((/[A-Za-z0-9_]$/u.test(anchor) && /^(?:[A-Za-z0-9_]|[-.][A-Za-z0-9_])/u.test(after))
+			|| (/^[A-Za-z0-9_]/u.test(anchor) && /(?:[A-Za-z0-9_]|[A-Za-z0-9_][-.])$/u.test(before))) {
+			return 'anchor_partial_identifier';
+		}
+		return '';
+	}
 
 	function canonicalInternalLinkUrl(value) {
 		try {
@@ -179,6 +198,8 @@
 		if (!range) return { error: 'missing_phrase' };
 		if (internalLinkRangeHasLink(value, range.start, range.end)) return { error: 'range_already_linked' };
 		if (internalLinkBlocksContainUrl(allBlocks, url, richTextApi)) return { error: 'target_already_linked' };
+		const boundaryReason = internalLinkAnchorBoundaryReason(value.text, range);
+		if (boundaryReason) return { error: boundaryReason };
 		const editorPolicy = internalLinkEditorPolicy(allBlocks, match.block_client_id, richTextApi);
 		if (!editorPolicy.canApply) return { error: editorPolicy.error, editorPolicy };
 		const formatted = richTextApi.applyFormat(value, { type: 'core/link', attributes: { url } }, range.start, range.end);
@@ -246,6 +267,7 @@
 		const selected = Array.isArray(candidates) ? candidates : [];
 		const baseResult = {
 			schema: 'current_article_multi_link_result.v1',
+			anchor_eligibility_version: anchorEligibilityVersion,
 			write_posture: 'native_editor_commit',
 			direct_wordpress_write: false,
 			persisted: false,
@@ -377,10 +399,10 @@
 	// Preview one candidate through the Apply engine; never mutate live blocks or rank candidates.
 	function internalLinkCandidateEligibility(candidate, allBlocks, richTextApi) {
 		if (!candidate || candidate.candidateRelevance === 'weak' || !['post', 'page'].includes(candidate.targetPostType)) {
-			return { canApply: false, reasonCodes: [] };
+			return { canApply: false, reasonCodes: [], anchorEligibilityVersion };
 		}
 		const result = prepareInternalLinkBatchApplication([candidate], allBlocks, richTextApi);
-		return { canApply: result.applied_count === 1, reasonCodes: result.items[0].reason_codes };
+		return { canApply: result.applied_count === 1, reasonCodes: result.items[0].reason_codes, anchorEligibilityVersion };
 	}
 	function recommendationCountBucket(prefix, count) {
 		const total = Math.max(0, parseInt(count || 0, 10) || 0);

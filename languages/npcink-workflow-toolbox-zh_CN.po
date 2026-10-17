@@ -9660,3 +9660,15 @@ msgstr "之前的图片已不在刷新后的结果中。其 SEO 字段已丢弃�
 #: assets/editor-content-support.js
 msgid "The selected image and its SEO fields were cleared for the new hosted-image request."
 msgstr "已为新的托管图片请求清除当前图片及其 SEO 字段。"
+
+#: assets/editor-content-support.js
+msgid "The anchor stops before the complete phrase. Review the surrounding text."
+msgstr "锚文本在完整短语中途结束，请核对上下文。"
+
+#: assets/editor-content-support.js
+msgid "The anchor is an incomplete text fragment. Choose a complete phrase manually."
+msgstr "锚文本是不完整的片段，请手动选择完整短语。"
+
+#: assets/editor-content-support.js
+msgid "The anchor cuts through a technical name. Review the complete name."
+msgstr "锚文本截断了技术名称，请核对完整名称。"

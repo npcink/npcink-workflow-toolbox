@@ -1713,6 +1713,8 @@
 	function editorContentSupportFeedbackPayload(payload, intent, outcome, labels, localProposalId, options) {
 		const feedbackOptions = options && typeof options === 'object' ? options : {};
 		const activeIntent = String(intent || (payload && payload.intent) || 'content_support').trim();
+		const reasonCodes = Array.isArray(feedbackOptions.reasonCodes) ? feedbackOptions.reasonCodes.slice() : [];
+		if (activeIntent === 'internal_links') reasonCodes.unshift('anchor_eligibility_v2');
 		const runId = payload && payload.run_id ? String(payload.run_id) : '';
 		const artifactType = payload && payload.artifact_type ? String(payload.artifact_type) : 'editor_content_support_flow';
 		const sourceRuntime = editorContentSupportSourceRuntime(payload, activeIntent);
@@ -1742,7 +1744,7 @@
 			source_action_id: sanitizeFeedbackAction(feedbackOptions.action || ''),
 			source_object_type: String(feedbackOptions.sourceObjectType || '').slice(0, 64),
 			source_object_id: String(feedbackOptions.sourceObjectId || '').slice(0, 191),
-			source_reason_codes: Array.isArray(feedbackOptions.reasonCodes) ? feedbackOptions.reasonCodes.slice(0, 12) : [],
+			source_reason_codes: Array.from(new Set(reasonCodes)).slice(0, 12),
 			redaction_status: 'metadata_only',
 			retention_class: 'quality_eval',
 			created_at: new Date().toISOString()
@@ -6376,6 +6378,9 @@
 			missing_exact_source_match: __('No exact phrase was found in the draft.', 'npcink-workflow-toolbox'),
 			stale_editor_block: __('The draft changed after these suggestions were retrieved.', 'npcink-workflow-toolbox'),
 			generic_anchor: __('The anchor text is too generic.', 'npcink-workflow-toolbox'),
+			anchor_incomplete_compound: __('The anchor stops before the complete phrase. Review the surrounding text.', 'npcink-workflow-toolbox'),
+			anchor_dependent_fragment: __('The anchor is an incomplete text fragment. Choose a complete phrase manually.', 'npcink-workflow-toolbox'),
+			anchor_partial_identifier: __('The anchor cuts through a technical name. Review the complete name.', 'npcink-workflow-toolbox'),
 			code_block_match_not_eligible: __('Code blocks stay unchanged; cite the article from nearby explanatory text.', 'npcink-workflow-toolbox'),
 			range_already_linked: __('This phrase already contains a link.', 'npcink-workflow-toolbox'),
 			target_already_linked: __('The current article already links to this target.', 'npcink-workflow-toolbox'),

@@ -1210,6 +1210,7 @@ $internal_links_expected            = array(
 );
 toolbox_assert( false !== strpos( $internal_links_part_source, 'const result = prepareInternalLinkBatchApplication([candidate], allBlocks, richTextApi)' ) && false !== strpos( $editor_main_js_source, 'internalLinkCandidateEligibility(item, actionControls.blocks || [], richText)' ), 'Internal-link readiness projects the same live editor Apply engine instead of trusting server eligibility alone.' );
 toolbox_assert( false !== strpos( $editor_main_js_source, 'const internalLinkBlocks = useSelect(' ) && false !== strpos( $editor_main_js_source, 'blocks: internalLinkBlocks' ) && false !== strpos( $editor_main_js_source, 'const selectedCandidates = applicableCandidates.filter(' ), 'Live block changes refresh readiness and exclude stale selections from Apply controls.' );
+toolbox_assert( false !== strpos( $internal_links_part_source, 'internal_link_anchor_eligibility.v2' ) && false !== strpos( $internal_links_part_source, 'const boundaryReason = internalLinkAnchorBoundaryReason(value.text, range)' ) && false !== strpos( $editor_main_js_source, "reasonCodes.unshift('anchor_eligibility_v2')" ), 'Versioned anchor eligibility shares live Apply checks and bounded metadata without changing ranking versions.' );
 $internal_links_exported_sorted     = $internal_links_exported;
 $internal_links_destructured_sorted = $internal_links_destructured;
 $internal_links_expected_sorted     = $internal_links_expected;

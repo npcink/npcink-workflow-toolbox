@@ -111,6 +111,12 @@ writing).
 
 ## Open Debt (top items)
 
+- Recommendation anchor eligibility now has a separate
+  [v2 contract](internal-link-anchor-eligibility-v2.md) for bounded fragment
+  rejection in the current editor. The frozen ranking v1 and its old editor
+  implementation remain the comparison; consult Eval Lab release acceptance
+  evidence before treating the recommendation feature as ready to release.
+
 0. The UX delivery arc in PRs #257–#263 is merged. Browser verification is
    complete for Site Check. Recommendation stage 0 now passes through the
    actual M4-backed Cloud route. Toolkit anchor-hint consumption is fixed by
