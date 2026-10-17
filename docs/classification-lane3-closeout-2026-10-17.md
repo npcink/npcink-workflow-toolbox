@@ -21,6 +21,12 @@ public ability ids and authorization behavior are unchanged.
 The [machine-readable evidence](classification-lane3-wordpress-evidence-2026-10-17.json)
 binds the exact script SHA-256 and local baseline revisions.
 
+The local site loads plugins from the existing shared roots. A subsequent
+preflight observed active Toolkit owner changes on `codex/internal-link-anchor-evidence`
+at HEAD `921d1dc7`; the HEAD label alone does not identify that dirty tree.
+These runs prove this fixture's observed local behavior and cleanup, not clean
+dependency release acceptance. No owner files or plugin symlinks were changed.
+
 - Normal run: exit 0, 65 assertions. Core returned HTTP 201, one pending batch
   proposal and eight dry-run actions. No article/media execution or local
   consent path was used.
@@ -41,6 +47,10 @@ readability, ownership, SQL safety or performance issue. The advisory
 OpenCodeReview workflow is `disabled_manually`; publication must record the
 standard exception rather than claim an AI review was delivered. Required CI
 checks and branch protection remain the merge authority.
+
+The first PR CI round caught a missing documentation-index entry: the earlier
+local gate ran before these new records were added. The index was corrected,
+and the final local/CI gates must cover the complete committed file set.
 
 ## Preservation and rollback
 

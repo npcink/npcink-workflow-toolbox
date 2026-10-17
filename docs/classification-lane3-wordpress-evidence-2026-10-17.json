@@ -79,5 +79,12 @@
     "Synthetic local WordPress evidence, not a real-user production ledger.",
     "Existing saved stashes and unrelated source work remain preserved.",
     "No tag, manifest, final-execution or authorization contract change."
-  ]
+  ],
+  "runtime_dependency_qualification": {
+    "toolkit_head": "921d1dc7cb5661fef10ca8f83b781690c98034cb",
+    "subsequent_observation": "Active owner branch codex/internal-link-anchor-evidence with seven modified/untracked files.",
+    "clean_dependency_tree_claimed": false,
+    "owner_files_or_plugin_symlinks_changed": false,
+    "release_acceptance_claimed": false
+  }
 }
