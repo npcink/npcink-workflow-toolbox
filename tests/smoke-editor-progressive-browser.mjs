@@ -8,6 +8,8 @@
 
 import { execFileSync } from 'node:child_process';
 import { editorBlockSnapshot } from './editor-block-snapshot.mjs';
+import { recommendationCloudObservation } from './recommendation-cloud-observation.mjs';
+import { createFreshCloudProbe } from './fresh-cloud-probe.mjs';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -273,6 +275,7 @@ const internalLinkBatchSmoke = process.env.NPCINK_INTERNAL_LINK_BATCH_SMOKE === 
 const requireInternalLinkApply = process.env.NPCINK_INTERNAL_LINK_REQUIRE_APPLY === '1';
 const allowUnconfiguredCloud = process.env.NPCINK_INTERNAL_LINK_ALLOW_UNCONFIGURED_CLOUD === '1';
 const nativeSaveSmoke = process.env.NPCINK_INTERNAL_LINK_NATIVE_SAVE_SMOKE === '1';
+const requireFreshCloud = process.env.NPCINK_INTERNAL_LINK_REQUIRE_FRESH_CLOUD === '1';
 const fixtureSourcePostId = parseInt(env('NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID', '0'), 10) || 0;
 let activePostId = requestedPostId;
 if (nativeSaveSmoke && requestedPostId) {
@@ -295,6 +298,8 @@ if (process.env.BROWSER_EXECUTABLE) {
 
 const browser = await chromium.launch(browserOptions);
 let loginHelper = null;
+let freshCloudProbe = null;
+let cloudObservationEmitted = false;
 let page = null;
 try {
 	const viewport = {
@@ -312,6 +317,14 @@ try {
 	const networkErrors = [];
 	const developerFeedback = [];
 	const feedbackReceipts = [];
+	if (requireFreshCloud) {
+		freshCloudProbe = createFreshCloudProbe(wpPath(), baseUrl);
+		await page.route('**/npcink-toolbox/v1/editor/content-support', (route) => {
+			const request = route.request();
+			if (new URL(request.url()).origin !== new URL(baseUrl).origin || request.method() !== 'POST' || request.postDataJSON()?.intent !== 'internal_links') return route.continue();
+			return route.continue({ headers: { ...request.headers(), ...freshCloudProbe.headers } });
+		});
+	}
 	await page.route('**/npcink-toolbox/v1/agent-feedback', async (route) => {
 		const request = route.request();
 		if (request.method() !== 'POST') return route.continue();
@@ -404,10 +417,33 @@ try {
 				return response.url().includes('/wp-json/npcink-toolbox/v1/editor/content-support')
 					&& String(request.postData() || '').includes('internal_links');
 			}, { timeout: 45000 });
+			const started = performance.now();
+			let internalLinkResponse, internalLinkPayload;
+			try {
 				await page.getByRole('button', { name: /Run Site citation suggestions|运行 站内引用建议/i }).click({ timeout: 30000 });
-			const internalLinkResponse = await responsePromise;
-			const internalLinkPayload = await internalLinkResponse.json();
+				internalLinkResponse = await responsePromise;
+				internalLinkPayload = await internalLinkResponse.json();
+			} catch (error) {
+				// A click failure must also consume the pending response wait rejection.
+				responsePromise.catch(() => {});
+				cloudObservationEmitted = true;
+				console.log('INFO: internal_link_cloud_observation=' + JSON.stringify(recommendationCloudObservation({
+					httpStatus: internalLinkResponse?.status(), elapsedMs: performance.now() - started,
+					requestBody: internalLinkResponse?.request().postData(), errorName: error.name,
+					phase: internalLinkResponse ? 'invalid_json' : 'request_failed',
+				})));
+				throw error;
+			}
 			const internalLinkSection = internalLinkPayload && internalLinkPayload.sections ? internalLinkPayload.sections.internal_links || {} : {};
+			cloudObservationEmitted = true;
+			console.log('INFO: internal_link_cloud_observation=' + JSON.stringify(recommendationCloudObservation({
+				section: internalLinkSection, httpStatus: internalLinkResponse.status(),
+				elapsedMs: performance.now() - started, requestBody: internalLinkResponse.request().postData(),
+			})));
+
+			if (requireFreshCloud && internalLinkSection.retrieval_status === 'cloud_vector_evidence') {
+				assert(['miss', 'bypass'].includes(internalLinkSection.source_knowledge?.cache_status), 'Fresh-Cloud acceptance rejects cache hits or unknown cache evidence.');
+			}
 					await page.waitForSelector('text=/Site citation suggestions|站内引用建议/', { timeout: 30000 });
 					const adjustmentDisclosure = page.locator('.npcink-toolbox-editor-support__citation-adjustments');
 					assert(await adjustmentDisclosure.count() === 1, 'Recommendation preferences are available in one low-frequency disclosure.');
@@ -662,10 +698,14 @@ try {
 			})}`);
 		}
 	} catch (error) {
+		if (internalLinkBatchSmoke && !cloudObservationEmitted) {
+			console.log('INFO: internal_link_cloud_observation=' + JSON.stringify(recommendationCloudObservation({ phase: 'editor_setup_failed', errorName: error.name })));
+		}
 		await captureDiagnostics(page, requests, error);
 		throw error;
 	}
 } finally {
+	freshCloudProbe?.cleanup();
 	if (loginHelper) {
 		if (!requestedPostId && activePostId && page) {
 			await page.goto(loginHelper.cleanupUrl(activePostId), { waitUntil: 'domcontentloaded', timeout: 10000 }).catch((error) => {

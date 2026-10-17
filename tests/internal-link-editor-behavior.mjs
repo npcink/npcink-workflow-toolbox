@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createFreshCloudProbe } from './fresh-cloud-probe.mjs';
 import { editorBlockSnapshot } from './editor-block-snapshot.mjs';
+import { recommendationCloudObservation } from './recommendation-cloud-observation.mjs';
 
 import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
 
@@ -430,3 +436,47 @@ assert.ok(explicitRelatedContext.reasonCodes.includes('retrieval_no_cloud_eviden
 assert.ok(explicitRelatedContext.reasonCodes.includes('source_local_fallback'), 'Explicit evidence wins over fallback metadata');
 const unknownRelatedContext = helpers.recommendationFeedbackContext({ sections: { related_content: { results: [] } } }, 'related_content');
 assert.ok(unknownRelatedContext.reasonCodes.includes('retrieval_unknown') && unknownRelatedContext.reasonCodes.includes('source_unknown'), 'Absent evidence remains unknown');
+
+const unavailable = recommendationCloudObservation({ section: { retrieval_status: 'cloud_unavailable', source_knowledge: { status: 'error', code: 'http_request_failed', message: 'cURL error 28 timeout at https://private.test/?key=private-secret', provider_output: 'private-secret' } }, httpStatus: 200, elapsedMs: 20001.6, requestBody: '{"content":"private-secret"}' });
+assert.equal(unavailable.error_class, 'timeout');
+assert.equal(unavailable.error_code, 'http_request_failed');
+assert.equal(unavailable.elapsed_from_click_ms, 20002);
+assert.equal(unavailable.http_status, 200, 'HTTP 200 is not mistaken for Cloud availability');
+assert.equal(unavailable.retrieval_status, 'cloud_unavailable');
+assert.match(unavailable.request_sha256, /^[a-f0-9]{64}$/);
+assert.ok(!JSON.stringify(unavailable).includes('private-secret') && !JSON.stringify(unavailable).includes('private.test'));
+const unlisted = recommendationCloudObservation({ section: { source_knowledge: { code: 'private-secret', message: 'private-secret', status: 'error' } }, elapsedMs: -1 });
+assert.equal(unlisted.error_code, 'unlisted');
+assert.equal(unlisted.elapsed_from_click_ms, null);
+assert.ok(!JSON.stringify(unlisted).includes('private-secret'));
+const waitFailure = recommendationCloudObservation({ phase: 'request_failed', errorName: 'TimeoutError', elapsedMs: 45000 });
+assert.equal(waitFailure.error_class, 'browser_timeout');
+assert.equal(waitFailure.http_status, null);
+const parseFailure = recommendationCloudObservation({ phase: 'invalid_json', httpStatus: 502 });
+assert.equal(parseFailure.error_class, 'invalid_json');
+const healthy = recommendationCloudObservation({ section: { retrieval_status: 'cloud_vector_evidence', recommendation_candidates: [], source_knowledge: { status: 'ready', cache_status: 'hit' } }, httpStatus: 200 });
+assert.equal(healthy.error_class, 'none');
+assert.equal(healthy.cache_status, 'hit');
+assert.equal(healthy.candidate_count, 0);
+console.log('PASS: bounded Cloud observations retain unavailable/timeout/parse failures without raw error or request data');
+
+const probeRoot = mkdtempSync(join(tmpdir(), 'npcink-fresh-probe-'));
+try {
+	assert.throws(() => createFreshCloudProbe(probeRoot, 'https://production.example'), /local development/);
+	const probe = createFreshCloudProbe(probeRoot, 'https://example.local');
+	const probeDirectory = join(probeRoot, 'wp-content', 'mu-plugins');
+	const probeFile = join(probeDirectory, readdirSync(probeDirectory)[0]);
+	const phpProbe = `define('ABSPATH', '/test/'); $_SERVER['REQUEST_METHOD']=$argv[3]; $_SERVER['REQUEST_URI']=$argv[4]; $_SERVER['HTTP_X_NPCINK_SMOKE_FRESH_CLOUD']=$argv[2]; $actions=[]; $filters=[]; function add_action($tag,$fn){$GLOBALS['actions'][$tag]=$fn;} function add_filter($tag,$fn){$GLOBALS['filters'][$tag]=$fn;} require $argv[1]; if(isset($actions['all'])){($actions['all'])('pre_transient_other_cache'); ($actions['all'])('pre_transient_npcink_toolbox_editor_site_knowledge_abc');} echo json_encode(array_keys($filters));`;
+	const invoke = (token, method = 'POST', uri = '/wp-json/npcink-toolbox/v1/editor/content-support') => JSON.parse(execFileSync('php', ['-r', phpProbe, probeFile, token, method, uri], { encoding: 'utf8' }));
+	assert.deepEqual(invoke('wrong-token'), []);
+	assert.deepEqual(invoke(probe.headers['X-Npcink-Smoke-Fresh-Cloud'], 'GET'), []);
+	assert.deepEqual(invoke(probe.headers['X-Npcink-Smoke-Fresh-Cloud'], 'POST', '/wp-json/other'), []);
+	assert.deepEqual(invoke(probe.headers['X-Npcink-Smoke-Fresh-Cloud']), ['pre_transient_npcink_toolbox_editor_site_knowledge_abc']);
+	probe.cleanup();
+	assert.equal(readdirSync(probeDirectory).length, 0);
+	console.log('PASS: fresh Cloud probe is local-only, request-token scoped, cache-specific and removable');
+} finally { rmSync(probeRoot, { recursive: true, force: true }); }
+
+const setupFailure = recommendationCloudObservation({ phase: 'editor_setup_failed', errorName: 'TimeoutError' });
+assert.equal(setupFailure.error_class, 'editor_setup_failed');
+assert.equal(setupFailure.retrieval_status, 'unknown', 'An editor login/setup failure is not evidence of Cloud unavailability');

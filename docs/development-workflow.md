@@ -495,6 +495,27 @@ then reads WordPress again through WP-CLI to prove `post_content` was not
 persisted. Short or weak-candidate articles may finish in the Chinese
 review-only/empty state, but must never enable Apply without an exact match.
 
+Before UI/availability acceptance, the smoke emits
+`internal_link_cloud_observation` with click-to-response time, HTTP/retrieval
+and cache state, a request fingerprint, and bounded error classification. It
+also records response-wait, invalid-JSON and editor setup failures separately.
+Run same-site browser observations serially to avoid competing temporary logins;
+a login redirect/setup failure is not an attempted Cloud retrieval. Arbitrary error codes are
+hashed, not copied; error messages, URLs, request bodies and provider output
+are omitted. Classification is a heuristic, not a root-cause claim. A cached
+success is not a fresh Cloud execution. These are local developer diagnostics,
+not product telemetry or human adoption; failed attempts must remain in the
+regression denominator even when later independent observations succeed.
+
+For independent fresh Cloud observations set
+`NPCINK_INTERNAL_LINK_REQUIRE_FRESH_CLOUD=1`. This is local-only: a temporary
+request-token-scoped MU guard returns a non-array cache miss solely for the
+Toolbox Site Knowledge transient on the matching editor request, then is removed
+in `finally`. It deletes no cache, changes no query/ranking or production
+setting, and grants no write permission. Healthy acceptance requires an explicit
+cache `miss`/`bypass`; normal cache hits remain valid editor smoke but cannot
+prove repeated Cloud executions. Keep this flag off for ordinary product use.
+
 Recommendation POSTs made by this harness are annotated with
 `source_reason_codes=developer_smoke` in the test transport. Exclude these
 events from human adoption or gold-set metrics. Configured-Cloud runs require
