@@ -88,10 +88,12 @@ Provider 同时保留有界 rerank 证据与只读 `recommendation_quality` 汇�
 
 ## 已知限制与下一步
 
-Toolkit 当前忽略传入的 `anchor_or_context`，只使用目标标题或作者选区匹配；
-其能力 schema 也未声明该 hint。此缺口独立记录，当前不改 Toolkit 契约或放宽 Apply。
-它解释了为什么 Cloud 有 anchor evidence 而自然样本仍可能仅能复制/打开。
-后续需以独立契约修复和真实样本验证，不能通过调整 metadata 隐藏这个限制。
+冻结时记录的 Toolkit `anchor_or_context` 消费和 schema 缺口已由
+[Toolkit PR #262](https://github.com/npcink/npcink-abilities-toolkit/pull/262) 修复，
+真实文章 Apply/Undo 与正文副本原生保存已验证，目标顺序和分数保持不变。
+Toolbox 的实时可插入状态遵循推荐标准 11.1：服务端资格标记仍需通过当前富文本的
+Apply 预检，已有链接、密度或过期正文可使它降为仅供参考；此安全投影不重排候选，
+不修改本页冻结的任何排序参数、Top K、rank 或版本。
 
 保持本基线，先核对事件字段完整性，再积累真实使用；不足 20 个真实 session 时
 报告样本不足。人工相关性标注、版本分组报表、rerank/权重优化属于后续工作。

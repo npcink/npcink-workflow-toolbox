@@ -146,13 +146,14 @@ if ($post_id <= 0) {
 		'post_status'  => 'draft',
 		'post_author'  => $user->ID,
 		'post_title'   => $fixture_title,
-		'post_content' => $fixture_content,
+		'post_content' => wp_slash($fixture_content),
 	), true);
 	if (is_wp_error($post_id)) {
 		http_response_code(500);
 		exit($post_id->get_error_message());
 	}
 }
+if (${sourcePostId} > 0 && ${requestedPostId} === 0 && (string) get_post_field('post_content', $post_id) !== $fixture_content) { wp_delete_post($post_id, true); http_response_code(500); exit('real_body_copy_mismatch'); }
 wp_safe_redirect(admin_url('post.php?post=' . absint($post_id) . '&action=edit'));
 exit;
 `);
@@ -303,6 +304,10 @@ try {
 		if (message.type() === 'error') consoleErrors.push(message.text());
 	});
 	page.on('pageerror', (error) => consoleErrors.push(error.message || String(error)));
+	page.on('requestfailed', (request) => {
+		const code = request.failure()?.errorText || 'request_failed';
+		if (code !== 'net::ERR_ABORTED') networkErrors.push({ status: 0, url: request.url(), code });
+	});
 	page.on('response', async (response) => {
 		if (response.status() >= 400) {
 			const entry = { status: response.status(), url: response.url(), code: '' };
@@ -361,7 +366,8 @@ try {
 		if (internalLinkBatchSmoke) {
 			assert(Boolean(activePostId), 'Internal-link browser smoke has a real post id.');
 			const databaseContentBefore = wpPostContent(activePostId);
-			const editorContentBefore = await page.evaluate(() => {
+			const editorBlocksBefore = await page.evaluate(() => JSON.stringify(window.wp.data.select('core/block-editor').getBlocks()));
+			let editorContentBefore = await page.evaluate(() => {
 				const selector = window.wp.data.select('core/editor');
 				return selector && typeof selector.getEditedPostContent === 'function' ? selector.getEditedPostContent() : '';
 			});
@@ -401,6 +407,78 @@ try {
 			console.log(`INFO: internal_link_cloud_anchor_evidence=${JSON.stringify(cloudAnchorEvidence)}`);
 			const applicableRows = page.locator('.npcink-toolbox-editor-support__internal-link-item.is-applicable');
 			const applicableCount = await applicableRows.count();
+			const readiness = await page.evaluate((section) => {
+				const helpers = window.NpcinkToolboxInternalLinkHelpers;
+				const currentBlocks = window.wp.data.select('core/block-editor').getBlocks();
+				const candidates = helpers.dedupeInternalLinkCandidates(section.recommendation_candidates.map((item) => ({
+					id: item.id, targetUrl: item.target_url || item.target_ref.url || item.source_candidate_ref,
+					targetPostId: Number(item.target_ref.post_id), targetStatus: item.target_ref.status,
+					targetPostType: item.target_ref.post_type, anchorText: item.anchor_or_context,
+					sourceMatch: item.source_match, candidateRelevance: item.candidate_relevance,
+					candidateSource: item.candidate_source || section.candidate_source,
+					retrievalStatus: section.retrieval_status, canApplyToEditor: item.can_apply_to_editor === true,
+				})));
+				return candidates.map((candidate, index) => {
+					const state = helpers.internalLinkCandidateEligibility(candidate, currentBlocks, window.wp.richText);
+					return { id: candidate.id, rank: index + 1, ready: state.canApply, reasons: state.reasonCodes };
+				});
+			}, { ...internalLinkSection, recommendation_candidates: internalLinkSection.recommendation_candidates || [] });
+			console.log(`INFO: internal_link_live_readiness=${JSON.stringify(readiness)}`);
+			mkdirSync(env('SMOKE_ARTIFACT_DIR', 'tests/artifacts'), { recursive: true });
+			await page.screenshot({ path: `${env('SMOKE_ARTIFACT_DIR', 'tests/artifacts')}/editor-internal-link-readiness-${activePostId}.png`, fullPage: true });
+			for (const item of readiness) {
+				const row = page.locator(`.npcink-toolbox-editor-support__internal-links [data-candidate-rank="${item.rank}"]`);
+				assert(await row.count() === 1, 'The ranked candidate remains available once: ' + item.id);
+				if (!await row.isVisible()) await row.locator('xpath=ancestor::details[1]').locator('summary').click();
+				assert((await row.getAttribute('class')).includes('is-applicable') === item.ready, 'Visible readiness agrees with the current Apply checks: ' + item.id);
+				if (!item.ready) assert(await row.getByRole('button', { name: /Add citation|添加引用/i }).count() === 0, 'Blocked candidates have no Add citation action: ' + item.id);
+				if (item.reasons.includes('range_already_linked')) assert(/already contains a link|已有链接|已经包含链接/.test(await row.innerText()), 'Existing linked phrases show the concrete reason.');
+			}
+			const expectedBucket = await page.evaluate((count) => window.NpcinkToolboxInternalLinkHelpers.recommendationCountBucket('applicable_count', count), applicableCount);
+			assert(internalLinkImpression.source_reason_codes.includes(expectedBucket), 'Impression readiness uses the same live denominator as the UI.');
+			if (process.env.NPCINK_INTERNAL_LINK_LIVE_STATE_SMOKE === '1') {
+				assert(readiness.some((item) => item.reasons.includes('range_already_linked')), 'The real article covers existing linked phrases.');
+				const ready = readiness.find((item) => item.ready);
+				assert(Boolean(ready), 'The real article also has an independently applicable phrase.');
+				const retrievalCountBefore = requests.filter((request) => request.url.includes('/editor/content-support') && String(request.body).includes('internal_links')).length;
+				const original = await page.evaluate(({ id, section }) => {
+					const candidate = section.recommendation_candidates.find((item) => item.id === id);
+					const match = candidate.source_match;
+					const editor = window.wp.data.select('core/block-editor');
+					const block = editor.getBlock(match.block_client_id);
+					const h = window.NpcinkToolboxInternalLinkHelpers;
+					const content = h.internalLinkBlockContent(block);
+					const value = window.wp.richText.create({ html: content });
+					const range = h.internalLinkMatchRange(value.text, match.matched_text, match.text_offset);
+					const linked = window.wp.richText.applyFormat(value, { type: 'core/link', attributes: { url: 'https://example.test/existing-reference' } }, range.start, range.end);
+					window.wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, { content: window.wp.richText.toHTMLString({ value: linked }) });
+					return { clientId: block.clientId, content };
+				}, { id: ready.id, section: internalLinkSection });
+				await page.waitForFunction((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-reference-only'), ready.rank);
+				assert(wpPostContent(activePostId) === databaseContentBefore, 'A native format-only edit changes readiness without persisting content.');
+				await page.evaluate((snapshot) => window.wp.data.dispatch('core/block-editor').updateBlockAttributes(snapshot.clientId, { content: snapshot.content }), original);
+				await page.waitForFunction((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-applicable'), ready.rank);
+				await page.evaluate(({ original, raw }) => {
+					const api = window.wp.richText;
+					const h = window.NpcinkToolboxInternalLinkHelpers;
+					const value = api.create({ html: original.content });
+					const range = h.internalLinkMatchRange(value.text, raw.source_match.matched_text, raw.source_match.text_offset);
+					const start = range.start >= 4 ? 0 : range.end;
+					const end = Math.min(value.text.length, start + 4);
+					if (end <= start || (start < range.end && end > range.start)) throw new Error('No independent existing phrase for the same-target check.');
+					const linked = api.applyFormat(value, { type: 'core/link', attributes: { url: raw.target_url || raw.target_ref.url } }, start, end);
+					window.wp.data.dispatch('core/block-editor').updateBlockAttributes(original.clientId, { content: api.toHTMLString({ value: linked }) });
+				}, { original, raw: internalLinkSection.recommendation_candidates.find((item) => item.id === ready.id) });
+				const changedRow = page.locator(`[data-candidate-rank="${ready.rank}"]`);
+				await page.waitForFunction((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-reference-only'), ready.rank);
+				assert(/already links to this target|已经链接|已链接|已有指向该目标/.test(await changedRow.innerText()), 'An existing link elsewhere to the same target blocks duplicate insertion.');
+				await page.evaluate((snapshot) => window.wp.data.dispatch('core/block-editor').updateBlockAttributes(snapshot.clientId, { content: snapshot.content }), original);
+				await page.waitForFunction((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-applicable'), ready.rank);
+				assert(wpPostContent(activePostId) === databaseContentBefore, 'Both existing-link checks leave the real article database content unchanged.');
+				assert(requests.filter((request) => request.url.includes('/editor/content-support') && String(request.body).includes('internal_links')).length === retrievalCountBefore, 'Live readiness does not fetch or reorder new recommendations.');
+				editorContentBefore = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
+				pass('Restoring an existing-link format restores readiness without fetching new recommendations.');
+			}
 			const copyButton = page.locator('.npcink-toolbox-editor-support__internal-link-item button').filter({ hasText: /Copy link|复制链接/ }).first();
 				if (await copyButton.count()) {
 					await copyButton.click();
@@ -429,6 +507,8 @@ try {
 				const editorContentAfterSelection = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
 				assert(editorContentAfterSelection === editorContentBefore, 'Selecting internal-link suggestions does not mutate editor content.');
 				assert(wpPostContent(activePostId) === databaseContentBefore, 'Selecting internal-link suggestions does not persist WordPress content.');
+				const checkedRanks = await page.locator('.is-applicable:has(input:checked)').evaluateAll((rows) => rows.map((row) => Number(row.dataset.candidateRank)));
+				assert(checkedRanks.length === selectionCount, 'The selected DOM rows identify every reviewed candidate.');
 				const requestIndexBeforeApply = requests.length;
 				await page.getByRole('button', { name: /应用 \d+ 条内链|Apply \d+ links/i }).click();
 				await page.waitForSelector('text=/已在当前编辑器应用/', { timeout: 10000 });
@@ -438,6 +518,11 @@ try {
 				rejectedCount = counts ? parseInt(counts[2], 10) : 0;
 				const editorContentAfterApply = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
 					assert(appliedCount > 0 && editorContentAfterApply !== editorContentBefore, 'Explicit Apply changes only the visible Gutenberg editor state.');
+					for (const rank of checkedRanks) {
+						const expected = readiness.find((item) => item.rank === rank);
+						assert(Boolean(expected && expected.ready), 'Only current ready candidates enter Apply.');
+					}
+
 					const internalLinkApplyFeedback = await waitForFeedbackAction(requests, 'internal_link_applied_to_editor');
 					assert(internalLinkApplyFeedback.source_object_id === internalLinkImpression.source_object_id, 'Internal-link Apply correlates to its recommendation impression session.');
 					const rankDeadline = Date.now() + 5000;
@@ -446,6 +531,9 @@ try {
 					}
 					const appliedRankEvents = agentFeedbackRequests(requests).map((request) => JSON.parse(request.body || '{}')).filter((payload) => payload.source_action_id === 'internal_link_applied_to_editor');
 					assert(new Set(appliedRankEvents.map((payload) => payload.candidate_rank)).size === appliedCount, 'Every applied candidate retains its distinct displayed position.');
+					const appliedRanks = appliedRankEvents.map((event) => event.candidate_rank);
+					assert(appliedRanks.every((rank) => checkedRanks.includes(rank)), 'Applied metadata ranks retain their original candidate identities.');
+					await page.waitForFunction((ranks) => ranks.every((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-reference-only')), appliedRanks);
 					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Apply does not persist post_content before native Update or Publish.');
 				const applyRequests = requests.slice(requestIndexBeforeApply);
 				const directWriteRequests = applyRequests.filter((request) => /\/wp-json\/wp\/v2\/(posts|pages)\/\d+/i.test(request.url) && /POST|PUT|PATCH/i.test(request.method));
@@ -465,17 +553,20 @@ try {
 					assert(nativeSaveFeedback.source_object_id === internalLinkImpression.source_object_id, 'Native-save confirmation correlates to the original recommendation impression session.');
 					const databaseContentAfterSave = wpPostContent(activePostId);
 					assert(databaseContentAfterSave !== databaseContentBefore && /<a\s/i.test(databaseContentAfterSave), 'WordPress post_content changes only after the explicit native save.');
+					assert(databaseContentAfterSave === editorContentAfterApply, 'Native save persists the complete reviewed editor content exactly.');
 					nativeSavePerformed = true;
 				} else {
 					await page.getByRole('button', { name: /撤销本次内链应用|Undo current internal-link application/i }).click();
 					await page.waitForSelector('text=/本次应用的内链已从当前编辑器撤销/', { timeout: 10000 });
 					const editorContentAfterUndo = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
-					const undoComparison = await page.evaluate(({ before, after }) => ({
+					const undoComparison = await page.evaluate(({ before, after, blocksBefore }) => ({
+						blocks_equal: JSON.stringify(window.wp.data.select('core/block-editor').getBlocks()) === blocksBefore,
 						raw_equal: before === after,
 						canonical_equal: window.wp.blocks.serialize(window.wp.blocks.parse(before)) === window.wp.blocks.serialize(window.wp.blocks.parse(after)),
-					}), { before: editorContentBefore, after: editorContentAfterUndo });
+					}), { before: editorContentBefore, after: editorContentAfterUndo, blocksBefore: editorBlocksBefore });
 					console.log(`INFO: internal_link_undo_comparison=${JSON.stringify(undoComparison)}`);
-					assert(undoComparison.canonical_equal, 'Explicit Undo restores the visible Gutenberg editor state.');
+					assert(undoComparison.blocks_equal, 'Explicit Undo restores the visible Gutenberg editor state.');
+					await page.waitForFunction((ranks) => ranks.every((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-applicable')), checkedRanks);
 					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Undo does not persist post_content.');
 					undoPerformed = true;
 				}
@@ -516,6 +607,7 @@ try {
 				anchors: candidateReview.map((candidate) => ({ anchor_text: candidate.anchor_text, has_source_match: candidate.has_source_match })),
 				cloud_anchor_evidence: cloudAnchorEvidence,
 				applicable_count: applicableCount,
+				live_readiness: readiness.map((item) => ({ rank: item.rank, ready: item.ready, reason_codes: item.reasons })),
 				applied_count: appliedCount,
 				rejected_count: rejectedCount,
 				undo_performed: undoPerformed,

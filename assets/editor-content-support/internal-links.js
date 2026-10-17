@@ -373,6 +373,15 @@
 			return internalLinkBlockContent(block) === snapshot.appliedContent;
 		}));
 	}
+
+	// Preview one candidate through the Apply engine; never mutate live blocks or rank candidates.
+	function internalLinkCandidateEligibility(candidate, allBlocks, richTextApi) {
+		if (!candidate || candidate.candidateRelevance === 'weak' || !['post', 'page'].includes(candidate.targetPostType)) {
+			return { canApply: false, reasonCodes: [] };
+		}
+		const result = prepareInternalLinkBatchApplication([candidate], allBlocks, richTextApi);
+		return { canApply: result.applied_count === 1, reasonCodes: result.items[0].reason_codes };
+	}
 	function recommendationCountBucket(prefix, count) {
 		const total = Math.max(0, parseInt(count || 0, 10) || 0);
 		if (total === 0) {
@@ -465,6 +474,7 @@
 			dedupeInternalLinkCandidates,
 			prepareInternalLinkApplication,
 			prepareInternalLinkBatchApplication,
+			internalLinkCandidateEligibility,
 			internalLinkSelectedText,
 			canUndoInternalLink,
 			canUndoInternalLinkBatch,
