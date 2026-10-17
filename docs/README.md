@@ -42,6 +42,8 @@ Start from the active documents below before changing code.
 ## Development And Release
 
 - [Development Workflow](development-workflow.md)
+- [Classification Lane 3 Fixture Closeout — 2026-10-17](classification-lane3-closeout-2026-10-17.md)
+- [Classification Lane 3 WordPress Evidence — 2026-10-17](classification-lane3-wordpress-evidence-2026-10-17.json)
 - [AI Development Quality Workflow](ai-development-quality-workflow.md)
 - [AI Change Envelope Template](ai-change-envelope-template.md)
 - [AI Code Review Standard v1](platform/ai-code-review-standard-v1.md)

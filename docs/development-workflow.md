@@ -109,6 +109,16 @@ entrypoints, rerun the three-lane classification regression on the local
    Core proposal evidence, performs no WordPress post/media writes, and emits
    no `local_admin_consent.*` audit events.
 
+   All required abilities are checked through WordPress's global Abilities
+   API. Only `npcink-abilities-toolkit/*` abilities must also exist in Toolkit's
+   private callback registry; the Toolbox planner is not owned by Toolkit.
+   By default the smoke purges its returned proposal ids, their audit rows,
+   and `proposal.plan_ingested` audit rows scoped to the returned batch ids.
+   Verify proposal/audit counts and existing-row fingerprints before and after
+   the run, including a failure after intake, when closing a fixture-cleanup
+   change. `NPCINK_TOOLBOX_ARTICLE_MEDIA_BATCH_SMOKE_PURGE=0` deliberately
+   preserves evidence for debugging and must not be used for a clean closeout.
+
 This gate is not a new product feature. Do not add summary/category/tag
 generation, a second write path, a local queue, workflow runtime, Cloud
 WordPress writes, or Core final execution to satisfy it.

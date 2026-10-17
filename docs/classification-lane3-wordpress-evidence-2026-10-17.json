@@ -1,0 +1,90 @@
+{
+  "started_at": "2026-10-17T02:29:31.002591+00:00",
+  "wordpress": "7.1.3",
+  "script_sha256": "a491fee86251cfa59e51514b1d18e8c90bf8a2634e51cef59efc595436f10b9b",
+  "before": {
+    "proposals": {
+      "count": 326,
+      "sha256": "ee9bd1752cc7648d0caa424023b84c3b9b5cc767676817ef9bb54124e8fd8f7c"
+    },
+    "audit_log": {
+      "count": 4140,
+      "sha256": "a3a5b27e91e458724bb19f8c5b40b55730b417322cec60ea56f6f243e6c3dedb"
+    },
+    "posts": 2391,
+    "attachments": 26,
+    "local_consent_audit": 6
+  },
+  "runs": [
+    {
+      "name": "normal",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "pass_assertions": 65,
+      "cleanup_receipt": true,
+      "state_after": {
+        "proposals": {
+          "count": 326,
+          "sha256": "ee9bd1752cc7648d0caa424023b84c3b9b5cc767676817ef9bb54124e8fd8f7c"
+        },
+        "audit_log": {
+          "count": 4140,
+          "sha256": "a3a5b27e91e458724bb19f8c5b40b55730b417322cec60ea56f6f243e6c3dedb"
+        },
+        "posts": 2391,
+        "attachments": 26,
+        "local_consent_audit": 6
+      },
+      "state_unchanged": true
+    },
+    {
+      "name": "post-intake-fault",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "pass_assertions": 52,
+      "cleanup_receipt": true,
+      "state_after": {
+        "proposals": {
+          "count": 326,
+          "sha256": "ee9bd1752cc7648d0caa424023b84c3b9b5cc767676817ef9bb54124e8fd8f7c"
+        },
+        "audit_log": {
+          "count": 4140,
+          "sha256": "a3a5b27e91e458724bb19f8c5b40b55730b417322cec60ea56f6f243e6c3dedb"
+        },
+        "posts": 2391,
+        "attachments": 26,
+        "local_consent_audit": 6
+      },
+      "state_unchanged": true,
+      "injected_after_real_intake": true,
+      "expected_failure": true
+    }
+  ],
+  "baseline_toolbox_sha": "135090bdc2c8a70389f81065fe0bd44f9a6959c8",
+  "core_sha": "79c247f10768b6a7c9243b3ec1e06c5cb0e07d65",
+  "toolkit_sha": "921d1dc7cb5661fef10ca8f83b781690c98034cb",
+  "reproduction": {
+    "original_exit_code": 1,
+    "failed_assertion": "npcink-toolbox/build-article-media-batch-write-plan is available through the Toolkit registry.",
+    "before_proposal_intake": true
+  },
+  "review": {
+    "self_review": "correctness, readability, architecture, SQL escaping and bounded cleanup reviewed; no blocking findings",
+    "ci_ai_workflow": "disabled_manually",
+    "ai_review_delivered": false,
+    "publication_exception_required": true
+  },
+  "limits": [
+    "Synthetic local WordPress evidence, not a real-user production ledger.",
+    "Existing saved stashes and unrelated source work remain preserved.",
+    "No tag, manifest, final-execution or authorization contract change."
+  ],
+  "runtime_dependency_qualification": {
+    "toolkit_head": "921d1dc7cb5661fef10ca8f83b781690c98034cb",
+    "subsequent_observation": "Active owner branch codex/internal-link-anchor-evidence with seven modified/untracked files.",
+    "clean_dependency_tree_claimed": false,
+    "owner_files_or_plugin_symlinks_changed": false,
+    "release_acceptance_claimed": false
+  }
+}

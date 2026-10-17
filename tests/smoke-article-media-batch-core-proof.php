@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $toolbox_article_media_batch_smoke_proposal_ids = array();
+$toolbox_article_media_batch_smoke_batch_ids    = array();
 
 function toolbox_article_media_batch_smoke_pass( string $message ): void {
 	echo "PASS: {$message}\n";
@@ -93,10 +94,14 @@ function toolbox_article_media_batch_smoke_local_consent_audit_count(): int {
 }
 
 function toolbox_article_media_batch_smoke_track_rest_fixture( string $method, string $route, $data ): void {
-	global $toolbox_article_media_batch_smoke_proposal_ids;
+	global $toolbox_article_media_batch_smoke_proposal_ids, $toolbox_article_media_batch_smoke_batch_ids;
 
 	if ( 'POST' !== strtoupper( $method ) || '/npcink-governance-core/v1/proposals/from-plan' !== $route || ! is_array( $data ) ) {
 		return;
+	}
+	$batch_id = trim( (string) ( $data['batch_id'] ?? '' ) );
+	if ( '' !== $batch_id ) {
+		$toolbox_article_media_batch_smoke_batch_ids[ $batch_id ] = true;
 	}
 
 	foreach ( (array) ( $data['proposals'] ?? array() ) as $proposal ) {
@@ -121,14 +126,15 @@ function toolbox_article_media_batch_smoke_should_purge_governance_records(): bo
 }
 
 function toolbox_article_media_batch_smoke_purge_governance_records(): void {
-	global $wpdb, $toolbox_article_media_batch_smoke_proposal_ids;
+	global $wpdb, $toolbox_article_media_batch_smoke_proposal_ids, $toolbox_article_media_batch_smoke_batch_ids;
 
 	if ( ! toolbox_article_media_batch_smoke_should_purge_governance_records() ) {
 		return;
 	}
 
 	$proposal_ids = array_keys( is_array( $toolbox_article_media_batch_smoke_proposal_ids ) ? $toolbox_article_media_batch_smoke_proposal_ids : array() );
-	if ( empty( $proposal_ids ) ) {
+	$batch_ids    = array_keys( is_array( $toolbox_article_media_batch_smoke_batch_ids ) ? $toolbox_article_media_batch_smoke_batch_ids : array() );
+	if ( empty( $proposal_ids ) && empty( $batch_ids ) ) {
 		return;
 	}
 
@@ -140,8 +146,18 @@ function toolbox_article_media_batch_smoke_purge_governance_records(): void {
 		$wpdb->delete( $audit_table, array( 'proposal_id' => $proposal_id ), array( '%s' ) );
 		$wpdb->delete( $proposal_table, array( 'proposal_id' => $proposal_id ), array( '%s' ) );
 	}
+	foreach ( $batch_ids as $batch_id ) {
+		// Plan-ingest audit rows have no proposal_id; bind cleanup to this response's batch.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$audit_table} WHERE event_name = %s AND metadata_json LIKE %s",
+				'proposal.plan_ingested',
+				'%' . $wpdb->esc_like( '"batch_id":"' . sanitize_text_field( $batch_id ) . '"' ) . '%'
+			)
+		);
+	}
 
-	toolbox_article_media_batch_smoke_info( 'Purged Core proposal fixtures: ' . count( $proposal_ids ) );
+	toolbox_article_media_batch_smoke_info( 'Purged Core proposal fixtures: ' . count( $proposal_ids ) . '; plan-ingest audit fixtures: ' . count( $batch_ids ) );
 }
 
 function toolbox_article_media_batch_smoke_rest( string $method, string $route, array $params = array() ): array {
@@ -182,10 +198,13 @@ foreach (
 	) as $ability_id
 ) {
 	toolbox_article_media_batch_smoke_assert( is_object( wp_get_ability( $ability_id ) ), "{$ability_id} is registered." );
-	toolbox_article_media_batch_smoke_assert(
-		isset( $definitions[ $ability_id ] ) && is_array( $definitions[ $ability_id ] ) && is_callable( $definitions[ $ability_id ]['execute_callback'] ?? null ),
-		"{$ability_id} is available through the Toolkit registry."
-	);
+	// Toolbox owns the planner; only Toolkit abilities belong in its private registry.
+	if ( 0 === strpos( $ability_id, 'npcink-abilities-toolkit/' ) ) {
+		toolbox_article_media_batch_smoke_assert(
+			isset( $definitions[ $ability_id ] ) && is_array( $definitions[ $ability_id ] ) && is_callable( $definitions[ $ability_id ]['execute_callback'] ?? null ),
+			"{$ability_id} is available through the Toolkit registry."
+		);
+	}
 }
 
 $run_id = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : uniqid( 'article_media_batch_', true );
