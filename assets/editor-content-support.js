@@ -6381,6 +6381,7 @@
 			anchor_incomplete_compound: __('The anchor stops before the complete phrase. Review the surrounding text.', 'npcink-workflow-toolbox'),
 			anchor_dependent_fragment: __('The anchor is an incomplete text fragment. Choose a complete phrase manually.', 'npcink-workflow-toolbox'),
 			anchor_partial_identifier: __('The anchor cuts through a technical name. Review the complete name.', 'npcink-workflow-toolbox'),
+			anchor_reference_requires_review: __('This label names a specific resource. Verify its original destination and add the link manually.', 'npcink-workflow-toolbox'),
 			code_block_match_not_eligible: __('Code blocks stay unchanged; cite the article from nearby explanatory text.', 'npcink-workflow-toolbox'),
 			range_already_linked: __('This phrase already contains a link.', 'npcink-workflow-toolbox'),
 			target_already_linked: __('The current article already links to this target.', 'npcink-workflow-toolbox'),

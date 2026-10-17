@@ -20,11 +20,19 @@
 		const anchor = text.slice(range.start, range.end);
 		const before = text.slice(0, range.start);
 		const after = text.slice(range.end);
-		if (/(?:个人|私人|独立)$/u.test(anchor) && /^\s*(?:网站|博客|主页|站点|空间|账号|账户|品牌|项目)/u.test(after)) {
+		if ((/(?:个人|私人|独立)$/u.test(anchor) && /^\s*(?:网站|博客|主页|站点|空间|账号|账户|品牌|项目)/u.test(after))
+			|| (/(?:Google|谷歌)$/iu.test(anchor) && /^\s*(?:云端硬盘|云盘|Drive|Docs|Sheets|Chrome)/iu.test(after))) {
 			return 'anchor_incomplete_compound';
 		}
-		if (/^的\s*[A-Za-z][A-Za-z0-9+#._\s-]*$/u.test(anchor) || /^[A-Za-z][A-Za-z0-9+#._\s-]*的$/u.test(anchor)) {
+		if (/^(?:的(?!确|士|卢)|来的|于(?=[A-Za-z]))/u.test(anchor)
+			|| (/(?:的|一个|一种|一些|一款|一套|一位|一名|一条|即可享受|便可享受|可以享受)$/u.test(anchor) && !/(?:目的|标的)$/u.test(anchor))) {
 			return 'anchor_dependent_fragment';
+		}
+		const label = anchor.toLocaleLowerCase().replace(/[\s:：]+/gu, '');
+		const captionPosition = /^\s*[:：]/u.test(after) || /[:：]\s*$/u.test(before) || (!before.trim() && !after.trim());
+		if ((captionPosition && ['github', 'demo', '原文来源', '代码来源', '项目来源', '官方网站', '第三方演示', '插件介绍', '主题介绍', '安装教程', '使用文档', '项目下载', '下载地址', '项目介绍', '功能演示'].includes(label))
+			|| /^(?:官方)?售价\d+(?:[.,]\d+)?(?:美元|元|usd|cny)$/iu.test(label)) {
+			return 'anchor_reference_requires_review';
 		}
 		if ((/[A-Za-z0-9_]$/u.test(anchor) && /^(?:[A-Za-z0-9_]|[-.][A-Za-z0-9_])/u.test(after))
 			|| (/^[A-Za-z0-9_]/u.test(anchor) && /(?:[A-Za-z0-9_]|[A-Za-z0-9_][-.])$/u.test(before))) {

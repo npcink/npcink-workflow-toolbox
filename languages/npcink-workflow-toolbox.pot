@@ -9546,3 +9546,7 @@ msgstr ""
 #: assets/editor-content-support.js
 msgid "The anchor cuts through a technical name. Review the complete name."
 msgstr ""
+
+#: assets/editor-content-support.js
+msgid "This label names a specific resource. Verify its original destination and add the link manually."
+msgstr ""

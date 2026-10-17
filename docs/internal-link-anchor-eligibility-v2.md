@@ -25,17 +25,29 @@ these bounded shapes on the actual matched range:
 
 - A span ending in `个人`, `私人` or `独立` immediately before optional whitespace
   and `网站`, `博客`, `主页`, `站点`, `空间`, `账号`, `账户`, `品牌` or `项目`:
-  `anchor_incomplete_compound`.
-- A Latin technical fragment prefixed or suffixed by dependent `的`, such as
-  `的HTML` or `css的`: `anchor_dependent_fragment`.
+  `anchor_incomplete_compound`. The same check protects an ending `Google` /
+  `谷歌` before `云端硬盘`, `云盘`, `Drive`, `Docs`, `Sheets` or `Chrome`.
+- Dependency-shaped starts `的` (excluding `的确` / `的士` / `的卢`), `来的`, or
+  `于` before Latin text; endings `的` (excluding lexical `目的` / `标的`),
+  `一个`, `一种`, `一些`, `一款`, `一套`, `一位`, `一名`, `一条`, `即可享受`,
+  `便可享受` or `可以享受`: `anchor_dependent_fragment`.
 - A span starting/ending inside an ASCII technical identifier, including a
   continued hyphen/dot identifier: `anchor_partial_identifier`.
+- Generic project/resource captions (Github, Demo, 原文来源, 代码来源,
+  项目来源, 官方网站, 第三方演示, 插件介绍, 主题介绍, 安装教程, 使用文档,
+  项目下载, 下载地址, 项目介绍, 功能演示), in a colon/standalone caption position, or a bare numeric price caption:
+  `anchor_reference_requires_review`. The current contract does not establish
+  the specific resource's ownership, so these stay manual. This does **not**
+  judge their language unnatural or assert every target is wrong.
 
 Full `搭建个人网站`, `HTML内容`, `background-attachment`, `Node.js`, standalone
 `面向个人`, `JavaScript` before Chinese prose and the discussed `category` URL
 component remain eligible if all existing checks pass. Punctuation breaks the
 modifier-noun continuation. Unicode offsets still use the existing matcher;
 emoji and inline formatting controls verify that the observed span is preserved.
+Named `Intro.js功能演示`, `教育目的` and `交易标的` controls stay eligible. Nominalized
+`的` phrases outside the explicit exceptions can conservatively become manual;
+this is an Apply guard, not a grammar correctness label.
 
 This is a conservative, explicit set of fragment shapes, not general Chinese
 segmentation, full naturalness detection or destination-ownership inference.
@@ -56,7 +68,7 @@ codes rather than relabeling historical events. No raw anchor/context is sent.
 Eval Lab stores current and frozen-v1 eligibility side by side for the same
 live blocks and unchanged candidates. It records helper hashes and the frozen
 revision. The old read-only/model/human artifacts are not overwritten. The
-26 control cases are developer assertions, never human relevance gold.
+45 control cases are developer assertions, never human relevance gold.
 
 ## Verification and rollback
 

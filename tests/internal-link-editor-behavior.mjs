@@ -396,6 +396,7 @@ let anchorBoundaryCases = [
  ['参考 background-attachment 属性。', 'background', 'anchor_partial_identifier'],
  ['参考 background-attachment 属性。', 'background-attachment', ''],
  ['学习 JavaScript 教程。', 'JavaScript', ''],
+ ['学习 Github 教程。', 'Github', ''],
  ['例如 mysite.com/category/my-category/ 路径。', 'category', ''],
 ];
 if (process.env.NPCINK_LINK_ANCHOR_FIXTURES) {
@@ -405,7 +406,7 @@ if (process.env.NPCINK_LINK_ANCHOR_FIXTURES) {
  assert.ok(Array.isArray(fixture.cases) && fixture.cases.length >= 12);
  anchorBoundaryCases = fixture.cases.map(row => {
   assert.ok(typeof row.text === 'string' && typeof row.anchor === 'string' && row.text.includes(row.anchor));
-  assert.ok(['', 'anchor_incomplete_compound', 'anchor_dependent_fragment', 'anchor_partial_identifier'].includes(row.expected_reason));
+  assert.ok(['', 'anchor_incomplete_compound', 'anchor_dependent_fragment', 'anchor_partial_identifier', 'anchor_reference_requires_review'].includes(row.expected_reason));
   return [row.text, row.anchor, row.expected_reason];
  });
 }

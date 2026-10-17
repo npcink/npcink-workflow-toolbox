@@ -9672,3 +9672,7 @@ msgstr "锚文本是不完整的片段，请手动选择完整短语。"
 #: assets/editor-content-support.js
 msgid "The anchor cuts through a technical name. Review the complete name."
 msgstr "锚文本截断了技术名称，请核对完整名称。"
+
+#: assets/editor-content-support.js
+msgid "This label names a specific resource. Verify its original destination and add the link manually."
+msgstr "此标签指向具体资源，请核对原有去向并手动添加链接。"

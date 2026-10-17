@@ -1153,6 +1153,7 @@
       "趋势信号": ["趋势信号"],
       "应用后正文又发生了变化，不能安全整批撤销。请使用 WordPress 编辑器历史记录。": ["应用后正文又发生了变化，不能安全整批撤销。请使用 WordPress 编辑器历史记录。"],
       "The anchor text is too generic.": ["锚文本过于泛化"],
+      "This label names a specific resource. Verify its original destination and add the link manually.": ["此标签指向具体资源，请核对原有去向并手动添加链接。"],
       "The anchor stops before the complete phrase. Review the surrounding text.": ["锚文本在完整短语中途结束，请核对上下文。"],
       "The anchor is an incomplete text fragment. Choose a complete phrase manually.": ["锚文本是不完整的片段，请手动选择完整短语。"],
       "The anchor cuts through a technical name. Review the complete name.": ["锚文本截断了技术名称，请核对完整名称。"],
