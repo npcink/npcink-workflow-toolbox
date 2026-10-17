@@ -102,3 +102,12 @@ reviewable candidate shape. Batch generation should first export these
 candidates as dry-run JSON or XLSX rows. Accepted WordPress writes still need
 the existing editor save, Core proposal, or explicitly classified future local
 confirmation path.
+
+## Ranking Observation Metadata
+
+Related-content and internal-link sections may expose `ranking_version`,
+`retrieval_source`, and an evidence-backed `rerank_applied` boolean. Candidates
+may expose one-based `candidate_rank` and bounded `score_bucket`. These fields
+are observational and do not change ordering, Apply eligibility, or write truth.
+See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md) for the frozen
+families, telemetry bounds, rollout order, and known anchor-contract limitation.

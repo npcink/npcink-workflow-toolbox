@@ -1385,6 +1385,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				)
 			)
 		);
+		$related_content = Recommendation_Metadata::project_section( $related_content, 'related_content' );
 		$taxonomy_terms  = $this->editor_taxonomy_term_candidates( $context, $query, $related_content );
 		$summary_ai      = $this->editor_support_section(
 			$this->editor_cached_hosted_ai_content_support(
@@ -1704,6 +1705,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$items,
 			'cloud_vector' === $source_status && 'cloud_vector_evidence' === $retrieval_status
 		);
+		$artifact                              = Recommendation_Metadata::project_section( $artifact, 'internal_links' );
 		$artifact['final_write_path']          = 'native_editor_commit';
 		$artifact['direct_wordpress_write']    = false;
 		$artifact['owner_label']               = 'human_editor';

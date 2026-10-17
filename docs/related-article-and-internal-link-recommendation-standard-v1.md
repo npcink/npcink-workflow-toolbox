@@ -490,3 +490,10 @@ Apply 只改变当前 Gutenberg 可见状态。用户可能撤销、继续编辑
   保留可发现入口；
 - 文档与实现冲突时，以版本化运行时契约、当前测试和活动边界标准为准，
   同步修正文档，不用历史记录覆盖当前事实。
+
+## 10. 已冻结的技术基线与观测字段
+
+2026-10-16 的阶段 0、两个独立版本及 metadata-only 字段规范见
+[Ranking Baseline v1](recommendation-ranking-baseline-v1.md)。该文档记录实际
+candidate 证据、兼容部署顺序及 Toolkit 未消费 Cloud anchor hint 的限制；
+不以合成正向样本代替人工相关性评测，也不改变写入边界。

@@ -76,3 +76,10 @@ operator actions. WordPress remains final review and persistence truth.
 Do not add raw-content telemetry, user profiles, a local queue, another vector
 database, automatic WordPress writes, or a model-routing control plane for this
 evaluation loop.
+
+The [frozen technical baselines](recommendation-ranking-baseline-v1.md) now
+identify both families separately. Optional version, position, score bucket,
+retrieval source, and rerank metadata pass through Toolbox, Addon, and Cloud.
+The new fields preserve the existing privacy and native-save boundaries.
+Developer smoke events and synthetic positive drafts are wiring evidence only;
+exclude them from later human-adoption or relevance claims.
