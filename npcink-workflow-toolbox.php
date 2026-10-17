@@ -38,6 +38,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Site_Knowledge_Service.php'
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Content_Collector_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Discoverability_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Workflow_Plans_Service.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Recommendation_Metadata.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Agent_Feedback_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Site_Ops_Cloud_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Provider_Article_Audio_Service.php';

@@ -336,3 +336,30 @@ assert.equal(fallbackResult.applied_count, 0);
 assert.equal(fallbackResult.items[0].reason_codes[0], 'fallback_must_not_be_labeled_vector');
 
 console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');
+
+const relatedMetadataPayload = { sections: { related_content: {
+ ranking_version: 'related_content.v1', retrieval_source: 'cloud_vector', rerank_applied: false,
+ results: [{ post_id: 4, title: 'One', url: 'https://example.test/one', score_bucket: 'high' }, { post_id: 9, title: 'Two', url: 'https://example.test/two', score_bucket: 'medium' }],
+} } };
+const relatedContext = helpers.recommendationFeedbackContext(relatedMetadataPayload, 'related_content');
+assert.equal(relatedContext.candidateCount, 2, 'Related impressions count their own result shape');
+assert.equal(relatedContext.applicableCount, 0);
+const relatedImpression = helpers.recommendationImpressionFeedbackPayload(relatedMetadataPayload, 'related_content', 'related-session');
+assert.equal(relatedImpression.ranking_version, 'related_content.v1');
+assert.equal(relatedImpression.rerank_applied, false);
+assert.equal(relatedImpression.candidate_rank, undefined, 'Impressions have no singular candidate position');
+assert.equal(relatedImpression.evidence_ref_ids.length, 0);
+const candidateMetadata = helpers.recommendationFeedbackMetadata(relatedMetadataPayload, 'related_content', { candidateRank: 2, scoreBucket: 'medium', title: 'private title', targetUrl: 'https://private.test' });
+assert.equal(candidateMetadata.candidate_rank, 2);
+assert.equal(candidateMetadata.score_bucket, 'medium');
+assert.equal(JSON.stringify(candidateMetadata).includes('private'), false);
+const rankedApplySeed = helpers.internalLinkApplyFeedbackSeed({ sections: { internal_links: { ranking_version: 'internal_links.v1', retrieval_source: 'cloud_vector' } } }, 'ranked-session', 2, [{ candidateRank: 2 }, { candidateRank: 6 }]);
+const rankedSave = helpers.internalLinkSavedFollowupPayload(rankedApplySeed, false);
+assert.equal(rankedSave.ranking_version, 'internal_links.v1');
+assert.ok(rankedSave.source_reason_codes.includes('candidate_rank_2'));
+assert.ok(rankedSave.source_reason_codes.includes('candidate_rank_6'));
+console.log('Recommendation family counts, position, version and saved-rank privacy: ok');
+const positionEvent = { handoff_id: 'same-session-copy', ranking_version: 'internal_links.v1', candidate_rank: 2 };
+assert.notEqual(helpers.implicitAgentFeedbackKey(positionEvent), helpers.implicitAgentFeedbackKey({ ...positionEvent, candidate_rank: 6 }), 'Distinct candidate positions are not deduplicated together');
+assert.equal(helpers.implicitAgentFeedbackKey(positionEvent), helpers.implicitAgentFeedbackKey({ ...positionEvent }), 'Repeated clicks on the same candidate remain deduplicated');
+assert.notEqual(helpers.implicitAgentFeedbackKey({ handoff_id: 'same-session-save', source_reason_codes: ['candidate_rank_2'] }), helpers.implicitAgentFeedbackKey({ handoff_id: 'same-session-save', source_reason_codes: ['candidate_rank_6'] }));

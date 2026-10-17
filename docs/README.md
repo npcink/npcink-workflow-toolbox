@@ -112,6 +112,7 @@ Start from the active documents below before changing code.
 - [Recommendation Candidate Contract](recommendation-candidate-contract.md)
 - [WordPress-First AI Content Platform Development Standard v1](wordpress-first-ai-content-platform-development-standard-v1.md)
 - [Recommendation Eval](recommendation-eval.md)
+- [Recommendation Ranking Baseline v1](recommendation-ranking-baseline-v1.md)
 - [Summary Eval](summary-eval.md)
 - [Site Ops Cloud Analysis Contract](site-ops-cloud-analysis-contract.md)
 - [Site Knowledge Vector Operations Contract](site-knowledge-vector-operations-contract.md)

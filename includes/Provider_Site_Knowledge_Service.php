@@ -177,6 +177,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 				'intent'               => sanitize_key( (string) ( $result['intent'] ?? '' ) ),
 				'result_granularity'   => sanitize_key( (string) ( $result['result_granularity'] ?? 'chunk' ) ),
 				'result_grouping'      => is_array( $result['result_grouping'] ?? null ) ? $this->sanitize_payload( $result['result_grouping'] ) : array(),
+				'rerank'               => is_array( $result['rerank'] ?? null ) ? array_intersect_key( $this->sanitize_payload( $result['rerank'] ), array_flip( array( 'status', 'provider', 'candidate_count', 'reason' ) ) ) : array(),
 				'evidence_gate'        => is_array( $result['evidence_gate'] ?? null ) ? $this->sanitize_payload( $result['evidence_gate'] ) : array(),
 				'retrieval_readiness'  => is_array( $result['retrieval_readiness'] ?? null ) ? $this->sanitize_payload( $result['retrieval_readiness'] ) : array(),
 				'agent_handoff'        => $agent_handoff,

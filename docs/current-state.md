@@ -92,10 +92,14 @@ writing).
 - Browser closeout on 2026-10-14: `smoke-site-ops-insights-browser` passed
   against `https://magick-ai.local` with the fourth Site Check tab, all
   read-only sub-tabs, narrow-layout checks, and no Cloud/Core execution calls.
-  The internal-link review-only smoke passed its no-write and fail-closed
-  assertions before stopping at the expected environment boundary; the full
-  smoke remains blocked because Cloud-backed candidate evidence returned HTTP
-  502 `cloud_runtime_request_failed` from the local Addon.
+  The subsequent recommendation stage-0 verification resolved the Cloud anchor
+  matcher CPU bottleneck on the actual M4-backed Addon route. Related-content
+  and internal-link queries passed three consecutive rounds; editor
+  review/copy, disposable-draft Apply/Undo, and native-save feedback passed.
+  Natural samples can still be review-only because Toolkit currently matches
+  target titles or author selections, not Cloud anchor hints. See
+  [Ranking Baseline v1](recommendation-ranking-baseline-v1.md) for the separate
+  ranking versions, bounded metadata, evidence, and remaining contract gap.
 - Environment-dependent smokes (browser/Cloud/local site) live outside
   `test:all`; see `docs/development-workflow.md` before running them.
   Never pipe a gate through `grep`/`tail` — check the composer exit code.
@@ -103,8 +107,9 @@ writing).
 ## Open Debt (top items)
 
 0. The UX delivery arc in PRs #257–#263 is merged. Browser verification is
-   complete for Site Check and review-only internal-link behavior; a local
-   Cloud Addon HTTP 502 still blocks a candidate-evidence/Apply-path check.
+   complete for Site Check. Recommendation stage 0 now passes through the
+   actual M4-backed Cloud route; the remaining natural-article Apply limitation
+   is Toolkit anchor-hint consumption, documented in Ranking Baseline v1.
    Remaining next-phase actions are real hold-comment calibration for Cloud
    scheduling (highest value), the ③ media-ALT adoption gate (needs ~1 week
    of production use), the PHPStan ratchet, and the carried cluster splits.

@@ -470,6 +470,7 @@ if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
 	class_alias( Npcink_Toolbox_Progressive_Plugin_Stub::class, 'Npcink_Toolbox\\Plugin' );
 }
 
+require_once dirname( __DIR__ ) . '/includes/Recommendation_Metadata.php';
 require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';

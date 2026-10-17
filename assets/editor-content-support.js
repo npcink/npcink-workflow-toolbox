@@ -87,6 +87,9 @@
 	if (typeof window !== 'undefined') {
 		window.NpcinkToolboxInternalLinkHelpers = Object.freeze(Object.assign({}, window.NpcinkToolboxInternalLinkHelpers || {}, {
 			recommendationFeedbackContext,
+			recommendationFeedbackMetadata,
+			recommendationImpressionFeedbackPayload,
+			implicitAgentFeedbackKey,
 			internalLinkApplyFeedbackSeed,
 			internalLinkSavedFollowupPayload,
 		}));
@@ -777,16 +780,23 @@
 		);
 	}
 
-	function submitImplicitAgentFeedback(payload) {
-		if (!payload || typeof payload !== 'object') {
-			return;
-		}
-		const key = [
+	function implicitAgentFeedbackKey(payload) {
+		return [
+			payload.ranking_version || '',
+			payload.candidate_rank || '',
+			(Array.isArray(payload.source_reason_codes) ? payload.source_reason_codes : []).filter((code) => /^candidate_rank_([1-9]|1[0-9]|20)$/.test(code)).slice(0, 8).join(','),
 			payload.source_runtime || '',
 			payload.handoff_type || '',
 			payload.handoff_id || '',
 			payload.local_outcome || '',
 		].join('|').slice(0, 500);
+	}
+
+	function submitImplicitAgentFeedback(payload) {
+		if (!payload || typeof payload !== 'object') {
+			return;
+		}
+		const key = implicitAgentFeedbackKey(payload);
 		if (implicitAgentFeedbackSent[key]) {
 			return;
 		}
@@ -1714,7 +1724,7 @@
 			runId || String(contentSupportFeedbackEvidenceRefIds(payload || {}).length)
 		].filter(Boolean).join(':');
 
-		return {
+		return Object.assign({
 			contract_version: 'cloud_agent_feedback.v1',
 			agent_id: 'editor_content_support_agent',
 			agent_version: payload && payload.contract_version ? String(payload.contract_version) : '',
@@ -1735,7 +1745,7 @@
 			redaction_status: 'metadata_only',
 			retention_class: 'quality_eval',
 			created_at: new Date().toISOString()
-		};
+		}, feedbackOptions.rankingMetadata || {});
 	}
 
 	function editorContentSupportSourceRuntime(payload, intent) {
@@ -1793,7 +1803,7 @@
 	function recommendationFeedbackContext(payload, intent) {
 		const sections = payload && payload.sections && typeof payload.sections === 'object' ? payload.sections : {};
 		const section = sections[intent] && typeof sections[intent] === 'object' ? sections[intent] : {};
-		const candidates = internalLinkCandidateItems(section);
+		const candidates = intent === 'related_content' ? relatedContentCandidateItems(section).slice(0, 8) : internalLinkCandidateItems(section);
 		const applicableCount = candidates.filter((candidate) => candidate && candidate.canApplyToEditor && candidate.candidateRelevance !== 'weak' && candidate.sourceMatch).length;
 		const retrievalStatus = sanitizeFeedbackAction(section.retrieval_status || section.source_status || 'unknown');
 		const candidateSource = sanitizeFeedbackAction(section.candidate_source || 'unknown');
@@ -1811,6 +1821,18 @@
 		};
 	}
 
+	function recommendationFeedbackMetadata(payload, intent, candidate) {
+		const section = payload && payload.sections && payload.sections[intent] || {};
+		if (!['internal_links.v1', 'related_content.v1'].includes(section.ranking_version)) return {};
+		const metadata = { ranking_version: section.ranking_version, retrieval_source: section.retrieval_source || 'unknown' };
+		if (typeof section.rerank_applied === 'boolean') metadata.rerank_applied = section.rerank_applied;
+		if (candidate && Number.isInteger(candidate.candidateRank) && candidate.candidateRank >= 1 && candidate.candidateRank <= 20) {
+			metadata.candidate_rank = candidate.candidateRank;
+			metadata.score_bucket = ['low', 'medium', 'high'].includes(candidate.scoreBucket) ? candidate.scoreBucket : 'unknown';
+		}
+		return metadata;
+	}
+
 	function recommendationImpressionFeedbackPayload(payload, intent, sessionId) {
 		const normalizedIntent = String(intent || '').trim() === 'related_content' ? 'related_content' : 'internal_links';
 		const action = normalizedIntent === 'related_content' ? 'related_content_impression' : 'internal_link_impression';
@@ -1819,16 +1841,18 @@
 			sourceObjectType: 'recommendation_session',
 			sourceObjectId: sessionId,
 			reasonCodes: ['impression_only'].concat(context.reasonCodes),
+			rankingMetadata: recommendationFeedbackMetadata(payload, normalizedIntent),
 		});
 		eventPayload.evidence_ref_ids = [];
 		return eventPayload;
 	}
 
-	function internalLinkApplyFeedbackSeed(payload, sessionId, appliedCount) {
+	function internalLinkApplyFeedbackSeed(payload, sessionId, appliedCount, appliedCandidates = []) {
 		const eventPayload = editorContentImplicitFeedbackPayload(payload || {}, 'internal_links', 'internal_link_applied_to_editor', 'accepted', [], '', {
 			sourceObjectType: 'recommendation_session',
 			sourceObjectId: sessionId,
-			reasonCodes: [recommendationCountBucket('applied_count', appliedCount)],
+			reasonCodes: [recommendationCountBucket('applied_count', appliedCount)].concat(appliedCandidates.map((candidate) => 'candidate_rank_' + candidate.candidateRank).filter((code) => /^candidate_rank_([1-9]|1[0-9]|20)$/.test(code)).slice(0, 8)),
+			rankingMetadata: recommendationFeedbackMetadata(payload, 'internal_links'),
 		});
 		eventPayload.evidence_ref_ids = [];
 		return eventPayload;
@@ -5296,7 +5320,7 @@
 	function internalLinkCandidateItems(section) {
 		const sourceItems = section && Array.isArray(section.items) ? section.items : [];
 		if (section && Array.isArray(section.recommendation_candidates) && section.recommendation_candidates.length) {
-			return dedupeInternalLinkCandidates(section.recommendation_candidates.map((item, index) => {
+			return rankedRecommendationCandidates(dedupeInternalLinkCandidates(section.recommendation_candidates.map((item, index) => {
 				const source = sourceItems[index] && typeof sourceItems[index] === 'object' ? sourceItems[index] : {};
 				const targetRef = item && item.target_ref && typeof item.target_ref === 'object' ? item.target_ref : {};
 				const title = plainTextFromHtml(readableItemText(item.label || item.name || source.title || item.id, __('Internal link candidate', 'npcink-workflow-toolbox')));
@@ -5328,6 +5352,7 @@
 					),
 					quality_status: item.quality_status,
 					quality_score: item.quality_score,
+					scoreBucket: item.score_bucket || 'unknown',
 					quality_issues: item.quality_issues,
 					priorityReason: internalLinkPriorityReasonText(item.priority_reason),
 					linkGraphIssues: Array.isArray(item.link_graph_issues) ? item.link_graph_issues : [],
@@ -5335,9 +5360,9 @@
 					action_policy: item.action_policy,
 					target_field: item.target_field,
 				};
-			}));
+			})));
 		}
-		return dedupeInternalLinkCandidates(sourceItems.map((item, index) => {
+		return rankedRecommendationCandidates(dedupeInternalLinkCandidates(sourceItems.map((item, index) => {
 			const title = plainTextFromHtml(readableItemText(item.title || item.target_url, __('Internal link candidate', 'npcink-workflow-toolbox')));
 			return {
 				id: readableItemText(item.target_post_id || String(index + 1), String(index + 1)),
@@ -5365,7 +5390,7 @@
 				action_policy: 'operator_review_only_no_insert',
 				target_field: 'post_content',
 			};
-		}));
+		})));
 	}
 
 	function imageAltSuggestionItems(section) {
@@ -5577,12 +5602,18 @@
 		});
 	}
 
+	function rankedRecommendationCandidates(candidates) {
+		return candidates.map((candidate, index) => Object.assign({}, candidate, { candidateRank: index + 1 }));
+	}
+
 	function relatedContentCandidateItems(section) {
 		return extractKnowledgeItems(section).map((item, index) => {
 			const sourceId = item && (item.post_id || item.id || item.source_id) ? String(item.post_id || item.id || item.source_id) : '';
 			const title = readableItemText(item && (item.title || item.name || item.source_title), __('Related article', 'npcink-workflow-toolbox') + ' ' + String(index + 1));
 			return {
 				id: sourceId || String(index + 1),
+				candidateRank: index + 1,
+				scoreBucket: item && item.score_bucket || 'unknown',
 				title,
 				targetUrl: readableItemText(item && (item.target_url || item.url || item.permalink || item.link || item.source_url), ''),
 				detail: readableItemText(item && (item.reason || item.excerpt || item.snippet || item.content_excerpt), ''),
@@ -8230,10 +8261,15 @@
 			}
 
 			function recommendationActionFeedbackOptions(intent, fallbackObjectId) {
+				const candidateId = typeof fallbackObjectId === 'object' ? String(fallbackObjectId && fallbackObjectId.id || '') : String(fallbackObjectId || '');
+				const section = result && result.sections && result.sections[intent] || {};
+				const candidates = intent === 'related_content' ? relatedContentCandidateItems(section) : internalLinkCandidateItems(section);
+				const candidate = candidates.find((item) => String(item.id) === candidateId);
 				const sessionId = String(recommendationSessionRef.current[intent] || '');
 				return {
 					sourceObjectType: sessionId ? 'recommendation_session' : 'internal_link_candidate',
-					sourceObjectId: sessionId || String(fallbackObjectId || ''),
+					sourceObjectId: sessionId || candidateId,
+					rankingMetadata: recommendationFeedbackMetadata(result, intent, candidate),
 				};
 			}
 
@@ -8339,7 +8375,7 @@
 			setRelatedContentRunning(String(key || 'related') + ':copy');
 			try {
 				await copyTextToClipboard(url);
-				const feedbackOptions = recommendationActionFeedbackOptions('related_content', '');
+				const feedbackOptions = recommendationActionFeedbackOptions('related_content', candidate);
 				if (feedbackOptions.sourceObjectType === 'recommendation_session') {
 					submitContentImplicitFeedback('related_content_copy', 'accepted', ['evidence_useful', 'operator_confidence_high'], feedbackOptions);
 				}
@@ -8385,8 +8421,9 @@
 			batchResult.updates.forEach((update) => dispatcher.updateBlockAttributes(update.blockClientId, { content: update.appliedContent }));
 			const feedbackSessionId = mediaQualitySessionId('internal_link_apply');
 			const recommendationSessionId = String(recommendationSessionRef.current.internal_links || feedbackSessionId);
-			const feedbackSeed = internalLinkApplyFeedbackSeed(result || {}, recommendationSessionId, batchResult.applied_count);
+			const feedbackSeed = internalLinkApplyFeedbackSeed(result || {}, recommendationSessionId, batchResult.applied_count, candidates.filter((candidate) => (batchResult.items || []).some((item) => item.id === candidate.id && item.outcome === 'applied')));
 			batchResult.undo.feedback_session_id = feedbackSessionId;
+			batchResult.undo.rank_reason_codes = feedbackSeed.source_reason_codes.filter((code) => /^candidate_rank_/.test(code));
 			pendingInternalLinkTelemetryRef.current[feedbackSessionId] = {
 				feedback_seed: feedbackSeed,
 				snapshots: internalLinkTelemetrySnapshots(batchResult.updates),
@@ -8431,7 +8468,7 @@
 			setInternalLinkUndo(null);
 			setInternalLinkBatchResult(null);
 			setInternalLinkStatus({ status: 'info', message: __('本次应用的内链已从当前编辑器撤销，尚未保存到 WordPress。', 'npcink-workflow-toolbox') });
-				submitContentImplicitFeedback('internal_link_undone', 'rejected', ['operator_reversed', 'candidate_not_adopted'], recommendationActionFeedbackOptions('internal_links', ''));
+				submitContentImplicitFeedback('internal_link_undone', 'rejected', ['operator_reversed', 'candidate_not_adopted'], Object.assign(recommendationActionFeedbackOptions('internal_links', ''), { reasonCodes: internalLinkUndo.rank_reason_codes || [] }));
 		}
 
 		function openInternalLinkCandidate(candidate) {
@@ -8458,7 +8495,7 @@
 				setRelatedContentStatus({ status: 'error', message: __('This article has an unsafe URL.', 'npcink-workflow-toolbox') });
 				return;
 			}
-			const feedbackOptions = recommendationActionFeedbackOptions('related_content', '');
+			const feedbackOptions = recommendationActionFeedbackOptions('related_content', candidate);
 			if (feedbackOptions.sourceObjectType === 'recommendation_session') {
 				submitContentImplicitFeedback('related_content_open', 'accepted', ['evidence_useful', 'operator_confidence_high'], feedbackOptions);
 			}

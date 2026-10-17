@@ -135,15 +135,17 @@ wp_set_auth_cookie($user->ID, false, is_ssl());
 $post_id = ${requestedPostId};
 if ($post_id <= 0) {
 	$fixture_content = 'This temporary draft exists only for the editor progressive browser smoke. It should be deleted by the smoke cleanup.';
+	$fixture_title = 'Npcink browser smoke fixture ' . wp_generate_uuid4();
 	$fixture_source = get_post(${sourcePostId});
 	if ($fixture_source instanceof WP_Post) {
 		$fixture_content = (string) $fixture_source->post_content;
+		$fixture_title = (string) $fixture_source->post_title . ' [smoke]';
 	}
 	$post_id = wp_insert_post(array(
 		'post_type'    => 'post',
 		'post_status'  => 'draft',
 		'post_author'  => $user->ID,
-		'post_title'   => 'Npcink browser smoke fixture ' . wp_generate_uuid4(),
+		'post_title'   => $fixture_title,
 		'post_content' => $fixture_content,
 	), true);
 	if (is_wp_error($post_id)) {
@@ -196,6 +198,7 @@ async function waitForFeedbackAction(requests, action, timeoutMs = 10000) {
 function assertMetadataOnlyFeedback(payload, label) {
 	const serialized = JSON.stringify(payload || {});
 	assert(payload && payload.redaction_status === 'metadata_only', `${label} declares metadata-only redaction.`);
+	assert(payload.ranking_version === 'internal_links.v1', `${label} carries the frozen ranking version.`);
 	assert(Array.isArray(payload.evidence_ref_ids) && payload.evidence_ref_ids.length === 0, `${label} omits content and candidate evidence references.`);
 	assert(!/"(?:content|post_content|anchor|anchor_text|source_match|provider_output)"\s*:/i.test(serialized) && String(payload.operator_note || '') === '', `${label} carries no raw content, anchor, source-match, note, or Provider fields.`);
 }
@@ -404,6 +407,7 @@ try {
 					await page.waitForSelector('text=/Link copied|链接已复制/', { timeout: 10000 });
 					const internalLinkCopyFeedback = await waitForFeedbackAction(requests, 'internal_link_copy');
 					assertMetadataOnlyFeedback(internalLinkCopyFeedback, 'Internal-link copy');
+					assert(Number.isInteger(internalLinkCopyFeedback.candidate_rank) && internalLinkCopyFeedback.candidate_rank >= 1 && internalLinkCopyFeedback.candidate_rank <= 8, 'Copied candidate retains its displayed position.');
 					assert(internalLinkCopyFeedback.source_object_id === internalLinkImpression.source_object_id, 'Internal-link copy correlates to its recommendation impression session.');
 					pass('A reviewed internal-link URL can be copied manually.');
 			}
@@ -436,6 +440,12 @@ try {
 					assert(appliedCount > 0 && editorContentAfterApply !== editorContentBefore, 'Explicit Apply changes only the visible Gutenberg editor state.');
 					const internalLinkApplyFeedback = await waitForFeedbackAction(requests, 'internal_link_applied_to_editor');
 					assert(internalLinkApplyFeedback.source_object_id === internalLinkImpression.source_object_id, 'Internal-link Apply correlates to its recommendation impression session.');
+					const rankDeadline = Date.now() + 5000;
+					while (agentFeedbackRequests(requests).filter((request) => JSON.parse(request.body || '{}').source_action_id === 'internal_link_applied_to_editor').length < appliedCount && Date.now() < rankDeadline) {
+						await new Promise((resolve) => setTimeout(resolve, 100));
+					}
+					const appliedRankEvents = agentFeedbackRequests(requests).map((request) => JSON.parse(request.body || '{}')).filter((payload) => payload.source_action_id === 'internal_link_applied_to_editor');
+					assert(new Set(appliedRankEvents.map((payload) => payload.candidate_rank)).size === appliedCount, 'Every applied candidate retains its distinct displayed position.');
 					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Apply does not persist post_content before native Update or Publish.');
 				const applyRequests = requests.slice(requestIndexBeforeApply);
 				const directWriteRequests = applyRequests.filter((request) => /\/wp-json\/wp\/v2\/(posts|pages)\/\d+/i.test(request.url) && /POST|PUT|PATCH/i.test(request.method));
@@ -450,6 +460,7 @@ try {
 					});
 					nativeSaveFeedback = await waitForFeedbackAction(requests, 'internal_link_saved_unchanged', 20000);
 					assertMetadataOnlyFeedback(nativeSaveFeedback, 'Internal-link native-save confirmation');
+					assert(nativeSaveFeedback.source_reason_codes.some((code) => /^candidate_rank_/.test(code)), 'Native save retains bounded applied candidate positions.');
 					assert(nativeSaveFeedback.source_object_type === 'recommendation_session', 'Native-save confirmation keeps recommendation-session identity.');
 					assert(nativeSaveFeedback.source_object_id === internalLinkImpression.source_object_id, 'Native-save confirmation correlates to the original recommendation impression session.');
 					const databaseContentAfterSave = wpPostContent(activePostId);
@@ -459,7 +470,12 @@ try {
 					await page.getByRole('button', { name: /撤销本次内链应用|Undo current internal-link application/i }).click();
 					await page.waitForSelector('text=/本次应用的内链已从当前编辑器撤销/', { timeout: 10000 });
 					const editorContentAfterUndo = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
-					assert(editorContentAfterUndo === editorContentBefore, 'Explicit Undo restores the visible Gutenberg editor state.');
+					const undoComparison = await page.evaluate(({ before, after }) => ({
+						raw_equal: before === after,
+						canonical_equal: window.wp.blocks.serialize(window.wp.blocks.parse(before)) === window.wp.blocks.serialize(window.wp.blocks.parse(after)),
+					}), { before: editorContentBefore, after: editorContentAfterUndo });
+					console.log(`INFO: internal_link_undo_comparison=${JSON.stringify(undoComparison)}`);
+					assert(undoComparison.canonical_equal, 'Explicit Undo restores the visible Gutenberg editor state.');
 					assert(wpPostContent(activePostId) === databaseContentBefore, 'Explicit Undo does not persist post_content.');
 					undoPerformed = true;
 				}
@@ -488,6 +504,7 @@ try {
 				assert(wpPostContent(activePostId) === databaseContentBefore, 'Cloud-unavailable review leaves WordPress content unchanged.');
 				pass('Fail-closed acceptance only: Cloud retrieval, feedback ingestion, and editor Apply remain unverified.');
 			} else {
+				assert(!cloudUnavailable, 'Configured-Cloud acceptance requires available Cloud retrieval; HTTP 200 alone cannot pass.');
 				assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
 			}
 			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
