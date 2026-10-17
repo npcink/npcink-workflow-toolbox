@@ -425,6 +425,11 @@ for (const [text, anchor, expectedReason] of anchorBoundaryCases) {
 }
 
 
+const inlineFragment = batchCandidate('inline-compound', '搭建个人', 3, 3003, 'https://example.test/target/', '为自己搭建个人网站。');
+const inlineFragmentBlocks = [{ ...batchBlock, attributes: { content: '为自己搭建<strong>个人</strong>网站。' } }];
+inlineFragment.sourceMatch.expected_text = windowObject.NpcinkToolboxTextHelpers.plainTextFromHtml(inlineFragmentBlocks[0].attributes.content);
+assert.equal(helpers.internalLinkCandidateEligibility(inlineFragment, inlineFragmentBlocks, richText).reasonCodes[0], 'anchor_incomplete_compound');
+assert.equal(inlineFragmentBlocks[0].attributes.content, '为自己搭建<strong>个人</strong>网站。', 'Fragment rejection preserves inline markup');
 console.log('PASS: anchor eligibility v2 controls: ' + anchorBoundaryCases.length);
 console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');
 
