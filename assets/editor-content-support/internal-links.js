@@ -13,6 +13,33 @@
 	'use strict';
 
 	const { plainTextFromHtml, truncateText } = (typeof window !== 'undefined' && window.NpcinkToolboxTextHelpers) || {};
+	const anchorEligibilityVersion = 'internal_link_anchor_eligibility.v2';
+
+	// Bounded fragment checks, not general Chinese segmentation or target relevance.
+	function internalLinkAnchorBoundaryReason(text, range) {
+		const anchor = text.slice(range.start, range.end);
+		const before = text.slice(0, range.start);
+		const after = text.slice(range.end);
+		if ((/(?:个人|私人|独立)$/u.test(anchor) && /^\s*(?:网站|博客|主页|站点|空间|账号|账户|品牌|项目)/u.test(after))
+			|| (/(?:Google|谷歌)$/iu.test(anchor) && /^\s*(?:云端硬盘|云盘|Drive|Docs|Sheets|Chrome)/iu.test(after))) {
+			return 'anchor_incomplete_compound';
+		}
+		if (/^(?:的(?!确|士|卢)|来的|于(?=[A-Za-z]))/u.test(anchor)
+			|| (/(?:的|一个|一种|一些|一款|一套|一位|一名|一条|即可享受|便可享受|可以享受)$/u.test(anchor) && !/(?:目的|标的)$/u.test(anchor))) {
+			return 'anchor_dependent_fragment';
+		}
+		const label = anchor.toLocaleLowerCase().replace(/[\s:：]+/gu, '');
+		const captionPosition = /^\s*[:：]/u.test(after) || /[:：]\s*$/u.test(before) || (!before.trim() && !after.trim());
+		if ((captionPosition && ['github', 'demo', '原文来源', '代码来源', '项目来源', '官方网站', '第三方演示', '插件介绍', '主题介绍', '安装教程', '使用文档', '项目下载', '下载地址', '项目介绍', '功能演示'].includes(label))
+			|| /^(?:官方)?售价\d+(?:[.,]\d+)?(?:美元|元|usd|cny)$/iu.test(label)) {
+			return 'anchor_reference_requires_review';
+		}
+		if ((/[A-Za-z0-9_]$/u.test(anchor) && /^(?:[A-Za-z0-9_]|[-.][A-Za-z0-9_])/u.test(after))
+			|| (/^[A-Za-z0-9_]/u.test(anchor) && /(?:[A-Za-z0-9_]|[A-Za-z0-9_][-.])$/u.test(before))) {
+			return 'anchor_partial_identifier';
+		}
+		return '';
+	}
 
 	function canonicalInternalLinkUrl(value) {
 		try {
@@ -179,6 +206,8 @@
 		if (!range) return { error: 'missing_phrase' };
 		if (internalLinkRangeHasLink(value, range.start, range.end)) return { error: 'range_already_linked' };
 		if (internalLinkBlocksContainUrl(allBlocks, url, richTextApi)) return { error: 'target_already_linked' };
+		const boundaryReason = internalLinkAnchorBoundaryReason(value.text, range);
+		if (boundaryReason) return { error: boundaryReason };
 		const editorPolicy = internalLinkEditorPolicy(allBlocks, match.block_client_id, richTextApi);
 		if (!editorPolicy.canApply) return { error: editorPolicy.error, editorPolicy };
 		const formatted = richTextApi.applyFormat(value, { type: 'core/link', attributes: { url } }, range.start, range.end);
@@ -246,6 +275,7 @@
 		const selected = Array.isArray(candidates) ? candidates : [];
 		const baseResult = {
 			schema: 'current_article_multi_link_result.v1',
+			anchor_eligibility_version: anchorEligibilityVersion,
 			write_posture: 'native_editor_commit',
 			direct_wordpress_write: false,
 			persisted: false,
@@ -377,10 +407,10 @@
 	// Preview one candidate through the Apply engine; never mutate live blocks or rank candidates.
 	function internalLinkCandidateEligibility(candidate, allBlocks, richTextApi) {
 		if (!candidate || candidate.candidateRelevance === 'weak' || !['post', 'page'].includes(candidate.targetPostType)) {
-			return { canApply: false, reasonCodes: [] };
+			return { canApply: false, reasonCodes: [], anchorEligibilityVersion };
 		}
 		const result = prepareInternalLinkBatchApplication([candidate], allBlocks, richTextApi);
-		return { canApply: result.applied_count === 1, reasonCodes: result.items[0].reason_codes };
+		return { canApply: result.applied_count === 1, reasonCodes: result.items[0].reason_codes, anchorEligibilityVersion };
 	}
 	function recommendationCountBucket(prefix, count) {
 		const total = Math.max(0, parseInt(count || 0, 10) || 0);

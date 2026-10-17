@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createFreshCloudProbe } from './fresh-cloud-probe.mjs';
@@ -240,13 +240,13 @@ assert.equal(helpers.internalLinkSavedStateChanged([], telemetrySnapshots), true
 const applyFeedbackSeed = helpers.internalLinkApplyFeedbackSeed({}, 'internal_link_results_session', 2);
 assert.equal(applyFeedbackSeed.source_object_type, 'recommendation_session');
 assert.equal(applyFeedbackSeed.source_object_id, 'internal_link_results_session');
-assert.deepEqual(Array.from(applyFeedbackSeed.source_reason_codes), ['applied_count_1_3']);
+assert.deepEqual(Array.from(applyFeedbackSeed.source_reason_codes), ['anchor_eligibility_v2', 'applied_count_1_3']);
 const savedUnchangedFeedback = helpers.internalLinkSavedFollowupPayload(applyFeedbackSeed, false);
 assert.equal(savedUnchangedFeedback.source_action_id, 'internal_link_saved_unchanged');
 assert.equal(savedUnchangedFeedback.local_outcome, 'accepted');
 assert.equal(savedUnchangedFeedback.source_object_type, 'recommendation_session');
 assert.equal(savedUnchangedFeedback.source_object_id, 'internal_link_results_session');
-assert.deepEqual(Array.from(savedUnchangedFeedback.source_reason_codes), ['applied_count_1_3', 'saved_without_editor_changes']);
+assert.deepEqual(Array.from(savedUnchangedFeedback.source_reason_codes), ['anchor_eligibility_v2', 'applied_count_1_3', 'saved_without_editor_changes']);
 const savedEditedFeedback = helpers.internalLinkSavedFollowupPayload(savedUnchangedFeedback, true);
 assert.equal(savedEditedFeedback.source_action_id, 'internal_link_saved_edited');
 assert.equal(savedEditedFeedback.local_outcome, 'edited_before_accept');
@@ -378,11 +378,60 @@ assert.equal(helpers.recommendationFeedbackContext(livePayload, 'internal_links'
 assert.equal(helpers.recommendationFeedbackContext(livePayload, 'internal_links', [linkedLiveBlock], richText).applicableCount, 0);
 const liveImpression = helpers.recommendationImpressionFeedbackPayload(livePayload, 'internal_links', 'live-session', [linkedLiveBlock], richText);
 assert.ok(liveImpression.source_reason_codes.includes('applicable_count_0'));
+assert.ok(liveImpression.source_reason_codes.includes('anchor_eligibility_v2'));
 assert.equal(liveImpression.ranking_version, 'internal_links.v1');
 assert.equal(liveImpression.evidence_ref_ids.length, 0);
 assert.equal(/"(?:content|anchor_text|source_match|blocks)"\s*:/.test(JSON.stringify(liveImpression)), false, 'Readiness telemetry stays metadata-only');
 console.log('PASS: live readiness, existing links, editor changes, rank preservation and impression denominator');
 
+// Known compound/token fragments must fail identically in readiness and Apply.
+let anchorBoundaryCases = [
+ ['那么现在还有必要为自己搭建个人网站吗？', '搭建个人', 'anchor_incomplete_compound'],
+ ['为自己建立独立博客。', '建立独立', 'anchor_incomplete_compound'],
+ ['那么现在还有必要为自己搭建个人网站吗？', '搭建个人网站', ''],
+ ['面向个人提供服务。', '面向个人', ''],
+ ['修改元素的HTML内容。', '的HTML', 'anchor_dependent_fragment'],
+ ['修改元素的HTML内容。', 'HTML内容', ''],
+ ['了解css的用法。', 'css的', 'anchor_dependent_fragment'],
+ ['参考 background-attachment 属性。', 'background', 'anchor_partial_identifier'],
+ ['参考 background-attachment 属性。', 'background-attachment', ''],
+ ['学习 JavaScript 教程。', 'JavaScript', ''],
+ ['学习 Github 教程。', 'Github', ''],
+ ['例如 mysite.com/category/my-category/ 路径。', 'category', ''],
+];
+if (process.env.NPCINK_LINK_ANCHOR_FIXTURES) {
+ const fixture = JSON.parse(readFileSync(process.env.NPCINK_LINK_ANCHOR_FIXTURES, 'utf8'));
+ assert.equal(fixture.contract, 'internal_link_anchor_eligibility_controls.v2');
+ assert.equal(fixture.gold_source, 'developer_controls_not_human_gold');
+ assert.ok(Array.isArray(fixture.cases) && fixture.cases.length >= 12);
+ anchorBoundaryCases = fixture.cases.map(row => {
+  assert.ok(typeof row.text === 'string' && typeof row.anchor === 'string' && row.text.includes(row.anchor));
+  assert.ok(['', 'anchor_incomplete_compound', 'anchor_dependent_fragment', 'anchor_partial_identifier', 'anchor_reference_requires_review'].includes(row.expected_reason));
+  return [row.text, row.anchor, row.expected_reason];
+ });
+}
+for (const [text, anchor, expectedReason] of anchorBoundaryCases) {
+ const current = batchCandidate('boundary', anchor, Array.from(text.slice(0, text.indexOf(anchor))).length, 3003, 'https://example.test/target/', text);
+ const blocks = [{ ...batchBlock, attributes: { content: text } }];
+ const before = JSON.stringify({ current, blocks });
+ const ready = helpers.internalLinkCandidateEligibility(current, blocks, richText);
+ const applied = helpers.prepareInternalLinkBatchApplication([current], blocks, richText);
+ assert.equal(ready.reasonCodes[0] || '', expectedReason, 'Anchor boundary: ' + anchor);
+ assert.equal(ready.canApply, !expectedReason);
+ assert.equal(applied.applied_count, expectedReason ? 0 : 1);
+ assert.equal(ready.anchorEligibilityVersion, 'internal_link_anchor_eligibility.v2');
+ assert.equal(applied.anchor_eligibility_version, ready.anchorEligibilityVersion);
+ if (expectedReason) assert.equal(helpers.prepareInternalLinkApplication(current, blocks[0], blocks, richText).error, expectedReason);
+ assert.equal(JSON.stringify({ current, blocks }), before, 'Do not rewrite anchors or editor text');
+}
+
+
+const inlineFragment = batchCandidate('inline-compound', '搭建个人', 3, 3003, 'https://example.test/target/', '为自己搭建个人网站。');
+const inlineFragmentBlocks = [{ ...batchBlock, attributes: { content: '为自己搭建<strong>个人</strong>网站。' } }];
+inlineFragment.sourceMatch.expected_text = windowObject.NpcinkToolboxTextHelpers.plainTextFromHtml(inlineFragmentBlocks[0].attributes.content);
+assert.equal(helpers.internalLinkCandidateEligibility(inlineFragment, inlineFragmentBlocks, richText).reasonCodes[0], 'anchor_incomplete_compound');
+assert.equal(inlineFragmentBlocks[0].attributes.content, '为自己搭建<strong>个人</strong>网站。', 'Fragment rejection preserves inline markup');
+console.log('PASS: anchor eligibility v2 controls: ' + anchorBoundaryCases.length);
 console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');
 
 const relatedMetadataPayload = { sections: { related_content: {

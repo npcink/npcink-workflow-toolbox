@@ -9534,3 +9534,19 @@ msgstr ""
 #: assets/editor-content-support.js
 msgid "The selected image and its SEO fields were cleared for the new hosted-image request."
 msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The anchor stops before the complete phrase. Review the surrounding text."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The anchor is an incomplete text fragment. Choose a complete phrase manually."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The anchor cuts through a technical name. Review the complete name."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "This label names a specific resource. Verify its original destination and add the link manually."
+msgstr ""
