@@ -1348,6 +1348,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 							<span><?php esc_html_e( 'Optional AI suggestion preferences', 'npcink-workflow-toolbox' ); ?></span>
 							<small><?php esc_html_e( 'Keep defaults unless a support or editorial policy needs tighter guidance.', 'npcink-workflow-toolbox' ); ?></small>
 						</summary>
+					<div class="npcink-toolbox__context-panels">
+					<?php if ( ! Settings::DISCOVERABILITY_PAUSED ) : ?>
 					<nav class="npcink-toolbox__context-tabs" aria-label="<?php esc_attr_e( 'Advanced content context sections', 'npcink-workflow-toolbox' ); ?>">
 						<button type="button" class="npcink-toolbox__context-tab is-active" data-toolbox-context-target="seo" aria-selected="true">
 							<span><?php esc_html_e( 'SEO', 'npcink-workflow-toolbox' ); ?></span>
@@ -1366,8 +1368,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 							<small><?php esc_html_e( 'Claims and preview', 'npcink-workflow-toolbox' ); ?></small>
 						</button>
 					</nav>
-
-					<div class="npcink-toolbox__context-panels">
 					<section class="npcink-toolbox__card" data-toolbox-context-panel="seo">
 						<h2><?php esc_html_e( 'SEO', 'npcink-workflow-toolbox' ); ?></h2>
 						<p><?php esc_html_e( 'Control search-oriented metadata, keyword coverage, and which SEO fields AI may suggest.', 'npcink-workflow-toolbox' ); ?></p>
@@ -1508,7 +1508,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						</div>
 					</section>
 
-						<section class="npcink-toolbox__card" data-toolbox-context-panel="boundaries" hidden>
+					<?php endif; ?>
+						<section class="npcink-toolbox__card" data-toolbox-context-panel="boundaries"<?php echo Settings::DISCOVERABILITY_PAUSED ? '' : ' hidden'; ?>>
 							<h2><?php esc_html_e( 'Boundaries', 'npcink-workflow-toolbox' ); ?></h2>
 							<p><?php esc_html_e( 'Limit what AI can claim and inspect the read-only technical preview exposed to callers.', 'npcink-workflow-toolbox' ); ?></p>
 						<div class="npcink-toolbox__context-group-workspace" data-toolbox-context-groups>

@@ -1010,6 +1010,15 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			),
 		);
 
+		if ( Settings::DISCOVERABILITY_PAUSED ) {
+			foreach ( $contracts as &$contract ) {
+				foreach ( array( 'seo_title', 'meta_description', 'seo_meta_description', 'direct_answer_summary' ) as $field ) {
+					unset( $contract['output_shape'][ $field ] );
+				}
+			}
+			unset( $contract );
+		}
+
 		$contract = $contracts[ $intent ] ?? array(
 			'output_shape'     => array(
 				'suggestions'           => 'concise reviewable suggestions',

@@ -249,7 +249,7 @@ final class Site_Ops_Insight_Builder {
 			if ( ! is_array( $post ) ) {
 				continue;
 			}
-			if ( empty( $post['meta_description_present'] ) || empty( $post['excerpt_present'] ) ) {
+			if ( empty( $post['excerpt_present'] ) ) {
 				$missing_meta[] = $post;
 			}
 			if ( empty( $post['categories'] ) || empty( $post['tags'] ) ) {
@@ -268,11 +268,11 @@ final class Site_Ops_Insight_Builder {
 			count( $missing_meta ) + count( $missing_terms ) >= 5 ? 'high' : 'medium',
 			sprintf(
 				/* translators: 1: missing meta count, 2: missing taxonomy count. */
-				__( '%1$d sampled items need excerpt or meta-description review; %2$d need category or tag review.', 'npcink-workflow-toolbox' ),
+				__( '%1$d sampled items need excerpt review; %2$d need category or tag review.', 'npcink-workflow-toolbox' ),
 				count( $missing_meta ),
 				count( $missing_terms )
 			),
-			__( 'Weak metadata reduces snippet quality and makes suggestion workflows less grounded.', 'npcink-workflow-toolbox' ),
+			__( 'Missing summaries make content review less informative.', 'npcink-workflow-toolbox' ),
 			__( 'Use editor metadata suggestions for individual posts, then hand accepted values to Core proposals.', 'npcink-workflow-toolbox' ),
 			'core_handoff_candidate',
 			array_slice( $this->object_refs( array_merge( $missing_meta, $missing_terms ) ), 0, 5 )
@@ -408,7 +408,7 @@ final class Site_Ops_Insight_Builder {
 			72,
 			'medium',
 			__( 'The compact site positioning, audience, voice, or keyword context is incomplete.', 'npcink-workflow-toolbox' ),
-			__( 'Weak site context makes downstream SEO/AEO/GEO and content support suggestions less consistent.', 'npcink-workflow-toolbox' ),
+			__( 'Site context helps keep content suggestions consistent.', 'npcink-workflow-toolbox' ),
 			__( 'Fill the Site Context brief before relying on repeated AI recommendations.', 'npcink-workflow-toolbox' ),
 			'manual_review_only',
 			array()

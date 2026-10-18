@@ -35,6 +35,9 @@ final class Abilities {
 		}
 
 		foreach ( $this->definitions() as $ability_id => $definition ) {
+			if ( Settings::DISCOVERABILITY_PAUSED && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
+				continue;
+			}
 			npcink_abilities_toolkit_register_readonly( $ability_id, $definition );
 		}
 
@@ -65,6 +68,9 @@ final class Abilities {
 		}
 
 		foreach ( $this->definitions() as $ability_id => $definition ) {
+			if ( Settings::DISCOVERABILITY_PAUSED && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
+				continue;
+			}
 			wp_register_ability(
 				$ability_id,
 				array(
@@ -281,8 +287,8 @@ final class Abilities {
 				)
 			),
 			'npcink-toolbox/get-content-discoverability-context' => $this->definition(
-				__( 'Get Content Discoverability Context', 'npcink-workflow-toolbox' ),
-				__( 'Return the operator-maintained SEO, AEO, and GEO context for third-party AI callers without exposing provider secrets or writing WordPress content.', 'npcink-workflow-toolbox' ),
+				__( 'Get Site Content Context', 'npcink-workflow-toolbox' ),
+				__( 'Return the operator-maintained site content context for third-party AI callers without exposing provider secrets or writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array(),
 				array( $this, 'get_content_discoverability_context' ),
 				'cap.toolbox.context.read',
@@ -294,8 +300,8 @@ final class Abilities {
 				)
 			),
 			'npcink-toolbox/validate-content-discoverability-context' => $this->definition(
-				__( 'Validate Content Discoverability Context', 'npcink-workflow-toolbox' ),
-				__( 'Check whether the operator-maintained SEO, AEO, and GEO context has enough fields for third-party AI suggestion workflows.', 'npcink-workflow-toolbox' ),
+				__( 'Validate Site Content Context', 'npcink-workflow-toolbox' ),
+				__( 'Check whether the operator-maintained site context has enough fields for ordinary content suggestions.', 'npcink-workflow-toolbox' ),
 				array(),
 				array( $this, 'validate_content_discoverability_context' ),
 				'cap.toolbox.context.read',

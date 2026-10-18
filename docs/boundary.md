@@ -1,5 +1,11 @@
 # Npcink Toolbox Boundary
 
+SEO/AEO/GEO specialist surfaces are temporarily paused from 2026-10-18.
+Their stored settings, historical records, implementation and contract ids are
+retained; allowed ownership descriptions below do not enable those surfaces.
+Generic content assistance and existing WordPress governance remain unchanged.
+See [pause implementation](seo-specialist-pause-implementation-2026-10-18.md).
+
 ADR-015 permits one narrow present-admin write lane for `auto_safe.v1` Media Library optimization. Toolbox owns only the frozen local manifest, foreground progress, and confirmation receipt. Cloud owns derivative analysis and short-lived Artifacts; Toolkit owns every replacement, backup, verification, lineage record, and restore. This lane creates no Core proposal because the exact manifest is strongly confirmed once by the present administrator. It is unavailable to agents, background execution, Cron, or arbitrary media transforms, and does not change Core or Adapter contracts.
 
 ADR-017 retires the Toolbox single-image import, replacement, backup-listing,

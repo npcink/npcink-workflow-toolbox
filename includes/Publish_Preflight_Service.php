@@ -8,6 +8,7 @@
 namespace Npcink_Toolbox;
 
 defined( 'ABSPATH' ) || exit;
+require_once __DIR__ . '/Settings.php';
 
 final class Publish_Preflight_Service {
 	/**
@@ -23,12 +24,15 @@ final class Publish_Preflight_Service {
 	 * @return array<string,mixed>
 	 */
 	public function build_sections( array $context, array $discoverability, array $duplicate_check, array $local_article_checkup = array() ): array {
-		$sections                       = array(
+		$sections = array(
 			'checks'                => $this->local_checks( $context ),
 			'duplicate_check'       => $duplicate_check,
 			'seo_handoff'           => $this->seo_handoff_preview( $context, $discoverability ),
 			'local_article_checkup' => $local_article_checkup,
 		);
+		if ( Settings::DISCOVERABILITY_PAUSED ) {
+			unset( $sections['seo_handoff'] );
+		}
 		$sections['pre_publish_review'] = $this->pre_publish_review( $context, $sections );
 
 		return $sections;
@@ -84,6 +88,12 @@ final class Publish_Preflight_Service {
 	 * @return array<string,mixed>
 	 */
 	public function seo_handoff_preview( array $context, array $discoverability ): array {
+		if ( Settings::DISCOVERABILITY_PAUSED ) {
+			return array(
+				'status'         => 'paused',
+				'proposal_ready' => false,
+			);
+		}
 		$suggestions    = is_array( $discoverability['candidate_suggestions'] ?? null ) ? $discoverability['candidate_suggestions'] : array();
 		$fallback_title = sanitize_text_field( (string) ( $context['title'] ?? '' ) );
 		$fallback_desc  = trim( sanitize_textarea_field( (string) ( $context['excerpt'] ?? '' ) ) );
@@ -232,6 +242,10 @@ final class Publish_Preflight_Service {
 			),
 		);
 
+		if ( Settings::DISCOVERABILITY_PAUSED ) {
+			$items = array_values( array_filter( $items, static fn( array $item ): bool => 'seo_meta' !== $item['name'] ) );
+		}
+
 		return array(
 			'artifact_type'          => 'pre_publish_review.v1',
 			'candidate_type'         => 'pre_publish_review',
@@ -245,12 +259,10 @@ final class Publish_Preflight_Service {
 				'tag_suggestions',
 				'internal_links',
 				'image_candidates',
-				'seo_meta_single_post_handoff',
 				'polish_notes',
 			),
 			'handoff'                => array(
 				'metadata'               => 'core_proposal_required',
-				'seo'                    => 'core_proposal_required',
 				'internal_links'         => 'operator_review_only_no_insert',
 				'direct_wordpress_write' => false,
 			),

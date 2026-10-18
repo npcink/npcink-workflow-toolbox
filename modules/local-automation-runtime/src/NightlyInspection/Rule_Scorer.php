@@ -8,6 +8,7 @@
 namespace Npcink\LocalAutomationRuntime\NightlyInspection;
 
 final class Rule_Scorer {
+	private const SEO_METADATA_CHECKS_PAUSED = true;
 	/**
 	 * Scores one content item without reading WordPress state.
 	 *
@@ -23,7 +24,9 @@ final class Rule_Scorer {
 		$findings    = array();
 
 		$this->maybe_add_title_findings( $title, $findings );
-		$this->maybe_add_meta_findings( $item, $findings );
+		if ( ! self::SEO_METADATA_CHECKS_PAUSED ) {
+			$this->maybe_add_meta_findings( $item, $findings );
+		}
 		$this->maybe_add_structure_findings( $content, $findings );
 		$this->maybe_add_freshness_findings( $item, $title, $generated_at, $findings );
 		$this->maybe_add_link_findings( $item, $findings );
