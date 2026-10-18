@@ -124,7 +124,7 @@
     },
     {
       "button_id": "article_image_alt",
-      "label": "Article Image ALT (SEO)",
+      "label": "Image ALT Review",
       "surface": "editor_content_support",
       "source_contracts": [
         "current_article_image_alt_context_review.v1",
@@ -135,7 +135,7 @@
       "handoff_owner": "wordpress_native_save",
       "adapter_parity_status": "ability_parity_ready_editor_commit_excluded",
       "source_file": "assets/editor-content-support.js",
-      "source_marker": "Article image ALT (SEO)",
+      "source_marker": "Image ALT Review",
       "direct_wordpress_write": false
     },
     {

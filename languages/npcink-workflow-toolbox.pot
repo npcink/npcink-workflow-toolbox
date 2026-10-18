@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Npcink Workflow Toolbox 0.4.0\n"
+"Project-Id-Version: Npcink Workflow Toolbox 0.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/npcink-workflow-toolbox\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -9466,4 +9466,32 @@ msgstr ""
 
 #: assets/editor-content-support/audio-preferences.js:110
 msgid "Narration preferences"
+msgstr ""
+
+#: includes/Provider_Workflow_Plans_Service.php
+msgid "SEO/AEO/GEO specialist assistance is paused."
+msgstr ""
+
+msgid "Local suggestion context for claims, audience, and tone."
+msgstr ""
+
+msgid "Site context helps keep content suggestions consistent."
+msgstr ""
+
+msgid "Missing summaries make content review less informative."
+msgstr ""
+
+msgid "Check the site profile and source evidence before recommending metadata."
+msgstr ""
+
+msgid "Get Site Content Context"
+msgstr ""
+
+msgid "Return the operator-maintained site content context for third-party AI callers without exposing provider secrets or writing WordPress content."
+msgstr ""
+
+msgid "Validate Site Content Context"
+msgstr ""
+
+msgid "Check whether the operator-maintained site context has enough fields for ordinary content suggestions."
 msgstr ""

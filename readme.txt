@@ -4,7 +4,7 @@ Tags: ai, seo, editorial-workflow, media, content
 Requires at least: 6.9
 Requires PHP: 8.0
 Tested up to: 7.1
-Stable tag: 0.6.0
+Stable tag: 0.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -233,6 +233,14 @@ outside Toolbox except for the explicitly confirmed local media operations
 described above.
 
 == Changelog ==
+
+= 0.6.1 =
+
+* Temporarily pause SEO/AEO/GEO specialist configuration, briefs, proposal candidates and active discovery entries.
+* Preserve saved configuration and history; keep generic writing, search diagnostics, summaries, links, ALT and media tools available.
+* New inspection findings no longer penalize missing SEO descriptions. Historical results are retained.
+* This isolated candidate starts from published 0.6.0 and excludes later ranking and editor-refactor features.
+
 
 = 0.6.0 =
 

@@ -199,7 +199,7 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 	}
 
 	private function content_operations_projection( bool $cloud_ready ): array {
-		return array(
+		$projection = array(
 			'contract_version'       => 'toolbox_content_operations_projection.v1',
 			'registered'             => true,
 			'available'              => $cloud_ready,
@@ -265,6 +265,14 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 				'direct_wordpress_write' => false,
 			),
 		);
+		if ( Settings::is_discoverability_paused() ) {
+			$projection['surfaces']['editor_content_support']['intents']                    = array_values( array_diff( $projection['surfaces']['editor_content_support']['intents'], array( 'discoverability' ) ) );
+			$projection['gap_contracts']['seo_metadata_suggestion.v1']['state']             = 'paused';
+			$projection['gap_contracts']['seo_metadata_suggestion.v1']['available']         = false;
+			$projection['gap_contracts']['seo_metadata_suggestion.v1']['current_artifacts'] = array();
+			unset( $projection['gap_contracts']['seo_metadata_suggestion.v1']['target_ability_id'] );
+		}
+		return $projection;
 	}
 
 	private function image_visual_context_from_request( WP_REST_Request $request, string $query ): array {

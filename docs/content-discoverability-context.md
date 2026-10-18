@@ -1,6 +1,17 @@
 # Content Discoverability Context
 
-Status: active first-version contract.
+Status: compatibility contract; specialist entrypoints paused from 2026-10-18.
+
+The SEO/AEO/GEO form sections, discoverability brief registration, specialist
+Provider calls and SEO handoff are paused. Existing options are retained;
+normal Site Profile saves preserve hidden values exactly. Context reads and
+validation remain for generic writing support, with specialist rules masked and
+no specialist readiness requirements. Direct brief calls return
+`npcink_toolbox_feature_paused` (409) before search or cache access. General
+writing preparation uses shared source/context composition without GEO sections
+or instructions. The contract below records retained shapes for future review;
+it does not re-enable the paused feature. See the
+[pause implementation record](seo-specialist-pause-implementation-2026-10-18.md).
 
 This document records the SEO, AEO, and GEO context surface for future AI
 sessions. The feature exists so a WordPress operator can fill in site facts and

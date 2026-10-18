@@ -3,6 +3,12 @@
 This index keeps current contracts separate from historical closeout records.
 Start from the active documents below before changing code.
 
+## Current Reviews And Proposals
+
+- [SEO 专项功能暂停实施记录](seo-specialist-pause-implementation-2026-10-18.md) — three-repository implementation, retained data, restoration and verification states.
+
+- [SEO 相关功能暂停检查与建议](seo-feature-pause-review-2026-10-18.md) — original three-repository source inventory and pause proposal; see the implementation record for current candidate status. Includes the [reference chat archive](archive/2026-10/seo-geo-reference-chat-2026-10-18.md).
+
 ## Core Contracts
 
 - [Current State](current-state.md)
@@ -210,3 +216,13 @@ afterwards an archived record is edited only to fix link targets.
 ## Closeouts
 
 - [Pre-Release Hardening Closeout - 2026-09-30](pre-release-hardening-closeout-2026-09-30.md) records the positioning audit verdict, the delete-compatibility-early decision, the behavior-tests-unlock-refactors method, and the remaining known small items (i18n loader, weekly fingerprint cron documentation, label language, editor intent convergence).
+
+- [SEO 暂停生产候选与发布方案（2026-10-18）](seo-specialist-pause-production-plan-2026-10-18.md) — 隔离候选、顺序、影响与回滚；未部署。
+
+- [SEO 暂停候选 CI、集成与浏览器验收（2026-10-18）](seo-specialist-pause-candidate-validation-2026-10-18.md) — DeepSeek 实际基线、精确候选及既有严格 UI 阻断。
+
+- [SEO 候选独立汉化验收与发布续记（2026-10-19）](seo-specialist-pause-localization-validation-2026-10-19.md) — 独立 PR292、严格 UI 18→0、组合 ZIP、顺序与回滚；未部署。
+
+- [三项目最终源码候选与发布方案（2026-10-19）](seo-specialist-pause-final-candidates-2026-10-19.md) — 独立汉化评审与REST master合并、冻结包hash、顺序及回滚；未部署。
+
+- [三项目生产前验收、预检与回滚材料核验（2026-10-19）](seo-specialist-pause-preproduction-preflight-2026-10-19.md) — 已验证项、精确包指纹、离线及fixture回滚、正式门禁与待确认事项。

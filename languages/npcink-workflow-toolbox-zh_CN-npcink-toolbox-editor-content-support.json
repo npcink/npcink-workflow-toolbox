@@ -840,6 +840,7 @@
       "Write posture": ["写入姿态"],
       "Blocked guidance: ": ["阻塞指引："],
       "Flow and boundary": ["流程与边界"],
+      "Image ALT Review": ["图片 ALT 检查"],
       "Article image ALT (SEO)": ["文章图片 ALT（SEO）"],
       "Draft ALT for each image occurrence from its nearest heading and adjacent article text.": ["根据每次图片出现位置附近的标题和正文起草 ALT。"],
       "Current article image blocks and their local context": ["当前文章的图片区块及其局部上下文"],

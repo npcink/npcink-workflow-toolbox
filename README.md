@@ -1,5 +1,12 @@
 # Npcink Workflow Toolbox
 
+SEO/AEO/GEO specialist entrypoints and new specialist calls are temporarily
+paused. Ordinary titles, summaries, categories, tags, internal links, ALT,
+media tools and source preparation remain available. Existing specialist
+settings and history are retained for a reviewed future restoration; the older
+capability descriptions below record retained contracts. See the
+[pause implementation record](docs/seo-specialist-pause-implementation-2026-10-18.md).
+
 The editor's `整理` action now requests an inline Cloud-formatted body and applies
 validated text to the visible Gutenberg editor with undo, without invoking save
 or publish. See [Content formatting](docs/editor-content-format-v1.md) for its

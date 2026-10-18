@@ -39,6 +39,9 @@ abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 
 
 	protected function editor_cached_content_discoverability( array $input ) {
+		if ( Settings::is_discoverability_paused() ) {
+			return array();
+		}
 		return $this->editor_cached_client_result(
 			'content_discoverability',
 			$input,
@@ -127,7 +130,8 @@ abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 
 
 	protected function editor_flow_cache_key( string $namespace, array $input ): string {
-		$json = wp_json_encode( $input );
+		$input = array( 'product_policy' => 'discoverability_pause_v1' ) + $input;
+		$json  = wp_json_encode( $input );
 		if ( ! is_string( $json ) ) {
 			$json = serialize( $input );
 		}
