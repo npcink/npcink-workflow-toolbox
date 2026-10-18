@@ -224,3 +224,5 @@ afterwards an archived record is edited only to fix link targets.
 - [SEO 候选独立汉化验收与发布续记（2026-10-19）](seo-specialist-pause-localization-validation-2026-10-19.md) — 独立 PR292、严格 UI 18→0、组合 ZIP、顺序与回滚；未部署。
 
 - [三项目最终源码候选与发布方案（2026-10-19）](seo-specialist-pause-final-candidates-2026-10-19.md) — 独立汉化评审与REST master合并、冻结包hash、顺序及回滚；未部署。
+
+- [三项目生产前验收、预检与回滚材料核验（2026-10-19）](seo-specialist-pause-preproduction-preflight-2026-10-19.md) — 已验证项、精确包指纹、离线及fixture回滚、正式门禁与待确认事项。
