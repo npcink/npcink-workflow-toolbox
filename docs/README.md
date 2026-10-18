@@ -3,6 +3,12 @@
 This index keeps current contracts separate from historical closeout records.
 Start from the active documents below before changing code.
 
+## Current Reviews And Proposals
+
+- [SEO 专项功能暂停实施记录](seo-specialist-pause-implementation-2026-10-18.md) — three-repository implementation, retained data, restoration and verification states.
+
+- [SEO 相关功能暂停检查与建议](seo-feature-pause-review-2026-10-18.md) — original three-repository source inventory and pause proposal; see the implementation record for current candidate status. Includes the [reference chat archive](archive/2026-10/seo-geo-reference-chat-2026-10-18.md).
+
 ## Core Contracts
 
 - [Current State](current-state.md)

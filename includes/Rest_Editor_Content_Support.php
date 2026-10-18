@@ -2530,7 +2530,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		$related_summary       = Rest_Editor_Summary_Terms::editor_related_content_summary( $related_content );
 		$summary_evidence_refs = is_array( $related_summary['evidence_refs'] ?? null ) ? $related_summary['evidence_refs'] : array();
 
-		return array(
+		$result = array(
 			'candidate_type'          => 'summary_layer_candidates',
 			'write_posture'           => 'suggestion_only',
 			'direct_wordpress_write'  => false,
@@ -2565,6 +2565,10 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				),
 			),
 		);
+		if ( Settings::is_discoverability_paused() ) {
+			$result['items'] = array_values( array_filter( $result['items'], static fn( array $item ): bool => 'seo_meta_description' !== $item['id'] ) );
+		}
+		return $result;
 	}
 
 	private function editor_taxonomy_term_candidates( array $context, string $query, array $related_content = array() ): array {

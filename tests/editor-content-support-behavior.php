@@ -661,14 +661,14 @@ npcink_toolbox_editor_flow_assert( isset( $images['data']['sections']['image_can
 $preflight_run = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'publish_preflight' ) + $npcink_toolbox_editor_flow_draft );
 npcink_toolbox_editor_flow_assert( isset( $preflight_run['data'] ), 'Publish preflight returns a flow response.' );
 npcink_toolbox_editor_flow_assert_flow_contract( $preflight_run['data'], 'publish_preflight', 'Publish preflight' );
-npcink_toolbox_editor_flow_assert( isset( $preflight_run['data']['sections']['discoverability'] ), 'Publish preflight includes the discoverability section.' );
+npcink_toolbox_editor_flow_assert( empty( $preflight_run['data']['sections']['discoverability'] ) && ! isset( $preflight_run['data']['sections']['seo_handoff'] ), 'Publish preflight omits specialist candidates and SEO handoff.' );
 
 // 9. No default-button intent performed any WordPress write, and none of them
 //    fired a hosted-AI writing-pack/draft request or an external source-reader
 //    fetch: those stay explicit follow-up actions for the writing-pack flow.
 npcink_toolbox_editor_flow_assert( array() === $npcink_toolbox_editor_flow_writes, 'No editor content-support intent performed a WordPress write (' . implode( ', ', $npcink_toolbox_editor_flow_writes ) . ').' );
 npcink_toolbox_editor_flow_assert( array() === $npcink_toolbox_progressive_writing_pack_inputs, 'No default-button intent fired a hosted-AI writing-pack or draft request.' );
-npcink_toolbox_editor_flow_assert( 1 === $npcink_toolbox_progressive_source_reader_calls, 'Only publish preflight requests external search evidence; other default intents fire none.' );
+npcink_toolbox_editor_flow_assert( 0 === $npcink_toolbox_progressive_source_reader_calls, 'Default intents perform no incidental discoverability search while specialist features are paused.' );
 
 /**
  * ADR-018 permission behavior: an edit_posts-only user passes the scoped

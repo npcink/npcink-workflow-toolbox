@@ -348,7 +348,7 @@
 		{
 			intent: 'image_alt_suggestions',
 			defaultVisible: false,
-			label: __('Article image ALT (SEO)', 'npcink-workflow-toolbox'),
+			label: __('Image ALT Review', 'npcink-workflow-toolbox'),
 			description: __('Draft ALT for each image occurrence from its nearest heading and adjacent article text.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current article image blocks and their local context', 'npcink-workflow-toolbox'),
@@ -2140,7 +2140,7 @@
 			publish_preflight: __('Publish preflight', 'npcink-workflow-toolbox'),
 			polish_notes: __('Paragraph review', 'npcink-workflow-toolbox'),
 			discoverability: __('Discoverability suggestions', 'npcink-workflow-toolbox'),
-				image_alt_suggestions: __('Article image ALT (SEO)', 'npcink-workflow-toolbox'),
+				image_alt_suggestions: __('Image ALT Review', 'npcink-workflow-toolbox'),
 			categories: __('Categories', 'npcink-workflow-toolbox'),
 			tags: __('Tags', 'npcink-workflow-toolbox'),
 			featured_image: __('Featured image', 'npcink-workflow-toolbox'),
@@ -2253,7 +2253,7 @@
 			return __('Review selected paragraph', 'npcink-workflow-toolbox');
 		}
 			if (value === 'image_alt_suggestions') {
-				return __('Article image ALT (SEO)', 'npcink-workflow-toolbox');
+				return __('Image ALT Review', 'npcink-workflow-toolbox');
 			}
 		if (value === 'summary_terms_optimization') {
 			return __('Metadata optimization', 'npcink-workflow-toolbox');
@@ -5193,7 +5193,7 @@
 		return createElement(
 			'section',
 			{ className: 'npcink-toolbox-editor-support__discoverability-media' },
-				createElement('h4', null, __('Article image ALT (SEO)', 'npcink-workflow-toolbox')),
+				createElement('h4', null, __('Image ALT Review', 'npcink-workflow-toolbox')),
 			mediaSummary.total ? createElement(
 				'div',
 				{ className: 'npcink-toolbox-editor-support__discoverability-media-counts' },
@@ -5455,7 +5455,7 @@
 		return createElement(
 			'section',
 			{ className: 'npcink-toolbox-editor-support__contextual-alt-review' },
-			createElement('h4', null, __('Article image ALT (SEO)', 'npcink-workflow-toolbox')),
+			createElement('h4', null, __('Image ALT Review', 'npcink-workflow-toolbox')),
 			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Review empty image ALT values page by page. Visual recognition runs only after you request it; nothing is applied until final confirmation.', 'npcink-workflow-toolbox')),
 			createElement(
 				'div',
@@ -5778,7 +5778,7 @@
 					status: seoHandoff.proposal_ready ? 'review' : 'warning',
 					value: seoHandoff.proposal_ready ? __('Ready for Core review', 'npcink-workflow-toolbox') : __('SEO handoff incomplete', 'npcink-workflow-toolbox'),
 				},
-			];
+			].filter((item) => item.key !== 'core-handoff-readiness' || Boolean(sections && sections.seo_handoff && sections.seo_handoff.proposal_ready));
 		}
 
 		function renderPreflightReadinessRows(sections, counts) {

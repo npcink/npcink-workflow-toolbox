@@ -10,6 +10,13 @@ namespace Npcink_Toolbox;
 defined( 'ABSPATH' ) || exit;
 
 final class Settings {
+	/** Release pause: retain stored preferences and implementations for future review. */
+	public const DISCOVERABILITY_PAUSED = true;
+
+	/** Central release policy; callers preserve dormant restoration paths. */
+	public static function is_discoverability_paused(): bool {
+		return self::DISCOVERABILITY_PAUSED;
+	}
 
 	public const REVIEW_TALLY_SETS = array(
 		'media_alt'          => 'media_alt_caption_review_set.v1',
@@ -388,6 +395,15 @@ final class Settings {
 
 	public function get_content_context_for_ability(): array {
 		$context = $this->get_content_context();
+		if ( self::is_discoverability_paused() ) {
+			foreach ( array( 'seo_rules', 'aeo_rules', 'geo_rules' ) as $key ) {
+				$context[ $key ] = '';
+			}
+			foreach ( array( 'allow_faq_generation', 'allow_aeo_summary', 'allow_geo_summary', 'allow_structured_data_suggestions' ) as $key ) {
+				$context[ $key ] = false;
+			}
+			$context['proposal_allowed_fields'] = array_values( array_intersect( (array) $context['proposal_allowed_fields'], array( 'slug', 'excerpt' ) ) );
+		}
 
 		return array(
 			'context_type'            => 'content_discoverability',
@@ -440,10 +456,12 @@ final class Settings {
 		$this->append_context_check( $checks, 'target_audience', __( 'Target audience is filled.', 'npcink-workflow-toolbox' ), $context['target_audience'], 'required' );
 		$this->append_context_check( $checks, 'brand_voice', __( 'Brand voice is filled.', 'npcink-workflow-toolbox' ), $context['brand_voice'], 'required' );
 		$this->append_context_check( $checks, 'keywords.primary', __( 'Primary keywords are filled.', 'npcink-workflow-toolbox' ), $context['keywords']['primary'], 'required' );
-		$this->append_context_check( $checks, 'rules.seo', __( 'SEO rules are filled.', 'npcink-workflow-toolbox' ), $context['rules']['seo'], 'required' );
-		$this->append_context_check( $checks, 'rules.aeo', __( 'AEO rules are filled.', 'npcink-workflow-toolbox' ), $context['rules']['aeo'], 'required' );
-		$this->append_context_check( $checks, 'rules.geo', __( 'GEO rules are filled.', 'npcink-workflow-toolbox' ), $context['rules']['geo'], 'required' );
-		$this->append_context_check( $checks, 'proposal_allowed_fields', __( 'Proposal suggestion fields are selected.', 'npcink-workflow-toolbox' ), $context['proposal_allowed_fields'], 'required' );
+		if ( ! self::is_discoverability_paused() ) {
+			$this->append_context_check( $checks, 'rules.seo', __( 'SEO rules are filled.', 'npcink-workflow-toolbox' ), $context['rules']['seo'], 'required' );
+			$this->append_context_check( $checks, 'rules.aeo', __( 'AEO rules are filled.', 'npcink-workflow-toolbox' ), $context['rules']['aeo'], 'required' );
+			$this->append_context_check( $checks, 'rules.geo', __( 'GEO rules are filled.', 'npcink-workflow-toolbox' ), $context['rules']['geo'], 'required' );
+			$this->append_context_check( $checks, 'proposal_allowed_fields', __( 'Proposal suggestion fields are selected.', 'npcink-workflow-toolbox' ), $context['proposal_allowed_fields'], 'required' );
+		}
 
 		$this->append_context_check( $checks, 'keywords.long_tail', __( 'Long-tail keywords are filled.', 'npcink-workflow-toolbox' ), $context['keywords']['long_tail'], 'recommended' );
 		$this->append_context_check( $checks, 'keywords.entities', __( 'Entity keywords are filled.', 'npcink-workflow-toolbox' ), $context['keywords']['entities'], 'recommended' );
@@ -799,7 +817,8 @@ final class Settings {
 	}
 
 	public function sanitize_content_context( $input ): array {
-		$input = is_array( $input ) ? $input : array();
+		$input  = is_array( $input ) ? $input : array();
+		$stored = self::is_discoverability_paused() ? $this->get_content_context() : array();
 
 		$allowed_proposal_fields = array(
 			'seo_title',
@@ -815,7 +834,7 @@ final class Settings {
 			? array_values( array_intersect( $allowed_proposal_fields, array_map( 'sanitize_key', $input['proposal_allowed_fields'] ) ) )
 			: array();
 
-		return array(
+		$result = array(
 			'site_positioning'                  => sanitize_textarea_field( (string) ( $input['site_positioning'] ?? '' ) ),
 			'target_audience'                   => $this->sanitize_context_list( $input['target_audience'] ?? array() ),
 			'brand_voice'                       => sanitize_textarea_field( (string) ( $input['brand_voice'] ?? '' ) ),
@@ -837,6 +856,28 @@ final class Settings {
 			'allow_structured_data_suggestions' => ! empty( $input['allow_structured_data_suggestions'] ),
 			'proposal_allowed_fields'           => $proposal_fields,
 		);
+		if ( self::is_discoverability_paused() ) {
+			foreach ( array( 'seo_rules', 'aeo_rules', 'geo_rules', 'long_tail_keywords', 'entity_keywords', 'allow_faq_generation', 'allow_aeo_summary', 'allow_geo_summary', 'allow_structured_data_suggestions', 'proposal_allowed_fields' ) as $key ) {
+				$result[ $key ] = $stored[ $key ];
+			}
+		}
+		return $result;
+	}
+
+	/** Detects structured specialist actions without scanning article prose. */
+	public static function contains_specialist_action( array $input ): bool {
+		foreach ( $input as $key => $value ) {
+			if ( in_array( $key, array( 'seo_title', 'seo_description', 'seo_meta', 'geo_summary', 'aeo_summary', 'answer_summary', 'structured_data_hints' ), true ) && ! empty( $value ) ) {
+				return true;
+			}
+			if ( in_array( $key, array( 'field', 'ability_id', 'target_ability_id', 'handoff_type' ), true ) && in_array( $value, array( 'seo_title', 'seo_description', 'seo_meta', 'geo_summary', 'answer_summary', 'npcink-abilities-toolkit/set-post-seo-meta', 'seo_meta_handoff_preview' ), true ) ) {
+				return true;
+			}
+			if ( is_array( $value ) && self::contains_specialist_action( $value ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private function sanitize_context_list( $value ): array {

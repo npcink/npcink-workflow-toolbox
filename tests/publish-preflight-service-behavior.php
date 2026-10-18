@@ -91,21 +91,16 @@ $discoverability = array(
 );
 
 $sections = $service->build_sections( $context, $discoverability, array( 'results' => array() ) );
-npcink_toolbox_preflight_assert( array( 'checks', 'duplicate_check', 'seo_handoff', 'local_article_checkup', 'pre_publish_review' ) === array_keys( $sections ), 'Publish preflight keeps the established section order and shape, with the folded local article checkup before the review.' );
+npcink_toolbox_preflight_assert( array( 'checks', 'duplicate_check', 'local_article_checkup', 'pre_publish_review' ) === array_keys( $sections ), 'Publish preflight keeps the established section order and shape, with the folded local article checkup before the review.' );
 
 $checks = npcink_toolbox_preflight_index( (array) ( $sections['checks']['items'] ?? array() ), 'id' );
 npcink_toolbox_preflight_assert( array( 'title', 'excerpt', 'terms', 'featured_media' ) === array_keys( $checks ), 'Local checks keep the four established check ids.' );
 npcink_toolbox_preflight_assert( array( 'ok', 'ok', 'ok', 'ok' ) === array_column( $checks, 'status' ), 'Complete editor context passes every local check.' );
 npcink_toolbox_preflight_assert( 'suggestion_only' === (string) ( $sections['checks']['write_posture'] ?? '' ) && false === (bool) ( $sections['checks']['direct_wordpress_write'] ?? true ), 'Local checks remain suggestion-only and no-write.' );
 
-$seo_handoff = (array) ( $sections['seo_handoff'] ?? array() );
-$seo_template = (array) ( $seo_handoff['proposal_payload_template'] ?? array() );
-$seo_input = (array) ( $seo_template['input'] ?? array() );
-$seo_preview = (array) ( $seo_template['preview'] ?? array() );
-npcink_toolbox_preflight_assert( 'seo_meta_handoff_preview.v1' === (string) ( $seo_handoff['artifact_type'] ?? '' ) && true === (bool) ( $seo_handoff['proposal_ready'] ?? false ), 'Complete context produces the established proposal-ready SEO preview.' );
-npcink_toolbox_preflight_assert( 'npcink-abilities-toolkit/set-post-seo-meta' === (string) ( $seo_handoff['target_ability_id'] ?? '' ), 'SEO preview keeps the governed Toolkit ability id.' );
-npcink_toolbox_preflight_assert( true === (bool) ( $seo_input['dry_run'] ?? false ) && false === (bool) ( $seo_input['commit'] ?? true ) && false === (bool) ( $seo_preview['commit_execution'] ?? true ), 'SEO proposal input remains dry-run and non-committing.' );
-npcink_toolbox_preflight_assert( 2 === count( (array) ( $seo_preview['field_patch'] ?? array() ) ) && false === (bool) ( $seo_handoff['direct_wordpress_write'] ?? true ), 'SEO preview preserves two reviewable field patches without a Toolbox write.' );
+$paused_preview = $service->seo_handoff_preview( $context, $discoverability );
+npcink_toolbox_preflight_assert( ! isset( $sections['seo_handoff'] ) && 'paused' === $paused_preview['status'] && false === $paused_preview['proposal_ready'], 'SEO candidates and fallback content cannot create a new handoff while paused.' );
+npcink_toolbox_preflight_assert( ! isset( $paused_preview['proposal_payload_template'] ), 'Paused handoff exposes no executable or proposal payload.' );
 
 $review = (array) ( $sections['pre_publish_review'] ?? array() );
 $review_items = npcink_toolbox_preflight_index( (array) ( $review['items'] ?? array() ), 'name' );
@@ -117,15 +112,14 @@ npcink_toolbox_preflight_assert(
 		'tags'           => 'ok',
 		'featured_image' => 'ok',
 		'internal_links' => 'review',
-		'seo_meta'       => 'review',
 		'prose_quality'  => 'ok',
 		'duplicate_risk' => 'ok',
 	) === $review_statuses,
-	'Unified review maps complete context, manual link review, SEO review, and no duplicate evidence exactly.'
+	'Unified review maps complete context, manual link review, and no duplicate evidence exactly.'
 );
 npcink_toolbox_preflight_assert( 'pre_publish_review.v1' === (string) ( $review['artifact_type'] ?? '' ) && 'core_proposal_required' === (string) ( $review['final_write_path'] ?? '' ), 'Unified review keeps its v1 artifact and governed final-write path.' );
 npcink_toolbox_preflight_assert(
-	array( 'summary_terms_optimization', 'category_suggestions', 'tag_suggestions', 'internal_links', 'image_candidates', 'seo_meta_single_post_handoff', 'polish_notes' ) === (array) ( $review['next_actions'] ?? array() ),
+	array( 'summary_terms_optimization', 'category_suggestions', 'tag_suggestions', 'internal_links', 'image_candidates', 'polish_notes' ) === (array) ( $review['next_actions'] ?? array() ),
 	'Unified review keeps the established next-action contract.'
 );
 npcink_toolbox_preflight_assert( false === (bool) ( $review['direct_wordpress_write'] ?? true ) && false === (bool) ( $review['handoff']['direct_wordpress_write'] ?? true ), 'Unified review and handoff both prohibit direct WordPress writes.' );
@@ -146,8 +140,8 @@ $missing_sections = $service->build_sections(
 $missing_checks = npcink_toolbox_preflight_index( (array) ( $missing_sections['checks']['items'] ?? array() ), 'id' );
 npcink_toolbox_preflight_assert( array( 'warning', 'warning', 'warning', 'warning' ) === array_column( $missing_checks, 'status' ), 'Missing editor metadata produces the established local warning states.' );
 $missing_review = npcink_toolbox_preflight_index( (array) ( $missing_sections['pre_publish_review']['items'] ?? array() ), 'name' );
-npcink_toolbox_preflight_assert( 'warning' === (string) ( $missing_review['summary']['status'] ?? '' ) && 'warning' === (string) ( $missing_review['seo_meta']['status'] ?? '' ), 'Missing excerpt and proposal target remain visible warnings.' );
+npcink_toolbox_preflight_assert( 'warning' === (string) ( $missing_review['summary']['status'] ?? '' ) && ! isset( $missing_review['seo_meta'] ), 'Missing excerpt remains a warning without an SEO requirement.' );
 npcink_toolbox_preflight_assert( 'review' === (string) ( $missing_review['duplicate_risk']['status'] ?? '' ), 'Related Site Knowledge evidence preserves duplicate-risk review status.' );
-npcink_toolbox_preflight_assert( false === (bool) ( $missing_sections['seo_handoff']['proposal_ready'] ?? true ), 'SEO handoff fails closed without a current post id.' );
+npcink_toolbox_preflight_assert( ! isset( $missing_sections['seo_handoff'] ), 'SEO handoff fails closed without a current post id.' );
 
 echo "Publish preflight service behavior checks passed.\n";

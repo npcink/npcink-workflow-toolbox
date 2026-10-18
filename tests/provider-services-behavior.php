@@ -164,7 +164,7 @@ function rest_sanitize_boolean( $value ): bool {
 }
 
 function get_option( string $key, $default = false ) {
-	return $default;
+	return $GLOBALS['npcink_toolbox_pause_options'][ $key ] ?? $default;
 }
 
 function apply_filters( string $hook, $value, ...$args ) {
@@ -652,3 +652,65 @@ npcink_toolbox_provider_services_assert( is_array( $site_media_error ), 'Site-me
 npcink_toolbox_provider_services_assert( 'ready' === (string) ( $site_media_error['status'] ?? '' ), 'Site-media search keeps its Cloud search status when the evidence status call fails.' );
 
 echo "Provider services behavior checks passed.\n";
+
+// Pause rejects specialist work before any paid call, while preserving stored settings.
+$pause_settings = new Npcink_Toolbox\Settings();
+$GLOBALS['npcink_toolbox_pause_options']['npcink_toolbox_content_context'] = array(
+	'seo_rules'               => 'old search rules',
+	'aeo_rules'               => 'old answer rules',
+	'geo_rules'               => 'old entity rules',
+	'allow_faq_generation'    => true,
+	'allow_aeo_summary'       => true,
+	'allow_geo_summary'       => true,
+	'proposal_allowed_fields' => array( 'seo_title', 'seo_description', 'geo_summary', 'excerpt', 'slug' ),
+);
+$pause_saved = $pause_settings->sanitize_content_context( array( 'site_positioning' => 'New positioning' ) );
+npcink_toolbox_progressive_assert( 'old search rules' === $pause_saved['seo_rules'] && true === $pause_saved['allow_geo_summary'], 'Hidden specialist rules and flags survive a normal profile save.' );
+npcink_toolbox_progressive_assert( $pause_saved['proposal_allowed_fields'] === $GLOBALS['npcink_toolbox_pause_options']['npcink_toolbox_content_context']['proposal_allowed_fields'], 'The saved specialist field selection is preserved exactly.' );
+$pause_projection = $pause_settings->get_content_context_for_ability();
+npcink_toolbox_progressive_assert( '' === $pause_projection['rules']['seo'] && false === $pause_projection['rules']['allow_geo_summary'] && array( 'excerpt', 'slug' ) === $pause_projection['proposal_allowed_fields'], 'Runtime context masks specialist preferences without mutating stored data.' );
+$pause_client = new Npcink_Toolbox\Provider_Client( $pause_settings );
+$pause_calls  = $npcink_toolbox_progressive_cloud_calls;
+$pause_result = $pause_client->build_content_discoverability_brief( array( 'topic' => 'SEO pause' ) );
+npcink_toolbox_progressive_assert( is_wp_error( $pause_result ) && 'npcink_toolbox_feature_paused' === $pause_result->get_error_code() && $pause_calls === $npcink_toolbox_progressive_cloud_calls, 'Specialist brief is rejected before Cloud search or Provider work.' );
+
+$pause_plan = $pause_client->build_content_metadata_apply_plan(
+	array(
+		'post_id'   => 1,
+		'seo_title' => 'Old candidate',
+	)
+);
+npcink_toolbox_progressive_assert( is_wp_error( $pause_plan ) && 'npcink_toolbox_feature_paused' === $pause_plan->get_error_code(), 'A stale structured SEO candidate cannot pass through the generic metadata planner.' );
+if ( ! function_exists( 'remove_accents' ) ) {
+	function remove_accents( $text ): string {
+		return (string) $text; }
+}
+$pause_pack = $pause_client->build_ai_article_writing_pack(
+	array(
+		'title'                   => 'General writing',
+		'topic'                   => 'General writing',
+		'include_external_search' => false,
+	)
+);
+npcink_toolbox_progressive_assert( is_array( $pause_pack ) && ! isset( $pause_pack['discoverability_brief']['seo'] ) && ! in_array( 'geo_summary', array_column( $pause_pack['suggested_article_structure'], 'section' ), true ), 'General writing preparation remains available without specialist brief sections or GEO instructions.' );
+
+require_once dirname( __DIR__ ) . '/includes/Abilities.php';
+function wp_register_ability( $id, $definition ) { $GLOBALS['pause_native_abilities'][] = $id; }
+function npcink_abilities_toolkit_register_readonly( $id, $definition ) { $GLOBALS['pause_helper_abilities'][] = $id; }
+$pause_abilities = new Npcink_Toolbox\Abilities( $pause_settings, $pause_client );
+$pause_abilities->register_native_abilities();
+$pause_abilities->register_with_npcink_abilities_toolkit();
+foreach ( array( 'pause_native_abilities', 'pause_helper_abilities' ) as $registration_lane ) {
+    npcink_toolbox_progressive_assert( ! in_array( 'npcink-toolbox/build-content-discoverability-brief', $GLOBALS[ $registration_lane ], true ) && in_array( 'npcink-toolbox/get-content-discoverability-context', $GLOBALS[ $registration_lane ], true ), 'Specialist discovery is absent while generic context remains in ' . $registration_lane . '.' );
+}
+
+npcink_toolbox_progressive_assert( ! isset( $pause_pack['handoff']['brief_ability_id'] ) && false === strpos( implode( ' ', $pause_pack['handoff']['next_steps'] ), 'SEO/AEO/GEO' ), 'Retained writing packs do not send clients to a paused specialist ability or next step.' );
+foreach ( array( 'discoverability', 'publish_preflight' ) as $diagnostic_scenario ) {
+    $diagnostic = $pause_client->diagnose_automatic_web_search( array( 'topic' => 'Generic source research', 'scenario' => $diagnostic_scenario ) );
+    npcink_toolbox_progressive_assert( is_array( $diagnostic ) && 'web_search_diagnostics' === ( $diagnostic['artifact_type'] ?? '' ), 'Generic web-search diagnostics remain callable during the specialist pause: ' . $diagnostic_scenario );
+}
+$pause_surface = new Npcink_Toolbox\Rest_Surface_Bridges( $pause_settings, $pause_client );
+$pause_projection_method = new ReflectionMethod( $pause_surface, 'content_operations_projection' );
+$pause_projection_method->setAccessible( true );
+$pause_projection = $pause_projection_method->invoke( $pause_surface, true );
+npcink_toolbox_progressive_assert( ! in_array( 'discoverability', $pause_projection['surfaces']['editor_content_support']['intents'], true ) && 'paused' === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['state'] && false === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['available'] && ! isset( $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['target_ability_id'] ), 'Ready Cloud status does not advertise paused specialist intents or SEO write handoffs.' );

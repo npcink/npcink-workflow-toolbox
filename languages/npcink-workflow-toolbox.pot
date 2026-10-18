@@ -9550,3 +9550,31 @@ msgstr ""
 #: assets/editor-content-support.js
 msgid "This label names a specific resource. Verify its original destination and add the link manually."
 msgstr ""
+
+#: includes/Provider_Workflow_Plans_Service.php
+msgid "SEO/AEO/GEO specialist assistance is paused."
+msgstr ""
+
+msgid "Local suggestion context for claims, audience, and tone."
+msgstr ""
+
+msgid "Site context helps keep content suggestions consistent."
+msgstr ""
+
+msgid "Missing summaries make content review less informative."
+msgstr ""
+
+msgid "Check the site profile and source evidence before recommending metadata."
+msgstr ""
+
+msgid "Get Site Content Context"
+msgstr ""
+
+msgid "Return the operator-maintained site content context for third-party AI callers without exposing provider secrets or writing WordPress content."
+msgstr ""
+
+msgid "Validate Site Content Context"
+msgstr ""
+
+msgid "Check whether the operator-maintained site context has enough fields for ordinary content suggestions."
+msgstr ""
