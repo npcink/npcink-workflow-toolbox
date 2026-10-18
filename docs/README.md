@@ -218,3 +218,5 @@ afterwards an archived record is edited only to fix link targets.
 - [Pre-Release Hardening Closeout - 2026-09-30](pre-release-hardening-closeout-2026-09-30.md) records the positioning audit verdict, the delete-compatibility-early decision, the behavior-tests-unlock-refactors method, and the remaining known small items (i18n loader, weekly fingerprint cron documentation, label language, editor intent convergence).
 
 - [SEO 暂停生产候选与发布方案（2026-10-18）](seo-specialist-pause-production-plan-2026-10-18.md) — 隔离候选、顺序、影响与回滚；未部署。
+
+- [SEO 暂停候选 CI、集成与浏览器验收（2026-10-18）](seo-specialist-pause-candidate-validation-2026-10-18.md) — DeepSeek 实际基线、精确候选及既有严格 UI 阻断。

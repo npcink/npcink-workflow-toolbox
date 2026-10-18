@@ -1,5 +1,7 @@
 # 三项目 SEO 暂停：生产候选与发布方案
 
+更新：DeepSeek 已由独立发布完成安装，候选 CI 和专项集成/浏览器验证已执行；严格 UI 仍有 18 个既有缺口。当前证据以[候选验收续记](seo-specialist-pause-candidate-validation-2026-10-18.md)为准。下面保留首次准备快照。
+
 日期：2026-10-18，Asia/Shanghai。状态：本地候选准备完成，尚未授权本轮生产发布。
 风险 L2。范围仅 AI Cloud、Cloud Addon、Workflow Toolbox。
 
