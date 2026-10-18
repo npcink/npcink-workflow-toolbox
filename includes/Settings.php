@@ -14,7 +14,7 @@ final class Settings {
 	public const DISCOVERABILITY_PAUSED = true;
 
 	/** Reversible release policy, independent of saved user preferences. */
-	private static array $paused_cloud_features = array( 'cloud_inspection' => true );
+	private static array $paused_cloud_features = array( 'cloud_inspection' => true, 'audio_generation' => true );
 
 	public static function cloud_feature_paused( string $feature ): bool {
 		return ! empty( self::$paused_cloud_features[ $feature ] );

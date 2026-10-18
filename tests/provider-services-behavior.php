@@ -580,6 +580,8 @@ $paused_site_ops = $client->run_site_ops_cloud_analysis( array() );
 npcink_toolbox_provider_services_assert( is_wp_error( $paused_inspection ) && 'npcink_toolbox_feature_paused' === $paused_inspection->get_error_code(), 'Cloud inspection is paused before sampling or transport.' );
 npcink_toolbox_provider_services_assert( is_wp_error( $paused_site_ops ) && 'npcink_toolbox_feature_paused' === $paused_site_ops->get_error_code(), 'Site Ops Cloud analysis is paused before transport.' );
 npcink_toolbox_provider_services_assert( $pause_before_calls === $npcink_toolbox_progressive_cloud_calls, 'Paused Cloud features perform zero provider calls.' );
+$paused_audio = $client->run_audio_generation( array( 'intent' => 'article_narration' ) );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_audio ) && 'npcink_toolbox_feature_paused' === $paused_audio->get_error_code(), 'Audio is paused before summary generation or transport.' );
 $retained_feature_policy = new ReflectionProperty( Npcink_Toolbox\Settings::class, 'paused_cloud_features' );
 $retained_feature_policy->setAccessible( true );
 $retained_feature_snapshot = $retained_feature_policy->getValue();
