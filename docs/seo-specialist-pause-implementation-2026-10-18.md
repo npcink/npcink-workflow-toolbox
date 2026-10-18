@@ -101,3 +101,34 @@ Addon 已将其加入暂停集合，并覆盖有无 task contract 两条路径�
 Toolbox 状态投影不再宣传 discoverability intent，SEO gap 明确标为 paused 且不可用；
 写作包不再携带已暂停 brief ability 或专项 next step。普通网页搜索诊断复用保留的
 通用写作材料组成，两个历史 scenario 均有可调用回归。以上变化仍不触及其他项目。
+
+## 2026-10-19 收尾与下一次发布入口
+
+本节更新当前交付状态，前文首次候选、未提交和中继失败记录仍作为历史快照保留。
+
+- Cloud #1141、Addon #290、Toolbox #277 已合入各自 master；Addon 汉化 #289
+  与 REST 补修 #293 亦已合入 master。Addon #292 仅合入独立组合候选。
+- Cloud #1143 已合入 production，SHA 为
+  `16747c401d2d1fc9d07bfbf5c530d3aca4a9cfa4`；正式 CI、CodeQL、镜像扫描策略、
+  bundle 完整性与精确 SHA 元数据预检通过。服务器当时仍是 b8cc6049，未部署。
+- Addon #291、Toolbox #278 保留为基于旧正式版本的隔离候选草稿；无需重复合入
+  master。候选 ZIP：Addon0.4.3 为
+  `6576603c6272934936b7dd840d00257aeef14fc493108c78615516e5cdb123f6`，
+  Toolbox0.6.1 为
+  `7ff6a5c4d48bb833963272e80528c81932460dedc5005c301bf84de307efabd3`。
+- 候选已完成三仓库矩阵、M4 聚焦验证、真实中英文 PC 浏览器及固定 UI 严格审计；
+  降级并恢复后隐藏配置和历史保留。确定性 Provider fixture 不代表付费模型质量或
+  实际生产站点验收。原源码中继认证问题未宣称修复，曾按操作者选择使用蒲公英直传。
+
+下一次发布先读取当前仓库规则与实际线上版本，明确是否仍用隔离候选；若纳入后来
+master 改动，重新生成范围及指纹。刷新 CI/制品保留期、扫描及例外有效性、短期凭据，
+处理旧基线正式烟测 ready health403，补齐主机实际镜像和受保护配置/备份恢复核验。
+Cloud 当时17项 Redis/Nginx 扫描例外于2026-10-25 UTC到期；离线回滚包已验真，
+不能据此推断完整主机恢复演练已完成。重新明确插件目标站点、渠道、人工验收责任和
+该次部署/分发授权，再按 Cloud → Addon → Toolbox 验证专项阻断、通用能力、汉化、
+正常保存隐藏字段和历史保留。不得卸载插件或删除 options/history 来回退。
+
+可复用经验正式归入[开发流程](development-workflow.md)的暂停与交接章节，
+Cloud 的运行证据边界见其[开发验证指南](../../npcink-ai-cloud/docs/development-validation-operating-model-v1.md)，
+Addon 的汉化与包证据见其[验证证据标准](../../npcink-cloud-addon/docs/verification-evidence-standard.md)。
+本轮没有生产部署或插件分发；后续文档合并也不改变该事实。
