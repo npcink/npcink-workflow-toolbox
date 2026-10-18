@@ -5,7 +5,11 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-12.
+Last reviewed for isolated SEO release preparation: 2026-10-18.
+
+SEO/AEO/GEO specialist entries are paused; generic content assistance,
+original configuration and history remain. Other runtime code stays at the
+published 0.6.0 baseline. See [pause implementation](seo-specialist-pause-implementation-2026-10-18.md).
 
 **Next session: read
 [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md)

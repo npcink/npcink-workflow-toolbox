@@ -55,7 +55,10 @@ if ( 101 !== ( $first['object_id'] ?? 0 ) ) {
 }
 
 $reason_codes = $first['reason_codes'] ?? array();
-foreach ( array( 'missing_meta_description', 'thin_content', 'stale_year_marker', 'missing_internal_links', 'missing_image_alt' ) as $expected_code ) {
+if ( in_array( 'missing_meta_description', $reason_codes, true ) ) {
+	$fail( 'Paused SEO checks must not create new preview findings.' );
+}
+foreach ( array( 'thin_content', 'stale_year_marker', 'missing_internal_links', 'missing_image_alt' ) as $expected_code ) {
 	if ( ! in_array( $expected_code, $reason_codes, true ) ) {
 		$fail( 'Top priority is missing expected reason code: ' . $expected_code );
 	}

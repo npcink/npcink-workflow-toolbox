@@ -24,7 +24,7 @@ final class Ability_Surface_Metadata {
 			'site_knowledge'           => self::definition( __( 'Site Knowledge', 'npcink-workflow-toolbox' ), 'admin_support_context', false, 'cloud_runtime_via_addon', 'search_or_sync_request', 'npcink_supporting_surface' ),
 			'cloud_web_search'         => self::definition( __( 'Cloud Web Search', 'npcink-workflow-toolbox' ), 'route_only_compatibility', false, 'cloud_runtime_via_addon', 'evidence_only', 'npcink_supporting_surface' ),
 			'batch_alt_review_handoff' => self::definition( __( 'Batch ALT Review Handoff', 'npcink-workflow-toolbox' ), 'admin_secondary_handoff', false, 'cloud_runtime_via_addon', 'media_alt_caption_review_plan', 'npcink_supporting_surface' ),
-			'image_alt_suggestions'    => self::definition( __( 'Article image ALT (SEO)', 'npcink-workflow-toolbox' ), 'editor_internal_flow', false, 'toolbox_local_with_explicit_cloud_vision', 'current_article_image_alt_context_review', 'npcink_supporting_surface' ),
+			'image_alt_suggestions'    => self::definition( __( 'Image ALT Review', 'npcink-workflow-toolbox' ), 'editor_internal_flow', false, 'toolbox_local_with_explicit_cloud_vision', 'current_article_image_alt_context_review', 'npcink_supporting_surface' ),
 		);
 	}
 
@@ -42,7 +42,7 @@ final class Ability_Surface_Metadata {
 				'label'       => __( 'Site Profile', 'npcink-workflow-toolbox' ),
 				'status'      => $profile_ready ? 'ok' : 'neutral',
 				'status_text' => $profile_ready ? __( 'Ready', 'npcink-workflow-toolbox' ) : __( 'Needs brief', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Local suggestion context for SEO, AEO, GEO, claims, audience, and tone.', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Local suggestion context for claims, audience, and tone.', 'npcink-workflow-toolbox' ),
 			),
 			array(
 				'id'          => 'cloud_runtime',

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Npcink Workflow Toolbox 0.2.0\n"
+"Project-Id-Version: Npcink Workflow Toolbox 0.6.1\n"
 "Report-Msgid-Bugs-To: https://npc.ink/\n"
 "POT-Creation-Date: 2026-06-06 00:00+0800\n"
 "PO-Revision-Date: 2026-10-02 00:00+0800\n"
@@ -9519,3 +9519,31 @@ msgstr "此审查为只读：Toolbox 绝不插入链接或更新文章内容。�
 
 msgid "%d local prose review notes. Review the flagged paragraphs before publishing."
 msgstr "发现 %d 条本地行文复查提示。发布前请复核被标记的段落。"
+
+#: includes/Provider_Workflow_Plans_Service.php
+msgid "SEO/AEO/GEO specialist assistance is paused."
+msgstr "SEO/AEO/GEO 专项辅助功能已暂停。"
+
+msgid "Local suggestion context for claims, audience, and tone."
+msgstr "用于事实边界、受众和语气的本地建议上下文。"
+
+msgid "Site context helps keep content suggestions consistent."
+msgstr "站点上下文有助于保持内容建议一致。"
+
+msgid "Missing summaries make content review less informative."
+msgstr "缺少摘要会影响内容审阅的信息完整性。"
+
+msgid "Check the site profile and source evidence before recommending metadata."
+msgstr "建议元数据前，请检查站点画像和来源证据。"
+
+msgid "Get Site Content Context"
+msgstr "读取站点内容上下文"
+
+msgid "Return the operator-maintained site content context for third-party AI callers without exposing provider secrets or writing WordPress content."
+msgstr "向第三方 AI 调用者提供操作者维护的站点内容上下文，不暴露服务商密钥，也不写入 WordPress 内容。"
+
+msgid "Validate Site Content Context"
+msgstr "检查站点内容上下文"
+
+msgid "Check whether the operator-maintained site context has enough fields for ordinary content suggestions."
+msgstr "检查操作者维护的站点上下文是否具有普通内容建议所需的字段。"

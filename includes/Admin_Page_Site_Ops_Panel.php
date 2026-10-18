@@ -1325,11 +1325,11 @@ abstract class Admin_Page_Site_Ops_Panel {
 			'stale_content_backlog'            => __( 'Older but still active content can reduce reader trust and search freshness.', 'npcink-workflow-toolbox' ),
 			'content_depth_and_linking_gap'    => __( 'Thin pages and missing internal paths make it harder for readers and AI systems to understand the site map.', 'npcink-workflow-toolbox' ),
 			'internal_link_health'             => __( 'Weak internal paths can make related content harder for readers and editors to discover.', 'npcink-workflow-toolbox' ),
-			'metadata_review_backlog'          => __( 'Weak metadata reduces snippet quality and makes suggestion workflows less grounded.', 'npcink-workflow-toolbox' ),
+			'metadata_review_backlog'          => __( 'Missing summaries make content review less informative.', 'npcink-workflow-toolbox' ),
 			'comment_signal_review'            => __( 'Comment patterns can reveal missing FAQ, troubleshooting, or follow-up content needs.', 'npcink-workflow-toolbox' ),
 			'media_metadata_debt'              => __( 'Image metadata affects accessibility, editorial reuse, and media search quality.', 'npcink-workflow-toolbox' ),
 			'taxonomy_structure_drift'         => __( 'Sparse vocabulary can fragment content discovery and weaken recommendation quality.', 'npcink-workflow-toolbox' ),
-			'site_context_incomplete'          => __( 'Weak site context makes downstream SEO/AEO/GEO and content support suggestions less consistent.', 'npcink-workflow-toolbox' ),
+			'site_context_incomplete'          => __( 'Site context helps keep content suggestions consistent.', 'npcink-workflow-toolbox' ),
 			'site_knowledge_cloud_unavailable' => __( 'Without Cloud, recommendations stay local and cannot use semantic related-content evidence.', 'npcink-workflow-toolbox' ),
 		);
 		if ( isset( $impacts[ $id ] ) ) {
