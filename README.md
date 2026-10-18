@@ -7,6 +7,14 @@ settings and history are retained for a reviewed future restoration; the older
 capability descriptions below record retained contracts. See the
 [pause implementation record](docs/seo-specialist-pause-implementation-2026-10-18.md).
 
+Cloud inspection/site analysis, new article audio and media optimization are
+also temporarily paused. Their generation, submission, retry, bulk-action and
+planning entrypoints are withdrawn; old API contracts return a non-retryable
+pause error. Local deterministic Site Check, existing audio playback, media
+backup recovery, Site Knowledge and ordinary text/image/ALT stay available.
+See [reversible pauses](docs/reversible-feature-pauses-v1.md). Retained contract
+and architecture descriptions below are not availability promises.
+
 The editor's `整理` action now requests an inline Cloud-formatted body and applies
 validated text to the visible Gutenberg editor with undo, without invoking save
 or publish. See [Content formatting](docs/editor-content-format-v1.md) for its
@@ -14,7 +22,7 @@ bounded paragraph/list/line-break repairs and fail-closed contract.
 
 Media recognition continuation ownership and failure recovery are documented in [Media Recognition Continuation](docs/media-recognition-continuation.md).
 
-The default Media Library optimization flow is `choose range -> check samples -> confirm once and run -> history and restore`. It uses Cloud `auto_safe.v1` analysis while WordPress and Abilities Toolkit retain all file replacement, backup, and restore authority. See `docs/decisions/ADR-015-exact-manifest-local-media-optimization.md`.
+The Media Library optimization implementation is retained but temporarily unavailable for new planning and execution. Historical batches and backups remain; restore and retention cleanup stay available. WordPress and Abilities Toolkit retain file mutation authority. See `docs/decisions/ADR-015-exact-manifest-local-media-optimization.md`.
 
 Single-image import, replacement, and restore are governed external-client
 actions. OpenClaw or another client submits the Toolbox plan through Adapter to
@@ -57,7 +65,7 @@ The first version provides:
   publish preflight, direct existing-category and existing-tag suggestions,
   internal-link candidates, current-article contextual ALT review, and image
   candidates.
-  Article narration and audio summary remain callable compatibility flows but
+  Article narration and audio summary remain implemented for future restoration, with new generation paused but
   are temporarily hidden from the default menu. The 2026-10-07 intent
   convergence retired the route-only generic intents (title/summary
   suggestions, outline, article checkup, discoverability, comment reply,
@@ -568,7 +576,7 @@ The post editor also exposes **Npcink Content Support** as a plugin sidebar
 opened from the editor top toolbar. Its visible buttons run fixed Npcink flows
 for publish preflight, internal-link candidates, and image-source candidates
 from the current draft context. Article narration and audio summary remain
-callable but are temporarily hidden from the default menu. The 2026-10-07
+implemented for future restoration, with new generation paused but are temporarily hidden from the default menu. The 2026-10-07
 intent convergence retired the route-only generic intents (title/summary
 suggestions, outline, article checkup, discoverability, comment reply,
 combined taxonomy tags, writing support, and the editor-route Zhihu
@@ -723,7 +731,7 @@ performs no local media-library write.
 The post editor **Npcink Content Support** sidebar owns high-frequency Npcink
 review and handoff actions because those actions need the current article
 context: publish preflight, internal-link candidates, and image candidates.
-Article narration and audio summary remain callable but temporarily hidden.
+Article narration and audio summary are retained but reject new generation requests.
 The generic writing, title/summary suggestion, outline, article-checkup,
 discoverability, and comment-reply route intents were retired by the
 2026-10-07 convergence; the local checkup signals live inside publish
@@ -743,7 +751,7 @@ and no media library, post, SEO, proposal, crawler, or queue state is changed
 locally.
 Publish preflight, internal-link candidates, and image candidates are the
 default editor sidebar buttons. Article narration and audio summary remain
-callable compatibility flows but are temporarily hidden. Summary suggestions,
+implemented for future restoration, with new generation paused compatibility flows but are temporarily hidden. Summary suggestions,
 category suggestions, tag suggestions, article checkup, discoverability, and
 current-article ALT checks stay route-compatible but are demoted from the
 default button list to avoid duplicating generic AI plugin features.
@@ -751,8 +759,8 @@ Internal-link candidate assembly is delegated to
 `npcink-abilities-toolkit/resolve-internal-link-targets`; Toolbox only passes
 editor context plus optional Cloud Site Knowledge evidence and renders the
 review/copy/open surface.
-The admin **Image Handling** tab defaults to media work, with **Batch Optimize
-Images** as the first visible workbench. Single-image ALT and optimization
+The admin **Image Handling** tab now defaults to ALT review. The Batch Optimize
+Images workbench and optimize-selected-images bulk action are withdrawn. Single-image ALT and optimization
 actions start from the media-library attachment details panel or media list row
 actions, then carry that attachment into the same selected-image workbenches
 used for batches. Admin URLs use the canonical `toolbox_tab` and `toolbox_tool` parameters only;

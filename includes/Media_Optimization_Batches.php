@@ -25,11 +25,17 @@ final class Media_Optimization_Batches {
 
 	/** @return array<string,mixed>|WP_Error */
 	public function build_manifest( array $input ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		return $this->run_registered_ability( self::MANIFEST_ABILITY_ID, $input );
 	}
 
 	/** @return array<string,mixed>|WP_Error */
 	public function create( array $payload ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		$plan       = is_array( $payload['plan'] ?? null ) ? $payload['plan'] : array();
 		$candidates = is_array( $plan['candidates'] ?? null ) ? array_values( $plan['candidates'] ) : array();
 		if ( 'toolbox_media_optimization_manifest.v1' !== (string) ( $plan['plan_contract_version'] ?? '' ) ) {
@@ -120,6 +126,9 @@ final class Media_Optimization_Batches {
 
 	/** @return array<string,mixed>|WP_Error */
 	public function confirm( string $batch_id, array $payload ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		$batch = $this->find( $batch_id );
 		if ( is_wp_error( $batch ) ) {
 			return $batch;
@@ -139,6 +148,9 @@ final class Media_Optimization_Batches {
 
 	/** @return array<string,mixed>|WP_Error */
 	public function complete_item( string $batch_id, int $attachment_id, array $payload ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		$batch = $this->find( $batch_id );
 		if ( is_wp_error( $batch ) ) {
 			return $batch;

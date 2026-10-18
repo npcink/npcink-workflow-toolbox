@@ -305,8 +305,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return $actions;
 		}
-		$actions['npcink_toolbox_batch_alt']      = __( 'Npcink: complete ALT for selected images', 'npcink-workflow-toolbox' );
-		$actions['npcink_toolbox_batch_optimize'] = __( 'Npcink: optimize selected images', 'npcink-workflow-toolbox' );
+		$actions['npcink_toolbox_batch_alt'] = __( 'Npcink: complete ALT for selected images', 'npcink-workflow-toolbox' );
+		if ( ! Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			$actions['npcink_toolbox_batch_optimize'] = __( 'Npcink: optimize selected images', 'npcink-workflow-toolbox' );
+		}
 		return $actions;
 	}
 
@@ -319,6 +321,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	 * @return string
 	 */
 	public function handle_media_library_bulk_action( string $redirect_to, string $action, array $post_ids ): string {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'npcink_toolbox_batch_optimize' === $action ) {
+			return $redirect_to; }
 		if ( ! in_array( $action, array( 'npcink_toolbox_batch_alt', 'npcink_toolbox_batch_optimize' ), true ) || ! current_user_can( 'manage_options' ) ) {
 			return $redirect_to;
 		}
@@ -618,7 +622,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			'media-alt-caption-review' => true,
 			'image-settings'           => true,
 		);
-		return isset( $allowed[ $requested ] ) ? $requested : 'media-batch-optimize';
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			unset( $allowed['media-batch-optimize'] ); }
+		return isset( $allowed[ $requested ] ) ? $requested : ( Settings::cloud_feature_paused( 'advanced_media' ) ? 'media-alt-caption-review' : 'media-batch-optimize' );
 	}
 
 	private function render_start_panel( array $content_context, bool $cloud_ready ): void {
@@ -777,7 +783,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	 * @param array<string,mixed>      $settings Settings.
 	 */
 	private function render_operations_insights_panel( ?array $preview, array $content_context, bool $cloud_ready, array $settings, ?array $nightly_preview, string $active_site_check_tab ): void {
-		$cloud_ready = $cloud_ready && ! Settings::cloud_feature_paused( 'cloud_inspection' );
+		$cloud_ready        = $cloud_ready && ! Settings::cloud_feature_paused( 'cloud_inspection' );
 		$context_ready      = $this->content_context_ready( $content_context );
 		$pack               = isset( $preview['pack'] ) && is_array( $preview['pack'] ) ? $preview['pack'] : array();
 		$cloud_request      = isset( $preview['cloud_request'] ) && is_array( $preview['cloud_request'] ) ? $preview['cloud_request'] : array();
@@ -1270,7 +1276,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</div>
 		<?php endif; ?>
 		<?php
-		if ( ! $cloud_ready ) {
+		if ( ! $cloud_ready && ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
 			$this->render_cloud_runtime_notice();
 		}
 		?>
@@ -1279,7 +1285,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<div class="npcink-toolbox__section-heading">
 					<div>
 						<h3><?php esc_html_e( 'Scheduled review status', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php esc_html_e( 'Use this only to preview whether the scheduled review can read local content. Cloud run history and recovery open in Cloud Addon.', 'npcink-workflow-toolbox' ); ?></p>
+						<p><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Preview whether the local scheduled review can read public content.', 'npcink-workflow-toolbox' ) : __( 'Use this only to preview whether the scheduled review can read local content. Cloud run history and recovery open in Cloud Addon.', 'npcink-workflow-toolbox' ) ); ?></p>
 					</div>
 					<div class="npcink-toolbox__inline-actions">
 						<a class="button button-primary" href="<?php echo esc_url( $this->nightly_inspection_preview_url() ); ?>"><?php esc_html_e( 'Preview scheduled review', 'npcink-workflow-toolbox' ); ?></a>
@@ -1618,6 +1624,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			array_filter(
 				$tools,
 				static function ( array $tool ) use ( $surface ): bool {
+					if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'media-batch-optimize' === (string) $tool['id'] ) {
+						return false; }
 					if ( $surface !== (string) ( $tool['surface'] ?? 'image' ) ) {
 						return false;
 					}

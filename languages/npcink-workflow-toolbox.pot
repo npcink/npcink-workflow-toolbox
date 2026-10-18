@@ -9578,3 +9578,12 @@ msgstr ""
 
 msgid "Check whether the operator-maintained site context has enough fields for ordinary content suggestions."
 msgstr ""
+
+msgid "This Cloud feature is temporarily paused."
+msgstr ""
+
+msgid "Cloud analysis is temporarily paused. This brief uses local rules only."
+msgstr ""
+
+msgid "Preview whether the local scheduled review can read public content."
+msgstr ""

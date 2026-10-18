@@ -28,6 +28,9 @@ final class Rest_Media_Derivative_Previews {
 	}
 
 	public function media_derivative_handoff( WP_REST_Request $request ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		$params = method_exists( $request, 'get_params' ) ? $request->get_params() : array();
 		return rest_ensure_response( $this->client->build_media_derivative_handoff( is_array( $params ) ? $params : array() ) );
 	}
@@ -40,6 +43,9 @@ final class Rest_Media_Derivative_Previews {
 	 */
 
 	public function create_media_derivative_preview( WP_REST_Request $request ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		$preview_input = $this->media_derivative_preview_input( $request );
 		if ( is_wp_error( $preview_input ) ) {
 			return $preview_input;
@@ -170,6 +176,9 @@ final class Rest_Media_Derivative_Previews {
 	}
 
 	public function build_media_derivative_optimization_payload( WP_REST_Request $request ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		if ( ! function_exists( 'npcink_cloud_addon_build_media_derivative_optimization_payload' ) ) {
 			return $this->media_derivative_cloud_addon_unavailable();
 		}

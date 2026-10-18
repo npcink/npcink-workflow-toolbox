@@ -314,7 +314,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 						<p><?php esc_html_e( 'Need a clearer explanation or semantic ranking? Use Cloud detail after reviewing the local top items.', 'npcink-workflow-toolbox' ); ?></p>
 						<a class="button button-small" href="<?php echo esc_url( $this->site_ops_cloud_analysis_url() ); ?>"><?php esc_html_e( 'Use Cloud detail', 'npcink-workflow-toolbox' ); ?></a>
 					<?php else : ?>
-						<p><?php esc_html_e( 'Cloud is not ready, so this brief uses local rules only. Connect Cloud when you need AI summary or semantic ranking.', 'npcink-workflow-toolbox' ); ?></p>
+						<p><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Cloud analysis is temporarily paused. This brief uses local rules only.', 'npcink-workflow-toolbox' ) : __( 'Cloud is not ready, so this brief uses local rules only. Connect Cloud when you need AI summary or semantic ranking.', 'npcink-workflow-toolbox' ) ); ?></p>
 					<?php endif; ?>
 				</div>
 				<div>

@@ -14,14 +14,26 @@ final class Settings {
 	public const DISCOVERABILITY_PAUSED = true;
 
 	/** Reversible release policy, independent of saved user preferences. */
-	private static array $paused_cloud_features = array( 'cloud_inspection' => true, 'audio_generation' => true );
+	private static array $paused_cloud_features = array(
+		'cloud_inspection' => true,
+		'audio_generation' => true,
+		'advanced_media'   => true,
+	);
 
 	public static function cloud_feature_paused( string $feature ): bool {
 		return ! empty( self::$paused_cloud_features[ $feature ] );
 	}
 
 	public static function cloud_feature_pause_error( string $feature ) {
-		return new \WP_Error( 'npcink_toolbox_feature_paused', __( 'This Cloud feature is temporarily paused.', 'npcink-workflow-toolbox' ), array( 'status' => 409, 'feature' => $feature, 'retryable' => false ) );
+		return new \WP_Error(
+			'npcink_toolbox_feature_paused',
+			__( 'This Cloud feature is temporarily paused.', 'npcink-workflow-toolbox' ),
+			array(
+				'status'    => 409,
+				'feature'   => $feature,
+				'retryable' => false,
+			)
+		);
 	}
 
 
@@ -613,6 +625,13 @@ final class Settings {
 			'nightly_inspection_cloud_payload_mode'   => $this->sanitize_nightly_inspection_cloud_payload_mode( $input['nightly_inspection_cloud_payload_mode'] ?? 'metadata_only' ),
 			'nightly_inspection_cloud_retention_days' => max( 1, min( 90, absint( $input['nightly_inspection_cloud_retention_days'] ?? 7 ) ) ),
 		);
+
+		if ( self::cloud_feature_paused( 'cloud_inspection' ) ) {
+			$stored = $this->get_all();
+			foreach ( array( 'nightly_inspection_pro_enabled', 'nightly_inspection_cloud_payload_mode', 'nightly_inspection_cloud_retention_days' ) as $key ) {
+				$sanitized[ $key ] = $stored[ $key ];
+			}
+		}
 
 		return $sanitized;
 	}

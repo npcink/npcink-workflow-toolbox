@@ -400,7 +400,7 @@
 			writePostureLabel: __('No media import, post meta write, or playback adoption in Toolbox', 'npcink-workflow-toolbox'),
 			blockedLabel: __('Blocked when summary context is missing, Cloud audio runtime is unavailable, or adoption evidence is incomplete.', 'npcink-workflow-toolbox'),
 		},
-	].filter((flow) => !['article_narration', 'article_audio_summary'].includes(flow.intent));
+	];
 
 	const flowGroups = [
 		{
@@ -417,9 +417,10 @@
 		},
 		];
 
-	const defaultFlows = flows.filter((flow) => flow.defaultVisible !== false);
+	const defaultFlows = flows.filter((flow) => flow.defaultVisible !== false && !isAudioIntent(flow.intent));
 
 	function flowByIntent(intent) {
+		if (isAudioIntent(intent)) { return null; }
 		const key = String(intent || '');
 		return flows.find((flow) => flow.intent === key) || null;
 	}

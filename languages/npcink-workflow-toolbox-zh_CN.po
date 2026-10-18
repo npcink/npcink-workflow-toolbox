@@ -9704,3 +9704,12 @@ msgstr "检查站点内容上下文"
 
 msgid "Check whether the operator-maintained site context has enough fields for ordinary content suggestions."
 msgstr "检查操作者维护的站点上下文是否具有普通内容建议所需的字段。"
+
+msgid "This Cloud feature is temporarily paused."
+msgstr "此 Cloud 功能已暂时停用。"
+
+msgid "Cloud analysis is temporarily paused. This brief uses local rules only."
+msgstr "Cloud 分析已暂时停用，此摘要仅使用本地规则。"
+
+msgid "Preview whether the local scheduled review can read public content."
+msgstr "预览本地定时检查能否读取公开内容。"
