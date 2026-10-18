@@ -1,5 +1,7 @@
 # 三项目 SEO 暂停：生产候选与发布方案
 
+最终收口：汉化PR292及REST master回补PR293已独立评审、CI、合并；当前源码候选和发布方案以[最终候选记录](seo-specialist-pause-final-candidates-2026-10-19.md)为准。下文保留当时准备状态。
+
 更新（2026-10-19）：18 个既有汉化缺口已在独立 Addon 草稿 PR #292 修复，严格 UI 审计为 0；另补齐 REST 导入错误的真实路径。当前方案以[独立汉化验收与发布续记](seo-specialist-pause-localization-validation-2026-10-19.md)为准，SEO 原候选评审不变。下面保留首次准备快照。
 
 日期：2026-10-18，Asia/Shanghai。状态：本地候选准备完成，尚未授权本轮生产发布。
