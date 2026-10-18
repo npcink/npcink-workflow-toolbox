@@ -131,7 +131,7 @@ abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 
 	protected function editor_flow_cache_key( string $namespace, array $input ): string {
 		$input = array( 'product_policy' => 'discoverability_pause_v1' ) + $input;
-		$json = wp_json_encode( $input );
+		$json  = wp_json_encode( $input );
 		if ( ! is_string( $json ) ) {
 			$json = serialize( $input );
 		}
