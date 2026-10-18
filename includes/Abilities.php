@@ -35,7 +35,7 @@ final class Abilities {
 		}
 
 		foreach ( $this->definitions() as $ability_id => $definition ) {
-			if ( Settings::DISCOVERABILITY_PAUSED && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
+			if ( Settings::is_discoverability_paused() && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
 				continue;
 			}
 			npcink_abilities_toolkit_register_readonly( $ability_id, $definition );
@@ -68,7 +68,7 @@ final class Abilities {
 		}
 
 		foreach ( $this->definitions() as $ability_id => $definition ) {
-			if ( Settings::DISCOVERABILITY_PAUSED && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
+			if ( Settings::is_discoverability_paused() && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
 				continue;
 			}
 			wp_register_ability(

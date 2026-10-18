@@ -39,7 +39,7 @@ abstract class Rest_Editor_Flow_Cache extends Rest_Controller_Support {
 
 
 	protected function editor_cached_content_discoverability( array $input ) {
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			return array();
 		}
 		return $this->editor_cached_client_result(

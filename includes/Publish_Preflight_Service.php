@@ -30,7 +30,7 @@ final class Publish_Preflight_Service {
 			'seo_handoff'           => $this->seo_handoff_preview( $context, $discoverability ),
 			'local_article_checkup' => $local_article_checkup,
 		);
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			unset( $sections['seo_handoff'] );
 		}
 		$sections['pre_publish_review'] = $this->pre_publish_review( $context, $sections );
@@ -88,7 +88,7 @@ final class Publish_Preflight_Service {
 	 * @return array<string,mixed>
 	 */
 	public function seo_handoff_preview( array $context, array $discoverability ): array {
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			return array(
 				'status'         => 'paused',
 				'proposal_ready' => false,
@@ -242,7 +242,7 @@ final class Publish_Preflight_Service {
 			),
 		);
 
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			$items = array_values( array_filter( $items, static fn( array $item ): bool => 'seo_meta' !== $item['name'] ) );
 		}
 

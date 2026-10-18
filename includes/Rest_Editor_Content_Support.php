@@ -2565,7 +2565,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				),
 			),
 		);
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			$result['items'] = array_values( array_filter( $result['items'], static fn( array $item ): bool => 'seo_meta_description' !== $item['id'] ) );
 		}
 		return $result;

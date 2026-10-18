@@ -81,7 +81,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			'excerpt'         => sanitize_textarea_field( (string) ( $input['excerpt'] ?? wp_trim_words( wp_strip_all_tags( $content ), 35, '' ) ) ),
 		);
 
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			$discoverability_pack = array_intersect_key( $discoverability_pack, array_flip( array( 'excerpt', 'slug' ) ) );
 		}
 
@@ -1105,7 +1105,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 
 
 	public function build_content_metadata_apply_plan( array $input ) {
-		if ( Settings::DISCOVERABILITY_PAUSED && Settings::contains_specialist_action( $input ) ) {
+		if ( Settings::is_discoverability_paused() && Settings::contains_specialist_action( $input ) ) {
 			return new WP_Error( 'npcink_toolbox_feature_paused', __( 'SEO/AEO/GEO specialist assistance is paused.', 'npcink-workflow-toolbox' ), array( 'status' => 409 ) );
 		}
 		$ability_id = 'npcink-abilities-toolkit/build-content-metadata-apply-plan';
@@ -1458,7 +1458,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 
 
 	public function build_content_discoverability_brief( array $input ) {
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			return new WP_Error( 'npcink_toolbox_feature_paused', __( 'SEO/AEO/GEO specialist assistance is paused.', 'npcink-workflow-toolbox' ), array( 'status' => 409 ) );
 		}
 		return $this->build_content_brief( $input );
@@ -1566,7 +1566,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'direct_wordpress_write' => false,
 			),
 		);
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			unset( $brief['seo'], $brief['aeo'], $brief['geo'], $brief['handoff']['brief_ability_id'] );
 			$brief['composition_role'] = 'site_content_brief';
 		}
@@ -1657,8 +1657,8 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'Use this pack as the local site-context source before writing.',
 				'If ready_for_writing is false, stop and ask the operator to complete Toolbox Content Context.',
 				'Write from the supplied source and topic; do not invent product facts, customer cases, rankings, citations, or unavailable features.',
-				Settings::DISCOVERABILITY_PAUSED ? 'Respect factual boundaries and the requested brand voice.' : 'Respect forbidden claims, brand voice, SEO rules, AEO rules, and GEO rules.',
-				Settings::DISCOVERABILITY_PAUSED ? 'Return reviewable article preparation and ordinary editorial suggestions only.' : 'Return article draft text and proposal-ready SEO/AEO/GEO suggestions only.',
+				Settings::is_discoverability_paused() ? 'Respect factual boundaries and the requested brand voice.' : 'Respect forbidden claims, brand voice, SEO rules, AEO rules, and GEO rules.',
+				Settings::is_discoverability_paused() ? 'Return reviewable article preparation and ordinary editorial suggestions only.' : 'Return article draft text and proposal-ready SEO/AEO/GEO suggestions only.',
 				'Do not write WordPress data. Final WordPress writes must go through Core proposal approval and commit preflight.',
 			),
 			'handoff'                     => array(
@@ -1933,7 +1933,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			);
 		}
 
-		if ( Settings::DISCOVERABILITY_PAUSED ) {
+		if ( Settings::is_discoverability_paused() ) {
 			$structure               = array_values( array_filter( $structure, static fn( array $item ): bool => 'geo_summary' !== $item['section'] ) );
 			$structure[1]['purpose'] = 'Open with a concise introduction grounded in the supplied content.';
 		}
