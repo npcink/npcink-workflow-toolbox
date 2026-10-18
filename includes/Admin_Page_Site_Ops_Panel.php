@@ -310,7 +310,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 								?>
 							</p>
 						<?php endif; ?>
-					<?php elseif ( $cloud_ready ) : ?>
+					<?php elseif ( $cloud_ready && ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) : ?>
 						<p><?php esc_html_e( 'Need a clearer explanation or semantic ranking? Use Cloud detail after reviewing the local top items.', 'npcink-workflow-toolbox' ); ?></p>
 						<a class="button button-small" href="<?php echo esc_url( $this->site_ops_cloud_analysis_url() ); ?>"><?php esc_html_e( 'Use Cloud detail', 'npcink-workflow-toolbox' ); ?></a>
 					<?php else : ?>
@@ -966,7 +966,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 			}
 		}
 
-		if ( 'blocked_until_cloud_ready' === (string) ( $finding['write_boundary'] ?? '' ) ) {
+		if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) && 'blocked_until_cloud_ready' === (string) ( $finding['write_boundary'] ?? '' ) ) {
 			$actions[] = array(
 				'label' => __( 'Use Cloud detail', 'npcink-workflow-toolbox' ),
 				'url'   => $this->site_ops_cloud_analysis_url(),

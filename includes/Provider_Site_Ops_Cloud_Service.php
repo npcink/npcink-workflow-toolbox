@@ -18,6 +18,9 @@ final class Provider_Site_Ops_Cloud_Service extends Provider_Client_Support {
 	}
 
 	public function run_site_ops_cloud_analysis( array $cloud_request ) {
+		if ( Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
+			return Settings::cloud_feature_pause_error( 'cloud_inspection' );
+		}
 		$runtime_payload = array(
 			'ability_name'            => 'npcink-toolbox/analyze-site-ops',
 			'contract_version'        => 'site_ops_cloud_analysis_request.v1',

@@ -572,6 +572,19 @@ function npcink_toolbox_provider_services_error_status( $error ): int {
 	return is_array( $data ) ? (int) ( $data['status'] ?? 0 ) : 0;
 }
 
+
+// Verify the default pause before exercising dormant implementation below.
+$pause_before_calls = $npcink_toolbox_progressive_cloud_calls;
+$paused_inspection = $client->submit_nightly_inspection_cloud_batch( array() );
+$paused_site_ops = $client->run_site_ops_cloud_analysis( array() );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_inspection ) && 'npcink_toolbox_feature_paused' === $paused_inspection->get_error_code(), 'Cloud inspection is paused before sampling or transport.' );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_site_ops ) && 'npcink_toolbox_feature_paused' === $paused_site_ops->get_error_code(), 'Site Ops Cloud analysis is paused before transport.' );
+npcink_toolbox_provider_services_assert( $pause_before_calls === $npcink_toolbox_progressive_cloud_calls, 'Paused Cloud features perform zero provider calls.' );
+$retained_feature_policy = new ReflectionProperty( Npcink_Toolbox\Settings::class, 'paused_cloud_features' );
+$retained_feature_policy->setAccessible( true );
+$retained_feature_snapshot = $retained_feature_policy->getValue();
+$retained_feature_policy->setValue( null, array() );
+
 // ---- Provider_Workflow_Plans_Service -------------------------------------
 
 // 1. Article write plans reject missing input before any composition.
@@ -714,3 +727,5 @@ $pause_projection_method = new ReflectionMethod( $pause_surface, 'content_operat
 $pause_projection_method->setAccessible( true );
 $pause_projection = $pause_projection_method->invoke( $pause_surface, true );
 npcink_toolbox_progressive_assert( ! in_array( 'discoverability', $pause_projection['surfaces']['editor_content_support']['intents'], true ) && 'paused' === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['state'] && false === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['available'] && ! isset( $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['target_ability_id'] ), 'Ready Cloud status does not advertise paused specialist intents or SEO write handoffs.' );
+
+$retained_feature_policy->setValue( null, $retained_feature_snapshot );

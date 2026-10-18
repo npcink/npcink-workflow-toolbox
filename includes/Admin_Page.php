@@ -777,6 +777,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	 * @param array<string,mixed>      $settings Settings.
 	 */
 	private function render_operations_insights_panel( ?array $preview, array $content_context, bool $cloud_ready, array $settings, ?array $nightly_preview, string $active_site_check_tab ): void {
+		$cloud_ready = $cloud_ready && ! Settings::cloud_feature_paused( 'cloud_inspection' );
 		$context_ready      = $this->content_context_ready( $content_context );
 		$pack               = isset( $preview['pack'] ) && is_array( $preview['pack'] ) ? $preview['pack'] : array();
 		$cloud_request      = isset( $preview['cloud_request'] ) && is_array( $preview['cloud_request'] ) ? $preview['cloud_request'] : array();
@@ -878,7 +879,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="structure" aria-selected="false"><?php esc_html_e( 'Structure', 'npcink-workflow-toolbox' ); ?></button>
 						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="findings" aria-selected="false"><?php esc_html_e( 'Findings', 'npcink-workflow-toolbox' ); ?></button>
 						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="evidence" aria-selected="false"><?php esc_html_e( 'Evidence', 'npcink-workflow-toolbox' ); ?></button>
+						<?php if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) : ?>
 						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="cloud" aria-selected="false"><?php esc_html_e( 'Cloud detail', 'npcink-workflow-toolbox' ); ?></button>
+						<?php endif; ?>
 						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="advanced" aria-selected="false"><?php esc_html_e( 'Advanced', 'npcink-workflow-toolbox' ); ?></button>
 					</nav>
 					<section class="npcink-toolbox__ops-panel" data-toolbox-ops-panel="overview">
@@ -953,7 +956,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 							<p><button type="button" class="button" data-toolbox-copy-json><?php esc_html_e( 'Copy JSON to clipboard', 'npcink-workflow-toolbox' ); ?></button></p>
 							<textarea class="large-text code" rows="12" readonly data-toolbox-copy-json-source><?php echo esc_textarea( (string) wp_json_encode( $pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ); ?></textarea>
 						</details>
-						<?php if ( array() !== $cloud_request ) : ?>
+						<?php if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) && array() !== $cloud_request ) : ?>
 							<details class="npcink-toolbox__result-details">
 								<summary><?php esc_html_e( 'Copy Cloud detail request JSON', 'npcink-workflow-toolbox' ); ?></summary>
 								<p class="description"><?php esc_html_e( 'This contract is prepared for Cloud runtime detail. Copying it does not call Cloud, schedule work, store a local run, create Core proposals, or write WordPress data.', 'npcink-workflow-toolbox' ); ?></p>
@@ -1283,7 +1286,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<?php if ( ! $embedded ) : ?>
 							<a class="button" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Open current check', 'npcink-workflow-toolbox' ); ?></a>
 						<?php endif; ?>
+						<?php if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) : ?>
 						<a class="button" href="<?php echo esc_url( $this->cloud_addon_runtime_runs_url() ); ?>"><?php esc_html_e( 'Open Cloud run recovery', 'npcink-workflow-toolbox' ); ?></a>
+						<?php endif; ?>
 					</div>
 				</div>
 			</section>
