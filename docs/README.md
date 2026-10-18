@@ -220,3 +220,5 @@ afterwards an archived record is edited only to fix link targets.
 - [SEO 暂停生产候选与发布方案（2026-10-18）](seo-specialist-pause-production-plan-2026-10-18.md) — 隔离候选、顺序、影响与回滚；未部署。
 
 - [SEO 暂停候选 CI、集成与浏览器验收（2026-10-18）](seo-specialist-pause-candidate-validation-2026-10-18.md) — DeepSeek 实际基线、精确候选及既有严格 UI 阻断。
+
+- [SEO 候选独立汉化验收与发布续记（2026-10-19）](seo-specialist-pause-localization-validation-2026-10-19.md) — 独立 PR292、严格 UI 18→0、组合 ZIP、顺序与回滚；未部署。
