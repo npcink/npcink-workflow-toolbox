@@ -54,6 +54,30 @@ Addon 通过宿主的 `wpai_default_feature_classes` 和
 当前三仓库均在 `codex/pause-seo-specialist-20261018` 分支，改动保持未提交，分支未设置 upstream；本轮没有新增提交。
 首次候选阶段未创建 PR、未请求合并、未修改生产。后续 merge 授权仍不包含生产部署。源基线：Cloud `67a94d6d`，Addon `a8e732b3`，Toolbox `8f186e9c`。原调查快照不代替本次源状态。
 
+## 后续 merge 阶段进展
+
+操作者随后明确授权三个仓库提交、PR、CI 和合并，仍不部署生产。当前跟踪入口：
+[Cloud PR #1141](https://github.com/npcink/npcink-ai-cloud/pull/1141)、
+[Toolbox PR #277](https://github.com/npcink/npcink-workflow-toolbox/pull/277)。
+PR 的最终合并和精确 SHA CI 结果以各自 GitHub 记录为准。
+
+中继排查发现旧默认节点 `100.90.87.36` 离线；文档中的国内节点
+`100.86.14.81` 在线，其 SSH 密钥与本机已信任的服务器记录匹配，但当前本机认证
+无法登录。因此没有修改中继服务或扩大 SSH 授权。操作者明确选择蒲公英直传恢复：
+`muze@172.16.3.35`，`NPCINK_CLOUD_M4_SOURCE_TRANSFER_MODE=direct`。
+原中继登录问题仍需以后提供正确用户名与身份文件，不将直传成功写成中继已修复。
+
+Cloud 干净候选 `7ac4d680` 已完成源码同步，无镜像重建；M4 Python 3.14.8
+聚焦测试 233 项通过，测试执行 50.41 秒、命令反馈 55 秒。候选不代表 accepted；
+正式验收仍需要 Cloud 合并后从最新干净 master promotion 并核对状态。
+
+Cloud CI 发现的两处行宽问题已修正；两 PHP 仓库通过统一策略读取保留恢复分支，
+没有增加 PHPStan baseline 或 ignore。修正后两仓库完整确定性 gate 与 PHPStan 均通过。
+Addon 的最终包校验 SHA256：`2ead76418ac0448abe62e64bab969ee66d93f85e32a9c2107d923d85d1b05f37`。
+Cloud advisory OCR 因单组预估 82308 超过 80000 预算，在零模型调用时停止，属于不完整证据；
+Toolbox 与 Addon 的 CI OCR 工作流处于 `disabled_manually`，未自行启用。
+Toolbox 使用发布工具支持的有理由审查例外；确定性 CI 和保护分支约束继续生效。
+
 ## 恢复方式与范围限制
 
 后续恢复应复核宿主插件版本和三个仓库的契约，然后按本次任务改动逐项回退或作新实现，
