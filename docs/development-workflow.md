@@ -1253,3 +1253,41 @@ Update `readme.txt` and `README.md` when:
 - a setting is added;
 - a public workflow button changes behavior;
 - the boundary changes.
+
+## Reversible Feature Pause and Release Handoff
+
+A specialist pause must close operator entry points, advertised capabilities
+and direct/new specialist calls while preserving generic work. Verify ordinary
+search, writing preparation, summary, slug and ALT paths independently; do not
+remove them merely because a historical scenario mentioned SEO. Retained old
+candidates must not create a new paused handoff through a generic planner.
+
+Keep stored options and history intact. Project only effective generic settings
+into runtime context, preserve hidden values on normal form saves, and version
+cache eligibility when old editor output could bypass the new policy. Restoration
+requires current contract/consumer checks and newly reviewed authorization.
+
+Keep unrelated repairs independently reviewed. If master includes unpublished
+work outside a release scope, retain an explicit published-baseline candidate;
+do not merge its older tree into master merely to close a release PR. A
+release-only repair must also reach master through a reviewed backport.
+
+The handoff records merged PRs, master and candidate identities, installed
+versions, shipping ZIP hashes, rollback packages, dated browser/integration
+results and unresolved operational checks. CI success, package verification,
+fixture acceptance and production acceptance are distinct. Refresh evidence
+when bytes, dependencies, host versions, scan validity or the release envelope
+change; do not repeatedly run a broad gate for unchanged valid evidence.
+
+For the three-repository pause, use Cloud then Addon then Toolbox as the planned
+release order, rechecking dependencies and the actual installed baseline at the
+next release. Validate Cloud before plugin distribution. Keep deployment and
+site/channel authorization explicit. Recheck saved hidden settings, historical
+data, specialist refusal and generic positive cases on the actual release.
+
+At closeout, report separately whether code is committed, PRs merged, worktrees
+clean and branches/worktrees removed. Before deleting an exact task-owned
+branch, confirm its merged PR and head, preserve squash-merged source/evidence
+and check that no open PR or release handoff needs it. Retain candidate and
+rollback materials outside disposable worktrees. Never clean another task's
+resources based on age, name or clean status alone.
