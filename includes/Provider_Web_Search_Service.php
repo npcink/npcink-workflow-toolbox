@@ -209,14 +209,15 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 			$scenario = 'discoverability';
 		}
 
-		$artifact = $this->client->build_content_discoverability_brief(
-			array(
-				'topic'                   => $topic,
-				'title'                   => sanitize_text_field( (string) ( $input['title'] ?? $topic ) ),
-				'external_search_intent'  => 'publish_preflight' === $scenario ? 'fact_check' : 'writing_context',
-				'include_external_search' => true,
-			)
+		$brief_input = array(
+			'topic'                   => $topic,
+			'title'                   => sanitize_text_field( (string) ( $input['title'] ?? $topic ) ),
+			'external_search_intent'  => 'publish_preflight' === $scenario ? 'fact_check' : 'writing_context',
+			'include_external_search' => true,
 		);
+		$artifact    = Settings::is_discoverability_paused()
+			? $this->client->build_ai_article_writing_pack( $brief_input )
+			: $this->client->build_content_discoverability_brief( $brief_input );
 
 		if ( is_wp_error( $artifact ) ) {
 			return $artifact;

@@ -1603,7 +1603,7 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 		$external_research  = is_array( $brief['external_research'] ?? null ) ? $brief['external_research'] : array();
 		$cloud_evidence     = is_array( $brief['cloud_evidence'] ?? null ) ? $brief['cloud_evidence'] : $this->client->cloud_web_search_evidence( $external_research );
 
-		return array(
+		$pack = array(
 			'artifact_type'               => 'ai_article_writing_pack',
 			'composition_role'            => 'ai_article_writing_pack',
 			'version'                     => 1,
@@ -1674,6 +1674,11 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				),
 			),
 		);
+		if ( Settings::is_discoverability_paused() ) {
+			unset( $pack['handoff']['brief_ability_id'] );
+			$pack['handoff']['next_steps'][0] = 'Use the pack to draft one article and ordinary editorial suggestions.';
+		}
+		return $pack;
 	}
 
 

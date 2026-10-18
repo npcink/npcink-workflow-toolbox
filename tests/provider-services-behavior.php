@@ -703,3 +703,14 @@ $pause_abilities->register_with_npcink_abilities_toolkit();
 foreach ( array( 'pause_native_abilities', 'pause_helper_abilities' ) as $registration_lane ) {
     npcink_toolbox_progressive_assert( ! in_array( 'npcink-toolbox/build-content-discoverability-brief', $GLOBALS[ $registration_lane ], true ) && in_array( 'npcink-toolbox/get-content-discoverability-context', $GLOBALS[ $registration_lane ], true ), 'Specialist discovery is absent while generic context remains in ' . $registration_lane . '.' );
 }
+
+npcink_toolbox_progressive_assert( ! isset( $pause_pack['handoff']['brief_ability_id'] ) && false === strpos( implode( ' ', $pause_pack['handoff']['next_steps'] ), 'SEO/AEO/GEO' ), 'Retained writing packs do not send clients to a paused specialist ability or next step.' );
+foreach ( array( 'discoverability', 'publish_preflight' ) as $diagnostic_scenario ) {
+    $diagnostic = $pause_client->diagnose_automatic_web_search( array( 'topic' => 'Generic source research', 'scenario' => $diagnostic_scenario ) );
+    npcink_toolbox_progressive_assert( is_array( $diagnostic ) && 'web_search_diagnostics' === ( $diagnostic['artifact_type'] ?? '' ), 'Generic web-search diagnostics remain callable during the specialist pause: ' . $diagnostic_scenario );
+}
+$pause_surface = new Npcink_Toolbox\Rest_Surface_Bridges( $pause_settings, $pause_client );
+$pause_projection_method = new ReflectionMethod( $pause_surface, 'content_operations_projection' );
+$pause_projection_method->setAccessible( true );
+$pause_projection = $pause_projection_method->invoke( $pause_surface, true );
+npcink_toolbox_progressive_assert( ! in_array( 'discoverability', $pause_projection['surfaces']['editor_content_support']['intents'], true ) && 'paused' === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['state'] && false === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['available'] && ! isset( $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['target_ability_id'] ), 'Ready Cloud status does not advertise paused specialist intents or SEO write handoffs.' );

@@ -88,3 +88,16 @@ Toolkit、Core、Adapter、Eval 以及其他项目没有修改。它们已有的
 不受本次范围内暂停的全平台保证；历史内容和治理真值仍归原拥有者。
 
 M4_OBSERVATION_RECEIPT date=2026-10-18; route=Pgy+private-relay; sync=blocked by relay SSH timeout; focused=not occurred; promotion=not occurred; operations=sync1 attempted/0 completed,deploy0; stable_502=not measured; m4_only=not observed; coordination=previous candidate preserved
+
+## 合并前审查补充
+
+Addon 对应 [PR #290](https://github.com/npcink/npcink-cloud-addon/pull/290)。本地有界
+OCR 为部分覆盖，发现的装载、旧混合调用和 React 固定说明问题均修正并加回归；
+未增加预算或重复整轮调用。目录 POT/PO/MO 已按实际源码刷新。
+
+GitHub 的独立 Codex 审查指出 `seo_headline` 是既有已注册专项任务别名；Cloud 与
+Addon 已将其加入暂停集合，并覆盖有无 task contract 两条路径的零调用断言。
+通用自定义任务的正向样例改为 article_headline，继续验证通用投影能力。
+Toolbox 状态投影不再宣传 discoverability intent，SEO gap 明确标为 paused 且不可用；
+写作包不再携带已暂停 brief ability 或专项 next step。普通网页搜索诊断复用保留的
+通用写作材料组成，两个历史 scenario 均有可调用回归。以上变化仍不触及其他项目。
