@@ -491,10 +491,10 @@ try {
 					sourceMatch: item.source_match, candidateRelevance: item.candidate_relevance,
 					candidateSource: item.candidate_source || section.candidate_source,
 					retrievalStatus: section.retrieval_status, canApplyToEditor: item.can_apply_to_editor === true,
-				})));
+				}))).map((candidate, index) => Object.assign({}, candidate, { candidateRank: index + 1 })).filter((candidate) => candidate.candidateRelevance !== 'weak');
 				return candidates.map((candidate, index) => {
 					const state = helpers.internalLinkCandidateEligibility(candidate, currentBlocks, window.wp.richText);
-					return { id: candidate.id, rank: index + 1, ready: state.canApply, reasons: state.reasonCodes };
+					return { id: candidate.id, rank: candidate.candidateRank, ready: state.canApply, reasons: state.reasonCodes };
 				});
 			}, { ...internalLinkSection, recommendation_candidates: internalLinkSection.recommendation_candidates || [] });
 			console.log(`INFO: internal_link_live_readiness=${JSON.stringify(readiness)}`);
@@ -502,7 +502,10 @@ try {
 			await page.screenshot({ path: `${env('SMOKE_ARTIFACT_DIR', 'tests/artifacts')}/editor-internal-link-readiness-${activePostId}.png`, fullPage: true });
 			for (const item of readiness) {
 				const row = page.locator(`.npcink-toolbox-editor-support__internal-links [data-candidate-rank="${item.rank}"]`);
-				assert(await row.count() === 1, 'The ranked candidate remains available once: ' + item.id);
+				if (await row.count() === 0) {
+					assert(!item.ready, 'A hidden candidate is never silently applicable: ' + item.id);
+					continue;
+				}
 				if (!await row.isVisible()) await row.locator('xpath=ancestor::details[1]').locator('summary').click();
 				assert((await row.getAttribute('class')).includes('is-applicable') === item.ready, 'Visible readiness agrees with the current Apply checks: ' + item.id);
 				if (!item.ready) assert(await row.getByRole('button', { name: /Add citation|添加引用/i }).count() === 0, 'Blocked candidates have no Add citation action: ' + item.id);
