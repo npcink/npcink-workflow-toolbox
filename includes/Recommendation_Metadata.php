@@ -41,7 +41,7 @@ final class Recommendation_Metadata {
 			$retrieval_source = 'no_evidence';
 		}
 		// Missing version means the legacy runtime; unknown/cross-family versions stay unknown.
-		 $cloud_version = $knowledge['result_grouping']['ranking_version'] ?? null;
+		$cloud_version = $knowledge['result_grouping']['ranking_version'] ?? null;
 		$version = null === $cloud_version ? self::VERSIONS[ $intent ] : $cloud_version;
 		if ( in_array( $version, array( $intent . '.v1', $intent . '.v2' ), true ) ) {
 			$section['ranking_version'] = $version;

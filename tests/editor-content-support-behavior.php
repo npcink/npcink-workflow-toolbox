@@ -230,6 +230,9 @@ function apply_filters( string $hook, $value, ...$args ) {
 		);
 	}
 	if ( 'npcink_toolbox_site_knowledge_cloud_request' === $hook ) {
+		if ( isset( $GLOBALS['npcink_toolbox_abstention_test_result'] ) ) {
+			return array( 'status' => 'ok', 'run_id' => 'abstention-control', 'data' => array( 'result' => $GLOBALS['npcink_toolbox_abstention_test_result'] ) );
+		}
 		global $npcink_toolbox_progressive_site_knowledge_inputs;
 		$site_knowledge_runtime = is_array( $args[0] ?? null ) ? $args[0] : array();
 		$npcink_toolbox_progressive_site_knowledge_inputs[] = is_array( $site_knowledge_runtime['input'] ?? null ) ? $site_knowledge_runtime['input'] : array();
@@ -650,6 +653,27 @@ npcink_toolbox_editor_flow_assert_flow_contract( $links['data'], 'internal_links
 npcink_toolbox_editor_flow_assert( isset( $links['data']['sections']['internal_links'] ) && is_array( $links['data']['sections']['internal_links'] ), 'Internal links fill their section without a fatal.' );
 npcink_toolbox_editor_flow_assert( 'https://example.test/toolkit-target/' === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_safe_candidate_url( array( 'source' => array( 'target_url' => 'https://example.test/toolkit-target/' ) ) ), 'Internal-link service resolves the Toolkit artifact source.target_url fallback on the server.' );
 npcink_toolbox_editor_flow_assert( 'https://example.test/toolkit-url/' === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_safe_candidate_url( array( 'source' => array( 'url' => 'https://example.test/toolkit-url/' ) ) ), 'Internal-link service resolves the Toolkit artifact source.url fallback on the server.' );
+
+// A healthy explicit v2 abstention bypasses an absent Toolkit, never a Cloud failure.
+$before_abstention_transients = $npcink_toolbox_progressive_transients;
+foreach ( array( 'healthy_v2', 'failed_v2', 'legacy_empty' ) as $mode ) {
+ $npcink_toolbox_progressive_transients = array();
+ $GLOBALS['npcink_toolbox_abstention_test_result'] = array( 'status' => 'failed_v2' === $mode ? 'failed' : 'ready', 'results' => array(),
+  'result_grouping' => array( 'ranking_version' => 'legacy_empty' === $mode ? 'internal_links.v1' : 'internal_links.v2', 'recommendation_quality' => array( 'abstained' => true ) ) );
+ $empty = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'internal_links' ) + $npcink_toolbox_editor_flow_draft );
+ $section = $empty['data']['sections']['internal_links'];
+ if ( 'healthy_v2' === $mode ) {
+  npcink_toolbox_editor_flow_assert( 'internal_links.v2' === $section['ranking_version'] && 'no_evidence' === $section['retrieval_source'] && false === $section['fallback_used'] && array() === $section['recommendation_candidates'], 'Healthy v2 abstention remains versioned empty evidence without local fallback.' );
+  npcink_toolbox_editor_flow_assert( 'internal_link_candidates.v1' === $section['artifact_type'] && 'current_article_multi_link_result.v1' === $section['editor_transaction']['schema'] && false === $section['direct_wordpress_write'], 'Healthy abstention preserves the editor artifact and transaction contracts.' );
+  npcink_toolbox_editor_flow_assert( '' === $section['source_ability_id'] && array() === $section['toolkit_artifact'] && ! isset( $section['error_code'] ), 'Healthy abstention does not invent a Toolkit execution or an error.' );
+ } elseif ( 'failed_v2' === $mode ) {
+  npcink_toolbox_editor_flow_assert( 'cloud_unavailable' === $section['retrieval_status'], 'Cloud failures cannot become healthy abstentions.' );
+ } else {
+  npcink_toolbox_editor_flow_assert( true === $section['fallback_used'] && true === $section['toolkit_required'], 'Legacy empty responses retain their original Toolkit fallback contract.' );
+ }
+}
+unset( $GLOBALS['npcink_toolbox_abstention_test_result'] );
+$npcink_toolbox_progressive_transients = $before_abstention_transients;
 
 // 7. Image candidates fail closed when Cloud transport is unavailable.
 $images = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'image_candidates' ) + $npcink_toolbox_editor_flow_draft );

@@ -442,7 +442,7 @@ try {
 				elapsedMs: performance.now() - started, requestBody: internalLinkResponse.request().postData(),
 			})));
 
-			if (requireFreshCloud && internalLinkSection.retrieval_status === 'cloud_vector_evidence') {
+			if (requireFreshCloud && ['cloud_vector_evidence', 'no_cloud_evidence'].includes(internalLinkSection.retrieval_status)) {
 				assert(['miss', 'bypass'].includes(internalLinkSection.source_knowledge?.cache_status), 'Fresh-Cloud acceptance rejects cache hits or unknown cache evidence.');
 			}
 					await page.waitForSelector('text=/Site citation suggestions|站内引用建议/', { timeout: 30000 });
@@ -456,6 +456,15 @@ try {
 			assert(internalLinkSection.editor_transaction && internalLinkSection.editor_transaction.schema === 'current_article_multi_link_result.v1', 'Internal-link browser response exposes the current-article transaction contract.');
 
 			const candidateCount = Array.isArray(internalLinkSection.recommendation_candidates) ? internalLinkSection.recommendation_candidates.length : 0;
+            if (process.env.NPCINK_RECOMMENDATION_VERSION === 'v2') {
+                const knowledge = internalLinkSection.source_knowledge || {};
+                const quality = knowledge.result_grouping?.recommendation_quality || {};
+                assert(knowledge.status === 'ready' && knowledge.retrieval_readiness?.status === 'ready', 'v2 acceptance requires healthy Cloud readiness, including empty results.');
+                assert(quality.policy_version === 'reading_task_abstention.v2' && typeof quality.abstained === 'boolean', 'v2 acceptance carries the explicit qualification receipt.');
+                assert(!quality.abstained || (candidateCount === 0 && internalLinkSection.fallback_used === false), 'Healthy abstention has zero candidates and no fallback backfill.');
+                if (process.env.NPCINK_INTERNAL_LINK_EXPECT_ABSTAIN === '1') assert(quality.abstained && candidateCount === 0, 'The negative article abstains instead of returning candidates.');
+            }
+
 			const candidateReview = (Array.isArray(internalLinkSection.recommendation_candidates) ? internalLinkSection.recommendation_candidates : []).map((candidate) => ({
 				id: candidate.id || '',
 				anchor_text: candidate.anchor_or_context || '',
