@@ -35,6 +35,8 @@ final class Abilities {
 		}
 
 		foreach ( $this->definitions() as $ability_id => $definition ) {
+			if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'npcink-toolbox/build-media-derivative-handoff' === $ability_id ) {
+				continue; }
 			if ( Settings::is_discoverability_paused() && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
 				continue;
 			}
@@ -68,6 +70,8 @@ final class Abilities {
 		}
 
 		foreach ( $this->definitions() as $ability_id => $definition ) {
+			if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'npcink-toolbox/build-media-derivative-handoff' === $ability_id ) {
+				continue; }
 			if ( Settings::is_discoverability_paused() && 'npcink-toolbox/build-content-discoverability-brief' === $ability_id ) {
 				continue;
 			}

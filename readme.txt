@@ -15,6 +15,11 @@ Fixed AI workflow buttons for WordPress operators, with review-only suggestions 
 Npcink Workflow Toolbox helps WordPress operators turn proven AI-assisted
 content and site-operations practices into fixed, review-only buttons.
 
+Availability notice: SEO/AEO/GEO specialist assistance, Cloud inspection/site
+analysis, article audio generation and media optimization are temporarily paused.
+Their action entries are withdrawn. Existing history, preferences, adopted audio
+and media are retained; local checks and backup restore remain supported.
+
 The plugin provides a WordPress admin surface and post-editor panel for:
 
 * a Dashboard Zhihu hot-topic pool for deciding what may be worth researching
@@ -30,18 +35,13 @@ The plugin provides a WordPress admin surface and post-editor panel for:
   saved or published automatically;
 * a compact default URL flow that blocks metadata or navigation-only captures
   before drafting and keeps brief/evidence details in optional disclosures;
-* SEO, AEO, and GEO guidance from operator-maintained site context;
 * existing-category and existing-tag recommendations for review;
 * internal-link candidates and source-coverage notes;
 * image-source candidates, reviewed hosted image candidates, current-article
-  media ALT/caption review sets, and media planning handoff packets;
-* a contextual single-image optimization workbench with verified previews,
-  format/crop controls, reusable text or logo watermark templates, an optional
-  safe output basename, request-scoped Toolkit replacement, automatic rollback
-  backups, visible restore review, and a bounded 30- or 90-day retention choice;
+  media ALT/caption review sets;
 * Cloud-managed site knowledge search, status, and sync requests when a
   compatible host runtime is connected;
-* review-only Scheduled Review previews, with Cloud runtime inspection and recovery routed to Cloud Addon;
+* local, review-only Scheduled Review previews;
 * scoped editor access so authors and editors can run the post editor's
   suggestion-only content-support flows without administrator rights;
 * read-only comment moderation and flagged media review sets that send one
@@ -194,12 +194,10 @@ service.
 
 = Does this plugin write or publish my content automatically? =
 
-The default content-support flows only return suggestions, candidates,
-previews, and handoff plans. The Media Library Optimization workflow is the
-narrow exception: after an administrator checks and confirms one exact
-attachment-and-SHA-256 manifest, the browser delegates each reversible file
-replacement to Abilities Toolkit. It never publishes posts or runs as an
-unattended batch.
+The default content-support flows return suggestions, candidates, previews and
+handoff plans. New media optimization is temporarily unavailable. Existing
+backup restore remains an explicitly reviewed WordPress/Toolkit operation;
+Toolbox does not publish content or run an unattended optimization batch.
 
 = Can I use it without Npcink Cloud? =
 

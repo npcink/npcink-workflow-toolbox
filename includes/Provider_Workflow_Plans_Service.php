@@ -1721,6 +1721,9 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 
 
 	public function build_media_derivative_handoff( array $input ) {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			return Settings::cloud_feature_pause_error( 'advanced_media' );
+		}
 		$attachment_id = absint( $input['attachment_id'] ?? 0 );
 		if ( $attachment_id <= 0 ) {
 			return new WP_Error(

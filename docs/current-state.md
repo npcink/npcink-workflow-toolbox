@@ -22,6 +22,11 @@ gotchas); the second carries the user-perspective UX audit findings and
 the fix TODO order (uncommitted working-tree docs at the time of
 writing).
 
+Cloud inspection/site analysis, new audio and media optimization are also
+paused in the current source candidate. Local checks, playback, backup recovery,
+ordinary generation and Site Knowledge remain available. See
+[reversible pause scope](reversible-feature-pauses-v1.md).
+
 ## Product Snapshot
 
 - **0.6.0 is live on WordPress.org** (slug `npcink-workflow-toolbox`, SVN
@@ -37,7 +42,7 @@ writing).
   candidates) on `post`/`page` editors only (extend via the
   `npcink_toolbox_editor_supported_post_types` filter), visible **Site Check**
   tab (Overview remains the default; compatibility route retained), admin **Image Handling**
-  (Batch Optimize first), Overview + Site Profile + Site Check tabs. Release packages
+  (ALT review first; optimization paused), Overview + Site Profile + Site Check tabs. Release packages
   ship `.min` asset siblings (`composer package:release` runs
   `scripts/minify-assets.sh`); checkouts without them enqueue the
   readable sources.

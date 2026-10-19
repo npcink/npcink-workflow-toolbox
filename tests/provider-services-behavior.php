@@ -572,6 +572,23 @@ function npcink_toolbox_provider_services_error_status( $error ): int {
 	return is_array( $data ) ? (int) ( $data['status'] ?? 0 ) : 0;
 }
 
+
+// Verify the default pause before exercising dormant implementation below.
+$pause_before_calls = $npcink_toolbox_progressive_cloud_calls;
+$paused_inspection = $client->submit_nightly_inspection_cloud_batch( array() );
+$paused_site_ops = $client->run_site_ops_cloud_analysis( array() );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_inspection ) && 'npcink_toolbox_feature_paused' === $paused_inspection->get_error_code(), 'Cloud inspection is paused before sampling or transport.' );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_site_ops ) && 'npcink_toolbox_feature_paused' === $paused_site_ops->get_error_code(), 'Site Ops Cloud analysis is paused before transport.' );
+npcink_toolbox_provider_services_assert( $pause_before_calls === $npcink_toolbox_progressive_cloud_calls, 'Paused Cloud features perform zero provider calls.' );
+$paused_audio = $client->run_audio_generation( array( 'intent' => 'article_narration' ) );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_audio ) && 'npcink_toolbox_feature_paused' === $paused_audio->get_error_code(), 'Audio is paused before summary generation or transport.' );
+$paused_media = $client->build_media_derivative_handoff( array() );
+npcink_toolbox_provider_services_assert( is_wp_error( $paused_media ) && 'npcink_toolbox_feature_paused' === $paused_media->get_error_code(), 'Media optimization planning is paused before provider or Core handoff.' );
+$retained_feature_policy = new ReflectionProperty( Npcink_Toolbox\Settings::class, 'paused_cloud_features' );
+$retained_feature_policy->setAccessible( true );
+$retained_feature_snapshot = $retained_feature_policy->getValue();
+$retained_feature_policy->setValue( null, array() );
+
 // ---- Provider_Workflow_Plans_Service -------------------------------------
 
 // 1. Article write plans reject missing input before any composition.
@@ -714,3 +731,21 @@ $pause_projection_method = new ReflectionMethod( $pause_surface, 'content_operat
 $pause_projection_method->setAccessible( true );
 $pause_projection = $pause_projection_method->invoke( $pause_surface, true );
 npcink_toolbox_progressive_assert( ! in_array( 'discoverability', $pause_projection['surfaces']['editor_content_support']['intents'], true ) && 'paused' === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['state'] && false === $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['available'] && ! isset( $pause_projection['gap_contracts']['seo_metadata_suggestion.v1']['target_ability_id'] ), 'Ready Cloud status does not advertise paused specialist intents or SEO write handoffs.' );
+
+$retained_feature_policy->setValue( null, $retained_feature_snapshot );
+
+$GLOBALS['pause_native_abilities'] = array();
+$paused_media_abilities = new Npcink_Toolbox\Abilities( $pause_settings, $pause_client );
+$paused_media_abilities->register_native_abilities();
+npcink_toolbox_progressive_assert( ! in_array( 'npcink-toolbox/build-media-derivative-handoff', $GLOBALS['pause_native_abilities'], true ) && in_array( 'npcink-toolbox/get-site-knowledge-status', $GLOBALS['pause_native_abilities'], true ), 'Paused media planning is undiscoverable while Site Knowledge remains discoverable.' );
+$default_projection = $pause_projection_method->invoke( $pause_surface, true );
+npcink_toolbox_progressive_assert( false === $default_projection['surfaces']['nightly_inspection']['available'], 'Ready Cloud does not advertise paused inspection availability.' );
+
+$GLOBALS['npcink_toolbox_pause_options'][Npcink_Toolbox\Plugin::OPTION_NAME] = array(
+    'nightly_inspection_pro_enabled' => true,
+    'nightly_inspection_cloud_payload_mode' => 'excerpt',
+    'nightly_inspection_cloud_retention_days' => 14,
+);
+$paused_saved_settings = $pause_settings->sanitize( array( 'nightly_inspection_enabled' => true ) );
+npcink_toolbox_progressive_assert( true === $paused_saved_settings['nightly_inspection_pro_enabled'] && 'excerpt' === $paused_saved_settings['nightly_inspection_cloud_payload_mode'] && 14 === $paused_saved_settings['nightly_inspection_cloud_retention_days'], 'An ordinary local settings save preserves paused Cloud preferences exactly.' );
+npcink_toolbox_progressive_assert( false === $pause_settings->get_nightly_inspection_settings()['pro_enabled'], 'Retained enabled preference cannot restore effective Cloud inspection availability.' );

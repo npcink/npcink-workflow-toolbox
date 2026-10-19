@@ -13,6 +13,30 @@ final class Settings {
 	/** Release pause: retain stored preferences and implementations for future review. */
 	public const DISCOVERABILITY_PAUSED = true;
 
+	/** Reversible release policy, independent of saved user preferences. */
+	private static array $paused_cloud_features = array(
+		'cloud_inspection' => true,
+		'audio_generation' => true,
+		'advanced_media'   => true,
+	);
+
+	public static function cloud_feature_paused( string $feature ): bool {
+		return ! empty( self::$paused_cloud_features[ $feature ] );
+	}
+
+	public static function cloud_feature_pause_error( string $feature ) {
+		return new \WP_Error(
+			'npcink_toolbox_feature_paused',
+			__( 'This Cloud feature is temporarily paused.', 'npcink-workflow-toolbox' ),
+			array(
+				'status'    => 409,
+				'feature'   => $feature,
+				'retryable' => false,
+			)
+		);
+	}
+
+
 	/** Central release policy; callers preserve dormant restoration paths. */
 	public static function is_discoverability_paused(): bool {
 		return self::DISCOVERABILITY_PAUSED;
@@ -528,7 +552,7 @@ final class Settings {
 			'time'                 => (string) $settings['nightly_inspection_time'],
 			'post_limit'           => (int) $settings['nightly_inspection_post_limit'],
 			'media_limit'          => (int) $settings['nightly_inspection_media_limit'],
-			'pro_enabled'          => ! empty( $settings['nightly_inspection_pro_enabled'] ),
+			'pro_enabled'          => ! self::cloud_feature_paused( 'cloud_inspection' ) && ! empty( $settings['nightly_inspection_pro_enabled'] ),
 			'cloud_payload_mode'   => (string) $settings['nightly_inspection_cloud_payload_mode'],
 			'cloud_retention_days' => (int) $settings['nightly_inspection_cloud_retention_days'],
 			'cloud_retention_ttl'  => (int) $settings['nightly_inspection_cloud_retention_days'] * ( defined( 'DAY_IN_SECONDS' ) ? DAY_IN_SECONDS : 86400 ),
@@ -601,6 +625,13 @@ final class Settings {
 			'nightly_inspection_cloud_payload_mode'   => $this->sanitize_nightly_inspection_cloud_payload_mode( $input['nightly_inspection_cloud_payload_mode'] ?? 'metadata_only' ),
 			'nightly_inspection_cloud_retention_days' => max( 1, min( 90, absint( $input['nightly_inspection_cloud_retention_days'] ?? 7 ) ) ),
 		);
+
+		if ( self::cloud_feature_paused( 'cloud_inspection' ) ) {
+			$stored = $this->get_all();
+			foreach ( array( 'nightly_inspection_pro_enabled', 'nightly_inspection_cloud_payload_mode', 'nightly_inspection_cloud_retention_days' ) as $key ) {
+				$sanitized[ $key ] = $stored[ $key ];
+			}
+		}
 
 		return $sanitized;
 	}

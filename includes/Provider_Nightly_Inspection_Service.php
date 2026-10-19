@@ -20,6 +20,9 @@ defined( 'ABSPATH' ) || exit;
 final class Provider_Nightly_Inspection_Service extends Provider_Client_Support {
 
 	public function submit_nightly_inspection_cloud_batch( array $snapshot, array $options = array() ) {
+		if ( Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
+			return Settings::cloud_feature_pause_error( 'cloud_inspection' );
+		}
 		$runtime_payload = $this->build_nightly_inspection_cloud_batch_runtime_payload( $snapshot, $options );
 		if ( is_wp_error( $runtime_payload ) ) {
 			return $runtime_payload;
@@ -155,6 +158,9 @@ final class Provider_Nightly_Inspection_Service extends Provider_Client_Support 
 
 
 	public function retry_nightly_inspection_cloud_batch( string $run_id, array $snapshot, array $options = array() ) {
+		if ( Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
+			return Settings::cloud_feature_pause_error( 'cloud_inspection' );
+		}
 		$run_id = sanitize_text_field( $run_id );
 		if ( '' === $run_id ) {
 			return new WP_Error(

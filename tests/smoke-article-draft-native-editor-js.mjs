@@ -6,6 +6,7 @@ import { readEditorContentSupportBundle } from './editor-content-support-sources
 const source = readEditorContentSupportBundle();
 const expose = `
 	window.__NpcinkArticleDraftTest = {
+		defaultFlows,
 		articleDraftPreviewBlocks,
 		articleDraftPreviewPlanInput,
 		editorBlockHasMeaningfulContent,
@@ -61,6 +62,8 @@ const context = vm.createContext({
 vm.runInContext(instrumented, context, { filename: 'editor-content-support.js' });
 
 const helpers = context.window.__NpcinkArticleDraftTest;
+assert.equal(helpers.defaultFlows.some(flow => ['article_narration', 'article_audio_summary'].includes(flow.intent)), false, 'Paused audio generation entries are absent.');
+assert.equal(helpers.defaultFlows.some(flow => flow.intent === 'format_content'), true, 'Ordinary editor formatting remains available.');
 assert.ok(helpers, 'Editor draft helpers must be exposed to the smoke test.');
 
 const converted = helpers.articleDraftPreviewBlocks({

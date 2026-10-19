@@ -21,6 +21,9 @@ final class Provider_Article_Audio_Service extends Provider_Client_Support {
 	}
 
 	public function run_audio_generation( array $input ) {
+		if ( Settings::cloud_feature_paused( 'audio_generation' ) ) {
+			return Settings::cloud_feature_pause_error( 'audio_generation' );
+		}
 		$intent = sanitize_key( (string) ( $input['intent'] ?? 'article_narration' ) );
 		if ( ! in_array( $intent, array( 'article_narration', 'article_audio_summary' ), true ) ) {
 			return new WP_Error(
