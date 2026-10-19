@@ -29,4 +29,11 @@ foreach ( array( 'ranking_version', 'score_bucket', 'retrieval_source', 'rerank_
 foreach ( array( array( 'ranking_version' => 'private article' ), array( 'ranking_version' => 'internal_links.v1', 'candidate_rank' => 0 ), array( 'ranking_version' => 'internal_links.v1', 'candidate_rank' => true ), array( 'ranking_version' => 'internal_links.v1', 'score_bucket' => 'https://example.test' ), array( 'ranking_version' => 'internal_links.v1', 'rerank_applied' => 'false' ) ) as $invalid ) {
 	$check( Recommendation_Metadata::feedback_fields( $invalid ) instanceof WP_Error, 'Unbounded or mistyped metadata is rejected.' );
 }
+foreach ( array( 'internal_links', 'related_content' ) as $family ) {
+ $v2 = Recommendation_Metadata::project_section( array( 'status' => 'ready', 'source_knowledge' => array( 'status' => 'ready', 'result_grouping' => array( 'ranking_version' => $family . '.v2' ) ) ), $family );
+ $check( $v2['ranking_version'] === $family . '.v2' && $v2['retrieval_source'] === 'no_evidence', 'Healthy v2 empty results retain their version and no-evidence source.' );
+ $check( is_array( Recommendation_Metadata::feedback_fields( array( 'ranking_version' => $family . '.v2', 'retrieval_source' => 'no_evidence' ) ) ), 'v2 metadata-only empty impressions are accepted.' );
+ $mismatch = Recommendation_Metadata::project_section( array( 'result_grouping' => array( 'ranking_version' => 'other.v2' ) ), $family );
+ $check( ! isset( $mismatch['ranking_version'] ), 'Unknown or cross-family versions never masquerade as v2.' );
+}
 echo "Recommendation metadata behavior checks passed.\n";

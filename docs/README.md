@@ -223,3 +223,5 @@ afterwards an archived record is edited only to fix link targets.
 ## Closeouts
 
 - [Pre-Release Hardening Closeout - 2026-09-30](pre-release-hardening-closeout-2026-09-30.md) records the positioning audit verdict, the delete-compatibility-early decision, the behavior-tests-unlock-refactors method, and the remaining known small items (i18n loader, weekly fingerprint cron documentation, label language, editor intent convergence).
+
+- [推荐不推荐规则 v2](recommendation-abstention-v2.md)：Cloud 版本消费、健康空结果与 metadata-only 反馈。

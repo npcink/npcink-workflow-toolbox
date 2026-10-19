@@ -529,3 +529,20 @@ try {
 const setupFailure = recommendationCloudObservation({ phase: 'editor_setup_failed', errorName: 'TimeoutError' });
 assert.equal(setupFailure.error_class, 'editor_setup_failed');
 assert.equal(setupFailure.retrieval_status, 'unknown', 'An editor login/setup failure is not evidence of Cloud unavailability');
+
+for (const family of ['internal_links', 'related_content']) {
+ const payload = { sections: { [family]: { ranking_version: family + '.v2', status: 'ready',
+  retrieval_source: 'no_evidence', fallback_used: false, results: [], recommendation_candidates: [],
+  result_grouping: { recommendation_quality: { abstained: true } },
+ } } };
+ const event = helpers.recommendationImpressionFeedbackPayload(payload, family, 'empty-' + family);
+ assert.equal(event.ranking_version, family + '.v2');
+ assert.equal(event.retrieval_source, 'no_evidence');
+ assert.equal(event.candidate_rank, undefined);
+ assert.ok(event.source_reason_codes.includes('candidate_count_0'));
+ assert.ok(event.source_reason_codes.includes('recommendation_abstained'));
+ assert.ok(event.source_reason_codes.includes('fallback_not_used'));
+ assert.equal(event.evidence_ref_ids.length, 0);
+ assert.equal(/"(?:content|anchor|title|url|score)"\s*:/.test(JSON.stringify(event)), false);
+}
+console.log('PASS: versioned healthy abstention feedback has zero denominator and no fabricated rank');

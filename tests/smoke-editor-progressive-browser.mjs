@@ -202,8 +202,9 @@ async function waitForFeedbackAction(requests, action, timeoutMs = 10000) {
 function assertMetadataOnlyFeedback(payload, label) {
 	const serialized = JSON.stringify(payload || {});
 	assert(payload && payload.redaction_status === 'metadata_only', `${label} declares metadata-only redaction.`);
-	const version = String(payload.source_action_id || '').startsWith('related_content_') ? 'related_content.v1' : 'internal_links.v1';
-	assert(payload.ranking_version === version, `${label} carries the frozen ranking version.`);
+	const family = String(payload.source_action_id || '').startsWith('related_content_') ? 'related_content' : 'internal_links';
+	const version = family + '.' + (process.env.NPCINK_RECOMMENDATION_VERSION || 'v1');
+	assert(payload.ranking_version === version, `${label} carries the expected ranking version.`);
 	assert(['cloud_vector', 'cloud_vector_rerank', 'local_fallback', 'no_evidence', 'unavailable', 'unknown'].includes(payload.retrieval_source), `${label} carries a bounded retrieval source.`);
 	assert(!Object.hasOwn(payload, 'rerank_applied') || typeof payload.rerank_applied === 'boolean', `${label} preserves a boolean or absent rerank observation.`);
 	if (/(?:_copy|_open|_applied_to_editor)$/.test(payload.source_action_id)) {
