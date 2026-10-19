@@ -1819,6 +1819,8 @@
 			section.fallback_used === true ? 'fallback_used' : 'fallback_not_used',
 		];
 		reasonCodes.splice(1, 0, recommendationCountBucket('applicable_count', applicableCount));
+		const quality = section.source_knowledge?.result_grouping?.recommendation_quality || section.result_grouping?.recommendation_quality;
+		if (section.ranking_version === intent + '.v2' && quality?.abstained === true) reasonCodes.push('recommendation_abstained');
 		return {
 			candidateCount: candidates.length,
 			applicableCount,
@@ -1828,7 +1830,7 @@
 
 	function recommendationFeedbackMetadata(payload, intent, candidate) {
 		const section = payload && payload.sections && payload.sections[intent] || {};
-		if (!['internal_links.v1', 'related_content.v1'].includes(section.ranking_version)) return {};
+		if (!['internal_links.v1', 'related_content.v1', 'internal_links.v2', 'related_content.v2'].includes(section.ranking_version)) return {};
 		const metadata = { ranking_version: section.ranking_version, retrieval_source: section.retrieval_source || 'unknown' };
 		if (typeof section.rerank_applied === 'boolean') metadata.rerank_applied = section.rerank_applied;
 		if (candidate && Number.isInteger(candidate.candidateRank) && candidate.candidateRank >= 1 && candidate.candidateRank <= 20) {

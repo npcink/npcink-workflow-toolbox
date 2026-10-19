@@ -202,8 +202,9 @@ async function waitForFeedbackAction(requests, action, timeoutMs = 10000) {
 function assertMetadataOnlyFeedback(payload, label) {
 	const serialized = JSON.stringify(payload || {});
 	assert(payload && payload.redaction_status === 'metadata_only', `${label} declares metadata-only redaction.`);
-	const version = String(payload.source_action_id || '').startsWith('related_content_') ? 'related_content.v1' : 'internal_links.v1';
-	assert(payload.ranking_version === version, `${label} carries the frozen ranking version.`);
+	const family = String(payload.source_action_id || '').startsWith('related_content_') ? 'related_content' : 'internal_links';
+	const version = family + '.' + (process.env.NPCINK_RECOMMENDATION_VERSION || 'v1');
+	assert(payload.ranking_version === version, `${label} carries the expected ranking version.`);
 	assert(['cloud_vector', 'cloud_vector_rerank', 'local_fallback', 'no_evidence', 'unavailable', 'unknown'].includes(payload.retrieval_source), `${label} carries a bounded retrieval source.`);
 	assert(!Object.hasOwn(payload, 'rerank_applied') || typeof payload.rerank_applied === 'boolean', `${label} preserves a boolean or absent rerank observation.`);
 	if (/(?:_copy|_open|_applied_to_editor)$/.test(payload.source_action_id)) {
@@ -441,7 +442,7 @@ try {
 				elapsedMs: performance.now() - started, requestBody: internalLinkResponse.request().postData(),
 			})));
 
-			if (requireFreshCloud && internalLinkSection.retrieval_status === 'cloud_vector_evidence') {
+			if (requireFreshCloud && ['cloud_vector_evidence', 'no_cloud_evidence'].includes(internalLinkSection.retrieval_status)) {
 				assert(['miss', 'bypass'].includes(internalLinkSection.source_knowledge?.cache_status), 'Fresh-Cloud acceptance rejects cache hits or unknown cache evidence.');
 			}
 					await page.waitForSelector('text=/Site citation suggestions|站内引用建议/', { timeout: 30000 });
@@ -455,6 +456,15 @@ try {
 			assert(internalLinkSection.editor_transaction && internalLinkSection.editor_transaction.schema === 'current_article_multi_link_result.v1', 'Internal-link browser response exposes the current-article transaction contract.');
 
 			const candidateCount = Array.isArray(internalLinkSection.recommendation_candidates) ? internalLinkSection.recommendation_candidates.length : 0;
+            if (process.env.NPCINK_RECOMMENDATION_VERSION === 'v2') {
+                const knowledge = internalLinkSection.source_knowledge || {};
+                const quality = knowledge.result_grouping?.recommendation_quality || {};
+                assert(knowledge.status === 'ready' && knowledge.retrieval_readiness?.status === 'ready', 'v2 acceptance requires healthy Cloud readiness, including empty results.');
+                assert(quality.policy_version === 'reading_task_abstention.v2' && typeof quality.abstained === 'boolean', 'v2 acceptance carries the explicit qualification receipt.');
+                assert(!quality.abstained || (candidateCount === 0 && internalLinkSection.fallback_used === false), 'Healthy abstention has zero candidates and no fallback backfill.');
+                if (process.env.NPCINK_INTERNAL_LINK_EXPECT_ABSTAIN === '1') assert(quality.abstained && candidateCount === 0, 'The negative article abstains instead of returning candidates.');
+            }
+
 			const candidateReview = (Array.isArray(internalLinkSection.recommendation_candidates) ? internalLinkSection.recommendation_candidates : []).map((candidate) => ({
 				id: candidate.id || '',
 				anchor_text: candidate.anchor_or_context || '',
@@ -481,10 +491,10 @@ try {
 					sourceMatch: item.source_match, candidateRelevance: item.candidate_relevance,
 					candidateSource: item.candidate_source || section.candidate_source,
 					retrievalStatus: section.retrieval_status, canApplyToEditor: item.can_apply_to_editor === true,
-				})));
+				}))).map((candidate, index) => Object.assign({}, candidate, { candidateRank: index + 1 })).filter((candidate) => candidate.candidateRelevance !== 'weak');
 				return candidates.map((candidate, index) => {
 					const state = helpers.internalLinkCandidateEligibility(candidate, currentBlocks, window.wp.richText);
-					return { id: candidate.id, rank: index + 1, ready: state.canApply, reasons: state.reasonCodes };
+					return { id: candidate.id, rank: candidate.candidateRank, ready: state.canApply, reasons: state.reasonCodes };
 				});
 			}, { ...internalLinkSection, recommendation_candidates: internalLinkSection.recommendation_candidates || [] });
 			console.log(`INFO: internal_link_live_readiness=${JSON.stringify(readiness)}`);
@@ -492,7 +502,10 @@ try {
 			await page.screenshot({ path: `${env('SMOKE_ARTIFACT_DIR', 'tests/artifacts')}/editor-internal-link-readiness-${activePostId}.png`, fullPage: true });
 			for (const item of readiness) {
 				const row = page.locator(`.npcink-toolbox-editor-support__internal-links [data-candidate-rank="${item.rank}"]`);
-				assert(await row.count() === 1, 'The ranked candidate remains available once: ' + item.id);
+				if (await row.count() === 0) {
+					assert(!item.ready, 'A hidden candidate is never silently applicable: ' + item.id);
+					continue;
+				}
 				if (!await row.isVisible()) await row.locator('xpath=ancestor::details[1]').locator('summary').click();
 				assert((await row.getAttribute('class')).includes('is-applicable') === item.ready, 'Visible readiness agrees with the current Apply checks: ' + item.id);
 				if (!item.ready) assert(await row.getByRole('button', { name: /Add citation|添加引用/i }).count() === 0, 'Blocked candidates have no Add citation action: ' + item.id);

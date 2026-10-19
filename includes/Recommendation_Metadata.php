@@ -15,6 +15,7 @@ final class Recommendation_Metadata {
 		'internal_links'  => 'internal_links.v1',
 		'related_content' => 'related_content.v1',
 	);
+	public const SUPPORTED_VERSIONS = array( 'internal_links.v1', 'related_content.v1', 'internal_links.v2', 'related_content.v2' );
 	public const SCORE_BUCKETS     = array( 'low', 'medium', 'high', 'unknown' );
 	public const RETRIEVAL_SOURCES = array( 'cloud_vector', 'cloud_vector_rerank', 'local_fallback', 'no_evidence', 'unavailable', 'unknown' );
 
@@ -39,7 +40,14 @@ final class Recommendation_Metadata {
 		} elseif ( in_array( $retrieval_status, array( 'ready', 'no_cloud_evidence' ), true ) ) {
 			$retrieval_source = 'no_evidence';
 		}
-		$section['ranking_version']  = self::VERSIONS[ $intent ];
+		// Missing version means the legacy runtime; unknown/cross-family versions stay unknown.
+		$cloud_version = $knowledge['result_grouping']['ranking_version'] ?? null;
+		$version = null === $cloud_version ? self::VERSIONS[ $intent ] : $cloud_version;
+		if ( in_array( $version, array( $intent . '.v1', $intent . '.v2' ), true ) ) {
+			$section['ranking_version'] = $version;
+		} else {
+			unset( $section['ranking_version'] );
+		}
 		$section['retrieval_source'] = $retrieval_source;
 		// Missing rerank evidence stays unknown instead of becoming false.
 		if ( in_array( $rerank['status'] ?? '', array( 'succeeded', 'disabled', 'skipped', 'failed' ), true ) ) {
@@ -49,7 +57,11 @@ final class Recommendation_Metadata {
 			if ( ! is_array( $item ) ) {
 				continue;
 			}
-			$item['ranking_version'] = $section['ranking_version'];
+			if ( isset( $section['ranking_version'] ) ) {
+				$item['ranking_version'] = $section['ranking_version'];
+			} else {
+				unset( $item['ranking_version'] );
+			}
 			$item['candidate_rank']  = $index + 1;
 			$has_quality_score       = is_numeric( $item['quality_score'] ?? null );
 			$score                   = $has_quality_score ? $item['quality_score'] : ( $item['score'] ?? null );
@@ -70,7 +82,7 @@ final class Recommendation_Metadata {
 		if ( empty( $fields ) ) {
 			return array();
 		}
-		$valid = in_array( $fields['ranking_version'] ?? null, self::VERSIONS, true );
+		$valid = in_array( $fields['ranking_version'] ?? null, self::SUPPORTED_VERSIONS, true );
 		foreach ( array(
 			'score_bucket'     => self::SCORE_BUCKETS,
 			'retrieval_source' => self::RETRIEVAL_SOURCES,

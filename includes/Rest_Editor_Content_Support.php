@@ -1643,11 +1643,17 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			absint( $context['post_id'] ?? 0 )
 		);
 		$cloud_status             = sanitize_key( (string) ( $source_knowledge['status'] ?? '' ) );
+		$abstained                = 'ready' === $cloud_status
+			&& 'internal_links.v2' === ( $source_knowledge['result_grouping']['ranking_version'] ?? '' )
+			&& true === ( $source_knowledge['result_grouping']['recommendation_quality']['abstained'] ?? false );
 		$retrieval_status         = 'cloud_vector_evidence';
 		$source_status            = 'cloud_vector';
 		if ( in_array( $cloud_status, array( 'error', 'failed' ), true ) ) {
 			$retrieval_status = 'cloud_unavailable';
 			$source_status    = 'cloud_unavailable';
+		} elseif ( $abstained ) {
+			$retrieval_status = 'no_cloud_evidence';
+			$source_status    = 'no_evidence';
 		} elseif ( empty( $related_content_evidence ) ) {
 			$retrieval_status = 'no_cloud_evidence';
 			$source_status    = 'local_fallback';
@@ -1675,7 +1681,17 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			unset( $input['related_content_evidence'] );
 		}
 
-		$result = Rest_Editor_Internal_Links::editor_toolkit_internal_link_candidates( $input );
+		// A healthy Cloud abstention is final for this recommendation request.
+		// Do not replace it with unrelated local fallback suggestions.
+		$result = $abstained
+			? array( 'data' => array( 'internal_link_candidates' => array(
+				'artifact_type' => 'internal_link_candidates.v1',
+				'candidate_type' => 'internal_link_candidates',
+				'candidate_contract' => 'recommendation_candidate.v1',
+				'write_posture' => 'suggestion_only',
+				'items' => array(),
+			) ) )
+			: Rest_Editor_Internal_Links::editor_toolkit_internal_link_candidates( $input );
 		if ( is_wp_error( $result ) ) {
 			return $this->empty_toolkit_internal_link_candidates( $result, $source_knowledge );
 		}
@@ -1696,14 +1712,14 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		$items                                 = is_array( $artifact['items'] ?? null ) ? $artifact['items'] : array();
 		$items                                 = Rest_Editor_Internal_Links::editor_internal_link_merge_cloud_relevance( $items, $related_content_evidence );
 		$artifact['input_scope']               = Rest_Editor_Flow_Cache::editor_input_scope( $context );
-		$artifact['source_ability_id']         = 'npcink-abilities-toolkit/resolve-internal-link-targets';
+		$artifact['source_ability_id']         = $abstained ? '' : 'npcink-abilities-toolkit/resolve-internal-link-targets';
 		$artifact['source_knowledge']          = $source_knowledge;
 		$artifact['candidate_source']          = $source_status;
 		$artifact['source_status']             = $retrieval_status;
 		$artifact['retrieval_status']          = $retrieval_status;
 		$artifact['cloud_result_count']        = count( $related_content_evidence );
 		$artifact['fallback_used']             = 'local_fallback' === $source_status;
-		$artifact['toolkit_artifact']          = $data;
+		$artifact['toolkit_artifact']          = $abstained ? array() : $data;
 		$artifact['recommendation_candidates'] = Rest_Editor_Internal_Links::editor_internal_link_recommendation_candidates(
 			$items,
 			'cloud_vector' === $source_status && 'cloud_vector_evidence' === $retrieval_status
