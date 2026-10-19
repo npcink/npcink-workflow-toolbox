@@ -1684,13 +1684,17 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		// A healthy Cloud abstention is final for this recommendation request.
 		// Do not replace it with unrelated local fallback suggestions.
 		$result = $abstained
-			? array( 'data' => array( 'internal_link_candidates' => array(
-				'artifact_type' => 'internal_link_candidates.v1',
-				'candidate_type' => 'internal_link_candidates',
-				'candidate_contract' => 'recommendation_candidate.v1',
-				'write_posture' => 'suggestion_only',
-				'items' => array(),
-			) ) )
+			? array(
+				'data' => array(
+					'internal_link_candidates' => array(
+						'artifact_type'      => 'internal_link_candidates.v1',
+						'candidate_type'     => 'internal_link_candidates',
+						'candidate_contract' => 'recommendation_candidate.v1',
+						'write_posture'      => 'suggestion_only',
+						'items'              => array(),
+					),
+				),
+			)
 			: Rest_Editor_Internal_Links::editor_toolkit_internal_link_candidates( $input );
 		if ( is_wp_error( $result ) ) {
 			return $this->empty_toolkit_internal_link_candidates( $result, $source_knowledge );
