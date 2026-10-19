@@ -11,13 +11,13 @@ defined( 'ABSPATH' ) || exit;
 
 final class Recommendation_Metadata {
 
-	public const VERSIONS          = array(
+	public const VERSIONS           = array(
 		'internal_links'  => 'internal_links.v1',
 		'related_content' => 'related_content.v1',
 	);
 	public const SUPPORTED_VERSIONS = array( 'internal_links.v1', 'related_content.v1', 'internal_links.v2', 'related_content.v2' );
-	public const SCORE_BUCKETS     = array( 'low', 'medium', 'high', 'unknown' );
-	public const RETRIEVAL_SOURCES = array( 'cloud_vector', 'cloud_vector_rerank', 'local_fallback', 'no_evidence', 'unavailable', 'unknown' );
+	public const SCORE_BUCKETS      = array( 'low', 'medium', 'high', 'unknown' );
+	public const RETRIEVAL_SOURCES  = array( 'cloud_vector', 'cloud_vector_rerank', 'local_fallback', 'no_evidence', 'unavailable', 'unknown' );
 
 	public static function project_section( array $section, string $intent ): array {
 		if ( ! in_array( $intent, array( 'internal_links', 'related_content' ), true ) ) {
@@ -42,7 +42,7 @@ final class Recommendation_Metadata {
 		}
 		// Missing version means the legacy runtime; unknown/cross-family versions stay unknown.
 		$cloud_version = $knowledge['result_grouping']['ranking_version'] ?? null;
-		$version = null === $cloud_version ? self::VERSIONS[ $intent ] : $cloud_version;
+		$version       = null === $cloud_version ? self::VERSIONS[ $intent ] : $cloud_version;
 		if ( in_array( $version, array( $intent . '.v1', $intent . '.v2' ), true ) ) {
 			$section['ranking_version'] = $version;
 		} else {
@@ -62,10 +62,10 @@ final class Recommendation_Metadata {
 			} else {
 				unset( $item['ranking_version'] );
 			}
-			$item['candidate_rank']  = $index + 1;
-			$has_quality_score       = is_numeric( $item['quality_score'] ?? null );
-			$score                   = $has_quality_score ? $item['quality_score'] : ( $item['score'] ?? null );
-			$score                   = is_numeric( $score ) ? (float) $score : null;
+			$item['candidate_rank'] = $index + 1;
+			$has_quality_score      = is_numeric( $item['quality_score'] ?? null );
+			$score                  = $has_quality_score ? $item['quality_score'] : ( $item['score'] ?? null );
+			$score                  = is_numeric( $score ) ? (float) $score : null;
 			if ( null !== $score && ! $has_quality_score ) {
 				$score *= 100;
 			}
