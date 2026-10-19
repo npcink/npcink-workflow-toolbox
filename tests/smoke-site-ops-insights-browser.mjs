@@ -235,7 +235,7 @@ try {
 		const overviewRawText = await page.locator('[data-toolbox-ops-panel="overview"]').textContent();
 		assert(/Site action brief|站点待办摘要/.test(overviewText), 'Overview starts with a site action brief.');
 		assert(/Do first|先做这些/.test(overviewText) && /Defer for now|暂时不做/.test(overviewText), 'Site action brief separates first tasks from deferred scope.');
-		assert(/AI assist|AI 辅助/.test(overviewText) && /Use Cloud detail|使用 Cloud 详情/.test(overviewText), 'Site action brief makes optional Cloud detail visible without auto-running it.');
+		assert(/local rules only|仅使用本地规则/.test(overviewText) && await page.locator('a[href*="site_ops_cloud_analysis"]').count() === 0, 'Paused Cloud analysis has no submission entrance while the local brief remains available.');
 		assert(/Close the loop|形成闭环/.test(overviewText), 'Site action brief tells the operator how to close the loop.');
 		const pathPanel = page.locator('[data-toolbox-ops-panel="overview"] .npcink-toolbox__ops-path-panel');
 		assert(await pathPanel.count() === 1 && await pathPanel.isVisible(), 'Overview shows a treatment path panel near the top decisions.');
@@ -287,16 +287,13 @@ try {
 		assert(await firstContentFinding.evaluate((element) => element.scrollWidth <= element.clientWidth), 'Narrow content finding does not overflow horizontally.');
 		await page.setViewportSize({ width: 1280, height: 720 });
 
-		for (const target of ['content', 'media', 'comments', 'structure', 'findings', 'evidence', 'cloud', 'advanced']) {
+		for (const target of ['content', 'media', 'comments', 'structure', 'findings', 'evidence', 'advanced']) {
 			await openOpsTab(page, target);
 			const selected = await page.locator(`[data-toolbox-ops-target="${target}"]`).getAttribute('aria-selected');
 			assert(selected === 'true', `${target} sub-tab can be opened.`);
 		}
 
-		await openOpsTab(page, 'cloud');
-		const cloudText = await page.locator('[data-toolbox-ops-panel="cloud"]').innerText();
-		assert(/Cloud detail has not run|Cloud detail result|Cloud 详情|云端详情/.test(cloudText), 'Cloud tab renders review-only status without automatic execution.');
-		assert(/Use Cloud detail|使用 Cloud 详情/.test(cloudText), 'Cloud tab owns the optional deeper AI detail action.');
+		assert(await page.locator('[data-toolbox-ops-target="cloud"]').count() === 0, 'Paused Cloud detail tab is absent.');
 		assert(forbiddenRequests(requests).length === 0, 'Site Check browser smoke does not call Cloud detail, Core proposals, or execute routes.');
 
 		await openOpsTab(page, 'overview');

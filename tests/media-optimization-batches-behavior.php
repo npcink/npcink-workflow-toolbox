@@ -11,6 +11,7 @@ class WP_Error {
 	public function get_error_code(): string { return $this->code; }
 }
 
+function __( $text, $domain = null ) { return $text; }
 function absint( $value ): int { return abs( (int) $value ); }
 function esc_url_raw( string $value ): string { return $value; }
 function sanitize_key( string $value ): string { return preg_replace( '/[^a-z0-9_-]/', '', strtolower( $value ) ) ?? ''; }
@@ -84,7 +85,16 @@ function batch_assert( bool $condition, string $message ): void {
 	echo "PASS: {$message}\n";
 }
 
+require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/includes/Media_Optimization_Batches.php';
+$default_batch_service = new \Npcink_Toolbox\Media_Optimization_Batches();
+$paused_batch = $default_batch_service->create( array() );
+batch_assert( is_wp_error( $paused_batch ) && 'npcink_toolbox_feature_paused' === $paused_batch->get_error_code(), 'Default pause rejects new batches before persistence or ability calls.' );
+$retained_batch_policy = new ReflectionProperty( \Npcink_Toolbox\Settings::class, 'paused_cloud_features' );
+$retained_batch_policy->setAccessible( true );
+$retained_batch_snapshot = $retained_batch_policy->getValue();
+$retained_batch_policy->setValue( null, array() );
+
 
 $fixture_dir = sys_get_temp_dir() . '/npcink-toolbox-batch-' . getmypid();
 if ( ! is_dir( $fixture_dir ) ) mkdir( $fixture_dir, 0755, true );
@@ -184,3 +194,5 @@ $cleanup_again = $service->cleanup_backups( array( 'confirm' => true, 'preview_v
 batch_assert( is_array( $cleanup_again ) && 2 === (int) ( $cleanup_again['removed'] ?? 0 ) && 2 === $GLOBALS['batch_cleanup_commits'], 'Repeated backup cleanup confirmation remains safe for the idempotent Toolkit ability.' );
 
 echo "OK: media optimization batch behavior\n";
+
+$retained_batch_policy->setValue( null, $retained_batch_snapshot );

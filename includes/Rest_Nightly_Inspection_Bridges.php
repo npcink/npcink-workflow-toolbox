@@ -29,6 +29,9 @@ final class Rest_Nightly_Inspection_Bridges {
 	}
 
 	public function nightly_inspection_cloud_batch( WP_REST_Request $request ) {
+		if ( Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
+			return Settings::cloud_feature_pause_error( 'cloud_inspection' );
+		}
 		if ( ! $this->settings->cloud_runtime_available() ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_batch_unavailable',
@@ -121,6 +124,9 @@ final class Rest_Nightly_Inspection_Bridges {
 	}
 
 	public function nightly_inspection_cloud_batch_retry( WP_REST_Request $request ) {
+		if ( Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
+			return Settings::cloud_feature_pause_error( 'cloud_inspection' );
+		}
 		if ( ! $this->settings->cloud_runtime_available() ) {
 			return new WP_Error(
 				'npcink_toolbox_nightly_inspection_cloud_batch_unavailable',

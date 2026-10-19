@@ -417,9 +417,10 @@
 		},
 		];
 
-	const defaultFlows = flows.filter((flow) => flow.defaultVisible !== false);
+	const defaultFlows = flows.filter((flow) => flow.defaultVisible !== false && !isAudioIntent(flow.intent));
 
 	function flowByIntent(intent) {
+		if (isAudioIntent(intent)) { return null; }
 		const key = String(intent || '');
 		return flows.find((flow) => flow.intent === key) || null;
 	}
@@ -7728,6 +7729,7 @@
 			}
 
 			async function runFlow(intent, options) {
+				if (isAudioIntent(intent)) { return; } // Release pause; retained audio playback is independent.
 					const runOptions = options && typeof options === 'object' ? options : {};
 					if (intent === 'image_candidates') {
 						openImageSourcePicker({ mode: 'featured' });

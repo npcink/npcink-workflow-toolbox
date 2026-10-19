@@ -68,7 +68,8 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 				'content_operations'             => $this->content_operations_projection( $cloud_ready ),
 				'pro_nightly_inspection'         => array(
 					'registered'             => true,
-					'available'              => $cloud_ready,
+					'available'              => $cloud_ready && ! Settings::cloud_feature_paused( 'cloud_inspection' ),
+					'availability_state'     => Settings::cloud_feature_paused( 'cloud_inspection' ) ? 'paused' : 'available',
 					'entry_surface'          => 'nightly_inspection_cloud_batch',
 					'runtime_owner'          => 'npcink-local-automation-runtime',
 					'cloud_role'             => 'runtime_detail',
@@ -77,7 +78,7 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 					'polling_registered'     => true,
 					'entitlement_route'      => '/nightly-inspection/cloud-runtime-entitlement',
 					'recent_route'           => '/nightly-inspection/cloud-batch/recent',
-					'retry_registered'       => true,
+					'retry_registered'       => ! Settings::cloud_feature_paused( 'cloud_inspection' ),
 				),
 				'boundary'                       => 'Toolbox returns Cloud-managed image-source and Cloud-managed site-knowledge suggestions only. Cloud owns web search execution and provider configuration. WordPress writes should be handed to Abilities/Core governance.',
 			)
@@ -271,6 +272,10 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 			$projection['gap_contracts']['seo_metadata_suggestion.v1']['available']         = false;
 			$projection['gap_contracts']['seo_metadata_suggestion.v1']['current_artifacts'] = array();
 			unset( $projection['gap_contracts']['seo_metadata_suggestion.v1']['target_ability_id'] );
+		}
+		if ( Settings::cloud_feature_paused( 'cloud_inspection' ) ) {
+			$projection['surfaces']['nightly_inspection']['available']          = false;
+			$projection['surfaces']['nightly_inspection']['availability_state'] = 'paused';
 		}
 		return $projection;
 	}
