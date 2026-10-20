@@ -4,7 +4,7 @@
 
 产品边界（MVP = 仅巡检摘要一包、suggestion_only、不写 WP）：见 [deidentified-assistant-boundary-draft-v1.md](deidentified-assistant-boundary-draft-v1.md)。Site Ops 契约背景：[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)。
 
-**MVP 薄 UI 已有：** 站点检查 → 当前检查 → **关于本次检查提问（开发测试）**。完整对话壳仍未做。验证也可用 REST + CLI。相关实现在 PR `#289` 分支 `feat/site-ops-insight-pack-rest-20261020`（未合 master 前以该分支为准）。
+**MVP 薄 UI 已有（`#289` 已合 master）：** 站点检查 → 当前检查 → **关于本次检查提问（开发测试）**。完整对话壳仍未做。验证也可用 REST + CLI。产品边界见 [deidentified-assistant-boundary-draft-v1.md](deidentified-assistant-boundary-draft-v1.md)（定稿结构 / 待确认）。
 
 ---
 
@@ -141,7 +141,7 @@ Cloud `RuntimePayload` 为 `extra=forbid`。以下键 **不要** 放进 runtime 
 ## 给其它 AI 的最短路径
 
 1. 读本页 + [deidentified-assistant-boundary-draft-v1.md](deidentified-assistant-boundary-draft-v1.md)  
-2. 优先用后台 **站点检查 → 当前检查 → 关于本次检查提问（开发测试）**，或在 `#289` 分支跑 `./scripts/insight-pack-cloud-qa.sh`  
+2. 优先用后台 **站点检查 → 当前检查 → 关于本次检查提问（开发测试）**，或在当前 master 跑 `./scripts/insight-pack-cloud-qa.sh`  
 3. 排障带上 Cloud `run_id`；遇 429 先清槽再跑  
 4. **不要**恢复 `cloud_inspection`；**不要**合入未获用户确认的 PR  
 5. 不要把 `summary_prompt_mode` / timeout 字段塞进 runtime payload  

@@ -150,7 +150,7 @@ Start from the active documents below before changing code.
 - [Media Governance Development Lessons 2026-09](platform/media-governance-development-lessons-2026-09.md)
 - [Site Check Operator Loop](full-site-insights-operator-loop.md)
 - [Insight Pack → Cloud CLI 验证（MVP）](insight-pack-cloud-qa-cli.md) — 脱密巡检摘要 REST + `scripts/insight-pack-cloud-qa.sh` 试问 Cloud；其它 AI 从这里跑验证。
-- [脱密对话助手边界草稿 v1（MVP）](deidentified-assistant-boundary-draft-v1.md) — 仅巡检摘要一包；suggestion_only；链到 CLI 手册。
+- [脱密对话助手边界草稿 v1（定稿结构 / 待确认）](deidentified-assistant-boundary-draft-v1.md) — 五包意向 + MVP 仅巡检摘要；suggestion_only；对齐 `#289`；链到 CLI 手册。
 - [AI 站点体检与效果验证：讨论归纳及分阶段规划](ai-site-check-effect-verification-plan-2026-10-14.md) — proposed plan, not an implemented runtime or write path.
 - [Site Check Decision Entry Closeout](archive/2026-06/site-check-decision-entry-closeout-2026-06-30.md)
 - [Site Check Visibility Reassessment](archive/2026-07/site-check-visibility-reassessment-2026-07-10.md)

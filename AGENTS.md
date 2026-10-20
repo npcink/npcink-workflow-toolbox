@@ -28,7 +28,7 @@ do not expect local prefix traces to grep Cloud logs directly.
 `docs/insight-pack-cloud-qa-cli.md`；一键脚本
 `scripts/insight-pack-cloud-qa.sh`（PHP：`scripts/insight-pack-cloud-qa.php`）；
 后台开发测试面板：**站点检查 → 当前检查 → 关于本次检查提问（开发测试）**（不要去「图片处理」；REST
-`POST …/site-ops/insight-pack-qa`，与 CLI 同路径）。MVP 边界草稿：
+`POST …/site-ops/insight-pack-qa`，与 CLI 同路径）。MVP 边界草稿（定稿结构 / 待确认）：
 `docs/deidentified-assistant-boundary-draft-v1.md`。勿走已暂停的
 `cloud_inspection`；排障优先带 Cloud `run_id`。
 
