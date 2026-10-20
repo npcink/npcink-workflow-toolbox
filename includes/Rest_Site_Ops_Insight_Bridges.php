@@ -248,14 +248,14 @@ final class Rest_Site_Ops_Insight_Bridges {
 		if ( is_wp_error( $response ) ) {
 			$code = (string) $response->get_error_code();
 			$data = array(
-				'status'         => 502,
-				'pack_run_id'    => $pack_run_id,
-				'trace_id'       => $trace_id,
-				'elapsed_ms'     => $elapsed_ms,
-				'error_data'     => $response->get_error_data(),
+				'status'      => 502,
+				'pack_run_id' => $pack_run_id,
+				'trace_id'    => $trace_id,
+				'elapsed_ms'  => $elapsed_ms,
+				'error_data'  => $response->get_error_data(),
 			);
 			if ( 'cloud_commercial_concurrency_exceeded' === $code ) {
-				$data['hint'] = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
+				$data['hint']   = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
 				$data['status'] = 429;
 			}
 
@@ -320,7 +320,7 @@ final class Rest_Site_Ops_Insight_Bridges {
 				'title'                  => (string) ( $finding['title'] ?? '' ),
 				'issue_type'             => (string) ( $finding['issue_type'] ?? '' ),
 				'category'               => (string) ( $finding['category'] ?? '' ),
-				'severity'              => (string) ( $finding['severity'] ?? '' ),
+				'severity'               => (string) ( $finding['severity'] ?? '' ),
 				'priority_score'         => $finding['priority_score'] ?? null,
 				'evidence_summary'       => (string) ( $finding['evidence_summary'] ?? '' ),
 				'recommended_action'     => (string) ( $finding['recommended_action'] ?? '' ),
@@ -397,5 +397,4 @@ final class Rest_Site_Ops_Insight_Bridges {
 
 		return '';
 	}
-
 }
