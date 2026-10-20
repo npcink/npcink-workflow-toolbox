@@ -36,6 +36,10 @@
  *   - Avoids paused paths: analyze-site-ops / cloud_inspection / analyze-nightly.
 
  *
+ *
+ * Full runbook (humans + other AIs): docs/insight-pack-cloud-qa-cli.md
+ * MVP boundary draft: docs/deidentified-assistant-boundary-draft-v1.md
+ *
  * @package Npcink_Toolbox
  */
 

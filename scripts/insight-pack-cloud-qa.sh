@@ -10,6 +10,8 @@
 #   WP_PATH / WP_CLI_BIN / WP_CLI_PHP / WP_DB_SOCKET / NPCINK_INSIGHT_QA_USER
 #   NPCINK_INSIGHT_QA_QUESTION / NPCINK_INSIGHT_QA_OUT
 #
+# Docs (humans + other AIs): docs/insight-pack-cloud-qa-cli.md
+# MVP boundary: docs/deidentified-assistant-boundary-draft-v1.md
 # See scripts/insight-pack-cloud-qa.php header for contract details.
 set -eu
 
