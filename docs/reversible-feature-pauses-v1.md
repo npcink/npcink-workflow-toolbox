@@ -38,6 +38,39 @@ restoration; they are not active product promises. Do not delete history or
 saved options. Restore a feature through a reviewed source change and fresh
 consumer verification, not by re-enabling a saved option.
 
+
+## Cross-repo对照 / 三仓对照
+
+Availability is enforced **independently** in each repository (parallel lists,
+not a shared constant package). Unpause publish order remains
+**Cloud → Addon → Toolbox** so UI never advertises a path Cloud still rejects.
+Do not restore SEO/AEO/GEO or the three runtime keys from documentation alone.
+
+Authoritative task-id / runtime-key tables, error-code families, and the pause
+smoke matrix row map live in the Addon inventory. Cloud and this file keep
+sibling scopes for the same faces.
+
+| Repo | Inventory |
+| --- | --- |
+| Addon | [`docs/reversible-feature-pauses-v1.md`](https://github.com/npcink/npcink-cloud-addon/blob/master/docs/reversible-feature-pauses-v1.md) — Tables A–C and matrix row map;对照 landed in [PR #309](https://github.com/npcink/npcink-cloud-addon/pull/309) (use that PR until merge). Local sibling: `../../npcink-cloud-addon/docs/reversible-feature-pauses-v1.md`. **Naming:** Addon has no `$paused_specialist_tasks`; the ten SEO/AEO/GEO ids live inside `is_task_paused()`. |
+| Cloud | [`docs/reversible-feature-pauses-v1.md`](https://github.com/npcink/npcink-ai-cloud/blob/master/docs/reversible-feature-pauses-v1.md) — ordered pause batches and evidence. Local sibling: `../../npcink-ai-cloud/docs/reversible-feature-pauses-v1.md`. |
+| Toolbox (this file) | Specialist surface: `Settings::DISCOVERABILITY_PAUSED` (whole-surface boolean, no per-task array). Runtime keys in `$paused_cloud_features`: `cloud_inspection`, `audio_generation`, `advanced_media`. Reject code: `npcink_toolbox_feature_paused` (409). |
+
+### Pause smoke matrix v1 (row owners)
+
+Every row must satisfy **entry not visible / not registered** and **execute
+path returns the expected pause code**, with **zero outbound Cloud HTTP** on
+Addon/Toolbox reject paths. “Visible but rejected” = fail.
+
+| Rows | Owner |
+| --- | --- |
+| D1–D4, C1–C3, A1–A3, M1–M3 | Toolbox |
+| D5–D6, C4–C5, A4, M4 | Addon |
+| D7–D8, C6, A5, M5 | Cloud |
+
+SEO specialist narrative for this repo:
+[seo-specialist-pause-implementation-2026-10-18.md](seo-specialist-pause-implementation-2026-10-18.md).
+
 ## Evidence and rollback
 
 Default-policy tests assert rejected work and zero provider calls; isolated
