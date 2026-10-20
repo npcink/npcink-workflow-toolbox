@@ -17,6 +17,13 @@ Every new AI development session should start with:
 4. Briefly report the current module, relevant boundary, and intended focused
    gate before editing.
 
+Cross-repo compatibility is governed by
+https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md;
+do not add Addon `version_compare` checks.
+
+When debugging cross-repo or Cloud integration, prefer the Cloud `run_id`;
+do not expect local prefix traces to grep Cloud logs directly.
+
 **脱密巡检摘要 → Cloud 验证（其它 AI 必读）：** 手册
 `docs/insight-pack-cloud-qa-cli.md`；一键脚本
 `scripts/insight-pack-cloud-qa.sh`（PHP：`scripts/insight-pack-cloud-qa.php`）；
