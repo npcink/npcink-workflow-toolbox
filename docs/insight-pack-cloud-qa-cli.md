@@ -4,7 +4,7 @@
 
 产品边界（MVP = 仅巡检摘要一包、suggestion_only、不写 WP）：见 [deidentified-assistant-boundary-draft-v1.md](deidentified-assistant-boundary-draft-v1.md)。Site Ops 契约背景：[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)。
 
-**MVP 薄 UI 已有：** Site Check → Current check → **Ask about this check (MVP)**。完整对话壳仍未做。验证也可用 REST + CLI。相关实现在 PR `#289` 分支 `feat/site-ops-insight-pack-rest-20261020`（未合 master 前以该分支为准）。
+**MVP 薄 UI 已有：** 站点检查 → 当前检查 → **关于本次检查提问（开发测试）**。完整对话壳仍未做。验证也可用 REST + CLI。相关实现在 PR `#289` 分支 `feat/site-ops-insight-pack-rest-20261020`（未合 master 前以该分支为准）。
 
 ---
 
@@ -24,7 +24,7 @@
 
 - **Route:** `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack`
 - **QA Route:** `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa`（body `{ "question": "..." }`；`manage_options`；本地拼包 + Hosted AI content-support，与 CLI 同路径）
-- **Admin UI:** Npcink AI → Workflow Toolbox → Site Check → Current check → Ask about this check (MVP)
+- **Admin UI:** Npcink AI → 流程工具箱 → **站点检查** → **当前检查** → **关于本次检查提问（开发测试）**（不要去「图片处理」）
 - **Cap:** `manage_options`（注册为 `cap.toolbox.admin`）
 - **行为:** 本地 `Site_Ops_Snapshot_Collector` + `Site_Ops_Insight_Builder`；**不调 Cloud**、不写站
 - **契约:** `contract_version = site_ops_insight_pack.v1`，`write_posture = suggestion_only`
@@ -43,14 +43,20 @@
 
 ---
 
-## 后台薄 UI（MVP）
+## 后台薄 UI（开发测试）
 
-1. 确认本机在 `#289` 分支（magick-ai 插件目录是本仓 symlink）。
-2. 打开 `https://magick-ai.local/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=operations-insights&site_check_tab=current-check`
-3. 在 **Ask about this check (MVP)** 改问题或直接点 **Ask (MVP)**。
-4. 看答复与 `run_id`（suggestion-only，不写站）。
+**中文点击路径（面板不在「图片处理」里）：**
 
-若 Cloud 返回并发 429：等挂起 run 释放后重试。
+1. 左侧：**Npcink AI** → **流程工具箱**
+2. 顶部页签点 **站点检查**（不是「图片处理」，也不是「设置」）
+3. 站点检查内再点 **当前检查**
+4. 页面上方卡片 **关于本次检查提问（开发测试）** → 改问题 → 点 **提问**
+
+直达链接（magick-ai）：
+
+`https://magick-ai.local/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=operations-insights&site_check_tab=current-check`
+
+确认本机在 `#289` 分支（magick-ai 插件目录是本仓 symlink）。看答复与 `run_id`（仅建议，不写站）。若 Cloud 返回并发 429：等挂起 run 释放后重试。
 
 ## 怎么跑
 
@@ -133,7 +139,7 @@ Cloud `RuntimePayload` 为 `extra=forbid`。以下键 **不要** 放进 runtime 
 ## 给其它 AI 的最短路径
 
 1. 读本页 + [deidentified-assistant-boundary-draft-v1.md](deidentified-assistant-boundary-draft-v1.md)  
-2. 优先用后台 **Ask about this check (MVP)**，或在 `#289` 分支跑 `./scripts/insight-pack-cloud-qa.sh`  
+2. 优先用后台 **站点检查 → 当前检查 → 关于本次检查提问（开发测试）**，或在 `#289` 分支跑 `./scripts/insight-pack-cloud-qa.sh`  
 3. 排障带上 Cloud `run_id`；遇 429 先清槽再跑  
 4. **不要**恢复 `cloud_inspection`；**不要**合入未获用户确认的 PR  
 5. 不要把 `summary_prompt_mode` / timeout 字段塞进 runtime payload  

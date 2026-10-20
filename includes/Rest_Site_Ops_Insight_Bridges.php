@@ -168,7 +168,7 @@ final class Rest_Site_Ops_Insight_Bridges {
 		if ( ! class_exists( '\Npcink_Cloud_Runtime_Client_Factory' ) ) {
 			return new WP_Error(
 				'npcink_toolbox_insight_pack_qa_addon_missing',
-				__( 'Npcink Cloud Addon is required for Ask about this check.', 'npcink-workflow-toolbox' ),
+				__( 'Npcink Cloud Addon is required for Ask about this check (dev test).', 'npcink-workflow-toolbox' ),
 				array( 'status' => 503 )
 			);
 		}

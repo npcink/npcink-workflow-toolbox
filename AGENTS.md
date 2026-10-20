@@ -20,7 +20,7 @@ Every new AI development session should start with:
 **脱密巡检摘要 → Cloud 验证（其它 AI 必读）：** 手册
 `docs/insight-pack-cloud-qa-cli.md`；一键脚本
 `scripts/insight-pack-cloud-qa.sh`（PHP：`scripts/insight-pack-cloud-qa.php`）；
-后台薄 UI：Site Check → Current check → **Ask about this check (MVP)**（REST
+后台开发测试面板：**站点检查 → 当前检查 → 关于本次检查提问（开发测试）**（不要去「图片处理」；REST
 `POST …/site-ops/insight-pack-qa`，与 CLI 同路径）。MVP 边界草稿：
 `docs/deidentified-assistant-boundary-draft-v1.md`。勿走已暂停的
 `cloud_inspection`；排障优先带 Cloud `run_id`。

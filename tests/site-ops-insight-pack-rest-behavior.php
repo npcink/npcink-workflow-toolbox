@@ -264,7 +264,7 @@ site_ops_rest_assert( false !== strpos( $controller_source, 'return $this->site_
 $admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
 $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
 site_ops_rest_assert( false !== strpos( $admin_source, 'data-toolbox-insight-pack-qa' ), 'Site Check Current check renders MVP Ask UI markup.' );
-site_ops_rest_assert( false !== strpos( $admin_source, 'Ask about this check (MVP)' ), 'Ask UI is labeled MVP.' );
+site_ops_rest_assert( false !== strpos( $admin_source, 'Ask about this check (dev test)' ), 'Ask UI is labeled as a dev-test panel.' );
 site_ops_rest_assert( false !== strpos( $js_source, 'initInsightPackQa' ) && false !== strpos( $js_source, 'site-ops/insight-pack-qa' ), 'admin.js wires Ask UI to insight-pack-qa REST.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";

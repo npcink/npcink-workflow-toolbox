@@ -7560,7 +7560,7 @@
 				button.disabled = true;
 				const previousLabel = button.textContent;
 				button.textContent = (config.labels && config.labels.running) || t('Running...');
-				setStatus(t('Building pack and asking Cloud…'), 'is-warning');
+				setStatus(t('Building the pack and asking Cloud…'), 'is-warning');
 				resultEl.hidden = true;
 				answerEl.textContent = '';
 				runIdEl.textContent = '';
@@ -7581,7 +7581,7 @@
 					}
 					resultEl.hidden = false;
 					if (body && body.ok && answer) {
-						setStatus(t('Suggestion ready (MVP, no WordPress write).'), 'is-ok');
+						setStatus(t('Suggestion ready (dev test, no WordPress write).'), 'is-ok');
 					} else {
 						setStatus(t('Cloud returned without a usable answer. Check run_id / Addon.'), 'is-warning');
 					}
