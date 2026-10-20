@@ -268,5 +268,7 @@ site_ops_rest_assert( false !== strpos( $admin_source, 'Ask about this check (de
 site_ops_rest_assert( false !== strpos( $js_source, 'initInsightPackQa' ) && false !== strpos( $js_source, 'site-ops/insight-pack-qa' ), 'admin.js wires Ask UI to insight-pack-qa REST.' );
 site_ops_rest_assert( false !== strpos( $js_source, 'renderSafeMarkdown' ) && false !== strpos( $js_source, 'setMarkdownContent' ) && false !== strpos( $js_source, 'escapeHtml' ), 'Ask UI renders Cloud answers through a sanitizing Markdown helper.' );
 site_ops_rest_assert( false !== strpos( $admin_source, 'npcink-toolbox__markdown' ) && false !== strpos( $admin_source, 'data-toolbox-insight-pack-qa-answer' ) && false === strpos( $admin_source, 'data-toolbox-insight-pack-qa-answer style=' ), 'Ask UI answer surface is a Markdown container, not a raw <pre> dump.' );
+site_ops_rest_assert( false !== strpos( $admin_source, 'aria-live="polite"' ) && false !== strpos( $js_source, 'is-ask-busy' ) && false !== strpos( $js_source, 'In progress: building the pack and asking Cloud…' ), 'Ask UI shows in-progress / busy loading state while a question is in flight.' );
+site_ops_rest_assert( false !== strpos( $js_source, 'isBusySlotError' ) && false !== strpos( $js_source, 'Another Cloud run is using this site' ) && false !== strpos( $bridge_source, 'busy_slot' ) && false !== strpos( $bridge_source, "\$data['status']     = 429" ), 'Ask UI maps Cloud busy-slot / 429 to Chinese-friendly copy without raw status dumps.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";

@@ -246,22 +246,42 @@ final class Rest_Site_Ops_Insight_Bridges {
 		$elapsed_ms      = (int) round( ( microtime( true ) - $started ) * 1000 );
 
 		if ( is_wp_error( $response ) ) {
-			$code = (string) $response->get_error_code();
-			$data = array(
+			$code         = (string) $response->get_error_code();
+			$raw_message  = (string) $response->get_error_message();
+			$error_data   = $response->get_error_data();
+			$error_status = is_array( $error_data ) ? (int) ( $error_data['status'] ?? 0 ) : 0;
+			$data         = array(
 				'status'      => 502,
 				'pack_run_id' => $pack_run_id,
 				'trace_id'    => $trace_id,
 				'elapsed_ms'  => $elapsed_ms,
-				'error_data'  => $response->get_error_data(),
+				'error_data'  => $error_data,
 			);
-			if ( 'cloud_commercial_concurrency_exceeded' === $code ) {
-				$data['hint']   = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
-				$data['status'] = 429;
+			$is_busy_slot = (
+				'cloud_commercial_concurrency_exceeded' === $code
+				|| false !== strpos( $code, 'concurrency' )
+				|| 429 === $error_status
+				|| false !== strpos( strtolower( $raw_message ), 'max active' )
+				|| false !== strpos( strtolower( $raw_message ), 'active cloud run' )
+			);
+			if ( $is_busy_slot ) {
+				// Thin UX only: Chinese-friendly primary copy. Stuck-run productization
+				// (mark_stale / auto-clear) is owned elsewhere.
+				$friendly           = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
+				$data['hint']       = $friendly;
+				$data['status']     = 429;
+				$data['busy_slot']  = true;
+
+				return new WP_Error(
+					'cloud_commercial_concurrency_exceeded',
+					$friendly,
+					$data
+				);
 			}
 
 			return new WP_Error(
 				$code !== '' ? $code : 'npcink_toolbox_insight_pack_qa_cloud_failed',
-				(string) $response->get_error_message(),
+				$raw_message,
 				$data
 			);
 		}

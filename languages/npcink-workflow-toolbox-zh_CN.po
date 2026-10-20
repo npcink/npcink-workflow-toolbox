@@ -9798,6 +9798,22 @@ msgstr "Cloud 未返回可用答复。请检查 run_id / Addon。"
 msgid "(empty answer)"
 msgstr "（空答复）"
 
+#: assets/admin.js
+msgid "In progress…"
+msgstr "进行中…"
+
+#: assets/admin.js
+msgid "In progress: building the pack and asking Cloud…"
+msgstr "进行中：正在组装摘要并询问 Cloud…"
+
+#: assets/admin.js
+msgid "A question is already in progress. Please wait."
+msgstr "已有提问在进行中，请稍候。"
+
+#: assets/admin.js
+msgid "Another Cloud run is using this site’s slot. Wait for it to finish, then ask again."
+msgstr "本站 Cloud 名额正被另一个运行占用。请等其结束后再提问。"
+
 #: includes/Admin_Page.php
 msgid "run_id"
 msgstr "run_id"
