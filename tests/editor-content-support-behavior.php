@@ -622,6 +622,15 @@ npcink_toolbox_editor_flow_assert( isset( $empty_context['error'] ) && 'npcink_t
 $no_selection = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'polish_notes' ) + $npcink_toolbox_editor_flow_draft );
 npcink_toolbox_editor_flow_assert( isset( $no_selection['error'] ) && 'npcink_toolbox_missing_editor_selection' === $no_selection['error']->get_error_code(), 'Paragraph review without a selection is rejected.' );
 
+// A2. Audio intents are paused at the REST editor path before generation or transport.
+foreach ( array( 'article_narration', 'article_audio_summary' ) as $audio_intent ) {
+	$paused_audio = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => $audio_intent ) + $npcink_toolbox_editor_flow_draft );
+	npcink_toolbox_editor_flow_assert( isset( $paused_audio['error'] ) && 'npcink_toolbox_feature_paused' === $paused_audio['error']->get_error_code(), "{$audio_intent} is paused with npcink_toolbox_feature_paused at the editor REST path." );
+	npcink_toolbox_editor_flow_assert( 409 === npcink_toolbox_editor_flow_error_status( $paused_audio['error'] ), "{$audio_intent} pause rejection is a 409." );
+	$paused_audio_data = $paused_audio['error']->get_error_data();
+	npcink_toolbox_editor_flow_assert( is_array( $paused_audio_data ) && 'audio_generation' === (string) ( $paused_audio_data['feature'] ?? '' ), "{$audio_intent} pause names feature=audio_generation." );
+}
+
 /**
  * Checks shared by every successful default-button intent.
  */
