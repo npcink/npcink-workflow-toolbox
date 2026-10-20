@@ -3,7 +3,7 @@
 > **Status:** 已定稿 v1（产品方 2026-10-20 按建议拍板 §11）  
 > **Date:** 2026-10-20（Asia/Shanghai）  
 > **Filename:** `deidentified-assistant-boundary-v1.md`（自 `*-draft*` 升格）  
-> **Related:** [insight-pack-cloud-qa-cli.md](insight-pack-cloud-qa-cli.md)（验证手册）、[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)、[boundary.md](boundary.md)（Site Check 硬边界）、[cross-repo-boundary-matrix.md](cross-repo-boundary-matrix.md)、ADR-001 / ADR-008
+> **Related:** [insight-pack-cloud-qa-cli.md](insight-pack-cloud-qa-cli.md)（巡检摘要验证）、[content-structure-pack-cloud-qa-cli.md](content-structure-pack-cloud-qa-cli.md)（内容结构验证）、[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)、[boundary.md](boundary.md)（Site Check 硬边界）、[cross-repo-boundary-matrix.md](cross-repo-boundary-matrix.md)、ADR-001 / ADR-008
 
 ---
 
@@ -11,18 +11,19 @@
 
 - 这是**已定稿的产品边界**，不是第二控制面、不是 Ability/工作流注册表、不是审批库。
 - 硬边界仍以 `docs/boundary.md` 与既有 Site Ops 隐私合同为准；本稿对齐「脱密 pack + 对话/CLI」方向。
-- 与已合入 master 的 MVP（PR `#289`，加载/429 UX `#290`）对齐；**不**在本稿扩第二类脱密包代码（第二包另开独立工作，见 §3 / §11）。
+- 与已合入 master 的 MVP（PR `#289`，加载/429 UX `#290`）及第二包接线 PR 对齐；第三包仍延后（见 §3 / §11）。
 
 ### 已断言（与 `#289` / `#290` 一致，可按实现核对）
 
 | 断言 | 事实锚点 |
 | --- | --- |
 | 入口仓是 Toolbox | Admin + REST；Addon 不做第二产品面 |
-| MVP 唯一 pack | `site_ops_insight_pack.v1`（本地 Collector → Insight_Builder） |
+| MVP 第一包 | `site_ops_insight_pack.v1`（本地 Collector → Insight_Builder） |
+| 第二包（内容结构） | `content_structure_insight_pack.v1`（本地 Builder；Site Profile Ask） |
 | 写姿态 | `suggestion_only`；不直写 WP；不自动 Core proposal |
 | 运输 | 推理在 Cloud；签名/runtime 经 Addon |
 | 通道 | `hosted_ai_content_support.v1`（验证用）；**不**走已暂停的 `cloud_inspection` / Site Ops Cloud detail |
-| 验证面 | 只读 REST + CLI + Site Check「关于本次检查提问」薄 UI（内部试用就绪；已去掉「开发测试」标签） |
+| 验证面 | 巡检：REST + CLI + Site Check Ask；内容结构：REST + CLI + **站点资料** Ask（内部试用） |
 | Ask UX | 进行中态 + Cloud 忙位/429 中文提示（`#290`） |
 
 ---
@@ -44,23 +45,23 @@
 - 不在 Toolbox / Addon / Cloud 任一侧建立：本地队列、自定义 run 表、审批真相、provider/model 路由真相、计费真相、WP 直写执行器。
 - 不上传正文全文、评论原文、私信、邮件、IP、密钥、原始日志、未公开内容。
 - 不把对话回复直接写成 WP 变更；任何写意图最多产出**可审阅的 handoff 候选**，由既有治理链路落地。
-- **本稿不扩第二脱密包代码、不新开完整多轮对话产品壳**（见 §6.2 / §11）。
+- **不新开完整多轮对话产品壳；卡住-run 产品化落地前不开第三包**（见 §6.2 / §11）。
 
 ---
 
 ## 3. 数据包清单（完整 v1 意向；MVP 仅巡检摘要）
 
-完整 v1 按需拉取下表；**当前已接线 / 已验证的只有「巡检摘要」**。其余四包为意向清单，**未实现、未开第二套 UI**；未点名的 pack 不预取。新字段必须先补合同再接线（Reuse first）。
+完整 v1 按需拉取下表；**当前已接线：「巡检摘要」+「内容结构摘要」**。其余三包仍为意向清单；未点名的 pack 不预取。**不做第二套完整对话壳。**新字段必须先补合同再接线（Reuse first）。
 
 | 用户可见名 | 状态 | 意图 | 优先复用（投影既有真相，不新造） |
 | --- | --- | --- | --- |
 | **巡检摘要** | **MVP 已接线**（`#289`） | 当前本地巡检结论与优先处理队列 | `site_ops_insight_pack.v1`；本地确定性扫描；**不**默认触发已暂停的 Cloud inspection |
-| **内容结构摘要**（第二包优先） | 延后；下一包优先 | 内容形态与结构量级 / SEO·内容健康类脱密摘要 | `post_counts` / structure 类聚合（公开计数与分类结构，非正文）；仍 `suggestion_only` |
+| **内容结构摘要**（第二包） | **已接线（本 PR）** | 内容形态与结构量级 / SEO·内容健康类脱密摘要 | `content_structure_insight_pack.v1`（`post_counts` / taxonomy shape / 公开标题样本；非正文）；仍 `suggestion_only` |
 | 站点概况 | 延后 | 站点身份与就绪度一览 | insight pack 内站点/上下文摘要；Site Context / Cloud readiness 投影 |
 | 近期错误 / 健康信号 | 延后 | 有界健康与失败信号 | ops health / 连接与 runtime 失败投影（错误码级，非 raw log） |
 | Cloud 连接与用量状态 | 延后 | 连接是否可用、窄配额 / entitlement | `cloud_runtime` / nightly entitlement 窄读；非计费后台 |
 
-> **已定：** 五包名称如上为完整 v1 意向清单；**第二包优先「内容结构摘要」**（SEO/内容健康类 de-id summary，`suggestion_only`）。**在卡住-run 产品化落地前不开第三包。**
+> **已定：** 五包名称如上为完整 v1 意向清单；**第二包「内容结构摘要」已接线**（SEO/内容健康类 de-id summary，`suggestion_only`）。**在卡住-run 产品化落地前不开第三包。**
 
 ---
 
@@ -128,12 +129,11 @@
 
 验证手册：[insight-pack-cloud-qa-cli.md](insight-pack-cloud-qa-cli.md)。
 
-### 6.2 完整 v1（第二包起）
+### 6.2 完整 v1（第二包已接线）
 
-- 按 §3 / §11：第二包优先 **内容结构摘要**（SEO/内容健康类 de-id，`suggestion_only`）；卡住-run 产品化落地前**不开第三包**。
+- 按 §3 / §11：第二包 **内容结构摘要**（`content_structure_insight_pack.v1`，SEO/内容健康类 de-id，`suggestion_only`）已接线；卡住-run 产品化落地前**不开第三包**。
 - 仍尊重 `cloud_inspection` 等可逆暂停。
-- Ask 与 Generate site check **双轨并存**（见 §11）。
-- **本定稿 PR 不启动第二包实现。**
+- Ask（巡检）与 Generate site check **双轨并存**；内容结构 Ask 挂在 **站点资料**，与巡检 Ask 入口分离（见 §11）。
 
 ### 6.3 v1.1（已知缺口，不阻塞 MVP）
 
@@ -146,23 +146,28 @@
 
 ## 7. 已接线挂点
 
-| 路径 | 现状（master / `#289` + `#290`） |
+| 路径 | 现状 |
 | --- | --- |
-| 只读拼包 REST | `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack`（`manage_options`） |
-| Ask / QA REST | `POST …/site-ops/insight-pack-qa`（body `{ "question": "…" }`；同 cap；本地 pack + Hosted AI） |
-| 实现 | `includes/Rest_Site_Ops_Insight_Bridges.php` |
-| Admin 薄 UI | Site Check → 当前检查 → **关于本次检查提问**（内部试用就绪） |
-| CLI | `scripts/insight-pack-cloud-qa.sh` / `.php` |
-| 既有本地预览 | `Admin_Page_Site_Ops_Panel` 仍可 Generate site check；与 Ask **双轨并存** |
-| 暂停的 Cloud detail | `cloud_inspection` 仍暂停；Ask **不**走该路径 |
+| 巡检只读拼包 REST | `GET …/site-ops/insight-pack`（`manage_options`） |
+| 巡检 Ask / QA REST | `POST …/site-ops/insight-pack-qa` |
+| 巡检实现 | `includes/Rest_Site_Ops_Insight_Bridges.php` |
+| 巡检 Admin 薄 UI | Site Check → 当前检查 → **关于本次检查提问** |
+| 巡检 CLI | `scripts/insight-pack-cloud-qa.sh` / `.php` |
+| **内容结构只读拼包 REST** | `GET …/content-structure/insight-pack`（`manage_options`） |
+| **内容结构 Ask / QA REST** | `POST …/content-structure/insight-pack-qa` |
+| **内容结构实现** | `includes/Content_Structure_Insight_Builder.php` + `Rest_Content_Structure_Insight_Bridges.php` |
+| **内容结构 Admin 薄 UI** | **站点资料（Site Profile）** → **关于内容结构提问**（与 Site Check Ask 分离） |
+| **内容结构 CLI** | `scripts/content-structure-pack-cloud-qa.sh` / `.php`；手册 `docs/content-structure-pack-cloud-qa-cli.md` |
+| 既有本地预览 | Generate site check 仍可用；与两路 Ask **三轨并存、不合并 UI** |
+| 暂停的 Cloud detail | `cloud_inspection` 仍暂停；两路 Ask **均不**走该路径 |
 
 ---
 
-## 8. 入口约定（MVP）
+## 8. 入口约定
 
-- **已采用：** Site Check → Current check 上的提问条（中文 UI；内部试用，已去掉「开发测试」标签）。
-- **理由：** 与 Generate site check 同源；不新开顶栏 tab；与已降级的 Cloud detail 隔离。
-- **完整多轮壳：** 不做（本阶段）；Ask ≠ Generate，两入口共享 hosted AI 通道，不合并 UI。
+- **巡检摘要：** Site Check → Current check 提问条（内部试用）。
+- **内容结构摘要：** **站点资料（Site Profile / `toolbox_tab=context`）** 提问条 — 更贴近 SEO/内容健康语境；不新开顶栏 tab。
+- **完整多轮壳：** 不做（本阶段）；Ask ≠ Generate；两路 Ask 共享 hosted AI 通道，**不合并 UI**。
 
 ---
 
@@ -176,7 +181,7 @@
 | D. Cloud suggestion_only | Hosted content-support + pack | **已合入 `#289`** |
 | UX 加载/429 | Ask 进行中 + 中文忙位 | **已合入 `#290`** |
 | E. 深链增强 | 答复内系统深链编排 | 未作为独立切片强绑 |
-| 第二包 UI/REST | 内容结构摘要 | **不做（本阶段）；见 §11** |
+| 第二包 UI/REST | 内容结构摘要 | **本 PR 接线**（REST + Site Profile Ask + CLI）；见 §11 |
 
 ---
 
@@ -196,7 +201,7 @@
 
 产品方 2026-10-20 按建议定稿：
 
-1. **五包 / 第二包：** 仅「巡检摘要」已接线。第二包优先 **内容结构摘要**（SEO/内容健康类 de-id summary，`suggestion_only`）。卡住-run 产品化落地前**不开第三包**。
+1. **五包 / 第二包：** 「巡检摘要」+「内容结构摘要」已接线。第二包 = **内容结构摘要**（`content_structure_insight_pack.v1`，SEO/内容健康类 de-id，`suggestion_only`）。卡住-run 产品化落地前**不开第三包**。
 2. **授权 / 审计 v1：** 记录 `run_id` + 操作者 + 时间即可；能力门槛 = WP `manage_options`（经 `cap.toolbox.admin`）；**不另造角色、不新建审计表**。
 3. **Cloud 失败降级：** 失败只展示**中文错误 + 可重试**；**不做**本地假答复 / 纯本地规则默认答复，避免双真相。
 4. **Ask 文案：** 去掉「开发测试」；Ask 为**内部试用就绪**。完整多轮对话壳本阶段不做。
@@ -205,4 +210,4 @@
 
 ---
 
-*本稿为脱密对话助手产品边界已定稿 v1。实现切片 B–D / 加载·429 已随 `#289` / `#290` 合入；扩第二包代码须另开 PR，且遵守 §11。*
+*本稿为脱密对话助手产品边界已定稿 v1。实现切片 B–D / 加载·429 已随 `#289` / `#290` 合入；第二包（内容结构）随本 PR 接线；第三包须另开且遵守 §11。*

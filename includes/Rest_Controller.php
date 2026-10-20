@@ -22,6 +22,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	private Rest_Web_Search_Bridges $web_search_bridges;
 	private Rest_Site_Knowledge_Bridges $site_knowledge_bridges;
 	private Rest_Site_Ops_Insight_Bridges $site_ops_insight_bridges;
+	private Rest_Content_Structure_Insight_Bridges $content_structure_insight_bridges;
 	private Rest_Media_Derivative_Previews $media_derivative_previews;
 	private Rest_Flow_Plan_Bridges $flow_plan_bridges;
 	private Rest_Media_Optimization_Bridges $media_optimization_bridges;
@@ -87,6 +88,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->web_search_bridges             = new Rest_Web_Search_Bridges( $client );
 		$this->site_knowledge_bridges         = new Rest_Site_Knowledge_Bridges( $client );
 		$this->site_ops_insight_bridges       = new Rest_Site_Ops_Insight_Bridges( $settings );
+		$this->content_structure_insight_bridges = new Rest_Content_Structure_Insight_Bridges( $settings );
 		$this->media_derivative_previews      = new Rest_Media_Derivative_Previews( $client );
 		$this->flow_plan_bridges              = new Rest_Flow_Plan_Bridges( $client );
 		$this->media_optimization_bridges     = new Rest_Media_Optimization_Bridges();
@@ -143,6 +145,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->get( '/review-tally/summary', 'review_tally_summary' );
 		$this->get( '/site-ops/insight-pack', 'site_ops_insight_pack' );
 		$this->post( '/site-ops/insight-pack-qa', 'site_ops_insight_pack_qa' );
+		$this->get( '/content-structure/insight-pack', 'content_structure_insight_pack' );
+		$this->post( '/content-structure/insight-pack-qa', 'content_structure_insight_pack_qa' );
 
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
@@ -277,6 +281,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/web-search/diagnostics'                  => 'cap.toolbox.web_search',
 			'/site-ops/insight-pack'                    => 'cap.toolbox.admin',
 			'/site-ops/insight-pack-qa'                 => 'cap.toolbox.admin',
+			'/content-structure/insight-pack'           => 'cap.toolbox.admin',
+			'/content-structure/insight-pack-qa'        => 'cap.toolbox.admin',
 			'/site-knowledge/status'                   => 'cap.toolbox.knowledge.read',
 			'/site-knowledge/search'                   => 'cap.toolbox.knowledge.search',
 			'/site-knowledge/sync'                     => 'cap.toolbox.knowledge.sync',
@@ -333,6 +339,14 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function site_ops_insight_pack_qa( WP_REST_Request $request ) {
 		return $this->site_ops_insight_bridges->site_ops_insight_pack_qa( $request );
+	}
+
+	public function content_structure_insight_pack( WP_REST_Request $request ) {
+		return $this->content_structure_insight_bridges->content_structure_insight_pack( $request );
+	}
+
+	public function content_structure_insight_pack_qa( WP_REST_Request $request ) {
+		return $this->content_structure_insight_bridges->content_structure_insight_pack_qa( $request );
 	}
 
 	public function site_knowledge_status( WP_REST_Request $request ) {

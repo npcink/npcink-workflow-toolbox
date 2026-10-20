@@ -1,0 +1,352 @@
+<?php
+/**
+ * Read-only content-structure insight pack REST bridge (pack 2).
+ *
+ * Assembles content_structure_insight_pack.v1 locally and optionally asks
+ * Cloud via hosted_ai_content_support.v1. Does not write WordPress and does
+ * not use the paused Site Ops Cloud detail path.
+ *
+ * @package Npcink_Toolbox
+ */
+
+namespace Npcink_Toolbox;
+
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+
+defined( 'ABSPATH' ) || exit;
+
+final class Rest_Content_Structure_Insight_Bridges {
+
+	private Settings $settings;
+
+	public function __construct( Settings $settings ) {
+		$this->settings = $settings;
+	}
+
+	/**
+	 * GET /content-structure/insight-pack — local pack only.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function content_structure_insight_pack( WP_REST_Request $request ) {
+		unset( $request );
+
+		try {
+			$pack = $this->assemble_pack();
+		} catch ( \Throwable $throwable ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_insight_pack_failed',
+				__( 'Could not build the local content-structure insight pack.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return rest_ensure_response( $pack );
+	}
+
+	/**
+	 * @return array<string,mixed>
+	 */
+	public function assemble_pack(): array {
+		// Local pack only today; $this->settings kept for future readiness hints.
+		$builder = new Content_Structure_Insight_Builder();
+
+		return $builder->build();
+	}
+
+	/**
+	 * POST /content-structure/insight-pack-qa — local pack + Hosted AI.
+	 *
+	 * Same transport as insight-pack-qa: execute_runtime + hosted_ai_content_support.v1.
+	 * Omits Cloud-rejected extras. Suggestion-only; no WordPress writes.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function content_structure_insight_pack_qa( WP_REST_Request $request ) {
+		$question = trim( sanitize_textarea_field( (string) $request->get_param( 'question' ) ) );
+		if ( '' === $question ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_qa_question_required',
+				__( 'Enter a question about the de-identified content-structure pack.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+		if ( strlen( $question ) > 2000 ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_qa_question_too_long',
+				__( 'Keep the question under 2000 characters.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! class_exists( '\Npcink_Cloud_Runtime_Client_Factory' ) ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_qa_addon_missing',
+				__( 'Npcink Cloud Addon is required to ask about content structure.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 503 )
+			);
+		}
+
+		$client = \Npcink_Cloud_Runtime_Client_Factory::configured();
+		if ( ! $client ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_qa_cloud_unconfigured',
+				__( 'Connect and verify Npcink Cloud before asking about content structure.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 503 )
+			);
+		}
+
+		try {
+			$pack = $this->assemble_pack();
+		} catch ( \Throwable $throwable ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_insight_pack_failed',
+				__( 'Could not build the local content-structure insight pack.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$pack_run_id = (string) ( $pack['run_id'] ?? '' );
+		$compact     = $this->compact_pack_for_qa( $pack );
+		$pack_json   = wp_json_encode( $compact, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+		if ( ! is_string( $pack_json ) || '' === $pack_json ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_qa_encode_failed',
+				__( 'Could not encode the de-identified content-structure pack.', 'npcink-workflow-toolbox' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$user_content = $question . "\n\n---\nDe-identified content_structure insight pack (JSON):\n" . $pack_json;
+
+		// Cloud RuntimePayload: extra=forbid. Do NOT forward Addon-local-only extras.
+		$runtime_payload = array(
+			'ability_name'        => 'npcink-toolbox/ai-content-support',
+			'contract_version'    => 'hosted_ai_content_support.v1',
+			'profile_id'          => 'text.ai',
+			'execution_kind'      => 'text',
+			'execution_pattern'   => 'inline',
+			'input'               => array(
+				'messages' => array(
+					array(
+						'role'    => 'system',
+						'content' => 'You are Npcink Workflow Toolbox. Use only the provided de-identified content-structure / SEO-health insight pack. Focus on structure, taxonomy shape, metadata coverage, and content depth — not private content. Return concise, reviewable suggestions. Do not claim to write, publish, approve, or bypass governance. Do not invent credentials, emails, or private content. Never request post bodies or comments.',
+					),
+					array(
+						'role'    => 'user',
+						'content' => $user_content,
+					),
+				),
+				'params'   => array(
+					'temperature' => 0.2,
+					'max_tokens'  => 900,
+				),
+			),
+			'data_classification' => 'public_site_content',
+			'storage_mode'        => 'result_only',
+			'retention_ttl'       => 86400,
+			'timeout_seconds'     => 45,
+			'retry_max'           => 0,
+			'policy'              => array(
+				'allow_fallback' => false,
+			),
+		);
+
+		$trace_id        = 'content_structure_qa_' . wp_generate_uuid4();
+		$idempotency_key = 'content_structure_qa_' . wp_generate_uuid4();
+		$started         = microtime( true );
+		$response        = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
+		$elapsed_ms      = (int) round( ( microtime( true ) - $started ) * 1000 );
+
+		if ( is_wp_error( $response ) ) {
+			$code         = (string) $response->get_error_code();
+			$raw_message  = (string) $response->get_error_message();
+			$error_data   = $response->get_error_data();
+			$error_status = is_array( $error_data ) ? (int) ( $error_data['status'] ?? 0 ) : 0;
+			$data         = array(
+				'status'      => 502,
+				'pack_run_id' => $pack_run_id,
+				'trace_id'    => $trace_id,
+				'elapsed_ms'  => $elapsed_ms,
+				'error_data'  => $error_data,
+			);
+			$is_busy_slot = (
+				'cloud_commercial_concurrency_exceeded' === $code
+				|| false !== strpos( $code, 'concurrency' )
+				|| 429 === $error_status
+				|| false !== strpos( strtolower( $raw_message ), 'max active' )
+				|| false !== strpos( strtolower( $raw_message ), 'active cloud run' )
+			);
+			if ( $is_busy_slot ) {
+				$friendly          = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
+				$data['hint']      = $friendly;
+				$data['status']    = 429;
+				$data['busy_slot'] = true;
+
+				return new WP_Error(
+					'cloud_commercial_concurrency_exceeded',
+					$friendly,
+					$data
+				);
+			}
+
+			return new WP_Error(
+				$code !== '' ? $code : 'npcink_toolbox_content_structure_qa_cloud_failed',
+				$raw_message,
+				$data
+			);
+		}
+
+		if ( ! is_array( $response ) ) {
+			return new WP_Error(
+				'npcink_toolbox_content_structure_qa_invalid_response',
+				__( 'Cloud returned an unexpected response.', 'npcink-workflow-toolbox' ),
+				array(
+					'status'      => 502,
+					'pack_run_id' => $pack_run_id,
+					'elapsed_ms'  => $elapsed_ms,
+				)
+			);
+		}
+
+		$data   = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
+		$run_id = (string) ( $data['run_id'] ?? '' );
+		$answer = $this->extract_hosted_ai_answer_text( $response );
+		$status = (string) ( $data['status'] ?? ( $response['status'] ?? '' ) );
+
+		return rest_ensure_response(
+			array(
+				'ok'              => ( '' !== $run_id && '' !== $answer ),
+				'pack'            => 'content_structure_insight_pack.v1',
+				'path'            => 'Npcink_Cloud_Runtime_Client::execute_runtime via hosted_ai_content_support.v1',
+				'ability_name'    => 'npcink-toolbox/ai-content-support',
+				'contract'        => 'hosted_ai_content_support.v1',
+				'write_posture'   => 'suggestion_only',
+				'pack_run_id'     => $pack_run_id,
+				'run_id'          => $run_id,
+				'status'          => $status,
+				'trace_id'        => $trace_id,
+				'idempotency_key' => $idempotency_key,
+				'elapsed_ms'      => $elapsed_ms,
+				'question'        => $question,
+				'answer'          => $answer,
+			)
+		);
+	}
+
+	/**
+	 * Compact de-identified pack for the QA prompt.
+	 *
+	 * @param array<string,mixed> $pack Full pack.
+	 * @return array<string,mixed>
+	 */
+	private function compact_pack_for_qa( array $pack ): array {
+		$findings = array();
+		foreach ( array_slice( is_array( $pack['top_findings'] ?? null ) ? $pack['top_findings'] : array(), 0, 8 ) as $finding ) {
+			if ( ! is_array( $finding ) ) {
+				continue;
+			}
+			$findings[] = array(
+				'id'                     => (string) ( $finding['id'] ?? '' ),
+				'title'                  => (string) ( $finding['title'] ?? '' ),
+				'issue_type'             => (string) ( $finding['issue_type'] ?? '' ),
+				'category'               => (string) ( $finding['category'] ?? '' ),
+				'severity'               => (string) ( $finding['severity'] ?? '' ),
+				'priority_score'         => $finding['priority_score'] ?? null,
+				'evidence_summary'       => (string) ( $finding['evidence_summary'] ?? '' ),
+				'recommended_action'     => (string) ( $finding['recommended_action'] ?? '' ),
+				'write_boundary'         => (string) ( $finding['write_boundary'] ?? '' ),
+				'direct_wordpress_write' => (bool) ( $finding['direct_wordpress_write'] ?? false ),
+			);
+		}
+
+		$signals = is_array( $pack['structure_signals'] ?? null ) ? $pack['structure_signals'] : array();
+		// Drop full sample flags; keep rates/buckets + short title samples only.
+		$compact_signals = array(
+			'sample_size'                    => $signals['sample_size'] ?? 0,
+			'missing_excerpt_rate'           => $signals['missing_excerpt_rate'] ?? 0,
+			'missing_meta_description_rate'  => $signals['missing_meta_description_rate'] ?? 0,
+			'missing_featured_image_rate'    => $signals['missing_featured_image_rate'] ?? 0,
+			'thin_content_rate'              => $signals['thin_content_rate'] ?? 0,
+			'posts_missing_category'         => $signals['posts_missing_category'] ?? 0,
+			'posts_missing_tag'              => $signals['posts_missing_tag'] ?? 0,
+			'word_count_buckets'             => $signals['word_count_buckets'] ?? array(),
+			'age_buckets'                    => $signals['age_buckets'] ?? array(),
+			'title_samples'                  => array_slice( is_array( $signals['title_samples'] ?? null ) ? $signals['title_samples'] : array(), 0, 8 ),
+		);
+
+		$taxonomies = array();
+		foreach ( array( 'category', 'post_tag' ) as $tax ) {
+			$block = is_array( $pack['taxonomies'][ $tax ] ?? null ) ? $pack['taxonomies'][ $tax ] : array();
+			$taxonomies[ $tax ] = array(
+				'total'       => (int) ( $block['total'] ?? 0 ),
+				'empty_count' => (int) ( $block['empty_count'] ?? 0 ),
+				'low_count'   => (int) ( $block['low_count'] ?? 0 ),
+				'top_terms'   => array_slice( is_array( $block['top_terms'] ?? null ) ? $block['top_terms'] : array(), 0, 8 ),
+			);
+		}
+
+		return array(
+			'contract_version'       => (string) ( $pack['contract_version'] ?? '' ),
+			'artifact_type'          => (string) ( $pack['artifact_type'] ?? '' ),
+			'run_id'                 => (string) ( $pack['run_id'] ?? '' ),
+			'site_id'                => (string) ( $pack['site_id'] ?? '' ),
+			'generated_at'           => (string) ( $pack['generated_at'] ?? '' ),
+			'write_posture'          => (string) ( $pack['write_posture'] ?? '' ),
+			'direct_wordpress_write' => (bool) ( $pack['direct_wordpress_write'] ?? false ),
+			'summary'                => is_array( $pack['summary'] ?? null ) ? $pack['summary'] : array(),
+			'post_counts'            => is_array( $pack['post_counts'] ?? null ) ? $pack['post_counts'] : array(),
+			'taxonomies'             => $taxonomies,
+			'structure_signals'      => $compact_signals,
+			'top_findings'           => $findings,
+			'safety'                 => is_array( $pack['safety'] ?? null ) ? $pack['safety'] : array(),
+		);
+	}
+
+	/**
+	 * @param array<string,mixed> $response Runtime response.
+	 */
+	private function extract_hosted_ai_answer_text( array $response ): string {
+		$data   = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
+		$result = is_array( $data['result'] ?? null ) ? $data['result'] : array();
+
+		if ( is_string( $result['output_text'] ?? null ) && '' !== trim( (string) $result['output_text'] ) ) {
+			return trim( (string) $result['output_text'] );
+		}
+
+		$messages = is_array( $result['messages'] ?? null ) ? $result['messages'] : array();
+		foreach ( $messages as $message ) {
+			if ( ! is_array( $message ) ) {
+				continue;
+			}
+			if ( 'assistant' !== (string) ( $message['role'] ?? '' ) ) {
+				continue;
+			}
+			$content = $message['content'] ?? '';
+			if ( is_string( $content ) && '' !== trim( $content ) ) {
+				return trim( $content );
+			}
+		}
+
+		$output = is_array( $result['output'] ?? null ) ? $result['output'] : array();
+		foreach ( $output as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+			$content = is_array( $item['content'] ?? null ) ? $item['content'] : array();
+			foreach ( $content as $part ) {
+				if ( is_array( $part ) && is_string( $part['text'] ?? null ) && '' !== trim( (string) $part['text'] ) ) {
+					return trim( (string) $part['text'] );
+				}
+			}
+		}
+
+		if ( is_string( $data['message'] ?? null ) && '' !== trim( (string) $data['message'] ) ) {
+			return trim( (string) $data['message'] );
+		}
+
+		return '';
+	}
+}

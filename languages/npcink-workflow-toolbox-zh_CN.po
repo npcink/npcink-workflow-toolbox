@@ -9817,3 +9817,31 @@ msgstr "本站 Cloud 名额正被另一个运行占用。请等其结束后再�
 #: includes/Admin_Page.php
 msgid "run_id"
 msgstr "run_id"
+
+msgid "Ask about content structure"
+msgstr "关于内容结构提问"
+
+msgid "Sends a de-identified content-structure / SEO-health pack (counts, taxonomy shape, public title samples — never post bodies) to Hosted AI for a suggestion-only answer. Does not write WordPress. Distinct from Site Check Ask."
+msgstr "将脱密的内容结构 / SEO·内容健康摘要（计数、分类结构、公开标题样本——从不含正文）发给 Hosted AI，仅返回建议。不写 WordPress。与「站点检查」提问入口分离。"
+
+msgid "Example: How healthy is our public content structure for SEO?"
+msgstr "示例：公开内容结构对 SEO 是否健康？"
+
+msgid "根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？"
+msgstr "根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？"
+
+msgid "Could not build the local content-structure insight pack."
+msgstr "无法生成本地内容结构摘要包。"
+
+msgid "Enter a question about the de-identified content-structure pack."
+msgstr "请输入关于脱密内容结构摘要的问题。"
+
+msgid "Npcink Cloud Addon is required to ask about content structure."
+msgstr "关于内容结构提问需要已安装并可用的 Npcink Cloud Addon。"
+
+msgid "Connect and verify Npcink Cloud before asking about content structure."
+msgstr "请先连接并验证 Npcink Cloud，再提问内容结构。"
+
+msgid "Could not encode the de-identified content-structure pack."
+msgstr "无法编码脱密内容结构摘要包。"
+

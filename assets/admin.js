@@ -7804,6 +7804,143 @@
 		});
 	}
 
+	function initContentStructurePackQa() {
+		document.querySelectorAll('[data-toolbox-content-structure-qa]').forEach((root) => {
+			const button = root.querySelector('[data-toolbox-content-structure-qa-submit]');
+			const questionField = root.querySelector('[data-toolbox-content-structure-qa-question]');
+			const statusEl = root.querySelector('[data-toolbox-content-structure-qa-status]');
+			const resultEl = root.querySelector('[data-toolbox-content-structure-qa-result]');
+			const answerEl = root.querySelector('[data-toolbox-content-structure-qa-answer]');
+			const runIdEl = root.querySelector('[data-toolbox-content-structure-qa-run-id]');
+			const metaEl = root.querySelector('[data-toolbox-content-structure-qa-meta]');
+			if (!button || !questionField || !statusEl || !resultEl || !answerEl || !runIdEl) {
+				return;
+			}
+
+			let inFlight = false;
+			const idleLabel = button.textContent;
+
+			const setStatus = (message, kind) => {
+				statusEl.hidden = !message;
+				statusEl.textContent = message || '';
+				statusEl.classList.remove('is-ok', 'is-warning', 'is-error', 'is-pending');
+				if (kind) {
+					statusEl.classList.add(kind);
+				}
+			};
+
+			const setBusy = (busy) => {
+				inFlight = busy;
+				root.classList.toggle('is-ask-busy', busy);
+				root.setAttribute('aria-busy', busy ? 'true' : 'false');
+				button.disabled = busy;
+				button.setAttribute('aria-busy', busy ? 'true' : 'false');
+				questionField.disabled = busy;
+				button.textContent = busy ? t('In progress…') : idleLabel;
+			};
+
+			const isBusySlotError = (error) => {
+				const data = (error && error.data) || {};
+				const status = Number((error && error.status) || data.status || 0);
+				const code = String((error && error.code) || data.code || '').toLowerCase();
+				const message = String(
+					(error && (error.message || error.error)) || data.message || ''
+				).toLowerCase();
+				const nested = JSON.stringify(data.error_data || data || {}).toLowerCase();
+				return (
+					status === 429 ||
+					code.indexOf('concurrency') >= 0 ||
+					message.indexOf('max active') >= 0 ||
+					message.indexOf('active cloud run') >= 0 ||
+					nested.indexOf('concurrency') >= 0 ||
+					nested.indexOf('max active') >= 0
+				);
+			};
+
+			const formatAskError = (error) => {
+				const data = (error && error.data) || {};
+				if (isBusySlotError(error)) {
+					const parts = [
+						data.hint ||
+							t('Another Cloud run is using this site’s slot. Wait for it to finish, then ask again.'),
+					];
+					if (data.next_step) {
+						parts.push(String(data.next_step));
+					}
+					if (data.pack_run_id) {
+						parts.push('pack_run_id=' + String(data.pack_run_id));
+					}
+					return parts.filter(Boolean).join(' ');
+				}
+
+				const message =
+					(error && (error.message || error.error || data.message)) ||
+					(config.labels && config.labels.error) ||
+					t('Request failed.');
+				const extras = [];
+				if (data.hint) {
+					extras.push(String(data.hint));
+				}
+				if (data.pack_run_id) {
+					extras.push('pack_run_id=' + String(data.pack_run_id));
+				}
+				return [String(message)].concat(extras).join(' ');
+			};
+
+			button.addEventListener('click', async () => {
+				if (inFlight) {
+					setStatus(t('A question is already in progress. Please wait.'), 'is-pending');
+					return;
+				}
+
+				const question = String(questionField.value || '').trim();
+				if (!question) {
+					setStatus(t('Enter a question first.'), 'is-warning');
+					resultEl.hidden = true;
+					return;
+				}
+				if (!config.restUrl) {
+					setStatus(t('REST URL is missing.'), 'is-error');
+					return;
+				}
+
+				setBusy(true);
+				setStatus(t('In progress: building the pack and asking Cloud…'), 'is-pending');
+				resultEl.hidden = true;
+				setMarkdownContent(answerEl, '');
+				runIdEl.textContent = '';
+				if (metaEl) {
+					metaEl.textContent = '';
+				}
+
+				try {
+					const body = await postJson(config.restUrl, 'content-structure/insight-pack-qa', { question });
+					const runId = String((body && body.run_id) || '');
+					const answer = String((body && body.answer) || '');
+					const packRunId = String((body && body.pack_run_id) || '');
+					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
+					runIdEl.textContent = runId || '—';
+					setMarkdownContent(answerEl, answer || t('(empty answer)'));
+					if (metaEl) {
+						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · ');
+					}
+					resultEl.hidden = false;
+					if (body && body.ok && answer) {
+						setStatus(t('Suggestion ready (no WordPress write).'), 'is-ok');
+					} else {
+						setStatus(t('Cloud returned without a usable answer. Check run_id / Addon.'), 'is-warning');
+					}
+				} catch (error) {
+					resultEl.hidden = true;
+					const busySlot = isBusySlotError(error);
+					setStatus(formatAskError(error), busySlot ? 'is-warning' : 'is-error');
+				} finally {
+					setBusy(false);
+				}
+			});
+		});
+	}
+
 	function initSiteCheckTabs() {
 		document.querySelectorAll('[data-toolbox-site-check-tabs]').forEach((workspace) => {
 			workspace.addEventListener('click', (event) => {
@@ -8950,6 +9087,7 @@
 	initContextSectionSwitcher();
 	initContextGroupSwitcher();
 	initInsightPackQa();
+	initContentStructurePackQa();
 	initSiteCheckTabs();
 	initOperationsInsightsTabs();
 	initContextDrafts();

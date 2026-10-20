@@ -1349,6 +1349,27 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<p><?php esc_html_e( 'Fill the short site brief used by AI suggestions. Most sites can keep the optional preferences unchanged.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 
+		<section class="npcink-toolbox__card" data-toolbox-content-structure-qa aria-label="<?php esc_attr_e( 'Ask about content structure', 'npcink-workflow-toolbox' ); ?>">
+			<div class="npcink-toolbox__section-heading">
+				<div>
+					<h3><?php esc_html_e( 'Ask about content structure', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Sends a de-identified content-structure / SEO-health pack (counts, taxonomy shape, public title samples — never post bodies) to Hosted AI for a suggestion-only answer. Does not write WordPress. Distinct from Site Check Ask.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+			</div>
+			<label for="npcink-toolbox-content-structure-qa-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
+			<textarea id="npcink-toolbox-content-structure-qa-question" class="large-text" rows="3" data-toolbox-content-structure-qa-question placeholder="<?php esc_attr_e( 'Example: How healthy is our public content structure for SEO?', 'npcink-workflow-toolbox' ); ?>"><?php echo esc_textarea( __( '根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ) ); ?></textarea>
+			<p class="npcink-toolbox__ops-status-actions" style="margin-top:10px;">
+				<button type="button" class="button button-primary" data-toolbox-content-structure-qa-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
+				<span class="description"><?php esc_html_e( 'Administrator permission required. May take up to about 45 seconds.', 'npcink-workflow-toolbox' ); ?></span>
+			</p>
+			<div class="npcink-toolbox__result-notice" data-toolbox-content-structure-qa-status aria-live="polite" hidden></div>
+			<div data-toolbox-content-structure-qa-result hidden>
+				<p><strong><?php esc_html_e( 'run_id', 'npcink-workflow-toolbox' ); ?>:</strong> <code data-toolbox-content-structure-qa-run-id></code>
+					<span class="description"> · <span data-toolbox-content-structure-qa-meta></span></span></p>
+				<div class="npcink-toolbox__markdown" data-toolbox-content-structure-qa-answer></div>
+			</div>
+		</section>
+
 		<form class="npcink-toolbox__settings-form" method="post" action="options.php" data-toolbox-context-form>
 			<?php settings_fields( 'npcink_toolbox_content_context' ); ?>
 
