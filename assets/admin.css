@@ -4337,3 +4337,11 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__markdown a {
 	color: #2271b1;
 }
+
+[data-toolbox-insight-pack-qa].is-ask-busy [data-toolbox-insight-pack-qa-question] {
+	opacity: 0.72;
+}
+
+[data-toolbox-insight-pack-qa].is-ask-busy [data-toolbox-insight-pack-qa-submit] {
+	cursor: progress;
+}

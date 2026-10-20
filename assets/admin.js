@@ -7680,16 +7680,82 @@
 				return;
 			}
 
+			let inFlight = false;
+			const idleLabel = button.textContent;
+
 			const setStatus = (message, kind) => {
 				statusEl.hidden = !message;
 				statusEl.textContent = message || '';
-				statusEl.classList.remove('is-ok', 'is-warning', 'is-error');
+				statusEl.classList.remove('is-ok', 'is-warning', 'is-error', 'is-pending');
 				if (kind) {
 					statusEl.classList.add(kind);
 				}
 			};
 
+			const setBusy = (busy) => {
+				inFlight = busy;
+				root.classList.toggle('is-ask-busy', busy);
+				root.setAttribute('aria-busy', busy ? 'true' : 'false');
+				button.disabled = busy;
+				button.setAttribute('aria-busy', busy ? 'true' : 'false');
+				questionField.disabled = busy;
+				button.textContent = busy ? t('In progress…') : idleLabel;
+			};
+
+			const isBusySlotError = (error) => {
+				const data = (error && error.data) || {};
+				const status = Number((error && error.status) || data.status || 0);
+				const code = String((error && error.code) || data.code || '').toLowerCase();
+				const message = String(
+					(error && (error.message || error.error)) || data.message || ''
+				).toLowerCase();
+				const nested = JSON.stringify(data.error_data || data || {}).toLowerCase();
+				return (
+					status === 429 ||
+					code.indexOf('concurrency') >= 0 ||
+					message.indexOf('max active') >= 0 ||
+					message.indexOf('active cloud run') >= 0 ||
+					nested.indexOf('concurrency') >= 0 ||
+					nested.indexOf('max active') >= 0
+				);
+			};
+
+			const formatAskError = (error) => {
+				const data = (error && error.data) || {};
+				if (isBusySlotError(error)) {
+					const parts = [
+						data.hint ||
+							t('Another Cloud run is using this site’s slot. Wait for it to finish, then ask again.'),
+					];
+					if (data.next_step) {
+						parts.push(String(data.next_step));
+					}
+					if (data.pack_run_id) {
+						parts.push('pack_run_id=' + String(data.pack_run_id));
+					}
+					return parts.filter(Boolean).join(' ');
+				}
+
+				const message =
+					(error && (error.message || error.error || data.message)) ||
+					(config.labels && config.labels.error) ||
+					t('Request failed.');
+				const extras = [];
+				if (data.hint) {
+					extras.push(String(data.hint));
+				}
+				if (data.pack_run_id) {
+					extras.push('pack_run_id=' + String(data.pack_run_id));
+				}
+				return [String(message)].concat(extras).join(' ');
+			};
+
 			button.addEventListener('click', async () => {
+				if (inFlight) {
+					setStatus(t('A question is already in progress. Please wait.'), 'is-pending');
+					return;
+				}
+
 				const question = String(questionField.value || '').trim();
 				if (!question) {
 					setStatus(t('Enter a question first.'), 'is-warning');
@@ -7701,10 +7767,8 @@
 					return;
 				}
 
-				button.disabled = true;
-				const previousLabel = button.textContent;
-				button.textContent = (config.labels && config.labels.running) || t('Running...');
-				setStatus(t('Building the pack and asking Cloud…'), 'is-warning');
+				setBusy(true);
+				setStatus(t('In progress: building the pack and asking Cloud…'), 'is-pending');
 				resultEl.hidden = true;
 				setMarkdownContent(answerEl, '');
 				runIdEl.textContent = '';
@@ -7731,16 +7795,10 @@
 					}
 				} catch (error) {
 					resultEl.hidden = true;
-					const message =
-						(error && (error.message || error.error || (error.data && error.data.message))) ||
-						(config.labels && config.labels.error) ||
-						t('Request failed.');
-					const hint = error && error.data && error.data.hint ? ' ' + String(error.data.hint) : '';
-					const runHint = error && error.data && error.data.pack_run_id ? ' pack_run_id=' + String(error.data.pack_run_id) : '';
-					setStatus(String(message) + hint + runHint, 'is-error');
+					const busySlot = isBusySlotError(error);
+					setStatus(formatAskError(error), busySlot ? 'is-warning' : 'is-error');
 				} finally {
-					button.disabled = false;
-					button.textContent = previousLabel;
+					setBusy(false);
 				}
 			});
 		});

@@ -852,7 +852,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<button type="button" class="button button-primary" data-toolbox-insight-pack-qa-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
 						<span class="description"><?php esc_html_e( 'Administrator permission required. May take up to about 45 seconds.', 'npcink-workflow-toolbox' ); ?></span>
 					</p>
-					<div class="npcink-toolbox__result-notice" data-toolbox-insight-pack-qa-status hidden></div>
+					<div class="npcink-toolbox__result-notice" data-toolbox-insight-pack-qa-status aria-live="polite" hidden></div>
 					<div data-toolbox-insight-pack-qa-result hidden>
 						<p><strong><?php esc_html_e( 'run_id', 'npcink-workflow-toolbox' ); ?>:</strong> <code data-toolbox-insight-pack-qa-run-id></code>
 							<span class="description"> · <span data-toolbox-insight-pack-qa-meta></span></span></p>
