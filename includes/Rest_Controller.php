@@ -142,6 +142,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->post( '/review-tally/mark', 'review_tally_mark' );
 		$this->get( '/review-tally/summary', 'review_tally_summary' );
 		$this->get( '/site-ops/insight-pack', 'site_ops_insight_pack' );
+		$this->post( '/site-ops/insight-pack-qa', 'site_ops_insight_pack_qa' );
 
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
@@ -275,6 +276,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/web-search/test'                         => 'cap.toolbox.web_search',
 			'/web-search/diagnostics'                  => 'cap.toolbox.web_search',
 			'/site-ops/insight-pack'                    => 'cap.toolbox.admin',
+			'/site-ops/insight-pack-qa'                 => 'cap.toolbox.admin',
 			'/site-knowledge/status'                   => 'cap.toolbox.knowledge.read',
 			'/site-knowledge/search'                   => 'cap.toolbox.knowledge.search',
 			'/site-knowledge/sync'                     => 'cap.toolbox.knowledge.sync',
@@ -327,6 +329,10 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function site_ops_insight_pack( WP_REST_Request $request ) {
 		return $this->site_ops_insight_bridges->site_ops_insight_pack( $request );
+	}
+
+	public function site_ops_insight_pack_qa( WP_REST_Request $request ) {
+		return $this->site_ops_insight_bridges->site_ops_insight_pack_qa( $request );
 	}
 
 	public function site_knowledge_status( WP_REST_Request $request ) {

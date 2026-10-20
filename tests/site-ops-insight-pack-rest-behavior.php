@@ -1,6 +1,6 @@
 <?php
 /**
- * Behavior checks for the read-only Site Ops insight pack REST bridge.
+ * Behavior checks for the Site Ops insight pack REST bridge (read-only pack + MVP QA).
  *
  * @package Npcink_Toolbox
  */
@@ -226,6 +226,12 @@ $bridge_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Res
 site_ops_rest_assert( false === strpos( $bridge_source, 'run_site_ops_cloud_analysis' ), 'Bridge source never calls run_site_ops_cloud_analysis.' );
 site_ops_rest_assert( false === strpos( $bridge_source, 'cloud_inspection' ), 'Bridge source does not reference cloud_inspection pause bypass.' );
 site_ops_rest_assert( false === strpos( $bridge_source, 'Site_Ops_Cloud_Request_Builder' ), 'Bridge source does not assemble Cloud request payloads.' );
+site_ops_rest_assert( false !== strpos( $bridge_source, 'site_ops_insight_pack_qa' ), 'Bridge exposes site_ops_insight_pack_qa for MVP UI.' );
+site_ops_rest_assert( false !== strpos( $bridge_source, 'execute_runtime' ), 'QA path uses Runtime Client execute_runtime.' );
+site_ops_rest_assert( false !== strpos( $bridge_source, 'hosted_ai_content_support.v1' ), 'QA path uses hosted_ai_content_support.v1.' );
+site_ops_rest_assert( false === strpos( $bridge_source, 'summary_prompt_mode' ), 'QA payload omits rejected summary_prompt_mode.' );
+site_ops_rest_assert( false === strpos( $bridge_source, 'http_timeout_seconds' ), 'QA payload omits rejected http_timeout_seconds.' );
+site_ops_rest_assert( false === strpos( $bridge_source, 'connect_timeout_seconds' ), 'QA payload omits rejected connect_timeout_seconds.' );
 
 $settings = new Npcink_Toolbox\Settings();
 $bridge   = new Npcink_Toolbox\Rest_Site_Ops_Insight_Bridges( $settings );
@@ -249,7 +255,16 @@ site_ops_rest_assert( is_array( $data ) && Npcink_Toolbox\Site_Ops_Insight_Build
 
 $controller_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Rest_Controller.php' );
 site_ops_rest_assert( false !== strpos( $controller_source, "\$this->get( '/site-ops/insight-pack', 'site_ops_insight_pack' )" ), 'Rest_Controller registers GET /site-ops/insight-pack.' );
+site_ops_rest_assert( false !== strpos( $controller_source, "\$this->post( '/site-ops/insight-pack-qa', 'site_ops_insight_pack_qa' )" ), 'Rest_Controller registers POST /site-ops/insight-pack-qa.' );
 site_ops_rest_assert( false !== strpos( $controller_source, "'/site-ops/insight-pack'                    => 'cap.toolbox.admin'" ), 'Rest_Controller scopes insight-pack to cap.toolbox.admin (manage_options default).' );
+site_ops_rest_assert( false !== strpos( $controller_source, "'/site-ops/insight-pack-qa'                 => 'cap.toolbox.admin'" ), 'Rest_Controller scopes insight-pack-qa to cap.toolbox.admin.' );
 site_ops_rest_assert( false !== strpos( $controller_source, 'return $this->site_ops_insight_bridges->site_ops_insight_pack( $request );' ), 'Rest_Controller delegates to the Site Ops insight bridge.' );
+site_ops_rest_assert( false !== strpos( $controller_source, 'return $this->site_ops_insight_bridges->site_ops_insight_pack_qa( $request );' ), 'Rest_Controller delegates insight-pack-qa to the Site Ops insight bridge.' );
+
+$admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
+$js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
+site_ops_rest_assert( false !== strpos( $admin_source, 'data-toolbox-insight-pack-qa' ), 'Site Check Current check renders MVP Ask UI markup.' );
+site_ops_rest_assert( false !== strpos( $admin_source, 'Ask about this check (MVP)' ), 'Ask UI is labeled MVP.' );
+site_ops_rest_assert( false !== strpos( $js_source, 'initInsightPackQa' ) && false !== strpos( $js_source, 'site-ops/insight-pack-qa' ), 'admin.js wires Ask UI to insight-pack-qa REST.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";

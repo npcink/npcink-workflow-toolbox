@@ -7523,6 +7523,85 @@
 		});
 	}
 
+	function initInsightPackQa() {
+		document.querySelectorAll('[data-toolbox-insight-pack-qa]').forEach((root) => {
+			const button = root.querySelector('[data-toolbox-insight-pack-qa-submit]');
+			const questionField = root.querySelector('[data-toolbox-insight-pack-qa-question]');
+			const statusEl = root.querySelector('[data-toolbox-insight-pack-qa-status]');
+			const resultEl = root.querySelector('[data-toolbox-insight-pack-qa-result]');
+			const answerEl = root.querySelector('[data-toolbox-insight-pack-qa-answer]');
+			const runIdEl = root.querySelector('[data-toolbox-insight-pack-qa-run-id]');
+			const metaEl = root.querySelector('[data-toolbox-insight-pack-qa-meta]');
+			if (!button || !questionField || !statusEl || !resultEl || !answerEl || !runIdEl) {
+				return;
+			}
+
+			const setStatus = (message, kind) => {
+				statusEl.hidden = !message;
+				statusEl.textContent = message || '';
+				statusEl.classList.remove('is-ok', 'is-warning', 'is-error');
+				if (kind) {
+					statusEl.classList.add(kind);
+				}
+			};
+
+			button.addEventListener('click', async () => {
+				const question = String(questionField.value || '').trim();
+				if (!question) {
+					setStatus(t('Enter a question first.'), 'is-warning');
+					resultEl.hidden = true;
+					return;
+				}
+				if (!config.restUrl) {
+					setStatus(t('REST URL is missing.'), 'is-error');
+					return;
+				}
+
+				button.disabled = true;
+				const previousLabel = button.textContent;
+				button.textContent = (config.labels && config.labels.running) || t('Running...');
+				setStatus(t('Building pack and asking Cloud…'), 'is-warning');
+				resultEl.hidden = true;
+				answerEl.textContent = '';
+				runIdEl.textContent = '';
+				if (metaEl) {
+					metaEl.textContent = '';
+				}
+
+				try {
+					const body = await postJson(config.restUrl, 'site-ops/insight-pack-qa', { question });
+					const runId = String((body && body.run_id) || '');
+					const answer = String((body && body.answer) || '');
+					const packRunId = String((body && body.pack_run_id) || '');
+					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
+					runIdEl.textContent = runId || '—';
+					answerEl.textContent = answer || t('(empty answer)');
+					if (metaEl) {
+						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · ');
+					}
+					resultEl.hidden = false;
+					if (body && body.ok && answer) {
+						setStatus(t('Suggestion ready (MVP, no WordPress write).'), 'is-ok');
+					} else {
+						setStatus(t('Cloud returned without a usable answer. Check run_id / Addon.'), 'is-warning');
+					}
+				} catch (error) {
+					resultEl.hidden = true;
+					const message =
+						(error && (error.message || error.error || (error.data && error.data.message))) ||
+						(config.labels && config.labels.error) ||
+						t('Request failed.');
+					const hint = error && error.data && error.data.hint ? ' ' + String(error.data.hint) : '';
+					const runHint = error && error.data && error.data.pack_run_id ? ' pack_run_id=' + String(error.data.pack_run_id) : '';
+					setStatus(String(message) + hint + runHint, 'is-error');
+				} finally {
+					button.disabled = false;
+					button.textContent = previousLabel;
+				}
+			});
+		});
+	}
+
 	function initSiteCheckTabs() {
 		document.querySelectorAll('[data-toolbox-site-check-tabs]').forEach((workspace) => {
 			workspace.addEventListener('click', (event) => {
@@ -8668,6 +8747,7 @@
 	initSettingsFormReturnUrls();
 	initContextSectionSwitcher();
 	initContextGroupSwitcher();
+	initInsightPackQa();
 	initSiteCheckTabs();
 	initOperationsInsightsTabs();
 	initContextDrafts();

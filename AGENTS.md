@@ -17,10 +17,12 @@ Every new AI development session should start with:
 4. Briefly report the current module, relevant boundary, and intended focused
    gate before editing.
 
-**脱密巡检摘要 → Cloud CLI 验证（其它 AI 必读）：** 手册
+**脱密巡检摘要 → Cloud 验证（其它 AI 必读）：** 手册
 `docs/insight-pack-cloud-qa-cli.md`；一键脚本
-`scripts/insight-pack-cloud-qa.sh`（PHP：`scripts/insight-pack-cloud-qa.php`）。
-MVP 边界草稿：`docs/deidentified-assistant-boundary-draft-v1.md`。勿走已暂停的
+`scripts/insight-pack-cloud-qa.sh`（PHP：`scripts/insight-pack-cloud-qa.php`）；
+后台薄 UI：Site Check → Current check → **Ask about this check (MVP)**（REST
+`POST …/site-ops/insight-pack-qa`，与 CLI 同路径）。MVP 边界草稿：
+`docs/deidentified-assistant-boundary-draft-v1.md`。勿走已暂停的
 `cloud_inspection`；排障优先带 Cloud `run_id`。
 
 ## Product Boundary

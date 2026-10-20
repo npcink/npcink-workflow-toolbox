@@ -6,14 +6,14 @@
 
 - **入口仓:** Workflow Toolbox（Addon 不另开第二控制面）
 - **第一包:** 仅 **巡检摘要** `site_ops_insight_pack.v1`（Site Check 同源）
-- **验证方式:** 只读 REST + CLI 试问 Cloud — 见 [insight-pack-cloud-qa-cli.md](insight-pack-cloud-qa-cli.md)
+- **验证方式:** 只读 REST + CLI + Site Check **Ask about this check (MVP)** 薄 UI — 见 [insight-pack-cloud-qa-cli.md](insight-pack-cloud-qa-cli.md)
 - **写姿态:** `suggestion_only`；不直写 WP；不自动 Core proposal
 - **运输:** 推理在 Cloud；签名/runtime 经 Addon；**不**走已暂停的 `cloud_inspection`
 - **通道:** `hosted_ai_content_support.v1`（验证用），不是 Site Ops Cloud detail UI
 
 ## 后续（非 MVP）
 
-站点概况环境字段、真错误面、内容结构/连接用量等更多脱密包、对话壳 UI、按需取包编排 — 待 MVP 验证通过后再开。
+站点概况环境字段、真错误面、内容结构/连接用量等更多脱密包、完整多轮对话壳、按需取包编排 — 待 MVP 验证通过后再开（薄 Ask UI 已在 MVP）。
 
 ## 红线（摘要）
 
