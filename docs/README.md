@@ -5,7 +5,7 @@ Start from the active documents below before changing code.
 
 ## Current Reviews And Proposals
 
-- [Reversible Feature Pauses](reversible-feature-pauses-v1.md) — withdrawn Cloud inspection, audio and media optimization entrypoints; preserved data and restoration evidence.
+- [Reversible Feature Pauses](reversible-feature-pauses-v1.md) — withdrawn Cloud inspection, audio and media optimization entrypoints; preserved data and restoration evidence; cross-repo对照 + smoke matrix row owners (links Addon / Cloud inventories).
 
 - [SEO 专项功能暂停实施记录](seo-specialist-pause-implementation-2026-10-18.md) — three-repository implementation, retained data, restoration and verification states.
 

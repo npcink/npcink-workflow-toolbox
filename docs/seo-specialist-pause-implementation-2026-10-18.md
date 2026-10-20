@@ -43,6 +43,11 @@ Addon 通过宿主的 `wpai_default_feature_classes` 和
 源码位置与恢复边界分别见 [Cloud 暂停契约](../../npcink-ai-cloud/docs/seo-specialist-pause-v1.md)
 和 [Addon 暂停契约](../../npcink-cloud-addon/docs/seo-specialist-pause-v1.md)。
 
+三仓 task-id / runtime-key 对照、错误码差异、发布顺序与冒烟矩阵行号见
+[可恢复暂停范围 / Cross-repo对照](reversible-feature-pauses-v1.md)；Addon 侧展开表见
+[Addon reversible-feature-pauses-v1](https://github.com/npcink/npcink-cloud-addon/blob/master/docs/reversible-feature-pauses-v1.md)
+（[PR #309](https://github.com/npcink/npcink-cloud-addon/pull/309) 合并前以该 PR 为准）。默认保持 SEO/AEO/GEO 暂停。
+
 ## 首次候选的 M4 和交付状态（历史快照）
 
 局域网 SSH 连续两次关闭连接，停止重试该地址。文档规定的 Pgy 路径可读状态；
