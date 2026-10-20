@@ -21,6 +21,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	private Rest_Nightly_Inspection_Bridges $nightly_bridges;
 	private Rest_Web_Search_Bridges $web_search_bridges;
 	private Rest_Site_Knowledge_Bridges $site_knowledge_bridges;
+	private Rest_Site_Ops_Insight_Bridges $site_ops_insight_bridges;
 	private Rest_Media_Derivative_Previews $media_derivative_previews;
 	private Rest_Flow_Plan_Bridges $flow_plan_bridges;
 	private Rest_Media_Optimization_Bridges $media_optimization_bridges;
@@ -85,6 +86,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->nightly_bridges                = new Rest_Nightly_Inspection_Bridges( $settings, $client );
 		$this->web_search_bridges             = new Rest_Web_Search_Bridges( $client );
 		$this->site_knowledge_bridges         = new Rest_Site_Knowledge_Bridges( $client );
+		$this->site_ops_insight_bridges       = new Rest_Site_Ops_Insight_Bridges( $settings );
 		$this->media_derivative_previews      = new Rest_Media_Derivative_Previews( $client );
 		$this->flow_plan_bridges              = new Rest_Flow_Plan_Bridges( $client );
 		$this->media_optimization_bridges     = new Rest_Media_Optimization_Bridges();
@@ -139,6 +141,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->post( '/nightly-inspection/cloud-batch/(?P<run_id>[A-Za-z0-9._:-]+)/retry', 'nightly_inspection_cloud_batch_retry' );
 		$this->post( '/review-tally/mark', 'review_tally_mark' );
 		$this->get( '/review-tally/summary', 'review_tally_summary' );
+		$this->get( '/site-ops/insight-pack', 'site_ops_insight_pack' );
 
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
@@ -271,6 +274,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/image-candidates'                        => 'cap.toolbox.image_source',
 			'/web-search/test'                         => 'cap.toolbox.web_search',
 			'/web-search/diagnostics'                  => 'cap.toolbox.web_search',
+			'/site-ops/insight-pack'                    => 'cap.toolbox.admin',
 			'/site-knowledge/status'                   => 'cap.toolbox.knowledge.read',
 			'/site-knowledge/search'                   => 'cap.toolbox.knowledge.search',
 			'/site-knowledge/sync'                     => 'cap.toolbox.knowledge.sync',
@@ -319,6 +323,10 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function site_media_index_batch( WP_REST_Request $request ) {
 		return $this->surface_bridges->site_media_index_batch( $request );
+	}
+
+	public function site_ops_insight_pack( WP_REST_Request $request ) {
+		return $this->site_ops_insight_bridges->site_ops_insight_pack( $request );
 	}
 
 	public function site_knowledge_status( WP_REST_Request $request ) {

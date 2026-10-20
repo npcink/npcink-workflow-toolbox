@@ -222,6 +222,7 @@ first scoped version; those actions stay administrator-facing.
 - `/web-search/test`
 - `/web-search/diagnostics`
 - `/site-knowledge/status`
+- `/site-ops/insight-pack`
 - `/site-knowledge/search`
 - `/site-knowledge/sync`
 - `/site-media/index-batch`
