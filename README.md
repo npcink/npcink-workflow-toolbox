@@ -299,6 +299,8 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/web-search/test`
 - `POST /wp-json/npcink-toolbox/v1/web-search/diagnostics`
 - `GET /wp-json/npcink-toolbox/v1/site-knowledge/status`
+- `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack` (local `site_ops_insight_pack.v1` only; `manage_options`; no Cloud analysis, no WordPress writes)
+- `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa` (MVP Ask UI: local pack + hosted_ai_content_support.v1; `manage_options`; suggestion-only, no WordPress writes)
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/search`
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync` (refresh-only bounded
   Cloud request; no rebuild/delete, indexing lifecycle, local queue, or

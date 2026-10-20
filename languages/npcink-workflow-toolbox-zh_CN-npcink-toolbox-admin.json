@@ -951,7 +951,14 @@
       "Refresh the batch history and retry this image when it is ready.": ["刷新批次历史，准备好后重试此图片。"],
       "Optimization cancelled. Completed items were kept; continue when ready.": ["优化已取消，已完成的项目会保留；准备好后可继续。"],
       "Cancel optimization": ["取消优化"],
-      "Cancelling optimization...": ["正在取消优化……"]
+      "Cancelling optimization...": ["正在取消优化……"],
+      "Enter a question first.": ["请先输入问题。"],
+      "REST URL is missing.": ["缺少 REST URL。"],
+      "Building the pack and asking Cloud…": ["正在组装摘要并询问 Cloud…"],
+      "Suggestion ready (dev test, no WordPress write).": ["建议已生成（开发测试，未写入 WordPress）。"],
+      "Cloud returned without a usable answer. Check run_id / Addon.": ["Cloud 未返回可用答复。请检查 run_id / Addon。"],
+      "(empty answer)": ["（空答复）"],
+      "Running...": ["运行中…"]
     }
   }
 }

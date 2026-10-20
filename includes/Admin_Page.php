@@ -839,6 +839,27 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					</div>
 				</section>
 
+				<section class="npcink-toolbox__card" data-toolbox-insight-pack-qa aria-label="<?php esc_attr_e( 'Ask about this check (dev test)', 'npcink-workflow-toolbox' ); ?>">
+					<div class="npcink-toolbox__section-heading">
+						<div>
+							<h3><?php esc_html_e( 'Ask about this check (dev test)', 'npcink-workflow-toolbox' ); ?></h3>
+							<p><?php esc_html_e( 'Sends the de-identified Site Check insight pack to Hosted AI for a suggestion-only answer. Does not write WordPress and does not use the paused Cloud detail / cloud_inspection path. Dev-test panel — not a full chat product.', 'npcink-workflow-toolbox' ); ?></p>
+						</div>
+					</div>
+					<label for="npcink-toolbox-insight-pack-qa-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
+					<textarea id="npcink-toolbox-insight-pack-qa-question" class="large-text" rows="3" data-toolbox-insight-pack-qa-question placeholder="<?php esc_attr_e( 'Example: What should we prioritize on this site?', 'npcink-workflow-toolbox' ); ?>"><?php echo esc_textarea( __( '根据这份巡检摘要，站点优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ) ); ?></textarea>
+					<p class="npcink-toolbox__ops-status-actions" style="margin-top:10px;">
+						<button type="button" class="button button-primary" data-toolbox-insight-pack-qa-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
+						<span class="description"><?php esc_html_e( 'Administrator permission required. May take up to about 45 seconds.', 'npcink-workflow-toolbox' ); ?></span>
+					</p>
+					<div class="npcink-toolbox__result-notice" data-toolbox-insight-pack-qa-status hidden></div>
+					<div data-toolbox-insight-pack-qa-result hidden>
+						<p><strong><?php esc_html_e( 'run_id', 'npcink-workflow-toolbox' ); ?>:</strong> <code data-toolbox-insight-pack-qa-run-id></code>
+							<span class="description"> · <span data-toolbox-insight-pack-qa-meta></span></span></p>
+						<div class="npcink-toolbox__markdown" data-toolbox-insight-pack-qa-answer></div>
+					</div>
+				</section>
+
 				<details class="npcink-toolbox__ops-loop-disclosure"<?php echo null === $preview ? ' open' : ''; ?>>
 					<summary><?php esc_html_e( 'How to use Site Check', 'npcink-workflow-toolbox' ); ?></summary>
 					<section class="npcink-toolbox__ops-detail-grid" aria-label="<?php esc_attr_e( 'Site Check operator loop', 'npcink-workflow-toolbox' ); ?>">

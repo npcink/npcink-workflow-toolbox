@@ -9713,3 +9713,91 @@ msgstr "Cloud 分析已暂时停用，此摘要仅使用本地规则。"
 
 msgid "Preview whether the local scheduled review can read public content."
 msgstr "预览本地定时检查能否读取公开内容。"
+
+#: includes/Admin_Page.php
+msgid "Ask about this check (dev test)"
+msgstr "关于本次检查提问（开发测试）"
+
+#: includes/Admin_Page.php
+msgid "Sends the de-identified Site Check insight pack to Hosted AI for a suggestion-only answer. Does not write WordPress and does not use the paused Cloud detail / cloud_inspection path. Dev-test panel — not a full chat product."
+msgstr "把脱密后的站点检查摘要发给托管 AI，仅返回建议。不会写入 WordPress，也不走已暂停的 Cloud detail / cloud_inspection。开发测试面板，不是完整对话产品。"
+
+#: includes/Admin_Page.php
+msgid "Ask question"
+msgstr "提问"
+
+#: includes/Admin_Page.php
+msgid "Administrator permission required. May take up to about 45 seconds."
+msgstr "需要管理员权限。可能需要约 45 秒。"
+
+#: includes/Admin_Page.php
+msgid "Example: What should we prioritize on this site?"
+msgstr "例如：这个站点优先该处理什么？"
+
+#: includes/Admin_Page.php
+msgid "Question"
+msgstr "问题"
+
+#: includes/Admin_Page.php
+msgid "根据这份巡检摘要，站点优先该处理哪 1–3 件事？"
+msgstr "根据这份巡检摘要，站点优先该处理哪 1–3 件事？"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Npcink Cloud Addon is required for Ask about this check (dev test)."
+msgstr "关于本次检查提问（开发测试）需要 Npcink Cloud Addon。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Enter a question about the de-identified Site Check pack."
+msgstr "请输入关于脱密站点检查摘要的问题。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Keep the question under 2000 characters."
+msgstr "问题请控制在 2000 字以内。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Connect and verify Npcink Cloud before asking about this check."
+msgstr "提问前请先连接并验证 Npcink Cloud。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Could not encode the de-identified insight pack."
+msgstr "无法编码脱密巡检摘要。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again."
+msgstr "本站 Cloud 同时只允许 1 个进行中的运行。请等上一次结束后再试。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Cloud returned an unexpected response."
+msgstr "Cloud 返回了意外响应。"
+
+#: includes/Rest_Site_Ops_Insight_Bridges.php
+msgid "Could not build the local Site Check insight pack."
+msgstr "无法生成本地站点检查摘要包。"
+
+#: assets/admin.js
+msgid "Enter a question first."
+msgstr "请先输入问题。"
+
+#: assets/admin.js
+msgid "REST URL is missing."
+msgstr "缺少 REST URL。"
+
+#: assets/admin.js
+msgid "Building the pack and asking Cloud…"
+msgstr "正在组装摘要并询问 Cloud…"
+
+#: assets/admin.js
+msgid "Suggestion ready (dev test, no WordPress write)."
+msgstr "建议已生成（开发测试，未写入 WordPress）。"
+
+#: assets/admin.js
+msgid "Cloud returned without a usable answer. Check run_id / Addon."
+msgstr "Cloud 未返回可用答复。请检查 run_id / Addon。"
+
+#: assets/admin.js
+msgid "(empty answer)"
+msgstr "（空答复）"
+
+#: includes/Admin_Page.php
+msgid "run_id"
+msgstr "run_id"

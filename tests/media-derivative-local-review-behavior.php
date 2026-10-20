@@ -161,6 +161,7 @@ require_once dirname( __DIR__ ) . '/includes/Rest_Media_Derivative_Previews.php'
 require_once dirname( __DIR__ ) . '/includes/Rest_Site_Knowledge_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Web_Search_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Nightly_Inspection_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Site_Ops_Insight_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
 
 $controller  = ( new ReflectionClass( \Npcink_Toolbox\Rest_Controller::class ) )->newInstanceWithoutConstructor();
