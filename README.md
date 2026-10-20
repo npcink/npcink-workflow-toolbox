@@ -15,6 +15,8 @@ backup recovery, Site Knowledge and ordinary text/image/ALT stay available.
 See [reversible pauses](docs/reversible-feature-pauses-v1.md). Retained contract
 and architecture descriptions below are not availability promises.
 
+三仓最低配版本地板以 Cloud [`docs/compatibility-matrix.md`](https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md) 为准（[Cloud PR #1170](https://github.com/npcink/npcink-ai-cloud/pull/1170) 合并前以该 PR 为准）；本仓不做运行时硬拒、不对 Addon 做 `version_compare`。
+
 The editor's `整理` action now requests an inline Cloud-formatted body and applies
 validated text to the visible Gutenberg editor with undo, without invoking save
 or publish. See [Content formatting](docs/editor-content-format-v1.md) for its

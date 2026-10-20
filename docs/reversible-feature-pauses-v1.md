@@ -46,6 +46,10 @@ not a shared constant package). Unpause publish order remains
 **Cloud → Addon → Toolbox** so UI never advertises a path Cloud still rejects.
 Do not restore SEO/AEO/GEO or the three runtime keys from documentation alone.
 
+Version / floors compatibility (separate from pause inventories) is owned by Cloud
+[`docs/compatibility-matrix.md`](https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md)
+([PR #1170](https://github.com/npcink/npcink-ai-cloud/pull/1170) until merge). Toolbox does not add runtime hard-reject or Addon `version_compare` for those floors.
+
 Authoritative task-id / runtime-key tables, error-code families, and the pause
 smoke matrix row map live in the Addon inventory. Cloud and this file keep
 sibling scopes for the same faces.

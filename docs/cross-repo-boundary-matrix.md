@@ -8,6 +8,15 @@ control plane, fixed Toolbox surfaces, Cloud Addon transport, and hosted Cloud
 runtime. It is a boundary reference for implementation reviews, not a new
 runtime contract.
 
+## 三仓最低配兼容（以 Cloud 表为准）
+
+Closed-beta Cloud ↔ Addon ↔ Toolbox version floors live only in Cloud
+[`docs/compatibility-matrix.md`](https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md)
+(landing in [Cloud PR #1170](https://github.com/npcink/npcink-ai-cloud/pull/1170); use that PR until merge).
+Local sibling: `../../npcink-ai-cloud/docs/compatibility-matrix.md`.
+This repo does **not** add a runtime hard-reject or Addon `version_compare`;
+exact `contract_version` string match remains the only hard gate (see Cloud table / ADR-053).
+
 | Repo | Owns | Must Not Own | Allowed Handoff |
 | --- | --- | --- | --- |
 | `npcink-governance-core` | Proposal intake, approval state, preflight authorization, audit records, app-key scope policy, and governance decision status. | Final WordPress write execution, reusable first-party ability or workflow definitions, hosted model routing, workflow runtime, queues, schedulers, provider keys, or Cloud runtime state. | Receives proposal-ready `flagged_media_removal_plan.v1` payloads, issues commit preflight context, and records execution outcomes from the adapter path. |
