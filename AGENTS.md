@@ -17,6 +17,10 @@ Every new AI development session should start with:
 4. Briefly report the current module, relevant boundary, and intended focused
    gate before editing.
 
+Cross-repo compatibility is governed by
+https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md;
+do not add Addon `version_compare` checks.
+
 ## Product Boundary
 
 Npcink Toolbox is the WordPress operator-facing AI tool surface.
