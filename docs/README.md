@@ -27,6 +27,7 @@ Start from the active documents below before changing code.
 - [Admin UI Design Standard v1](admin-ui-design-standard-v1.md)
 - [Single-Article Editor Tools Development Standard v1](single-article-editor-tools-development-standard-v1.md)
 - [Cross-Repo Boundary Matrix](cross-repo-boundary-matrix.md)
+- [三仓最低配兼容（Cloud 表）](https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md) — Cloud `docs/compatibility-matrix.md` is the sole floors ledger; Toolbox does not hard-reject or `version_compare` Addon ([Cloud PR #1170](https://github.com/npcink/npcink-ai-cloud/pull/1170) until merge).
 - [Cross-Repo Database Boundary](cross-repo-database-boundary.md)
 - [Cross-Repo Database Boundary Closeout](archive/2026-07/cross-repo-database-boundary-closeout-2026-07-08.md)
 - [Cross-Repo Contract Reuse Acceptance](cross-repo-contract-reuse-acceptance.md)
