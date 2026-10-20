@@ -955,7 +955,7 @@
       "Enter a question first.": ["请先输入问题。"],
       "REST URL is missing.": ["缺少 REST URL。"],
       "Building the pack and asking Cloud…": ["正在组装摘要并询问 Cloud…"],
-      "Suggestion ready (dev test, no WordPress write).": ["建议已生成（开发测试，未写入 WordPress）。"],
+      "Suggestion ready (no WordPress write).": ["建议已生成（未写入 WordPress）。"],
       "Cloud returned without a usable answer. Check run_id / Addon.": ["Cloud 未返回可用答复。请检查 run_id / Addon。"],
       "(empty answer)": ["（空答复）"],
       "Running...": ["运行中…"],

@@ -7789,7 +7789,7 @@
 					}
 					resultEl.hidden = false;
 					if (body && body.ok && answer) {
-						setStatus(t('Suggestion ready (dev test, no WordPress write).'), 'is-ok');
+						setStatus(t('Suggestion ready (no WordPress write).'), 'is-ok');
 					} else {
 						setStatus(t('Cloud returned without a usable answer. Check run_id / Addon.'), 'is-warning');
 					}
