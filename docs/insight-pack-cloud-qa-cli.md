@@ -56,7 +56,9 @@
 
 `https://magick-ai.local/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=operations-insights&site_check_tab=current-check`
 
-确认本机在 `#289` 分支（magick-ai 插件目录是本仓 symlink）。看答复与 `run_id`（仅建议，不写站）。若 Cloud 返回并发 429：等挂起 run 释放后重试。
+确认本机在 `#289` 分支（magick-ai 插件目录是本仓 symlink）。看答复与 `run_id`（仅建议，不写站）。答复区会把 Markdown（标题 / 列表 / **加粗** / `代码` / 链接）渲染成可读排版；HTML 先转义，不含原始 `**` 纯文本。若 Cloud 返回并发 429：等挂起 run 释放后重试。
+
+验证 Markdown 展示：硬刷新后台（必要时清缓存）→ 提问 → 确认加粗/列表正常、没有露出 `**`，且恶意 HTML 不会执行。
 
 ## 怎么跑
 

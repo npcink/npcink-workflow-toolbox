@@ -856,7 +856,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					<div data-toolbox-insight-pack-qa-result hidden>
 						<p><strong><?php esc_html_e( 'run_id', 'npcink-workflow-toolbox' ); ?>:</strong> <code data-toolbox-insight-pack-qa-run-id></code>
 							<span class="description"> · <span data-toolbox-insight-pack-qa-meta></span></span></p>
-						<pre class="npcink-toolbox__result-raw" data-toolbox-insight-pack-qa-answer style="white-space:pre-wrap;"></pre>
+						<div class="npcink-toolbox__markdown" data-toolbox-insight-pack-qa-answer></div>
 					</div>
 				</section>
 

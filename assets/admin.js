@@ -65,6 +65,150 @@
 		container.appendChild(item);
 	}
 
+
+	function escapeHtml(value) {
+		return String(value == null ? '' : value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+
+	function formatInlineMarkdown(value) {
+		let text = escapeHtml(value);
+		const inlineCodes = [];
+		// Protect inline code first so later emphasis/link passes cannot rewrite HTML or snake_case.
+		text = text.replace(/`([^`\n]+)`/g, (_match, code) => {
+			const index = inlineCodes.length;
+			inlineCodes.push('<code class="npcink-toolbox-md-inline">' + code + '</code>');
+			return '@@CODE' + index + '@@';
+		});
+		// Asterisk emphasis only: underscore forms break identifiers like stale_content_backlog.
+		text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+		text = text.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+		text = text.replace(
+			/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+			'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+		);
+		text = text.replace(/@@CODE(\d+)@@/g, (_match, index) => inlineCodes[Number(index)] || '');
+		return text;
+	}
+
+	function renderSafeMarkdown(source) {
+		const raw = String(source == null ? '' : source).replace(/\r\n?/g, '\n').trim();
+		if (!raw) {
+			return '';
+		}
+
+		const fences = [];
+		const protectedText = raw.replace(/```([\w-]*)\n?([\s\S]*?)```/g, (_match, _lang, code) => {
+			const index = fences.length;
+			fences.push(
+				'<pre class="npcink-toolbox__md-code"><code>' +
+					escapeHtml(String(code).replace(/\n$/, '')) +
+					'</code></pre>'
+			);
+			return '\n@@FENCE' + index + '@@\n';
+		});
+
+		const lines = protectedText.split('\n');
+		const out = [];
+		let i = 0;
+
+		while (i < lines.length) {
+			const line = lines[i];
+			const fenceMatch = String(line || '').trim().match(/^@@FENCE(\d+)@@$/);
+			if (fenceMatch) {
+				out.push(fences[Number(fenceMatch[1])] || '');
+				i += 1;
+				continue;
+			}
+
+			if (!String(line || '').trim()) {
+				i += 1;
+				continue;
+			}
+
+			const heading = line.match(/^(#{1,4})\s+(.+)$/);
+			if (heading) {
+				const level = heading[1].length;
+				out.push(
+					'<h' +
+						level +
+						' class="npcink-toolbox__md-h">' +
+						formatInlineMarkdown(heading[2]) +
+						'</h' +
+						level +
+						'>'
+				);
+				i += 1;
+				continue;
+			}
+
+			if (/^\s*[-*+]\s+/.test(line)) {
+				const items = [];
+				while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
+					items.push('<li>' + formatInlineMarkdown(lines[i].replace(/^\s*[-*+]\s+/, '')) + '</li>');
+					i += 1;
+				}
+				out.push('<ul class="npcink-toolbox__md-list">' + items.join('') + '</ul>');
+				continue;
+			}
+
+			if (/^\s*\d+\.\s+/.test(line)) {
+				const items = [];
+				while (i < lines.length) {
+					if (/^\s*\d+\.\s+/.test(lines[i])) {
+						items.push('<li>' + formatInlineMarkdown(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>');
+						i += 1;
+						continue;
+					}
+					if (
+						!String(lines[i] || '').trim() &&
+						i + 1 < lines.length &&
+						/^\s*\d+\.\s+/.test(lines[i + 1])
+					) {
+						i += 1;
+						continue;
+					}
+					break;
+				}
+				out.push('<ol class="npcink-toolbox__md-list">' + items.join('') + '</ol>');
+				continue;
+			}
+
+			const para = [];
+			while (
+				i < lines.length &&
+				String(lines[i] || '').trim() &&
+				!/^(#{1,4})\s+/.test(lines[i]) &&
+				!/^\s*[-*+]\s+/.test(lines[i]) &&
+				!/^\s*\d+\.\s+/.test(lines[i]) &&
+				!/^@@FENCE\d+@@$/.test(String(lines[i] || '').trim())
+			) {
+				para.push(formatInlineMarkdown(lines[i]));
+				i += 1;
+			}
+			out.push('<p class="npcink-toolbox__md-p">' + para.join('<br>') + '</p>');
+		}
+
+		return out.join('');
+	}
+
+	function setMarkdownContent(node, source) {
+		if (!node) {
+			return;
+		}
+		const html = renderSafeMarkdown(source);
+		if (!html) {
+			node.textContent = '';
+			return;
+		}
+		node.innerHTML = html;
+	}
+
+
 	function appendPositiveMeta(container, label, value) {
 		const numeric = Number(value);
 		if (!Number.isFinite(numeric) || numeric <= 0) {
@@ -7562,7 +7706,7 @@
 				button.textContent = (config.labels && config.labels.running) || t('Running...');
 				setStatus(t('Building the pack and asking Cloud…'), 'is-warning');
 				resultEl.hidden = true;
-				answerEl.textContent = '';
+				setMarkdownContent(answerEl, '');
 				runIdEl.textContent = '';
 				if (metaEl) {
 					metaEl.textContent = '';
@@ -7575,7 +7719,7 @@
 					const packRunId = String((body && body.pack_run_id) || '');
 					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
 					runIdEl.textContent = runId || '—';
-					answerEl.textContent = answer || t('(empty answer)');
+					setMarkdownContent(answerEl, answer || t('(empty answer)'));
 					if (metaEl) {
 						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · ');
 					}

@@ -4272,3 +4272,68 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__review-tally-note {
 	color: #50575e;
 }
+
+
+.npcink-toolbox__markdown {
+	max-height: 420px;
+	overflow: auto;
+	margin: 8px 0 0;
+	padding: 12px 14px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	line-height: 1.55;
+	color: #1d2327;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-p {
+	margin: 0 0 0.75em;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-p:last-child {
+	margin-bottom: 0;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-h {
+	margin: 0.9em 0 0.45em;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-h:first-child {
+	margin-top: 0;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-list {
+	margin: 0 0 0.75em;
+	padding-left: 1.35em;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-list li {
+	margin: 0.25em 0;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox-md-inline,
+.npcink-toolbox__markdown .npcink-toolbox__md-code code {
+	font-family: Menlo, Consolas, Monaco, monospace;
+	font-size: 12px;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox-md-inline {
+	padding: 0.1em 0.35em;
+	background: #f0f0f1;
+	border-radius: 3px;
+}
+
+.npcink-toolbox__markdown .npcink-toolbox__md-code {
+	margin: 0 0 0.75em;
+	padding: 10px 12px;
+	overflow: auto;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+}
+
+.npcink-toolbox__markdown a {
+	color: #2271b1;
+}

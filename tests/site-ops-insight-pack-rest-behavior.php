@@ -266,5 +266,7 @@ $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.
 site_ops_rest_assert( false !== strpos( $admin_source, 'data-toolbox-insight-pack-qa' ), 'Site Check Current check renders MVP Ask UI markup.' );
 site_ops_rest_assert( false !== strpos( $admin_source, 'Ask about this check (dev test)' ), 'Ask UI is labeled as a dev-test panel.' );
 site_ops_rest_assert( false !== strpos( $js_source, 'initInsightPackQa' ) && false !== strpos( $js_source, 'site-ops/insight-pack-qa' ), 'admin.js wires Ask UI to insight-pack-qa REST.' );
+site_ops_rest_assert( false !== strpos( $js_source, 'renderSafeMarkdown' ) && false !== strpos( $js_source, 'setMarkdownContent' ) && false !== strpos( $js_source, 'escapeHtml' ), 'Ask UI renders Cloud answers through a sanitizing Markdown helper.' );
+site_ops_rest_assert( false !== strpos( $admin_source, 'npcink-toolbox__markdown' ) && false !== strpos( $admin_source, 'data-toolbox-insight-pack-qa-answer' ) && false === strpos( $admin_source, 'data-toolbox-insight-pack-qa-answer style=' ), 'Ask UI answer surface is a Markdown container, not a raw <pre> dump.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";
