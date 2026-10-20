@@ -839,11 +839,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					</div>
 				</section>
 
-				<section class="npcink-toolbox__card" data-toolbox-insight-pack-qa aria-label="<?php esc_attr_e( 'Ask about this check (dev test)', 'npcink-workflow-toolbox' ); ?>">
+				<section class="npcink-toolbox__card" data-toolbox-insight-pack-qa aria-label="<?php esc_attr_e( 'Ask about this check', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__section-heading">
 						<div>
-							<h3><?php esc_html_e( 'Ask about this check (dev test)', 'npcink-workflow-toolbox' ); ?></h3>
-							<p><?php esc_html_e( 'Sends the de-identified Site Check insight pack to Hosted AI for a suggestion-only answer. Does not write WordPress and does not use the paused Cloud detail / cloud_inspection path. Dev-test panel — not a full chat product.', 'npcink-workflow-toolbox' ); ?></p>
+							<h3><?php esc_html_e( 'Ask about this check', 'npcink-workflow-toolbox' ); ?></h3>
+							<p><?php esc_html_e( 'Sends the de-identified Site Check insight pack to Hosted AI for a suggestion-only answer. Does not write WordPress and does not use the paused Cloud detail / cloud_inspection path. Internal trial panel — not a full chat product.', 'npcink-workflow-toolbox' ); ?></p>
 						</div>
 					</div>
 					<label for="npcink-toolbox-insight-pack-qa-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
