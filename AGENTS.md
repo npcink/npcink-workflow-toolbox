@@ -87,6 +87,9 @@ implementing it inside Toolbox.
 
 ## Development Rules
 
+- New work branches must start from the latest `master`; never branch off an
+  unmerged branch. Keep at most 1 unmerged branch per repo (exception: changes
+  with zero file overlap may each branch from `master`).
 - Check `git status --short --branch` before edits.
 - Use command-line `git` for all ordinary Git work: status, diff, branch,
   fetch, merge/rebase, staging, commit, push, pruning, and local sync. Use
