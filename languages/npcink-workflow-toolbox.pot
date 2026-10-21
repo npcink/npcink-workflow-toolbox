@@ -9587,3 +9587,31 @@ msgstr ""
 
 msgid "Preview whether the local scheduled review can read public content."
 msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "The previous AI task on this site has not finished yet. Wait about 3 minutes, then try again."
+msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "Your AI credits have run out. Top up on Npcink Cloud, then try again."
+msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "This site is no longer connected to Npcink Cloud. Reconnect it on the Npcink AI > Cloud Addon page, then try again."
+msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "This site is turned off in Npcink Cloud. Turn it on in Npcink Cloud, then try again."
+msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "Too many AI requests right now. Wait a minute, then try again."
+msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "Npcink Cloud is temporarily unavailable. Try again in a few minutes."
+msgstr ""
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support."
+msgstr ""

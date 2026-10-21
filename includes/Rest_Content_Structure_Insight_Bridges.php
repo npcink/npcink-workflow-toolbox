@@ -168,7 +168,6 @@ final class Rest_Content_Structure_Insight_Bridges {
 			$code         = (string) $response->get_error_code();
 			$raw_message  = (string) $response->get_error_message();
 			$error_data   = $response->get_error_data();
-			$error_status = is_array( $error_data ) ? (int) ( $error_data['status'] ?? 0 ) : 0;
 			$data         = array(
 				'status'      => 502,
 				'pack_run_id' => $pack_run_id,
@@ -179,12 +178,11 @@ final class Rest_Content_Structure_Insight_Bridges {
 			$is_busy_slot = (
 				'cloud_commercial_concurrency_exceeded' === $code
 				|| false !== strpos( $code, 'concurrency' )
-				|| 429 === $error_status
 				|| false !== strpos( strtolower( $raw_message ), 'max active' )
 				|| false !== strpos( strtolower( $raw_message ), 'active cloud run' )
 			);
 			if ( $is_busy_slot ) {
-				$friendly          = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
+				$friendly          = Cloud_Error_Plain_Messages::message( Cloud_Error_Plain_Messages::KEY_BUSY );
 				$data['hint']      = $friendly;
 				$data['status']    = 429;
 				$data['busy_slot'] = true;

@@ -9868,3 +9868,31 @@ msgstr "提问对象"
 
 msgid "Choose what to ask about first."
 msgstr "请先选择提问对象。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "The previous AI task on this site has not finished yet. Wait about 3 minutes, then try again."
+msgstr "上一个 AI 任务还没结束。请等 3 分钟左右再试。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "Your AI credits have run out. Top up on Npcink Cloud, then try again."
+msgstr "AI 积分已用完。请去 Npcink Cloud 充值后再试。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "This site is no longer connected to Npcink Cloud. Reconnect it on the Npcink AI > Cloud Addon page, then try again."
+msgstr "此站点已与 Npcink Cloud 断开。请在“Npcink AI > 云端扩展”页面重新连接后再试。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "This site is turned off in Npcink Cloud. Turn it on in Npcink Cloud, then try again."
+msgstr "此站点在 Npcink Cloud 中已停用。请在 Npcink Cloud 中启用后再试。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "Too many AI requests right now. Wait a minute, then try again."
+msgstr "AI 请求太频繁了。请等一分钟后再试。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "Npcink Cloud is temporarily unavailable. Try again in a few minutes."
+msgstr "Npcink Cloud 暂时不可用。请过几分钟再试。"
+
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support."
+msgstr "AI 请求没有成功。请稍后再试，若一直失败请到「检查」页复制信息联系客服。"

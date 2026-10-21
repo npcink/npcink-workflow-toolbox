@@ -11,6 +11,7 @@
       },
       "Toolbox": ["流程工具箱"],
       "Request failed.": ["请求失败。"],
+      "The previous AI task on this site has not finished yet. Wait about 3 minutes, then try again.": ["上一个 AI 任务还没结束。请等 3 分钟左右再试。"],
       "Authorizing bounded read...": ["正在授权有限范围读取……"],
       "Code: ": ["代码："],
       "Cloud runtime profile expects text input but received an empty value. Check the Cloud route/profile input mapping.": ["Cloud 运行时配置需要文本输入，但收到了空值。请检查 Cloud 路由或 profile 的输入映射。"],
