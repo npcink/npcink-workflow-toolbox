@@ -157,24 +157,78 @@
 			}
 
 			if (/^\s*\d+\.\s+/.test(line)) {
+				// One <ol> for consecutive numbered items, even when Cloud separates them with
+				// blank lines and sub-lines (做什么/为什么/怎么做). Every fragment is still
+				// escaped through formatInlineMarkdown; only our own tags are emitted.
+				const isNumbered = (value) => /^\s*\d+\.\s+/.test(String(value || ''));
+				const isBullet = (value) => /^\s*[-*+]\s+/.test(String(value || ''));
+				const isBreak = (value) =>
+					/^(#{1,4})\s+/.test(String(value || '')) || /^@@FENCE\d+@@$/.test(String(value || '').trim());
+				const numberedAhead = (from) => {
+					for (let j = from; j < lines.length; j += 1) {
+						if (isBreak(lines[j])) {
+							return false;
+						}
+						if (isNumbered(lines[j])) {
+							return true;
+						}
+					}
+					return false;
+				};
+				const startNumber = Number((line.match(/^\s*(\d+)\./) || [])[1] || 1);
 				const items = [];
+				let current = null;
+				let afterBlank = false;
 				while (i < lines.length) {
-					if (/^\s*\d+\.\s+/.test(lines[i])) {
-						items.push('<li>' + formatInlineMarkdown(lines[i].replace(/^\s*\d+\.\s+/, '')) + '</li>');
+					const value = String(lines[i] || '');
+					if (isNumbered(value)) {
+						current = { title: formatInlineMarkdown(value.replace(/^\s*\d+\.\s+/, '')), parts: [] };
+						items.push(current);
+						afterBlank = false;
 						i += 1;
 						continue;
 					}
-					if (
-						!String(lines[i] || '').trim() &&
-						i + 1 < lines.length &&
-						/^\s*\d+\.\s+/.test(lines[i + 1])
-					) {
+					if (!value.trim()) {
+						afterBlank = true;
 						i += 1;
 						continue;
 					}
-					break;
+					if (isBreak(value)) {
+						break;
+					}
+					// After a blank line, plain unindented text belongs to the list only if
+					// another numbered item follows; otherwise it is a closing paragraph.
+					if (afterBlank && !/^\s+/.test(value) && !numberedAhead(i + 1)) {
+						break;
+					}
+					if (isBullet(value)) {
+						const sub = [];
+						while (i < lines.length && isBullet(lines[i])) {
+							sub.push('<li>' + formatInlineMarkdown(String(lines[i]).replace(/^\s*[-*+]\s+/, '')) + '</li>');
+							i += 1;
+						}
+						current.parts.push('<ul class="npcink-toolbox__md-list">' + sub.join('') + '</ul>');
+					} else {
+						current.parts.push('<span class="npcink-toolbox__md-li-line">' + formatInlineMarkdown(value.trim()) + '</span>');
+						i += 1;
+					}
+					afterBlank = false;
 				}
-				out.push('<ol class="npcink-toolbox__md-list">' + items.join('') + '</ol>');
+				const startAttr = startNumber > 1 ? ' start="' + startNumber + '"' : '';
+				out.push(
+					'<ol class="npcink-toolbox__md-list"' +
+						startAttr +
+						'>' +
+						items
+							.map((item) =>
+								'<li>' + item.title + (item.parts.length ? '<br>' + item.parts.join('<br>') : '') + '</li>'
+							)
+							.join('') +
+						'</ol>'
+				);
+				if (i < lines.length && !String(lines[i] || '').trim()) {
+					i += 1;
+				}
 				continue;
 			}
 
