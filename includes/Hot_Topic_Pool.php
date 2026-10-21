@@ -66,14 +66,14 @@ final class Hot_Topic_Pool {
 			if ( is_array( $backup ) && ! empty( $backup['items'] ) && is_array( $backup['items'] ) ) {
 				$backup['status']       = 'stale';
 				$backup['cache_status'] = 'stale';
-				$backup['message']      = $result->get_error_message();
+				$backup['message']      = Cloud_Error_Plain_Messages::visible_message( $result );
 				return $backup;
 			}
 
 			return array(
 				'status'       => 'failed',
 				'cache_status' => 'error',
-				'message'      => $result->get_error_message(),
+				'message'      => Cloud_Error_Plain_Messages::visible_message( $result ),
 				'items'        => array(),
 			);
 		}

@@ -9615,3 +9615,24 @@ msgstr ""
 #: includes/Cloud_Error_Plain_Messages.php
 msgid "The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support."
 msgstr ""
+
+msgid "Details for support"
+msgstr ""
+
+msgid "The last nightly check did not finish. You can try it again; nothing on your site was changed."
+msgstr ""
+
+msgid "Nightly check"
+msgstr ""
+
+msgid "Still checking the previous image task. Nothing is uploaded again."
+msgstr ""
+
+msgid "Some items did not finish. Check the failed items, then try them again."
+msgstr ""
+
+msgid "The AI gave no suggestions for this paragraph, so the local check is shown instead."
+msgstr ""
+
+msgid "The AI did not return a usable suggestion. Try again, or use the full-article check."
+msgstr ""

@@ -211,7 +211,7 @@ final class Rest_Editor_Taxonomy_Shaping {
 			'preferred_source_ability_id' => 'npcink-abilities-toolkit/build-taxonomy-tag-review-set',
 			'runtime_owner'               => 'npcink-workflow-toolbox',
 			'fallback_reason'             => sanitize_key( $fallback_reason->get_error_code() ),
-			'fallback_message'            => sanitize_text_field( $fallback_reason->get_error_message() ),
+			'fallback_message'            => sanitize_text_field( Cloud_Error_Plain_Messages::visible_message( $fallback_reason ) ),
 			'review_set_limit'            => $review_set_limit,
 			'eligibility_summary'         => array(
 				'scanned'  => count( $items ),

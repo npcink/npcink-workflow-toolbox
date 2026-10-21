@@ -810,7 +810,14 @@ final class Provider_Ai_Image_Service extends Provider_Client_Support {
 				'contract_version'           => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'image_generation_request.v1' ) ),
 				'hosted_profile'             => $hosted_profile,
 				'status'                     => sanitize_key( (string) ( $result['status'] ?? $response['status'] ?? ( array() === $images ? 'empty' : 'ready' ) ) ),
-				'message'                    => sanitize_text_field( (string) ( $result['message'] ?? $response['message'] ?? '' ) ),
+				'message'                    => sanitize_text_field(
+					Cloud_Error_Plain_Messages::embedded_message(
+						(string) ( $result['status'] ?? $response['status'] ?? '' ),
+						(string) ( $result['message'] ?? $response['message'] ?? '' ),
+						(string) ( $result['error_code'] ?? $response['error_code'] ?? '' )
+					)
+				),
+				'diagnostic_code'            => sanitize_key( (string) ( $result['error_code'] ?? $response['error_code'] ?? '' ) ),
 				'run_id'                     => sanitize_text_field( (string) ( $response['run_id'] ?? ( $response['data']['run_id'] ?? ( $result['run_id'] ?? '' ) ) ) ),
 				'model_id'                   => $model,
 				'query'                      => '',

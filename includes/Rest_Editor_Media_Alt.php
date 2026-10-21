@@ -671,7 +671,7 @@ final class Rest_Editor_Media_Alt extends Rest_Editor_Flow_Cache {
 			'adoption_plan_ability_id'  => 'npcink-abilities-toolkit/build-image-candidate-adoption-plan',
 			'toolkit_required'          => true,
 			'error_code'                => sanitize_key( $error->get_error_code() ),
-			'error_message'             => sanitize_text_field( $error->get_error_message() ),
+			'error_message'             => sanitize_text_field( Cloud_Error_Plain_Messages::visible_message( $error ) ),
 			'items'                     => array(),
 			'recommendation_candidates' => array(),
 		);

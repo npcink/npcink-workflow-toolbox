@@ -127,4 +127,22 @@ foreach ( array( 'AI 积分已用完。请去 Npcink Cloud 充值后再试。', 
 	$assert( false !== strpos( $po, $zh ), "zh_CN translation present: $zh" );
 }
 
+// Sweep (#304): embedded 200 failures and visible-message helper.
+$assert( M::message( M::KEY_CREDITS_EXHAUSTED ) === M::embedded_message( 'failed', 'Provider quota exhausted for tenant', 'insufficient_credits' ), 'embedded failure with code maps to plain sentence' );
+$assert( M::message( M::KEY_FAILED ) === M::embedded_message( 'error', 'routing profile image-source.managed missing' ), 'embedded failure without code maps to fallback sentence' );
+$assert( 'Found 3 images.' === M::embedded_message( 'ready', 'Found 3 images.' ), 'success message passes through' );
+$assert( M::message( M::KEY_NOT_CONNECTED ) === M::visible_message( new WP_Error( 'cloud_runtime_unconfigured', 'Npcink Cloud is not configured.' ) ), 'visible_message maps Cloud WP_Error' );
+$assert( 'Pick a post first.' === M::visible_message( new WP_Error( 'npcink_toolbox_missing_post', 'Pick a post first.' ) ), 'visible_message keeps local message' );
+$editor_js2 = (string) file_get_contents( dirname( __DIR__ ) . '/assets/editor-content-support.js' );
+foreach ( array( 'Check the Cloud image Provider', 'image Provider credentials', 'Configure image-source.managed', 'runtime envelope', 'Cloud marked this runtime response' ) as $old ) {
+	$assert( false === strpos( $editor_js2, $old ), "editor JS no longer shows: $old" );
+}
+$admin_js2 = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
+foreach ( array( 'Latest retry candidate: ', 'Check run_id / Addon', 'Continuing status checks for Cloud run ', 'Cloud runtime quota is exhausted' ) as $old ) {
+	$assert( false === strpos( $admin_js2, $old ), "admin JS no longer shows: $old" );
+}
+$assert( false !== strpos( $admin_js2, 'function appendSupportMeta' ) && false !== strpos( $admin_js2, "appendSupportMeta(meta, t('Error code')" ), 'admin error codes and run ids fold into support details' );
+$main = (string) file_get_contents( dirname( __DIR__ ) . '/npcink-workflow-toolbox.php' );
+$assert( false !== strpos( $main, "includes/Cloud_Error_Plain_Messages.php" ), 'plugin entry loads Cloud_Error_Plain_Messages' );
+
 exit( $failures > 0 ? 1 : 0 );

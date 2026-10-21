@@ -111,6 +111,7 @@ if ( ! defined( 'NPCINK_TOOLBOX_DISABLE_RAW_RESPONSES' ) ) {
 }
 
 $root = dirname( __DIR__ );
+require_once $root . '/includes/Cloud_Error_Plain_Messages.php';
 require_once $root . '/includes/Plugin.php';
 require_once $root . '/includes/Settings.php';
 require_once $root . '/tests/load-provider-client.php';

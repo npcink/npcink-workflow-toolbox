@@ -11,6 +11,7 @@ namespace Npcink_Toolbox\Tests;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once dirname( __DIR__ ) . '/includes/Cloud_Error_Plain_Messages.php';
 require_once dirname( __DIR__ ) . '/includes/Recommendation_Metadata.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Client_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Provider_Nightly_Inspection_Service.php';
