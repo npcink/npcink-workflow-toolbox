@@ -9763,8 +9763,8 @@ msgid "Could not encode the de-identified insight pack."
 msgstr "无法编码脱密巡检摘要。"
 
 #: includes/Rest_Site_Ops_Insight_Bridges.php
-msgid "Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again."
-msgstr "本站 Cloud 同时只允许 1 个进行中的运行。请等上一次结束后再试。"
+msgid "Cloud runs one task at a time on this site. The previous task may not have finished cleanly and may still be holding the slot. Wait about 3 minutes and try again. If it keeps failing, end that run in Cloud first."
+msgstr "本站 Cloud 同时只允许 1 个进行中的任务。上一个任务可能没有正常结束、仍占着名额。请等待约 3 分钟后再试；若一直失败，请先到 Cloud 后台结束该任务。"
 
 #: includes/Rest_Site_Ops_Insight_Bridges.php
 msgid "Cloud returned an unexpected response."

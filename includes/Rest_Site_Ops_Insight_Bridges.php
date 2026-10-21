@@ -265,12 +265,16 @@ final class Rest_Site_Ops_Insight_Bridges {
 				|| false !== strpos( strtolower( $raw_message ), 'active cloud run' )
 			);
 			if ( $is_busy_slot ) {
-				// Thin UX only: Chinese-friendly primary copy. Stuck-run productization
-				// (mark_stale / auto-clear) is owned elsewhere.
-				$friendly           = __( 'Cloud allows one active run at a time on this site. Wait for the prior run to finish, then try again.', 'npcink-workflow-toolbox' );
-				$data['hint']       = $friendly;
-				$data['status']     = 429;
-				$data['busy_slot']  = true;
+				// Thin UX only: operator-facing copy. An orphaned inline run never
+				// reaches a terminal state on its own, so "wait for the previous run
+				// to finish" used to be a dead end. The 3 minutes mirrors Cloud's
+				// inline admission lease (RUNTIME_INLINE_RUN_LEASE_SECONDS = 180),
+				// after which a stuck run stops holding the site slot. Ending the run
+				// itself stays a Cloud-side operator action.
+				$friendly          = __( 'Cloud runs one task at a time on this site. The previous task may not have finished cleanly and may still be holding the slot. Wait about 3 minutes and try again. If it keeps failing, end that run in Cloud first.', 'npcink-workflow-toolbox' );
+				$data['hint']      = $friendly;
+				$data['status']    = 429;
+				$data['busy_slot'] = true;
 
 				return new WP_Error(
 					'cloud_commercial_concurrency_exceeded',
