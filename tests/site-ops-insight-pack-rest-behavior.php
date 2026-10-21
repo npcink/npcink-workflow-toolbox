@@ -279,7 +279,7 @@ site_ops_rest_assert( false !== strpos( $admin_source, 'aria-live="polite"' ) &&
 // run of spaces would pin a formatting accident, not behaviour.
 $busy_slot_bridge_wired = false !== strpos( $bridge_source, 'busy_slot' )
 	&& 1 === preg_match( '/\$data\[\'status\'\]\s+= 429/', $bridge_source );
-site_ops_rest_assert( false !== strpos( $js_source, 'isBusySlotError' ) && false !== strpos( $js_source, 'Another Cloud run is using this site' ) && $busy_slot_bridge_wired, 'Ask UI maps Cloud busy-slot / 429 to Chinese-friendly copy without raw status dumps.' );
+site_ops_rest_assert( false !== strpos( $js_source, 'isBusySlotError' ) && false !== strpos( $js_source, 'The previous AI task on this site has not finished yet' ) && $busy_slot_bridge_wired, 'Ask UI maps Cloud busy-slot / 429 to Chinese-friendly copy without raw status dumps.' );
 
 
 // Plain-language answer guidance (shared by both packs).

@@ -2308,6 +2308,11 @@
 	}
 
 	function formatImageErrorMessage(error, fallback) {
+		// Cloud failures arrive already rewritten to one plain sentence by the
+		// server (Cloud_Error_Plain_Messages); codes stay in data.diagnostic.
+		if (error && error.data && error.data.plain_message) {
+			return String(error.data.plain_message);
+		}
 		const code = error && error.code ? String(error.code) : '';
 		const message = error && error.message ? String(error.message) : '';
 		if (/<(?:!doctype|html|body|p|a)\b/i.test(message) || /wordpress\.org\/documentation\/article\/faq-troubleshooting/i.test(message)) {

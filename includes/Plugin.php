@@ -80,6 +80,7 @@ final class Plugin {
 		add_action( 'admin_post_npcink_toolbox_resume_media_recognition', array( $this->admin_page, 'handle_resume_media_recognition' ) );
 		add_action( 'admin_post_npcink_toolbox_confirm_changed_media_recognition', array( $this->admin_page, 'handle_confirm_changed_media_recognition' ) );
 		add_action( 'rest_api_init', array( $this->rest_controller, 'register_routes' ) );
+		Cloud_Error_Plain_Messages::register();
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_with_npcink_abilities_toolkit' ), 1 );
 		add_action( 'wp_abilities_api_categories_init', array( $this->abilities, 'register_native_category' ) );
 		add_action( 'wp_abilities_api_init', array( $this->abilities, 'register_native_abilities' ) );

@@ -169,6 +169,7 @@
       "@test:progressive-recommendations",
       "@test:editor-content-support",
       "@test:site-ops-insight-pack-rest",
+      "@test:cloud-error-plain-messages",
       "@test:provider-services",
       "@test:taxonomy-tag-review",
       "@test:internal-link-review",
@@ -204,7 +205,8 @@
     "smoke:ux-hardening-browser": "node tests/smoke-ux-hardening-browser.mjs",
     "test:taxonomy-tag-review": "php tests/taxonomy-tag-review-set-behavior.php",
     "test:internal-link-review": "php tests/internal-link-review-set-behavior.php",
-    "test:content-structure-insight-pack-rest": "php tests/content-structure-insight-pack-rest-behavior.php"
+    "test:content-structure-insight-pack-rest": "php tests/content-structure-insight-pack-rest-behavior.php",
+    "test:cloud-error-plain-messages": "php tests/cloud-error-plain-messages-behavior.php"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.2",

@@ -420,15 +420,10 @@
 		['message', 'error', 'error_message', 'detail', 'description'].forEach((key) => {
 			collectErrorText(value[key], messages, seen);
 		});
-		if (value.code && typeof value.code !== 'object') {
-			messages.push(t('Code: ') + String(value.code));
-		}
-		if (value.status && typeof value.status !== 'object') {
-			messages.push(t('Status: ') + String(value.status));
-		}
+		// Error codes and HTTP statuses are support details, not visible text.
 		collectErrorText(value.errors, messages, seen);
 		if (value.data && typeof value.data === 'object') {
-			['message', 'error', 'error_message', 'detail', 'status'].forEach((key) => {
+			['message', 'error', 'error_message', 'detail'].forEach((key) => {
 				collectErrorText(value.data[key], messages, seen);
 			});
 		}
@@ -446,7 +441,16 @@
 		return text;
 	}
 
+	function plainCloudErrorMessage(error) {
+		const data = error && typeof error === 'object' && error.data && typeof error.data === 'object' ? error.data : null;
+		return data && data.plain_message ? String(data.plain_message) : '';
+	}
+
 	function formatErrorMessage(error, fallback) {
+		const plain = plainCloudErrorMessage(error);
+		if (plain) {
+			return plain;
+		}
 		const messages = [];
 		collectErrorText(error, messages, new WeakSet());
 		const unique = messages.filter((message, index) => message && messages.indexOf(message) === index);
@@ -7793,32 +7797,23 @@
 
 			const formatAskError = (error) => {
 				const data = (error && error.data) || {};
+				// One plain sentence only; run ids and codes stay in error.data
+				// for support copy, never in the visible answer area.
+				if (data.plain_message) {
+					return String(data.plain_message);
+				}
 				if (isBusySlotError(error)) {
-					const parts = [
+					return String(
 						data.hint ||
-							t('Another Cloud run is using this site’s slot. Wait for it to finish, then ask again.'),
-					];
-					if (data.next_step) {
-						parts.push(String(data.next_step));
-					}
-					if (data.pack_run_id) {
-						parts.push('pack_run_id=' + String(data.pack_run_id));
-					}
-					return parts.filter(Boolean).join(' ');
+							t('The previous AI task on this site has not finished yet. Wait about 3 minutes, then try again.')
+					);
 				}
 
 				const message =
 					(error && (error.message || error.error || data.message)) ||
 					(config.labels && config.labels.error) ||
 					t('Request failed.');
-				const extras = [];
-				if (data.hint) {
-					extras.push(String(data.hint));
-				}
-				if (data.pack_run_id) {
-					extras.push('pack_run_id=' + String(data.pack_run_id));
-				}
-				return [String(message)].concat(extras).join(' ');
+				return String(message);
 			};
 
 			button.addEventListener('click', async () => {
