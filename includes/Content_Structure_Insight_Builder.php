@@ -16,8 +16,19 @@ final class Content_Structure_Insight_Builder {
 	public const CONTRACT_VERSION = 'content_structure_insight_pack.v1';
 	public const ARTIFACT_TYPE    = 'content_structure_insight_pack';
 
-	private const SAMPLE_LIMIT    = 24;
+	public const SAMPLE_LIMIT_DEFAULT = 60;
+	public const SAMPLE_LIMIT_MIN     = 6;
+	public const SAMPLE_LIMIT_MAX     = 120;
+	public const SAMPLE_LIMIT_FILTER  = 'npcink_toolbox_content_structure_sample_limit';
+
 	private const TOP_TERMS_LIMIT = 12;
+
+	/** Publish-date strata, oldest first. Population is split into equal thirds. */
+	private const STRATA = array(
+		'oldest' => '最早发布的三分之一',
+		'middle' => '中间的三分之一',
+		'newest' => '最新发布的三分之一',
+	);
 
 	/**
 	 * @return array<string,mixed>
@@ -25,8 +36,10 @@ final class Content_Structure_Insight_Builder {
 	public function build(): array {
 		$timestamp    = time();
 		$generated_at = gmdate( 'c', $timestamp );
-		$sample       = $this->collect_public_sample( self::SAMPLE_LIMIT );
+		$plan         = self::plan_strata( $this->collect_public_ids_by_date(), self::sample_limit() );
+		$sample       = $this->collect_public_sample( $plan );
 		$post_counts  = $this->collect_post_counts();
+		$sampling     = self::sampling_summary( $plan, $sample );
 		$taxonomies   = $this->collect_taxonomies();
 		$signals      = $this->structure_signals( $sample, $generated_at );
 		$findings     = $this->build_findings( $post_counts, $taxonomies, $signals, $sample );
@@ -60,6 +73,7 @@ final class Content_Structure_Insight_Builder {
 			'post_counts'            => $post_counts,
 			'taxonomies'             => $taxonomies,
 			'structure_signals'      => $signals,
+			'sampling'               => $sampling,
 			'top_findings'           => $findings,
 			'opportunities'          => $this->opportunities( $findings ),
 			'data_sources'           => array(
@@ -71,6 +85,7 @@ final class Content_Structure_Insight_Builder {
 					'available' => count( $sample ) > 0,
 					'count'     => count( $sample ),
 					'source'    => 'local_public_wordpress_titles_and_structure_flags',
+					'method'    => 'publish_date_thirds_systematic',
 				),
 				'taxonomies'    => array(
 					'available' => ! empty( $taxonomies ),
@@ -117,25 +132,132 @@ final class Content_Structure_Insight_Builder {
 		return $out;
 	}
 
+	/** Bounded sample size; filterable, clamped to keep the Cloud payload small. */
+	public static function sample_limit(): int {
+		$limit = self::SAMPLE_LIMIT_DEFAULT;
+		if ( function_exists( 'apply_filters' ) ) {
+			$limit = (int) apply_filters( self::SAMPLE_LIMIT_FILTER, $limit );
+		}
+
+		return max( self::SAMPLE_LIMIT_MIN, min( self::SAMPLE_LIMIT_MAX, $limit ) );
+	}
+
 	/**
-	 * Bounded public titles + structure flags only (no body).
+	 * All published post/page IDs, oldest publish date first (ids only, no bodies).
 	 *
+	 * @return array<int,int>
+	 */
+	private function collect_public_ids_by_date(): array {
+		if ( ! function_exists( 'get_posts' ) ) {
+			return array();
+		}
+		$rows = get_posts(
+			array(
+				'post_type'              => array( 'post', 'page' ),
+				'post_status'            => 'publish',
+				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
+				'orderby'                => array(
+					'date' => 'ASC',
+					'ID'   => 'ASC',
+				),
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'suppress_filters'       => true,
+			)
+		);
+		$ids  = array();
+		foreach ( $rows as $row ) {
+			$id = $row instanceof \WP_Post ? (int) $row->ID : (int) $row;
+			if ( $id > 0 ) {
+				$ids[] = $id;
+			}
+		}
+
+		return array_values( array_unique( $ids ) );
+	}
+
+	/**
+	 * Splits date-ordered IDs into oldest/middle/newest thirds and picks evenly
+	 * spaced IDs from each (deterministic systematic sampling). Pure: no WP calls.
+	 *
+	 * @param array<int,int> $ids_by_date Published IDs, oldest first.
+	 * @return array<string,array{population:int,ids:array<int,int>,first_id:int,last_id:int}>
+	 */
+	public static function plan_strata( array $ids_by_date, int $limit ): array {
+		$ids    = array_values( array_map( 'intval', $ids_by_date ) );
+		$total  = count( $ids );
+		$keys   = array_keys( self::STRATA );
+		$k      = count( $keys );
+		$limit  = max( 0, $limit );
+		$plan   = array();
+		$offset = 0;
+		foreach ( $keys as $index => $key ) {
+			$size    = intdiv( $total, $k ) + ( $index >= $k - ( $total % $k ) ? 1 : 0 );
+			$slice   = array_slice( $ids, $offset, $size );
+			$offset += $size;
+			// Remainder of the budget goes to the newest strata first.
+			$quota  = intdiv( $limit, $k ) + ( $index >= $k - ( $limit % $k ) ? 1 : 0 );
+			$quota  = min( $quota, $size );
+			$picked = array();
+			if ( $quota > 0 ) {
+				$step = $size / $quota;
+				for ( $i = 0; $i < $quota; $i++ ) {
+					$picked[] = $slice[ (int) floor( $i * $step + $step / 2 ) ];
+				}
+			}
+			$plan[ $key ] = array(
+				'population' => $size,
+				'ids'        => $picked,
+				'first_id'   => $size > 0 ? (int) $slice[0] : 0,
+				'last_id'    => $size > 0 ? (int) $slice[ $size - 1 ] : 0,
+			);
+		}
+
+		return $plan;
+	}
+
+	/**
+	 * Bounded public titles + structure flags only. Body is read locally for word
+	 * count and never returned.
+	 *
+	 * @param array<string,array<string,mixed>> $plan Strata plan.
 	 * @return array<int,array<string,mixed>>
 	 */
-	private function collect_public_sample( int $limit ): array {
+	private function collect_public_sample( array $plan ): array {
 		if ( ! function_exists( 'get_posts' ) ) {
+			return array();
+		}
+		$stratum_of = array();
+		$lanes      = array();
+		foreach ( array_reverse( $plan, true ) as $key => $row ) {
+			$lanes[ $key ] = array_values( (array) $row['ids'] );
+			foreach ( $lanes[ $key ] as $id ) {
+				$stratum_of[ (int) $id ] = (string) $key;
+			}
+		}
+		// Interleave newest/middle/oldest so short prefixes (title samples, refs) span all strata.
+		$order = array();
+		for ( $i = 0, $max = max( array_map( 'count', $lanes ?: array( array() ) ) ); $i < $max; $i++ ) {
+			foreach ( $lanes as $lane ) {
+				if ( isset( $lane[ $i ] ) ) {
+					$order[] = (int) $lane[ $i ];
+				}
+			}
+		}
+		if ( empty( $order ) ) {
 			return array();
 		}
 
 		$posts = get_posts(
 			array(
-				'post_type'     => array( 'post', 'page' ),
-				'post_status'   => 'publish',
-				'numberposts'   => max( 1, min( 50, $limit ) ),
-				'orderby'       => 'modified',
-				'order'         => 'ASC',
-				'no_found_rows' => true,
-				'cache_results' => true,
+				'post_type'      => array( 'post', 'page' ),
+				'post_status'    => 'publish',
+				'post__in'       => $order,
+				'orderby'        => 'post__in',
+				'posts_per_page' => count( $order ),
+				'no_found_rows'  => true,
 			)
 		);
 
@@ -145,14 +267,14 @@ final class Content_Structure_Insight_Builder {
 				continue;
 			}
 			$post_id  = (int) $post->ID;
-			$content  = (string) $post->post_content;
 			$sample[] = array(
 				'object_type'              => (string) $post->post_type,
 				'object_id'                => $post_id,
+				'stratum'                  => $stratum_of[ $post_id ] ?? 'newest',
 				'title'                    => wp_strip_all_tags( (string) $post->post_title ),
 				'published_at'             => $this->gmt_iso( (string) $post->post_date_gmt ),
 				'modified_at'              => $this->gmt_iso( (string) $post->post_modified_gmt ),
-				'word_count'               => $this->word_count( $content ),
+				'word_count'               => $this->word_count( (string) $post->post_content ),
 				'excerpt_present'          => '' !== trim( (string) $post->post_excerpt ),
 				'meta_description_present' => '' !== $this->meta_description( $post_id ),
 				'featured_image_present'   => function_exists( 'get_post_thumbnail_id' ) && (int) get_post_thumbnail_id( $post_id ) > 0,
@@ -162,6 +284,82 @@ final class Content_Structure_Insight_Builder {
 		}
 
 		return $sample;
+	}
+
+	/**
+	 * De-identified sampling metadata: strata, per-stratum population vs sample,
+	 * per-stratum sample rates, and population-weighted overall estimates.
+	 *
+	 * @param array<string,array<string,mixed>> $plan Strata plan.
+	 * @param array<int,array<string,mixed>>    $sample Sample rows.
+	 * @return array<string,mixed>
+	 */
+	public static function sampling_summary( array $plan, array $sample ): array {
+		$flags    = array(
+			'missing_meta_description_rate' => static fn( array $r ): bool => empty( $r['meta_description_present'] ),
+			'missing_excerpt_rate'          => static fn( array $r ): bool => empty( $r['excerpt_present'] ),
+			'missing_featured_image_rate'   => static fn( array $r ): bool => empty( $r['featured_image_present'] ),
+			'thin_content_rate'             => static fn( array $r ): bool => (int) ( $r['word_count'] ?? 0 ) > 0 && (int) ( $r['word_count'] ?? 0 ) < 300,
+		);
+		$strata   = array();
+		$weighted = array_fill_keys( array_keys( $flags ), 0.0 );
+		$pop_used = 0;
+		$total    = 0;
+		$sampled  = 0;
+		foreach ( $plan as $key => $row ) {
+			$rows       = array_values( array_filter( $sample, static fn( array $r ): bool => (string) ( $r['stratum'] ?? '' ) === (string) $key ) );
+			$n          = count( $rows );
+			$population = (int) ( $row['population'] ?? 0 );
+			$total     += $population;
+			$sampled   += $n;
+			$rates      = array();
+			foreach ( $flags as $name => $test ) {
+				$hits           = count( array_filter( $rows, $test ) );
+				$rates[ $name ] = $n > 0 ? round( $hits / $n, 3 ) : 0.0;
+				if ( $n > 0 ) {
+					$weighted[ $name ] += $rates[ $name ] * $population;
+				}
+			}
+			if ( $n > 0 ) {
+				$pop_used += $population;
+			}
+			$strata[] = array(
+				'id'               => (string) $key,
+				'label'            => self::STRATA[ $key ] ?? (string) $key,
+				'published_from'   => self::year_of( (int) ( $row['first_id'] ?? 0 ) ),
+				'published_to'     => self::year_of( (int) ( $row['last_id'] ?? 0 ) ),
+				'population_count' => $population,
+				'sample_count'     => $n,
+				'sample_rates'     => $rates,
+			);
+		}
+		foreach ( $weighted as $name => $sum ) {
+			$weighted[ $name ] = $pop_used > 0 ? round( $sum / $pop_used, 3 ) : 0.0;
+		}
+
+		return array(
+			'method'            => 'publish_date_thirds_systematic',
+			'strata_definition' => '已发布文章和页面按发布时间从早到晚排序，平均分成三批，每批等间隔抽取',
+			'strata_count'      => count( $plan ),
+			'sample_limit'      => self::sample_limit(),
+			'total_published'   => $total,
+			'total_sampled'     => $sampled,
+			'strata'            => $strata,
+			'weighted_rates'    => $weighted,
+			'rate_basis'        => 'structure_signals rates are raw sample rates; weighted_rates weight each stratum by its population',
+		);
+	}
+
+	private static function year_of( int $post_id ): string {
+		if ( $post_id <= 0 || ! function_exists( 'get_post_field' ) ) {
+			return '';
+		}
+		$date = (string) get_post_field( 'post_date', $post_id );
+		if ( 1 !== preg_match( '/^(\d{4})/', $date, $m ) || (int) $m[1] < 1990 ) {
+			return ''; // Placeholder or corrupt dates (e.g. 0000-00-00) are not reported.
+		}
+
+		return $m[1];
 	}
 
 	/**
@@ -490,6 +688,7 @@ final class Content_Structure_Insight_Builder {
 			'stale_180d_rate'               => ( (int) ( $signals['sample_size'] ?? 0 ) > 0 )
 				? round( ( (int) ( $signals['age_buckets']['180_plus'] ?? 0 ) ) / (int) $signals['sample_size'], 3 )
 				: 0.0,
+			'sampling_method'               => 'publish_date_thirds_systematic',
 			'top_finding_count'             => count( $findings ),
 			'high_priority_findings'        => $high,
 		);

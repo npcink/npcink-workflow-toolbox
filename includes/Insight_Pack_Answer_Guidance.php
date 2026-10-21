@@ -92,6 +92,27 @@ final class Insight_Pack_Answer_Guidance {
 		return '';
 	}
 
+	/**
+	 * Chinese caveat for a publish-date stratified sample (no field names).
+	 */
+	public static function stratified_sample_note( int $strata_count, int $sampled, int $published_total ): string {
+		if ( $sampled <= 0 ) {
+			return '';
+		}
+		if ( $strata_count <= 1 || $published_total <= $sampled ) {
+			return self::sample_note( $sampled, $published_total );
+		}
+		$batches = array(
+			2 => '两',
+			3 => '三',
+			4 => '四',
+			5 => '五',
+		);
+		$label   = $batches[ $strata_count ] ?? (string) $strata_count;
+
+		return sprintf( '按发布时间分%1$s批共抽查 %2$d 篇（全站已发布 %3$d 篇），结论仅供参考。', $label, $sampled, $published_total );
+	}
+
 	public static function user_message( string $question, string $pack_label_en, string $pack_json, string $sample_note ): string {
 		$parts = array( '站长的问题：' . $question );
 		if ( '' !== $sample_note ) {
