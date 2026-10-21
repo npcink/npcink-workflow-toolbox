@@ -45,7 +45,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$default_question = '根据这份巡检摘要，站点优先该处理哪 1–3 件事？请按优先级列出，每条一句话说明理由；只给建议，不要声称会写入 WordPress。';
+$default_question = '根据这份巡检摘要，站点优先该处理哪 1–3 件事？用大白话回答。';
 
 $question = '';
 if ( isset( $args ) && is_array( $args ) && isset( $args[0] ) && is_string( $args[0] ) && '' !== trim( $args[0] ) ) {
@@ -152,15 +152,15 @@ $compact_pack = static function ( array $pack ): array {
 			continue;
 		}
 		$findings[] = array(
-			'id'                  => (string) ( $finding['id'] ?? '' ),
-			'title'               => (string) ( $finding['title'] ?? '' ),
-			'issue_type'          => (string) ( $finding['issue_type'] ?? '' ),
-			'category'            => (string) ( $finding['category'] ?? '' ),
-			'severity'           => (string) ( $finding['severity'] ?? '' ),
-			'priority_score'      => $finding['priority_score'] ?? null,
-			'evidence_summary'    => (string) ( $finding['evidence_summary'] ?? '' ),
-			'recommended_action'  => (string) ( $finding['recommended_action'] ?? '' ),
-			'write_boundary'      => (string) ( $finding['write_boundary'] ?? '' ),
+			'id'                     => (string) ( $finding['id'] ?? '' ),
+			'title'                  => (string) ( $finding['title'] ?? '' ),
+			'issue_type'             => (string) ( $finding['issue_type'] ?? '' ),
+			'category'               => (string) ( $finding['category'] ?? '' ),
+			'severity'               => (string) ( $finding['severity'] ?? '' ),
+			'priority_score'         => $finding['priority_score'] ?? null,
+			'evidence_summary'       => (string) ( $finding['evidence_summary'] ?? '' ),
+			'recommended_action'     => (string) ( $finding['recommended_action'] ?? '' ),
+			'write_boundary'         => (string) ( $finding['write_boundary'] ?? '' ),
 			'direct_wordpress_write' => (bool) ( $finding['direct_wordpress_write'] ?? false ),
 		);
 	}
@@ -187,27 +187,35 @@ $compact_pack = static function ( array $pack ): array {
 	);
 };
 
-$compact = $compact_pack( $pack );
+$compact   = $compact_pack( $pack );
 $pack_json = wp_json_encode( $compact, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 if ( ! is_string( $pack_json ) || '' === $pack_json ) {
 	$fail( 'pack_encode_failed', 'Could not JSON-encode compact insight pack.' );
 }
 
-$user_content = $question . "\n\n---\nDe-identified site_ops insight pack (JSON):\n" . $pack_json;
+// Same plain-language guidance as the admin Ask (Insight_Pack_Answer_Guidance).
+$guidance_ready = class_exists( '\Npcink_Toolbox\Insight_Pack_Answer_Guidance' );
+$sample_note    = $guidance_ready ? \Npcink_Toolbox\Insight_Pack_Answer_Guidance::sample_note( (int) ( $compact['summary']['scanned_posts'] ?? 0 ), \Npcink_Toolbox\Insight_Pack_Answer_Guidance::published_total() ) : '';
+$user_content   = $guidance_ready
+	? \Npcink_Toolbox\Insight_Pack_Answer_Guidance::user_message( $question, 'site_ops insight pack', $pack_json, $sample_note )
+	: $question . "\n\n---\nDe-identified site_ops insight pack (JSON):\n" . $pack_json;
+$system_content = $guidance_ready
+	? \Npcink_Toolbox\Insight_Pack_Answer_Guidance::system_prompt( \Npcink_Toolbox\Insight_Pack_Answer_Guidance::PACK_SITE_OPS )
+	: 'You are Npcink Workflow Toolbox. Use only the provided de-identified Site Check insight pack. Return concise, reviewable suggestions in plain Chinese. Do not claim to write WordPress.';
 
 // Cloud RuntimePayload: extra=forbid. Do NOT send summary_prompt_mode /
 // http_timeout_seconds / connect_timeout_seconds (Addon-local only).
 $runtime_payload = array(
-	'ability_name'         => 'npcink-toolbox/ai-content-support',
-	'contract_version'     => 'hosted_ai_content_support.v1',
-	'profile_id'           => 'text.ai',
-	'execution_kind'       => 'text',
-	'execution_pattern'    => 'inline',
-	'input'                => array(
+	'ability_name'        => 'npcink-toolbox/ai-content-support',
+	'contract_version'    => 'hosted_ai_content_support.v1',
+	'profile_id'          => 'text.ai',
+	'execution_kind'      => 'text',
+	'execution_pattern'   => 'inline',
+	'input'               => array(
 		'messages' => array(
 			array(
 				'role'    => 'system',
-				'content' => 'You are Npcink Workflow Toolbox. Use only the provided de-identified Site Check insight pack. Return concise, reviewable suggestions. Do not claim to write, publish, approve, or bypass governance. Do not invent credentials, emails, or private content.',
+				'content' => $system_content,
 			),
 			array(
 				'role'    => 'user',
@@ -219,12 +227,12 @@ $runtime_payload = array(
 			'max_tokens'  => 900,
 		),
 	),
-	'data_classification'  => 'public_site_content',
-	'storage_mode'         => 'result_only',
-	'retention_ttl'        => 86400,
-	'timeout_seconds'      => 45,
-	'retry_max'            => 0,
-	'policy'               => array(
+	'data_classification' => 'public_site_content',
+	'storage_mode'        => 'result_only',
+	'retention_ttl'       => 86400,
+	'timeout_seconds'     => 45,
+	'retry_max'           => 0,
+	'policy'              => array(
 		'allow_fallback' => false,
 	),
 );
@@ -288,7 +296,7 @@ if ( ! is_array( $response ) ) {
  * @param array<string,mixed> $response Runtime response.
  */
 $extract_text = static function ( array $response ): string {
-	$data = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
+	$data   = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
 	$result = is_array( $data['result'] ?? null ) ? $data['result'] : array();
 
 	if ( is_string( $result['output_text'] ?? null ) && '' !== trim( (string) $result['output_text'] ) ) {
@@ -329,10 +337,10 @@ $extract_text = static function ( array $response ): string {
 	return '';
 };
 
-$data     = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
-$run_id   = (string) ( $data['run_id'] ?? '' );
-$answer   = $extract_text( $response );
-$status   = (string) ( $data['status'] ?? ( $response['status'] ?? '' ) );
+$data   = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
+$run_id = (string) ( $data['run_id'] ?? '' );
+$answer = $extract_text( $response );
+$status = (string) ( $data['status'] ?? ( $response['status'] ?? '' ) );
 
 $result = array(
 	'ok'              => ( '' !== $run_id && '' !== $answer ),

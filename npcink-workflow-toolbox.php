@@ -60,6 +60,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Publish_Preflight_Service.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Nightly_Inspection_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller_Support.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Web_Search_Bridges.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Insight_Pack_Answer_Guidance.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Site_Ops_Insight_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Content_Structure_Insight_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Site_Knowledge_Bridges.php';
