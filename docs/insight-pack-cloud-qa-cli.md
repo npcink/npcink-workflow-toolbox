@@ -2,7 +2,7 @@
 
 面向人与其它 AI 的本机验证手册：用**脱密巡检摘要**（`site_ops_insight_pack.v1`）经 Addon 问 Cloud 一题，确认「脱密包 → 建议」链路是否值得做成产品面。
 
-产品边界（MVP = 仅巡检摘要一包、suggestion_only、不写 WP）：见 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)。Site Ops 契约背景：[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)。
+产品边界（巡检摘要 + 内容结构摘要、suggestion_only、不写 WP）：见 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)。第二包手册：[content-structure-pack-cloud-qa-cli.md](content-structure-pack-cloud-qa-cli.md)。Site Ops 契约背景：[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)。
 
 **MVP 薄 UI 已有（`#289` 已合 master）：** 站点检查 → 当前检查 → **关于本次检查提问**。完整对话壳仍未做。验证也可用 REST + CLI。产品边界见 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)（已定稿）。
 

@@ -24,13 +24,14 @@ do not add Addon `version_compare` checks.
 When debugging cross-repo or Cloud integration, prefer the Cloud `run_id`;
 do not expect local prefix traces to grep Cloud logs directly.
 
-**脱密巡检摘要 → Cloud 验证（其它 AI 必读）：** 手册
-`docs/insight-pack-cloud-qa-cli.md`；一键脚本
-`scripts/insight-pack-cloud-qa.sh`（PHP：`scripts/insight-pack-cloud-qa.php`）；
-后台提问面板：**站点检查 → 当前检查 → 关于本次检查提问**（不要去「图片处理」；REST
-`POST …/site-ops/insight-pack-qa`，与 CLI 同路径）。MVP 边界已定稿：
-`docs/deidentified-assistant-boundary-v1.md`。勿走已暂停的
-`cloud_inspection`；排障优先带 Cloud `run_id`。
+**脱密 pack → Cloud 验证（其它 AI 必读）：** 边界
+`docs/deidentified-assistant-boundary-v1.md`。
+- **巡检摘要：** `docs/insight-pack-cloud-qa-cli.md`；`scripts/insight-pack-cloud-qa.sh`；
+  后台 **站点检查 → 当前检查 → 关于本次检查提问**（`POST …/site-ops/insight-pack-qa`）。
+- **内容结构摘要（第二包）：** `docs/content-structure-pack-cloud-qa-cli.md`；
+  `scripts/content-structure-pack-cloud-qa.sh`；后台 **站点资料 → 关于内容结构提问**
+  （`POST …/content-structure/insight-pack-qa`；不要去「图片处理」）。
+勿走已暂停的 `cloud_inspection`；不开第三包；排障优先带 Cloud `run_id`。
 
 ## Product Boundary
 

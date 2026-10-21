@@ -409,6 +409,8 @@ and `/agent-feedback`, which accept
 - `GET /wp-json/npcink-toolbox/v1/site-knowledge/status`
 - `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack`
 - `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa` (MVP Ask UI / same path as CLI hosted AI content-support)
+- `GET /wp-json/npcink-toolbox/v1/content-structure/insight-pack`
+- `POST /wp-json/npcink-toolbox/v1/content-structure/insight-pack-qa` (Site Profile Ask; pack 2)
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/search`
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync`
 - `POST /wp-json/npcink-toolbox/v1/site-media/index-batch`

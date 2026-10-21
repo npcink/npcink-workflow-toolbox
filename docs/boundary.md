@@ -224,6 +224,8 @@ first scoped version; those actions stay administrator-facing.
 - `/site-knowledge/status`
 - `/site-ops/insight-pack`
 - `/site-ops/insight-pack-qa`
+- `/content-structure/insight-pack`
+- `/content-structure/insight-pack-qa`
 - `/site-knowledge/search`
 - `/site-knowledge/sync`
 - `/site-media/index-batch`
