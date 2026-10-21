@@ -209,7 +209,7 @@ final class Content_Structure_Insight_Builder {
 		$low_count   = 0;
 		$top_terms   = array();
 		foreach ( $terms as $term ) {
-			$count = (int) ( $term->count ?? 0 );
+			$count = (int) $term->count;
 			if ( 0 === $count ) {
 				++$empty_count;
 			}
@@ -218,7 +218,7 @@ final class Content_Structure_Insight_Builder {
 			}
 			if ( count( $top_terms ) < self::TOP_TERMS_LIMIT && $count > 0 ) {
 				$top_terms[] = array(
-					'name'  => sanitize_text_field( (string) ( $term->name ?? '' ) ),
+					'name'  => sanitize_text_field( (string) $term->name ),
 					'count' => $count,
 				);
 			}

@@ -90,6 +90,30 @@
       "boundary_note": "MVP Ask UI: local site_ops_insight_pack.v1 plus hosted_ai_content_support.v1 via Addon Runtime Client execute_runtime; manage_options. Suggestion-only; omits Cloud-rejected extras; does not call paused cloud_inspection/analyze-site-ops; no WordPress writes or Core proposals."
     },
     {
+      "route": "/content-structure/insight-pack",
+      "documented_route": "/content-structure/insight-pack",
+      "methods": [
+        "GET"
+      ],
+      "scope": "cap.toolbox.admin",
+      "owner": "toolbox_site_ops_local",
+      "write_posture": "read_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Read-only local content_structure_insight_pack.v1 (counts, taxonomy shape, public title samples; never post bodies); manage_options. Does not call Cloud, create Core proposals, or write WordPress."
+    },
+    {
+      "route": "/content-structure/insight-pack-qa",
+      "documented_route": "/content-structure/insight-pack-qa",
+      "methods": [
+        "POST"
+      ],
+      "scope": "cap.toolbox.admin",
+      "owner": "toolbox_site_ops_local",
+      "write_posture": "suggestion_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Site Profile Ask: local content_structure_insight_pack.v1 plus hosted_ai_content_support.v1 via Addon Runtime Client execute_runtime; manage_options. Suggestion-only; omits Cloud-rejected extras; no paused Site Ops Cloud detail; no WordPress writes or Core proposals."
+    },
+    {
       "route": "/site-knowledge/search",
       "documented_route": "/site-knowledge/search",
       "methods": [

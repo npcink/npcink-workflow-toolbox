@@ -19,10 +19,8 @@ defined( 'ABSPATH' ) || exit;
 
 final class Rest_Content_Structure_Insight_Bridges {
 
-	private Settings $settings;
-
 	public function __construct( Settings $settings ) {
-		$this->settings = $settings;
+		unset( $settings ); // Signature parity with pack 1; pack is local-only.
 	}
 
 	/**
@@ -50,7 +48,6 @@ final class Rest_Content_Structure_Insight_Bridges {
 	 * @return array<string,mixed>
 	 */
 	public function assemble_pack(): array {
-		// Local pack only today; $this->settings kept for future readiness hints.
 		$builder = new Content_Structure_Insight_Builder();
 
 		return $builder->build();
