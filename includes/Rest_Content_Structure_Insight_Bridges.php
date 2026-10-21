@@ -117,7 +117,9 @@ final class Rest_Content_Structure_Insight_Bridges {
 		}
 
 		$summary      = is_array( $compact['summary'] ?? null ) ? $compact['summary'] : array();
-		$sample_note  = Insight_Pack_Answer_Guidance::sample_note(
+		$sampling     = is_array( $compact['sampling'] ?? null ) ? $compact['sampling'] : array();
+		$sample_note  = Insight_Pack_Answer_Guidance::stratified_sample_note(
+			(int) ( $sampling['strata_count'] ?? 1 ),
 			(int) ( $summary['sample_size'] ?? 0 ),
 			(int) ( $summary['published_posts'] ?? 0 ) + (int) ( $summary['published_pages'] ?? 0 )
 		);
@@ -279,6 +281,33 @@ final class Rest_Content_Structure_Insight_Bridges {
 			'title_samples'                 => array_slice( is_array( $signals['title_samples'] ?? null ) ? $signals['title_samples'] : array(), 0, 8 ),
 		);
 
+		$sampling       = is_array( $pack['sampling'] ?? null ) ? $pack['sampling'] : array();
+		$compact_strata = array();
+		foreach ( array_slice( is_array( $sampling['strata'] ?? null ) ? $sampling['strata'] : array(), 0, 5 ) as $stratum ) {
+			if ( ! is_array( $stratum ) ) {
+				continue;
+			}
+			$compact_strata[] = array(
+				'id'               => sanitize_key( (string) ( $stratum['id'] ?? '' ) ),
+				'label'            => sanitize_text_field( (string) ( $stratum['label'] ?? '' ) ),
+				'published_from'   => sanitize_text_field( (string) ( $stratum['published_from'] ?? '' ) ),
+				'published_to'     => sanitize_text_field( (string) ( $stratum['published_to'] ?? '' ) ),
+				'population_count' => (int) ( $stratum['population_count'] ?? 0 ),
+				'sample_count'     => (int) ( $stratum['sample_count'] ?? 0 ),
+				'sample_rates'     => is_array( $stratum['sample_rates'] ?? null ) ? array_map( 'floatval', $stratum['sample_rates'] ) : array(),
+			);
+		}
+		$compact_sampling = array(
+			'method'            => (string) ( $sampling['method'] ?? '' ),
+			'strata_definition' => (string) ( $sampling['strata_definition'] ?? '' ),
+			'strata_count'      => (int) ( $sampling['strata_count'] ?? 0 ),
+			'total_published'   => (int) ( $sampling['total_published'] ?? 0 ),
+			'total_sampled'     => (int) ( $sampling['total_sampled'] ?? 0 ),
+			'strata'            => $compact_strata,
+			'weighted_rates'    => is_array( $sampling['weighted_rates'] ?? null ) ? array_map( 'floatval', $sampling['weighted_rates'] ) : array(),
+			'rate_basis'        => (string) ( $sampling['rate_basis'] ?? '' ),
+		);
+
 		$taxonomies = array();
 		foreach ( array( 'category', 'post_tag' ) as $tax ) {
 			$block              = is_array( $pack['taxonomies'][ $tax ] ?? null ) ? $pack['taxonomies'][ $tax ] : array();
@@ -302,6 +331,7 @@ final class Rest_Content_Structure_Insight_Bridges {
 			'post_counts'            => is_array( $pack['post_counts'] ?? null ) ? $pack['post_counts'] : array(),
 			'taxonomies'             => $taxonomies,
 			'structure_signals'      => $compact_signals,
+			'sampling'               => $compact_sampling,
 			'top_findings'           => $findings,
 			'safety'                 => is_array( $pack['safety'] ?? null ) ? $pack['safety'] : array(),
 		);

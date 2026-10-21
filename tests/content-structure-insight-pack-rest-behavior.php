@@ -323,6 +323,40 @@ content_structure_rest_assert( false !== strpos( $sys_prompt, '没有流量' ) &
 content_structure_rest_assert( false !== strpos( $sys_prompt, '只给建议' ), 'Ask prompt keeps suggestion-only posture.' );
 content_structure_rest_assert( '只抽查了 24 篇（全站已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
 content_structure_rest_assert( '' === $guidance_cls::sample_note( 24, 24 ), 'Full-coverage sample adds no caveat.' );
+
+// Stratified sampling (publish-date thirds, systematic picks).
+$builder_cls = '\\Npcink_Toolbox\\Content_Structure_Insight_Builder';
+$plan        = $builder_cls::plan_strata( range( 1, 2000 ), 60 );
+content_structure_rest_assert( array( 'oldest', 'middle', 'newest' ) === array_keys( $plan ), 'Strata are oldest/middle/newest thirds.' );
+content_structure_rest_assert( 666 === $plan['oldest']['population'] && 667 === $plan['middle']['population'] && 667 === $plan['newest']['population'], 'Population split into near-equal thirds (remainder to newer strata).' );
+content_structure_rest_assert( 20 === count( $plan['oldest']['ids'] ) && 20 === count( $plan['middle']['ids'] ) && 20 === count( $plan['newest']['ids'] ), 'Sample budget split evenly across strata.' );
+content_structure_rest_assert( min( $plan['newest']['ids'] ) > 1333 && max( $plan['oldest']['ids'] ) <= 666, 'Each stratum samples only from its own date range.' );
+content_structure_rest_assert( count( array_unique( array_merge( $plan['oldest']['ids'], $plan['middle']['ids'], $plan['newest']['ids'] ) ) ) === 60, 'No duplicate picks across strata.' );
+$small = $builder_cls::plan_strata( range( 1, 5 ), 60 );
+content_structure_rest_assert( 5 === count( $small['oldest']['ids'] ) + count( $small['middle']['ids'] ) + count( $small['newest']['ids'] ), 'Small sites are fully sampled, never over-picked.' );
+$empty = $builder_cls::plan_strata( array(), 60 );
+content_structure_rest_assert( 0 === $empty['newest']['population'] && array() === $empty['newest']['ids'], 'Empty site yields empty strata.' );
+content_structure_rest_assert( 60 === $builder_cls::sample_limit(), 'Default sample limit is 60.' );
+$rows     = array(
+	array( 'stratum' => 'oldest', 'meta_description_present' => false, 'excerpt_present' => false, 'featured_image_present' => false, 'word_count' => 100 ),
+	array( 'stratum' => 'oldest', 'meta_description_present' => true, 'excerpt_present' => false, 'featured_image_present' => true, 'word_count' => 800 ),
+	array( 'stratum' => 'newest', 'meta_description_present' => true, 'excerpt_present' => true, 'featured_image_present' => true, 'word_count' => 800 ),
+);
+$sum_plan = array(
+	'oldest' => array( 'population' => 900, 'ids' => array( 1, 2 ) ),
+	'middle' => array( 'population' => 0, 'ids' => array() ),
+	'newest' => array( 'population' => 100, 'ids' => array( 3 ) ),
+);
+$sampling = $builder_cls::sampling_summary( $sum_plan, $rows );
+content_structure_rest_assert( 1000 === $sampling['total_published'] && 3 === $sampling['total_sampled'] && 3 === $sampling['strata_count'], 'Sampling exposes total sampled vs total published.' );
+content_structure_rest_assert( 2 === $sampling['strata'][0]['sample_count'] && 900 === $sampling['strata'][0]['population_count'] && 0.5 === $sampling['strata'][0]['sample_rates']['missing_meta_description_rate'], 'Per-stratum sample vs population counts and sample rates.' );
+content_structure_rest_assert( 0.45 === $sampling['weighted_rates']['missing_meta_description_rate'], 'Overall rate is population-weighted across strata.' );
+content_structure_rest_assert( false !== strpos( (string) $sampling['rate_basis'], 'weighted' ) && 'publish_date_thirds_systematic' === $sampling['method'], 'Rate basis is labeled.' );
+$sampling_json = (string) json_encode( $sampling );
+content_structure_rest_assert( false === strpos( $sampling_json, 'post_content' ) && false === strpos( $sampling_json, '"ids"' ), 'Sampling metadata carries no bodies or raw ID lists.' );
+content_structure_rest_assert( '按发布时间分三批共抽查 60 篇（全站已发布 2000 篇），结论仅供参考。' === $guidance_cls::stratified_sample_note( 3, 60, 2000 ), 'Stratified caveat is plain Chinese without field names.' );
+content_structure_rest_assert( '' === $guidance_cls::stratified_sample_note( 3, 20, 20 ), 'Full coverage adds no caveat.' );
+content_structure_rest_assert( is_array( $pack['sampling'] ?? null ) && isset( $pack['sampling']['strata'] ), 'Pack exposes sampling metadata.' );
 content_structure_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示（请放在回答第一行）' ), 'User message carries the sample caveat ahead of the pack JSON.' );
 content_structure_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 

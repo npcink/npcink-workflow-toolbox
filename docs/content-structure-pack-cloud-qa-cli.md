@@ -27,7 +27,8 @@
 
 - `post_counts`：按类型/状态的聚合计数（含 draft 等数量，**不含**草稿标题/正文）
 - `taxonomies`：category / post_tag 总量、空项、低频项、`top_terms`（名称 + count）
-- `structure_signals`：抽样公开篇的 excerpt / meta / featured / 字数桶 / 新鲜度桶；最多若干**公开标题**样本
+- `structure_signals`：抽样公开篇的 excerpt / meta / featured / 字数桶 / 新鲜度桶；最多若干**公开标题**样本（比率为原始样本率）
+- `sampling`：按发布时间把已发布文章+页面分成最早/中间/最新三批，每批等间隔抽取（默认共 60 篇，filter `npcink_toolbox_content_structure_sample_limit` 可调，范围 6–120）；给出每批的年份范围、总体数 vs 抽样数、每批样本率，以及按总体加权的 `weighted_rates`。只用 ID 查询总体，正文只在本地数字数，不外发。答复首行提示形如「按发布时间分三批共抽查 60 篇（全站已发布 2000 篇），结论仅供参考。」
 - `top_findings`：结构 / SEO 健康建议（suggestion_only）
 - 操作员问题文案
 
