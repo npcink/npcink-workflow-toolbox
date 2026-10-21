@@ -257,8 +257,11 @@ site_ops_rest_assert( is_array( $data ) && Npcink_Toolbox\Site_Ops_Insight_Build
 $controller_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Rest_Controller.php' );
 site_ops_rest_assert( false !== strpos( $controller_source, "\$this->get( '/site-ops/insight-pack', 'site_ops_insight_pack' )" ), 'Rest_Controller registers GET /site-ops/insight-pack.' );
 site_ops_rest_assert( false !== strpos( $controller_source, "\$this->post( '/site-ops/insight-pack-qa', 'site_ops_insight_pack_qa' )" ), 'Rest_Controller registers POST /site-ops/insight-pack-qa.' );
-site_ops_rest_assert( false !== strpos( $controller_source, "'/site-ops/insight-pack'                    => 'cap.toolbox.admin'" ), 'Rest_Controller scopes insight-pack to cap.toolbox.admin (manage_options default).' );
-site_ops_rest_assert( false !== strpos( $controller_source, "'/site-ops/insight-pack-qa'                 => 'cap.toolbox.admin'" ), 'Rest_Controller scopes insight-pack-qa to cap.toolbox.admin.' );
+// Whitespace-insensitive: phpcs aligns this route map, so the number of spaces
+// before => depends on the neighbouring keys. Pinning an exact run of spaces
+// would encode formatting instead of behaviour.
+site_ops_rest_assert( 1 === preg_match( "~'/site-ops/insight-pack'\s+=> 'cap\.toolbox\.admin'~", $controller_source ), 'Rest_Controller scopes insight-pack to cap.toolbox.admin (manage_options default).' );
+site_ops_rest_assert( 1 === preg_match( "~'/site-ops/insight-pack-qa'\s+=> 'cap\.toolbox\.admin'~", $controller_source ), 'Rest_Controller scopes insight-pack-qa to cap.toolbox.admin.' );
 site_ops_rest_assert( false !== strpos( $controller_source, 'return $this->site_ops_insight_bridges->site_ops_insight_pack( $request );' ), 'Rest_Controller delegates to the Site Ops insight bridge.' );
 site_ops_rest_assert( false !== strpos( $controller_source, 'return $this->site_ops_insight_bridges->site_ops_insight_pack_qa( $request );' ), 'Rest_Controller delegates insight-pack-qa to the Site Ops insight bridge.' );
 
