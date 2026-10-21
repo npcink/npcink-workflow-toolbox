@@ -971,7 +971,15 @@
       "Enter a question about the de-identified content-structure pack.": ["请输入关于脱密内容结构摘要的问题。"],
       "Npcink Cloud Addon is required to ask about content structure.": ["关于内容结构提问需要已安装并可用的 Npcink Cloud Addon。"],
       "Connect and verify Npcink Cloud before asking about content structure.": ["请先连接并验证 Npcink Cloud，再提问内容结构。"],
-      "Could not encode the de-identified content-structure pack.": ["无法编码脱密内容结构摘要包。"]
+      "Could not encode the de-identified content-structure pack.": ["无法编码脱密内容结构摘要包。"],
+      "Smart Ask": ["智能提问"],
+      "Current site check": ["本次站点检查"],
+      "Content structure": ["内容结构"],
+      "Go to Smart Ask": ["去智能提问"],
+      "Ask a question about this data in plain language.": ["用大白话问问这份数据。"],
+      "Answers are for reference only and will not change your site.": ["答复仅供参考，不会改动网站"],
+      "Ask about": ["提问对象"],
+      "Choose what to ask about first.": ["请先选择提问对象。"]
     }
   }
 }

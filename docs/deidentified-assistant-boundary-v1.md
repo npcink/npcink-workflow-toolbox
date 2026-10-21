@@ -118,7 +118,7 @@
 
 | 项 | MVP 范围（已实现） |
 | --- | --- |
-| 入口 | **站点检查 → 当前检查 → 关于本次检查提问**；另有 REST + CLI |
+| 入口 | **智能提问** → 选择「本次站点检查」（站点检查→当前检查 有「去智能提问」链接）；另有 REST + CLI |
 | 唯一 on-demand pack | **`site_ops_insight_pack.v1` only** |
 | 其它四包 | 全部延后（§3）；第二包见 §11 |
 | Cloud | `hosted_ai_content_support.v1` + 本地 pack；`suggestion_only`；禁止 WP 写；不建 Core proposal |
@@ -151,12 +151,12 @@
 | 巡检只读拼包 REST | `GET …/site-ops/insight-pack`（`manage_options`） |
 | 巡检 Ask / QA REST | `POST …/site-ops/insight-pack-qa` |
 | 巡检实现 | `includes/Rest_Site_Ops_Insight_Bridges.php` |
-| 巡检 Admin 薄 UI | Site Check → 当前检查 → **关于本次检查提问** |
+| 巡检 Admin 薄 UI | **智能提问** → 选择「本次站点检查」 |
 | 巡检 CLI | `scripts/insight-pack-cloud-qa.sh` / `.php` |
 | **内容结构只读拼包 REST** | `GET …/content-structure/insight-pack`（`manage_options`） |
 | **内容结构 Ask / QA REST** | `POST …/content-structure/insight-pack-qa` |
 | **内容结构实现** | `includes/Content_Structure_Insight_Builder.php` + `Rest_Content_Structure_Insight_Bridges.php` |
-| **内容结构 Admin 薄 UI** | **站点资料（Site Profile）** → **关于内容结构提问**（与 Site Check Ask 分离） |
+| **内容结构 Admin 薄 UI** | **智能提问** → 选择「内容结构」（站点画像 有「去智能提问」链接；与巡检共用一个提问壳） |
 | **内容结构 CLI** | `scripts/content-structure-pack-cloud-qa.sh` / `.php`；手册 `docs/content-structure-pack-cloud-qa-cli.md` |
 | 既有本地预览 | Generate site check 仍可用；与两路 Ask **三轨并存、不合并 UI** |
 | 暂停的 Cloud detail | `cloud_inspection` 仍暂停；两路 Ask **均不**走该路径 |
@@ -166,7 +166,7 @@
 ## 8. 入口约定
 
 - **巡检摘要：** Site Check → Current check 提问条（内部试用）。
-- **内容结构摘要：** **站点资料（Site Profile / `toolbox_tab=context`）** 提问条 — 更贴近 SEO/内容健康语境；不新开顶栏 tab。
+- **内容结构摘要：** 统一在 **智能提问** tab（`toolbox_tab=smart-ask&ask_pack=content_structure`）；站点画像只放「去智能提问」链接。
 - **完整多轮壳：** 不做（本阶段）；Ask ≠ Generate；两路 Ask 共享 hosted AI 通道，**不合并 UI**。
 
 ---

@@ -57,13 +57,13 @@ Cap：`manage_options`（`cap.toolbox.admin`）。实现：`includes/Rest_Conten
 
 1. 左侧：**Npcink AI** → **流程工具箱**
 2. 顶部页签：**站点资料**（Site Profile；**不是**「站点检查」，也不是「图片处理」）
-3. 卡片 **关于内容结构提问** → 改问题 → **提问**
+3. **智能提问** → 选择「内容结构」 → 改问题 → **提问**
 
 直达（magick-ai）：
 
 `https://magick-ai.local/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=context`
 
-与 Site Check「关于本次检查提问」并列、入口不同、包不同；共享 hosted AI 通道。
+与「本次站点检查」在同一个 **智能提问** 页用下拉切换；包不同，共享 hosted AI 通道。
 
 硬刷新后验证：进行中态、Markdown 答复、忙位/429 中文提示。
 
@@ -95,6 +95,6 @@ cd /Users/muze/gitee/npcink-workflow-toolbox
 ## 给其它 AI 的最短路径
 
 1. 读本页 + [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)  
-2. 后台 **站点资料 → 关于内容结构提问**，或跑 `./scripts/content-structure-pack-cloud-qa.sh`  
+2. 后台 **智能提问** → 选择「内容结构」，或跑 `./scripts/content-structure-pack-cloud-qa.sh`  
 3. 排障带 Cloud `run_id`；遇 429 先清槽  
 4. **不要**恢复 `cloud_inspection`；**不要**开第三包；**不要**合入未获用户确认的 PR  

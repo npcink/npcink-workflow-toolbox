@@ -4,7 +4,7 @@
 
 产品边界（巡检摘要 + 内容结构摘要、suggestion_only、不写 WP）：见 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)。第二包手册：[content-structure-pack-cloud-qa-cli.md](content-structure-pack-cloud-qa-cli.md)。Site Ops 契约背景：[site-ops-cloud-analysis-contract.md](site-ops-cloud-analysis-contract.md)。
 
-**MVP 薄 UI 已有（`#289` 已合 master）：** 站点检查 → 当前检查 → **关于本次检查提问**。完整对话壳仍未做。验证也可用 REST + CLI。产品边界见 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)（已定稿）。
+**MVP 薄 UI 已有（`#289` 已合 master）：** 流程工具箱 → **智能提问** → 选择「本次站点检查」（站点检查→当前检查 上有「去智能提问」链接）。验证也可用 REST + CLI。产品边界见 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)（已定稿）。
 
 ---
 
@@ -24,7 +24,7 @@
 
 - **Route:** `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack`
 - **QA Route:** `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa`（body `{ "question": "..." }`；`manage_options`；本地拼包 + Hosted AI content-support，与 CLI 同路径）
-- **Admin UI:** Npcink AI → 流程工具箱 → **站点检查** → **当前检查** → **关于本次检查提问**（不要去「图片处理」）
+- **Admin UI:** Npcink AI → 流程工具箱 → **智能提问** → 选择「本次站点检查」（或 站点检查 → 当前检查 → 「去智能提问」）
 - **Cap:** `manage_options`（注册为 `cap.toolbox.admin`）
 - **行为:** 本地 `Site_Ops_Snapshot_Collector` + `Site_Ops_Insight_Builder`；**不调 Cloud**、不写站
 - **契约:** `contract_version = site_ops_insight_pack.v1`，`write_posture = suggestion_only`
@@ -50,7 +50,7 @@
 1. 左侧：**Npcink AI** → **流程工具箱**
 2. 顶部页签点 **站点检查**（不是「图片处理」，也不是「设置」）
 3. 站点检查内再点 **当前检查**
-4. 页面上方卡片 **关于本次检查提问** → 改问题 → 点 **提问**
+4. **智能提问** 页选择「本次站点检查」→ 改问题 → 点 **提问**
 
 直达链接（magick-ai）：
 
@@ -143,7 +143,7 @@ Cloud `RuntimePayload` 为 `extra=forbid`。以下键 **不要** 放进 runtime 
 ## 给其它 AI 的最短路径
 
 1. 读本页 + [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)  
-2. 优先用后台 **站点检查 → 当前检查 → 关于本次检查提问**，或在当前 master 跑 `./scripts/insight-pack-cloud-qa.sh`  
+2. 优先用后台 **智能提问** → 选择「本次站点检查」，或在当前 master 跑 `./scripts/insight-pack-cloud-qa.sh`  
 3. 排障带上 Cloud `run_id`；遇 429 先清槽再跑  
 4. **不要**恢复 `cloud_inspection`；**不要**合入未获用户确认的 PR  
 5. 不要把 `summary_prompt_mode` / timeout 字段塞进 runtime payload  
