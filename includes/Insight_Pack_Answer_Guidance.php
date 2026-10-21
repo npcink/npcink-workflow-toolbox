@@ -59,7 +59,7 @@ final class Insight_Pack_Answer_Guidance {
 				'- 实在避不开的词，用括号加一句短解释。',
 				'',
 				'【结构（严格按顺序，总长尽量不超过 300 字）】',
-				'1. 若用户消息给出了「抽样提示」，第一行原样写出它。',
+				'1. 若用户消息给出了「第一行要写的话」，回答第一行只原样写那句话本身，不带任何前缀、标签或说明。',
 				'2. 结论：1–2 句话说清网站现在最主要的情况。',
 				'3. 最多 3 件要做的事，按先后编号；每件写三行：做什么 / 为什么 / 怎么做（用简单步骤，指向站长能找到的地方）。',
 				'4. 不要写长篇背景、免责声明或总结段。',
@@ -117,7 +117,7 @@ final class Insight_Pack_Answer_Guidance {
 	public static function user_message( string $question, string $pack_label_en, string $pack_json, string $sample_note ): string {
 		$parts = array( '站长的问题：' . $question );
 		if ( '' !== $sample_note ) {
-			$parts[] = '抽样提示（请放在回答第一行）：' . $sample_note;
+			$parts[] = "第一行要写的话（只写引号里的句子，不要写这条说明）：\n「" . $sample_note . '」';
 		}
 		$parts[] = "---\nDe-identified " . $pack_label_en . " (JSON):\n" . $pack_json;
 

@@ -358,7 +358,7 @@ content_structure_rest_assert( false === strpos( $sampling_json, 'post_content' 
 content_structure_rest_assert( '按发布时间分三批共抽查 60 篇（全站已发布 2000 篇），结论仅供参考。' === $guidance_cls::stratified_sample_note( 3, 60, 2000 ), 'Stratified caveat is plain Chinese without field names.' );
 content_structure_rest_assert( '' === $guidance_cls::stratified_sample_note( 3, 20, 20 ), 'Full coverage adds no caveat.' );
 content_structure_rest_assert( is_array( $pack['sampling'] ?? null ) && isset( $pack['sampling']['strata'] ), 'Pack exposes sampling metadata.' );
-content_structure_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示（请放在回答第一行）' ), 'User message carries the sample caveat ahead of the pack JSON.' );
+content_structure_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
 content_structure_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
 echo "All content-structure insight pack REST behavior checks passed.\n";

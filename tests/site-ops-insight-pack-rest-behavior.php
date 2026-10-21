@@ -293,7 +293,7 @@ site_ops_rest_assert( false !== strpos( $sys_prompt, '不要在回答里解释�
 site_ops_rest_assert( false !== strpos( $sys_prompt, '只给建议' ), 'Ask prompt keeps suggestion-only posture.' );
 site_ops_rest_assert( '只抽查了 24 篇（全站已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
 site_ops_rest_assert( '' === $guidance_cls::sample_note( 24, 24 ), 'Full-coverage sample adds no caveat.' );
-site_ops_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示（请放在回答第一行）' ), 'User message carries the sample caveat ahead of the pack JSON.' );
+site_ops_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
 site_ops_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";
