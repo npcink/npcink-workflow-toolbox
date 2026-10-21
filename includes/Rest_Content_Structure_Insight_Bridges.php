@@ -116,7 +116,12 @@ final class Rest_Content_Structure_Insight_Bridges {
 			);
 		}
 
-		$user_content = $question . "\n\n---\nDe-identified content_structure insight pack (JSON):\n" . $pack_json;
+		$summary      = is_array( $compact['summary'] ?? null ) ? $compact['summary'] : array();
+		$sample_note  = Insight_Pack_Answer_Guidance::sample_note(
+			(int) ( $summary['sample_size'] ?? 0 ),
+			(int) ( $summary['published_posts'] ?? 0 ) + (int) ( $summary['published_pages'] ?? 0 )
+		);
+		$user_content = Insight_Pack_Answer_Guidance::user_message( $question, 'content_structure insight pack', $pack_json, $sample_note );
 
 		// Cloud RuntimePayload: extra=forbid. Do NOT forward Addon-local-only extras.
 		$runtime_payload = array(
@@ -129,7 +134,7 @@ final class Rest_Content_Structure_Insight_Bridges {
 				'messages' => array(
 					array(
 						'role'    => 'system',
-						'content' => 'You are Npcink Workflow Toolbox. Use only the provided de-identified content-structure / SEO-health insight pack. Focus on structure, taxonomy shape, metadata coverage, and content depth — not private content. Return concise, reviewable suggestions. Do not claim to write, publish, approve, or bypass governance. Do not invent credentials, emails, or private content. Never request post bodies or comments.',
+						'content' => Insight_Pack_Answer_Guidance::system_prompt( Insight_Pack_Answer_Guidance::PACK_CONTENT_STRUCTURE ),
 					),
 					array(
 						'role'    => 'user',

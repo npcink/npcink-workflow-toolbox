@@ -24,7 +24,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$default_question = '根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？请按优先级列出，每条一句话说明理由；只给建议，不要声称会写入 WordPress。';
+$default_question = '根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？用大白话回答。';
 
 $question = '';
 if ( isset( $args ) && is_array( $args ) && isset( $args[0] ) && is_string( $args[0] ) && '' !== trim( $args[0] ) ) {

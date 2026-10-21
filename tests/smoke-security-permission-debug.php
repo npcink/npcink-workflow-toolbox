@@ -133,6 +133,7 @@ require_once $root . '/includes/Rest_Media_Derivative_Previews.php';
 require_once $root . '/includes/Rest_Site_Knowledge_Bridges.php';
 require_once $root . '/includes/Rest_Web_Search_Bridges.php';
 require_once $root . '/includes/Rest_Nightly_Inspection_Bridges.php';
+require_once $root . '/includes/Insight_Pack_Answer_Guidance.php';
 require_once $root . '/includes/Rest_Site_Ops_Insight_Bridges.php';
 require_once $root . '/includes/Content_Structure_Insight_Builder.php';
 require_once $root . '/includes/Rest_Content_Structure_Insight_Bridges.php';

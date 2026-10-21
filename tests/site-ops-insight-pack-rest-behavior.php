@@ -220,6 +220,7 @@ require_once dirname( __DIR__ ) . '/includes/Plugin.php';
 require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/includes/Site_Ops_Snapshot_Collector.php';
 require_once dirname( __DIR__ ) . '/includes/Site_Ops_Insight_Builder.php';
+require_once dirname( __DIR__ ) . '/includes/Insight_Pack_Answer_Guidance.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Site_Ops_Insight_Bridges.php';
 
 $bridge_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Rest_Site_Ops_Insight_Bridges.php' );
@@ -278,5 +279,19 @@ site_ops_rest_assert( false !== strpos( $admin_source, 'aria-live="polite"' ) &&
 $busy_slot_bridge_wired = false !== strpos( $bridge_source, 'busy_slot' )
 	&& 1 === preg_match( '/\$data\[\'status\'\]\s+= 429/', $bridge_source );
 site_ops_rest_assert( false !== strpos( $js_source, 'isBusySlotError' ) && false !== strpos( $js_source, 'Another Cloud run is using this site' ) && $busy_slot_bridge_wired, 'Ask UI maps Cloud busy-slot / 429 to Chinese-friendly copy without raw status dumps.' );
+
+
+// Plain-language answer guidance (shared by both packs).
+$guidance_cls = 'Npcink_Toolbox\\Insight_Pack_Answer_Guidance';
+$sys_prompt   = $guidance_cls::system_prompt( $guidance_cls::PACK_SITE_OPS );
+site_ops_rest_assert( false !== strpos( $sys_prompt, '不懂技术' ) && false !== strpos( $sys_prompt, '日常口语' ), 'Ask prompt targets a non-technical Chinese site owner.' );
+site_ops_rest_assert( false !== strpos( $sys_prompt, '不要出现 JSON 字段名' ) && false !== strpos( $sys_prompt, '搜索结果里的简介' ) && false !== strpos( $sys_prompt, '内容太短的文章' ), 'Ask prompt bans raw field names and maps jargon to everyday words.' );
+site_ops_rest_assert( false !== strpos( $sys_prompt, '结论：1–2 句话' ) && false !== strpos( $sys_prompt, '最多 3 件' ) && false !== strpos( $sys_prompt, '做什么 / 为什么 / 怎么做' ), 'Ask prompt enforces conclusion-first, max 3 what/why/how items.' );
+site_ops_rest_assert( false !== strpos( $sys_prompt, '没有流量' ) && false !== strpos( $sys_prompt, '高流量页面' ), 'Ask prompt forbids citing metrics absent from the pack (traffic).' );
+site_ops_rest_assert( false !== strpos( $sys_prompt, '只给建议' ), 'Ask prompt keeps suggestion-only posture.' );
+site_ops_rest_assert( '只抽查了 24 篇（全站已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
+site_ops_rest_assert( '' === $guidance_cls::sample_note( 24, 24 ), 'Full-coverage sample adds no caveat.' );
+site_ops_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示（请放在回答第一行）' ), 'User message carries the sample caveat ahead of the pack JSON.' );
+site_ops_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";

@@ -203,7 +203,9 @@ final class Rest_Site_Ops_Insight_Bridges {
 			);
 		}
 
-		$user_content = $question . "\n\n---\nDe-identified site_ops insight pack (JSON):\n" . $pack_json;
+		$sample_size  = (int) ( $compact['summary']['scanned_posts'] ?? 0 );
+		$sample_note  = Insight_Pack_Answer_Guidance::sample_note( $sample_size, Insight_Pack_Answer_Guidance::published_total() );
+		$user_content = Insight_Pack_Answer_Guidance::user_message( $question, 'site_ops insight pack', $pack_json, $sample_note );
 
 		// Cloud RuntimePayload: extra=forbid. Do NOT forward Addon-local-only
 		// timeout or prompt-mode extras (see docs/insight-pack-cloud-qa-cli.md).
@@ -217,7 +219,7 @@ final class Rest_Site_Ops_Insight_Bridges {
 				'messages' => array(
 					array(
 						'role'    => 'system',
-						'content' => 'You are Npcink Workflow Toolbox. Use only the provided de-identified Site Check insight pack. Return concise, reviewable suggestions. Do not claim to write, publish, approve, or bypass governance. Do not invent credentials, emails, or private content.',
+						'content' => Insight_Pack_Answer_Guidance::system_prompt( Insight_Pack_Answer_Guidance::PACK_SITE_OPS ),
 					),
 					array(
 						'role'    => 'user',
