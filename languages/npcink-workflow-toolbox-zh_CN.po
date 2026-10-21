@@ -9845,3 +9845,26 @@ msgstr "请先连接并验证 Npcink Cloud，再提问内容结构。"
 msgid "Could not encode the de-identified content-structure pack."
 msgstr "无法编码脱密内容结构摘要包。"
 
+msgid "Smart Ask"
+msgstr "智能提问"
+
+msgid "Current site check"
+msgstr "本次站点检查"
+
+msgid "Content structure"
+msgstr "内容结构"
+
+msgid "Go to Smart Ask"
+msgstr "去智能提问"
+
+msgid "Ask a question about this data in plain language."
+msgstr "用大白话问问这份数据。"
+
+msgid "Answers are for reference only and will not change your site."
+msgstr "答复仅供参考，不会改动网站"
+
+msgid "Ask about"
+msgstr "提问对象"
+
+msgid "Choose what to ask about first."
+msgstr "请先选择提问对象。"

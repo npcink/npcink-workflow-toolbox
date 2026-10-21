@@ -304,9 +304,9 @@ content_structure_rest_assert( false !== strpos( $controller_source, "'/content-
 
 $admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
 $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
-content_structure_rest_assert( false !== strpos( $admin_source, 'data-toolbox-content-structure-qa' ), 'Site Profile renders content-structure Ask UI.' );
-content_structure_rest_assert( false !== strpos( $admin_source, 'Ask about content structure' ), 'Ask UI labeled as content structure.' );
-content_structure_rest_assert( false !== strpos( $js_source, 'initContentStructurePackQa' ) && false !== strpos( $js_source, 'content-structure/insight-pack-qa' ), 'admin.js wires content-structure Ask to REST.' );
+content_structure_rest_assert( false === strpos( $admin_source, 'data-toolbox-content-structure-qa' ) && false !== strpos( $admin_source, "render_smart_ask_link( 'content_structure' )" ), 'Site Profile links to Smart Ask instead of hosting its own Ask card.' );
+content_structure_rest_assert( false !== strpos( $admin_source, "'endpoint'         => 'content-structure/insight-pack-qa'" ) && false !== strpos( $admin_source, "'contract'         => 'content_structure_insight_pack.v1'" ), 'Smart Ask registry includes the content-structure pack.' );
+content_structure_rest_assert( false !== strpos( $js_source, 'initSmartAsk' ) && false !== strpos( $js_source, "getAttribute('data-endpoint')" ), 'admin.js sends Smart Ask to the selected pack endpoint.' );
 content_structure_rest_assert( false !== strpos( $js_source, 'is-ask-busy' ) && false !== strpos( $bridge_source, 'busy_slot' ), 'Ask UI / bridge share busy-slot handling.' );
 
 $boundary = (string) file_get_contents( dirname( __DIR__ ) . '/docs/deidentified-assistant-boundary-v1.md' );
