@@ -9917,3 +9917,301 @@ msgstr "AI 没有给出这段的建议，下面显示的是本地检查结果。
 
 msgid "The AI did not return a usable suggestion. Try again, or use the full-article check."
 msgstr "AI 没有给出可用的建议。请再试一次，或使用全文检查。"
+
+msgid "Nightly check details"
+msgstr "夜间巡检详情"
+
+msgid "Needs your review"
+msgstr "需要你来查看"
+
+msgid "Result not loaded yet"
+msgstr "结果还没载入"
+
+msgid "What to do"
+msgstr "怎么处理"
+
+msgid "Some items did not finish."
+msgstr "有部分项目没有完成。"
+
+msgid "This check can be tried again."
+msgstr "这次巡检可以重新试一次。"
+
+msgid "Loaded the last nightly check. You can refresh it below."
+msgstr "已载入上一次夜间巡检，可以在下方刷新。"
+
+msgid "AI credits used up"
+msgstr "AI 积分已用完"
+
+msgid "Credits updated"
+msgstr "积分已更新"
+
+msgid "No nightly checks are left this billing period. You can still view earlier results."
+msgstr "本计费周期的夜间巡检次数已用完，之前的结果仍可查看。"
+
+msgid "Shows your current plan from Npcink Cloud. Nothing here changes your site."
+msgstr "显示你在 Npcink Cloud 的当前套餐，这里不会改动网站。"
+
+msgid "Your plan"
+msgstr "当前套餐"
+
+msgid "Last nightly check"
+msgstr "上一次夜间巡检"
+
+msgid "Recent nightly checks"
+msgstr "最近的夜间巡检"
+
+msgid "These are the recent nightly checks for this site. They are for viewing only and do not change your site."
+msgstr "这是本站最近的夜间巡检，只供查看，不会改动网站。"
+
+msgid "No recent nightly checks yet."
+msgstr "还没有最近的夜间巡检。"
+
+msgid "Scheduled by"
+msgstr "由谁安排"
+
+msgid "Changes your site"
+msgstr "会改动网站"
+
+msgid "Unfinished items"
+msgstr "未完成的项目"
+
+msgid "Recent checks"
+msgstr "最近的巡检"
+
+msgid "Loaded this nightly check. You can refresh, load the result, or try again."
+msgstr "已载入这次夜间巡检，可以刷新、载入结果或重试。"
+
+msgid "Items to review"
+msgstr "要查看的项目"
+
+msgid "These results are for viewing only. History and follow-up are handled in Npcink Cloud."
+msgstr "这些结果只供查看，历史记录和后续处理在 Npcink Cloud 中进行。"
+
+msgid "Look over the matched items first."
+msgstr "请先看一下匹配到的项目。"
+
+msgid "Load the result first."
+msgstr "请先载入结果。"
+
+msgid "Nothing needs follow-up from this check."
+msgstr "这次巡检没有需要跟进的事项。"
+
+msgid "Progress"
+msgstr "进度"
+
+msgid "Items checked"
+msgstr "检查的项目数"
+
+msgid "The check is still running in Npcink Cloud. Refresh later; nothing runs on your site."
+msgstr "巡检仍在 Npcink Cloud 中进行，请稍后刷新；网站上不会运行任何任务。"
+
+msgid "Load the result first"
+msgstr "请先载入结果"
+
+msgid "This page only shows results; it does not change your site."
+msgstr "此页面只显示结果，不会改动网站。"
+
+msgid "More in Npcink Cloud"
+msgstr "在 Npcink Cloud 中查看更多"
+
+msgid "See full history in Npcink Cloud. Any change to your site still needs your approval."
+msgstr "完整历史请到 Npcink Cloud 查看；任何对网站的改动都仍需你确认。"
+
+msgid "Waiting for the check to start."
+msgstr "正在等待巡检开始。"
+
+msgid "Load the result after the check finishes."
+msgstr "巡检完成后再载入结果。"
+
+msgid "Suggested actions"
+msgstr "建议的操作"
+
+msgid "Matched items"
+msgstr "匹配到的项目"
+
+msgid "The results were added to your review list. Nothing on your site was changed."
+msgstr "结果已加入待查看列表，网站内容没有改动。"
+
+msgid "The check is still running. This page checks back for a short while; you can also refresh it yourself."
+msgstr "巡检还在进行。此页面会短暂自动查看，你也可以手动刷新。"
+
+msgid "The check finished. Load the result to see it."
+msgstr "巡检已完成，载入结果即可查看。"
+
+msgid "The check ended without a result. Nothing on your site was changed; you can try again."
+msgstr "巡检结束了但没有结果，网站内容没有改动，可以重新试一次。"
+
+msgid "Nightly check status"
+msgstr "夜间巡检状态"
+
+msgid "Nightly check result"
+msgstr "夜间巡检结果"
+
+msgid "The results were added to your review list automatically. Nothing on your site was changed."
+msgstr "结果已自动加入待查看列表，网站内容没有改动。"
+
+msgid "Turn on nightly checks in the settings and save, then try again."
+msgstr "请先在设置中开启夜间巡检并保存，再试一次。"
+
+msgid "Nightly check started"
+msgstr "夜间巡检已开始"
+
+msgid "Npcink Cloud is checking your site. Nothing on your site will be changed."
+msgstr "Npcink Cloud 正在检查你的网站，不会改动网站内容。"
+
+msgid "The check started, but this page stopped waiting for it. Refresh later to see the result."
+msgstr "巡检已开始，但此页面没有等到结果，请稍后刷新查看。"
+
+msgid "Nightly check finished"
+msgstr "夜间巡检已结束"
+
+msgid "The check ended without a result. You can try again."
+msgstr "巡检结束了但没有结果，可以重新试一次。"
+
+msgid "Nightly check still running"
+msgstr "夜间巡检仍在进行"
+
+msgid "The check is still running in Npcink Cloud. Refresh later to see the result; nothing runs on your site."
+msgstr "巡检仍在 Npcink Cloud 中进行，请稍后刷新查看结果；网站上不会运行任何任务。"
+
+msgid "Could not update your credits. Try again later."
+msgstr "没能更新积分，请稍后再试。"
+
+msgid "Could not load recent checks. Try again later."
+msgstr "没能载入最近的巡检，请稍后再试。"
+
+msgid "Pick a nightly check first."
+msgstr "请先选择一次夜间巡检。"
+
+msgid "Latest status of this nightly check."
+msgstr "这次夜间巡检的最新状态。"
+
+msgid "Could not refresh the status. Try again later."
+msgstr "没能刷新状态，请稍后再试。"
+
+msgid "Here are the results to review. Nothing on your site was changed."
+msgstr "以下是要查看的结果，网站内容没有改动。"
+
+msgid "The result is not ready yet. Refresh after the check finishes."
+msgstr "结果还没准备好，请在巡检完成后刷新。"
+
+msgid "Could not load the result. Try again later."
+msgstr "没能载入结果，请稍后再试。"
+
+msgid "Trying the check again"
+msgstr "正在重新巡检"
+
+msgid "The check will run again in Npcink Cloud. Nothing on your site was changed."
+msgstr "巡检会在 Npcink Cloud 中重新运行，网站内容没有改动。"
+
+msgid "Could not start the check again. Try again later."
+msgstr "没能重新开始巡检，请稍后再试。"
+
+#, php-format
+msgid "Checking the status automatically (%1$d of 4). The check runs in Npcink Cloud; nothing runs on your site."
+msgstr "正在自动查看状态（第 %1$d 次，共 4 次）。巡检在 Npcink Cloud 中进行，网站上不会运行任何任务。"
+
+msgid "Advanced: download the preview file"
+msgstr "高级：下载预览文件"
+
+msgid "Advanced: check on this site (optional)"
+msgstr "高级：在本站检查（可选）"
+
+msgid "Check the Npcink Cloud connection, then try again."
+msgstr "请检查与 Npcink Cloud 的连接后再试。"
+
+msgid "Could not build the preview. Try again later."
+msgstr "没能生成预览，请稍后再试。"
+
+msgid "Download preview file"
+msgstr "下载预览文件"
+
+msgid "Only needed when support asks for it. Downloading it does not change your site."
+msgstr "只在客服需要时下载，下载不会改动网站。"
+
+msgid "Also check on this site when Npcink Cloud is unavailable"
+msgstr "Npcink Cloud 不可用时也在本站检查"
+
+#, php-format
+msgid "Found %d things to look at. This only confirms the check can read your content; for everyday upkeep use Current check."
+msgstr "找到 %d 处可以看看的地方。这只用于确认巡检能读取你的内容；日常维护请用「当前检查」。"
+
+msgid "Install and connect Npcink Cloud Addon to use this."
+msgstr "请安装并连接 Npcink Cloud Addon 后再使用。"
+
+#, php-format
+msgid "Latest preview: %1$s, %2$d items to look at."
+msgstr "最近一次预览：%1$s，%2$d 处可以看看。"
+
+msgid "Check on this site (optional)"
+msgstr "在本站检查（可选）"
+
+msgid "For an occasional look only. For everyday upkeep, start with Current check."
+msgstr "只适合偶尔看看。日常维护请从「当前检查」开始。"
+
+msgid "Preview only. It reads your content and lists things to look at; it does not schedule anything, contact Npcink Cloud, or change your site."
+msgstr "只是预览：读取你的内容并列出可以看看的地方，不会安排任务、不会联系 Npcink Cloud，也不会改动网站。"
+
+msgid "No preview yet."
+msgstr "还没有预览。"
+
+msgid "Nothing is scheduled, sent, or changed."
+msgstr "不会安排任务、发送数据或改动网站。"
+
+msgid "Nothing important was found in this preview."
+msgstr "这次预览没有发现需要优先处理的地方。"
+
+msgid "Open Npcink Cloud settings"
+msgstr "打开 Npcink Cloud 设置"
+
+msgid "See nightly check history"
+msgstr "查看夜间巡检记录"
+
+msgid "Optional backup that checks on this site. Use it only when Npcink Cloud is unavailable or while trying things out; it is not the nightly check."
+msgstr "可选的本站备用检查。只在 Npcink Cloud 不可用或试用时使用，它不是夜间巡检。"
+
+msgid "Things to look at"
+msgstr "可以看看的地方"
+
+msgid "Preview whether the check can read your public content."
+msgstr "预览巡检能否读取你的公开内容。"
+
+msgid "Hints only; nothing is changed."
+msgstr "只是提示，不会改动任何内容。"
+
+msgid "Connect this site to Npcink Cloud to use this."
+msgstr "请先把此站点连接到 Npcink Cloud 再使用。"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Use this only to check that your content can be read. Nightly check history is in Npcink Cloud."
+msgstr "这里只用于确认内容能被读取。夜间巡检记录请到 Npcink Cloud 查看。"
+
+msgid "These settings only affect the preview on this site."
+msgstr "这些设置只影响本站的预览。"
+
+msgid "Did not finish"
+msgstr "没有完成"
+
+msgid "Runs in Npcink Cloud."
+msgstr "在 Npcink Cloud 中进行。"
+
+msgid "Result loaded"
+msgstr "结果已载入"
+
+#, c-format
+msgid "%d matched items; please look them over."
+msgstr "匹配到 %d 处，请看一下。"
+
+msgid "Most important"
+msgstr "最需要处理"
+
+msgid "Open Npcink Cloud"
+msgstr "打开 Npcink Cloud"
+
+msgid "Partial Success"
+msgstr "部分完成"
+
+msgid "Ended"
+msgstr "已结束"

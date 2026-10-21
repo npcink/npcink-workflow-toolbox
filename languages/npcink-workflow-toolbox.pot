@@ -9636,3 +9636,304 @@ msgstr ""
 
 msgid "The AI did not return a usable suggestion. Try again, or use the full-article check."
 msgstr ""
+
+msgid "Nightly check details"
+msgstr ""
+
+msgid "Needs your review"
+msgstr ""
+
+msgid "Result not loaded yet"
+msgstr ""
+
+msgid "What to do"
+msgstr ""
+
+msgid "Some items did not finish."
+msgstr ""
+
+msgid "This check can be tried again."
+msgstr ""
+
+msgid "Loaded the last nightly check. You can refresh it below."
+msgstr ""
+
+msgid "AI credits used up"
+msgstr ""
+
+msgid "Credits updated"
+msgstr ""
+
+msgid "No nightly checks are left this billing period. You can still view earlier results."
+msgstr ""
+
+msgid "Shows your current plan from Npcink Cloud. Nothing here changes your site."
+msgstr ""
+
+msgid "Your plan"
+msgstr ""
+
+msgid "Last nightly check"
+msgstr ""
+
+msgid "Recent nightly checks"
+msgstr ""
+
+msgid "These are the recent nightly checks for this site. They are for viewing only and do not change your site."
+msgstr ""
+
+msgid "No recent nightly checks yet."
+msgstr ""
+
+msgid "Scheduled by"
+msgstr ""
+
+msgid "Changes your site"
+msgstr ""
+
+msgid "Unfinished items"
+msgstr ""
+
+msgid "Recent checks"
+msgstr ""
+
+msgid "Loaded this nightly check. You can refresh, load the result, or try again."
+msgstr ""
+
+msgid "Items to review"
+msgstr ""
+
+msgid "These results are for viewing only. History and follow-up are handled in Npcink Cloud."
+msgstr ""
+
+msgid "Look over the matched items first."
+msgstr ""
+
+msgid "Load the result first."
+msgstr ""
+
+msgid "Nothing needs follow-up from this check."
+msgstr ""
+
+msgid "Progress"
+msgstr ""
+
+msgid "Items checked"
+msgstr ""
+
+msgid "The check is still running in Npcink Cloud. Refresh later; nothing runs on your site."
+msgstr ""
+
+msgid "Load the result first"
+msgstr ""
+
+msgid "This page only shows results; it does not change your site."
+msgstr ""
+
+msgid "More in Npcink Cloud"
+msgstr ""
+
+msgid "See full history in Npcink Cloud. Any change to your site still needs your approval."
+msgstr ""
+
+msgid "Waiting for the check to start."
+msgstr ""
+
+msgid "Load the result after the check finishes."
+msgstr ""
+
+msgid "Suggested actions"
+msgstr ""
+
+msgid "Matched items"
+msgstr ""
+
+msgid "The results were added to your review list. Nothing on your site was changed."
+msgstr ""
+
+msgid "The check is still running. This page checks back for a short while; you can also refresh it yourself."
+msgstr ""
+
+msgid "The check finished. Load the result to see it."
+msgstr ""
+
+msgid "The check ended without a result. Nothing on your site was changed; you can try again."
+msgstr ""
+
+msgid "Nightly check status"
+msgstr ""
+
+msgid "Nightly check result"
+msgstr ""
+
+msgid "The results were added to your review list automatically. Nothing on your site was changed."
+msgstr ""
+
+msgid "Turn on nightly checks in the settings and save, then try again."
+msgstr ""
+
+msgid "Nightly check started"
+msgstr ""
+
+msgid "Npcink Cloud is checking your site. Nothing on your site will be changed."
+msgstr ""
+
+msgid "The check started, but this page stopped waiting for it. Refresh later to see the result."
+msgstr ""
+
+msgid "Nightly check finished"
+msgstr ""
+
+msgid "The check ended without a result. You can try again."
+msgstr ""
+
+msgid "Nightly check still running"
+msgstr ""
+
+msgid "The check is still running in Npcink Cloud. Refresh later to see the result; nothing runs on your site."
+msgstr ""
+
+msgid "Could not update your credits. Try again later."
+msgstr ""
+
+msgid "Could not load recent checks. Try again later."
+msgstr ""
+
+msgid "Pick a nightly check first."
+msgstr ""
+
+msgid "Latest status of this nightly check."
+msgstr ""
+
+msgid "Could not refresh the status. Try again later."
+msgstr ""
+
+msgid "Here are the results to review. Nothing on your site was changed."
+msgstr ""
+
+msgid "The result is not ready yet. Refresh after the check finishes."
+msgstr ""
+
+msgid "Could not load the result. Try again later."
+msgstr ""
+
+msgid "Trying the check again"
+msgstr ""
+
+msgid "The check will run again in Npcink Cloud. Nothing on your site was changed."
+msgstr ""
+
+msgid "Could not start the check again. Try again later."
+msgstr ""
+
+#, php-format
+msgid "Checking the status automatically (%1$d of 4). The check runs in Npcink Cloud; nothing runs on your site."
+msgstr ""
+
+msgid "Advanced: download the preview file"
+msgstr ""
+
+msgid "Advanced: check on this site (optional)"
+msgstr ""
+
+msgid "Check the Npcink Cloud connection, then try again."
+msgstr ""
+
+msgid "Could not build the preview. Try again later."
+msgstr ""
+
+msgid "Download preview file"
+msgstr ""
+
+msgid "Only needed when support asks for it. Downloading it does not change your site."
+msgstr ""
+
+msgid "Also check on this site when Npcink Cloud is unavailable"
+msgstr ""
+
+#, php-format
+msgid "Found %d things to look at. This only confirms the check can read your content; for everyday upkeep use Current check."
+msgstr ""
+
+msgid "Install and connect Npcink Cloud Addon to use this."
+msgstr ""
+
+#, php-format
+msgid "Latest preview: %1$s, %2$d items to look at."
+msgstr ""
+
+msgid "Check on this site (optional)"
+msgstr ""
+
+msgid "For an occasional look only. For everyday upkeep, start with Current check."
+msgstr ""
+
+msgid "Preview only. It reads your content and lists things to look at; it does not schedule anything, contact Npcink Cloud, or change your site."
+msgstr ""
+
+msgid "No preview yet."
+msgstr ""
+
+msgid "Nothing is scheduled, sent, or changed."
+msgstr ""
+
+msgid "Nothing important was found in this preview."
+msgstr ""
+
+msgid "Open Npcink Cloud settings"
+msgstr ""
+
+msgid "See nightly check history"
+msgstr ""
+
+msgid "Optional backup that checks on this site. Use it only when Npcink Cloud is unavailable or while trying things out; it is not the nightly check."
+msgstr ""
+
+msgid "Things to look at"
+msgstr ""
+
+msgid "Preview whether the check can read your public content."
+msgstr ""
+
+msgid "Hints only; nothing is changed."
+msgstr ""
+
+msgid "Connect this site to Npcink Cloud to use this."
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Use this only to check that your content can be read. Nightly check history is in Npcink Cloud."
+msgstr ""
+
+msgid "These settings only affect the preview on this site."
+msgstr ""
+
+msgid "Did not finish"
+msgstr ""
+
+msgid "Runs in Npcink Cloud."
+msgstr ""
+
+msgid "Result loaded"
+msgstr ""
+
+#, c-format
+msgid "%d matched items; please look them over."
+msgstr ""
+
+msgid "Most important"
+msgstr ""
+
+msgid "Open Npcink Cloud"
+msgstr ""
+
+msgid "Retry run"
+msgstr ""
+
+msgid "Partial Success"
+msgstr ""
+
+msgid "Ended"
+msgstr ""
