@@ -298,8 +298,8 @@ content_structure_rest_assert( 'npcink_toolbox_content_structure_qa_question_req
 $controller_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Rest_Controller.php' );
 content_structure_rest_assert( false !== strpos( $controller_source, "\$this->get( '/content-structure/insight-pack', 'content_structure_insight_pack' )" ), 'Rest_Controller registers GET /content-structure/insight-pack.' );
 content_structure_rest_assert( false !== strpos( $controller_source, "\$this->post( '/content-structure/insight-pack-qa', 'content_structure_insight_pack_qa' )" ), 'Rest_Controller registers POST QA.' );
-content_structure_rest_assert( false !== strpos( $controller_source, "'/content-structure/insight-pack'           => 'cap.toolbox.admin'" ), 'GET scoped to cap.toolbox.admin.' );
-content_structure_rest_assert( false !== strpos( $controller_source, "'/content-structure/insight-pack-qa'        => 'cap.toolbox.admin'" ), 'QA scoped to cap.toolbox.admin.' );
+content_structure_rest_assert( false !== strpos( $controller_source, "'/content-structure/insight-pack'          => 'cap.toolbox.admin'" ), 'GET scoped to cap.toolbox.admin.' );
+content_structure_rest_assert( false !== strpos( $controller_source, "'/content-structure/insight-pack-qa'       => 'cap.toolbox.admin'" ), 'QA scoped to cap.toolbox.admin.' );
 
 $admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
 $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
