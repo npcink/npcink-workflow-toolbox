@@ -217,7 +217,7 @@ final class Rest_Content_Structure_Insight_Bridges {
 
 		$data   = is_array( $response['data'] ?? null ) ? $response['data'] : $response;
 		$run_id = (string) ( $data['run_id'] ?? '' );
-		$answer = $this->extract_hosted_ai_answer_text( $response );
+		$answer = Insight_Pack_Answer_Guidance::strip_first_line_quotes( $this->extract_hosted_ai_answer_text( $response ) );
 		$status = (string) ( $data['status'] ?? ( $response['status'] ?? '' ) );
 
 		return rest_ensure_response(

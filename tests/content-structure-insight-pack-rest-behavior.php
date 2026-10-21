@@ -359,6 +359,13 @@ content_structure_rest_assert( '按发布时间分三批共抽查 60 篇（全�
 content_structure_rest_assert( '' === $guidance_cls::stratified_sample_note( 3, 20, 20 ), 'Full coverage adds no caveat.' );
 content_structure_rest_assert( is_array( $pack['sampling'] ?? null ) && isset( $pack['sampling']['strata'] ), 'Pack exposes sampling metadata.' );
 content_structure_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
+content_structure_rest_assert( false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), "：\n只抽查了 1 篇。" ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), '「只抽查' ), 'Caveat is a plain standalone line, not wrapped in quotes.' );
+content_structure_rest_assert( false !== strpos( $guidance_cls::system_prompt( 'x' ), '不带任何前缀、标签、引号或说明' ), 'System rule forbids quotes on the first line.' );
+content_structure_rest_assert( "按 60 篇。\n\n1. a" === $guidance_cls::strip_first_line_quotes( "「按 60 篇。」\n\n1. a" ), 'Strips 「」 wrapping the whole first line.' );
+content_structure_rest_assert( "按 60 篇。\nb" === $guidance_cls::strip_first_line_quotes( "“按 60 篇。”\nb" ) && "hi\nx" === $guidance_cls::strip_first_line_quotes( '"hi"' . "\nx" ), 'Strips “” and "" wrapping the first line.' );
+content_structure_rest_assert( "只抽查。\n「x」" === $guidance_cls::strip_first_line_quotes( "只抽查。\n「x」" ), 'Unwrapped first line and later quotes untouched.' );
+content_structure_rest_assert( '“甲”和“乙”' === $guidance_cls::strip_first_line_quotes( '“甲”和“乙”' ) && '「a」「b」' === $guidance_cls::strip_first_line_quotes( '「a」「b」' ), 'Inner quoted spans are kept.' );
+content_structure_rest_assert( '' === $guidance_cls::strip_first_line_quotes( '' ) && '「」' === $guidance_cls::strip_first_line_quotes( '「」' ), 'Empty input and empty pair are left alone.' );
 content_structure_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
 echo "All content-structure insight pack REST behavior checks passed.\n";

@@ -59,7 +59,7 @@ final class Insight_Pack_Answer_Guidance {
 				'- 实在避不开的词，用括号加一句短解释。',
 				'',
 				'【结构（严格按顺序，全文不超过 300 字，宁短勿长）】',
-				'1. 若用户消息给出了「第一行要写的话」，回答第一行只原样写那句话本身，不带任何前缀、标签或说明。',
+				'1. 若用户消息给出了「第一行要写的话」，回答第一行只原样写那句话本身，不带任何前缀、标签、引号或说明。',
 				'2. 结论：1–2 句话说清网站现在最主要的情况。',
 				'3. 最多 3 件要做的事，按先后编号；每件写三行：做什么 / 为什么 / 怎么做（用简单步骤，指向站长能找到的地方）。「为什么」「怎么做」各只写一句、不超过 40 字，每件最多引用一个数字。',
 				'4. 不要写长篇背景、免责声明或总结段。',
@@ -114,10 +114,41 @@ final class Insight_Pack_Answer_Guidance {
 		return sprintf( '按发布时间分%1$s批共抽查 %2$d 篇（全站已发布 %3$d 篇），结论仅供参考。', $label, $sampled, $published_total );
 	}
 
+	/**
+	 * Strips one outer pair of 「」 / “” / "" when it wraps the whole first non-empty
+	 * line of a Cloud answer. Quotes anywhere else are left untouched.
+	 */
+	public static function strip_first_line_quotes( string $answer ): string {
+		if ( 1 !== preg_match( '/^(\s*)([^\n]*)(.*)$/su', $answer, $m ) ) {
+			return $answer;
+		}
+		$line  = trim( $m[2] );
+		$pairs = array(
+			array( '「', '」' ),
+			array( '“', '”' ),
+			array( '"', '"' ),
+		);
+		foreach ( $pairs as $pair ) {
+			$open  = $pair[0];
+			$close = $pair[1];
+			$ol    = strlen( $open );
+			$cl    = strlen( $close );
+			if ( strlen( $line ) > $ol + $cl && 0 === strpos( $line, $open ) && substr( $line, -$cl ) === $close ) {
+				$inner = substr( $line, $ol, strlen( $line ) - $ol - $cl );
+				// Only strip when the pair wraps the line, not two separate quoted spans.
+				if ( false === strpos( $inner, $open ) && false === strpos( $inner, $close ) ) {
+					return $m[1] . trim( $inner ) . $m[3];
+				}
+			}
+		}
+
+		return $answer;
+	}
+
 	public static function user_message( string $question, string $pack_label_en, string $pack_json, string $sample_note ): string {
 		$parts = array( '站长的问题：' . $question );
 		if ( '' !== $sample_note ) {
-			$parts[] = "第一行要写的话（只写引号里的句子，不要写这条说明）：\n「" . $sample_note . '」';
+			$parts[] = "第一行要写的话（只写下一行这句话本身，不要写这条说明）：\n" . $sample_note;
 		}
 		$parts[] = "---\nDe-identified " . $pack_label_en . " (JSON):\n" . $pack_json;
 
