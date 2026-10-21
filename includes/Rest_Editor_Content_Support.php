@@ -549,7 +549,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			return array(
 				'status'                 => 'error',
 				'code'                   => sanitize_key( (string) $value->get_error_code() ),
-				'message'                => sanitize_text_field( $value->get_error_message() ),
+				'message'                => sanitize_text_field( Cloud_Error_Plain_Messages::visible_message( $value ) ),
 				'write_posture'          => 'suggestion_only',
 				'direct_wordpress_write' => false,
 			);
@@ -2701,7 +2701,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'fallback_used'             => 'local_fallback' === $candidate_source,
 			'toolkit_required'          => true,
 			'error_code'                => sanitize_key( $error->get_error_code() ),
-			'error_message'             => sanitize_text_field( $error->get_error_message() ),
+			'error_message'             => sanitize_text_field( Cloud_Error_Plain_Messages::visible_message( $error ) ),
 			'items'                     => array(),
 			'recommendation_candidates' => array(),
 			'owner_label'               => 'human_editor',
@@ -2734,7 +2734,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'source_ability_id'      => 'npcink-abilities-toolkit/suggest-post-taxonomy-terms',
 			'toolkit_required'       => true,
 			'error_code'             => sanitize_key( $error->get_error_code() ),
-			'error_message'          => sanitize_text_field( $error->get_error_message() ),
+			'error_message'          => sanitize_text_field( Cloud_Error_Plain_Messages::visible_message( $error ) ),
 			'ranking_context'        => array(
 				'draft_query_overlap'         => true,
 				'related_content_terms'       => array() !== $related_term_evidence,

@@ -670,9 +670,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</p>
 			<div class="npcink-toolbox__result-notice" data-toolbox-smart-ask-status aria-live="polite" hidden></div>
 			<div data-toolbox-smart-ask-result hidden>
-				<p><strong><?php esc_html_e( 'run_id', 'npcink-workflow-toolbox' ); ?>:</strong> <code data-toolbox-smart-ask-run-id></code>
-					<span class="description"> · <span data-toolbox-smart-ask-meta></span></span></p>
 				<div class="npcink-toolbox__markdown" data-toolbox-smart-ask-answer></div>
+				<details class="npcink-toolbox__support-meta"><summary><?php esc_html_e( 'Details for support', 'npcink-workflow-toolbox' ); ?></summary>
+					<p class="description">run_id: <code data-toolbox-smart-ask-run-id></code> · <span data-toolbox-smart-ask-meta></span></p>
+				</details>
 			</div>
 		</section>
 		<?php

@@ -1502,7 +1502,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 		}
 		if ( is_wp_error( $cloud_analysis ) ) {
 			?>
-			<div class="npcink-toolbox__result-notice is-warning"><?php echo esc_html( $cloud_analysis->get_error_message() ); ?></div>
+			<div class="npcink-toolbox__result-notice is-warning"><?php echo esc_html( Cloud_Error_Plain_Messages::visible_message( $cloud_analysis ) ); ?></div>
 			<?php
 			return;
 		}

@@ -66,6 +66,21 @@
 	}
 
 
+	// Run ids and error codes are support details: keep them out of the
+	// visible text and fold them under one "Details for support" disclosure.
+	function appendSupportMeta(container, label, value) {
+		if (value === undefined || value === null || value === '' || !container) {
+			return;
+		}
+		let details = container.querySelector(':scope > details.npcink-toolbox__support-meta');
+		if (!details) {
+			details = el('details', 'npcink-toolbox__support-meta');
+			details.appendChild(el('summary', '', t('Details for support')));
+			container.appendChild(details);
+		}
+		appendMeta(details, label, String(value));
+	}
+
 	function escapeHtml(value) {
 		return String(value == null ? '' : value)
 			.replace(/&/g, '&amp;')
@@ -431,11 +446,11 @@
 
 	function normalizeRuntimeErrorText(text) {
 		if (text.toLowerCase().indexOf('runtime quota') >= 0 && text.toLowerCase().indexOf('exhausted') >= 0) {
-			return t('Cloud runtime quota is exhausted for this request. Check Cloud quota or billing limits, then retry.');
+			return t('Your AI credits have run out. Top up on Npcink Cloud, then try again.');
 		}
 		const profileTextInputMatch = text.match(/^profile '([^']+)' expects 'text', received ''$/);
 		if (profileTextInputMatch) {
-			return t('Cloud runtime profile expects text input but received an empty value. Check the Cloud route/profile input mapping.') + ' (' + profileTextInputMatch[1] + ')';
+			return t('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.');
 		}
 
 		return text;
@@ -1010,7 +1025,7 @@
 		appendMeta(meta, t('Severity'), feedback.severity ? formatLabel(feedback.severity) : '');
 		appendMeta(meta, t('Retry after revision'), feedback.can_retry_after_revision === true ? t('Yes') : t('No'));
 		if (feedback.core_evidence && feedback.core_evidence.core_error_code) {
-			appendMeta(meta, t('Core code'), feedback.core_evidence.core_error_code);
+			appendSupportMeta(meta, t('Core code'), feedback.core_evidence.core_error_code);
 		}
 		if (feedback.core_evidence && feedback.core_evidence.proposal_id) {
 			appendMeta(meta, t('Proposal'), feedback.core_evidence.proposal_id);
@@ -1203,7 +1218,7 @@
 		}
 		const meta = el('div', 'npcink-toolbox__result-meta');
 		appendMeta(meta, t('Model'), payload.model_id || (payload.usage_summary && payload.usage_summary.model_id));
-		appendMeta(meta, t('Run'), payload.run_id);
+		appendSupportMeta(meta, t('Run'), payload.run_id);
 		appendMeta(meta, t('Candidates'), count);
 		if (payload.ai_generation && payload.ai_generation.aspect_ratio) {
 			appendMeta(meta, t('Aspect ratio'), payload.ai_generation.aspect_ratio);
@@ -1648,7 +1663,7 @@
 		appendMeta(meta, t('Skipped'), progress.skipped_documents);
 		appendMeta(meta, t('Quota skipped'), progress.skipped_due_to_quota || quota.skipped_due_to_quota);
 		appendMeta(meta, t('Last sync'), formatDateTime(coverage.last_sync_at));
-		appendMeta(meta, t('Active run'), activeRun.run_id);
+		appendSupportMeta(meta, t('Active run'), activeRun.run_id);
 		appendMeta(meta, t('Comments'), coverage.comments_enabled === true ? 'Enabled in Cloud' : 'Disabled in Cloud');
 		appendMeta(meta, t('Cloud quota'), quota.status ? localizedLabel(quota.status) : '');
 		appendMeta(
@@ -1816,7 +1831,7 @@
 		appendMeta(meta, t('Batch size'), health.batch_size);
 		appendMeta(meta, t('Last delivery'), formatDateTime(health.last_delivery_at || health.last_delivered_at));
 		appendMeta(meta, t('Last success'), formatDateTime(health.last_success_at));
-		appendMeta(meta, t('Last error'), health.last_error_code);
+		appendSupportMeta(meta, t('Last error'), health.last_error_code);
 		if (meta.childNodes.length) {
 			container.appendChild(meta);
 		}
@@ -1939,7 +1954,7 @@
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
 		appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
-		appendMeta(meta, t('Run'), payload.run_id);
+		appendSupportMeta(meta, t('Run'), payload.run_id);
 		appendMeta(meta, t('Action'), sync.sync_mode ? 'Index refresh' : '');
 		appendMeta(meta, t('Accepted documents'), sync.accepted_documents);
 		appendMeta(meta, t('Indexed documents'), sync.indexed_documents);
@@ -2046,7 +2061,7 @@
 		appendMeta(meta, t('Cloud provider mode'), payload.provider_mode ? formatLabel(payload.provider_mode) : 'Cloud Managed');
 		appendMeta(meta, t('Actual channel'), payload.provider ? formatLabel(payload.provider) : '');
 		appendMeta(meta, t('Provider calls'), payload.provider_call_count);
-		appendMeta(meta, t('Run'), payload.run_id);
+		appendSupportMeta(meta, t('Run'), payload.run_id);
 		if (payload.usage_summary && typeof payload.usage_summary === 'object') {
 			appendMeta(meta, t('Failure'), payload.usage_summary.failure_reason ? formatLabel(payload.usage_summary.failure_reason) : '');
 		}
@@ -2115,14 +2130,14 @@
 		appendMeta(meta, t('Provider calls'), payload.provider_call_count);
 		appendMeta(meta, t('Results'), payload.result_count);
 		appendMeta(meta, t('Sources'), payload.source_count);
-		appendMeta(meta, t('Error code'), payload.error_code ? formatLabel(payload.error_code) : '');
+		appendSupportMeta(meta, t('Error code'), payload.error_code ? formatLabel(payload.error_code) : '');
 		if (payload.usage_summary && typeof payload.usage_summary === 'object') {
 			appendMeta(meta, t('Evidence'), payload.usage_summary.evidence_status ? formatLabel(payload.usage_summary.evidence_status) : '');
 		}
 		result.appendChild(meta);
 
 		if (payload.search_triggered !== true) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Check Cloud connection before relying on external evidence.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Npcink Cloud is temporarily unavailable. Try again in a few minutes.'));
 		}
 
 		if (Array.isArray(search.sources) && search.sources.length) {
@@ -2268,7 +2283,7 @@
 			appendMeta(meta, t('Model'), payload.model_id || '');
 			appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
 			appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
-			appendMeta(meta, t('Run'), payload.run_id || '');
+			appendSupportMeta(meta, t('Run'), payload.run_id || '');
 		}
 		result.appendChild(meta);
 
@@ -2395,7 +2410,7 @@
 			appendMeta(meta, t('Model'), payload.model_id || '');
 			appendMeta(meta, t('Intent'), payload.intent ? formatLabel(payload.intent) : '');
 			appendMeta(meta, t('Status'), payload.status ? formatLabel(payload.status) : '');
-			appendMeta(meta, t('Run'), payload.run_id || '');
+			appendSupportMeta(meta, t('Run'), payload.run_id || '');
 			result.appendChild(meta);
 		}
 
@@ -3199,7 +3214,7 @@
 		}
 		if (sections.image_candidates) {
 			if (sections.image_candidates.status === 'error') {
-				result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', sections.image_candidates.message || 'Image candidate search failed.'));
+				result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', sections.image_candidates.message || 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'));
 			} else {
 				renderImageList(result, sections.image_candidates.images || sections.image_candidates.image_candidates || sections.image_candidates.candidates);
 			}
@@ -4404,7 +4419,7 @@
 		}
 
 		const meta = el('div', 'npcink-toolbox__result-meta');
-		appendMeta(meta, t('Run'), state.runId);
+		appendSupportMeta(meta, t('Run'), state.runId);
 		appendMeta(meta, t('Artifact'), derivative.artifact_id || derivative.id);
 		appendMeta(meta, t('Format'), derivative.format ? String(derivative.format).toUpperCase() : '');
 		appendMeta(meta, t('MIME'), derivative.mime_type);
@@ -5485,7 +5500,7 @@
 			throw { message: 'No resumable media derivative run context is available.' };
 		}
 		const batchAttachmentId = parseInt(resumeContext.batch_attachment_id || '0', 10) || 0;
-		renderMediaDerivativeProgress(form, 'process', 'Continuing status checks for Cloud run ' + String(resumeContext.run_id) + '. No source upload or new run is being created.');
+		renderMediaDerivativeProgress(form, 'process', t('Still checking the previous image task. Nothing is uploaded again.'));
 		let state;
 		try {
 			state = await finishMediaDerivativePreview(resumeContext, (stage, detail) => {
@@ -6487,7 +6502,7 @@
 		}
 
 		if (runtime.quota_exhausted) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'New runs are disabled until Cloud reports remaining quota. Existing run IDs can still be refreshed or loaded.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Your AI credits have run out. Top up on Npcink Cloud, then try again.'));
 		}
 		result.appendChild(createRawDetails(payload, 'Advanced details: Cloud entitlement payload'));
 	}
@@ -6524,7 +6539,7 @@
 		if (latestFailure.run_id) {
 			const failurePayload = nightlyCloudPayloadFromRecentCard(latestFailure);
 			const retry = nightlyCloudRetryGuidance(failurePayload);
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Latest retry candidate: ' + latestFailure.run_id + '. Retry guidance remains Cloud-owned and final writes remain local.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('The last nightly check did not finish. You can try it again; nothing on your site was changed.')));
 			const retryMeta = el('div', 'npcink-toolbox__result-meta');
 			appendMeta(retryMeta, t('Retryable'), nightlyCloudRetryable(failurePayload) ? t('Yes') : '');
 			appendMeta(retryMeta, t('Failed actions'), Array.isArray(retry.failed_action_ids) ? retry.failed_action_ids.join(', ') : '');
@@ -6539,8 +6554,9 @@
 			items.slice(0, 5).forEach((item) => {
 				const card = nightlyCloudPayloadFromRecentCard(item);
 				const row = el('article', 'npcink-toolbox__result-item');
-				row.appendChild(el('h4', '', String(item.run_id || 'Cloud run')));
+				row.appendChild(el('h4', '', t('Nightly check')));
 				const rowMeta = el('div', 'npcink-toolbox__result-meta');
+				appendSupportMeta(rowMeta, t('Run'), item.run_id || '');
 				appendMeta(rowMeta, t('Run status'), item.status ? formatLabel(item.status) : '');
 				appendMeta(rowMeta, t('Result'), item.result_status ? formatLabel(item.result_status) : '');
 				appendMeta(rowMeta, t('Reviewable'), item.summary && item.summary.reviewable_count);
@@ -6762,7 +6778,7 @@
 		appendMeta(meta, t('Result'), nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
 		appendMeta(meta, t('Started'), formatDateTime(lifecycle.processing_started_at || lifecycle.started_at || cloudRun.started_at));
 		appendMeta(meta, t('Finished'), formatDateTime(lifecycle.processing_finished_at || lifecycle.completed_at || lifecycle.terminal_at || cloudRun.completed_at));
-		appendMeta(meta, t('Failure code'), firstNightlyCloudText(lifecycle, ['error_code', 'failure_code', 'reason_code']) || firstNightlyCloudText(cloudRun, ['error_code', 'failure_code', 'reason_code']));
+		appendSupportMeta(meta, t('Failure code'), firstNightlyCloudText(lifecycle, ['error_code', 'failure_code', 'reason_code']) || firstNightlyCloudText(cloudRun, ['error_code', 'failure_code', 'reason_code']));
 		appendMeta(meta, t('Retryable'), nightlyCloudRetryable(payload) ? t('Yes') : '');
 		appendPositiveMeta(meta, 'Snapshot items', requestSummary.item_count);
 		appendMeta(meta, t('Retention'), requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
@@ -6771,9 +6787,9 @@
 			section.appendChild(meta);
 		}
 		if (nightlyCloudTerminal(payload) && !nightlyCloudSucceeded(payload)) {
-			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Cloud finished without a mergeable result. Review the advanced payload or retry after resolving the Cloud-side reason.'));
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'));
 		} else if (nightlyCloudResultStatus(payload) === 'partially_succeeded') {
-			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Cloud returned partial success. Review failed items and retry only after confirming the local bounded snapshot is still current.'));
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Some items did not finish. Check the failed items, then try them again.'));
 		} else if (!nightlyCloudTerminal(payload)) {
 			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Cloud is still the run-state owner. Refresh status later; Toolbox is not running a local queue.'));
 		}
@@ -6881,7 +6897,7 @@
 		const requestSummary = payload && payload.cloud_request_summary && typeof payload.cloud_request_summary === 'object' ? payload.cloud_request_summary : {};
 		const patch = payload && payload.morning_brief_patch && typeof payload.morning_brief_patch === 'object' ? payload.morning_brief_patch : {};
 		const merged = payload && payload.merged_morning_brief && typeof payload.merged_morning_brief === 'object' ? payload.merged_morning_brief : {};
-		appendMeta(meta, t('Run'), nightlyCloudRunIdFromPayload(payload));
+		appendSupportMeta(meta, t('Run'), nightlyCloudRunIdFromPayload(payload));
 		appendMeta(meta, t('Status'), payload && payload.status ? formatLabel(payload.status) : (cloudRun.status ? formatLabel(cloudRun.status) : ''));
 		appendMeta(meta, t('Result'), nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
 		appendPositiveMeta(meta, 'Snapshot items', requestSummary.item_count);
@@ -6962,7 +6978,7 @@
 				renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection started', 'Cloud accepted the run, but the automatic status/result follow-up did not complete. Use Recent run actions or Advanced details with the retained run ID.');
 				const result = root.querySelector('.npcink-toolbox__result');
 				if (result) {
-					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', formatErrorMessage(followupError, 'Automatic Cloud follow-up failed.')));
+					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', formatErrorMessage(followupError, 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.')));
 				}
 				return payload;
 			}
@@ -7855,15 +7871,16 @@
 					const packRunId = String((body && body.pack_run_id) || '');
 					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
 					runIdEl.textContent = runId || '—';
+					// run_id / pack_run_id live in the folded support details only.
 					setMarkdownContent(answerEl, answer || t('(empty answer)'));
 					if (metaEl) {
-						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · ');
+						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · '); // inside support <details>
 					}
 					resultEl.hidden = false;
 					if (body && body.ok && answer) {
 						setStatus(t('Suggestion ready (no WordPress write).'), 'is-ok');
 					} else {
-						setStatus(t('Cloud returned without a usable answer. Check run_id / Addon.'), 'is-warning');
+						setStatus(t('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'), 'is-warning');
 					}
 				} catch (error) {
 					resultEl.hidden = true;

@@ -40,7 +40,7 @@ final class Provider_Web_Search_Service extends Provider_Client_Support {
 		$notice                 = $this->cloud_web_search_notice();
 		$notice['status']       = 'failed';
 		$notice['error_code']   = sanitize_key( (string) $error->get_error_code() );
-		$notice['error']        = sanitize_text_field( $error->get_error_message() );
+		$notice['error']        = sanitize_text_field( Cloud_Error_Plain_Messages::visible_message( $error ) );
 		$notice['result_count'] = 0;
 
 		return $notice;

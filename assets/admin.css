@@ -4345,3 +4345,7 @@ pre.npcink-toolbox__result {
 [data-toolbox-insight-pack-qa].is-ask-busy [data-toolbox-insight-pack-qa-submit] {
 	cursor: progress;
 }
+
+/* Support-only details (run ids, error codes) stay folded. */
+.npcink-toolbox__support-meta { flex-basis: 100%; margin-top: 6px; color: #646970; font-size: 12px; }
+.npcink-toolbox__support-meta > summary { cursor: pointer; }

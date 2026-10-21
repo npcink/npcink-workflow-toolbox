@@ -2323,15 +2323,19 @@
 			.replace(/^cloud_/, '')
 			.replace(/^provider_/, 'provider.')
 			.replace(/^image_generation_/, 'image_generation.');
+		// Plain sentences shared with Cloud_Error_Plain_Messages (PHP) and the
+		// Npcink Cloud Addon; provider/routing jargon never reaches the editor.
+		const plainServiceUnavailable = __('Npcink Cloud is temporarily unavailable. Try again in a few minutes.', 'npcink-workflow-toolbox');
+		const plainFailed = __('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.', 'npcink-workflow-toolbox');
 		const providerMessages = {
 			'provider.invalid_request': __('The image service rejected the current settings. Try one candidate at medium quality, or revise the visual description.', 'npcink-workflow-toolbox'),
-			'provider.rate_limited': __('The image service is receiving too many requests. Wait a moment, then try again.', 'npcink-workflow-toolbox'),
-			'provider.auth_invalid': __('The image Provider credentials are invalid. Check the Cloud Provider configuration.', 'npcink-workflow-toolbox'),
-			'provider.access_denied': __('The hosted image service denied access to the selected image model. Check the Cloud image Provider permissions or routing configuration.', 'npcink-workflow-toolbox'),
-			'provider.endpoint_not_found': __('The hosted image model endpoint is not available. Check the Cloud image Provider and routing configuration.', 'npcink-workflow-toolbox'),
+			'provider.rate_limited': __('Too many AI requests right now. Wait a minute, then try again.', 'npcink-workflow-toolbox'),
+			'provider.auth_invalid': plainServiceUnavailable,
+			'provider.access_denied': plainServiceUnavailable,
+			'provider.endpoint_not_found': plainServiceUnavailable,
 			'provider.timeout': __('Image generation timed out. Try one candidate or a lower quality setting.', 'npcink-workflow-toolbox'),
-			'provider.network_error': __('The image service is temporarily unreachable. Try again later.', 'npcink-workflow-toolbox'),
-			'provider.upstream_error': __('The image service is temporarily unavailable. Try again later.', 'npcink-workflow-toolbox'),
+			'provider.network_error': plainServiceUnavailable,
+			'provider.upstream_error': plainServiceUnavailable,
 			'image_generation.prompt_translation_unavailable': __('Chinese prompt conversion is not available. No image request was sent. Try again or enter an English description.', 'npcink-workflow-toolbox'),
 			'image_generation.prompt_translation_failed': __('Chinese prompt conversion failed. No image request was sent. Try again or enter an English description.', 'npcink-workflow-toolbox'),
 			'image_generation.prompt_translation_invalid': __('Chinese prompt conversion returned an invalid result. No image request was sent. Try again or enter an English description.', 'npcink-workflow-toolbox'),
@@ -2339,17 +2343,15 @@
 		if (providerMessages[normalizedCode]) {
 			return providerMessages[normalizedCode];
 		}
-		if (message.toLowerCase().indexOf('runtime quota') >= 0 && message.toLowerCase().indexOf('exhausted') >= 0) {
-			return __('Cloud runtime quota is exhausted for this request. Check Cloud quota or billing limits, then retry.', 'npcink-workflow-toolbox');
+		const lowerMessage = message.toLowerCase();
+		if ((lowerMessage.indexOf('runtime quota') >= 0 && lowerMessage.indexOf('exhausted') >= 0) || /insufficient_credit|credits?_exhausted|quota_exhausted|payment_required/.test(code + ' ' + cloudCode)) {
+			return __('Your AI credits have run out. Top up on Npcink Cloud, then try again.', 'npcink-workflow-toolbox');
 		}
-		if (code === 'cloud_routing_profile_not_found' || message.indexOf('image-source.managed') >= 0) {
-			return __('Npcink Cloud image-source profile is not configured. Configure image-source.managed in Cloud, then search again.', 'npcink-workflow-toolbox');
+		if (lowerMessage.indexOf('connect npcink cloud') >= 0 || /not_connected|unconfigured|not_configured/.test(code)) {
+			return __('This site is no longer connected to Npcink Cloud. Reconnect it on the Npcink AI > Cloud Addon page, then try again.', 'npcink-workflow-toolbox');
 		}
-		if (code === 'cloud_routing_execution_kind_mismatch' || message.indexOf('expects') >= 0) {
-			return __('Npcink Cloud routed this image-source request to the wrong runtime profile. Verify the Cloud image-source routing profile.', 'npcink-workflow-toolbox');
-		}
-		if (message.toLowerCase().indexOf('connect npcink cloud') >= 0) {
-			return __('Npcink Cloud Addon is not connected or not configured for managed image-source search.', 'npcink-workflow-toolbox');
+		if (/^cloud_|^provider_|_cloud_|_runtime_/.test(code) || code === 'cloud_routing_profile_not_found' || message.indexOf('image-source.managed') >= 0 || code === 'cloud_routing_execution_kind_mismatch') {
+			return plainFailed;
 		}
 		return message || fallback;
 	}
@@ -4092,16 +4094,10 @@
 		}
 		const fallbackReason = String(section.fallback_reason || '');
 		if (fallbackReason === 'local_paragraph_check_after_hosted_ai_empty') {
-			return __('Hosted AI reached the runtime but returned no paragraph-review text, so Toolbox showed the local no-rewrite fallback.', 'npcink-workflow-toolbox');
-		}
-		if (String(section.cloud_status || '').toLowerCase() === 'omitted') {
-			return __('Cloud marked this runtime response as omitted. Review storage mode, provider call count, and replay status below before rerunning.', 'npcink-workflow-toolbox');
-		}
-		if (Number(section.cloud_provider_call_count || 0) === 0 && section.cloud_status) {
-			return __('Cloud returned a runtime envelope, but no provider call was recorded for this request.', 'npcink-workflow-toolbox');
+			return __('The AI gave no suggestions for this paragraph, so the local check is shown instead.', 'npcink-workflow-toolbox');
 		}
 		if (section.status || section.cloud_status) {
-			return __('The runtime returned a status but no displayable suggestion text. Rerun after adjusting the request, or use the local/full-article checks.', 'npcink-workflow-toolbox');
+			return __('The AI did not return a usable suggestion. Try again, or use the full-article check.', 'npcink-workflow-toolbox');
 		}
 		return '';
 	}

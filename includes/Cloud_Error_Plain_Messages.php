@@ -81,7 +81,7 @@ final class Cloud_Error_Plain_Messages {
 		if ( 1 === preg_match( '/(?:site[_ ](?:inactive|not[_ ]active|disabled|suspended)|key[_ ]inactive|secret[_ ]inactive)/', $haystack ) ) {
 			return self::KEY_SITE_INACTIVE;
 		}
-		if ( 1 === preg_match( '/(?:not[_ ]connected|not[_ ]configured|credential[_ ](?:expired|revoked|invalid)|signature[_ ]invalid|key[_ ]revoked|invalid[_ ]key|unauthenticated|unauthorized)/', $haystack ) || 401 === $status ) {
+		if ( 1 === preg_match( '/(?:not[_ ]connected|not[_ ]configured|unconfigured|credential[_ ](?:expired|revoked|invalid)|signature[_ ]invalid|key[_ ]revoked|invalid[_ ]key|unauthenticated|unauthorized)/', $haystack ) || 401 === $status ) {
 			return self::KEY_NOT_CONNECTED;
 		}
 		if ( 1 === preg_match( '/(?:rate.?limit|too[_ ]many[_ ]requests|throttl)/', $haystack ) || 429 === $status ) {
@@ -117,6 +117,47 @@ final class Cloud_Error_Plain_Messages {
 		$data = is_array( $data ) ? $data : array();
 		$key  = self::classify( $code, self::diagnostic_from_data( $data ), self::upstream_status( $data, 0 ) );
 		return new WP_Error( $code, self::message( $key ), self::plain_data( $data, $code, $key ) );
+	}
+
+	/**
+	 * Text safe to show for any WP_Error: the plain sentence for Cloud failures,
+	 * the original (already user-facing) message for local errors.
+	 *
+	 * @param WP_Error $error Error.
+	 */
+	public static function visible_message( WP_Error $error ): string {
+		$code = (string) $error->get_error_code();
+		if ( ! self::is_cloud_code( $code ) ) {
+			return (string) $error->get_error_message();
+		}
+		return (string) self::humanize_error( $error )->get_error_message();
+	}
+
+	/**
+	 * Plain sentence for a code that arrives without a WP_Error (embedded 200 payloads).
+	 *
+	 * @param string $code       Error code.
+	 * @param string $diagnostic Extra structured codes.
+	 * @param int    $status     Upstream status.
+	 */
+	public static function message_for_code( string $code, string $diagnostic = '', int $status = 0 ): string {
+		return self::message( self::classify( $code, $diagnostic, $status ) );
+	}
+
+	/**
+	 * Visible message for a Cloud payload that came back as HTTP 200 but carries
+	 * a failure (status failed/error/... or an error code). Success messages pass through.
+	 *
+	 * @param string $status     Payload status.
+	 * @param string $message    Payload message.
+	 * @param string $error_code Payload error code, if any.
+	 */
+	public static function embedded_message( string $status, string $message, string $error_code = '' ): string {
+		$failed = in_array( strtolower( $status ), array( 'failed', 'failure', 'error', 'errored', 'blocked', 'rejected', 'unavailable', 'denied', 'timeout', 'timed_out' ), true );
+		if ( ! $failed && '' === $error_code ) {
+			return $message;
+		}
+		return self::message_for_code( '' !== $error_code ? $error_code : 'cloud_' . strtolower( $status ) );
 	}
 
 	/**

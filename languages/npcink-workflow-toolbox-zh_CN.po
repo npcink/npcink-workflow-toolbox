@@ -9896,3 +9896,24 @@ msgstr "Npcink Cloud 暂时不可用。请过几分钟再试。"
 #: includes/Cloud_Error_Plain_Messages.php
 msgid "The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support."
 msgstr "AI 请求没有成功。请稍后再试，若一直失败请到「检查」页复制信息联系客服。"
+
+msgid "Details for support"
+msgstr "给客服的信息"
+
+msgid "The last nightly check did not finish. You can try it again; nothing on your site was changed."
+msgstr "上一次夜间巡检没有完成。可以重新试一次，站点内容没有任何改动。"
+
+msgid "Nightly check"
+msgstr "夜间巡检"
+
+msgid "Still checking the previous image task. Nothing is uploaded again."
+msgstr "正在继续查看上一个图片任务，不会重新上传。"
+
+msgid "Some items did not finish. Check the failed items, then try them again."
+msgstr "有部分项目没有完成。请查看失败的项目后再试。"
+
+msgid "The AI gave no suggestions for this paragraph, so the local check is shown instead."
+msgstr "AI 没有给出这段的建议，下面显示的是本地检查结果。"
+
+msgid "The AI did not return a usable suggestion. Try again, or use the full-article check."
+msgstr "AI 没有给出可用的建议。请再试一次，或使用全文检查。"

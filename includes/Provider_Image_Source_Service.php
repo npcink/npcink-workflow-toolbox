@@ -378,7 +378,14 @@ final class Provider_Image_Source_Service extends Provider_Client_Support {
 				'cloud_ability'              => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-toolbox/search-image-source' ) ),
 				'cloud_runtime'              => 'npcink_cloud_addon',
 				'status'                     => sanitize_key( (string) ( $result['status'] ?? $response['status'] ?? 'unknown' ) ),
-				'message'                    => sanitize_text_field( (string) ( $result['message'] ?? $result['error_message'] ?? $response['message'] ?? '' ) ),
+				'message'                    => sanitize_text_field(
+					Cloud_Error_Plain_Messages::embedded_message(
+						(string) ( $result['status'] ?? $response['status'] ?? '' ),
+						(string) ( $result['message'] ?? $result['error_message'] ?? $response['message'] ?? '' ),
+						(string) ( $result['error_code'] ?? $response['error_code'] ?? '' )
+					)
+				),
+				'diagnostic_code'            => sanitize_key( (string) ( $result['error_code'] ?? $response['error_code'] ?? '' ) ),
 				'retrieval_readiness'        => is_array( $result['retrieval_readiness'] ?? null ) ? $this->sanitize_payload( $result['retrieval_readiness'] ) : array(),
 				'candidate_source_count'     => count( $images ),
 				'result_count'               => count( $contract_images ),
