@@ -262,21 +262,21 @@ final class Rest_Content_Structure_Insight_Bridges {
 		$signals = is_array( $pack['structure_signals'] ?? null ) ? $pack['structure_signals'] : array();
 		// Drop full sample flags; keep rates/buckets + short title samples only.
 		$compact_signals = array(
-			'sample_size'                    => $signals['sample_size'] ?? 0,
-			'missing_excerpt_rate'           => $signals['missing_excerpt_rate'] ?? 0,
-			'missing_meta_description_rate'  => $signals['missing_meta_description_rate'] ?? 0,
-			'missing_featured_image_rate'    => $signals['missing_featured_image_rate'] ?? 0,
-			'thin_content_rate'              => $signals['thin_content_rate'] ?? 0,
-			'posts_missing_category'         => $signals['posts_missing_category'] ?? 0,
-			'posts_missing_tag'              => $signals['posts_missing_tag'] ?? 0,
-			'word_count_buckets'             => $signals['word_count_buckets'] ?? array(),
-			'age_buckets'                    => $signals['age_buckets'] ?? array(),
-			'title_samples'                  => array_slice( is_array( $signals['title_samples'] ?? null ) ? $signals['title_samples'] : array(), 0, 8 ),
+			'sample_size'                   => $signals['sample_size'] ?? 0,
+			'missing_excerpt_rate'          => $signals['missing_excerpt_rate'] ?? 0,
+			'missing_meta_description_rate' => $signals['missing_meta_description_rate'] ?? 0,
+			'missing_featured_image_rate'   => $signals['missing_featured_image_rate'] ?? 0,
+			'thin_content_rate'             => $signals['thin_content_rate'] ?? 0,
+			'posts_missing_category'        => $signals['posts_missing_category'] ?? 0,
+			'posts_missing_tag'             => $signals['posts_missing_tag'] ?? 0,
+			'word_count_buckets'            => $signals['word_count_buckets'] ?? array(),
+			'age_buckets'                   => $signals['age_buckets'] ?? array(),
+			'title_samples'                 => array_slice( is_array( $signals['title_samples'] ?? null ) ? $signals['title_samples'] : array(), 0, 8 ),
 		);
 
 		$taxonomies = array();
 		foreach ( array( 'category', 'post_tag' ) as $tax ) {
-			$block = is_array( $pack['taxonomies'][ $tax ] ?? null ) ? $pack['taxonomies'][ $tax ] : array();
+			$block              = is_array( $pack['taxonomies'][ $tax ] ?? null ) ? $pack['taxonomies'][ $tax ] : array();
 			$taxonomies[ $tax ] = array(
 				'total'       => (int) ( $block['total'] ?? 0 ),
 				'empty_count' => (int) ( $block['empty_count'] ?? 0 ),

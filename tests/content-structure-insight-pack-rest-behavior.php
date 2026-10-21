@@ -84,12 +84,12 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 
 if ( ! class_exists( 'WP_Post' ) ) {
 	class WP_Post {
-		public int $ID = 0;
-		public string $post_type = 'post';
-		public string $post_title = '';
-		public string $post_content = '';
-		public string $post_excerpt = '';
-		public string $post_date_gmt = '';
+		public int $ID                   = 0;
+		public string $post_type         = 'post';
+		public string $post_title        = '';
+		public string $post_content      = '';
+		public string $post_excerpt      = '';
+		public string $post_date_gmt     = '';
 		public string $post_modified_gmt = '';
 	}
 }
@@ -176,13 +176,13 @@ if ( ! function_exists( 'wp_parse_url' ) ) {
 }
 if ( ! function_exists( 'get_posts' ) ) {
 	function get_posts( array $args = array() ): array {
-		$post = new WP_Post();
-		$post->ID               = 11;
-		$post->post_type        = 'post';
-		$post->post_title       = 'Sample Public Title';
-		$post->post_content     = str_repeat( 'word ', 80 );
-		$post->post_excerpt     = '';
-		$post->post_date_gmt    = '2024-01-01 00:00:00';
+		$post                    = new WP_Post();
+		$post->ID                = 11;
+		$post->post_type         = 'post';
+		$post->post_title        = 'Sample Public Title';
+		$post->post_content      = str_repeat( 'word ', 80 );
+		$post->post_excerpt      = '';
+		$post->post_date_gmt     = '2024-01-01 00:00:00';
 		$post->post_modified_gmt = '2024-01-01 00:00:00';
 		return array( $post );
 	}

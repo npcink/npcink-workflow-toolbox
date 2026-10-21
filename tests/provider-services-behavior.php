@@ -526,6 +526,8 @@ require_once dirname( __DIR__ ) . '/includes/Rest_Site_Knowledge_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Web_Search_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Nightly_Inspection_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Site_Ops_Insight_Bridges.php';
+require_once dirname( __DIR__ ) . '/includes/Content_Structure_Insight_Builder.php';
+require_once dirname( __DIR__ ) . '/includes/Rest_Content_Structure_Insight_Bridges.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller.php';
 
 $settings   = new Npcink_Toolbox\Settings();

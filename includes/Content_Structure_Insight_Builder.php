@@ -16,20 +16,20 @@ final class Content_Structure_Insight_Builder {
 	public const CONTRACT_VERSION = 'content_structure_insight_pack.v1';
 	public const ARTIFACT_TYPE    = 'content_structure_insight_pack';
 
-	private const SAMPLE_LIMIT     = 24;
-	private const TOP_TERMS_LIMIT  = 12;
+	private const SAMPLE_LIMIT    = 24;
+	private const TOP_TERMS_LIMIT = 12;
 
 	/**
 	 * @return array<string,mixed>
 	 */
 	public function build(): array {
-		$timestamp   = time();
+		$timestamp    = time();
 		$generated_at = gmdate( 'c', $timestamp );
-		$sample      = $this->collect_public_sample( self::SAMPLE_LIMIT );
-		$post_counts = $this->collect_post_counts();
-		$taxonomies  = $this->collect_taxonomies();
-		$signals     = $this->structure_signals( $sample, $generated_at );
-		$findings    = $this->build_findings( $post_counts, $taxonomies, $signals, $sample );
+		$sample       = $this->collect_public_sample( self::SAMPLE_LIMIT );
+		$post_counts  = $this->collect_post_counts();
+		$taxonomies   = $this->collect_taxonomies();
+		$signals      = $this->structure_signals( $sample, $generated_at );
+		$findings     = $this->build_findings( $post_counts, $taxonomies, $signals, $sample );
 
 		usort(
 			$findings,
@@ -63,16 +63,16 @@ final class Content_Structure_Insight_Builder {
 			'top_findings'           => $findings,
 			'opportunities'          => $this->opportunities( $findings ),
 			'data_sources'           => array(
-				'post_counts'       => array(
+				'post_counts'   => array(
 					'available' => true,
 					'source'    => 'wp_count_posts',
 				),
-				'public_sample'     => array(
+				'public_sample' => array(
 					'available' => count( $sample ) > 0,
 					'count'     => count( $sample ),
 					'source'    => 'local_public_wordpress_titles_and_structure_flags',
 				),
-				'taxonomies'        => array(
+				'taxonomies'    => array(
 					'available' => ! empty( $taxonomies ),
 					'source'    => 'local_taxonomy_aggregates',
 				),
@@ -144,8 +144,8 @@ final class Content_Structure_Insight_Builder {
 			if ( ! $post instanceof \WP_Post ) {
 				continue;
 			}
-			$post_id = (int) $post->ID;
-			$content = (string) $post->post_content;
+			$post_id  = (int) $post->ID;
+			$content  = (string) $post->post_content;
 			$sample[] = array(
 				'object_type'              => (string) $post->post_type,
 				'object_id'                => $post_id,
@@ -237,7 +237,7 @@ final class Content_Structure_Insight_Builder {
 	 * @return array<string,mixed>
 	 */
 	private function structure_signals( array $sample, string $generated_at ): array {
-		$n = count( $sample );
+		$n               = count( $sample );
 		$missing_excerpt = 0;
 		$missing_meta    = 0;
 		$missing_feat    = 0;
@@ -245,16 +245,16 @@ final class Content_Structure_Insight_Builder {
 		$no_category     = 0;
 		$no_tag          = 0;
 		$buckets         = array(
-			'under_300'  => 0,
-			'300_999'    => 0,
-			'1000_plus'  => 0,
+			'under_300' => 0,
+			'300_999'   => 0,
+			'1000_plus' => 0,
 		);
-		$age = array(
-			'under_90d'  => 0,
-			'90_179d'    => 0,
-			'180_plus'   => 0,
+		$age             = array(
+			'under_90d' => 0,
+			'90_179d'   => 0,
+			'180_plus'  => 0,
 		);
-		$title_samples = array();
+		$title_samples   = array();
 
 		foreach ( $sample as $item ) {
 			$words = (int) ( $item['word_count'] ?? 0 );
@@ -307,20 +307,20 @@ final class Content_Structure_Insight_Builder {
 		};
 
 		return array(
-			'sample_size'                  => $n,
-			'missing_excerpt_count'        => $missing_excerpt,
-			'missing_excerpt_rate'         => $rate( $missing_excerpt, $n ),
+			'sample_size'                    => $n,
+			'missing_excerpt_count'          => $missing_excerpt,
+			'missing_excerpt_rate'           => $rate( $missing_excerpt, $n ),
 			'missing_meta_description_count' => $missing_meta,
-			'missing_meta_description_rate'=> $rate( $missing_meta, $n ),
-			'missing_featured_image_count' => $missing_feat,
-			'missing_featured_image_rate'  => $rate( $missing_feat, $n ),
-			'thin_content_count'           => $thin,
-			'thin_content_rate'            => $rate( $thin, $n ),
-			'posts_missing_category'       => $no_category,
-			'posts_missing_tag'            => $no_tag,
-			'word_count_buckets'           => $buckets,
-			'age_buckets'                  => $age,
-			'title_samples'                => $title_samples,
+			'missing_meta_description_rate'  => $rate( $missing_meta, $n ),
+			'missing_featured_image_count'   => $missing_feat,
+			'missing_featured_image_rate'    => $rate( $missing_feat, $n ),
+			'thin_content_count'             => $thin,
+			'thin_content_rate'              => $rate( $thin, $n ),
+			'posts_missing_category'         => $no_category,
+			'posts_missing_tag'              => $no_tag,
+			'word_count_buckets'             => $buckets,
+			'age_buckets'                    => $age,
+			'title_samples'                  => $title_samples,
 		);
 	}
 
@@ -419,7 +419,7 @@ final class Content_Structure_Insight_Builder {
 			);
 		}
 
-		$cat = is_array( $taxonomies['category'] ?? null ) ? $taxonomies['category'] : array();
+		$cat        = is_array( $taxonomies['category'] ?? null ) ? $taxonomies['category'] : array();
 		$empty_cats = (int) ( $cat['empty_count'] ?? 0 );
 		$low_cats   = (int) ( $cat['low_count'] ?? 0 );
 		if ( $empty_cats + $low_cats >= 3 ) {
