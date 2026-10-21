@@ -749,7 +749,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				'label'  => __( 'Connect Npcink Cloud', 'npcink-workflow-toolbox' ),
 				'help'   => __( 'Install and verify the Cloud Addon so hosted search, images, and checks can run.', 'npcink-workflow-toolbox' ),
 				'url'    => $addon_installed ? $this->cloud_addon_details_url() : admin_url( 'plugins.php' ),
-				'action' => $addon_installed ? __( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ) : __( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ),
+				'action' => $addon_installed ? __( 'Open Npcink Cloud settings', 'npcink-workflow-toolbox' ) : __( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ),
 			),
 			array(
 				'done'   => $profile_ready,
@@ -1122,7 +1122,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			$replay    = $planner->plan( $collector->collect() );
 		} catch ( \Throwable $throwable ) {
 			wp_die(
-				esc_html__( 'Could not build the local scheduled review preview.', 'npcink-workflow-toolbox' ),
+				esc_html__( 'Could not build the preview. Try again later.', 'npcink-workflow-toolbox' ),
 				esc_html__( 'Scheduled review download failed', 'npcink-workflow-toolbox' ),
 				array( 'response' => 500 )
 			);
@@ -1168,7 +1168,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			);
 		} catch ( \Throwable $throwable ) {
 			return array(
-				'error' => __( 'Could not build the local scheduled review preview.', 'npcink-workflow-toolbox' ),
+				'error' => __( 'Could not build the preview. Try again later.', 'npcink-workflow-toolbox' ),
 			);
 		}
 	}
@@ -1201,7 +1201,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<div class="npcink-toolbox__section-heading">
 				<div>
 					<h3><?php esc_html_e( 'Scheduled review preview', 'npcink-workflow-toolbox' ); ?></h3>
-					<p><?php esc_html_e( 'Manual dry-run only. The preview reads local content, produces review signals, and does not schedule, call Cloud, create Core proposals, or write WordPress data.', 'npcink-workflow-toolbox' ); ?></p>
+					<p><?php esc_html_e( 'Preview only. It reads your content and lists things to look at; it does not schedule anything, contact Npcink Cloud, or change your site.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
 				<a class="button" href="<?php echo esc_url( $this->nightly_inspection_preview_url() ); ?>"><?php esc_html_e( 'Refresh preview', 'npcink-workflow-toolbox' ); ?></a>
 			</div>
@@ -1209,27 +1209,27 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php
 				$this->render_start_status_item( __( 'Scanned posts', 'npcink-workflow-toolbox' ), 'neutral', (string) (int) ( $summary['scanned_posts'] ?? 0 ), __( 'Oldest modified public posts and pages.', 'npcink-workflow-toolbox' ) );
 				$this->render_start_status_item( __( 'Scanned media', 'npcink-workflow-toolbox' ), 'neutral', (string) (int) ( $summary['scanned_media'] ?? 0 ), __( 'Recent image attachments.', 'npcink-workflow-toolbox' ) );
-				$this->render_start_status_item( __( 'Preview signals', 'npcink-workflow-toolbox' ), (int) ( $summary['actions_total'] ?? 0 ) > 0 ? 'warning' : 'ok', (string) (int) ( $summary['actions_total'] ?? 0 ), __( 'Read-only hints; not tasks.', 'npcink-workflow-toolbox' ) );
-				$this->render_start_status_item( __( 'Execution', 'npcink-workflow-toolbox' ), 'ok', __( 'Disabled', 'npcink-workflow-toolbox' ), __( 'No cron, worker, Cloud call, Core proposal, or write.', 'npcink-workflow-toolbox' ) );
+				$this->render_start_status_item( __( 'Things to look at', 'npcink-workflow-toolbox' ), (int) ( $summary['actions_total'] ?? 0 ) > 0 ? 'warning' : 'ok', (string) (int) ( $summary['actions_total'] ?? 0 ), __( 'Hints only; nothing is changed.', 'npcink-workflow-toolbox' ) );
+				$this->render_start_status_item( __( 'Execution', 'npcink-workflow-toolbox' ), 'ok', __( 'Disabled', 'npcink-workflow-toolbox' ), __( 'Nothing is scheduled, sent, or changed.', 'npcink-workflow-toolbox' ) );
 				?>
 			</div>
 			<?php if ( $review_item_count <= 0 ) : ?>
-				<div class="npcink-toolbox__result-notice is-success"><?php esc_html_e( 'No priority review items were found in this bounded preview.', 'npcink-workflow-toolbox' ); ?></div>
+				<div class="npcink-toolbox__result-notice is-success"><?php esc_html_e( 'Nothing important was found in this preview.', 'npcink-workflow-toolbox' ); ?></div>
 			<?php else : ?>
 				<div class="npcink-toolbox__result-notice">
 					<?php
 					printf(
 						/* translators: %d: number of preview signals. */
-						esc_html__( 'Generated %d preview signals. This only confirms scheduled review can read local content; use Current check for ordinary site maintenance.', 'npcink-workflow-toolbox' ),
+						esc_html__( 'Found %d things to look at. This only confirms the check can read your content; for everyday upkeep use Current check.', 'npcink-workflow-toolbox' ),
 						absint( $review_item_count )
 					);
 					?>
 				</div>
 			<?php endif; ?>
 			<details class="npcink-toolbox__result-details">
-				<summary><?php esc_html_e( 'Advanced: download dry-run JSON', 'npcink-workflow-toolbox' ); ?></summary>
-				<p class="description"><?php esc_html_e( 'Download the replay payload only for support or debugging. It is not embedded in this page, saved automatically, or used to create scheduled work.', 'npcink-workflow-toolbox' ); ?></p>
-				<p><a class="button" href="<?php echo esc_url( $download ); ?>"><?php esc_html_e( 'Download dry-run JSON', 'npcink-workflow-toolbox' ); ?></a></p>
+				<summary><?php esc_html_e( 'Advanced: download the preview file', 'npcink-workflow-toolbox' ); ?></summary>
+				<p class="description"><?php esc_html_e( 'Only needed when support asks for it. Downloading it does not change your site.', 'npcink-workflow-toolbox' ); ?></p>
+				<p><a class="button" href="<?php echo esc_url( $download ); ?>"><?php esc_html_e( 'Download preview file', 'npcink-workflow-toolbox' ); ?></a></p>
 			</details>
 		</section>
 		<?php
@@ -1243,8 +1243,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<section class="npcink-toolbox__card" data-toolbox-nightly-inspection-basic-settings>
 			<div class="npcink-toolbox__section-heading">
 				<div>
-					<h3><?php esc_html_e( 'Local fallback preview (optional)', 'npcink-workflow-toolbox' ); ?></h3>
-					<p><?php esc_html_e( 'Optional WordPress-side WP-Cron dry-run fallback. Use it only when Cloud is unavailable or during trials; it is not the Cloud scheduled inspection.', 'npcink-workflow-toolbox' ); ?></p>
+					<h3><?php esc_html_e( 'Check on this site (optional)', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Optional backup that checks on this site. Use it only when Npcink Cloud is unavailable or while trying things out; it is not the nightly check.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
 			</div>
 			<form class="npcink-toolbox__settings-form" method="post" action="options.php">
@@ -1257,7 +1257,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php endif; ?>
 				<label class="npcink-toolbox__check">
 					<input type="checkbox" name="<?php echo esc_attr( Plugin::OPTION_NAME ); ?>[nightly_inspection_enabled]" value="1" <?php checked( ! empty( $settings['nightly_inspection_enabled'] ) ); ?> />
-					<span><?php esc_html_e( 'Enable optional local WP-Cron fallback preview', 'npcink-workflow-toolbox' ); ?></span>
+					<span><?php esc_html_e( 'Also check on this site when Npcink Cloud is unavailable', 'npcink-workflow-toolbox' ); ?></span>
 				</label>
 				<div class="npcink-toolbox__split">
 					<label>
@@ -1283,21 +1283,21 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					);
 					?>
 				</p>
-				<?php submit_button( __( 'Save local fallback', 'npcink-workflow-toolbox' ) ); ?>
+				<?php submit_button( __( 'Save', 'npcink-workflow-toolbox' ) ); ?>
 			</form>
 			<?php if ( array() !== $latest_preview ) : ?>
 				<div class="npcink-toolbox__result-notice is-success">
 					<?php
 					printf(
 						/* translators: 1: generated time, 2: action count. */
-						esc_html__( 'Latest scheduled dry-run preview: %1$s, %2$d review items.', 'npcink-workflow-toolbox' ),
+						esc_html__( 'Latest preview: %1$s, %2$d items to look at.', 'npcink-workflow-toolbox' ),
 						esc_html( (string) ( $latest_preview['generated_at'] ?? '' ) ),
 						(int) ( $summary['actions_total'] ?? 0 )
 					);
 					?>
 				</div>
 			<?php else : ?>
-				<div class="npcink-toolbox__result-notice is-neutral"><?php esc_html_e( 'No cron dry-run preview has been generated yet.', 'npcink-workflow-toolbox' ); ?></div>
+				<div class="npcink-toolbox__result-notice is-neutral"><?php esc_html_e( 'No preview yet.', 'npcink-workflow-toolbox' ); ?></div>
 			<?php endif; ?>
 		</section>
 		<?php
@@ -1335,7 +1335,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</span>
 			<p style="margin:8px 0 0;">
 				<?php if ( $this->is_suite_submenu_registered( 'npcink-cloud-addon' ) ) : ?>
-					<a class="button button-primary" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ); ?></a>
+					<a class="button button-primary" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Npcink Cloud settings', 'npcink-workflow-toolbox' ); ?></a>
 				<?php else : ?>
 					<a class="button button-primary" href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>"><?php esc_html_e( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ); ?></a>
 				<?php endif; ?>
@@ -1348,14 +1348,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$reason = $this->settings->cloud_runtime_unavailable_reason();
 
 		if ( 'cloud_addon_not_installed' === $reason ) {
-			return __( 'Install and connect the Cloud Addon to enable hosted execution.', 'npcink-workflow-toolbox' );
+			return __( 'Install and connect Npcink Cloud Addon to use this.', 'npcink-workflow-toolbox' );
 		}
 
 		if ( 'cloud_addon_not_connected' === $reason ) {
-			return __( 'Save and verify Cloud Addon credentials to enable hosted execution.', 'npcink-workflow-toolbox' );
+			return __( 'Connect this site to Npcink Cloud to use this.', 'npcink-workflow-toolbox' );
 		}
 
-		return __( 'Check Cloud Addon transport before running hosted execution.', 'npcink-workflow-toolbox' );
+		return __( 'Check the Npcink Cloud connection, then try again.', 'npcink-workflow-toolbox' );
 	}
 
 	private function render_morning_brief_panel( array $settings, bool $cloud_ready, ?array $nightly_preview, bool $embedded = false ): void {
@@ -1363,7 +1363,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php if ( ! $embedded ) : ?>
 			<div class="npcink-toolbox__panel-header">
 				<h2><?php esc_html_e( 'Scheduled review', 'npcink-workflow-toolbox' ); ?></h2>
-				<p><?php esc_html_e( 'Low-frequency scheduled-review preview only. Daily site maintenance starts with Current check.', 'npcink-workflow-toolbox' ); ?></p>
+				<p><?php esc_html_e( 'For an occasional look only. For everyday upkeep, start with Current check.', 'npcink-workflow-toolbox' ); ?></p>
 			</div>
 		<?php endif; ?>
 		<?php
@@ -1376,7 +1376,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<div class="npcink-toolbox__section-heading">
 					<div>
 						<h3><?php esc_html_e( 'Scheduled review status', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Preview whether the local scheduled review can read public content.', 'npcink-workflow-toolbox' ) : __( 'Use this only to preview whether the scheduled review can read local content. Cloud run history and recovery open in Cloud Addon.', 'npcink-workflow-toolbox' ) ); ?></p>
+						<p><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Preview whether the check can read your public content.', 'npcink-workflow-toolbox' ) : __( 'Use this only to check that your content can be read. Nightly check history is in Npcink Cloud.', 'npcink-workflow-toolbox' ) ); ?></p>
 					</div>
 					<div class="npcink-toolbox__inline-actions">
 						<a class="button button-primary" href="<?php echo esc_url( $this->nightly_inspection_preview_url() ); ?>"><?php esc_html_e( 'Preview scheduled review', 'npcink-workflow-toolbox' ); ?></a>
@@ -1384,7 +1384,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 							<a class="button" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Open current check', 'npcink-workflow-toolbox' ); ?></a>
 						<?php endif; ?>
 						<?php if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) : ?>
-						<a class="button" href="<?php echo esc_url( $this->cloud_addon_runtime_runs_url() ); ?>"><?php esc_html_e( 'Open Cloud run recovery', 'npcink-workflow-toolbox' ); ?></a>
+						<a class="button" href="<?php echo esc_url( $this->cloud_addon_runtime_runs_url() ); ?>"><?php esc_html_e( 'See nightly check history', 'npcink-workflow-toolbox' ); ?></a>
 						<?php endif; ?>
 					</div>
 				</div>
@@ -1392,8 +1392,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<?php $this->render_nightly_inspection_preview( $nightly_preview ); ?>
 			<details class="npcink-toolbox__start-advanced">
 				<summary>
-					<span><?php esc_html_e( 'Advanced: optional local fallback preview', 'npcink-workflow-toolbox' ); ?></span>
-					<small><?php esc_html_e( 'WP-Cron fallback settings stay here because they control local WordPress dry-run preview only.', 'npcink-workflow-toolbox' ); ?></small>
+					<span><?php esc_html_e( 'Advanced: check on this site (optional)', 'npcink-workflow-toolbox' ); ?></span>
+					<small><?php esc_html_e( 'These settings only affect the preview on this site.', 'npcink-workflow-toolbox' ); ?></small>
 				</summary>
 				<?php $this->render_nightly_inspection_basic_settings( $settings ); ?>
 			</details>
@@ -2776,7 +2776,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					<span><?php echo esc_html( $this->cloud_runtime_unavailable_reason_label() ); ?></span>
 					<p style="margin:8px 0 0;">
 						<?php if ( $this->is_suite_submenu_registered( 'npcink-cloud-addon' ) ) : ?>
-							<a class="button" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Cloud Addon settings', 'npcink-workflow-toolbox' ); ?></a>
+							<a class="button" href="<?php echo esc_url( $this->cloud_addon_details_url() ); ?>"><?php esc_html_e( 'Open Npcink Cloud settings', 'npcink-workflow-toolbox' ); ?></a>
 						<?php else : ?>
 							<a class="button" href="<?php echo esc_url( admin_url( 'plugins.php' ) ); ?>"><?php esc_html_e( 'Install the Cloud Addon plugin', 'npcink-workflow-toolbox' ); ?></a>
 						<?php endif; ?>

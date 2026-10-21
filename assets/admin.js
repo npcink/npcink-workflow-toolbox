@@ -6233,7 +6233,7 @@
 			return String(lifecycle.phase);
 		}
 		if (nightlyCloudTerminal(payload)) {
-			return 'terminal';
+			return 'ended';
 		}
 		return nightlyCloudStatus(payload) || 'submitted';
 	}
@@ -6371,7 +6371,7 @@
 			? String(record.merged_priority_count) + ' local match(es)'
 			: Number.isFinite(Number(record.action_count))
 				? String(record.action_count) + ' Cloud action(s)'
-				: 'Cloud run detail';
+				: 'Nightly check details';
 		container.appendChild(nightlyCloudSummaryItem(
 			'Recent run',
 			record.merged ? 'ok' : nightlyCloudTerminal({ status: record.status }) ? 'warning' : 'pending',
@@ -6379,17 +6379,17 @@
 			String(record.run_id)
 		));
 		container.appendChild(nightlyCloudSummaryItem(
-			'Review handoff',
+			'Next step',
 			record.merged ? 'ok' : 'warning',
-			record.merged ? 'Local review required' : 'Result not merged',
+			record.merged ? 'Needs your review' : 'Result not loaded yet',
 			count
 		));
 		if (record.result_status === 'partially_succeeded' || record.retryable) {
 			container.appendChild(nightlyCloudSummaryItem(
 				'Retry',
 				'warning',
-				record.retryable ? 'Available' : 'Review guidance',
-				record.result_status === 'partially_succeeded' ? 'Cloud reported partial success.' : 'Cloud returned retry guidance.'
+				record.retryable ? 'Available' : 'What to do',
+				record.result_status === 'partially_succeeded' ? 'Some items did not finish.' : 'This check can be tried again.'
 			));
 		}
 
@@ -6398,7 +6398,7 @@
 		useButton.type = 'button';
 		useButton.addEventListener('click', () => {
 			setNightlyCloudRunId(root, record.run_id);
-			renderTextResult(root, 'Recent Cloud run loaded. Use Recent run actions or Advanced details to refresh from Cloud.', 'pending');
+			renderTextResult(root, 'Loaded the last nightly check. You can refresh it below.', 'pending');
 		});
 		actions.appendChild(useButton);
 
@@ -6478,11 +6478,11 @@
 		root.dataset.toolboxNightlyCloudQuotaExhausted = runtime.quota_exhausted ? '1' : '0';
 		updateNightlyCloudButtonState(root, false);
 
-		const title = runtime.quota_exhausted ? 'Cloud quota exhausted' : 'Cloud quota refreshed';
+		const title = runtime.quota_exhausted ? 'AI credits used up' : 'Credits updated';
 		const summary = runtime.quota_exhausted
-			? 'This billing period has no remaining Nightly Site Inspection runs. Existing run status and results can still be reviewed.'
-			: 'Current Pro Cloud Runtime entitlement was read from Cloud as a local display snapshot.';
-		const result = renderShell(root, payload || { provider: 'Cloud entitlement' }, title, summary);
+			? 'No nightly checks are left this billing period. You can still view earlier results.'
+			: 'Shows your current plan from Npcink Cloud. Nothing here changes your site.';
+		const result = renderShell(root, payload || { provider: 'Your plan' }, title, summary);
 		if (!result) {
 			return;
 		}
@@ -6504,7 +6504,7 @@
 		if (runtime.quota_exhausted) {
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Your AI credits have run out. Top up on Npcink Cloud, then try again.'));
 		}
-		result.appendChild(createRawDetails(payload, 'Advanced details: Cloud entitlement payload'));
+		result.appendChild(createRawDetails(payload, 'Details for support'));
 	}
 
 	function renderNightlyCloudRecentRuns(root, payload) {
@@ -6513,14 +6513,14 @@
 		const latestFailure = payload && payload.latest_failure && typeof payload.latest_failure === 'object' ? payload.latest_failure : {};
 		if (latest.run_id) {
 			setNightlyCloudRunId(root, latest.run_id);
-			storeNightlyCloudRun(root, nightlyCloudPayloadFromRecentCard(latest), 'Cloud recent run');
+			storeNightlyCloudRun(root, nightlyCloudPayloadFromRecentCard(latest), 'Last nightly check');
 		}
 
 		const result = renderShell(
 			root,
-			payload || { provider: 'Cloud recent runs' },
-			'Cloud recent runs',
-			items.length ? 'Cloud returned recent Nightly Inspection run cards for this site. Toolbox displays them as review-only run detail.' : 'Cloud did not return recent Nightly Inspection runs for this site.'
+			payload || { provider: 'Recent nightly checks' },
+			'Recent nightly checks',
+			items.length ? 'These are the recent nightly checks for this site. They are for viewing only and do not change your site.' : 'No recent nightly checks yet.'
 		);
 		if (!result) {
 			return;
@@ -6530,8 +6530,8 @@
 		const meta = el('div', 'npcink-toolbox__result-meta');
 		appendMeta(meta, t('Runs'), items.length);
 		appendMeta(meta, t('Next action'), guidance.primary_next_action ? formatLabel(guidance.primary_next_action) : '');
-		appendMeta(meta, t('Cloud scheduler truth'), guidance.cloud_scheduler_truth === false ? t('No') : '');
-		appendMeta(meta, t('Direct writes'), payload && payload.safety && payload.safety.direct_wordpress_write === false ? t('No') : '');
+		appendMeta(meta, t('Scheduled by'), guidance.cloud_scheduler_truth === false ? t('No') : '');
+		appendMeta(meta, t('Changes your site'), payload && payload.safety && payload.safety.direct_wordpress_write === false ? t('No') : '');
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
 		}
@@ -6542,7 +6542,7 @@
 			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', t('The last nightly check did not finish. You can try it again; nothing on your site was changed.')));
 			const retryMeta = el('div', 'npcink-toolbox__result-meta');
 			appendMeta(retryMeta, t('Retryable'), nightlyCloudRetryable(failurePayload) ? t('Yes') : '');
-			appendMeta(retryMeta, t('Failed actions'), Array.isArray(retry.failed_action_ids) ? retry.failed_action_ids.join(', ') : '');
+			appendMeta(retryMeta, t('Unfinished items'), Array.isArray(retry.failed_action_ids) ? retry.failed_action_ids.join(', ') : '');
 			appendMeta(retryMeta, t('Next action'), retry.operator_next_action ? formatLabel(retry.operator_next_action) : '');
 			if (retryMeta.childNodes.length) {
 				result.appendChild(retryMeta);
@@ -6550,7 +6550,7 @@
 		}
 
 		if (items.length) {
-			const section = createSection('Recent Cloud run cards');
+			const section = createSection('Recent checks');
 			items.slice(0, 5).forEach((item) => {
 				const card = nightlyCloudPayloadFromRecentCard(item);
 				const row = el('article', 'npcink-toolbox__result-item');
@@ -6567,8 +6567,8 @@
 				use.type = 'button';
 				use.addEventListener('click', () => {
 					setNightlyCloudRunId(root, item.run_id);
-					storeNightlyCloudRun(root, card, 'Cloud recent run');
-					renderTextResult(root, 'Cloud recent run loaded. Refresh status, load result, or retry from Advanced details.', 'pending');
+					storeNightlyCloudRun(root, card, 'Last nightly check');
+					renderTextResult(root, 'Loaded this nightly check. You can refresh, load the result, or try again.', 'pending');
 				});
 				actions.appendChild(use);
 				row.appendChild(actions);
@@ -6577,7 +6577,7 @@
 			result.appendChild(section);
 		}
 
-		result.appendChild(createRawDetails(payload, 'Advanced details: Cloud recent runs'));
+		result.appendChild(createRawDetails(payload, 'Details for support'));
 	}
 
 	function renderNightlyCloudActions(result, patch) {
@@ -6586,7 +6586,7 @@
 			return;
 		}
 
-		const section = createSection('Cloud review details');
+		const section = createSection('Items to review');
 		actions.slice(0, 12).forEach((action) => {
 			const item = el('article', 'npcink-toolbox__result-item');
 			const title = [
@@ -6677,7 +6677,7 @@
 				list.appendChild(row);
 			});
 			section.appendChild(list);
-			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'This is read-only Cloud result detail. Runtime history, recovery, and proposal follow-up belong in Cloud Addon and Core.'));
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'These results are for viewing only. History and follow-up are handled in Npcink Cloud.'));
 		}
 		result.appendChild(section);
 	}
@@ -6736,10 +6736,10 @@
 			return 'Partial success';
 		}
 		if (nightlyCloudSucceeded(payload)) {
-			return 'Complete';
+			return 'Finished';
 		}
 		if (nightlyCloudTerminal(payload)) {
-			return 'Needs attention';
+			return 'Did not finish';
 		}
 		return 'Running';
 	}
@@ -6751,18 +6751,18 @@
 		if (mergedCount !== null && mergedCount > 0) {
 			return {
 				label: String(mergedCount) + ' local priorities',
-				description: t('Review the matched scheduled review priorities before proposal work.')
+				description: t('Look over the matched items first.')
 			};
 		}
 		if (actionCount !== null && actionCount > 0) {
 			return {
 				label: String(actionCount) + ' Cloud review items',
-				description: t('Load or inspect the result before proposal work.')
+				description: t('Load the result first.')
 			};
 		}
 		return {
 			label: t('No review items'),
-			description: t('No follow-up is ready from this inspection result.')
+			description: t('Nothing needs follow-up from this check.')
 		};
 	}
 
@@ -6771,18 +6771,18 @@
 		const lifecycle = cloudRun.run_lifecycle && typeof cloudRun.run_lifecycle === 'object' ? cloudRun.run_lifecycle : {};
 		const requestSummary = payload && payload.cloud_request_summary && typeof payload.cloud_request_summary === 'object' ? payload.cloud_request_summary : {};
 		const retryGuidance = nightlyCloudRetryGuidance(payload);
-		const section = createSection('Cloud run detail');
+		const section = createSection('Nightly check details');
 		const meta = el('div', 'npcink-toolbox__result-meta');
 		appendMeta(meta, t('Run state'), nightlyCloudOutcomeLabel(payload));
-		appendMeta(meta, t('Worker phase'), formatLabel(nightlyCloudRunPhase(payload)));
+		appendMeta(meta, t('Progress'), formatLabel(nightlyCloudRunPhase(payload)));
 		appendMeta(meta, t('Result'), nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
 		appendMeta(meta, t('Started'), formatDateTime(lifecycle.processing_started_at || lifecycle.started_at || cloudRun.started_at));
 		appendMeta(meta, t('Finished'), formatDateTime(lifecycle.processing_finished_at || lifecycle.completed_at || lifecycle.terminal_at || cloudRun.completed_at));
 		appendSupportMeta(meta, t('Failure code'), firstNightlyCloudText(lifecycle, ['error_code', 'failure_code', 'reason_code']) || firstNightlyCloudText(cloudRun, ['error_code', 'failure_code', 'reason_code']));
 		appendMeta(meta, t('Retryable'), nightlyCloudRetryable(payload) ? t('Yes') : '');
-		appendPositiveMeta(meta, 'Snapshot items', requestSummary.item_count);
+		appendPositiveMeta(meta, 'Items checked', requestSummary.item_count);
 		appendMeta(meta, t('Retention'), requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
-		appendMeta(meta, t('Cloud role'), requestSummary.cloud_role ? formatLabel(requestSummary.cloud_role) : '');
+		appendSupportMeta(meta, t('Cloud role'), requestSummary.cloud_role ? formatLabel(requestSummary.cloud_role) : '');
 		if (meta.childNodes.length) {
 			section.appendChild(meta);
 		}
@@ -6791,13 +6791,13 @@
 		} else if (nightlyCloudResultStatus(payload) === 'partially_succeeded') {
 			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Some items did not finish. Check the failed items, then try them again.'));
 		} else if (!nightlyCloudTerminal(payload)) {
-			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Cloud is still the run-state owner. Refresh status later; Toolbox is not running a local queue.'));
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'The check is still running in Npcink Cloud. Refresh later; nothing runs on your site.'));
 		}
 		if (nightlyCloudRetryable(payload)) {
 			const retryMeta = el('div', 'npcink-toolbox__result-meta');
-			appendMeta(retryMeta, t('Retry owner'), retryGuidance.retry_owner ? formatLabel(retryGuidance.retry_owner) : 'Cloud Runtime');
-			appendMeta(retryMeta, t('Retry action'), retryGuidance.operator_next_action ? formatLabel(retryGuidance.operator_next_action) : 'Retry run');
-			appendMeta(retryMeta, t('Failed actions'), Array.isArray(retryGuidance.failed_action_ids) ? retryGuidance.failed_action_ids.join(', ') : '');
+			appendSupportMeta(retryMeta, t('Retry owner'), retryGuidance.retry_owner ? formatLabel(retryGuidance.retry_owner) : 'Npcink Cloud');
+			appendMeta(retryMeta, t('Try again'), retryGuidance.operator_next_action ? formatLabel(retryGuidance.operator_next_action) : 'Retry run');
+			appendMeta(retryMeta, t('Unfinished items'), Array.isArray(retryGuidance.failed_action_ids) ? retryGuidance.failed_action_ids.join(', ') : '');
 			if (retryMeta.childNodes.length) {
 				section.appendChild(retryMeta);
 			}
@@ -6810,13 +6810,13 @@
 		const hasMerged = !!(merged && merged.cloud_runtime);
 		const strip = el('div', 'npcink-toolbox__readiness-strip');
 		strip.appendChild(nightlyCloudSummaryItem(
-			'Inspection',
+			'Nightly check',
 			nightlyCloudSucceeded(payload) ? 'ok' : nightlyCloudTerminal(payload) ? 'warning' : 'pending',
 			nightlyCloudOutcomeLabel(payload),
-			nightlyCloudRunIdFromPayload(payload) ? 'Run ID: ' + nightlyCloudRunIdFromPayload(payload) : 'Waiting for Cloud run id.'
+			nightlyCloudRunIdFromPayload(payload) ? '' : 'Waiting for the check to start.'
 		));
 		strip.appendChild(nightlyCloudSummaryItem(
-			'Top review',
+			'Most important',
 			focus.label === 'No review items' ? 'warning' : 'ok',
 			focus.label,
 			focus.description
@@ -6824,14 +6824,14 @@
 		strip.appendChild(nightlyCloudSummaryItem(
 			'Next step',
 			hasMerged ? 'ok' : 'warning',
-			hasMerged ? 'Open Cloud Addon' : 'Load result first',
-			'Toolbox shows compatibility detail only; recovery and proposal follow-up are not run from this page.'
+			hasMerged ? 'Open Npcink Cloud' : 'Load the result first',
+			'This page only shows results; it does not change your site.'
 		));
 
-		const section = createSection('Cloud follow-up');
+		const section = createSection('More in Npcink Cloud');
 		section.appendChild(strip);
 		if (hasMerged) {
-			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Open Cloud Addon Runtime Runs for run history, recovery, and any Cloud-owned follow-up. Final approval and WordPress writes stay outside this compatibility detail.'));
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'See full history in Npcink Cloud. Any change to your site still needs your approval.'));
 		}
 		result.appendChild(section);
 	}
@@ -6860,7 +6860,7 @@
 		const resultStatus = nightlyCloudResultStatus(payload);
 		const succeeded = status === 'succeeded' || lifecycle.terminal_status === 'succeeded';
 		const failed = status === 'failed' || status === 'canceled' || lifecycle.terminal_status === 'failed' || lifecycle.terminal_status === 'canceled';
-		const phase = lifecycle.phase || (succeeded || failed ? 'terminal' : status || 'submitted');
+		const phase = lifecycle.phase || (succeeded || failed ? 'ended' : status || 'submitted');
 		const mergedCount = merged.cloud_runtime && Number.isFinite(Number(merged.cloud_runtime.merged_priority_count)) ? Number(merged.cloud_runtime.merged_priority_count) : null;
 		const actionCount = Number.isFinite(Number(patch.action_count)) ? Number(patch.action_count) : null;
 
@@ -6868,19 +6868,19 @@
 			'Run status',
 			failed || resultStatus === 'partially_succeeded' ? 'warning' : succeeded ? 'ok' : 'warning',
 			resultStatus === 'partially_succeeded' ? 'Partial Success' : status ? formatLabel(status) : formatLabel(stageLabel || 'Submitted'),
-			runId ? 'Run ID: ' + runId : 'Waiting for Cloud run id.'
+			runId ? '' : 'Waiting for the check to start.'
 		));
 		summary.appendChild(nightlyCloudSummaryItem(
-			'Worker phase',
+			'Progress',
 			succeeded ? 'ok' : 'warning',
 			formatLabel(phase),
-			lifecycle.processing_started_at ? 'Started: ' + formatDateTime(lifecycle.processing_started_at) : 'Queue-backed Cloud worker status.'
+			lifecycle.processing_started_at ? t('Started') + ': ' + formatDateTime(lifecycle.processing_started_at) : 'Runs in Npcink Cloud.'
 		));
 		summary.appendChild(nightlyCloudSummaryItem(
-			'Merge',
+			'Result',
 			merged.cloud_runtime ? 'ok' : 'warning',
-			merged.cloud_runtime ? 'Merged preview' : 'Result not merged yet',
-			merged.cloud_runtime ? String(mergedCount === null ? actionCount || 0 : mergedCount) + ' local priority match(es); local review still required.' : 'Load result after the run succeeds.'
+			merged.cloud_runtime ? 'Result loaded' : 'Result not loaded yet',
+			merged.cloud_runtime ? t('%d matched items; please look them over.').replace('%d', String(mergedCount === null ? actionCount || 0 : mergedCount)) : 'Load the result after the check finishes.'
 		));
 		summary.hidden = false;
 	}
@@ -6900,11 +6900,11 @@
 		appendSupportMeta(meta, t('Run'), nightlyCloudRunIdFromPayload(payload));
 		appendMeta(meta, t('Status'), payload && payload.status ? formatLabel(payload.status) : (cloudRun.status ? formatLabel(cloudRun.status) : ''));
 		appendMeta(meta, t('Result'), nightlyCloudResultStatus(payload) ? formatLabel(nightlyCloudResultStatus(payload)) : '');
-		appendPositiveMeta(meta, 'Snapshot items', requestSummary.item_count);
+		appendPositiveMeta(meta, 'Items checked', requestSummary.item_count);
 		appendMeta(meta, t('Payload'), requestSummary.payload_mode ? formatLabel(requestSummary.payload_mode) : '');
 		appendMeta(meta, t('Retention'), requestSummary.retention_ttl ? Math.round(Number(requestSummary.retention_ttl) / 86400) + ' days' : '');
-		appendMeta(meta, t('Patch actions'), patch.action_count);
-		appendMeta(meta, t('Merged priorities'), merged.cloud_runtime && merged.cloud_runtime.merged_priority_count);
+		appendMeta(meta, t('Suggested actions'), patch.action_count);
+		appendMeta(meta, t('Matched items'), merged.cloud_runtime && merged.cloud_runtime.merged_priority_count);
 		if (meta.childNodes.length) {
 			result.appendChild(meta);
 		}
@@ -6916,18 +6916,18 @@
 		renderNightlyCloudHandoff(result, payload, patch, merged);
 
 		if (merged.cloud_runtime) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-success', 'Cloud scoring was merged into the local scheduled review preview for review.'));
-			result.appendChild(createRawDetails(merged, 'Advanced details: merged scheduled review'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-success', 'The results were added to your review list. Nothing on your site was changed.'));
+			result.appendChild(createRawDetails(merged, 'Details for support'));
 		} else if (!nightlyCloudTerminal(payload)) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'Cloud run is still processing. This panel will check briefly after submit; manual status and result reads remain available.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-pending', 'The check is still running. This page checks back for a short while; you can also refresh it yourself.'));
 		} else if (nightlyCloudSucceeded(payload)) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Cloud run succeeded, but the result has not been merged yet. Use Load result from Recent run or Advanced details.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'The check finished. Load the result to see it.'));
 		} else if (nightlyCloudTerminal(payload)) {
-			result.appendChild(el('div', 'npcink-toolbox__result-notice is-error', 'Cloud run ended without a merged result. No local queue, Core proposal, or WordPress write was created; retry after reviewing the advanced payload.'));
+			result.appendChild(el('div', 'npcink-toolbox__result-notice is-error', 'The check ended without a result. Nothing on your site was changed; you can try again.'));
 		}
 
 		storeNightlyCloudRun(root, payload, title);
-		result.appendChild(createRawDetails(payload, 'Advanced details: Cloud inspection payload'));
+		result.appendChild(createRawDetails(payload, 'Details for support'));
 	}
 
 	async function autoPollNightlyCloudBatch(root, runId) {
@@ -6936,7 +6936,7 @@
 			await sleep(attempt === 1 ? 1200 : 2200);
 			payload = await getJson(config.restUrl, 'nightly-inspection/cloud-batch/' + encodeURIComponent(runId));
 			setNightlyCloudRunId(root, nightlyCloudRunIdFromPayload(payload) || runId);
-			renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection status', 'Automatic status check ' + attempt + ' of 4. Cloud remains the run-state owner.');
+			renderNightlyCloudBatchPayload(root, payload, 'Nightly check status', t('Checking the status automatically (%1$d of 4). The check runs in Npcink Cloud; nothing runs on your site.').replace('%1$d', String(attempt)));
 			if (nightlyCloudTerminal(payload)) {
 				break;
 			}
@@ -6949,20 +6949,20 @@
 			morning_brief: nightlyCloudLocalMorningBrief(root)
 		});
 		setNightlyCloudRunId(root, nightlyCloudRunIdFromPayload(payload) || runId);
-		renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection result', 'Cloud scoring was automatically merged into the local review-only scheduled review preview.');
+		renderNightlyCloudBatchPayload(root, payload, 'Nightly check result', 'The results were added to your review list automatically. Nothing on your site was changed.');
 		return payload;
 	}
 
 	async function submitNightlyCloudBatch(root, button) {
 		if (!nightlyCloudSubmitAllowed(root)) {
-			renderTextResult(root, root.dataset.toolboxNightlyCloudQuotaExhausted === '1' ? 'Cloud quota is exhausted for Nightly Site Inspection.' : 'Enable Pro Cloud Runtime and save settings before submitting.', 'warning');
+			renderTextResult(root, t(root.dataset.toolboxNightlyCloudQuotaExhausted === '1' ? 'Your AI credits have run out. Top up on Npcink Cloud, then try again.' : 'Turn on nightly checks in the settings and save, then try again.'), 'warning');
 			return null;
 		}
 		setNightlyCloudBusy(root, true, button);
 		try {
 			const payload = await postJson(config.restUrl, 'nightly-inspection/cloud-batch', nightlyCloudRequestPayload());
 			setNightlyCloudRunId(root, nightlyCloudRunIdFromPayload(payload));
-			renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection started', 'Cloud accepted the bounded snapshot for review-only scoring.');
+			renderNightlyCloudBatchPayload(root, payload, 'Nightly check started', 'Npcink Cloud is checking your site. Nothing on your site will be changed.');
 			const runId = nightlyCloudRunIdFromPayload(payload) || nightlyCloudRunId(root);
 			if (!runId) {
 				return payload;
@@ -6975,7 +6975,7 @@
 					return await autoReadNightlyCloudBatchResult(root, runId);
 				}
 			} catch (followupError) {
-				renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection started', 'Cloud accepted the run, but the automatic status/result follow-up did not complete. Use Recent run actions or Advanced details with the retained run ID.');
+				renderNightlyCloudBatchPayload(root, payload, 'Nightly check started', 'The check started, but this page stopped waiting for it. Refresh later to see the result.');
 				const result = root.querySelector('.npcink-toolbox__result');
 				if (result) {
 					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', formatErrorMessage(followupError, 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.')));
@@ -6983,13 +6983,13 @@
 				return payload;
 			}
 			if (statusPayload && nightlyCloudTerminal(statusPayload)) {
-				renderNightlyCloudBatchPayload(root, statusPayload, 'Cloud inspection terminal status', 'Cloud run reached a terminal state without a mergeable result. Review the advanced status payload before retrying.');
+				renderNightlyCloudBatchPayload(root, statusPayload, 'Nightly check finished', 'The check ended without a result. You can try again.');
 				return statusPayload;
 			}
-			renderNightlyCloudBatchPayload(root, statusPayload || payload, 'Cloud inspection still running', 'Automatic checks ended before Cloud reached a terminal state. Use Recent run actions or Advanced details later; no local queue was created.');
+			renderNightlyCloudBatchPayload(root, statusPayload || payload, 'Nightly check still running', 'The check is still running in Npcink Cloud. Refresh later to see the result; nothing runs on your site.');
 			return statusPayload || payload;
 		} catch (error) {
-			renderErrorResult(root, error, 'Cloud inspection failed.');
+			renderErrorResult(root, error, 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.');
 			return null;
 		} finally {
 			setNightlyCloudBusy(root, false, button);
@@ -7003,7 +7003,7 @@
 			renderNightlyCloudEntitlement(root, payload);
 			return payload;
 		} catch (error) {
-			renderErrorResult(root, error, 'Cloud quota refresh failed.');
+			renderErrorResult(root, error, 'Could not update your credits. Try again later.');
 			return null;
 		} finally {
 			setNightlyCloudBusy(root, false, button);
@@ -7017,7 +7017,7 @@
 			renderNightlyCloudRecentRuns(root, payload);
 			return payload;
 		} catch (error) {
-			renderErrorResult(root, error, 'Cloud recent runs failed.');
+			renderErrorResult(root, error, 'Could not load recent checks. Try again later.');
 			return null;
 		} finally {
 			setNightlyCloudBusy(root, false, button);
@@ -7027,20 +7027,20 @@
 	async function refreshNightlyCloudBatchStatus(root, button) {
 		const runId = nightlyCloudRunId(root);
 		if (!runId) {
-			renderTextResult(root, 'Enter a Cloud run ID before checking status.', 'warning');
+			renderTextResult(root, 'Pick a nightly check first.', 'warning');
 			return null;
 		}
 		setNightlyCloudBusy(root, true, button);
 		try {
 			const payload = await getJson(config.restUrl, 'nightly-inspection/cloud-batch/' + encodeURIComponent(runId));
 			setNightlyCloudRunId(root, nightlyCloudRunIdFromPayload(payload) || runId);
-			renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection status', 'Latest Cloud runtime status for this review-only inspection.');
+			renderNightlyCloudBatchPayload(root, payload, 'Nightly check status', 'Latest status of this nightly check.');
 			if (nightlyCloudSucceeded(payload)) {
 				await autoReadNightlyCloudBatchResult(root, runId);
 			}
 			return payload;
 		} catch (error) {
-			renderErrorResult(root, error, 'Cloud inspection status failed.');
+			renderErrorResult(root, error, 'Could not refresh the status. Try again later.');
 			return null;
 		} finally {
 			setNightlyCloudBusy(root, false, button);
@@ -7050,7 +7050,7 @@
 	async function readNightlyCloudBatchResult(root, button) {
 		const runId = nightlyCloudRunId(root);
 		if (!runId) {
-			renderTextResult(root, 'Enter a Cloud run ID before reading the result.', 'warning');
+			renderTextResult(root, 'Pick a nightly check first.', 'warning');
 			return null;
 		}
 		setNightlyCloudBusy(root, true, button);
@@ -7059,13 +7059,13 @@
 				morning_brief: nightlyCloudLocalMorningBrief(root)
 			});
 			setNightlyCloudRunId(root, nightlyCloudRunIdFromPayload(payload) || runId);
-			renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection result', 'Cloud scoring was returned as a review-only scheduled review patch.');
+			renderNightlyCloudBatchPayload(root, payload, 'Nightly check result', 'Here are the results to review. Nothing on your site was changed.');
 			return payload;
 		} catch (error) {
 			if (error && (Number(error.status) === 409 || String(error.code || '').toLowerCase().indexOf('not_terminal') >= 0 || String(error.message || '').toLowerCase().indexOf('not terminal') >= 0)) {
-				renderTextResult(root, 'Cloud result is not ready yet. Refresh status after the Cloud worker reaches a terminal state.', 'warning');
+				renderTextResult(root, 'The result is not ready yet. Refresh after the check finishes.', 'warning');
 			} else {
-				renderErrorResult(root, error, 'Cloud inspection result failed.');
+				renderErrorResult(root, error, 'Could not load the result. Try again later.');
 			}
 			return null;
 		} finally {
@@ -7076,14 +7076,14 @@
 	async function retryNightlyCloudBatch(root, button) {
 		const runId = nightlyCloudRunId(root);
 		if (!runId) {
-			renderTextResult(root, 'Enter a Cloud run ID before retrying the run.', 'warning');
+			renderTextResult(root, 'Pick a nightly check first.', 'warning');
 			return null;
 		}
 		setNightlyCloudBusy(root, true, button);
 		try {
 			const payload = await postJson(config.restUrl, 'nightly-inspection/cloud-batch/' + encodeURIComponent(runId) + '/retry', nightlyCloudRequestPayload());
 			setNightlyCloudRunId(root, nightlyCloudRunIdFromPayload(payload) || runId);
-			renderNightlyCloudBatchPayload(root, payload, 'Cloud inspection retry queued', 'Cloud queued a retry with a new idempotency key. Toolbox did not create a local queue, Core proposal, or WordPress write.');
+			renderNightlyCloudBatchPayload(root, payload, 'Trying the check again', 'The check will run again in Npcink Cloud. Nothing on your site was changed.');
 			const retryRunId = nightlyCloudRunIdFromPayload(payload);
 			if (retryRunId) {
 				const statusPayload = await autoPollNightlyCloudBatch(root, retryRunId);
@@ -7094,7 +7094,7 @@
 			}
 			return payload;
 		} catch (error) {
-			renderErrorResult(root, error, 'Cloud inspection retry failed.');
+			renderErrorResult(root, error, 'Could not start the check again. Try again later.');
 			return null;
 		} finally {
 			setNightlyCloudBusy(root, false, button);
@@ -7121,7 +7121,7 @@
 			root.addEventListener('submit', (event) => {
 				event.preventDefault();
 				if (!nightlyCloudSubmitAllowed(root)) {
-					renderTextResult(root, root.dataset.toolboxNightlyCloudQuotaExhausted === '1' ? 'Cloud quota is exhausted for Nightly Site Inspection.' : 'Enable Pro Cloud Runtime and save settings before submitting.', 'warning');
+					renderTextResult(root, t(root.dataset.toolboxNightlyCloudQuotaExhausted === '1' ? 'Your AI credits have run out. Top up on Npcink Cloud, then try again.' : 'Turn on nightly checks in the settings and save, then try again.'), 'warning');
 					return;
 				}
 				submitNightlyCloudBatch(root, submitButton);
