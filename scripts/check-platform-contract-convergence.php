@@ -143,7 +143,9 @@ $sibling_contracts = array(
 	),
 	array(
 		'path'    => $family_root . '/npcink-ai-cloud/AGENTS.md',
-		'needles' => array( 'second WordPress control plane', 'second workflow registry' ),
+		// Cloud #1164 (2026-10-19) folded "second local ability registry, second workflow
+		// registry" into "second WordPress control plane, ability/workflow registry".
+		'needles' => array( 'second WordPress control plane', 'ability/workflow registry', 'WordPress write owner' ),
 		'label'   => 'Cloud runtime boundary',
 	),
 );
