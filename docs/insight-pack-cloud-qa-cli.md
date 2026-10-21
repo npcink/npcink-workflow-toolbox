@@ -111,8 +111,10 @@ Cloud `RuntimePayload` 为 `extra=forbid`。以下键 **不要** 放进 runtime 
 
 站点常为 `max_active_runs=1`。若返回商业并发 / `commercial.concurrency_exceeded` 或挂起 run 占槽：
 
-1. 等槽位释放，或在 Cloud 侧结束挂起 run  
-2. 再重跑脚本（PHP 侧会对部分并发错误短重试）
+1. 脚本会自己重试：退避递增（40s → 60s → 80s，累计约 180s），覆盖 Cloud 的
+   inline 准入租约——**超过租约的 run 不再占槽**，重试才有意义
+2. 若 4 次尝试仍失败，说明槽位被一个**没有正常结束的 run**占着：它不是"跑得慢"，
+   而是永远等不到自己结束 → 需到 Cloud 侧结束该 run
 
 这不是字段错误。
 

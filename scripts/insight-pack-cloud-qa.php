@@ -241,8 +241,13 @@ while ( $attempts < $max_tries ) {
 	// Fresh idempotency on each attempt so a hung prior lease is not replayed wrongly.
 	if ( $attempts > 1 ) {
 		$idempotency_key = 'insight_pack_qa_' . wp_generate_uuid4();
-		fwrite( STDERR, "retry {$attempts}/{$max_tries} after concurrency/transient failure...\n" );
-		sleep( 20 );
+		// Back off long enough for an orphaned run to stop holding the slot.
+		// Cloud stops counting an inline run against max_active_runs after its
+		// admission lease (~180s), so a flat 20s retry only re-runs into the same
+		// rejection. Cumulative wait across 4 attempts: 40 + 60 + 80 = 180s.
+		$backoff = 20 * $attempts;
+		fwrite( STDERR, "retry {$attempts}/{$max_tries} after concurrency/transient failure; waiting {$backoff}s...\n" );
+		sleep( $backoff );
 	}
 	$response = $client->execute_runtime( $runtime_payload, $trace_id, $idempotency_key );
 	if ( ! is_wp_error( $response ) ) {
@@ -267,7 +272,7 @@ if ( is_wp_error( $response ) ) {
 			'attempts'        => $attempts,
 			'error_data'      => $response->get_error_data(),
 			'hint'            => ( 'cloud_commercial_concurrency_exceeded' === (string) $response->get_error_code() )
-				? 'Site max active cloud runs is 1; wait for the prior run to finish or clear the hung lease on Cloud.'
+				? 'Cloud still holds the single run slot for this site: the previous run may not have finished cleanly, so waiting for it to "finish" can wait forever. Wait a few minutes and re-run; if it keeps failing, end that run in Cloud first.'
 				: '',
 		)
 	);
