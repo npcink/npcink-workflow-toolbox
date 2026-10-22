@@ -27,14 +27,14 @@ abstract class Admin_Page_Site_Ops_Panel {
 		return is_scalar( $value ) ? trim( (string) $value ) : '';
 	}
 
-	/** Multi-line GET text (e.g. Smart Ask seed) without encoding non-ASCII away. */
+	/** Multi-line GET text (e.g. Smart Ask seed); sanitize then decode entities for textarea use. */
 	protected function query_textarea_param( string $key ): string {
-		$value = filter_input( INPUT_GET, $key, FILTER_UNSAFE_RAW );
+		$value = filter_input( INPUT_GET, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		if ( ! is_scalar( $value ) ) {
 			return '';
 		}
 
-		return sanitize_textarea_field( wp_unslash( (string) $value ) );
+		return sanitize_textarea_field( wp_specialchars_decode( (string) $value, ENT_QUOTES ) );
 	}
 
 	protected function site_ops_insights_preview_url(): string {
