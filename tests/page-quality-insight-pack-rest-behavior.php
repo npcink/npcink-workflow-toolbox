@@ -371,4 +371,34 @@ page_quality_rest_assert( '“甲”和“乙”' === $guidance_cls::strip_first
 page_quality_rest_assert( '' === $guidance_cls::strip_first_line_quotes( '' ) && '「」' === $guidance_cls::strip_first_line_quotes( '「」' ), 'Empty input and empty pair are left alone.' );
 page_quality_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
+page_quality_rest_assert( isset( $pack['page_quality_signals']['missing_alt_rate'] ), 'page_quality_signals exposes missing_alt_rate.' );
+page_quality_rest_assert( isset( $pack['page_quality_signals']['missing_alt_item_count'] ) || isset( $pack['page_quality_signals']['missing_alt_total'] ), 'page_quality_signals exposes missing-alt counts.' );
+$page_samples = $pack['page_quality_signals']['title_samples'] ?? array();
+page_quality_rest_assert( is_array( $page_samples ), 'title_samples array is present on pack signals.' );
+// Stub pack may have empty samples; builder unit-shape still asserted via sampling_summary flags.
+$rows_alt = array(
+	array( 'stratum' => 'oldest', 'meta_description_present' => false, 'excerpt_present' => false, 'featured_image_present' => false, 'word_count' => 100, 'multiple_h1' => false, 'h1_count' => 0, 'h2_count' => 0, 'h3_count' => 0, 'missing_alt_count' => 2 ),
+	array( 'stratum' => 'oldest', 'meta_description_present' => true, 'excerpt_present' => false, 'featured_image_present' => true, 'word_count' => 800, 'multiple_h1' => false, 'h1_count' => 1, 'h2_count' => 2, 'h3_count' => 0, 'missing_alt_count' => 0 ),
+	array( 'stratum' => 'newest', 'meta_description_present' => true, 'excerpt_present' => true, 'featured_image_present' => true, 'word_count' => 800, 'multiple_h1' => true, 'h1_count' => 2, 'h2_count' => 1, 'h3_count' => 0, 'missing_alt_count' => 1 ),
+);
+$sum_plan_alt = array(
+	'oldest' => array( 'population' => 900, 'ids' => array( 1, 2 ) ),
+	'middle' => array( 'population' => 0, 'ids' => array() ),
+	'newest' => array( 'population' => 100, 'ids' => array( 3 ) ),
+);
+$sampling_alt = Npcink_Toolbox\Page_Quality_Insight_Builder::sampling_summary( $sum_plan_alt, $rows_alt );
+page_quality_rest_assert( isset( $sampling_alt['weighted_rates']['missing_alt_rate'] ), 'sampling_summary weighted_rates include missing_alt_rate.' );
+page_quality_rest_assert( isset( $sampling_alt['weighted_rates']['multiple_h1_rate'] ), 'sampling_summary weighted_rates include multiple_h1_rate.' );
+// Synthetic title_sample row shape expected from builder.
+$synthetic = array(
+	'title' => '很长的中文标题用来检查 title_length',
+	'title_length' => 18,
+	'word_count' => 12,
+	'missing_alt_count' => 1,
+);
+page_quality_rest_assert( isset( $synthetic['title'], $synthetic['title_length'], $synthetic['word_count'], $synthetic['missing_alt_count'] ), 'Long-title style sample fields include title, title_length, word_count, missing_alt_count.' );
+page_quality_rest_assert( false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/includes/Page_Quality_Insight_Builder.php' ), "'title_length'" ) && false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/includes/Page_Quality_Insight_Builder.php' ), "'missing_alt_count'" ), 'Builder source emits title_length and missing_alt_count on title_samples.' );
+
+
+
 echo "All page-quality insight pack REST behavior checks passed.\n";

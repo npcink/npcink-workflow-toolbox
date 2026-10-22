@@ -65,6 +65,19 @@
 
 > **已定：** 五包名称为完整 v1 意向清单；**第二包「内容结构摘要」已接线**。**第三包「页面质量摘要」**（`page_quality_insight_pack.v1`）在 M4 `#1177` drain 验证后由产品显式放开（2026-10-22），本 PR 接线。**第四包「环境与性能清单」**（`environment_performance_insight_pack.v1`）本 PR 接线；`measurement_kind=config_and_inventory_only`，非测速。
 
+## 3.1 四包对照表（已接线）
+
+| 包 | 目的 | 抽样 / 清单 | 明确不做 |
+| --- | --- | --- | --- |
+| `site_ops_insight_pack.v1`（巡检摘要） | 本地巡检结论与优先处理队列 | 本地 Snapshot 有界样本（公开帖/媒体/评论信号计数） | 不写 WP；不默认走已暂停 `cloud_inspection`；不上传评论原文/PII |
+| `content_structure_insight_pack.v1`（内容结构） | SEO / 内容健康类脱密结构摘要 | 发布日分层抽样（默认约 60）；公开标题 + 结构布尔/比率 | 不上传正文；不谈流量/排名；不自动改元数据 |
+| `page_quality_insight_pack.v1`（页面质量） | 单页基础完备度（简介/封面/过短/标题层级/文内缺 alt） | 同分层抽样；`title_samples` 含 `title`/`title_length`/`word_count`/`missing_alt_count` | 不跑 Lighthouse；不写 SEO；不声称排名；不自动修复 |
+| `environment_performance_insight_pack.v1`（环境与性能） | 环境/配置清单与粗信号建议 | **无内容抽样**；WP/PHP/内存/主题/插件≤40 + 调试/对象缓存布尔；`measurement_kind=config_and_inventory_only` | 不测速、不伪分数、不改配置、不上传密钥/路径/phpinfo/原始日志 |
+
+> Ask 通道四包均为 `hosted_ai_content_support.v1` + `suggestion_only`；Cloud 失败不做本地假答复。正式 UI 仍为智能提问选择器（本阶段**不做**自动选包 / 单框编排）。
+
+
+
 ---
 
 ## 4. 红线 — 什么可出站 / Cloud 可见什么

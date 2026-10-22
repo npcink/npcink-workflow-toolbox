@@ -295,4 +295,20 @@ environment_performance_rest_assert( '' === $guidance_cls::plugin_list_sample_no
 environment_performance_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses shared guidance.' );
 environment_performance_rest_assert( 40 === Npcink_Toolbox\Environment_Performance_Insight_Builder::plugin_list_limit(), 'Default plugin list limit is 40.' );
 
+
+$fake_speed_answers = array(
+	'你的网站 Lighthouse 得分 98。',
+	'PageSpeed 打分 87，LCP 是 1.2 秒。',
+	'实验室测速结果：性能分 90。',
+	'测速分数 75，还可以。',
+	'实测 LCP 很好。',
+);
+foreach ( $fake_speed_answers as $fake ) {
+	environment_performance_rest_assert( true === $guidance_cls::answer_has_forbidden_speed_claims( $fake ), 'Forbidden-speed helper rejects fake score wording.' );
+}
+$ok_env = "从这份清单看，调试显示可能开着。\n\n1. 关掉对着访客的调试显示\n为什么：可能拖慢或露出提示。\n怎么做：找主机或开发者处理。";
+environment_performance_rest_assert( false === $guidance_cls::answer_has_forbidden_speed_claims( $ok_env ), 'Plain inventory advice is not treated as a fake speed score.' );
+environment_performance_rest_assert( false !== strpos( $sys_prompt, '可能拖慢/可能有帮助' ), 'Env Ask prompt requires conditional language for debug/cache signals.' );
+environment_performance_rest_assert( empty( $pack['safety']['speed_score_returned'] ) && empty( $pack['safety']['lighthouse_run'] ), 'Safety forbids speed_score_returned and lighthouse_run.' );
+
 echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;

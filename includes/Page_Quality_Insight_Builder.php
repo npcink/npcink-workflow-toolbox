@@ -73,7 +73,7 @@ final class Page_Quality_Insight_Builder {
 			'summary'                => $this->summary( $post_counts, $taxonomies, $signals, $findings ),
 			'post_counts'            => $post_counts,
 			'taxonomies'             => $taxonomies,
-			'page_quality_signals'  => $signals,
+			'page_quality_signals'   => $signals,
 			'sampling'               => $sampling,
 			'top_findings'           => $findings,
 			'opportunities'          => $this->opportunities( $findings ),
@@ -268,9 +268,9 @@ final class Page_Quality_Insight_Builder {
 				continue;
 			}
 			$post_id  = (int) $post->ID;
-			$content   = (string) $post->post_content;
-			$headings  = $this->heading_counts( $content );
-			$sample[]  = array(
+			$content  = (string) $post->post_content;
+			$headings = $this->heading_counts( $content );
+			$sample[] = array(
 				'object_type'              => (string) $post->post_type,
 				'object_id'                => $post_id,
 				'stratum'                  => $stratum_of[ $post_id ] ?? 'newest',
@@ -518,11 +518,14 @@ final class Page_Quality_Insight_Builder {
 			}
 
 			if ( count( $title_samples ) < 8 ) {
+				$title_text      = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
 				$title_samples[] = array(
-					'object_type' => (string) ( $item['object_type'] ?? 'post' ),
-					'object_id'   => (int) ( $item['object_id'] ?? 0 ),
-					'title'       => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
-					'word_count'  => $words,
+					'object_type'       => (string) ( $item['object_type'] ?? 'post' ),
+					'object_id'         => (int) ( $item['object_id'] ?? 0 ),
+					'title'             => $title_text,
+					'title_length'      => function_exists( 'mb_strlen' ) ? mb_strlen( $title_text ) : strlen( $title_text ),
+					'word_count'        => $words,
+					'missing_alt_count' => (int) ( $item['missing_alt_count'] ?? 0 ),
 				);
 			}
 		}
