@@ -820,12 +820,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				);
 				?>
 			</div>
-			<details class="npcink-toolbox__start-advanced">
+			<details class="npcink-toolbox__start-advanced npcink-toolbox__start-support">
 				<summary>
 					<span><?php esc_html_e( 'Support details', 'npcink-workflow-toolbox' ); ?></span>
-					<small><?php esc_html_e( 'Technical readiness for setup and support. Safe to ignore day to day.', 'npcink-workflow-toolbox' ); ?></small>
+					<small><?php esc_html_e( 'Short notes for setup. Safe to ignore day to day.', 'npcink-workflow-toolbox' ); ?></small>
 				</summary>
-				<?php $this->render_npcink_capability_health_summary( $content_context, $cloud_ready ); ?>
+				<div class="npcink-toolbox__start-support-notes" data-toolbox-start-support-notes>
+					<p><?php esc_html_e( 'Toolbox only suggests. WordPress content still changes only after you review and confirm.', 'npcink-workflow-toolbox' ); ?></p>
+					<p><?php esc_html_e( 'For connector or runtime checks, open Npcink Cloud Addon when it is installed. Start does not list internal workflow rows here.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
 			</details>
 		</section>
 		<?php

@@ -69,3 +69,7 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 ## 开始页精简（2026-10-22）
 
 去掉重复大标题「开始」与「下一步」层级；仅保留一句引导 + 三张路由卡（文案不出现 packs）。站长可见就绪仅 **站点画像 / Npcink Cloud**；原 Workflow readiness 行收入「支持详情」折叠。
+
+## 开始页支持详情（2026-10-22）
+
+「支持详情」不再嵌套完整 Workflow readiness 卡片/行话表；仅短说明，并指向 Cloud Addon。站长默认仍只看站点画像 / Cloud 两行。

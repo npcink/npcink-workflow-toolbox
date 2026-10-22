@@ -10398,3 +10398,12 @@ msgstr "需要托管 AI 时请连接 Cloud Addon。"
 
 msgid "Npcink Cloud"
 msgstr "Npcink Cloud"
+
+msgid "Short notes for setup. Safe to ignore day to day."
+msgstr "简短设置说明。日常可忽略。"
+
+msgid "Toolbox only suggests. WordPress content still changes only after you review and confirm."
+msgstr "Toolbox 只提供建议。WordPress 内容仍须你审阅确认后才会改动。"
+
+msgid "For connector or runtime checks, open Npcink Cloud Addon when it is installed. Start does not list internal workflow rows here."
+msgstr "连接或运行时检查请打开已安装的 Npcink Cloud Addon。「开始」页不列出内部工作流行。"
