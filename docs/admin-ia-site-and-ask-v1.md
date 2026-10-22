@@ -46,3 +46,16 @@
 - ~~IA-2：折叠站点检查结果 L3 tab~~ → 默认只露行动清单/概览；分维 tab 收入「更多扫描视图」折叠。
 - 单框自动选包 / 隐藏 pack 下拉。
 - 改 REST 合同或 suggestion_only 边界。
+
+
+## 默认隐藏 / 折叠（2026-10-22 产品决议）
+
+UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不渲染：
+
+| 条目 | 键 | 默认 |
+| --- | --- | --- |
+| 定时回顾「高级：本站检查设置」 | `scheduled_review_advanced_settings` | 隐藏 |
+| 标记媒体回顾 | `flagged_media_review` | 隐藏 |
+| 评论审核 / 分类标签 / 内链 三卡片 | `site_check_ops_review_cards` | 隐藏 |
+
+站点档案 SEO / AEO / GEO / Boundaries 深偏好继续收在站点简介下方的 `<details class="npcink-toolbox__context-advanced">`，主摘要文案为 **Advanced / 高级**（智能提问 packs 不变）。

@@ -1083,9 +1083,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				</div>
 			<?php endif; ?>
 		</section>
-			<?php $this->render_comment_moderation_review_tool(); ?>
-			<?php $this->render_taxonomy_tag_review_tool(); ?>
-			<?php $this->render_internal_link_review_tool(); ?>
+			<?php if ( ! Settings::admin_ui_entry_hidden( 'site_check_ops_review_cards' ) ) : ?>
+				<?php $this->render_comment_moderation_review_tool(); ?>
+				<?php $this->render_taxonomy_tag_review_tool(); ?>
+				<?php $this->render_internal_link_review_tool(); ?>
+			<?php endif; ?>
 		</section>
 
 			<section class="npcink-toolbox__ops-panel" data-toolbox-site-check-panel="scheduled-review"<?php echo 'scheduled-review' === $active_site_check_tab ? '' : ' hidden'; ?>>
@@ -1407,6 +1409,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				</div>
 			</section>
 			<?php $this->render_nightly_inspection_preview( $nightly_preview ); ?>
+			<?php if ( ! Settings::admin_ui_entry_hidden( 'scheduled_review_advanced_settings' ) ) : ?>
 			<details class="npcink-toolbox__start-advanced">
 				<summary>
 					<span><?php esc_html_e( 'Advanced: check on this site (optional)', 'npcink-workflow-toolbox' ); ?></span>
@@ -1414,6 +1417,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				</summary>
 				<?php $this->render_nightly_inspection_basic_settings( $settings ); ?>
 			</details>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -1466,8 +1470,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 					<details class="npcink-toolbox__context-advanced">
 						<summary>
-							<span><?php esc_html_e( 'Optional AI suggestion preferences', 'npcink-workflow-toolbox' ); ?></span>
-							<small><?php esc_html_e( 'Keep defaults unless a support or editorial policy needs tighter guidance.', 'npcink-workflow-toolbox' ); ?></small>
+							<span><?php esc_html_e( 'Advanced', 'npcink-workflow-toolbox' ); ?></span>
+							<small><?php esc_html_e( 'Optional AI suggestion preferences', 'npcink-workflow-toolbox' ); ?> — <?php esc_html_e( 'Keep defaults unless a support or editorial policy needs tighter guidance.', 'npcink-workflow-toolbox' ); ?></small>
 						</summary>
 					<div class="npcink-toolbox__context-panels">
 					<?php if ( ! Settings::is_discoverability_paused() ) : ?>
@@ -1736,6 +1740,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				static function ( array $tool ) use ( $surface ): bool {
 					if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'media-batch-optimize' === (string) $tool['id'] ) {
 						return false; }
+					if ( Settings::admin_ui_entry_hidden( 'flagged_media_review' ) && 'flagged-media-review' === (string) $tool['id'] ) {
+						return false;
+					}
 					if ( $surface !== (string) ( $tool['surface'] ?? 'image' ) ) {
 						return false;
 					}
