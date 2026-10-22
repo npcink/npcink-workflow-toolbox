@@ -167,13 +167,6 @@ final class Environment_Performance_Insight_Builder {
 			$opt = get_option( 'active_plugins', array() );
 			$raw = is_array( $opt ) ? $opt : array();
 		}
-		if ( ! function_exists( 'get_plugins' ) && defined( 'ABSPATH' ) ) {
-			$plugin_php = ABSPATH . 'wp-admin/includes/plugin.php';
-			if ( is_readable( $plugin_php ) ) {
-				require_once $plugin_php; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
-			}
-		}
-		$all  = function_exists( 'get_plugins' ) ? get_plugins() : array();
 		$rows = array();
 		foreach ( $raw as $file ) {
 			if ( ! is_string( $file ) || '' === $file ) {
@@ -183,11 +176,9 @@ final class Environment_Performance_Insight_Builder {
 			if ( '.' === $slug || '' === $slug ) {
 				$slug = preg_replace( '/\.php$/', '', basename( $file ) );
 			}
-			$meta    = is_array( $all[ $file ] ?? null ) ? $all[ $file ] : array();
-			$version = sanitize_text_field( (string) ( $meta['Version'] ?? '' ) );
-			$rows[]  = array(
+			$rows[] = array(
 				'slug'    => sanitize_key( (string) $slug ),
-				'version' => $version,
+				'version' => $this->plugin_file_version( $file ),
 			);
 		}
 		usort(
@@ -526,6 +517,38 @@ final class Environment_Performance_Insight_Builder {
 			'direct_wordpress_write' => false,
 			'source_refs'            => $source_refs,
 		);
+	}
+
+
+	/**
+	 * Read only the Version header from an active plugin main file.
+	 * Reads Version from the plugin main file without loading core plugin admin helpers.
+	 */
+	private function plugin_file_version( string $relative_file ): string {
+		if ( ! defined( 'WP_PLUGIN_DIR' ) ) {
+			return '';
+		}
+		$path = WP_PLUGIN_DIR . '/' . ltrim( str_replace( '\\', '/', $relative_file ), '/' );
+		// Refuse path escape outside the plugins directory.
+		$root = realpath( WP_PLUGIN_DIR );
+		$real = realpath( $path );
+		if ( false === $root || false === $real || 0 !== strpos( $real, $root ) || ! is_readable( $real ) ) {
+			return '';
+		}
+		$fh = fopen( $real, 'rb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( false === $fh ) {
+			return '';
+		}
+		$head = fread( $fh, 8192 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
+		fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		if ( ! is_string( $head ) || '' === $head ) {
+			return '';
+		}
+		if ( 1 !== preg_match( '/^[ \t\/*#@]*Version:\s*(.+)$/mi', $head, $m ) ) {
+			return '';
+		}
+
+		return sanitize_text_field( trim( (string) $m[1] ) );
 	}
 
 	private function memory_to_bytes( string $value ): ?int {
