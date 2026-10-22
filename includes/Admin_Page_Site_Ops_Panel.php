@@ -27,6 +27,16 @@ abstract class Admin_Page_Site_Ops_Panel {
 		return is_scalar( $value ) ? trim( (string) $value ) : '';
 	}
 
+	/** Multi-line GET text (e.g. Smart Ask seed) without encoding non-ASCII away. */
+	protected function query_textarea_param( string $key ): string {
+		$value = filter_input( INPUT_GET, $key, FILTER_UNSAFE_RAW );
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		return sanitize_textarea_field( wp_unslash( (string) $value ) );
+	}
+
 	protected function site_ops_insights_preview_url(): string {
 		return wp_nonce_url(
 			add_query_arg(

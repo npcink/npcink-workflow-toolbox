@@ -9716,7 +9716,7 @@ msgstr "预览本地定时检查能否读取公开内容。"
 
 #: includes/Admin_Page.php
 msgid "Ask about this check"
-msgstr "关于本次检查提问"
+msgstr "去提问（看这次检查）"
 
 #: includes/Admin_Page.php
 msgid "Sends the de-identified Site Check insight pack to Hosted AI for a suggestion-only answer. Does not write WordPress and does not use the paused Cloud detail / cloud_inspection path. Internal trial panel — not a full chat product."
@@ -10422,3 +10422,12 @@ msgstr "站点改动"
 
 msgid "Suggestions only"
 msgstr "仅建议"
+
+msgid "Question drafted from your current Site Check summary. Edit it, then ask."
+msgstr "问题已根据当前站点检查摘要起草。可先改再提问。"
+
+msgid "这份站点检查找到约 %d 个问题。用大白话告诉我优先该处理哪 1–3 件事？"
+msgstr "这份站点检查找到约 %d 个问题。用大白话告诉我优先该处理哪 1–3 件事？"
+
+msgid "这份站点检查找到约 %1$d 个问题（例如：%2$s）。用大白话告诉我优先该处理哪 1–3 件事？"
+msgstr "这份站点检查找到约 %1$d 个问题（例如：%2$s）。用大白话告诉我优先该处理哪 1–3 件事？"

@@ -637,14 +637,69 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		return isset( $packs[ $requested ] ) ? $requested : (string) array_key_first( $packs );
 	}
 
-	private function smart_ask_url( string $pack ): string {
-		return add_query_arg(
-			array(
-				'page'        => self::MENU_SLUG,
-				'toolbox_tab' => 'site-and-ask',
-				'ask_pack'    => $pack,
-			),
-			admin_url( 'admin.php' )
+	private function smart_ask_url( string $pack, string $seed_question = '' ): string {
+		$args = array(
+			'page'        => self::MENU_SLUG,
+			'toolbox_tab' => 'site-and-ask',
+			'ask_pack'    => $pack,
+		);
+		$seed = trim( $seed_question );
+		if ( '' !== $seed ) {
+			$args['ask_seed'] = $seed;
+		}
+
+		return add_query_arg( $args, admin_url( 'admin.php' ) );
+	}
+
+	/**
+	 * Optional question prefill from Site Check → Smart Ask deep link.
+	 */
+	private function requested_smart_ask_seed(): string {
+		$seed = $this->query_textarea_param( 'ask_seed' );
+		if ( strlen( $seed ) > 2000 ) {
+			$seed = substr( $seed, 0, 2000 );
+		}
+
+		return $seed;
+	}
+
+	/**
+	 * Build a plain-language seed question from the current Site Check findings.
+	 *
+	 * @param array<int,mixed> $findings Top findings from the local preview pack.
+	 */
+	private function site_check_smart_ask_seed( array $findings ): string {
+		$titles = array();
+		foreach ( $findings as $finding ) {
+			if ( ! is_array( $finding ) ) {
+				continue;
+			}
+			$title = trim( (string) ( $finding['title'] ?? $finding['label'] ?? $finding['issue_type'] ?? '' ) );
+			if ( '' === $title ) {
+				continue;
+			}
+			$titles[] = $title;
+			if ( count( $titles ) >= 3 ) {
+				break;
+			}
+		}
+		$count = count( $findings );
+		if ( 0 === $count ) {
+			return __( '根据这份巡检摘要，站点优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' );
+		}
+		if ( array() === $titles ) {
+			return sprintf(
+				/* translators: %d: number of findings from the current Site Check. */
+				__( '这份站点检查找到约 %d 个问题。用大白话告诉我优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
+				$count
+			);
+		}
+
+		return sprintf(
+			/* translators: 1: number of findings, 2: comma-separated sample finding titles. */
+			__( '这份站点检查找到约 %1$d 个问题（例如：%2$s）。用大白话告诉我优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
+			$count,
+			implode( '、', $titles )
 		);
 	}
 
@@ -660,10 +715,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	private function render_smart_ask_panel(): void {
 		$packs    = $this->smart_ask_packs();
 		$selected = $this->requested_smart_ask_pack();
+		$seed     = $this->requested_smart_ask_seed();
+		$question = '' !== $seed ? $seed : (string) $packs[ $selected ]['default_question'];
 		?>
 		<div class="npcink-toolbox__panel-header">
 			<h2><?php esc_html_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?></h2>
 			<p class="description" data-toolbox-smart-ask-notice><?php esc_html_e( 'Answers are for reference only and will not change your site.', 'npcink-workflow-toolbox' ); ?></p>
+			<?php if ( '' !== $seed && 'site_ops' === $selected ) : ?>
+				<p class="description" data-toolbox-smart-ask-from-check><?php esc_html_e( 'Question drafted from your current Site Check summary. Edit it, then ask.', 'npcink-workflow-toolbox' ); ?></p>
+			<?php endif; ?>
 		</div>
 		<section class="npcink-toolbox__card" data-toolbox-smart-ask aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>">
 			<p>
@@ -675,7 +735,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				</select>
 			</p>
 			<label for="npcink-toolbox-smart-ask-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
-			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" data-toolbox-smart-ask-question><?php echo esc_textarea( $packs[ $selected ]['default_question'] ); ?></textarea>
+			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" data-toolbox-smart-ask-question><?php echo esc_textarea( $question ); ?></textarea>
 			<p class="npcink-toolbox__ops-status-actions" style="margin-top:10px;">
 				<button type="button" class="button button-primary" data-toolbox-smart-ask-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
 				<span class="description"><?php esc_html_e( 'Administrator permission required. May take up to about 45 seconds.', 'npcink-workflow-toolbox' ); ?></span>
@@ -967,13 +1027,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<?php if ( null === $preview || isset( $preview['error'] ) ) : ?>
 							<a class="button button-primary" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Generate site check', 'npcink-workflow-toolbox' ); ?></a>
 						<?php else : ?>
-							<span><?php esc_html_e( 'Current snapshot is ready.', 'npcink-workflow-toolbox' ); ?></span>
-							<a class="button button-small" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Rescan', 'npcink-workflow-toolbox' ); ?></a>
+							<a class="button button-primary" data-toolbox-check-to-ask href="<?php echo esc_url( $this->smart_ask_url( 'site_ops', $this->site_check_smart_ask_seed( $findings ) ) ); ?>"><?php esc_html_e( 'Ask about this check', 'npcink-workflow-toolbox' ); ?></a>
+							<a class="button" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Rescan', 'npcink-workflow-toolbox' ); ?></a>
 						<?php endif; ?>
 					</div>
 				</section>
-
-				<?php $this->render_smart_ask_link( 'site_ops' ); ?>
 
 				<details class="npcink-toolbox__ops-loop-disclosure"<?php echo null === $preview ? ' open' : ''; ?>>
 					<summary><?php esc_html_e( 'How to use Site Check', 'npcink-workflow-toolbox' ); ?></summary>
