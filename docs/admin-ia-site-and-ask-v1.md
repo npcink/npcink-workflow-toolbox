@@ -64,3 +64,8 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 ## 开始页下一步卡片（2026-10-22）
 
 「开始」默认展示三张路由卡（`data-toolbox-start-next`）：**去提问** / **去检查** / **去改图**，分别深链到 `site-and-ask`、`operations-insights`、`tools`。不恢复已移除的 Site Check 促销块（`start-priority`）。隐藏条目策略不变。
+
+
+## 开始页精简（2026-10-22）
+
+去掉重复大标题「开始」与「下一步」层级；仅保留一句引导 + 三张路由卡（文案不出现 packs）。站长可见就绪仅 **站点画像 / Npcink Cloud**；原 Workflow readiness 行收入「支持详情」折叠。

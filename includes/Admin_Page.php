@@ -729,62 +729,46 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 	private function render_start_panel( array $content_context, bool $cloud_ready ): void {
 		?>
-		<div class="npcink-toolbox__panel-header">
-			<h2><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></h2>
-			<p><?php esc_html_e( 'Pick a clear next step: ask about the site, run a site check, or handle images.', 'npcink-workflow-toolbox' ); ?></p>
-		</div>
-
 		<div class="npcink-toolbox__start" data-toolbox-start>
+			<p class="npcink-toolbox__start-intro"><?php esc_html_e( 'Choose what to do next. Nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php $this->render_start_next_step_cards(); ?>
 			<?php if ( ! $cloud_ready ) : ?>
 				<?php $this->render_getting_started_steps( $content_context ); ?>
 			<?php endif; ?>
-			<details class="npcink-toolbox__start-advanced">
-				<summary>
-					<span><?php esc_html_e( 'System status', 'npcink-workflow-toolbox' ); ?></span>
-					<small><?php esc_html_e( 'Workflow readiness and support-facing details.', 'npcink-workflow-toolbox' ); ?></small>
-				</summary>
-				<?php $this->render_npcink_capability_health_summary( $content_context, $cloud_ready ); ?>
-			</details>
+			<?php $this->render_start_owner_readiness( $content_context, $cloud_ready ); ?>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Renders the three primary Start routes after IA-1 (Ask / Site Check / Images).
+	 * Renders the three primary Start routes (Ask / Site Check / Images).
 	 */
 	private function render_start_next_step_cards(): void {
 		$cards = array(
 			array(
 				'id'     => 'ask',
 				'title'  => __( 'Go ask', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Open Site & Ask to fill the site profile and run Smart Ask packs.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Fill the site profile and ask questions about this site.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Site & Ask', 'npcink-workflow-toolbox' ),
 				'tab'    => 'site-and-ask',
 			),
 			array(
 				'id'     => 'check',
 				'title'  => __( 'Go check', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Open Site Check for the current local check and scheduled review.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Run a local site check or open scheduled review.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Site Check', 'npcink-workflow-toolbox' ),
 				'tab'    => 'operations-insights',
 			),
 			array(
 				'id'     => 'images',
 				'title'  => __( 'Go edit images', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Open Image Handling for ALT review, optimization, and watermark settings.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Review ALT text, optimize images, or manage watermarks.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Image Handling', 'npcink-workflow-toolbox' ),
 				'tab'    => 'tools',
 			),
 		);
 		?>
-		<section class="npcink-toolbox__start-next" data-toolbox-start-next aria-label="<?php esc_attr_e( 'Next steps', 'npcink-workflow-toolbox' ); ?>">
-			<div class="npcink-toolbox__section-heading">
-				<div>
-					<h3><?php esc_html_e( 'Next steps', 'npcink-workflow-toolbox' ); ?></h3>
-					<p><?php esc_html_e( 'Three common operator paths. Nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
-				</div>
-			</div>
+		<section class="npcink-toolbox__start-next" data-toolbox-start-next aria-label="<?php esc_attr_e( 'Choose a task', 'npcink-workflow-toolbox' ); ?>">
 			<div class="npcink-toolbox__start-next-grid">
 				<?php foreach ( $cards as $card ) : ?>
 					<?php
@@ -803,6 +787,46 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					</article>
 				<?php endforeach; ?>
 			</div>
+		</section>
+		<?php
+	}
+
+	/**
+	 * Owner-facing readiness: site profile + Cloud, with support jargon folded away.
+	 */
+	private function render_start_owner_readiness( array $content_context, bool $cloud_ready ): void {
+		$profile_ready = $this->content_context_ready( $content_context );
+		?>
+		<section class="npcink-toolbox__start-readiness" id="npcink-toolbox-tour-system-status" data-toolbox-start-readiness aria-label="<?php esc_attr_e( 'Site readiness', 'npcink-workflow-toolbox' ); ?>">
+			<div class="npcink-toolbox__start-status-list npcink-toolbox__start-status-list--owner">
+				<?php
+				$this->render_start_status_row(
+					__( 'Site profile', 'npcink-workflow-toolbox' ),
+					$profile_ready ? 'ok' : 'warning',
+					$profile_ready ? __( 'Ready', 'npcink-workflow-toolbox' ) : __( 'Needs a short brief', 'npcink-workflow-toolbox' ),
+					$profile_ready
+						? __( 'AI suggestions can use your site brief.', 'npcink-workflow-toolbox' )
+						: __( 'Open Site & Ask to fill the four brief fields.', 'npcink-workflow-toolbox' ),
+					''
+				);
+				$this->render_start_status_row(
+					__( 'Npcink Cloud', 'npcink-workflow-toolbox' ),
+					$cloud_ready ? 'ok' : 'warning',
+					$cloud_ready ? __( 'Connected', 'npcink-workflow-toolbox' ) : __( 'Not connected', 'npcink-workflow-toolbox' ),
+					$cloud_ready
+						? __( 'Hosted suggestions can run when you ask.', 'npcink-workflow-toolbox' )
+						: __( 'Connect Cloud Addon when you need hosted AI.', 'npcink-workflow-toolbox' ),
+					'npcink-toolbox-tour-cloud-status'
+				);
+				?>
+			</div>
+			<details class="npcink-toolbox__start-advanced">
+				<summary>
+					<span><?php esc_html_e( 'Support details', 'npcink-workflow-toolbox' ); ?></span>
+					<small><?php esc_html_e( 'Technical readiness for setup and support. Safe to ignore day to day.', 'npcink-workflow-toolbox' ); ?></small>
+				</summary>
+				<?php $this->render_npcink_capability_health_summary( $content_context, $cloud_ready ); ?>
+			</details>
 		</section>
 		<?php
 	}
@@ -891,7 +915,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			)
 		);
 		?>
-			<section class="npcink-toolbox__ability-health" id="npcink-toolbox-tour-system-status" aria-label="<?php esc_attr_e( 'Workflow readiness summary', 'npcink-workflow-toolbox' ); ?>">
+			<section class="npcink-toolbox__ability-health" data-toolbox-support-health aria-label="<?php esc_attr_e( 'Workflow readiness summary', 'npcink-workflow-toolbox' ); ?>">
 			<div class="npcink-toolbox__section-heading npcink-toolbox__section-heading--compact">
 				<div>
 					<h3><?php esc_html_e( 'Workflow readiness', 'npcink-workflow-toolbox' ); ?></h3>
