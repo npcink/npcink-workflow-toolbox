@@ -731,10 +731,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<div class="npcink-toolbox__panel-header">
 			<h2><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></h2>
-			<p><?php esc_html_e( 'Use Site & Ask and Image Handling for currently supported operator tasks.', 'npcink-workflow-toolbox' ); ?></p>
+			<p><?php esc_html_e( 'Pick a clear next step: ask about the site, run a site check, or handle images.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 
 		<div class="npcink-toolbox__start" data-toolbox-start>
+			<?php $this->render_start_next_step_cards(); ?>
 			<?php if ( ! $cloud_ready ) : ?>
 				<?php $this->render_getting_started_steps( $content_context ); ?>
 			<?php endif; ?>
@@ -746,6 +747,63 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php $this->render_npcink_capability_health_summary( $content_context, $cloud_ready ); ?>
 			</details>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Renders the three primary Start routes after IA-1 (Ask / Site Check / Images).
+	 */
+	private function render_start_next_step_cards(): void {
+		$cards = array(
+			array(
+				'id'     => 'ask',
+				'title'  => __( 'Go ask', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Open Site & Ask to fill the site profile and run Smart Ask packs.', 'npcink-workflow-toolbox' ),
+				'action' => __( 'Open Site & Ask', 'npcink-workflow-toolbox' ),
+				'tab'    => 'site-and-ask',
+			),
+			array(
+				'id'     => 'check',
+				'title'  => __( 'Go check', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Open Site Check for the current local check and scheduled review.', 'npcink-workflow-toolbox' ),
+				'action' => __( 'Open Site Check', 'npcink-workflow-toolbox' ),
+				'tab'    => 'operations-insights',
+			),
+			array(
+				'id'     => 'images',
+				'title'  => __( 'Go edit images', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Open Image Handling for ALT review, optimization, and watermark settings.', 'npcink-workflow-toolbox' ),
+				'action' => __( 'Open Image Handling', 'npcink-workflow-toolbox' ),
+				'tab'    => 'tools',
+			),
+		);
+		?>
+		<section class="npcink-toolbox__start-next" data-toolbox-start-next aria-label="<?php esc_attr_e( 'Next steps', 'npcink-workflow-toolbox' ); ?>">
+			<div class="npcink-toolbox__section-heading">
+				<div>
+					<h3><?php esc_html_e( 'Next steps', 'npcink-workflow-toolbox' ); ?></h3>
+					<p><?php esc_html_e( 'Three common operator paths. Nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
+			</div>
+			<div class="npcink-toolbox__start-next-grid">
+				<?php foreach ( $cards as $card ) : ?>
+					<?php
+					$url = add_query_arg(
+						array(
+							'page'        => self::MENU_SLUG,
+							'toolbox_tab' => (string) $card['tab'],
+						),
+						admin_url( 'admin.php' )
+					);
+					?>
+					<article class="npcink-toolbox__card npcink-toolbox__start-route-card" data-toolbox-start-route="<?php echo esc_attr( (string) $card['id'] ); ?>">
+						<h3><?php echo esc_html( (string) $card['title'] ); ?></h3>
+						<p><?php echo esc_html( (string) $card['help'] ); ?></p>
+						<a class="button button-primary" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( (string) $card['action'] ); ?></a>
+					</article>
+				<?php endforeach; ?>
+			</div>
+		</section>
 		<?php
 	}
 

@@ -59,3 +59,8 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 | 评论审核 / 分类标签 / 内链 三卡片 | `site_check_ops_review_cards` | 隐藏 |
 
 站点档案 SEO / AEO / GEO / Boundaries 深偏好继续收在站点简介下方的 `<details class="npcink-toolbox__context-advanced">`，主摘要文案为 **Advanced / 高级**（智能提问 packs 不变）。
+
+
+## 开始页下一步卡片（2026-10-22）
+
+「开始」默认展示三张路由卡（`data-toolbox-start-next`）：**去提问** / **去检查** / **去改图**，分别深链到 `site-and-ask`、`operations-insights`、`tools`。不恢复已移除的 Site Check 促销块（`start-priority`）。隐藏条目策略不变。
