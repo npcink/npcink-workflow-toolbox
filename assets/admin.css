@@ -170,6 +170,35 @@
 	background: var(--npcink-ui-surface);
 }
 
+.npcink-toolbox__start-readiness .npcink-toolbox__start-support {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+.npcink-toolbox__start-support-notes {
+	display: grid;
+	gap: var(--npcink-ui-space-2);
+	margin: var(--npcink-ui-space-2) 0 0;
+	padding: var(--npcink-ui-space-3);
+	background: var(--npcink-ui-canvas);
+	border: 1px solid var(--npcink-ui-border);
+	border-radius: var(--npcink-ui-radius-card);
+}
+
+.npcink-toolbox__start-support-notes p {
+	margin: 0;
+	color: var(--npcink-ui-text);
+	font-size: var(--npcink-ui-font-quiet);
+	line-height: 1.45;
+}
+
+/* Start must not nest the full ability-health card inside support details. */
+.npcink-toolbox__start-readiness .npcink-toolbox__ability-health {
+	display: none;
+}
+
 .npcink-toolbox__start-next-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
