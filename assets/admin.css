@@ -149,9 +149,25 @@
 	max-width: var(--npcink-ui-column-wide);
 }
 
+.npcink-toolbox__start-intro {
+	margin: 0;
+	color: var(--npcink-ui-text);
+	font-size: var(--npcink-ui-font-body);
+	line-height: 1.45;
+}
+
 .npcink-toolbox__start-next {
 	display: grid;
 	gap: var(--npcink-ui-space-3);
+}
+
+.npcink-toolbox__start-readiness {
+	display: grid;
+	gap: var(--npcink-ui-space-3);
+}
+
+.npcink-toolbox__start-status-list--owner {
+	background: var(--npcink-ui-surface);
 }
 
 .npcink-toolbox__start-next-grid {

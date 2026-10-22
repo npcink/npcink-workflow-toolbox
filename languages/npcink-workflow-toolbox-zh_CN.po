@@ -10353,3 +10353,48 @@ msgstr "打开站点与提问"
 
 msgid "Open Image Handling"
 msgstr "打开图片处理"
+
+msgid "Choose what to do next. Nothing is written without your review."
+msgstr "选择下一步要做的事。未经你确认不会写入任何内容。"
+
+msgid "Fill the site profile and ask questions about this site."
+msgstr "填写站点档案，并向本站提问。"
+
+msgid "Run a local site check or open scheduled review."
+msgstr "运行本站检查，或打开定时回顾。"
+
+msgid "Review ALT text, optimize images, or manage watermarks."
+msgstr "审核 ALT、优化图片或管理水印。"
+
+msgid "Choose a task"
+msgstr "选择任务"
+
+msgid "Site readiness"
+msgstr "站点就绪状态"
+
+msgid "Support details"
+msgstr "支持详情"
+
+msgid "Technical readiness for setup and support. Safe to ignore day to day."
+msgstr "供设置与支持查看的技术就绪信息。日常可忽略。"
+
+msgid "Needs a short brief"
+msgstr "需要简短简介"
+
+msgid "AI suggestions can use your site brief."
+msgstr "AI 建议可使用你的站点简介。"
+
+msgid "Open Site & Ask to fill the four brief fields."
+msgstr "打开「站点与提问」填写四个简介字段。"
+
+msgid "Not connected"
+msgstr "未连接"
+
+msgid "Hosted suggestions can run when you ask."
+msgstr "需要时即可运行托管建议。"
+
+msgid "Connect Cloud Addon when you need hosted AI."
+msgstr "需要托管 AI 时请连接 Cloud Addon。"
+
+msgid "Npcink Cloud"
+msgstr "Npcink Cloud"
