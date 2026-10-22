@@ -17,6 +17,7 @@ final class Insight_Pack_Answer_Guidance {
 
 	public const PACK_SITE_OPS          = 'site_ops';
 	public const PACK_CONTENT_STRUCTURE = 'content_structure';
+	public const PACK_PAGE_QUALITY      = 'page_quality';
 
 	/**
 	 * Everyday wording for pack field names / jargon (key => plain Chinese).
@@ -26,24 +27,34 @@ final class Insight_Pack_Answer_Guidance {
 	public static function glossary(): array {
 		return array(
 			'meta description / missing_meta_description_rate' => '搜索结果里的简介（缺简介的文章占比）',
-			'excerpt / missing_excerpt_rate'   => '文章摘要',
-			'featured image'                   => '文章封面图',
-			'thin content / thin_content_rate' => '内容太短的文章',
-			'stale / 180+ days'                => '半年以上没更新的文章',
-			'taxonomy / category / tag'        => '分类和标签',
-			'internal links / orphan'          => '站内互相链接（没有其他文章链到它的“孤立文章”）',
-			'alt text'                         => '图片的文字说明',
-			'priority_score / severity'        => '只用“最该先做 / 其次 / 可以稍后”表达，不写分数',
-			'manual_review_only'               => '需要你自己看一眼再决定',
-			'core_handoff_candidate'           => '可以交给现有的审核流程去改（不会自动改）',
-			'Site Context'                     => '站点简介（在「站点资料」里填写）',
-			'metadata 流程'                      => '在编辑器里补简介/摘要的现有功能',
+			'excerpt / missing_excerpt_rate'       => '文章摘要',
+			'featured image'                       => '文章封面图',
+			'thin content / thin_content_rate'     => '内容太短的文章',
+			'stale / 180+ days'                    => '半年以上没更新的文章',
+			'taxonomy / category / tag'            => '分类和标签',
+			'internal links / orphan'              => '站内互相链接（没有其他文章链到它的“孤立文章”）',
+			'alt text'                             => '图片的文字说明',
+			'priority_score / severity'            => '只用“最该先做 / 其次 / 可以稍后”表达，不写分数',
+			'manual_review_only'                   => '需要你自己看一眼再决定',
+			'core_handoff_candidate'               => '可以交给现有的审核流程去改（不会自动改）',
+			'Site Context'                         => '站点简介（在「站点资料」里填写）',
+			'metadata 流程'                          => '在编辑器里补简介/摘要的现有功能',
+			'heading structure / multiple H1'      => '标题层级（大标题有几个）',
+			'missing_heading_rate'                 => '较长文章缺少分节标题',
+			'missing_alt_count / missing_alt_rate' => '图片缺文字说明',
+			'measurement_kind'                     => '只看页面基础完备度抽样，不是测速分数',
 		);
 	}
 
 	public static function system_prompt( string $pack ): string {
-		$pack_label = self::PACK_CONTENT_STRUCTURE === $pack ? '内容结构摘要（SEO / 内容健康）' : '站点巡检摘要';
-		$terms      = array();
+		if ( self::PACK_CONTENT_STRUCTURE === $pack ) {
+			$pack_label = '内容结构摘要（SEO / 内容健康）';
+		} elseif ( self::PACK_PAGE_QUALITY === $pack ) {
+			$pack_label = '页面质量摘要（基础完备度）';
+		} else {
+			$pack_label = '站点巡检摘要';
+		}
+		$terms = array();
 		foreach ( self::glossary() as $term => $plain ) {
 			$terms[] = '- ' . $term . ' → ' . $plain;
 		}

@@ -615,6 +615,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				'endpoint'         => 'content-structure/insight-pack-qa',
 				'default_question' => __( '根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
 			),
+			'page_quality'      => array(
+				'label'            => __( 'Page quality', 'npcink-workflow-toolbox' ),
+				'contract'         => 'page_quality_insight_pack.v1',
+				'endpoint'         => 'page-quality/insight-pack-qa',
+				'default_question' => __( '根据这份页面质量摘要，优先该补哪 1–3 件基础问题？用大白话回答。', 'npcink-workflow-toolbox' ),
+			),
 		);
 	}
 
