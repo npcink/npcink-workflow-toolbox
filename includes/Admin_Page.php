@@ -549,8 +549,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$cloud_ready           = $this->settings->cloud_runtime_available();
 		$active_tab            = $this->requested_toolbox_tab();
 		$active_site_check_tab = $this->requested_site_check_tab();
-		$nightly_preview       = 'operations-insights' === $active_tab ? $this->nightly_inspection_preview_from_request() : null;
-		$site_ops_preview      = 'operations-insights' === $active_tab ? $this->site_ops_insights_preview_from_request( $content_context, $cloud_ready ) : null;
+		$nightly_preview       = 'site-and-ask' === $active_tab ? $this->nightly_inspection_preview_from_request() : null;
+		$site_ops_preview      = 'site-and-ask' === $active_tab ? $this->site_ops_insights_preview_from_request( $content_context, $cloud_ready ) : null;
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
@@ -567,7 +567,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<nav class="npcink-ai-tabs npcink-toolbox__tabs" data-toolbox-tabs aria-label="<?php esc_attr_e( 'Toolbox sections', 'npcink-workflow-toolbox' ); ?>">
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'site-and-ask' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="site-and-ask" aria-selected="<?php echo 'site-and-ask' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'site-and-ask' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'operations-insights' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="operations-insights" aria-selected="<?php echo 'operations-insights' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'operations-insights' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Handling', 'npcink-workflow-toolbox' ); ?></button>
 			</nav>
 
@@ -575,17 +574,20 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php $this->render_start_panel( $content_context, $cloud_ready ); ?>
 			</section>
 
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Site profile and Smart Ask', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
+			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Site profile, Smart Ask, and Site Check', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
 				<div class="npcink-toolbox__panel-header">
 					<h2><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></h2>
-					<p><?php esc_html_e( 'Fill the short site brief, then ask in plain language. Answers are suggestions only.', 'npcink-workflow-toolbox' ); ?></p>
+					<p><?php esc_html_e( 'Fill the short site brief, ask in plain language, or run a site check. Answers and checks are suggestions only.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
 				<?php $this->render_content_context_form( $content_context ); ?>
 				<?php $this->render_smart_ask_panel(); ?>
-			</section>
-
-			<section class="npcink-toolbox__panel npcink-toolbox__panel--secondary" data-toolbox-tab-panel="operations-insights" aria-label="<?php esc_attr_e( 'Site check', 'npcink-workflow-toolbox' ); ?>"<?php echo 'operations-insights' === $active_tab ? '' : ' hidden'; ?>>
-				<?php $this->render_operations_insights_panel( $site_ops_preview, $content_context, $cloud_ready, $settings, $nightly_preview, $active_site_check_tab ); ?>
+				<section class="npcink-toolbox__site-check-fold" id="npcink-toolbox-site-check" data-toolbox-site-check-fold aria-label="<?php esc_attr_e( 'Site check', 'npcink-workflow-toolbox' ); ?>">
+					<div class="npcink-toolbox__panel-header npcink-toolbox__panel-header--compact">
+						<h3><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></h3>
+						<p><?php esc_html_e( 'Scan this site, then ask about the result. Scheduled review stays here too.', 'npcink-workflow-toolbox' ); ?></p>
+					</div>
+					<?php $this->render_operations_insights_panel( $site_ops_preview, $content_context, $cloud_ready, $settings, $nightly_preview, $active_site_check_tab ); ?>
+				</section>
 			</section>
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="tools" aria-label="<?php esc_attr_e( 'Image handling', 'npcink-workflow-toolbox' ); ?>"<?php echo 'tools' === $active_tab ? '' : ' hidden'; ?>>
@@ -754,11 +756,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	private function requested_toolbox_tab(): string {
 		$requested = sanitize_key( $this->query_text_param( 'toolbox_tab' ) );
 
+		// Legacy Site Check top-tab slug still accepted; content now lives under Site & Ask.
+		if ( 'operations-insights' === $requested ) {
+			return 'site-and-ask';
+		}
+
 		$allowed = array(
-			'start'               => true,
-			'site-and-ask'        => true,
-			'tools'               => true,
-			'operations-insights' => true,
+			'start'        => true,
+			'site-and-ask' => true,
+			'tools'        => true,
 		);
 		return isset( $allowed[ $requested ] ) ? $requested : 'start';
 	}
@@ -801,7 +807,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	/**
-	 * Renders the three primary Start routes (Ask / Site Check / Images).
+	 * Renders the three primary Start routes (Ask / Check-under-Site-&-Ask / Images).
 	 */
 	private function render_start_next_step_cards(): void {
 		$cards = array(
@@ -815,9 +821,13 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			array(
 				'id'     => 'check',
 				'title'  => __( 'Go check', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Run a local site check or open scheduled review.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Run a local site check or open scheduled review under Site & Ask.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Site Check', 'npcink-workflow-toolbox' ),
-				'tab'    => 'operations-insights',
+				'tab'    => 'site-and-ask',
+				'args'   => array(
+					'site_check_tab' => 'current-check',
+				),
+				'hash'   => 'npcink-toolbox-site-check',
 			),
 			array(
 				'id'     => 'images',
@@ -832,13 +842,17 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<div class="npcink-toolbox__start-next-grid">
 				<?php foreach ( $cards as $card ) : ?>
 					<?php
-					$url = add_query_arg(
-						array(
-							'page'        => self::MENU_SLUG,
-							'toolbox_tab' => (string) $card['tab'],
-						),
-						admin_url( 'admin.php' )
+					$query = array(
+						'page'        => self::MENU_SLUG,
+						'toolbox_tab' => (string) $card['tab'],
 					);
+					if ( ! empty( $card['args'] ) && is_array( $card['args'] ) ) {
+						$query = array_merge( $query, $card['args'] );
+					}
+					$url = add_query_arg( $query, admin_url( 'admin.php' ) );
+					if ( ! empty( $card['hash'] ) ) {
+						$url .= '#' . rawurlencode( (string) $card['hash'] );
+					}
 					?>
 					<article class="npcink-toolbox__card npcink-toolbox__start-route-card" data-toolbox-start-route="<?php echo esc_attr( (string) $card['id'] ); ?>">
 						<h3><?php echo esc_html( (string) $card['title'] ); ?></h3>
@@ -1194,7 +1208,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			add_query_arg(
 				array(
 					'page'                       => self::MENU_SLUG,
-					'toolbox_tab'                => 'operations-insights',
+					'toolbox_tab'                => 'site-and-ask',
 					'site_check_tab'             => 'scheduled-review',
 					'nightly_inspection_preview' => '1',
 				),

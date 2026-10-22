@@ -743,6 +743,17 @@
 	font-weight: 600;
 }
 
+
+.npcink-toolbox__site-check-fold {
+	margin-top: var(--npcink-ui-space-6, 1.5rem);
+	padding-top: var(--npcink-ui-space-4, 1rem);
+	border-top: 1px solid var(--npcink-ui-border, #dcdcde);
+}
+
+.npcink-toolbox__site-check-fold > .npcink-toolbox__panel-header--compact {
+	margin-bottom: var(--npcink-ui-space-3, 0.75rem);
+}
+
 .npcink-toolbox__ops-workspace {
 	display: grid;
 	gap: 12px;

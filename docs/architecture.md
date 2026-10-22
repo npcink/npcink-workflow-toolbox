@@ -770,8 +770,8 @@ request log, or connector approval surface. It does not create proposals or
 writes. Single-post article
 support stays in the post editor sidebar and is not rendered as an Overview
 work block. The visible top-level admin tabs after **Start** (formerly Overview) are **Site & Ask**
-(merges Site Profile + Smart Ask), **Site Check**, and **Image Handling** (four top-level tabs; Site Check is the fourth top-level tab).
-Start remains the default landing page; see `docs/admin-ia-site-and-ask-v1.md`. The stable `operations-insights` compatibility route still builds a local
+(merges Site Profile + Smart Ask + the folded **Site Check** section) and **Image Handling** (three top-level tabs).
+Start remains the default landing page; see `docs/admin-ia-site-and-ask-v1.md`. The stable `operations-insights` compatibility query still maps into Site & Ask and builds a local
 `site_ops_insight_pack.v1` from bounded public content, approved comment signal
 counts, media metadata, taxonomy summaries, Site Context readiness, and Cloud
 availability, then presents it as a current-run decision queue for manual
@@ -786,8 +786,8 @@ administrator may explicitly run Cloud detail and render the suggestion-only
 `site_ops_cloud_analysis_result.v1`. It is a manual review surface, not a
 Cloud batch owner, local queue, Core proposal creator, or WordPress write path.
 Nightly Inspection fallback preview settings live in the low-frequency
-**Scheduled Review** sub tab inside Site Check, beside the **Current Check**
-manual report. The former Advanced directory is not rendered as a separate top-level tab, and the `toolbox_tab=advanced` and `toolbox_tab=morning-brief` aliases have been removed; use `toolbox_tab=operations-insights` with `site_check_tab=scheduled-review` instead. Cloud run status, result reads, recent runs,
+**Scheduled Review** sub tab inside the Site Check fold under Site & Ask, beside the **Current Check**
+manual report. The former Advanced directory is not rendered as a separate top-level tab, and the `toolbox_tab=advanced` and `toolbox_tab=morning-brief` aliases have been removed; use `toolbox_tab=site-and-ask` (or legacy `toolbox_tab=operations-insights`) with `site_check_tab=scheduled-review` instead. Cloud run status, result reads, recent runs,
 and recovery live in Cloud Addon Runtime Runs. They do not live inside Cloud
 Checks. That keeps recurring inspection preview and Cloud run recovery separate
 from ordinary connection diagnostics without changing the default Overview

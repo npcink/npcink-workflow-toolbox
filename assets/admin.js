@@ -7414,7 +7414,7 @@
 			tool: null,
 			toolbox_tab: target,
 			toolbox_tool: null,
-			site_check_tab: target === 'operations-insights' ? activeSiteCheckTab() : null,
+			site_check_tab: target === 'site-and-ask' ? activeSiteCheckTab() : null,
 		});
 	}
 
@@ -7446,7 +7446,7 @@
 			updateToolboxUrl({
 				tab: null,
 				tool: null,
-				toolbox_tab: 'operations-insights',
+				toolbox_tab: 'site-and-ask',
 				toolbox_tool: null,
 				site_check_tab: target === 'current-check' ? null : target,
 			});
@@ -7541,11 +7541,22 @@
 			tab = requestedToolTab;
 		}
 
+		// Legacy top-tab slug: Site Check now folds into Site & Ask.
+		if (tab === 'operations-insights') {
+			tab = 'site-and-ask';
+		}
+
 		if (tab) {
 			activateTopTab(tab, false);
 		}
-		if (tab === 'operations-insights') {
+		if (tab === 'site-and-ask') {
 			activateSiteCheckTab(requestedSiteCheckTab === 'scheduled-review' ? 'scheduled-review' : 'current-check', false);
+			if (window.location.hash === '#npcink-toolbox-site-check') {
+				const fold = document.getElementById('npcink-toolbox-site-check');
+				if (fold && typeof fold.scrollIntoView === 'function') {
+					fold.scrollIntoView({ block: 'start' });
+				}
+			}
 		}
 		if (tab === 'tools' && requestedTool) {
 			activateToolPanel(requestedTool, false, toolWorkspaceForTab(tab) || requestedToolWorkspace);
