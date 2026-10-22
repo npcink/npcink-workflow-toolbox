@@ -218,11 +218,13 @@ try {
 		await page.goto(loginHelper.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
 		await openToolboxPage(page, baseUrl);
 		await page.waitForSelector('[data-toolbox-site-ops-insights]', { state: 'attached', timeout: 30000 });
-		assert(await page.locator('[data-toolbox-tab-target="operations-insights"]').count() === 1, 'Site Check is visible as a top-level tab while its compatibility deep link remains available.');
-		if (await page.locator('[data-toolbox-tab-panel="operations-insights"]').isHidden()) {
-			await page.locator('[data-toolbox-tab-target="operations-insights"]').click();
+		assert(await page.locator('[data-toolbox-tab-target="operations-insights"]').count() === 0, 'Site Check is no longer a top-level tab.');
+		assert(await page.locator('[data-toolbox-site-check-fold]').count() === 1, 'Site Check fold is present under Site & Ask.');
+		if (await page.locator('[data-toolbox-tab-panel="site-and-ask"]').isHidden()) {
+			await page.locator('[data-toolbox-tab-target="site-and-ask"]').click();
 		}
-		await page.waitForSelector('[data-toolbox-tab-panel="operations-insights"]:not([hidden])', { timeout: 30000 });
+		await page.waitForSelector('[data-toolbox-tab-panel="site-and-ask"]:not([hidden])', { timeout: 30000 });
+		await page.waitForSelector('[data-toolbox-site-check-fold]', { timeout: 30000 });
 		await page.locator('.npcink-toolbox__ops-status-row .npcink-toolbox__ops-status-actions a.button-primary').click();
 		await page.waitForLoadState('domcontentloaded');
 		await page.waitForSelector('[data-toolbox-ops-tabs]', { timeout: 30000 });

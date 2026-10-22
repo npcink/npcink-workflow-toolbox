@@ -42,7 +42,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 			add_query_arg(
 				array(
 					'page'                      => self::MENU_SLUG,
-					'toolbox_tab'               => 'operations-insights',
+					'toolbox_tab'               => 'site-and-ask',
 					'site_check_tab'            => 'current-check',
 					'site_ops_insights_preview' => '1',
 				),
@@ -57,7 +57,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 			add_query_arg(
 				array(
 					'page'                      => self::MENU_SLUG,
-					'toolbox_tab'               => 'operations-insights',
+					'toolbox_tab'               => 'site-and-ask',
 					'site_check_tab'            => 'current-check',
 					'site_ops_insights_preview' => '1',
 					'site_ops_cloud_analysis'   => '1',

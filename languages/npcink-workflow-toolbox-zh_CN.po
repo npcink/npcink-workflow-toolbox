@@ -10431,3 +10431,15 @@ msgstr "这份站点检查找到约 %d 个问题。用大白话告诉我优先�
 
 msgid "这份站点检查找到约 %1$d 个问题（例如：%2$s）。用大白话告诉我优先该处理哪 1–3 件事？"
 msgstr "这份站点检查找到约 %1$d 个问题（例如：%2$s）。用大白话告诉我优先该处理哪 1–3 件事？"
+
+msgid "Fill the short site brief, ask in plain language, or run a site check. Answers and checks are suggestions only."
+msgstr "填写简短站点简介，用大白话提问，或运行站点检查。回答与检查结果都只是建议。"
+
+msgid "Site profile, Smart Ask, and Site Check"
+msgstr "站点画像、智能提问与站点检查"
+
+msgid "Scan this site, then ask about the result. Scheduled review stays here too."
+msgstr "先扫描本站，再针对结果提问。定时回顾也在这里。"
+
+msgid "Run a local site check or open scheduled review under Site & Ask."
+msgstr "在「站点与提问」里运行本站检查，或打开定时回顾。"

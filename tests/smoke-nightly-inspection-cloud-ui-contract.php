@@ -107,7 +107,8 @@ foreach (
 	$assert_contains( $admin_page, $required_admin_text, 'Scheduled Review admin panel routes Cloud run detail and recovery to Cloud Addon Runtime Runs.' );
 }
 
-$assert_contains( $admin_page, 'data-toolbox-tab-target="operations-insights"', 'Scheduled Review remains reachable through the visible Site Check tab and its compatibility deep link.' );
+$assert_contains( $admin_page, 'data-toolbox-site-check-fold', 'Scheduled Review remains reachable through the Site Check fold under Site & Ask.' );
+$assert_contains( $admin_page, "if ( 'operations-insights' === \$requested )", 'Legacy operations-insights deep links still map into Site & Ask.' );
 
 foreach (
 	array(
