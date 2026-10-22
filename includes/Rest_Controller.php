@@ -24,6 +24,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 	private Rest_Site_Ops_Insight_Bridges $site_ops_insight_bridges;
 	private Rest_Content_Structure_Insight_Bridges $content_structure_bridges;
 	private Rest_Page_Quality_Insight_Bridges $page_quality_bridges;
+	private Rest_Environment_Performance_Insight_Bridges $environment_performance_bridges;
 	private Rest_Media_Derivative_Previews $media_derivative_previews;
 	private Rest_Flow_Plan_Bridges $flow_plan_bridges;
 	private Rest_Media_Optimization_Bridges $media_optimization_bridges;
@@ -91,6 +92,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->site_ops_insight_bridges       = new Rest_Site_Ops_Insight_Bridges( $settings );
 		$this->content_structure_bridges      = new Rest_Content_Structure_Insight_Bridges( $settings );
 		$this->page_quality_bridges           = new Rest_Page_Quality_Insight_Bridges( $settings );
+		$this->environment_performance_bridges = new Rest_Environment_Performance_Insight_Bridges( $settings );
 		$this->media_derivative_previews      = new Rest_Media_Derivative_Previews( $client );
 		$this->flow_plan_bridges              = new Rest_Flow_Plan_Bridges( $client );
 		$this->media_optimization_bridges     = new Rest_Media_Optimization_Bridges();
@@ -151,6 +153,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->post( '/content-structure/insight-pack-qa', 'content_structure_insight_pack_qa' );
 		$this->get( '/page-quality/insight-pack', 'page_quality_insight_pack' );
 		$this->post( '/page-quality/insight-pack-qa', 'page_quality_insight_pack_qa' );
+		$this->get( '/environment-performance/insight-pack', 'environment_performance_insight_pack' );
+		$this->post( '/environment-performance/insight-pack-qa', 'environment_performance_insight_pack_qa' );
 
 		register_rest_route(
 			Plugin::REST_NAMESPACE,
@@ -318,6 +322,8 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/content-structure/insight-pack-qa'       => 'cap.toolbox.admin',
 			'/page-quality/insight-pack'               => 'cap.toolbox.admin',
 			'/page-quality/insight-pack-qa'            => 'cap.toolbox.admin',
+			'/environment-performance/insight-pack'    => 'cap.toolbox.admin',
+			'/environment-performance/insight-pack-qa' => 'cap.toolbox.admin',
 		);
 
 		return $scopes[ $route ] ?? 'cap.toolbox.admin';
@@ -362,6 +368,15 @@ final class Rest_Controller extends Rest_Controller_Support {
 	public function page_quality_insight_pack_qa( WP_REST_Request $request ) {
 		return $this->page_quality_bridges->page_quality_insight_pack_qa( $request );
 	}
+
+	public function environment_performance_insight_pack( WP_REST_Request $request ) {
+		return $this->environment_performance_bridges->environment_performance_insight_pack( $request );
+	}
+
+	public function environment_performance_insight_pack_qa( WP_REST_Request $request ) {
+		return $this->environment_performance_bridges->environment_performance_insight_pack_qa( $request );
+	}
+
 
 
 	public function site_knowledge_status( WP_REST_Request $request ) {

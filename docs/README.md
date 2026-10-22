@@ -153,6 +153,8 @@ Start from the active documents below before changing code.
 - [内容结构摘要 → Cloud CLI 验证（第二包）](content-structure-pack-cloud-qa-cli.md) — 脱密内容结构 / SEO 健康 REST + `scripts/content-structure-pack-cloud-qa.sh`；后台入口在站点资料。
 - [页面质量摘要（第三包）](page-quality-insight-pack-v1.md) — `page_quality_insight_pack.v1`：分层抽样页面完备度；suggestion_only；非 Lighthouse。
 - [页面质量摘要 → Cloud CLI 验证（第三包）](page-quality-pack-cloud-qa-cli.md) — REST + `scripts/page-quality-pack-cloud-qa.sh`；智能提问「页面质量」。
+- [环境与性能清单（第四包）](environment-performance-insight-pack-v1.md) — `environment_performance_insight_pack.v1`：配置/清单 only；非测速。
+- [环境与性能清单 → Cloud CLI 验证（第四包）](environment-performance-pack-cloud-qa-cli.md) — REST + `scripts/environment-performance-pack-cloud-qa.sh`；智能提问「环境与性能」。
 - [脱密对话助手边界 v1（已定稿）](deidentified-assistant-boundary-v1.md) — 五包意向 + MVP 仅巡检摘要；第二包内容结构 + 第三包页面质量已接线；suggestion_only；对齐 `#289`/`#290`；M4 `#1177` 后放开第三包；链到 CLI 手册。
 - [AI 站点体检与效果验证：讨论归纳及分阶段规划](ai-site-check-effect-verification-plan-2026-10-14.md) — proposed plan, not an implemented runtime or write path.
 - [Site Check Decision Entry Closeout](archive/2026-06/site-check-decision-entry-closeout-2026-06-30.md)

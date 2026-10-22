@@ -15,9 +15,10 @@ defined( 'ABSPATH' ) || exit;
 
 final class Insight_Pack_Answer_Guidance {
 
-	public const PACK_SITE_OPS          = 'site_ops';
-	public const PACK_CONTENT_STRUCTURE = 'content_structure';
-	public const PACK_PAGE_QUALITY      = 'page_quality';
+	public const PACK_SITE_OPS                = 'site_ops';
+	public const PACK_CONTENT_STRUCTURE       = 'content_structure';
+	public const PACK_PAGE_QUALITY            = 'page_quality';
+	public const PACK_ENVIRONMENT_PERFORMANCE = 'environment_performance';
 
 	/**
 	 * Everyday wording for pack field names / jargon (key => plain Chinese).
@@ -42,7 +43,12 @@ final class Insight_Pack_Answer_Guidance {
 			'heading structure / multiple H1'      => '标题层级（大标题有几个）',
 			'missing_heading_rate'                 => '较长文章缺少分节标题',
 			'missing_alt_count / missing_alt_rate' => '图片缺文字说明',
-			'measurement_kind'                     => '只看页面基础完备度抽样，不是测速分数',
+			'measurement_kind'                     => '只看清单/抽样完备度，不是测速分数',
+			'object cache drop-in'                 => '对象缓存（加快重复查询的一种机制）',
+			'memory_limit'                         => 'PHP 可用内存上限',
+			'WP_DEBUG / WP_DEBUG_DISPLAY'          => '调试模式（排错用；平时不宜对着访客开显示）',
+			'active_plugin_count'                  => '正在使用的插件数量',
+			'Lighthouse / LCP / PageSpeed'         => '不要提及；本摘要没有实验室测速数据',
 		);
 	}
 
@@ -51,6 +57,8 @@ final class Insight_Pack_Answer_Guidance {
 			$pack_label = '内容结构摘要（SEO / 内容健康）';
 		} elseif ( self::PACK_PAGE_QUALITY === $pack ) {
 			$pack_label = '页面质量摘要（基础完备度）';
+		} elseif ( self::PACK_ENVIRONMENT_PERFORMANCE === $pack ) {
+			$pack_label = '环境与性能清单（仅配置/清单，不是测速）';
 		} else {
 			$pack_label = '站点巡检摘要';
 		}
@@ -77,6 +85,7 @@ final class Insight_Pack_Answer_Guidance {
 				'',
 				'【边界】',
 				'- 只依据摘要里真实存在的数据。摘要不含流量、访问量、排名、点击、转化、收入等数据：回答里直接不谈这些，不得提及或假设“高流量页面”“热门文章”“排名下降”等。',
+				'- 摘要若标明只是环境清单（不是测速）：禁止编造网站得分、Lighthouse/PageSpeed 分数、LCP/CLS 实测；只能根据清单给检查建议。',
 				'- 不要在回答里解释或复述这些规则，也不要说明摘要缺少哪些数据；直接给建议即可。',
 				'- 只给建议：不要声称已经或将会修改、发布、审批任何内容，也不要绕过审核流程。',
 				'- 不编造账号、邮箱、密钥或私密内容；不要索要正文或评论原文。',
@@ -169,6 +178,18 @@ final class Insight_Pack_Answer_Guidance {
 	/**
 	 * Published post+page total from wp_count_posts (0 when unavailable).
 	 */
+
+	/**
+	 * Chinese caveat when the active-plugin list was truncated for the Cloud payload.
+	 */
+	public static function plugin_list_sample_note( int $listed, int $active_total, bool $truncated ): string {
+		if ( ! $truncated || $listed <= 0 || $active_total <= $listed ) {
+			return '';
+		}
+
+		return sprintf( '只列出了前 %1$d 个插件名称（共 %2$d 个在用），结论仅供参考。', $listed, $active_total );
+	}
+
 	public static function published_total(): int {
 		if ( ! function_exists( 'wp_count_posts' ) ) {
 			return 0;
