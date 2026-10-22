@@ -910,37 +910,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
-	private function render_npcink_capability_health_summary( array $content_context, bool $cloud_ready ): void {
-		$rows = Ability_Surface_Metadata::health_summary(
-			array(
-				'cloud_ready'        => $cloud_ready,
-				'site_profile_ready' => $this->content_context_ready( $content_context ),
-			)
-		);
-		?>
-			<section class="npcink-toolbox__ability-health" data-toolbox-support-health aria-label="<?php esc_attr_e( 'Workflow readiness summary', 'npcink-workflow-toolbox' ); ?>">
-			<div class="npcink-toolbox__section-heading npcink-toolbox__section-heading--compact">
-				<div>
-					<h3><?php esc_html_e( 'Workflow readiness', 'npcink-workflow-toolbox' ); ?></h3>
-					<p><?php esc_html_e( 'Read-only status for setup and support. It does not change WordPress content.', 'npcink-workflow-toolbox' ); ?></p>
-				</div>
-			</div>
-				<div class="npcink-toolbox__start-status-list">
-					<?php
-					foreach ( $rows as $row ) {
-						$this->render_start_status_row(
-							(string) ( $row['label'] ?? '' ),
-							(string) ( $row['status'] ?? 'neutral' ),
-							(string) ( $row['status_text'] ?? '' ),
-							(string) ( $row['description'] ?? '' ),
-							'cloud_runtime' === (string) ( $row['id'] ?? '' ) ? 'npcink-toolbox-tour-cloud-status' : ''
-						);
-					}
-					?>
-				</div>
-		</section>
-		<?php
-	}
 
 	private function cloud_addon_details_url(): string {
 		return add_query_arg(
