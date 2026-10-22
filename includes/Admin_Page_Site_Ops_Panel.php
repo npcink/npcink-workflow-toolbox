@@ -1003,7 +1003,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 			'comments'             => array( __( 'Open comments', 'npcink-workflow-toolbox' ), admin_url( 'edit-comments.php' ) ),
 			'media'                => array( __( 'Open media library', 'npcink-workflow-toolbox' ), admin_url( 'upload.php' ) ),
 			'taxonomy'             => array( __( 'Review categories', 'npcink-workflow-toolbox' ), admin_url( 'edit-tags.php?taxonomy=category' ) ),
-			'site_context'         => array( __( 'Open site profile', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=context' ) ),
+			'site_context'         => array( __( 'Open site profile', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask' ) ),
 			'site_knowledge'       => array( __( 'Open Site Knowledge in Cloud Addon', 'npcink-workflow-toolbox' ), admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
 			'content_freshness'    => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),
 			'content_quality'      => array( __( 'Open posts', 'npcink-workflow-toolbox' ), admin_url( 'edit.php' ) ),

@@ -85,8 +85,8 @@ Standalone diagnostics do not live in Toolbox. Marketplace, provider routing,
 vector provider settings, and vector lifecycle controls do not belong in
 Toolbox.
 
-The admin page should default to Overview. The visible top-level tabs are
-Overview, Site Profile, Site Check, and Image Handling; Site Knowledge and
+The admin page should default to Overview (Start). The visible top-level tabs are
+Start, Site & Ask, Site Check, and Image Handling; Site Knowledge and
 Morning Brief remain hidden compatibility/deep-link panels. Overview should not
 render a single-post article-support work block.
 Article-specific jobs use the editor Content Support sidebar:

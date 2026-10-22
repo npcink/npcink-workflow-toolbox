@@ -754,7 +754,7 @@ backend admin tool because there is no active external-draft import workflow;
 the ordinary operator path is the editor sidebar plus Site Check for
 site-level opportunities.
 
-The admin page defaults to an **Overview** surface for ordinary site owners,
+The admin page defaults to an **Overview** surface labeled **Start** for ordinary site owners,
 with one recommended next action, compact status rows for AI service, Site
 Profile, and safe mode, followed by common site/image next steps plus one
 folded advanced directory and a collapsed **System status** disclosure. That
@@ -769,11 +769,9 @@ executor. This summary is not a generic Abilities Explorer, provider picker,
 request log, or connector approval surface. It does not create proposals or
 writes. Single-post article
 support stays in the post editor sidebar and is not rendered as an Overview
-work block. The visible top-level admin tabs after Overview are **Site Profile**,
-**Site Check**, and **Image Handling**. Site Check is the fourth top-level tab, and
-Overview remains the default landing page;
-the stable
-`operations-insights` compatibility route still builds a local
+work block. The visible top-level admin tabs after **Start** (formerly Overview) are **Site & Ask**
+(merges Site Profile + Smart Ask), **Site Check**, and **Image Handling** (four top-level tabs; Site Check is the fourth top-level tab).
+Start remains the default landing page; see `docs/admin-ia-site-and-ask-v1.md`. The stable `operations-insights` compatibility route still builds a local
 `site_ops_insight_pack.v1` from bounded public content, approved comment signal
 counts, media metadata, taxonomy summaries, Site Context readiness, and Cloud
 availability, then presents it as a current-run decision queue for manual

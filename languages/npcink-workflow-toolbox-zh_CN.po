@@ -6820,8 +6820,8 @@ msgstr "此画像仅用于指导建议。WordPress 更改仍需审核批准。"
 msgid "Choose a range, check the expected results, then confirm once to optimize. Backups remain available for restore."
 msgstr "选择范围，检查预计效果，确认一次即可开始优化；备份会保留以便恢复。"
 
-msgid "Review image optimization and ALT suggestions. Full-site content opportunities start from Overview."
-msgstr "审阅图片优化和 ALT 建议。全站内容机会从概览开始。"
+msgid "Review image optimization and ALT suggestions. Full-site content opportunities start from Start."
+msgstr "审阅图片优化和 ALT 建议。全站内容机会请从「开始」进入。"
 
 msgid "Find images, review previews, then submit only the selected items. Nothing is written automatically."
 msgstr "查找图片、审阅预览，然后只提交选中的项目。不会自动写入。"
@@ -9847,6 +9847,25 @@ msgstr "无法编码脱密内容结构摘要包。"
 
 msgid "Smart Ask"
 msgstr "智能提问"
+
+msgid "Site & Ask"
+msgstr "站点与提问"
+
+msgid "Site profile and Smart Ask"
+msgstr "站点画像与智能提问"
+
+msgid "Fill the short site brief, then ask in plain language. Answers are suggestions only."
+msgstr "先填写简短站点简报，再用大白话提问。答复仅供参考。"
+
+msgid "Use Site & Ask and Image Handling for currently supported operator tasks."
+msgstr "请使用「站点与提问」和「图片处理」完成当前支持的运营任务。"
+
+msgid "Back to Start"
+msgstr "返回开始"
+
+msgid "Full-site content opportunities start from Start."
+msgstr "全站内容机会请从「开始」进入。"
+
 
 msgid "Current site check"
 msgstr "本次站点检查"

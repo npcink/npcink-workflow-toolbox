@@ -565,19 +565,23 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			?>
 
 			<nav class="npcink-ai-tabs npcink-toolbox__tabs" data-toolbox-tabs aria-label="<?php esc_attr_e( 'Toolbox sections', 'npcink-workflow-toolbox' ); ?>">
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Overview', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'context' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="context" aria-selected="<?php echo 'context' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'context' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site Profile', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'site-and-ask' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="site-and-ask" aria-selected="<?php echo 'site-and-ask' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'site-and-ask' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'operations-insights' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="operations-insights" aria-selected="<?php echo 'operations-insights' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'operations-insights' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Handling', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'smart-ask' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="smart-ask" aria-selected="<?php echo 'smart-ask' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'smart-ask' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?></button>
 			</nav>
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="start" aria-label="<?php esc_attr_e( 'Toolbox start', 'npcink-workflow-toolbox' ); ?>"<?php echo 'start' === $active_tab ? '' : ' hidden'; ?>>
 				<?php $this->render_start_panel( $content_context, $cloud_ready ); ?>
 			</section>
 
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="context" aria-label="<?php esc_attr_e( 'Site context', 'npcink-workflow-toolbox' ); ?>"<?php echo 'context' === $active_tab ? '' : ' hidden'; ?>>
+			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Site profile and Smart Ask', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
+				<div class="npcink-toolbox__panel-header">
+					<h2><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></h2>
+					<p><?php esc_html_e( 'Fill the short site brief, then ask in plain language. Answers are suggestions only.', 'npcink-workflow-toolbox' ); ?></p>
+				</div>
 				<?php $this->render_content_context_form( $content_context ); ?>
+				<?php $this->render_smart_ask_panel(); ?>
 			</section>
 
 			<section class="npcink-toolbox__panel npcink-toolbox__panel--secondary" data-toolbox-tab-panel="operations-insights" aria-label="<?php esc_attr_e( 'Site check', 'npcink-workflow-toolbox' ); ?>"<?php echo 'operations-insights' === $active_tab ? '' : ' hidden'; ?>>
@@ -586,10 +590,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="tools" aria-label="<?php esc_attr_e( 'Image handling', 'npcink-workflow-toolbox' ); ?>"<?php echo 'tools' === $active_tab ? '' : ' hidden'; ?>>
 				<?php $this->render_tool_cards( $cloud_ready, 'image' ); ?>
-			</section>
-
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="smart-ask" aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>"<?php echo 'smart-ask' === $active_tab ? '' : ' hidden'; ?>>
-				<?php $this->render_smart_ask_panel(); ?>
 			</section>
 
 		</div>
@@ -641,7 +641,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		return add_query_arg(
 			array(
 				'page'        => self::MENU_SLUG,
-				'toolbox_tab' => 'smart-ask',
+				'toolbox_tab' => 'site-and-ask',
 				'ask_pack'    => $pack,
 			),
 			admin_url( 'admin.php' )
@@ -696,10 +696,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 		$allowed = array(
 			'start'               => true,
-			'context'             => true,
+			'site-and-ask'        => true,
 			'tools'               => true,
 			'operations-insights' => true,
-			'smart-ask'           => true,
 		);
 		return isset( $allowed[ $requested ] ) ? $requested : 'start';
 	}
@@ -731,8 +730,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	private function render_start_panel( array $content_context, bool $cloud_ready ): void {
 		?>
 		<div class="npcink-toolbox__panel-header">
-			<h2><?php esc_html_e( 'Overview', 'npcink-workflow-toolbox' ); ?></h2>
-			<p><?php esc_html_e( 'Use Site Profile and Image Handling for currently supported operator tasks.', 'npcink-workflow-toolbox' ); ?></p>
+			<h2><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></h2>
+			<p><?php esc_html_e( 'Use Site & Ask and Image Handling for currently supported operator tasks.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 
 		<div class="npcink-toolbox__start" data-toolbox-start>
@@ -772,7 +771,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				'url'    => add_query_arg(
 					array(
 						'page'        => self::MENU_SLUG,
-						'toolbox_tab' => 'context',
+						'toolbox_tab' => 'site-and-ask',
 					),
 					admin_url( 'admin.php' )
 				),
@@ -909,7 +908,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				);
 				?>
 										">
-					&larr; <?php esc_html_e( 'Back to Overview', 'npcink-workflow-toolbox' ); ?>
+					&larr; <?php esc_html_e( 'Back to Start', 'npcink-workflow-toolbox' ); ?>
 				</a>
 			</p>
 			<h2><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></h2>
@@ -1783,7 +1782,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 		$surface_header = array(
 			'title'             => __( 'Image Handling', 'npcink-workflow-toolbox' ),
-			'description'       => __( 'Review image optimization and ALT suggestions. Full-site content opportunities start from Overview.', 'npcink-workflow-toolbox' ),
+			'description'       => __( 'Review image optimization and ALT suggestions. Full-site content opportunities start from Start.', 'npcink-workflow-toolbox' ),
 			'scope_title'       => __( 'Image tasks', 'npcink-workflow-toolbox' ),
 			'scope_description' => __( 'Find images, review previews, then submit only the selected items. Nothing is written automatically.', 'npcink-workflow-toolbox' ),
 		);
