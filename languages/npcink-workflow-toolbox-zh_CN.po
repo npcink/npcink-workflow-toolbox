@@ -10320,3 +10320,36 @@ msgstr "正在使用的插件偏多"
 
 msgid "Site address may not be using HTTPS"
 msgstr "站点地址可能还没用 HTTPS"
+
+msgid "Pick a clear next step: ask about the site, run a site check, or handle images."
+msgstr "请选择明确的下一步：去提问、去检查或去改图。"
+
+msgid "Go ask"
+msgstr "去提问"
+
+msgid "Go check"
+msgstr "去检查"
+
+msgid "Go edit images"
+msgstr "去改图"
+
+msgid "Next steps"
+msgstr "下一步"
+
+msgid "Three common operator paths. Nothing is written without your review."
+msgstr "三条常见运营路径。未经你确认不会写入任何内容。"
+
+msgid "Open Site & Ask to fill the site profile and run Smart Ask packs."
+msgstr "打开「站点与提问」填写站点档案并运行智能提问 packs。"
+
+msgid "Open Site Check for the current local check and scheduled review."
+msgstr "打开「站点检查」查看当前检查与定时回顾。"
+
+msgid "Open Image Handling for ALT review, optimization, and watermark settings."
+msgstr "打开「图片处理」进行 ALT 审核、优化与水印设置。"
+
+msgid "Open Site & Ask"
+msgstr "打开站点与提问"
+
+msgid "Open Image Handling"
+msgstr "打开图片处理"
