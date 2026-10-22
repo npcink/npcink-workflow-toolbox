@@ -819,6 +819,7 @@
 	line-height: 1.35;
 }
 
+.npcink-toolbox__ops-dimension-fold,
 .npcink-toolbox__ops-scan-details {
 	margin: 2px 0 12px;
 	background: var(--npcink-ui-surface);
@@ -826,6 +827,7 @@
 	border-radius: var(--npcink-ui-radius-card);
 }
 
+.npcink-toolbox__ops-dimension-fold summary,
 .npcink-toolbox__ops-scan-details summary {
 	display: flex;
 	gap: 10px;
@@ -838,23 +840,28 @@
 	line-height: 1.35;
 }
 
+.npcink-toolbox__ops-dimension-fold summary:hover,
 .npcink-toolbox__ops-scan-details summary:hover {
 	background: #f6f7f7;
 }
 
+.npcink-toolbox__ops-dimension-fold summary strong,
 .npcink-toolbox__ops-scan-details summary strong {
 	font-size: 13px;
 }
 
+.npcink-toolbox__ops-dimension-fold summary span,
 .npcink-toolbox__ops-scan-details summary span {
 	color: var(--npcink-ui-text-quiet);
 	font-size: 12px;
 }
 
+.npcink-toolbox__ops-dimension-fold[open],
 .npcink-toolbox__ops-scan-details[open] {
 	padding-bottom: 12px;
 }
 
+.npcink-toolbox__ops-dimension-fold[open] summary,
 .npcink-toolbox__ops-scan-details[open] summary {
 	margin-bottom: 10px;
 	border-bottom: 1px solid var(--npcink-ui-border);
@@ -4402,3 +4409,7 @@ pre.npcink-toolbox__result {
 /* Support-only details (run ids, error codes) stay folded. */
 .npcink-toolbox__support-meta { flex-basis: 100%; margin-top: 6px; color: var(--npcink-ui-text-quiet); font-size: 12px; }
 .npcink-toolbox__support-meta > summary { cursor: pointer; }
+
+.npcink-toolbox__ops-dimension-fold > .npcink-toolbox__ops-tabs {
+	margin: var(--npcink-ui-space-3) 0 var(--npcink-ui-space-4);
+}

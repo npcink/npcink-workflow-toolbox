@@ -979,19 +979,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<div class="npcink-toolbox__result-notice"><?php esc_html_e( 'No scan has run in this view yet. Generate a local site check when you need a current priority queue for fixed workflows.', 'npcink-workflow-toolbox' ); ?></div>
 			<?php else : ?>
 				<div class="npcink-toolbox__ops-workspace" data-toolbox-ops-tabs>
-					<nav class="npcink-toolbox__ops-tabs" aria-label="<?php esc_attr_e( 'Site Check views', 'npcink-workflow-toolbox' ); ?>">
-						<button type="button" class="npcink-toolbox__ops-tab is-active" data-toolbox-ops-target="overview" aria-selected="true"><?php esc_html_e( 'Overview', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="content" aria-selected="false"><?php esc_html_e( 'Content', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="media" aria-selected="false"><?php esc_html_e( 'Media', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="comments" aria-selected="false"><?php esc_html_e( 'Comments', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="structure" aria-selected="false"><?php esc_html_e( 'Structure', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="findings" aria-selected="false"><?php esc_html_e( 'Findings', 'npcink-workflow-toolbox' ); ?></button>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="evidence" aria-selected="false"><?php esc_html_e( 'Evidence', 'npcink-workflow-toolbox' ); ?></button>
-						<?php if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) : ?>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="cloud" aria-selected="false"><?php esc_html_e( 'Cloud detail', 'npcink-workflow-toolbox' ); ?></button>
-						<?php endif; ?>
-						<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="advanced" aria-selected="false"><?php esc_html_e( 'Advanced', 'npcink-workflow-toolbox' ); ?></button>
-					</nav>
 					<section class="npcink-toolbox__ops-panel" data-toolbox-ops-panel="overview">
 						<?php $this->render_site_ops_operator_brief( $findings, $summary, $cloud_analysis, $cloud_ready ); ?>
 						<?php $this->render_site_ops_decision_queue( $findings ); ?>
@@ -1019,6 +1006,24 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<div class="npcink-toolbox__result-notice is-success"><?php esc_html_e( 'No priority site check findings were produced from this bounded local sample.', 'npcink-workflow-toolbox' ); ?></div>
 					<?php endif; ?>
 					</section>
+					<details class="npcink-toolbox__ops-dimension-fold">
+						<summary>
+							<strong><?php esc_html_e( 'More scan views', 'npcink-workflow-toolbox' ); ?></strong>
+							<span><?php esc_html_e( 'Content, media, comments, structure, findings, evidence, and advanced JSON.', 'npcink-workflow-toolbox' ); ?></span>
+						</summary>
+						<nav class="npcink-toolbox__ops-tabs" aria-label="<?php esc_attr_e( 'Site Check views', 'npcink-workflow-toolbox' ); ?>">
+							<button type="button" class="npcink-toolbox__ops-tab is-active" data-toolbox-ops-target="overview" aria-selected="true" hidden><?php esc_html_e( 'Overview', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="content" aria-selected="false"><?php esc_html_e( 'Content', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="media" aria-selected="false"><?php esc_html_e( 'Media', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="comments" aria-selected="false"><?php esc_html_e( 'Comments', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="structure" aria-selected="false"><?php esc_html_e( 'Structure', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="findings" aria-selected="false"><?php esc_html_e( 'Findings', 'npcink-workflow-toolbox' ); ?></button>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="evidence" aria-selected="false"><?php esc_html_e( 'Evidence', 'npcink-workflow-toolbox' ); ?></button>
+							<?php if ( ! Settings::cloud_feature_paused( 'cloud_inspection' ) ) : ?>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="cloud" aria-selected="false"><?php esc_html_e( 'Cloud detail', 'npcink-workflow-toolbox' ); ?></button>
+							<?php endif; ?>
+							<button type="button" class="npcink-toolbox__ops-tab" data-toolbox-ops-target="advanced" aria-selected="false"><?php esc_html_e( 'Advanced', 'npcink-workflow-toolbox' ); ?></button>
+						</nav>
 					<section class="npcink-toolbox__ops-panel" data-toolbox-ops-panel="content" hidden>
 						<?php $this->render_site_ops_dimension_panel( __( 'Content analysis', 'npcink-workflow-toolbox' ), __( 'Posts and pages: freshness, depth, metadata, and internal paths.', 'npcink-workflow-toolbox' ), $summary, $findings, array( 'content_freshness', 'content_quality', 'internal_link_health', 'metadata' ) ); ?>
 					</section>
@@ -1074,6 +1079,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						<?php endif; ?>
 						<p class="description"><?php esc_html_e( 'No local trend chart is shown because Toolbox does not store historical Site Check runs. Cross-run trend analysis belongs in Cloud runtime/detail output.', 'npcink-workflow-toolbox' ); ?></p>
 					</section>
+					</details>
 				</div>
 			<?php endif; ?>
 		</section>

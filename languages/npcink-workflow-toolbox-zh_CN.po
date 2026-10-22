@@ -9851,6 +9851,13 @@ msgstr "智能提问"
 msgid "Site & Ask"
 msgstr "站点与提问"
 
+msgid "More scan views"
+msgstr "更多扫描视图"
+
+msgid "Content, media, comments, structure, findings, evidence, and advanced JSON."
+msgstr "内容、媒体、评论、结构、问题清单、证据与高级 JSON。"
+
+
 msgid "Site profile and Smart Ask"
 msgstr "站点画像与智能提问"
 
