@@ -10407,3 +10407,18 @@ msgstr "Toolbox 只提供建议。WordPress 内容仍须你审阅确认后才会
 
 msgid "For connector or runtime checks, open Npcink Cloud Addon when it is installed. Start does not list internal workflow rows here."
 msgstr "连接或运行时检查请打开已安装的 Npcink Cloud Addon。「开始」页不列出内部工作流行。"
+
+msgid "Run a read-only check of this site. Choose what to fix next; nothing is written without your review."
+msgstr "对本站做一次只读检查。选择下一步要处理的问题；未经你确认不会写入任何内容。"
+
+msgid "Local scan"
+msgstr "本地扫描"
+
+msgid "Available when needed"
+msgstr "需要时可用"
+
+msgid "Site changes"
+msgstr "站点改动"
+
+msgid "Suggestions only"
+msgstr "仅建议"
