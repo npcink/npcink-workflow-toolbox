@@ -194,10 +194,6 @@
 	line-height: 1.45;
 }
 
-/* Start must not nest the full ability-health card inside support details. */
-.npcink-toolbox__start-readiness .npcink-toolbox__ability-health {
-	display: none;
-}
 
 .npcink-toolbox__start-next-grid {
 	display: grid;
