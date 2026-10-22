@@ -303,6 +303,8 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa` (MVP Ask UI: local pack + hosted_ai_content_support.v1; `manage_options`; suggestion-only, no WordPress writes)
 - `GET /wp-json/npcink-toolbox/v1/content-structure/insight-pack` (local `content_structure_insight_pack.v1` only; `manage_options`; no post bodies, no Cloud call, no WordPress writes)
 - `POST /wp-json/npcink-toolbox/v1/content-structure/insight-pack-qa` (Site Profile Ask: local pack 2 + hosted_ai_content_support.v1; `manage_options`; suggestion-only, no WordPress writes)
+- `GET /wp-json/npcink-toolbox/v1/page-quality/insight-pack` (local `page_quality_insight_pack.v1` only; `manage_options`; stratified public sample; no post bodies, no Lighthouse, no WordPress writes)
+- `POST /wp-json/npcink-toolbox/v1/page-quality/insight-pack-qa` (Smart Ask pack 3: local pack + hosted_ai_content_support.v1; `manage_options`; suggestion-only, no WordPress writes)
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/search`
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync` (refresh-only bounded
   Cloud request; no rebuild/delete, indexing lifecycle, local queue, or

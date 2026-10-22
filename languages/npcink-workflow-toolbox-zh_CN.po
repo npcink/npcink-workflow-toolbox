@@ -10215,3 +10215,47 @@ msgstr "部分完成"
 
 msgid "Ended"
 msgstr "已结束"
+
+# page_quality_insight_pack.v1
+
+msgid "Page quality"
+msgstr "页面质量"
+
+msgid "根据这份页面质量摘要，优先该补哪 1–3 件基础问题？用大白话回答。"
+msgstr "根据这份页面质量摘要，优先该补哪 1–3 件基础问题？用大白话回答。"
+
+msgid "Could not build the local page-quality insight pack."
+msgstr "无法生成页面质量摘要。"
+
+msgid "Enter a question about your pages."
+msgstr "请输入关于页面的问题。"
+
+msgid "Npcink Cloud Addon is required for Smart Ask."
+msgstr "智能提问需要已安装并启用 Npcink Cloud Addon。"
+
+msgid "Connect and verify Npcink Cloud before asking."
+msgstr "请先连接并验证 Npcink Cloud，再提问。"
+
+msgid "Could not encode the de-identified page-quality pack."
+msgstr "无法编码脱密后的页面质量摘要。"
+
+msgid "Many public items lack a meta description"
+msgstr "不少公开内容缺少搜索结果简介"
+
+msgid "Excerpts are missing on sampled public content"
+msgstr "抽查的公开内容缺少摘要"
+
+msgid "Some public pages look thin"
+msgstr "有些公开页面内容偏短"
+
+msgid "A share of public pages has not been refreshed in 180+ days"
+msgstr "不少公开页面超过半年没更新"
+
+msgid "Some pages look like they have more than one top heading"
+msgstr "有些页面似乎有不止一个大标题"
+
+msgid "Longer pages are missing clear section headings"
+msgstr "较长页面缺少清楚的分节标题"
+
+msgid "Images in sampled pages are missing text descriptions"
+msgstr "抽查页面里的图片缺少文字说明"

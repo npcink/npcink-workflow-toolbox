@@ -45,7 +45,7 @@
 - 不在 Toolbox / Addon / Cloud 任一侧建立：本地队列、自定义 run 表、审批真相、provider/model 路由真相、计费真相、WP 直写执行器。
 - 不上传正文全文、评论原文、私信、邮件、IP、密钥、原始日志、未公开内容。
 - 不把对话回复直接写成 WP 变更；任何写意图最多产出**可审阅的 handoff 候选**，由既有治理链路落地。
-- **不新开完整多轮对话产品壳；卡住-run 产品化落地前不开第三包**（见 §6.2 / §11）。
+- **不新开完整多轮对话产品壳**；第三包门禁已在 M4 `#1177` 验证后放开（见 §6.2 / §11）；环境性能包仍延后。
 
 ---
 
@@ -56,12 +56,13 @@
 | 用户可见名 | 状态 | 意图 | 优先复用（投影既有真相，不新造） |
 | --- | --- | --- | --- |
 | **巡检摘要** | **MVP 已接线**（`#289`） | 当前本地巡检结论与优先处理队列 | `site_ops_insight_pack.v1`；本地确定性扫描；**不**默认触发已暂停的 Cloud inspection |
-| **内容结构摘要**（第二包） | **已接线（本 PR）** | 内容形态与结构量级 / SEO·内容健康类脱密摘要 | `content_structure_insight_pack.v1`（`post_counts` / taxonomy shape / 公开标题样本；非正文）；仍 `suggestion_only` |
+| **内容结构摘要**（第二包） | **已接线** | 内容形态与结构量级 / SEO·内容健康类脱密摘要 | `content_structure_insight_pack.v1`（`post_counts` / taxonomy shape / 公开标题样本；非正文）；仍 `suggestion_only` |
+| **页面质量摘要**（第三包） | **已接线（本 PR）** | 页面基础完备度（简介/封面/过短/标题层级/文内缺 alt 等抽样） | `page_quality_insight_pack.v1`；分层抽样；`suggestion_only`；**非** Lighthouse/测速 |
 | 站点概况 | 延后 | 站点身份与就绪度一览 | insight pack 内站点/上下文摘要；Site Context / Cloud readiness 投影 |
 | 近期错误 / 健康信号 | 延后 | 有界健康与失败信号 | ops health / 连接与 runtime 失败投影（错误码级，非 raw log） |
 | Cloud 连接与用量状态 | 延后 | 连接是否可用、窄配额 / entitlement | `cloud_runtime` / nightly entitlement 窄读；非计费后台 |
 
-> **已定：** 五包名称如上为完整 v1 意向清单；**第二包「内容结构摘要」已接线**（SEO/内容健康类 de-id summary，`suggestion_only`）。**在卡住-run 产品化落地前不开第三包。**
+> **已定：** 五包名称为完整 v1 意向清单；**第二包「内容结构摘要」已接线**。**第三包「页面质量摘要」**（`page_quality_insight_pack.v1`）在 M4 `#1177` drain 验证后由产品显式放开（2026-10-22），本 PR 接线。环境性能包仍见草案，另开 PR。
 
 ---
 
@@ -131,7 +132,7 @@
 
 ### 6.2 完整 v1（第二包已接线）
 
-- 按 §3 / §11：第二包 **内容结构摘要**（`content_structure_insight_pack.v1`，SEO/内容健康类 de-id，`suggestion_only`）已接线；卡住-run 产品化落地前**不开第三包**。
+- 按 §3 / §11：第二包 **内容结构摘要** 已接线；第三包 **页面质量摘要**（`page_quality_insight_pack.v1`）在 M4 `#1177` 验证后已放开并接线；环境性能包延后。
 - 仍尊重 `cloud_inspection` 等可逆暂停。
 - Ask（巡检）与 Generate site check **双轨并存**；内容结构 Ask 挂在 **站点资料**，与巡检 Ask 入口分离（见 §11）。
 
@@ -158,6 +159,11 @@
 | **内容结构实现** | `includes/Content_Structure_Insight_Builder.php` + `Rest_Content_Structure_Insight_Bridges.php` |
 | **内容结构 Admin 薄 UI** | **智能提问** → 选择「内容结构」（站点画像 有「去智能提问」链接；与巡检共用一个提问壳） |
 | **内容结构 CLI** | `scripts/content-structure-pack-cloud-qa.sh` / `.php`；手册 `docs/content-structure-pack-cloud-qa-cli.md` |
+| **页面质量只读拼包 REST** | `GET …/page-quality/insight-pack`（`manage_options`） |
+| **页面质量 Ask / QA REST** | `POST …/page-quality/insight-pack-qa` |
+| **页面质量实现** | `includes/Page_Quality_Insight_Builder.php` + `Rest_Page_Quality_Insight_Bridges.php` |
+| **页面质量 Admin** | **智能提问** → 选择「页面质量」（白话标签；合同 id 不对站长展示） |
+| **页面质量 CLI** | `scripts/page-quality-pack-cloud-qa.sh` / `.php`；手册 `docs/page-quality-pack-cloud-qa-cli.md` |
 | 既有本地预览 | Generate site check 仍可用；与两路 Ask **三轨并存、不合并 UI** |
 | 暂停的 Cloud detail | `cloud_inspection` 仍暂停；两路 Ask **均不**走该路径 |
 
@@ -201,7 +207,7 @@
 
 产品方 2026-10-20 按建议定稿：
 
-1. **五包 / 第二包：** 「巡检摘要」+「内容结构摘要」已接线。第二包 = **内容结构摘要**（`content_structure_insight_pack.v1`，SEO/内容健康类 de-id，`suggestion_only`）。卡住-run 产品化落地前**不开第三包**。
+1. **五包 / 第三包：** 「巡检摘要」+「内容结构摘要」已接线。第三包 = **页面质量摘要**（`page_quality_insight_pack.v1`，页面基础完备度 de-id，`suggestion_only`）。**门禁更新（2026-10-22）：** 产品在 M4 `#1177` drain 验证后显式放开第三包；环境性能包（`environment_performance_insight_pack.v1`）仍延后另开 PR。
 2. **授权 / 审计 v1：** 记录 `run_id` + 操作者 + 时间即可；能力门槛 = WP `manage_options`（经 `cap.toolbox.admin`）；**不另造角色、不新建审计表**。
 3. **Cloud 失败降级：** 失败只展示**中文错误 + 可重试**；**不做**本地假答复 / 纯本地规则默认答复，避免双真相。
 4. **Ask 文案：** 去掉「开发测试」；Ask 为**内部试用就绪**。完整多轮对话壳本阶段不做。
@@ -210,4 +216,4 @@
 
 ---
 
-*本稿为脱密对话助手产品边界已定稿 v1。实现切片 B–D / 加载·429 已随 `#289` / `#290` 合入；第二包（内容结构）随本 PR 接线；第三包须另开且遵守 §11。*
+*本稿为脱密对话助手产品边界已定稿 v1。实现切片 B–D / 加载·429 已随 `#289` / `#290` 合入；第二包（内容结构）已接线；第三包（页面质量）在 M4 `#1177` 验证后放开并接线；环境性能包另开。*

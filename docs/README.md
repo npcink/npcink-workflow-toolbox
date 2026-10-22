@@ -151,7 +151,9 @@ Start from the active documents below before changing code.
 - [Site Check Operator Loop](full-site-insights-operator-loop.md)
 - [Insight Pack → Cloud CLI 验证（MVP）](insight-pack-cloud-qa-cli.md) — 脱密巡检摘要 REST + `scripts/insight-pack-cloud-qa.sh` 试问 Cloud；其它 AI 从这里跑验证。
 - [内容结构摘要 → Cloud CLI 验证（第二包）](content-structure-pack-cloud-qa-cli.md) — 脱密内容结构 / SEO 健康 REST + `scripts/content-structure-pack-cloud-qa.sh`；后台入口在站点资料。
-- [脱密对话助手边界 v1（已定稿）](deidentified-assistant-boundary-v1.md) — 五包意向 + MVP 仅巡检摘要；第二包优先内容结构摘要；suggestion_only；对齐 `#289`/`#290`；链到 CLI 手册。
+- [页面质量摘要（第三包）](page-quality-insight-pack-v1.md) — `page_quality_insight_pack.v1`：分层抽样页面完备度；suggestion_only；非 Lighthouse。
+- [页面质量摘要 → Cloud CLI 验证（第三包）](page-quality-pack-cloud-qa-cli.md) — REST + `scripts/page-quality-pack-cloud-qa.sh`；智能提问「页面质量」。
+- [脱密对话助手边界 v1（已定稿）](deidentified-assistant-boundary-v1.md) — 五包意向 + MVP 仅巡检摘要；第二包内容结构 + 第三包页面质量已接线；suggestion_only；对齐 `#289`/`#290`；M4 `#1177` 后放开第三包；链到 CLI 手册。
 - [AI 站点体检与效果验证：讨论归纳及分阶段规划](ai-site-check-effect-verification-plan-2026-10-14.md) — proposed plan, not an implemented runtime or write path.
 - [Site Check Decision Entry Closeout](archive/2026-06/site-check-decision-entry-closeout-2026-06-30.md)
 - [Site Check Visibility Reassessment](archive/2026-07/site-check-visibility-reassessment-2026-07-10.md)
