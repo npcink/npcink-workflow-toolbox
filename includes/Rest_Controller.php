@@ -83,22 +83,22 @@ final class Rest_Controller extends Rest_Controller_Support {
 	);
 
 	public function __construct( Settings $settings, Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
-		$this->settings                       = $settings;
-		$this->client                         = $client;
-		$this->publish_preflight              = $publish_preflight;
-		$this->nightly_bridges                = new Rest_Nightly_Inspection_Bridges( $settings, $client );
-		$this->web_search_bridges             = new Rest_Web_Search_Bridges( $client );
-		$this->site_knowledge_bridges         = new Rest_Site_Knowledge_Bridges( $client );
-		$this->site_ops_insight_bridges       = new Rest_Site_Ops_Insight_Bridges( $settings );
-		$this->content_structure_bridges      = new Rest_Content_Structure_Insight_Bridges( $settings );
-		$this->page_quality_bridges           = new Rest_Page_Quality_Insight_Bridges( $settings );
+		$this->settings                        = $settings;
+		$this->client                          = $client;
+		$this->publish_preflight               = $publish_preflight;
+		$this->nightly_bridges                 = new Rest_Nightly_Inspection_Bridges( $settings, $client );
+		$this->web_search_bridges              = new Rest_Web_Search_Bridges( $client );
+		$this->site_knowledge_bridges          = new Rest_Site_Knowledge_Bridges( $client );
+		$this->site_ops_insight_bridges        = new Rest_Site_Ops_Insight_Bridges( $settings );
+		$this->content_structure_bridges       = new Rest_Content_Structure_Insight_Bridges( $settings );
+		$this->page_quality_bridges            = new Rest_Page_Quality_Insight_Bridges( $settings );
 		$this->environment_performance_bridges = new Rest_Environment_Performance_Insight_Bridges( $settings );
-		$this->media_derivative_previews      = new Rest_Media_Derivative_Previews( $client );
-		$this->flow_plan_bridges              = new Rest_Flow_Plan_Bridges( $client );
-		$this->media_optimization_bridges     = new Rest_Media_Optimization_Bridges();
-		$this->surface_bridges                = new Rest_Surface_Bridges( $settings, $client );
-		$this->local_admin_consent            = new Rest_Local_Admin_Consent();
-		$this->editor_content_support_service = new Rest_Editor_Content_Support( $client, $publish_preflight );
+		$this->media_derivative_previews       = new Rest_Media_Derivative_Previews( $client );
+		$this->flow_plan_bridges               = new Rest_Flow_Plan_Bridges( $client );
+		$this->media_optimization_bridges      = new Rest_Media_Optimization_Bridges();
+		$this->surface_bridges                 = new Rest_Surface_Bridges( $settings, $client );
+		$this->local_admin_consent             = new Rest_Local_Admin_Consent();
+		$this->editor_content_support_service  = new Rest_Editor_Content_Support( $client, $publish_preflight );
 	}
 
 	public function register_routes(): void {

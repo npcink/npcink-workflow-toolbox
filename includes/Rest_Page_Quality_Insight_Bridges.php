@@ -333,7 +333,7 @@ final class Rest_Page_Quality_Insight_Bridges {
 			'summary'                => is_array( $pack['summary'] ?? null ) ? $pack['summary'] : array(),
 			'post_counts'            => is_array( $pack['post_counts'] ?? null ) ? $pack['post_counts'] : array(),
 			'taxonomies'             => $taxonomies,
-			'page_quality_signals'  => $compact_signals,
+			'page_quality_signals'   => $compact_signals,
 			'sampling'               => $compact_sampling,
 			'top_findings'           => $findings,
 			'safety'                 => is_array( $pack['safety'] ?? null ) ? $pack['safety'] : array(),

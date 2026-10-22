@@ -603,19 +603,19 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	 */
 	private function smart_ask_packs(): array {
 		return array(
-			'site_ops'          => array(
+			'site_ops'                => array(
 				'label'            => __( 'Current site check', 'npcink-workflow-toolbox' ),
 				'contract'         => 'site_ops_insight_pack.v1',
 				'endpoint'         => 'site-ops/insight-pack-qa',
 				'default_question' => __( '根据这份巡检摘要，站点优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
 			),
-			'content_structure' => array(
+			'content_structure'       => array(
 				'label'            => __( 'Content structure', 'npcink-workflow-toolbox' ),
 				'contract'         => 'content_structure_insight_pack.v1',
 				'endpoint'         => 'content-structure/insight-pack-qa',
 				'default_question' => __( '根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
 			),
-			'page_quality'      => array(
+			'page_quality'            => array(
 				'label'            => __( 'Page quality', 'npcink-workflow-toolbox' ),
 				'contract'         => 'page_quality_insight_pack.v1',
 				'endpoint'         => 'page-quality/insight-pack-qa',
