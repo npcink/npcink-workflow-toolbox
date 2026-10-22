@@ -621,6 +621,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				'endpoint'         => 'page-quality/insight-pack-qa',
 				'default_question' => __( '根据这份页面质量摘要，优先该补哪 1–3 件基础问题？用大白话回答。', 'npcink-workflow-toolbox' ),
 			),
+			'environment_performance' => array(
+				'label'            => __( '环境与性能', 'npcink-workflow-toolbox' ),
+				'contract'         => 'environment_performance_insight_pack.v1',
+				'endpoint'         => 'environment-performance/insight-pack-qa',
+				'default_question' => __( '根据这份环境与性能相关摘要，站长先检查哪 1–3 件事更合适？用大白话，不要假装做过测速。', 'npcink-workflow-toolbox' ),
+			),
 		);
 	}
 

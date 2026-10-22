@@ -228,6 +228,8 @@ first scoped version; those actions stay administrator-facing.
 - `/content-structure/insight-pack-qa`
 - `/page-quality/insight-pack`
 - `/page-quality/insight-pack-qa`
+- `/environment-performance/insight-pack`
+- `/environment-performance/insight-pack-qa`
 - `/site-knowledge/search`
 - `/site-knowledge/sync`
 - `/site-media/index-batch`

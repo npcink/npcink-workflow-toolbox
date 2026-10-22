@@ -10259,3 +10259,38 @@ msgstr "较长页面缺少清楚的分节标题"
 
 msgid "Images in sampled pages are missing text descriptions"
 msgstr "抽查页面里的图片缺少文字说明"
+
+# environment_performance_insight_pack.v1
+
+msgid "环境与性能"
+msgstr "环境与性能"
+
+msgid "根据这份环境与性能相关摘要，站长先检查哪 1–3 件事更合适？用大白话，不要假装做过测速。"
+msgstr "根据这份环境与性能相关摘要，站长先检查哪 1–3 件事更合适？用大白话，不要假装做过测速。"
+
+msgid "Could not build the local environment inventory pack."
+msgstr "无法生成环境清单摘要。"
+
+msgid "Enter a question about your site environment."
+msgstr "请输入关于站点环境的问题。"
+
+msgid "Could not encode the de-identified environment inventory pack."
+msgstr "无法编码脱密后的环境清单。"
+
+msgid "Debug display may be on for visitors"
+msgstr "调试显示可能对着访客开着"
+
+msgid "Debug mode appears to be on"
+msgstr "调试模式看起来开着"
+
+msgid "No object cache signal showed up"
+msgstr "没有看到对象缓存信号"
+
+msgid "PHP memory limit looks low on paper"
+msgstr "纸面上 PHP 内存上限偏低"
+
+msgid "Quite a few plugins are active"
+msgstr "正在使用的插件偏多"
+
+msgid "Site address may not be using HTTPS"
+msgstr "站点地址可能还没用 HTTPS"
