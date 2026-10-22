@@ -85,7 +85,8 @@ final class Insight_Pack_Answer_Guidance {
 				'',
 				'【边界】',
 				'- 只依据摘要里真实存在的数据。摘要不含流量、访问量、排名、点击、转化、收入等数据：回答里直接不谈这些，不得提及或假设“高流量页面”“热门文章”“排名下降”等。',
-				'- 摘要若标明只是环境清单（不是测速）：禁止编造网站得分、Lighthouse/PageSpeed 分数、LCP/CLS 实测；只能根据清单给检查建议。',
+				'- 摘要若标明只是环境清单（不是测速）：禁止编造网站得分、Lighthouse/PageSpeed 分数、LCP/CLS 实测或“测速结果”；只能根据清单给检查建议。',
+				'- 环境清单里的调试/缓存/内存只是配置信号：最多说“可能拖慢/可能有帮助”，不要写成已经测到的变慢或变快。',
 				'- 不要在回答里解释或复述这些规则，也不要说明摘要缺少哪些数据；直接给建议即可。',
 				'- 只给建议：不要声称已经或将会修改、发布、审批任何内容，也不要绕过审核流程。',
 				'- 不编造账号、邮箱、密钥或私密内容；不要索要正文或评论原文。',
@@ -188,6 +189,39 @@ final class Insight_Pack_Answer_Guidance {
 		}
 
 		return sprintf( '只列出了前 %1$d 个插件名称（共 %2$d 个在用），结论仅供参考。', $listed, $active_total );
+	}
+
+
+	/**
+	 * True when an Ask answer invents lab speed scores or measured CWV-style claims.
+	 * Used by contract tests; not a runtime Cloud filter.
+	 */
+	public static function answer_has_forbidden_speed_claims( string $answer ): bool {
+		$answer = trim( $answer );
+		if ( '' === $answer ) {
+			return false;
+		}
+		$patterns = array(
+			'/Lighthouse/iu',
+			'/PageSpeed/iu',
+			'/\bLCP\b/u',
+			'/\bCLS\b/u',
+			'/\bFID\b/u',
+			'/\bINP\b/u',
+			'/得分\s*\d+/u',
+			'/打分\s*\d+/u',
+			'/性能分\s*\d+/u',
+			'/测速(结果|分数|得分)/u',
+			'/实验室测/u',
+			'/实测\s*(LCP|分数|得分)/u',
+		);
+		foreach ( $patterns as $pattern ) {
+			if ( 1 === preg_match( $pattern, $answer ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public static function published_total(): int {
