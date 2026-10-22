@@ -671,6 +671,14 @@
 	line-height: 1.4;
 }
 
+.npcink-toolbox__ops-intro {
+	margin: 0 0 var(--npcink-ui-space-3);
+	color: var(--npcink-ui-text);
+	font-size: var(--npcink-ui-font-body);
+	line-height: 1.45;
+	max-width: var(--npcink-ui-column-wide);
+}
+
 .npcink-toolbox__ops-status-row {
 	display: flex;
 	flex-wrap: wrap;

@@ -947,27 +947,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$finding_count      = count( $findings );
 		$has_cloud_analysis = null !== $cloud_analysis;
 		?>
-		<div class="npcink-toolbox__panel-header">
-			<p style="margin:0 0 6px;">
-				<a class="button" href="
-				<?php
-				echo esc_url(
-					add_query_arg(
-						array(
-							'page'        => self::MENU_SLUG,
-							'toolbox_tab' => 'start',
-						),
-						admin_url( 'admin.php' )
-					)
-				);
-				?>
-										">
-					&larr; <?php esc_html_e( 'Back to Start', 'npcink-workflow-toolbox' ); ?>
-				</a>
-			</p>
-			<h2><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></h2>
-			<p><?php esc_html_e( 'Run one read-only check that routes current site issues to the right fixed workflow, manual review, or optional Cloud detail. It does not create Core proposals or WordPress writes.', 'npcink-workflow-toolbox' ); ?></p>
-		</div>
+		<p class="npcink-toolbox__ops-intro"><?php esc_html_e( 'Run a read-only check of this site. Choose what to fix next; nothing is written without your review.', 'npcink-workflow-toolbox' ); ?></p>
 
 		<div class="npcink-toolbox__ops-workspace" data-toolbox-site-check-tabs>
 			<nav class="npcink-toolbox__ops-tabs" aria-label="<?php esc_attr_e( 'Site Check sections', 'npcink-workflow-toolbox' ); ?>">
@@ -978,10 +958,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<section class="npcink-toolbox__ops-panel" data-toolbox-site-check-panel="current-check"<?php echo 'current-check' === $active_site_check_tab ? '' : ' hidden'; ?>>
 				<section class="npcink-toolbox__ops-status-row" aria-label="<?php esc_attr_e( 'Site Check readiness', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__ops-status-main">
-						<span><strong><?php esc_html_e( 'Local data', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( null === $preview ? __( 'Ready to scan', 'npcink-workflow-toolbox' ) : __( 'Scanned', 'npcink-workflow-toolbox' ) ); ?></span>
-						<span><strong><?php esc_html_e( 'Site Context', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $context_ready ? __( 'Ready', 'npcink-workflow-toolbox' ) : __( 'Needs brief', 'npcink-workflow-toolbox' ) ); ?></span>
-						<span><strong><?php esc_html_e( 'Cloud', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $cloud_ready ? __( 'Ready on request', 'npcink-workflow-toolbox' ) : __( 'Optional', 'npcink-workflow-toolbox' ) ); ?></span>
-						<span><strong><?php esc_html_e( 'Writes', 'npcink-workflow-toolbox' ); ?></strong><?php esc_html_e( 'Disabled', 'npcink-workflow-toolbox' ); ?></span>
+						<span><strong><?php esc_html_e( 'Local scan', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( null === $preview ? __( 'Ready to scan', 'npcink-workflow-toolbox' ) : __( 'Scanned', 'npcink-workflow-toolbox' ) ); ?></span>
+						<span><strong><?php esc_html_e( 'Site profile', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $context_ready ? __( 'Ready', 'npcink-workflow-toolbox' ) : __( 'Needs brief', 'npcink-workflow-toolbox' ) ); ?></span>
+						<span><strong><?php esc_html_e( 'Cloud', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $cloud_ready ? __( 'Available when needed', 'npcink-workflow-toolbox' ) : __( 'Optional', 'npcink-workflow-toolbox' ) ); ?></span>
+						<span><strong><?php esc_html_e( 'Site changes', 'npcink-workflow-toolbox' ); ?></strong><?php esc_html_e( 'Suggestions only', 'npcink-workflow-toolbox' ); ?></span>
 					</div>
 					<div class="npcink-toolbox__ops-status-actions">
 						<?php if ( null === $preview || isset( $preview['error'] ) ) : ?>
