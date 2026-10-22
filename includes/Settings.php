@@ -20,8 +20,25 @@ final class Settings {
 		'advanced_media'   => true,
 	);
 
+	/**
+	 * Reversible admin UI hide policy: keep implementations and markup helpers,
+	 * but do not render these operator-facing entries by default.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static array $hidden_admin_ui_entries = array(
+		'scheduled_review_advanced_settings' => true,
+		'flagged_media_review'               => true,
+		'site_check_ops_review_cards'        => true,
+	);
+
 	public static function cloud_feature_paused( string $feature ): bool {
 		return ! empty( self::$paused_cloud_features[ $feature ] );
+	}
+
+	/** Whether an admin UI entry should stay out of the default render tree. */
+	public static function admin_ui_entry_hidden( string $entry ): bool {
+		return ! empty( self::$hidden_admin_ui_entries[ $entry ] );
 	}
 
 	public static function cloud_feature_pause_error( string $feature ) {
