@@ -39,8 +39,10 @@
 
 ## 5. 已知未做 / 旁路（勿当回归缺口误报）
 
-- 单框一问 / 自动选包未做。
-- 生产 Cloud 可能仍旧（本机 M4 ≠ 生产）。
+完整记账见 [admin-ia-open-todos-2026-10-23.md](admin-ia-open-todos-2026-10-23.md)。摘要：
+
+- 单框一问 / 自动选包未做；L3 结果维度 tab 待折叠（壳层 IA）。
+- 生产 Cloud 可能仍旧（本机 M4 ≠ 生产）— **部署待用户决定**。
 - Core handoff 英文、adapter 连接页 / WP AI 英文 success toast：已移交，本仓不动。
 - year-0020 日期类显示问题、DB orphan runs（Cloud AI 未清）、mid-sync 短暂 502/busy：已知预期/旁路，非本包必修。
 
@@ -54,5 +56,6 @@
 
 - [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) — 产品边界 / §3.1 四包对照表 / §11 政策
 - [admin-ia-site-and-ask-v1.md](admin-ia-site-and-ask-v1.md) — Admin 壳层 IA（三 Tab、隐藏入口、检查→提问、降门槛）
+- [admin-ia-open-todos-2026-10-23.md](admin-ia-open-todos-2026-10-23.md) — 开放待办 / 旁路记账
 - [page-quality-insight-pack-v1.md](page-quality-insight-pack-v1.md) / [environment-performance-insight-pack-v1.md](environment-performance-insight-pack-v1.md) — 第三/四包契约
 - [drafts/README-insight-packs-2026-10-22.md](drafts/README-insight-packs-2026-10-22.md) — 草案索引（正式稿以 `docs/*.md` 为准）

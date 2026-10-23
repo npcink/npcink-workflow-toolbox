@@ -72,3 +72,7 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 ## 折叠站点检查顶栏（2026-10-22）
 
 去掉顶栏「站点检查」。当前检查 + 定期巡检收入「站点与提问」下部折叠区；检查 → 提问 CTA 保留。
+
+## 开放待办
+
+会话遗留与旁路清单见 [admin-ia-open-todos-2026-10-23.md](admin-ia-open-todos-2026-10-23.md)（L3 折叠、单框选包、生产 Cloud 部署决策、year-0020、英文 toast 移交、orphan runs、mid-sync 502）。
