@@ -155,7 +155,8 @@ Start from the active documents below before changing code.
 - [页面质量摘要 → Cloud CLI 验证（第三包）](page-quality-pack-cloud-qa-cli.md) — REST + `scripts/page-quality-pack-cloud-qa.sh`；智能提问「页面质量」。
 - [环境与性能清单（第四包）](environment-performance-insight-pack-v1.md) — `environment_performance_insight_pack.v1`：配置/清单 only；非测速。
 - [环境与性能清单 → Cloud CLI 验证（第四包）](environment-performance-pack-cloud-qa-cli.md) — REST + `scripts/environment-performance-pack-cloud-qa.sh`；智能提问「环境与性能」。
-- [Toolbox Admin IA（开始 / 站点与提问 / 站点检查 / 图片处理）](admin-ia-site-and-ask-v1.md) — 顶栏 4；智能提问行为不变；开发期无旧 tab 别名。
+- [Toolbox Admin IA（开始 / 站点与提问 / 图片处理）](admin-ia-site-and-ask-v1.md) — 顶栏 3；站点检查折入站点与提问；智能提问行为不变；`operations-insights` 映射兼容。
+- [Admin IA 开放待办（2026-10-23）](admin-ia-open-todos-2026-10-23.md) — L3 折叠、单框选包、生产 Cloud 部署决策、year-0020、英文 toast 移交、orphan runs、mid-sync 502。
 - [Insight Pack 开发约定笔记 v1](insight-pack-dev-notes-v1.md) — `#289`–`#309` 操作约定：后端切片、suggestion_only、白话 Guidance、magick-ai.local+M4、证据目录、不擅自改生产；单框/自动选包未做。
 - [脱密对话助手边界 v1（已定稿）](deidentified-assistant-boundary-v1.md) — 五包意向 + MVP 仅巡检摘要；第二包内容结构 + 第三包页面质量已接线；suggestion_only；对齐 `#289`/`#290`；M4 `#1177` 后放开第三包；链到 CLI 手册。
 - [AI 站点体检与效果验证：讨论归纳及分阶段规划](ai-site-check-effect-verification-plan-2026-10-14.md) — proposed plan, not an implemented runtime or write path.
