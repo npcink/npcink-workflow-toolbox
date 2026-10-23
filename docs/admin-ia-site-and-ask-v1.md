@@ -2,6 +2,10 @@
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。智能提问 **行为**（pack 下拉 + REST）本阶段不变。
 
+## 产品意图（降门槛）
+
+本系列（`#311`–`#321`）目标是**降低站长使用智能提问的门槛**：顶栏变少、稀疏散入口默认隐藏、开始页只留清晰下一步、检查结果一键带到提问。不改 pack REST / `suggestion_only` 边界；不把 Addon 控制面塞进 Toolbox。
+
 ## 目标树
 
 ```text
@@ -55,13 +59,15 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 
 站点档案 SEO / AEO / GEO / Boundaries 深偏好继续收在站点简介下方的 `<details class="npcink-toolbox__context-advanced">`，主摘要文案为 **Advanced / 高级**（智能提问 packs 不变）。
 
-## 开始页下一步卡片（2026-10-22）
+## 开始页清理与下一步卡片（2026-10-22）
 
-「开始」默认展示三张路由卡：**去提问** / **去检查** / **去改图**。去检查进入「站点与提问」并滚到站点检查折叠区（不再打开独立顶栏）。
+- 三张路由卡：**去提问** / **去检查** / **去改图**（`#315`）。去检查深链「站点与提问」并滚到站点检查折叠区。
+- 站长向 chrome：去掉冗余能力健康摘要渲染、嵌套 readiness 卡片与嘈杂支持细节（`#316`–`#318`）；支持信息扁平展示。
+- 站点检查 chrome：去掉返回顶栏链接与行话条带（`#319`），把注意力留在检查结果与「去提问」。
 
 ## 检查 → 提问（2026-10-22）
 
-生成预览后主按钮 **Ask about this check / 去提问** 仍深链到智能提问，`ask_pack=site_ops` + `ask_seed`。站点检查与智能提问同页后，CTA 仍保留（刷新后可继续编辑种子问题）。
+生成预览后主按钮 **Ask about this check / 去提问**（`#320`）深链智能提问：`ask_pack=site_ops` + `ask_seed`（种子问题可编辑）。站点检查与智能提问同页（`#321`）后 CTA 仍保留——这是「看完检查立刻问」的降门槛主路径，不是装饰。
 
 ## 折叠站点检查顶栏（2026-10-22）
 
