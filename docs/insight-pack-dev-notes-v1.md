@@ -7,7 +7,7 @@
 | 约定 | 含义 |
 | --- | --- |
 | Pack = 后端切片 | Builder + REST bridges +（可选）CLI + Guidance 术语；合同 id（如 `page_quality_insight_pack.v1`）**不对站长展示** |
-| 正式 UI 现状 | 流程工具箱 → **智能提问** → 下拉选包（中文标签） |
+| 正式 UI 现状 | 顶栏三 Tab（开始 / 站点与提问 / 图片处理）；智能提问在「站点与提问」内下拉选包；站点检查同页折叠。壳层见 [admin-ia-site-and-ask-v1.md](admin-ia-site-and-ask-v1.md) |
 | 尚未做 | **单框一问 / 自动选包 / 多 pack 编排**（边界 §3.1 / §6.3 / §11.6：编排若做归属 Toolbox，本阶段不做） |
 | 通道 | 一律 `hosted_ai_content_support.v1` + `write_posture=suggestion_only`；Cloud 失败只中文错误可重试，**不做本地假答复** |
 
@@ -53,5 +53,6 @@
 ## 相关文档
 
 - [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) — 产品边界 / §3.1 四包对照表 / §11 政策
+- [admin-ia-site-and-ask-v1.md](admin-ia-site-and-ask-v1.md) — Admin 壳层 IA（三 Tab、隐藏入口、检查→提问、降门槛）
 - [page-quality-insight-pack-v1.md](page-quality-insight-pack-v1.md) / [environment-performance-insight-pack-v1.md](environment-performance-insight-pack-v1.md) — 第三/四包契约
 - [drafts/README-insight-packs-2026-10-22.md](drafts/README-insight-packs-2026-10-22.md) — 草案索引（正式稿以 `docs/*.md` 为准）
