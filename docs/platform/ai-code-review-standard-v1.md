@@ -453,8 +453,11 @@ document. Enrolling a repository means:
    (OpenAI-compatible providers such as GLM use `false`).
 4. Merge only after the secrets exist, so the first real PR run succeeds.
 
-The template pins `alibaba/open-code-review@v1.12.10`. Bump the pin
-deliberately, the same way any other CI dependency is bumped.
+The template pins `alibaba/open-code-review@1672852136fc87748249d22bce0819f33419ea79`
+for `v1.13.0`; annotated tag object
+`152cdab52ebfe72034bbce7b27329330e28ffc8a` peels to that commit.
+Bump the pin deliberately, recording the new tag-to-commit pair, the same
+way any other CI dependency is bumped.
 
 ### Local-first configuration and CI mirror - 2026-10-13
 
