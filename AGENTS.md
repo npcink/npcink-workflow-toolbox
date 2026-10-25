@@ -160,7 +160,11 @@ the exact head SHA and verifies a `fix:`/`accept:` triage line for every
 finding in the pull request body's `## AI Review Triage` section before
 requesting auto-merge. The only path past an undelivered review is
 `composer pr:publish -- --no-review-because "<reason>"`, which the gate
-records in the PR body. A local pre-publish round
+records in the PR body. With that explicit reason, the gate inspects review
+delivery once without waiting or re-running OCR. An undelivered round requires
+exception write/readback and a matching PR head; read/write/verification errors
+stop publishing. A successful round still requires delivery reconciliation and
+finding triage, even when a reason is supplied. A local pre-publish round
 
 ```bash
 ocr review --from origin/master --to HEAD
