@@ -9,6 +9,8 @@ Start from the active documents below before changing code.
 
 - [SEO 专项功能暂停实施记录](seo-specialist-pause-implementation-2026-10-18.md) — three-repository implementation, retained data, restoration and verification states.
 
+- [SEO 发布候选历史快照与后继边界](archive/2026-10/seo-specialist-pause-release-archive-2026-10-26.md) — PR #278 独有的最终候选与预检原文、精确源码/包/回滚身份；归档不代表发布或解除后续验收。
+
 - [SEO 相关功能暂停检查与建议](seo-feature-pause-review-2026-10-18.md) — original three-repository source inventory and pause proposal; see the implementation record for current candidate status. Includes the [reference chat archive](archive/2026-10/seo-geo-reference-chat-2026-10-18.md).
 
 ## Core Contracts
