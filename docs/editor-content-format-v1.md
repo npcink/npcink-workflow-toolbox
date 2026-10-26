@@ -1,6 +1,8 @@
 # Cloud Content Formatting In The Native Editor
 
-Status: development candidate; no merge or production claim.
+Status: source implementation merged in Toolbox PR #141 (2026-09-08).
+The roadmap includes formatting in 0.2.0. Dated candidate evidence below is
+historical; it does not certify today's runtime, production or human acceptance.
 
 ## Current Structure Contract v2
 

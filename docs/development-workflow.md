@@ -372,6 +372,46 @@ If the branch is ahead of its upstream, decide one of these outcomes:
 Do not report a stage as fully closed while omitting the branch ahead/behind
 state or hiding remaining modified/untracked files.
 
+## Referenced Session Closeout Gate
+
+Before closing or archiving a development chat, read its actual turns and
+reconcile them with current source. A historical final answer is not a merge
+receipt. Record the following in a dated local handoff, linked from
+`docs/current-state.md` and `docs/README.md`:
+
+1. Map intended changes to PR state and merge SHA, and verify that SHA is an
+   ancestor of the fetched default branch. Squash merges need the merge SHA;
+   the original topic SHA need not be an ancestor. Name stopped experiments
+   separately, with their reason and recoverable ref; never merge them merely
+   to make the branch list empty.
+2. Inventory local branches, live remote heads, worktrees, modified/untracked
+   files and branch ahead/behind state. A clean primary checkout does not prove
+   that auxiliary worktrees or another repository are clean. Verify known old
+   paths and local-site plugin symlinks before declaring worktree cleanup done.
+3. Read before deleting: preserve unique commits, uncommitted work and needed
+   ignored evidence; check active owners and locks. Remove only task-owned,
+   no-longer-needed branches/worktrees after merge or explicit retirement.
+   Keep recoverable archive refs. Do not unlock, reset or clean another chat's
+   worktree to satisfy a global cleanliness claim. Use the app's archive tool
+   for managed worktrees attached to the current chat.
+4. Summarize decisions, rejected approaches and reusable lessons in the existing
+   contract/workflow documents. Preserve useful stopped-experiment reports in
+   the documentation archive so readers need not recover a Git object to learn
+   why the experiment stopped. Do not copy credentials or raw private traces.
+5. Move every unfinished item to `docs/known-issues.md`, or link its maintained
+   owner ledger there. Name the owner, next action, completion evidence and
+   applicable pause. Archive a chat only after these handoffs are discoverable.
+6. Publish the closeout documents through the normal PR gate, verify the merge,
+   then clean that new topic branch and report the final state. Keep local
+   tests, dated browser/M4 receipts, merged source, packages, production and
+   human quality as distinct evidence levels; rerun only checks invalidated by
+   the proposed change. A failed advisory review remains a coverage gap even
+   when the publisher records an allowed exception.
+
+The [2026-10-26 five-session audit](session-closeout-audit-2026-10-26.md)
+applies this gate, including the retired local OCR route. This is a Git and
+documentation handoff rule, not a new runtime, approval store or write lane.
+
 ## WordPress Smoke Gate
 
 When a local WordPress site and WP-CLI are available, mount or install the

@@ -13,15 +13,40 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Open
 
+- **Five-session follow-up ownership (2026-10-26).** The
+  [closeout audit](session-closeout-audit-2026-10-26.md) supersedes historical
+  branch states and already-resolved Cloud/Apply blockers. The focused next
+  step is Eval Lab's existing five-case human recommendation review pilot,
+  with a named source/runtime revision and available product surface. Preserve
+  the frozen-v1 hold, exclude developer traffic, and keep candidate-review
+  worksheets separate from independent gold. No production rollout or ranking
+  campaign follows from this handoff.
+- **Article assistance follow-up (Toolbox editor / Cloud analysis).** Formatting
+  is merged (#141); fresh browser preservation/Undo evidence and unified
+  publish-preflight issue locations remain follow-up work. Generic cross-
+  paragraph logic and body risk classification are not delivered. Reuse the
+  current preflight/paragraph-review surface after a scoped contract; no new
+  editor intent, hidden save or automatic publishing block is authorized.
+  Source: [five-session audit](session-closeout-audit-2026-10-26.md).
+- **Site-effect verification remains a deferred design (Toolbox / Cloud).**
+  Existing Smart Ask consumes bounded deidentified packs. Deterministic
+  before/after measurement, reviewed method references and comparable black-box
+  rechecks still need their own evidence contracts. Environment inventory is
+  not a speed measurement. Keep Cloud inspection/optimization pauses and the
+  operator's no-new-pack scope; do not infer expansion authority from retained
+  code. Source: [original plan](ai-site-check-effect-verification-plan-2026-10-14.md).
+
 - **Next-phase actions for the following session** are consolidated in the
   [Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md):
-  real hold-comment calibration feeding Cloud intent scheduling (highest value;
+  real hold-comment calibration feeding Cloud intent scheduling (historical priority;
   framework ready in eval-lab #110), the ③ media-ALT adoption gate (needs
   ~1 week of production use), the PHPStan ratchet, and the remaining cluster
   splits. Site Check browser verification is green. The former Cloud HTTP 502
   internal-link blocker was resolved during recommendation stage 0; real
   candidate retrieval, Apply/Undo, and disposable-draft native save now pass.
-  See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md).
+  See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md). These older
+  actions are conditional on current feature visibility/pauses; the focused
+  next action is recorded above.
 - **Recommendation relevance and anchor naturalness still need a human gold
   set (Cloud ranking owner).** The 2026-10-17 twelve-article developer
   regression found weak related results for the short promotion and broad

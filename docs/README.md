@@ -53,6 +53,8 @@ Start from the active documents below before changing code.
 ## Development And Release
 
 - [Development Workflow](development-workflow.md)
+- [Five-Session Closeout Audit — 2026-10-26](session-closeout-audit-2026-10-26.md) — merged PRs, retired OCR experiments, branch/worktree scope, development lessons and remaining owners.
+- [Local OCR Final Feasibility Closeout — 2026-10-15](archive/2026-10/local-ocr-final-feasibility-closeout-2026-10-15.md) — preserved stopped experiment; not an accepted publication migration.
 - [Classification Lane 3 Fixture Closeout — 2026-10-17](classification-lane3-closeout-2026-10-17.md)
 - [Classification Lane 3 WordPress Evidence — 2026-10-17](classification-lane3-wordpress-evidence-2026-10-17.json)
 - [AI Development Quality Workflow](ai-development-quality-workflow.md)
