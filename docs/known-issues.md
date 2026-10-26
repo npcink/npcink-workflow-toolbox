@@ -16,9 +16,13 @@ with the closing commit or PR for one release cycle, then prune.
 - **Five-session follow-up ownership (2026-10-26).** The
   [closeout audit](session-closeout-audit-2026-10-26.md) supersedes historical
   branch states and already-resolved Cloud/Apply blockers. The focused next
-  step is Eval Lab's existing five-case human recommendation review pilot,
-  with a named source/runtime revision and available product surface. Preserve
-  the frozen-v1 hold, exclude developer traffic, and keep candidate-review
+  step, updated by the operator on 2026-10-26, is
+  [AI-led evaluation through Eval Lab](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-eval.md#ai-led-development-and-usage-feedback).
+  AI handles evidence, disagreements, scoped fixes and regression on named
+  source/runtime revisions. The operator uses the product, provides ordinary
+  feedback and makes final decisions; no five-case human worksheet is required
+  to continue development. Check both wrong suggestions and useful positives.
+  Preserve the frozen-v1 hold, exclude developer traffic, and keep candidate-review
   worksheets separate from independent gold. No production rollout or ranking
   campaign follows from this handoff.
 - **Article assistance follow-up (Toolbox editor / Cloud analysis).** Formatting

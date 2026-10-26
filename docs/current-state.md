@@ -122,9 +122,14 @@ ordinary generation and Site Knowledge remain available. See
 
 ## Open Debt (top items)
 
-- The focused next milestone is the existing Eval Lab five-case human
-  recommendation review pilot on explicitly named revisions and an available
-  surface. Ranking versions and bounded telemetry already shipped in #271;
+- The operator selected AI-led recommendation development on 2026-10-26:
+  Eval Lab reuses real samples and model evidence, the development agent handles
+  disagreements, fixes and regression, and the operator uses the product,
+  provides ordinary feedback and makes final decisions. Human worksheets are
+  not the next development gate. Follow
+  [Eval Lab's existing loop](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-eval.md#ai-led-development-and-usage-feedback)
+  on named source/runtime revisions; test useful positives as well as rejection.
+  Ranking versions and bounded telemetry already shipped in #271;
   v2 eligibility/abstention and the recorded 12-article editor smoke are
   development evidence, not independent human gold or production acceptance.
   See the [closeout audit](session-closeout-audit-2026-10-26.md).
