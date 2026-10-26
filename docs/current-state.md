@@ -5,22 +5,21 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-18.
+Last reviewed: 2026-10-26.
 
 SEO/AEO/GEO specialist product entrypoints are paused in the current candidate;
 generic content assistance, original configuration and historical data remain.
 See [pause implementation](seo-specialist-pause-implementation-2026-10-18.md)
 for source, gates and runtime evidence states.
 
-**Next session: read
-[Session Handoff 2026-10-11](session-handoff-2026-10-11-hardening-release-next-phase.md)
-and
-[Session Handoff 2026-10-12 — UX Audit Findings](session-handoff-2026-10-12-ux-audit-findings.md)
-after this page** — the first records what just shipped, the next actions
-in priority order, and the environment facts (sockets, test site,
-gotchas); the second carries the user-perspective UX audit findings and
-the fix TODO order (uncommitted working-tree docs at the time of
-writing).
+**Next session:** read the
+[five-session closeout audit](session-closeout-audit-2026-10-26.md) for merged
+work, retired experiments, preserved Git refs and the remaining owners.
+Admin work also starts from the
+[current three-tab IA](admin-ia-site-and-ask-v1.md) and its
+[open TODOs](admin-ia-open-todos-2026-10-23.md).
+The October 11/12 handoffs remain historical environment and UX evidence;
+their old priorities and branch states are not today's task queue.
 
 Cloud inspection/site analysis, new audio and media optimization are also
 paused in the current source candidate. Local checks, playback, backup recovery,
@@ -40,9 +39,11 @@ ordinary generation and Site Knowledge remain available. See
 - Default surfaces: editor **Npcink Content Support** sidebar (writing
   pack, preflight, category/tag, internal links, contextual ALT, image
   candidates) on `post`/`page` editors only (extend via the
-  `npcink_toolbox_editor_supported_post_types` filter), visible **Site Check**
-  tab (Overview remains the default; compatibility route retained), admin **Image Handling**
-  (ALT review first; optimization paused), Overview + Site Profile + Site Check tabs. Release packages
+  `npcink_toolbox_editor_supported_post_types` filter). Admin has three top
+  tabs: **Start**, **Site & Ask**, and **Image Handling** (ALT review first;
+  optimization paused). Site Profile, Smart Ask and the folded Site Check
+  live under Site & Ask; legacy Site Check URLs remain compatible. This is
+  the source layout, not a new WordPress.org release receipt. Release packages
   ship `.min` asset siblings (`composer package:release` runs
   `scripts/minify-assets.sh`); checkouts without them enqueue the
   readable sources.
@@ -69,7 +70,7 @@ ordinary generation and Site Knowledge remain available. See
   pure part files under `assets/editor-content-support/` behind frozen
   `window.NpcinkToolbox*` namespaces.
 - `assets/admin.js` — admin bundle (8.2k lines; split owed).
-- `tests/run.php` — static contract suite (~4.1k assertions, needles pin
+- `tests/run.php` — static contract suite (4,424 assertions on 2026-10-26, needles pin
   exact source strings; aggregation helpers keep them file-portable).
 - `docs/route-boundary-table.json`, `ability-boundary-table.json`,
   `cloud-bridge-contract-table.json`, `fixed-button-contract-table.json` —
@@ -121,6 +122,16 @@ ordinary generation and Site Knowledge remain available. See
 
 ## Open Debt (top items)
 
+- The focused next milestone is the existing Eval Lab five-case human
+  recommendation review pilot on explicitly named revisions and an available
+  surface. Ranking versions and bounded telemetry already shipped in #271;
+  v2 eligibility/abstention and the recorded 12-article editor smoke are
+  development evidence, not independent human gold or production acceptance.
+  See the [closeout audit](session-closeout-audit-2026-10-26.md).
+- Unified article-review improvements and deterministic before/after site
+  verification remain deferred in [Known Issues](known-issues.md). Existing
+  formatting is merged (#141); its historical candidate evidence is retained.
+
 - Recommendation anchor eligibility now has a separate
   [v2 contract](internal-link-anchor-eligibility-v2.md) for bounded fragment
   rejection in the current editor. The frozen ranking v1 and its old editor
@@ -132,9 +143,10 @@ ordinary generation and Site Knowledge remain available. See
    actual M4-backed Cloud route. Toolkit anchor-hint consumption is fixed by
    Toolkit PR #262; live editor
    readiness now reuses Apply checks as documented in Ranking Baseline v1.
-   Remaining next-phase actions are real hold-comment calibration for Cloud
-   scheduling (highest value), the ③ media-ALT adoption gate (needs ~1 week
-   of production use), the PHPStan ratchet, and the carried cluster splits.
+   Other carried actions are real hold-comment calibration, the media-ALT
+   adoption gate, the PHPStan ratchet, and the carried cluster splits. These
+   are conditional backlog under the current UI/feature pauses; they do not
+   authorize production observation, hidden surfaces or Cloud scheduling.
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
    draft) still inside the 10.6k main bundle.
 2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
