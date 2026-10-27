@@ -149,6 +149,10 @@ ordinary generation and Site Knowledge remain available. See
   [v2 contract](internal-link-anchor-eligibility-v2.md) with a bounded
   `解决办法` caption guard. The 20-source / 119-candidate development replay
   changes one eligibility outcome; ordinary prose and useful positives remain.
+  The original 10-source/full-corpus holdout then completed: 80 unchanged
+  eligibility outcomes/reasons, 26 eligible in both v2 and v3; no new-caption
+  candidate occurred. This closes the holdout eligibility regression task,
+  while semantic quality and release acceptance remain open.
   The policy remains bounded to the current editor. The frozen ranking v1 and its old editor
   implementation remain the comparison; consult Eval Lab release acceptance
   evidence before treating the recommendation feature as ready to release.

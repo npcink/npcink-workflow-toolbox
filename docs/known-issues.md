@@ -77,10 +77,12 @@ with the closing commit or PR for one release cycle, then prune.
   `你也可以` and `管理工具` within `管理工具栏` remain unresolved; assess
   source task, destination task and useful-positive retention through Eval Lab
   before another product change. AI opinions are evidence, not human gold.
-  Original 10-source holdout requests are captured, but full-corpus retrieval
-  failed at the existing embedding endpoint (including a single-text health
-  probe). Resume the same frozen holdout when healthy; do not claim holdout
-  acceptance or a release from the development/UI replay.
+  The original 10-source/full-corpus holdout completed after the initial
+  embedding timeout: all 80 eligibility outcomes/reasons unchanged, 26 eligible
+  under v2 and v3. No new-caption case occurred; semantic quality remains open.
+  The [cycle record](https://github.com/npcink/npcink-eval-lab/blob/59b31d6b38428c2123d6450940d8d64e570afba9/docs/link-recommendation-solution-caption-2026-10-27.md#服务恢复后完成留验)
+  documents the isolated runtime difference and unchanged source/index/postmeta
+  checks. No human adoption or release acceptance follows from this regression.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **User-facing UX audit (2026-10-12) is in closeout.** The audit found four
