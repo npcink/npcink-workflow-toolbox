@@ -37,12 +37,15 @@ The other 118 outcomes, including the useful 19025 → 20974 `intro.js`, stayed
 unchanged. Seven caption/prose contrasts accompany the existing controls.
 These are developer checks, not human relevance gold or adoption evidence.
 
-See [Eval Lab's cycle record](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-solution-caption-2026-10-27.md)
+See [Eval Lab's cycle record](https://github.com/npcink/npcink-eval-lab/blob/59b31d6b38428c2123d6450940d8d64e570afba9/docs/link-recommendation-solution-caption-2026-10-27.md)
 for source hashes, frozen holdout, live-editor checks, model failures and limits.
 The rule was frozen before examining holdout; holdout must not tune this rule.
-The 10-source browser capture completed, but full-corpus holdout retrieval
-failed on the existing embedding endpoint; its candidate comparison remains
-unfinished. This source improvement does not establish release acceptance.
+After the initial embedding timeout, the same 10-source/full-corpus holdout
+completed: all 80 candidate eligibility outcomes and reasons match v2, with
+26 eligible under either version. No candidate triggered the new caption guard;
+this supports no observed collateral eligibility regression, not new semantic
+quality or release acceptance. The cycle records a new container receipt and
+the exact two-line budget-path difference excluded from the isolated fixture.
 
 ## Limits and verification
 
