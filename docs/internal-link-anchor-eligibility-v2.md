@@ -1,5 +1,9 @@
 # Internal-link anchor eligibility v2
 
+Historical policy record. The active policy is the bounded
+[v3 caption extension](internal-link-anchor-eligibility-v3.md); preserve v2
+labels on historical feedback and comparison evidence.
+
 Scope: Toolbox current-editor eligibility and visible Apply only. Version:
 `internal_link_anchor_eligibility.v2`. It is independent of the unchanged
 `internal_links.v1` / `related_content.v1` ranking baseline. No weights, recall,

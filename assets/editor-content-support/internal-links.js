@@ -13,7 +13,7 @@
 	'use strict';
 
 	const { plainTextFromHtml, truncateText } = (typeof window !== 'undefined' && window.NpcinkToolboxTextHelpers) || {};
-	const anchorEligibilityVersion = 'internal_link_anchor_eligibility.v2';
+	const anchorEligibilityVersion = 'internal_link_anchor_eligibility.v3';
 
 	// Bounded fragment checks, not general Chinese segmentation or target relevance.
 	function internalLinkAnchorBoundaryReason(text, range) {
@@ -30,7 +30,7 @@
 		}
 		const label = anchor.toLocaleLowerCase().replace(/[\s:：]+/gu, '');
 		const captionPosition = /^\s*[:：]/u.test(after) || /[:：]\s*$/u.test(before) || (!before.trim() && !after.trim());
-		if ((captionPosition && ['github', 'demo', '原文来源', '代码来源', '项目来源', '官方网站', '第三方演示', '插件介绍', '主题介绍', '安装教程', '使用文档', '项目下载', '下载地址', '项目介绍', '功能演示'].includes(label))
+		if ((captionPosition && ['github', 'demo', '原文来源', '代码来源', '项目来源', '官方网站', '第三方演示', '插件介绍', '主题介绍', '安装教程', '使用文档', '项目下载', '下载地址', '项目介绍', '功能演示', '解决办法'].includes(label))
 			|| /^(?:官方)?售价\d+(?:[.,]\d+)?(?:美元|元|usd|cny)$/iu.test(label)) {
 			return 'anchor_reference_requires_review';
 		}

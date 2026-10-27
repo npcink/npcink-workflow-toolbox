@@ -1715,7 +1715,7 @@
 		const feedbackOptions = options && typeof options === 'object' ? options : {};
 		const activeIntent = String(intent || (payload && payload.intent) || 'content_support').trim();
 		const reasonCodes = Array.isArray(feedbackOptions.reasonCodes) ? feedbackOptions.reasonCodes.slice() : [];
-		if (activeIntent === 'internal_links') reasonCodes.unshift('anchor_eligibility_v2');
+		if (activeIntent === 'internal_links') reasonCodes.unshift('anchor_eligibility_v3');
 		const runId = payload && payload.run_id ? String(payload.run_id) : '';
 		const artifactType = payload && payload.artifact_type ? String(payload.artifact_type) : 'editor_content_support_flow';
 		const sourceRuntime = editorContentSupportSourceRuntime(payload, activeIntent);
