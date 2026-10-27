@@ -2,6 +2,40 @@
 
 Status: active.
 
+## Active policy — 2026-10-27 operator decision
+
+The operator retired GitHub/cloud AI review because its failures and waiting
+cost exceed its value. **Use local Qwen review for subsequent development.**
+This section supersedes every cloud delivery/wait/retry requirement below;
+the rest of this document is historical implementation and lessons.
+Deterministic required CI checks remain mandatory.
+
+Run the bounded, single-call local reviewer using the existing machine Qwen
+configuration (credentials stay outside Git):
+
+```bash
+python3 scripts/local-qwen-review.py --base origin/master --head HEAD --output /tmp/local-qwen-review.json
+composer pr:publish -- --title "..." --body-file /tmp/pr.md --local-review /tmp/local-qwen-review.json
+```
+
+The receipt binds base SHA, head SHA, diff hash, model and complete findings.
+Keep raw receipts locally and record model/receipt hash plus one `fix:` or
+`accept:` line per finding under `## AI Review Triage`. A failed, truncated,
+stale or malformed response is not a passed review. Material code fixes need
+a fresh review of the final committed diff. No silent truncation or automatic
+provider retry; split an oversized change. Local means the review is initiated
+and recorded on the developer machine; the existing configured Qwen endpoint
+may still be hosted. It does not promise on-device model inference.
+
+Toolbox publisher accepts `--local-review` and verifies the exact diff and PR
+triage without calling the legacy cloud gate. Other repositories may use this
+same local script from a Toolbox checkout. A legacy publisher may temporarily
+use its explicit `--no-review-because` compatibility option with the operator
+policy and local receipt identified; never wait for or rerun cloud review.
+Disable the existing OpenCodeReview workflow in enrolled repositories; retain
+its source as retired history until a focused cleanup removes it. No CI secret
+or provider setup is required for review. Do not re-enable it automatically.
+
 Purpose: adopt `alibaba/open-code-review` (OpenCodeReview, Apache-2.0) as the
 shared advisory AI reviewer across Npcink repositories, with one machine-level
 local install, a single canonical workflow template, and per-repository CI

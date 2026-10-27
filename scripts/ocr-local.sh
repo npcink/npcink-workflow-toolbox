@@ -34,5 +34,5 @@ if [ "$#" -eq 0 ]; then
 	set -- --from origin/master --to HEAD --effort low --concurrency 1 --timeout 8 --max-tokens-budget 80000
 fi
 
-echo '[ocr-local] running local review; GitHub CI remains the publish gate'
+echo '[ocr-local] running optional local OCR review; use local-qwen-review.py for the publish receipt'
 exec ocr review "$@"

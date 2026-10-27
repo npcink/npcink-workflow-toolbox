@@ -88,18 +88,11 @@ ordinary generation and Site Knowledge remain available. See
 - Static analysis (required in CI): `composer lint:standards`,
   `composer analyse:php` (level 5 + baseline; regenerate the baseline only
   when a split moves findings, counts must not grow).
-- Advisory AI review (mechanized at the publisher since 2026-10-07):
-  `composer pr:publish` waits for the delivered OpenCodeReview CI round
-  and a `fix:`/`accept:` triage line per finding in the PR body's
-  `## AI Review Triage` section; exceptions go through
-  `-- --no-review-because`. A local `ocr review --from origin/master
-  --to HEAD` round is optional extra signal.
-- Local OCR wrappers: `composer ocr:config-check` compares local provider/model
-  metadata with the GitHub Actions mirror without exposing secret values;
-  `composer ocr:local` runs the bounded local review. CI remains the exact-head
-  publish gate. On 2026-10-14 the local preview passed, but the Qwen review
-  timed out after 13m43s with zero tokens and zero findings; this is recorded
-  as provider timeout evidence rather than a code finding.
+- Advisory AI review: local Qwen only, per the 2026-10-27 operator decision.
+  Run `scripts/local-qwen-review.py` against the committed diff and pass its
+  receipt to `composer pr:publish -- --local-review <path>`. The publisher
+  verifies exact Git identity and finding triage; cloud review is retired.
+  See the active policy in `docs/platform/ai-code-review-standard-v1.md`.
 - Browser closeout on 2026-10-14: `smoke-site-ops-insights-browser` passed
   against `https://magick-ai.local` with the fourth Site Check tab, all
   read-only sub-tabs, narrow-layout checks, and no Cloud/Core execution calls.
