@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-26.
+Last reviewed: 2026-10-27.
 
 SEO/AEO/GEO specialist product entrypoints are paused in the current candidate;
 generic content assistance, original configuration and historical data remain.
@@ -133,6 +133,13 @@ ordinary generation and Site Knowledge remain available. See
   v2 eligibility/abstention and the recorded 12-article editor smoke are
   development evidence, not independent human gold or production acceptance.
   See the [closeout audit](session-closeout-audit-2026-10-26.md).
+  The first bounded cycle fixed repeated-anchor preview selection after emoji;
+  see the [occurrence contract](internal-link-anchor-eligibility-v2.md#review-preview-occurrence)
+  and [Eval Lab evidence](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-preview-occurrence-2026-10-27.md).
+  The current shared Cloud candidate has only 100 public documents / 119 chunks
+  and a dirty source receipt. Next semantic comparison needs a stable named
+  runtime/corpus from the Cloud owner; old ranking outcomes are not comparable
+  on that reduced corpus. No shared runtime or index was changed this cycle.
 - Unified article-review improvements and deterministic before/after site
   verification remain deferred in [Known Issues](known-issues.md). Existing
   formatting is merged (#141); its historical candidate evidence is retained.

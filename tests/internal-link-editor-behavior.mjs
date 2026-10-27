@@ -38,6 +38,47 @@ assert.equal(sourcePreview.clippedBefore, false);
 assert.equal(sourcePreview.clippedAfter, false);
 assert.equal(helpers.internalLinkSourcePreview({ expected_text: 'No matching phrase.', matched_text: 'missing' }), null);
 
+// Toolkit offsets count Unicode code points; previews must show the same
+// occurrence that Apply resolves, including repeated anchors after emoji.
+for (const text of [
+	'JavaScript 用于页面交互；这里用 JavaScript 处理异步请求。',
+	'😀 JavaScript 用于页面交互；这里用 JavaScript 处理异步请求。',
+	'😀🚀 JavaScript 用于页面交互；这里用 JAVASCRIPT 处理异步请求。',
+]) {
+	const start = text.toLowerCase().lastIndexOf('javascript');
+	const match = {
+		expected_text: text,
+		matched_text: 'JavaScript',
+		text_offset: Array.from(text.slice(0, start)).length,
+	};
+	const range = helpers.internalLinkMatchRange(text, match.matched_text, match.text_offset);
+	const preview = helpers.internalLinkSourcePreview(match, 180);
+	assert.equal(range.start, start, 'Apply resolves the supplied second occurrence');
+	assert.equal(preview.before, text.slice(0, range.start), 'review preview uses the same occurrence as Apply');
+	assert.equal(preview.match, text.slice(range.start, range.end), 'preview preserves the actual matched casing');
+	assert.equal(preview.after, text.slice(range.end));
+	assert.equal(preview.before + preview.match + preview.after, text);
+}
+const fallbackPreview = helpers.internalLinkSourcePreview({ expected_text: '😀 JavaScript and JavaScript.', matched_text: 'JavaScript', text_offset: 999 }, 180);
+assert.equal(fallbackPreview.before, '😀 ', 'preview preserves the matcher fallback when the supplied offset misses');
+for (const textOffset of [undefined, null, NaN, -1, 1.5, '999', '3']) {
+	const preview = helpers.internalLinkSourcePreview({ expected_text: '😀 JavaScript and JavaScript.', matched_text: 'JavaScript', text_offset: textOffset });
+	assert.equal(preview.before, '😀 ', 'invalid or non-matching offsets retain Apply\'s first-occurrence fallback');
+}
+for (const [prefixLength, suffixLength, clippedBefore, clippedAfter] of [
+	[0, 160, false, true], [100, 100, true, true], [160, 0, true, false],
+]) {
+	const prefix = '😀 JavaScript ' + '前'.repeat(prefixLength);
+	const text = prefix + ' JavaScript ' + '后'.repeat(suffixLength);
+	const preview = helpers.internalLinkSourcePreview({ expected_text: text, matched_text: 'JavaScript', text_offset: String(Array.from(prefix).length + 1) }, 80);
+	assert.equal(preview.match, 'JavaScript');
+	assert.equal(preview.before, text.slice(prefix.length + 1 - preview.before.length, prefix.length + 1), 'clipped context precedes the second occurrence');
+	assert.equal(preview.after, text.slice(prefix.length + 11, prefix.length + 11 + preview.after.length), 'clipped context follows the second occurrence');
+	assert.equal(preview.before.length + preview.match.length + preview.after.length, 80);
+	assert.equal(preview.clippedBefore, clippedBefore);
+	assert.equal(preview.clippedAfter, clippedAfter);
+}
+
 function richTextValue(html) {
 	const formats = [];
 	let text = '';
