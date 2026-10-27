@@ -26,9 +26,10 @@
 
 ## AI Review Triage
 
-Filled in after OpenCodeReview delivers its review on this pull request;
+Filled in after the local Qwen review of the exact committed diff;
 `composer pr:publish` verifies this section before requesting auto-merge.
-One line per finding id from the delivered review:
+Use `--local-review <receipt.json>` when publishing. Record the model and receipt hash.
+One line per finding id from the local review:
 
 - [ ] <finding-id> fix: <what changed>
 - [ ] <finding-id> accept: <one-line reason>

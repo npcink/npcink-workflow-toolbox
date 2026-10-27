@@ -154,27 +154,12 @@ Default gate:
 composer test:all
 ```
 
-Advisory AI review gate, mechanized at the publisher since 2026-10-07:
-`composer pr:publish` waits for the delivered OpenCodeReview CI round on
-the exact head SHA and verifies a `fix:`/`accept:` triage line for every
-finding in the pull request body's `## AI Review Triage` section before
-requesting auto-merge. The only path past an undelivered review is
-`composer pr:publish -- --no-review-because "<reason>"`, which the gate
-records in the PR body. With that explicit reason, the gate inspects review
-delivery once without waiting or re-running OCR. An undelivered round requires
-exception write/readback and a matching PR head; read/write/verification errors
-stop publishing. A successful round still requires delivery reconciliation and
-finding triage, even when a reason is supplied. A local pre-publish round
-
-```bash
-ocr review --from origin/master --to HEAD
-```
-
-is optional extra signal (and still useful on uncommitted work before
-staging). Treat findings as a second opinion: fix real defects or record
-why they are acceptable. Follows AI Code Review Standard v1 in
-`docs/platform/ai-code-review-standard-v1.md`; the CI workflow posting the
-review on pull requests is advisory and never a required check.
+Local Qwen review is the advisory review policy as of the 2026-10-27 operator
+decision. Do not wait for or rerun cloud AI review. Use
+`python3 scripts/local-qwen-review.py --base origin/master --head HEAD --output <new-local-receipt.json>`
+and publish with `--local-review <receipt.json>`. Bind the exact committed diff,
+triage every finding, and keep required deterministic CI checks. See the active
+policy at the top of `docs/platform/ai-code-review-standard-v1.md`.
 
 Composer metadata:
 
