@@ -66,7 +66,8 @@ def run(base, head, output, config):
     frozen, diff = snapshot(base, head)
     if not diff:
         raise ValueError('nonempty committed diff required')
-    # Explicit bounded context; fail instead of silently skipping large files.
+    # The full diff is mandatory. Complete small-file snapshots supplement it;
+    # large files are explicitly diff-only, never silently truncated.
     names = git('diff', '--name-only', '-z', frozen['base_sha'], frozen['head_sha'], '--').decode().split('\0')
     context = diff.decode('utf-8', errors='strict')
     for name in filter(None, names):
@@ -75,7 +76,8 @@ def run(base, head, output, config):
         exists = subprocess.run(['git', 'cat-file', '-e', frozen['head_sha'] + ':' + name], capture_output=True).returncode == 0
         if exists:
             content = git('show', frozen['head_sha'] + ':' + name).decode('utf-8', errors='strict')
-            context += '\n\nFILE ' + name + '\n' + content
+            context += ('\n\nFILE ' + name + '\n' + content if len(content) <= 30000
+                        else '\n\nFILE ' + name + ': complete diff above; full file exceeds 30000 characters.')
     if len(context) > 220000 or '\0' in context:
         raise ValueError('review exceeds text budget; split the change')
     settings = json.loads(config.read_text())
