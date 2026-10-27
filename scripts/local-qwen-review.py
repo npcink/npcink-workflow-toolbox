@@ -106,7 +106,10 @@ def run(base, head, output, config):
     signal.alarm(180)
     try:
         with urllib.request.urlopen(req, timeout=180) as response:
-            raw = json.load(response)
+            body = response.read(2_000_001)
+            if len(body) > 2_000_000:
+                raise ValueError('Qwen response exceeds 2000000 bytes')
+            raw = json.loads(body)
     except urllib.error.HTTPError as error:
         raise ValueError('Qwen HTTP ' + str(error.code) + '; no review delivered') from None
     finally:

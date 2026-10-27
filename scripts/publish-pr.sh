@@ -192,11 +192,7 @@ head_sha="$(git rev-parse HEAD)"
 if [ "${dry_run}" = '1' ]; then
 	quote_command git push -u origin "${branch}"
 	quote_command gh pr create --base "${base_branch}" --head "${branch}" --title "${title}" --body-file "${body_path}"
-	if [ -n "${review_exception}" ]; then
-		quote_command bash scripts/verify-ai-review.sh --pr '<pr-number>' --head-sha "${head_sha}" --no-review-because "${review_exception}"
-	else
-		quote_command bash scripts/verify-ai-review.sh --pr '<pr-number>' --head-sha "${head_sha}"
-	fi
+	quote_command python3 scripts/local-qwen-review.py --verify "$local_review" --head "$head_sha" --body-file "$body_path"
 	quote_command gh pr merge '<created-pr-url>' --auto --squash --subject '<title> (#<pr-number>)' --match-head-commit "${head_sha}"
 	echo '[pr-publish] dry-run passed'
 	exit 0
