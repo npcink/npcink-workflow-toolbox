@@ -469,11 +469,10 @@
 		const limit = Math.max(80, Number(maxLength || 180));
 		if (!sourceText || !matchedText) return null;
 
-		let offset = Number(match.text_offset);
-		if (!Number.isInteger(offset) || offset < 0 || sourceText.slice(offset, offset + matchedText.length).toLocaleLowerCase() !== matchedText.toLocaleLowerCase()) {
-			offset = sourceText.toLocaleLowerCase().indexOf(matchedText.toLocaleLowerCase());
-		}
-		if (offset < 0) return null;
+		// Share Apply's code-point conversion and occurrence fallback.
+		const range = internalLinkMatchRange(sourceText, matchedText, match.text_offset);
+		if (!range) return null;
+		const offset = range.start;
 
 		const available = Math.max(0, limit - matchedText.length);
 		let start = sourceText.length <= limit ? 0 : Math.max(0, offset - Math.floor(available / 2));

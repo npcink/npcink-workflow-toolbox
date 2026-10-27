@@ -51,17 +51,26 @@ with the closing commit or PR for one release cycle, then prune.
   See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md). These older
   actions are conditional on current feature visibility/pauses; the focused
   next action is recorded above.
-- **Recommendation relevance and anchor naturalness still need a human gold
-  set (Cloud ranking owner).** The 2026-10-17 twelve-article developer
+- **Recommendation relevance and anchor naturalness (Cloud ranking owner).**
+  Independent human gold remains absent; AI-led development continues under
+  the operator's 2026-10-26 decision above. The 2026-10-17 twelve-article developer
   regression found weak related results for the short promotion and broad
   CMS/theme matches, plus exact but unnatural anchors such as `的HTML`,
   `有一定的`, and `售价：49美元`. Physical Apply safety does not establish
   editorial quality. Keep `related_content.v1` / `internal_links.v1` frozen;
-  label source/target/anchor triples before proposing a versioned ranking
-  change. Developer events, including earlier unmarked smoke traffic, must
-  be excluded from human adoption metrics; the current Cloud summary still
+  compare source/target/anchor evidence through Eval Lab before proposing a
+  versioned ranking change. Developer events, including earlier unmarked smoke
+  traffic, must be excluded from human adoption metrics; the current Cloud summary still
   includes developer traffic. Owner: Cloud evaluation, with Toolbox real
   editor regression. Source: [Real Article Regression 2026-10-17](archive/2026-10/recommendation-real-article-regression-2026-10-17.md).
+  On 2026-10-27 the current shared M4 candidate contained only 100 public
+  documents / 119 chunks and a dirty source receipt; most selected historical
+  sources/targets were absent. The next semantic comparison requires a stable
+  named runtime and corpus through the Cloud owner's existing process. Do not
+  lower thresholds or add Toolbox indexing to compensate. The focused preview
+  occurrence fix and unchanged 95-anchor/45-control replay are recorded in
+  [Eval Lab's cycle](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-preview-occurrence-2026-10-27.md);
+  they establish review-context correctness, not relevance improvement.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **User-facing UX audit (2026-10-12) is in closeout.** The audit found four

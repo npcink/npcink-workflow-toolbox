@@ -55,6 +55,22 @@ It cannot prove a target relevant or authorize an insertion. Existing author
 review and structural protections remain necessary. Other language patterns
 need independent counterexamples before expanding the rule.
 
+## Review preview occurrence
+
+The source preview uses `internalLinkMatchRange`, the same code-point-offset
+conversion and occurrence fallback used by Apply. With repeated `JavaScript`
+after an emoji, an offset pointing to the second occurrence must highlight the
+second occurrence; UTF-16 indexing must not silently fall back to the first.
+The actual matched casing is retained. This fixes review context only: supplied
+anchors, matching/eligibility rules, ranks and versions are unchanged. It does
+not establish target relevance or authorize Apply. ASCII, CJK, multiple emoji,
+case-insensitive and invalid-offset fallback controls cover this behavior.
+Only occurrence resolution converts code points; the existing preview clipping
+budget still counts UTF-16 code units. Offset coercion and first-match fallback
+remain Apply's existing behavior, including missing or invalid offsets. Long
+preview controls check the selected second occurrence near the start, middle
+and end without introducing new clipping or Unicode-normalization rules.
+
 ## Version and observation
 
 The in-memory `current_article_multi_link_result.v1` gains optional
