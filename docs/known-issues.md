@@ -71,6 +71,16 @@ with the closing commit or PR for one release cycle, then prune.
   occurrence fix and unchanged 95-anchor/45-control replay are recorded in
   [Eval Lab's cycle](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-preview-occurrence-2026-10-27.md);
   they establish review-context correctness, not relevance improvement.
+  The next bounded cycle adds the [v3 caption guard](internal-link-anchor-eligibility-v3.md):
+  7201 → 5280 `解决办法` at an existing caption position becomes manual review; 118 of
+  119 development eligibility outcomes stay unchanged. Exact but generic
+  `你也可以` and `管理工具` within `管理工具栏` remain unresolved; assess
+  source task, destination task and useful-positive retention through Eval Lab
+  before another product change. AI opinions are evidence, not human gold.
+  Original 10-source holdout requests are captured, but full-corpus retrieval
+  failed at the existing embedding endpoint (including a single-text health
+  probe). Resume the same frozen holdout when healthy; do not claim holdout
+  acceptance or a release from the development/UI replay.
 - **Editor intent convergence accepted 2026-10-07** and moved to Recently
   Closed; see [Editor Intent Convergence Decision](editor-intent-convergence-decision.md).
 - **User-facing UX audit (2026-10-12) is in closeout.** The audit found four

@@ -144,9 +144,12 @@ ordinary generation and Site Knowledge remain available. See
   verification remain deferred in [Known Issues](known-issues.md). Existing
   formatting is merged (#141); its historical candidate evidence is retained.
 
-- Recommendation anchor eligibility now has a separate
-  [v2 contract](internal-link-anchor-eligibility-v2.md) for bounded fragment
-  rejection in the current editor. The frozen ranking v1 and its old editor
+- Recommendation anchor eligibility now has an active
+  [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical
+  [v2 contract](internal-link-anchor-eligibility-v2.md) with a bounded
+  `解决办法` caption guard. The 20-source / 119-candidate development replay
+  changes one eligibility outcome; ordinary prose and useful positives remain.
+  The policy remains bounded to the current editor. The frozen ranking v1 and its old editor
   implementation remain the comparison; consult Eval Lab release acceptance
   evidence before treating the recommendation feature as ready to release.
 

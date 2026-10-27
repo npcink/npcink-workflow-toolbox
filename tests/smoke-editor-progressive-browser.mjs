@@ -682,7 +682,7 @@ try {
 				while (feedbackReceipts.length < developerFeedback.length && Date.now() < receiptDeadline) await new Promise((resolve) => setTimeout(resolve, 100));
 				assert(developerFeedback.length > 0 && feedbackReceipts.length === developerFeedback.length, 'Every developer-marked recommendation event has a Cloud receipt.');
 				assert(feedbackReceipts.every((receipt) => receipt.status === 200 && receipt.accepted && receipt.event_id), 'Cloud accepts every metadata-only event and returns its identity.');
-				assert(developerFeedback.every((event) => event.source_reason_codes.includes('anchor_eligibility_v2')), 'Current internal-link events retain the bounded eligibility version.');
+				assert(developerFeedback.every((event) => event.source_reason_codes.includes('anchor_eligibility_v3')), 'Current internal-link events retain the bounded eligibility version.');
 			}
 			console.log(`INFO: internal_link_browser_receipt=${JSON.stringify({
 				post_id: parseInt(activePostId, 10),

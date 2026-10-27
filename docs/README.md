@@ -129,6 +129,7 @@ Start from the active documents below before changing code.
 - [Recommendation Eval](recommendation-eval.md)
 - [Recommendation Ranking Baseline v1](recommendation-ranking-baseline-v1.md)
 - [Internal-link Anchor Eligibility v2](internal-link-anchor-eligibility-v2.md)
+- [Internal-link Anchor Eligibility v3](internal-link-anchor-eligibility-v3.md)
 - [Summary Eval](summary-eval.md)
 - [Site Ops Cloud Analysis Contract](site-ops-cloud-analysis-contract.md)
 - [Site Knowledge Vector Operations Contract](site-knowledge-vector-operations-contract.md)

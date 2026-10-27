@@ -281,13 +281,16 @@ assert.equal(helpers.internalLinkSavedStateChanged([], telemetrySnapshots), true
 const applyFeedbackSeed = helpers.internalLinkApplyFeedbackSeed({}, 'internal_link_results_session', 2);
 assert.equal(applyFeedbackSeed.source_object_type, 'recommendation_session');
 assert.equal(applyFeedbackSeed.source_object_id, 'internal_link_results_session');
-assert.deepEqual(Array.from(applyFeedbackSeed.source_reason_codes), ['anchor_eligibility_v2', 'applied_count_1_3']);
+assert.deepEqual(Array.from(applyFeedbackSeed.source_reason_codes), ['anchor_eligibility_v3', 'applied_count_1_3']);
 const savedUnchangedFeedback = helpers.internalLinkSavedFollowupPayload(applyFeedbackSeed, false);
 assert.equal(savedUnchangedFeedback.source_action_id, 'internal_link_saved_unchanged');
 assert.equal(savedUnchangedFeedback.local_outcome, 'accepted');
 assert.equal(savedUnchangedFeedback.source_object_type, 'recommendation_session');
 assert.equal(savedUnchangedFeedback.source_object_id, 'internal_link_results_session');
-assert.deepEqual(Array.from(savedUnchangedFeedback.source_reason_codes), ['anchor_eligibility_v2', 'applied_count_1_3', 'saved_without_editor_changes']);
+assert.deepEqual(Array.from(savedUnchangedFeedback.source_reason_codes), ['anchor_eligibility_v3', 'applied_count_1_3', 'saved_without_editor_changes']);
+const historicalSeed = { ...applyFeedbackSeed, source_reason_codes: ['anchor_eligibility_v2', 'applied_count_1_3'] };
+assert.ok(helpers.internalLinkSavedFollowupPayload(historicalSeed, false).source_reason_codes.includes('anchor_eligibility_v2'), 'Historical seeds retain the policy used at Apply');
+assert.ok(!helpers.internalLinkSavedFollowupPayload(historicalSeed, false).source_reason_codes.includes('anchor_eligibility_v3'));
 const savedEditedFeedback = helpers.internalLinkSavedFollowupPayload(savedUnchangedFeedback, true);
 assert.equal(savedEditedFeedback.source_action_id, 'internal_link_saved_edited');
 assert.equal(savedEditedFeedback.local_outcome, 'edited_before_accept');
@@ -419,7 +422,7 @@ assert.equal(helpers.recommendationFeedbackContext(livePayload, 'internal_links'
 assert.equal(helpers.recommendationFeedbackContext(livePayload, 'internal_links', [linkedLiveBlock], richText).applicableCount, 0);
 const liveImpression = helpers.recommendationImpressionFeedbackPayload(livePayload, 'internal_links', 'live-session', [linkedLiveBlock], richText);
 assert.ok(liveImpression.source_reason_codes.includes('applicable_count_0'));
-assert.ok(liveImpression.source_reason_codes.includes('anchor_eligibility_v2'));
+assert.ok(liveImpression.source_reason_codes.includes('anchor_eligibility_v3'));
 assert.equal(liveImpression.ranking_version, 'internal_links.v1');
 assert.equal(liveImpression.evidence_ref_ids.length, 0);
 assert.equal(/"(?:content|anchor_text|source_match|blocks)"\s*:/.test(JSON.stringify(liveImpression)), false, 'Readiness telemetry stays metadata-only');
@@ -451,7 +454,16 @@ if (process.env.NPCINK_LINK_ANCHOR_FIXTURES) {
   return [row.text, row.anchor, row.expected_reason];
  });
 }
-for (const [text, anchor, expectedReason] of anchorBoundaryCases) {
+const solutionCaptionCases = [
+ ['解决办法：', '解决办法', 'anchor_reference_requires_review'],
+ ['解决办法', '解决办法', 'anchor_reference_requires_review'],
+ ['参考：解决办法', '解决办法', 'anchor_reference_requires_review'],
+ ['解决办法：', '解决办法：', 'anchor_reference_requires_review'],
+ ['本文介绍解决办法和注意事项。', '解决办法', ''],
+ ['缓存解决办法：', '缓存解决办法', ''],
+ ['解决办法：清除缓存。', '清除缓存', ''],
+];
+for (const [text, anchor, expectedReason] of [...anchorBoundaryCases, ...solutionCaptionCases]) {
  const current = batchCandidate('boundary', anchor, Array.from(text.slice(0, text.indexOf(anchor))).length, 3003, 'https://example.test/target/', text);
  const blocks = [{ ...batchBlock, attributes: { content: text } }];
  const before = JSON.stringify({ current, blocks });
@@ -460,7 +472,7 @@ for (const [text, anchor, expectedReason] of anchorBoundaryCases) {
  assert.equal(ready.reasonCodes[0] || '', expectedReason, 'Anchor boundary: ' + anchor);
  assert.equal(ready.canApply, !expectedReason);
  assert.equal(applied.applied_count, expectedReason ? 0 : 1);
- assert.equal(ready.anchorEligibilityVersion, 'internal_link_anchor_eligibility.v2');
+ assert.equal(ready.anchorEligibilityVersion, 'internal_link_anchor_eligibility.v3');
  assert.equal(applied.anchor_eligibility_version, ready.anchorEligibilityVersion);
  if (expectedReason) assert.equal(helpers.prepareInternalLinkApplication(current, blocks[0], blocks, richText).error, expectedReason);
  assert.equal(JSON.stringify({ current, blocks }), before, 'Do not rewrite anchors or editor text');
@@ -472,7 +484,7 @@ const inlineFragmentBlocks = [{ ...batchBlock, attributes: { content: '为自己
 inlineFragment.sourceMatch.expected_text = windowObject.NpcinkToolboxTextHelpers.plainTextFromHtml(inlineFragmentBlocks[0].attributes.content);
 assert.equal(helpers.internalLinkCandidateEligibility(inlineFragment, inlineFragmentBlocks, richText).reasonCodes[0], 'anchor_incomplete_compound');
 assert.equal(inlineFragmentBlocks[0].attributes.content, '为自己搭建<strong>个人</strong>网站。', 'Fragment rejection preserves inline markup');
-console.log('PASS: anchor eligibility v2 controls: ' + anchorBoundaryCases.length);
+console.log('PASS: anchor eligibility v3 controls: ' + (anchorBoundaryCases.length + solutionCaptionCases.length));
 console.log('PASS: internal-link editor batch apply, partial results, preflight, stale protection, and transaction undo safety');
 
 const relatedMetadataPayload = { sections: { related_content: {
