@@ -599,3 +599,61 @@ for (const family of ['internal_links', 'related_content']) {
  assert.equal(/"(?:content|anchor|title|url|score)"\s*:/.test(JSON.stringify(event)), false);
 }
 console.log('PASS: versioned healthy abstention feedback has zero denominator and no fabricated rank');
+
+// Render the real sidebar section with WordPress element stubs. Keep this
+// test-only hook out of the shipped helper API.
+const renderWindow = {
+ location: windowObject.location,
+ wp: {
+  element: { createElement: (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity).filter((child) => child !== null && child !== false) }), useState() {}, useEffect() {}, useRef() {} },
+  data: { useSelect() {} },
+  plugins: { registerPlugin() {} },
+  editor: { PluginSidebar: 'sidebar' },
+  richText,
+ },
+};
+const renderHook = '\tplugins.registerPlugin(PLUGIN_NAME, {';
+assert.ok(source.includes(renderHook));
+vm.runInNewContext(source.replace(renderHook, '\twindow.renderInternalLinksForTest = renderInternalLinkCandidateSection;\n' + renderHook), { window: renderWindow, URL }, { filename: 'editor-citation-render.js' });
+function descendants(node, predicate, insideDetails = false) {
+ if (!node || typeof node !== 'object') return [];
+ const hidden = insideDetails || node.type === 'details';
+ return (predicate(node, hidden) ? [node] : []).concat(node.children.flatMap((child) => descendants(child, predicate, hidden)));
+}
+function renderedText(node) {
+ return typeof node === 'string' ? node : node && node.children ? node.children.map(renderedText).join(' ') : '';
+}
+const renderItems = Array.from({ length: 9 }, (_, index) => ({
+ id: String(index + 1), label: 'Article ' + String(index + 1),
+ candidate_relevance: 'review', candidate_source: 'cloud_vector',
+ target_ref: { post_id: 4000 + index, status: 'publish', post_type: 'post', url: 'https://example.test/article-' + index + '/' },
+ can_apply_to_editor: index === 1, anchor_or_context: index === 1 ? 'Alpha' : '',
+ source_match: index === 1 ? alphaCandidate.sourceMatch : null,
+}));
+const renderSection = { retrieval_status: 'cloud_vector_evidence', recommendation_candidates: renderItems };
+const renderActions = [];
+const renderControls = { internalLinks: { blocks: [batchBlock],
+ open: (item) => renderActions.push('open:' + item.id),
+ copy: (item) => renderActions.push('copy:' + item.id),
+ applyBatch: (items) => renderActions.push('apply:' + items.map((item) => item.id).join(',')),
+} };
+const rendered = renderWindow.renderInternalLinksForTest(renderSection, renderControls);
+const articleRows = descendants(rendered, (node, hidden) => node.type === 'li' && !hidden);
+assert.deepEqual(articleRows.map((row) => row.props['data-candidate-rank']), [1, 2, 3, 4, 5, 6, 7, 8], 'Insertion readiness never moves a lower-ranked article ahead or folds useful candidates');
+for (const row of articleRows) {
+ assert.equal(descendants(row, (node) => node.type === 'button' && renderedText(node) === 'Open article').length, 1);
+ assert.equal(descendants(row, (node) => node.type === 'button' && renderedText(node) === 'Copy link').length, 1);
+}
+assert.equal(descendants(articleRows[0], (node) => renderedText(node) === 'Add citation').length, 0, 'An article without an anchor remains available without gaining Apply');
+for (const label of ['Open article', 'Copy link']) descendants(articleRows[0], (node) => node.type === 'button' && renderedText(node) === label)[0].props.onClick();
+descendants(articleRows[1], (node) => node.type === 'button' && renderedText(node) === 'Add citation')[0].props.onClick();
+assert.deepEqual(renderActions, ['open:1', 'copy:1', 'apply:2']);
+assert.equal(descendants(articleRows[1], (node, hidden) => node.type === 'blockquote' && !hidden).length, 1, 'Apply context stays visible for author review');
+assert.equal(descendants(articleRows[0], (node, hidden) => node.props.className === 'npcink-toolbox-editor-support__candidate-policy' && !hidden).length, 0, 'Insertion diagnostics are secondary to article selection');
+const batchRendered = renderWindow.renderInternalLinksForTest(renderSection, { internalLinks: { ...renderControls.internalLinks, batchMode: true, selected: { '1': true, '2': true } } });
+const applySelected = descendants(batchRendered, (node) => node.type === 'button' && renderedText(node).startsWith('Apply '))[0];
+applySelected.props.onClick();
+assert.equal(renderActions.at(-1), 'apply:2', 'Batch selections still exclude articles that fail insertion checks');
+const weakRendered = renderWindow.renderInternalLinksForTest({ ...renderSection, recommendation_candidates: renderItems.map((item, index) => ({ ...item, candidate_relevance: index === 0 ? 'weak' : 'review' })) }, renderControls);
+assert.deepEqual(descendants(weakRendered, (node, hidden) => node.type === 'li' && !hidden).map((row) => row.props['data-candidate-rank']), [2, 3, 4, 5, 6, 7, 8, 9], 'Weak candidates stay outside the main list');
+console.log('PASS: article-first recommendation rendering preserves ranking, manual actions, visible Apply context and live insertion guards');

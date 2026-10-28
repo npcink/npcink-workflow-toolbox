@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-27.
+Last reviewed: 2026-10-28.
 
 SEO/AEO/GEO specialist product entrypoints are paused in the current candidate;
 generic content assistance, original configuration and historical data remain.
@@ -115,6 +115,14 @@ ordinary generation and Site Knowledge remain available. See
 
 ## Open Debt (top items)
 
+- **2026-10-28 recommendation priority:** deliver useful ranked articles for
+  manual choice. The editor now shows up to eight non-weak candidates in their
+  existing order, with open/copy actions regardless of anchor eligibility.
+  Apply remains optional and uses the existing live safety checks; its source
+  preview stays visible. Perfect anchors, exact resource identity for every
+  candidate and model unanimity are not prerequisites for manual recommendation
+  delivery. See the [active recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md#3-当前目标相关候选优先用户自行挑选).
+  This UI change does not establish retrieval-quality improvement or deployment.
 - The operator selected AI-led recommendation development on 2026-10-26:
   Eval Lab reuses real samples and model evidence, the development agent handles
   disagreements, fixes and regression, and the operator uses the product,
@@ -129,9 +137,9 @@ ordinary generation and Site Knowledge remain available. See
   The first bounded cycle fixed repeated-anchor preview selection after emoji;
   see the [occurrence contract](internal-link-anchor-eligibility-v2.md#review-preview-occurrence)
   and [Eval Lab evidence](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-preview-occurrence-2026-10-27.md).
-  The current shared Cloud candidate has only 100 public documents / 119 chunks
-  and a dirty source receipt. Next semantic comparison needs a stable named
-  runtime/corpus from the Cloud owner; old ranking outcomes are not comparable
+  The earlier 2026-10-26 shared Cloud receipt recorded 100 public documents /
+  119 chunks and a dirty source receipt; it is historical, not a fresh status
+  check. Further retrieval comparison needs a named runtime/corpus from its owner; old ranking outcomes are not comparable
   on that reduced corpus. No shared runtime or index was changed this cycle.
 - Unified article-review improvements and deterministic before/after site
   verification remain deferred in [Known Issues](known-issues.md). Existing

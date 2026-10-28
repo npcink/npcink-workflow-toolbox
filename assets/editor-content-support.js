@@ -6413,7 +6413,6 @@
 		const eligibility = new Map(candidates.map((item) => [item, internalLinkCandidateEligibility(item, actionControls.blocks || [], richText)]));
 		const canApplyCandidate = (item) => eligibility.get(item).canApply;
 		const applicableCandidates = visibleCandidates.filter(canApplyCandidate);
-		const referenceCandidates = visibleCandidates.filter((item) => !canApplyCandidate(item));
 		const selectedCandidates = applicableCandidates.filter((item) => selected[String(item.id || '')]);
 		const selectionFull = selectedCandidates.length >= 8;
 		const batchMode = Boolean(actionControls.batchMode);
@@ -6424,9 +6423,7 @@
 			: retrievalStatus === 'no_cloud_evidence'
 				? __('Site Knowledge returned no matches. Any suggestions below use available local evidence.', 'npcink-workflow-toolbox')
 				: '';
-		const summaryText = applicableCandidates.length
-			? sprintf(__('%1$d ready to apply, %2$d for reference.', 'npcink-workflow-toolbox'), applicableCandidates.length, referenceCandidates.length)
-			: sprintf(__('Found %d related articles. None can be applied directly.', 'npcink-workflow-toolbox'), referenceCandidates.length);
+		const summaryText = sprintf(__('Found %d related articles. Open an article to decide whether to use it.', 'npcink-workflow-toolbox'), visibleCandidates.length);
 		const renderCandidate = (item, index) => {
 			const title = readableItemText(item && item.title, __('Internal link candidate', 'npcink-workflow-toolbox'));
 			const key = String(index) + '-' + title;
@@ -6470,7 +6467,12 @@
 						sourcePreview.clippedAfter ? '...' : ''
 					) : null,
 					reason ? createElement('p', null, reason) : null,
-					!canSelect && eligibility.get(item).reasonCodes.length ? createElement('p', { className: 'npcink-toolbox-editor-support__candidate-policy' }, internalLinkBatchReasonLabel(eligibility.get(item).reasonCodes[0])) : null
+					!canSelect && eligibility.get(item).reasonCodes.length ? createElement(
+						'details',
+						{ className: 'npcink-toolbox-editor-support__citation-more' },
+						createElement('summary', null, __('Insertion details', 'npcink-workflow-toolbox')),
+						createElement('p', { className: 'npcink-toolbox-editor-support__candidate-policy' }, internalLinkBatchReasonLabel(eligibility.get(item).reasonCodes[0]))
+					) : null
 				),
 				createElement(
 					'div',
@@ -6519,14 +6521,12 @@
 			),
 			createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, items.map(renderCandidate))
 		) : null;
-		const referencePreview = referenceCandidates.slice(0, 5);
-		const referenceRemainder = referenceCandidates.slice(5);
 		return createElement(
 				'section',
 				{ className: 'npcink-toolbox-editor-support__metadata-compact-section npcink-toolbox-editor-support__internal-links' },
 				visibleCandidates.length ? createElement('p', { className: 'npcink-toolbox-editor-support__citation-summary' }, summaryText) : null,
 				sourceNotice ? createElement('p', { className: 'npcink-toolbox-editor-support__citation-notice' }, sourceNotice) : null,
-				visibleCandidates.length ? renderCandidateGroup('applicable', __('Ready to apply', 'npcink-workflow-toolbox'), applicableCandidates, true) : null,
+				visibleCandidates.length ? renderCandidateGroup('recommended', __('Recommended articles', 'npcink-workflow-toolbox'), visibleCandidates, applicableCandidates.length > 0) : null,
 				applicableCandidates.length && batchMode ? createElement(
 					'div',
 					{ className: 'npcink-toolbox-editor-support__internal-link-review' },
@@ -6543,13 +6543,6 @@
 						sprintf(__('Apply %d links', 'npcink-workflow-toolbox'), selectedCandidates.length)
 					),
 					createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, __('Changes stay in the visible editor until you save or publish.', 'npcink-workflow-toolbox'))
-				) : null,
-				visibleCandidates.length ? renderCandidateGroup('reference', __('Reference only', 'npcink-workflow-toolbox'), referencePreview, false) : null,
-				referenceRemainder.length ? createElement(
-					'details',
-					{ className: 'npcink-toolbox-editor-support__citation-more' },
-					createElement('summary', null, sprintf(__('Show %d more', 'npcink-workflow-toolbox'), referenceRemainder.length)),
-					createElement('ul', { className: 'npcink-toolbox-editor-support__internal-link-list' }, referenceRemainder.map((item, index) => renderCandidate(item, index + referencePreview.length)))
 				) : null,
 				excludedCandidates.length ? createElement(
 					'details',
