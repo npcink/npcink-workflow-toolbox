@@ -139,16 +139,20 @@ $post_id = ${requestedPostId};
 if ($post_id <= 0) {
 	$fixture_content = 'This temporary draft exists only for the editor progressive browser smoke. It should be deleted by the smoke cleanup.';
 	$fixture_title = 'Npcink browser smoke fixture ' . wp_generate_uuid4();
+	$fixture_excerpt = '';
 	$fixture_source = get_post(${sourcePostId});
 	if ($fixture_source instanceof WP_Post) {
 		$fixture_content = (string) $fixture_source->post_content;
-		$fixture_title = (string) $fixture_source->post_title . ' [smoke]';
+		// Preserve query inputs; a smoke suffix can change bounded retrieval.
+		$fixture_title = (string) $fixture_source->post_title;
+		$fixture_excerpt = (string) $fixture_source->post_excerpt;
 	}
 	$post_id = wp_insert_post(array(
 		'post_type'    => 'post',
 		'post_status'  => 'draft',
 		'post_author'  => $user->ID,
-		'post_title'   => $fixture_title,
+		'post_title'   => wp_slash($fixture_title),
+		'post_excerpt' => wp_slash($fixture_excerpt),
 		'post_content' => wp_slash($fixture_content),
 	), true);
 	if (is_wp_error($post_id)) {
@@ -318,6 +322,7 @@ try {
 	const networkErrors = [];
 	const developerFeedback = [];
 	const feedbackReceipts = [];
+	const feedbackValidationErrors = [];
 	if (requireFreshCloud) {
 		freshCloudProbe = createFreshCloudProbe(wpPath(), baseUrl);
 		await page.route('**/npcink-toolbox/v1/editor/content-support', (route) => {
@@ -331,10 +336,17 @@ try {
 		if (request.method() !== 'POST') return route.continue();
 		const payload = request.postDataJSON();
 		if (!/^(?:internal_link|related_content)_/.test(payload.source_action_id || '')) return route.continue();
-		assertMetadataOnlyFeedback(payload, 'Observed ' + payload.source_action_id);
-		// Test transport annotation only: never count developer traffic as human adoption.
-		payload.source_reason_codes = [...new Set(['developer_smoke', ...(payload.source_reason_codes || [])])];
-		assert(payload.source_reason_codes.length <= 12, 'The developer marker does not truncate feedback metadata.');
+		try {
+			assertMetadataOnlyFeedback(payload, 'Observed ' + payload.source_action_id);
+			// Test transport annotation only: never count developer traffic as human adoption.
+			payload.source_reason_codes = [...new Set(['developer_smoke', ...(payload.source_reason_codes || [])])];
+			assert(payload.source_reason_codes.length <= 12, 'The developer marker does not truncate feedback metadata.');
+		} catch (error) {
+			// Route callbacks run outside the main try/finally; surface failure there
+			// so temporary credentials and the draft are still cleaned up.
+			feedbackValidationErrors.push(error.message);
+			return route.abort();
+		}
 		developerFeedback.push(payload);
 		await route.continue({ postData: JSON.stringify(payload) });
 	});
@@ -421,7 +433,7 @@ try {
 			const started = performance.now();
 			let internalLinkResponse, internalLinkPayload;
 			try {
-				await page.getByRole('button', { name: /Run Site citation suggestions|运行 站内引用建议/i }).click({ timeout: 30000 });
+				await page.getByRole('button', { name: /Body links|正文内链|Run Site citation suggestions|运行 站内引用建议/i }).click({ timeout: 30000 });
 				internalLinkResponse = await responsePromise;
 				internalLinkPayload = await internalLinkResponse.json();
 			} catch (error) {
@@ -445,7 +457,7 @@ try {
 			if (requireFreshCloud && ['cloud_vector_evidence', 'no_cloud_evidence'].includes(internalLinkSection.retrieval_status)) {
 				assert(['miss', 'bypass'].includes(internalLinkSection.source_knowledge?.cache_status), 'Fresh-Cloud acceptance rejects cache hits or unknown cache evidence.');
 			}
-					await page.waitForSelector('text=/Site citation suggestions|站内引用建议/', { timeout: 30000 });
+					await page.waitForSelector('text=/Body links|正文内链|Site citation suggestions|站内引用建议/', { timeout: 30000 });
 					const adjustmentDisclosure = page.locator('.npcink-toolbox-editor-support__citation-adjustments');
 					assert(await adjustmentDisclosure.count() === 1, 'Recommendation preferences are available in one low-frequency disclosure.');
 				const internalLinkImpression = await waitForFeedbackAction(requests, 'internal_link_impression');
@@ -682,6 +694,7 @@ try {
 				assert(toolboxNetworkErrors.length === 0, 'Internal-link browser flow has no Toolbox or Cloud Addon HTTP errors.');
 			}
 			if (!cloudUnavailable) {
+				assert(feedbackValidationErrors.length === 0, 'All intercepted feedback passes metadata validation: ' + feedbackValidationErrors.join('; '));
 				const receiptDeadline = Date.now() + 10000;
 				while (feedbackReceipts.length < developerFeedback.length && Date.now() < receiptDeadline) await new Promise((resolve) => setTimeout(resolve, 100));
 				assert(developerFeedback.length > 0 && feedbackReceipts.length === developerFeedback.length, 'Every developer-marked recommendation event has a Cloud receipt.');
