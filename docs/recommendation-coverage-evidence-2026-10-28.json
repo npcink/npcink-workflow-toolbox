@@ -1,0 +1,205 @@
+{
+  "contract_version": "recommendation_coverage_diagnosis.v1",
+  "observed_at": "2026-10-28T03:18:53.166052+00:00",
+  "site_url": "https://magick-ai.local",
+  "site_id_sha256": "b5e6f64fae932f1a8dff4bfb9ae62a8d41facc371fbdd0c4b22c4c29d572728e",
+  "cloud_runtime_revision": "1bc9435b5ce3de2b2094c7b8f1c27adfba0aa8ee",
+  "cloud_runtime_dirty": false,
+  "probe_run": "run_c7eef308f0d54df0b2f560da3c1b304d",
+  "read_only_transaction": {
+    "read_only": "on",
+    "isolation": "repeatable read"
+  },
+  "module_sha256": {
+    "app.domain.site_knowledge.repository": "91b205a8d46e87a2540cd3171bc9b5c2512090f9a9f14bc09a872b3419deebd3",
+    "app.domain.site_knowledge.service": "f5f26824ad0237b9a0f8a10d19d8fabce3c40e92d456fe93c5bcc85d4c85f78a"
+  },
+  "counts": {
+    "public_posts": 1966,
+    "public_pages": 33,
+    "public_total": 1999,
+    "indexed_public_intersection": 100,
+    "missing_public": 1899,
+    "indexed_public_extras": 0,
+    "article_page_coverage_percent": 5.0
+  },
+  "manifest_set_digest_format": "sha256 of newline-separated type:id, sorted by type then numeric id; no trailing newline",
+  "manifest_digests": {
+    "local_public": "21e566156691cf0ff6129b4a0ee234365d3ef29039dec903bdf2db2c1ec27792",
+    "cloud_searchable_public": "7d3c8d5a590e88590d36c174c3a4b1271296f52b686f7b1c6c4f9b79df00204e",
+    "missing_public": "2a75813f4488bd739b5a177abfe3a7fe4cc1e16f83abc5b71aba218d0295420c"
+  },
+  "document_groups": [
+    {
+      "source_type": "media",
+      "post_type": "attachment",
+      "post_status": "publish",
+      "count": 69
+    },
+    {
+      "source_type": "page",
+      "post_type": "page",
+      "post_status": "publish",
+      "count": 1
+    },
+    {
+      "source_type": "page",
+      "post_type": "page",
+      "post_status": "stale",
+      "count": 14
+    },
+    {
+      "source_type": "post",
+      "post_type": "post",
+      "post_status": "publish",
+      "count": 99
+    },
+    {
+      "source_type": "post",
+      "post_type": "post",
+      "post_status": "stale",
+      "count": 50
+    }
+  ],
+  "chunk_groups": [
+    {
+      "source_type": "media",
+      "post_type": "attachment",
+      "post_status": "publish",
+      "count": 69
+    },
+    {
+      "source_type": "page",
+      "post_type": "page",
+      "post_status": "publish",
+      "count": 1
+    },
+    {
+      "source_type": "page",
+      "post_type": "page",
+      "post_status": "stale",
+      "count": 16
+    },
+    {
+      "source_type": "post",
+      "post_type": "post",
+      "post_status": "publish",
+      "count": 118
+    },
+    {
+      "source_type": "post",
+      "post_type": "post",
+      "post_status": "stale",
+      "count": 62
+    }
+  ],
+  "history_window": {
+    "start": "2026-10-19T06:50:00Z",
+    "end": "2026-10-19T12:11:00Z",
+    "refresh_runs_with_deletions": 17,
+    "zero_accepted_runs": 16,
+    "failed_documents": 0,
+    "input_retained_runs": 0,
+    "encrypted_input_retained_runs": 0,
+    "result_retained_runs": 0
+  },
+  "selected_runs": [
+    {
+      "run_id": "run_a82e4030963549da81fd84609b047aaf",
+      "status": "succeeded",
+      "sync_mode": "refresh",
+      "accepted_documents": 0,
+      "indexed_documents": 0,
+      "failed_documents": 0,
+      "deleted_entries": 52,
+      "created_at": "2026-10-19 06:51:50.016121+00:00",
+      "input_retained": false,
+      "encrypted_input_retained": false,
+      "result_retained": false
+    },
+    {
+      "run_id": "run_8c859cf0f82b460c850c3743cdd44f32",
+      "status": "succeeded",
+      "sync_mode": "refresh",
+      "accepted_documents": 0,
+      "indexed_documents": 0,
+      "failed_documents": 0,
+      "deleted_entries": 430,
+      "created_at": "2026-10-19 10:30:15.502300+00:00",
+      "input_retained": false,
+      "encrypted_input_retained": false,
+      "result_retained": false
+    },
+    {
+      "run_id": "run_c275b566473a4f40af6b5a3b4b64eb31",
+      "status": "succeeded",
+      "sync_mode": "refresh",
+      "accepted_documents": 0,
+      "indexed_documents": 0,
+      "failed_documents": 0,
+      "deleted_entries": 432,
+      "created_at": "2026-10-19 12:07:36.878550+00:00",
+      "input_retained": false,
+      "encrypted_input_retained": false,
+      "result_retained": false
+    },
+    {
+      "run_id": "run_597e315eff254bf2aec302ed34e410ec",
+      "status": "succeeded",
+      "sync_mode": "refresh",
+      "accepted_documents": 100,
+      "indexed_documents": 100,
+      "failed_documents": 0,
+      "deleted_entries": 432,
+      "created_at": "2026-10-19 12:10:27.938504+00:00",
+      "input_retained": false,
+      "encrypted_input_retained": false,
+      "result_retained": false
+    }
+  ],
+  "selected_snapshots": [
+    {
+      "document_count": 2043,
+      "chunk_count": 2259,
+      "captured_at": "2026-10-19 06:51:50.017062+00:00",
+      "run_id": "run_a82e4030963549da81fd84609b047aaf",
+      "previous": 2068
+    },
+    {
+      "document_count": 1669,
+      "chunk_count": 1835,
+      "captured_at": "2026-10-19 10:30:15.503227+00:00",
+      "run_id": "run_8c859cf0f82b460c850c3743cdd44f32",
+      "previous": 1868
+    },
+    {
+      "document_count": 269,
+      "chunk_count": 301,
+      "captured_at": "2026-10-19 12:07:36.879245+00:00",
+      "run_id": "run_c275b566473a4f40af6b5a3b4b64eb31",
+      "previous": 469
+    },
+    {
+      "document_count": 169,
+      "chunk_count": 188,
+      "captured_at": "2026-10-19 12:10:27.939270+00:00",
+      "run_id": "run_597e315eff254bf2aec302ed34e410ec",
+      "previous": 269
+    }
+  ],
+  "current_collector": {
+    "source_count": 1999,
+    "collected_count": 1999,
+    "missing_count": 0,
+    "user_id": 0,
+    "network_dispatched": false,
+    "batch_count": 10,
+    "batch_limit": 200,
+    "all_batches_complete": true
+  },
+  "evidence_limits": [
+    "Historical request bodies and encrypted inputs absent; exact upstream trigger not established.",
+    "Counts describe SQL searchable eligibility; external vector backend parity was not separately audited.",
+    "This record is diagnosis, not restoration or semantic-quality acceptance."
+  ]
+}

@@ -119,11 +119,17 @@ ordinary generation and Site Knowledge remain available. See
   draft save and related-reading insert/Undo/save/reload pass with real Cloud
   candidates on restored `magick-ai.local`; see the
   [acceptance record](recommendation-original-site-acceptance-2026-10-28.md).
-  Next priority is Cloud/Addon corpus coverage and count reconciliation:
-  1,966 published local posts versus status 169 documents / 188 chunks,
-  type-count sum 233 and recommendation pool 119 chunks. Definitions are not
-  aligned; no exact coverage percentage or quality improvement is established.
-  No indexing/runtime changes or human labeling were required for this smoke.
+  The subsequent [coverage diagnosis](recommendation-coverage-diagnosis-2026-10-28.md)
+  confirms only 100 of 1,999 public post/page sources in the searchable SQL
+  collection (5.00%; 1,899 missing). Status 169 includes 69 media; 233 also
+  includes 64 intentionally isolated historical documents. October 19 refresh
+  runs deleted old entries without replacing them; their expired inputs prevent
+  identifying the exact upstream trigger. Current Addon collection reads all
+  1,999 sources. Next: Addon/Cloud refresh safety and bounded recovery, then
+  Toolbox status request/response truncation (80 versus intended 1,000 IDs),
+  then comparable Eval Lab relevance evidence. No index/runtime recovery or
+  quality improvement is established. The same diagnosis records Typecho/Astro
+  readiness gaps; only WordPress is implemented and accepted today.
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for
   manual choice. The editor now shows up to eight non-weak candidates in their
   existing order, with open/copy actions regardless of anchor eligibility.
