@@ -2,10 +2,11 @@
 (function () {
 	'use strict';
 
-	const { canonicalInternalLinkUrl, internalLinkUrlIsSafe, internalLinkBlocksContainUrl } = window.NpcinkToolboxInternalLinkHelpers;
+	const { canonicalInternalLinkUrl, internalLinkUrlIsSafe, internalLinkBlocksContainUrl } = window.NpcinkToolboxInternalLinkHelpers || {};
 
 	function relatedReadingSelection(candidates, selected, blocks, currentPostId, sourcePostId, richTextApi) {
 		const fail = (reason) => ({ items: [], reason });
+		if ([canonicalInternalLinkUrl, internalLinkUrlIsSafe, internalLinkBlocksContainUrl].some((helper) => typeof helper !== 'function')) return fail('editor_unavailable');
 		if (!Number.isInteger(currentPostId) || currentPostId < 1 || currentPostId !== sourcePostId) return fail('article_changed');
 		if (!richTextApi || typeof richTextApi.create !== 'function') return fail('editor_unavailable');
 		if (!Array.isArray(candidates) || !Array.isArray(selected) || !selected.length || selected.length > 8) return fail('invalid_selection');

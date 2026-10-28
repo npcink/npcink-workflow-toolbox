@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import { readFileSync } from 'node:fs';
 import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
+
+const missingDependencyWindow = {};
+vm.runInNewContext(readFileSync(new URL('../assets/editor-content-support/related-reading.js', import.meta.url), 'utf8'), { window: missingDependencyWindow, URL });
+assert.equal(missingDependencyWindow.NpcinkToolboxRelatedReading.relatedReadingSelection([], [], [], 31, 31).reason, 'editor_unavailable');
 
 const source = readEditorContentSupportBundle();
 const window = { location: { href: 'https://example.test/wp-admin/post.php' }, wp: {} };
