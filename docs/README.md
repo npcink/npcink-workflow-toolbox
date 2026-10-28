@@ -24,6 +24,8 @@ Start from the active documents below before changing code.
 - [套餐升级后的推荐语料恢复 — 2026-10-28](recommendation-corpus-recovery-2026-10-28.md) — account-plan correction, bounded additive recovery and retained-data/retrieval verification.
 - [推荐语料恢复断点回执 — 2026-10-28](recommendation-corpus-recovery-evidence-2026-10-28.json) — 61 confirmed batches, 1,505 added sources, pending run and Docker outage; retained historical checkpoint.
 - [推荐语料恢复最终回执 — 2026-10-28](recommendation-corpus-recovery-final-evidence-2026-10-28.json) — 1,999/1,999 coverage, preserved data, audited interruption repair and both retrieval probes.
+- [推荐索引刷新安全与交付 — 2026-10-28](recommendation-refresh-safety-2026-10-28.md) — preserve-on-omission refresh, explicit withdrawal migration, regression/runtime evidence and remaining Cron/status/Eval work.
+- [刷新安全交付回执 — 2026-10-28](recommendation-refresh-safety-evidence-2026-10-28.json) — exact source, merge and M4 acceptance identities.
 - [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)
 - [Platform Governance Index](platform/README.md)
 - [Cross-Repo Platform Governance History](platform/cross-repo-platform-governance-history-2026-07-08.md)

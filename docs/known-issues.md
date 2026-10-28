@@ -58,20 +58,26 @@ with the closing commit or PR for one release cycle, then prune.
   original 233 documents / 266 chunks and WordPress source fingerprints
   preserved. Historical Free plan decisions limit vectors to 100; the operator
   upgraded to Agency's 10,000. The earlier site-only `quota=ok` conclusion did
-  not exclude account quota. Delete-before-quota order remains unfixed and can
-  discard old indexes when replacement is prevented; expired historical input
-  bodies still limit the root-cause claim. Preserve legitimate withdrawals,
-  validate delivery/input and replacement capacity before destructive cleanup,
-  and test quota failure without losing existing data.
+  not exclude account quota. The follow-on [refresh safety slice](recommendation-refresh-safety-2026-10-28.md)
+  removes delete-before-quota behavior for refresh and adds explicit legitimate
+  withdrawals; malformed/conflicting markers fail before mutation. 267 focused
+  regressions and 23 M4 safety tests passed. Real single-article refresh and
+  named Site Knowledge Cron each delivered one source with zero deletions;
+  unrelated rows/chunks and WordPress source fingerprints were unchanged.
+  Exact merge/runtime states are in the [receipt](recommendation-refresh-safety-evidence-2026-10-28.json).
+  Expired historical inputs still limit the earlier root-cause claim. Explicit
+  rebuild and SQL/vector partial-failure risks remain separate.
   Docker outage is resolved by an authorized restart with no deployment or
   index/volume deletion. The old run committed 11/25 documents, was repaired
   through the existing audited Cloud action, and only missing keys were sent.
   The [checkpoint](recommendation-corpus-recovery-evidence-2026-10-28.json)
   remains historical; [final evidence](recommendation-corpus-recovery-final-evidence-2026-10-28.json)
-  records completion. Local Cron guard and advanced reconciliation cursor
-  remain; future automatic incremental delivery and guard removal need scoped
-  verification. This recovery changed index contents, not source code or
-  WordPress articles. Owner: Cloud index/repair and Addon delivery; Eval Lab
+  records completion. The local global-Cron guard and advanced reconciliation
+  cursor remain. A named-hook smoke proves bounded incremental dispatch, not
+  unattended global reconciliation. Guard exit must account for other overdue
+  backup/trash/draft/history cleanup hooks; do not run all Cron to test knowledge.
+  The corpus recovery changed indexes; the follow-on safety slice changes Cloud/
+  Addon code. Neither operation writes WordPress article content. Owner: Cloud index/repair and Addon delivery; Eval Lab
   measures comparable relevance, Toolbox retains editor regression. No
   per-article human labels are required.
 - **Site Knowledge status comparison truncation (Toolbox).** The public status

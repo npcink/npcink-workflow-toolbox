@@ -131,9 +131,16 @@ ordinary generation and Site Knowledge remain available. See
   the earlier [checkpoint](recommendation-corpus-recovery-evidence-2026-10-28.json)
   remains historical. Account quota and delete-before-quota order strongly
   explain the earlier 100-document reduction; expired historical inputs limit
-  certainty. Next: Cloud refresh safety and Addon incremental/Cron acceptance,
-  Toolbox status request/response truncation (80 versus intended 1,000 IDs),
-  then comparable AI-led Eval Lab relevance evidence. Coverage restoration is
+  certainty. The follow-on [refresh safety slice](recommendation-refresh-safety-2026-10-28.md)
+  preserves old sources on omitted/failed/quota-skipped refresh and adds explicit
+  Addon withdrawal markers. 267 focused Cloud regressions, 23 M4 safety tests,
+  real single refresh and named knowledge-Cron delivery passed with unchanged
+  unrelated indexes and WordPress sources. See its
+  [delivery receipt](recommendation-refresh-safety-evidence-2026-10-28.json) for
+  exact merged/runtime states. Global Cron guard removal and a complete automatic
+  reconciliation cycle remain open. Next: bounded Cron exit, Toolbox status
+  request/response truncation (80 versus intended 1,000 IDs), then comparable
+  AI-led Eval Lab relevance evidence. Coverage restoration is
   not semantic-quality improvement or human adoption. Typecho/Astro remain
   unimplemented; see [cross-platform diagnosis](recommendation-coverage-diagnosis-2026-10-28.md).
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for
