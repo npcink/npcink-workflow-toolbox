@@ -2,7 +2,7 @@
 
 状态：Active
 
-最近更新：2026-08-30
+最近更新：2026-10-28
 
 适用范围：WordPress 编辑器中的相关文章推荐、内链候选推荐，以及它们依赖的 Cloud Site Knowledge 向量检索。
 
@@ -43,50 +43,43 @@
 
 所有推荐结果均为 `suggestion_only`。Cloud 向量是证据和排序输入，不是第二个 WordPress 控制面。
 
-## 3. 相关文章与内链不是同一个排序问题
+## 3. 当前目标：相关候选优先，用户自行挑选
 
-两者共享召回层，但不能共用完全相同的最终排序：
+2026-10-28 运营者决定：先提供相关度高的文章，由用户打开查看、自行选择。
+推荐可以包括替代方案、背景知识和互补教程，不要求每篇文章都解决完全相同的任务。
+明显无关、当前文章、重复及测试内容仍需过滤；人工选择不替代召回质量。
 
-### 相关文章
+文章相关性与插入资格分别判断：没有精确锚点、无法确认某个资源的同一身份，
+或 AI 对插入位置有分歧，不应单独成为整篇候选无法交付的理由。
+资源身份、精确正文匹配、重复链接和过期正文等检查继续约束显式“添加引用”。
+不把安全插入的通过率当成相关文章推荐的准确率。
 
-主要回答：“读者接下来还应该看什么？”
-
-排序应关注：
-
-```text
-主题相关性 + 内容多样性 + 阅读价值 + 新鲜度 + 内容质量
-```
-
-### 内链
-
-主要回答：“当前文章的哪个位置，适合链接到哪篇文章？”
-
-排序应关注：
-
-```text
-段落/句子匹配 + 目标文章价值 + 锚文本适配 + 插入位置 + 链接结构机会
-```
-
-因此，相关文章候选不能未经重新排序直接作为内链目标；内链还需要段落级证据、重复链接保护和人工确认。
+编辑器按既有推荐顺序展示最多 8 篇非 weak 候选，不按能否插入重新分组或提序，
+也不再把第 6–8 篇折叠。每篇保留打开、复制，插入失败原因收在“插入说明”；
+可插入项的正文预览仍直接可见，单篇添加、多选和撤销沿用现有显式操作。
+weak 候选仍在次级折叠区，不因这次定位调整变成高相关候选。
 
 ## 4. 当前实现链路
 
-当前相关文章流程为：
-
-1. 从标题、摘要、正文和必要的用户指令组成查询文本。
-2. Toolbox 调用 Cloud Site Knowledge 的 `related_content` intent，要求 `document` 粒度，最多召回 8 项。
-3. Cloud 过滤公开文章，按向量相似度召回；配置启用时可用 Jina Reranker 做二阶段排序。
-4. Cloud 对 chunk 结果进行文档级合并，返回文章标题、URL、摘要、理由和分数。
-5. Toolbox 再次确认文章仍为公开发布状态，排除当前文章，过滤缺少标题或 URL 的候选。
-6. 编辑器最多显示 5 项，当前 MVP 提供打开和复制动作，不自动修改正文。
+1. 从当前文章标题、摘要、正文和必要的用户指令组成查询及上下文。
+2. 现有编辑器“站内引用建议”通过 `internal_links` 流程获取 Cloud Site Knowledge
+   候选及 Toolkit 投影；历史独立 `related_content` 编辑器入口保持停用。
+3. Cloud 负责向量召回、公开文档过滤、合并、相关性及排序；Toolbox 不实现第二套排序。
+4. WordPress 投影核验本地目标，并保留 `candidate_relevance` 与
+   `can_apply_to_editor` 两种不同含义。浏览器继续核对当前可见正文的插入资格。
+5. 编辑器按第 3 节展示候选，由用户决定打开、复制或明确添加；最终仅由正常保存持久化。
 
 当前相关代码：
 
-- `includes/Rest_Controller.php`：相关文章候选组装和安全过滤。
-- `includes/Provider_Client.php`：Cloud Site Knowledge 请求与结果规范化。
-- `assets/editor-content-support.js`：相关文章面板和状态提示。
-- `npcink-ai-cloud/app/domain/site_knowledge/service.py`：Cloud 召回、文档合并和 rerank 编排。
-- `npcink-ai-cloud/app/domain/site_knowledge/rerankers.py`：可选 Jina rerank 适配。
+- `includes/Rest_Editor_Internal_Links.php`：候选投影与安全过滤。
+- `assets/editor-content-support.js`：候选列表与打开/复制/添加交互。
+- `assets/editor-content-support/internal-links.js`：当前编辑器插入预检与撤销。
+- Cloud `app/domain/site_knowledge/service.py`：召回、文档合并和排序。
+
+本次只调整候选展示与验收目标，没有改变 Cloud 召回或排序。
+历史模型分歧、失败实验和独立样本保留为开发证据，不再作为人工推荐交付前
+必须完成的“完美锚点”或“双模型一致”门槛。后续用固定真实样本对比 Top 5/8
+有用候选、明显无关项和漏召回；具体数据及口径由 Eval Lab 保存。
 
 ## 5. 算法原则
 
@@ -375,7 +368,7 @@ gold set。先用 6 篇双人标注校准口径；分歧由第三次复核或共
   `retrieval_status=cloud_vector_evidence`；精确锚点本身不能让 local fallback
   或 Cloud unavailable 候选变为可应用。REST 的 `can_apply_to_editor` 是基于请求快照的
   资格上限，浏览器还必须对当前 Gutenberg 富文本运行同一个 Apply engine 的纯预检。
-  “可插入”分组、按钮、有效选择和 impression 的 applicable 分母采用该实时结果；
+  “添加引用”按钮、有效选择和 impression 的 applicable 分母采用该实时结果；
   已有链接范围、已链接目标、链接密度、过期正文及其他拒绝结果只保留复制/打开，
   并展示已有拒绝原因。单纯改变链接格式也必须触发状态刷新；旧缓存标记不能越过检查；
 - Toolbox 只做安全校验和编辑器事务，不重新实现语义关键词推荐算法。

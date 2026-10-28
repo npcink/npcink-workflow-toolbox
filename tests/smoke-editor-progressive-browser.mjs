@@ -509,7 +509,10 @@ try {
 				if (!await row.isVisible()) await row.locator('xpath=ancestor::details[1]').locator('summary').click();
 				assert((await row.getAttribute('class')).includes('is-applicable') === item.ready, 'Visible readiness agrees with the current Apply checks: ' + item.id);
 				if (!item.ready) assert(await row.getByRole('button', { name: /Add citation|添加引用/i }).count() === 0, 'Blocked candidates have no Add citation action: ' + item.id);
-				if (item.reasons.includes('range_already_linked')) assert(/already contains a link|已有链接|已经包含链接/.test(await row.innerText()), 'Existing linked phrases show the concrete reason.');
+				if (item.reasons.includes('range_already_linked')) {
+					await row.getByText(/Insertion details|插入说明/, { exact: true }).click();
+					assert(/already contains a link|已有链接|已经包含链接/.test(await row.innerText()), 'Existing linked phrases show the concrete reason in insertion details.');
+				}
 			}
 			const expectedBucket = await page.evaluate((count) => window.NpcinkToolboxInternalLinkHelpers.recommendationCountBucket('applicable_count', count), applicableCount);
 			assert(internalLinkImpression.source_reason_codes.includes(expectedBucket), 'Impression readiness uses the same live denominator as the UI.');
@@ -548,6 +551,7 @@ try {
 				}, { original, raw: internalLinkSection.recommendation_candidates.find((item) => item.id === ready.id) });
 				const changedRow = page.locator(`[data-candidate-rank="${ready.rank}"]`);
 				await page.waitForFunction((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-reference-only'), ready.rank);
+				await changedRow.getByText(/Insertion details|插入说明/, { exact: true }).click();
 				assert(/already links to this target|已经链接|已链接|已有指向该目标/.test(await changedRow.innerText()), 'An existing link elsewhere to the same target blocks duplicate insertion.');
 				await page.evaluate((snapshot) => window.wp.data.dispatch('core/block-editor').updateBlockAttributes(snapshot.clientId, { content: snapshot.content }), original);
 				await page.waitForFunction((rank) => document.querySelector(`[data-candidate-rank="${rank}"]`)?.classList.contains('is-applicable'), ready.rank);

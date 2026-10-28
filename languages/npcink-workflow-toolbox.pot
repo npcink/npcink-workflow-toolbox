@@ -9937,3 +9937,15 @@ msgstr ""
 
 msgid "Ended"
 msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Found %d related articles. Open an article to decide whether to use it."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Recommended articles"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Insertion details"
+msgstr ""

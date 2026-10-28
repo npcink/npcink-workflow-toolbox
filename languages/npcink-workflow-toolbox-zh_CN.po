@@ -10443,3 +10443,15 @@ msgstr "先扫描本站，再针对结果提问。定时回顾也在这里。"
 
 msgid "Run a local site check or open scheduled review under Site & Ask."
 msgstr "在「站点与提问」里运行本站检查，或打开定时回顾。"
+
+#: assets/editor-content-support.js
+msgid "Found %d related articles. Open an article to decide whether to use it."
+msgstr "找到 %d 篇相关文章，请打开查看并自行选择。"
+
+#: assets/editor-content-support.js
+msgid "Recommended articles"
+msgstr "推荐文章"
+
+#: assets/editor-content-support.js
+msgid "Insertion details"
+msgstr "插入说明"
