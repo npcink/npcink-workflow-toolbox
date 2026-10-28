@@ -143,9 +143,12 @@ ordinary generation and Site Knowledge remain available. See
   documents, two chunks, zero deletions; buffer empty). Other 16 scheduled hook
   buckets remain stored and paused. The cursor was preserved; no eligible
   candidates were found beyond it, so a nonempty full-corpus sweep is unproven.
-  Next: Toolbox status
-  request/response truncation (80 versus intended 1,000 IDs), then comparable
-  AI-led Eval Lab relevance evidence. Coverage restoration is
+  The [Toolbox status bounds fix](recommendation-status-bounds-2026-10-28.md)
+  preserves the intended 1,000-ID request/reply lists without widening generic
+  limits. Real REST comparison improved from 80 IDs / zero article rows to
+  1,000 IDs / 1,000 indexed rows; password-protected sources are excluded.
+  Malformed/incomplete receipts still suppress article verdicts. Next:
+  comparable AI-led Eval Lab relevance evidence. Coverage restoration is
   not semantic-quality improvement or human adoption. Typecho/Astro remain
   unimplemented; see [cross-platform diagnosis](recommendation-coverage-diagnosis-2026-10-28.md).
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for

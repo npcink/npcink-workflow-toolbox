@@ -983,7 +983,7 @@ final class Provider_Client extends Provider_Client_Support {
 			'ability_name'        => $ability_name,
 			'contract_version'    => $contract_version,
 			'execution_pattern'   => $execution_pattern,
-			'input'               => $this->sanitize_payload( $input ),
+			'input'               => $this->site_knowledge->sanitize_runtime_input( $input, $ability_name, $contract_version ),
 			'data_classification' => 'public_site_content',
 			'storage_mode'        => 'result_only',
 			'retention_ttl'       => 86400,

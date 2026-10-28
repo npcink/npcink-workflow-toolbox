@@ -61,6 +61,7 @@ final class Rest_Site_Knowledge_Bridges extends Rest_Controller_Support {
 			array(
 				'post_type'           => array( 'post', 'page' ),
 				'post_status'         => 'publish',
+				'has_password'        => false,
 				'posts_per_page'      => 1000,
 				'fields'              => 'ids',
 				'no_found_rows'       => true,

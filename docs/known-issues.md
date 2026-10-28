@@ -85,14 +85,17 @@ with the closing commit or PR for one release cycle, then prune.
   Addon code. Neither operation writes WordPress article content. Owner: Cloud index/repair and Addon delivery; Eval Lab
   measures comparable relevance, Toolbox retains editor regression. No
   per-article human labels are required.
-- **Site Knowledge status comparison truncation (Toolbox).** The public status
-  producer allows 1,000 local IDs, but the generic recursive sanitizer caps
-  request arrays at 80; the live reply confirms `indexed_post_ids_requested=80`.
-  Coverage response arrays use the same sanitizer. The complete-comparison
-  guard correctly suppresses mismatched article rows. Fix both directions with
-  contract-specific bounds and regression evidence, preserving generic limits
-  and the incomplete-receipt guard. This explains missing status rows, not the
-  Cloud corpus loss. Owner: Toolbox provider/status module; see the diagnosis.
+- **Site Knowledge status comparison truncation (Toolbox) — resolved in source.**
+  The [1,000-ID bounds fix](recommendation-status-bounds-2026-10-28.md) preserves
+  the intended request and indexed-ID response lists for the exact status
+  contract; unrelated arrays retain their 80-item limit. Malformed/oversized
+  replies and incomplete comparison receipts suppress article verdicts.
+  Password-protected articles are excluded from the public comparison. Real
+  REST integration on the original site moved from 80 compared IDs / zero rows
+  to 1,000 compared IDs / 1,000 indexed rows, without source/index changes.
+  The view remains bounded to the newest 1,000 eligible sources, not a whole-site
+  ratio. This explains missing status rows, not the earlier Cloud corpus loss
+  or ranking quality. Production release acceptance remains separate.
 - **Recommendation relevance and anchor naturalness (Cloud ranking owner).**
   Independent human gold remains absent; AI-led development continues under
   the operator's 2026-10-26 decision above. The 2026-10-17 twelve-article developer
