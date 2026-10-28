@@ -68,6 +68,20 @@ with the closing commit or PR for one release cycle, then prune.
   Owner: Cloud index/status and Addon delivery; Eval Lab measures comparable
   samples, Toolbox retains editor regression. No per-article human labels.
   Source: [original-site acceptance](recommendation-original-site-acceptance-2026-10-28.md).
+- **Recovery checkpoint / Docker outage (2026-10-28).** The earlier claim that
+  quota was not exhausted checked only the site ceiling. Historical affected
+  runs bind to Free's 100-document plan; the operator upgraded to Agency's
+  10,000. Addon additive refresh confirmed 1,505 new public documents, reaching
+  at least 1,605/1,999, with zero failed/skipped/deleted documents in 61 runs.
+  M4 Docker startup stalled; `run_ad5e8b35be5b4fd098edd855348cf06b` (25 sources)
+  has an unknown outcome, and 394 sources remain unconfirmed. Preserve this
+  run identity and inspect it before resubmission. Host restart authorization
+  was requested. Source: [recovery record](recommendation-corpus-recovery-2026-10-28.md).
+  The old corpus count is historical; complete coverage, preserved rows and
+  both retrieval probes still need final verification. WordPress source
+  fingerprints match. Cloud refresh must also protect existing content when
+  account quota would prevent replacement; this operational recovery has not
+  fixed that code path.
 - **Site Knowledge status comparison truncation (Toolbox).** The public status
   producer allows 1,000 local IDs, but the generic recursive sanitizer caps
   request arrays at 80; the live reply confirms `indexed_post_ids_requested=80`.
