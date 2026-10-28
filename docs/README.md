@@ -26,6 +26,8 @@ Start from the active documents below before changing code.
 - [推荐语料恢复最终回执 — 2026-10-28](recommendation-corpus-recovery-final-evidence-2026-10-28.json) — 1,999/1,999 coverage, preserved data, audited interruption repair and both retrieval probes.
 - [推荐索引刷新安全与交付 — 2026-10-28](recommendation-refresh-safety-2026-10-28.md) — preserve-on-omission refresh, explicit withdrawal migration, regression/runtime evidence and remaining Cron/status/Eval work.
 - [刷新安全交付回执 — 2026-10-28](recommendation-refresh-safety-evidence-2026-10-28.json) — exact source, merge and M4 acceptance identities.
+- [知识库自动增量恢复 — 2026-10-28](recommendation-knowledge-cron-recovery-2026-10-28.md) — local knowledge-only Cron, normal HTTP reconciliation and 180-second delivery, preserved sources and deferred other hooks.
+- [知识库自动增量回执 — 2026-10-28](recommendation-knowledge-cron-evidence-2026-10-28.json) — runtime run, hashes, scope and preservation evidence.
 - [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)
 - [Platform Governance Index](platform/README.md)
 - [Cross-Repo Platform Governance History](platform/cross-repo-platform-governance-history-2026-07-08.md)
