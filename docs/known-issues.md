@@ -51,18 +51,31 @@ with the closing commit or PR for one release cycle, then prune.
   See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md). These older
   actions are conditional on current feature visibility/pauses; the focused
   next action is recorded above.
-- **Recommendation corpus coverage/count reconciliation (Cloud / Addon).**
+- **Recommendation corpus recovery and refresh safety (Cloud / Addon).**
   Original-site 502 is resolved. Both editor actions pass real-Cloud editing
   acceptance on the original site; the earlier isolated fixture evidence
-  remains historical. The fresh status reports 169 documents / 188 chunks,
-  type counts sum to 233 and recommendation pool is 119 chunks, versus 1,966
-  published local posts. Reconcile site identity, eligibility and metric
-  definitions before calculating coverage or adjusting ranking. Quota is not
-  exhausted; disabled WP Cron / overdue reconciliation is a diagnostic lead,
-  not an established cause. No shared indexing/configuration was changed.
+  remains historical. The [2026-10-28 diagnosis](recommendation-coverage-diagnosis-2026-10-28.md)
+  establishes 100/1,999 public post/page coverage (5.00%), with 1,899 missing.
+  Status 169/188 includes 69 media; type sum 233 additionally includes 64
+  intentionally isolated documents. October 19 successful refreshes deleted old
+  entries with no replacement indexing; historical inputs have expired, so the
+  upstream trigger remains unknown. Current collection reads 1,999/1,999.
+  Disabled local Cron and the advanced reconciliation cursor hinder recovery;
+  neither proves the original deletion cause. Preserve legitimate withdrawal
+  semantics while distinguishing failed/partial delivery, then recover through
+  bounded existing delivery and verify source-key coverage. No shared index or
+  configuration was changed by this diagnosis; quota is not exhausted.
   Owner: Cloud index/status and Addon delivery; Eval Lab measures comparable
   samples, Toolbox retains editor regression. No per-article human labels.
   Source: [original-site acceptance](recommendation-original-site-acceptance-2026-10-28.md).
+- **Site Knowledge status comparison truncation (Toolbox).** The public status
+  producer allows 1,000 local IDs, but the generic recursive sanitizer caps
+  request arrays at 80; the live reply confirms `indexed_post_ids_requested=80`.
+  Coverage response arrays use the same sanitizer. The complete-comparison
+  guard correctly suppresses mismatched article rows. Fix both directions with
+  contract-specific bounds and regression evidence, preserving generic limits
+  and the incomplete-receipt guard. This explains missing status rows, not the
+  Cloud corpus loss. Owner: Toolbox provider/status module; see the diagnosis.
 - **Recommendation relevance and anchor naturalness (Cloud ranking owner).**
   Independent human gold remains absent; AI-led development continues under
   the operator's 2026-10-26 decision above. The 2026-10-17 twelve-article developer

@@ -19,6 +19,8 @@ Start from the active documents below before changing code.
 - [Known Issues](known-issues.md)
 - [Related Reading Editor v1](related-reading-editor-v1.md) — author-selected Gutenberg reading-list insertion.
 - [原站文章推荐验收 — 2026-10-28](recommendation-original-site-acceptance-2026-10-28.md) — real Cloud retrieval, editor Apply/Undo/save, preserved failed attempts and coverage follow-up.
+- [推荐语料覆盖诊断与跨平台准备 — 2026-10-28](recommendation-coverage-diagnosis-2026-10-28.md) — confirmed 100/1,999 coverage, historical refresh deletion evidence, bounded recovery gates and Typecho/Astro readiness gaps; recovery remains open.
+- [推荐覆盖脱敏回执 — 2026-10-28](recommendation-coverage-evidence-2026-10-28.json) — source-set digests, grouped counts and retained run/snapshot evidence; no article bodies or credentials.
 - [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)
 - [Platform Governance Index](platform/README.md)
 - [Cross-Repo Platform Governance History](platform/cross-repo-platform-governance-history-2026-07-08.md)
