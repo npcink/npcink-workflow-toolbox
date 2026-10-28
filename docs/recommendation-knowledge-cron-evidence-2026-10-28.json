@@ -1,0 +1,110 @@
+{
+  "schema": "recommendation_knowledge_cron_evidence.v1",
+  "date": "2026-10-28",
+  "scope": "local development knowledge-only WP-Cron recovery; no production deployment",
+  "source_revisions": {
+    "toolbox_base": "92a55b149c45bfbd8875ae45702f3052857acc71",
+    "addon": "fc9bdc880b7991c591b81b6d6bab13dea31c2f12",
+    "cloud_runtime": "d32e95cec73167ba69ee1470616e5380e218a23f",
+    "cloud_runtime_dirty": false
+  },
+  "local_cron": {
+    "retired": "000-npcink-local-validation-cron-guard.php",
+    "installed": "000-npcink-local-knowledge-cron-scope.php",
+    "installed_sha256": "d7dcd3865b34be499e710455890c1e55507345b56fc1c52231133b00a25ed042",
+    "allowed_hooks": [
+      "npcink_cloud_addon_reconcile_site_knowledge_changes",
+      "npcink_cloud_addon_flush_site_knowledge_changes"
+    ],
+    "disabled_after": false,
+    "protected_hook_buckets": 16,
+    "protected_hooks_unchanged": true,
+    "other_scheduled_jobs_remain_paused": true,
+    "new_permanent_scheduler": false
+  },
+  "reconciliation": {
+    "last_reconciled_at": "2026-10-28T06:25:47+00:00",
+    "next_reconcile_at": "2026-10-28T07:25:11+00:00",
+    "overdue": false,
+    "cursor": {
+      "modified_gmt": "2026-10-16 12:17:16",
+      "post_id": 282641
+    },
+    "cursor_unchanged": true,
+    "eligible_candidates_after_cursor": 0,
+    "nonempty_full_corpus_sweep_verified": false
+  },
+  "delivery": {
+    "fixture": "replayed existing save handler for existing public post/page; no source write",
+    "post_ids": [
+      21764,
+      282641
+    ],
+    "debounce_seconds": 180,
+    "due_epoch": 1793168962,
+    "trigger": "ordinary HTTPS home request after deadline (HTTP 200); core Cron spawn",
+    "manual_flush_or_named_cron_used": false,
+    "run": {
+      "run_id": "run_a131863a8394429b80a26927928b971d",
+      "status": "succeeded",
+      "started_at": "2026-10-28 06:29:50.912910+00:00",
+      "sync": {
+        "sync_mode": "refresh",
+        "accepted_documents": 2,
+        "indexed_documents": 2,
+        "indexed_chunks": 2,
+        "failed_documents": 0,
+        "truncated_documents": 0,
+        "skipped_documents": 0,
+        "skipped_due_to_quota": 0,
+        "unchanged_documents": 0,
+        "deleted_entries": 0
+      }
+    },
+    "buffer_count_after": 0,
+    "bridge_status_after": "idle",
+    "last_delivery_ok": true,
+    "last_delivery_error": ""
+  },
+  "preservation": {
+    "wordpress": {
+      "count": 2340,
+      "source_fingerprint": "aca7e5f335903f6cf956992015ed25e3dfb5d7e0f0e1af4d12880a2e48cad8db"
+    },
+    "public_post_page_documents": 1999,
+    "public_post_page_chunks": 2217,
+    "unrelated_excluded_post_ids": [
+      21764,
+      282641
+    ],
+    "documents_unrelated": {
+      "count": 2130,
+      "digest": "4176678289f6f41a84ddd49ea652e022"
+    },
+    "chunks_unrelated": {
+      "count": 2362,
+      "digest": "ca918f48701582354ddf803c8a06e49d"
+    },
+    "counts_and_unrelated_digests_unchanged": true,
+    "source_content_writes": false,
+    "delete_cron_events": false,
+    "rebuild_or_cursor_reset": false
+  },
+  "local_evidence": {
+    "directory": "tests/artifacts/knowledge-cron-2026-10-28",
+    "manifest": "sha256-manifest.json",
+    "manifest_sha256": "ce1b9b4c729085a6f2cf84e248e28c62bc835ef558d7ce1a982b7eebe6ce989c",
+    "tracked_raw_content": false,
+    "location": "primary Toolbox checkout; ignored local evidence, not portable CI fixtures"
+  },
+  "limitations": [
+    "Pseudo-Cron requires ordinary site requests and running local services.",
+    "Other WordPress cleanup/update/monitoring hooks remain paused by local scope.",
+    "Handler replay does not prove a newly edited article save or a nonempty reconciliation sweep.",
+    "Index delivery safety and coverage do not establish ranking quality."
+  ],
+  "next": [
+    "Toolbox status request/response contract-specific 1000-ID bounds",
+    "Eval Lab comparable AI-led relevance comparison"
+  ]
+}

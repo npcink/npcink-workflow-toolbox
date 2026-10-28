@@ -137,8 +137,13 @@ ordinary generation and Site Knowledge remain available. See
   real single refresh and named knowledge-Cron delivery passed with unchanged
   unrelated indexes and WordPress sources. See its
   [delivery receipt](recommendation-refresh-safety-evidence-2026-10-28.json) for
-  exact merged/runtime states. Global Cron guard removal and a complete automatic
-  reconciliation cycle remain open. Next: bounded Cron exit, Toolbox status
+  exact merged/runtime states. The [local knowledge-only Cron recovery](recommendation-knowledge-cron-recovery-2026-10-28.md)
+  retired the blanket pause: ordinary HTTP requests ran overdue reconciliation
+  and delivered a post/page pair after the normal 180-second debounce (two
+  documents, two chunks, zero deletions; buffer empty). Other 16 scheduled hook
+  buckets remain stored and paused. The cursor was preserved; no eligible
+  candidates were found beyond it, so a nonempty full-corpus sweep is unproven.
+  Next: Toolbox status
   request/response truncation (80 versus intended 1,000 IDs), then comparable
   AI-led Eval Lab relevance evidence. Coverage restoration is
   not semantic-quality improvement or human adoption. Typecho/Astro remain

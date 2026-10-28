@@ -72,10 +72,15 @@ with the closing commit or PR for one release cycle, then prune.
   through the existing audited Cloud action, and only missing keys were sent.
   The [checkpoint](recommendation-corpus-recovery-evidence-2026-10-28.json)
   remains historical; [final evidence](recommendation-corpus-recovery-final-evidence-2026-10-28.json)
-  records completion. The local global-Cron guard and advanced reconciliation
-  cursor remain. A named-hook smoke proves bounded incremental dispatch, not
-  unattended global reconciliation. Guard exit must account for other overdue
-  backup/trash/draft/history cleanup hooks; do not run all Cron to test knowledge.
+  records completion. The [knowledge-only Cron recovery](recommendation-knowledge-cron-recovery-2026-10-28.md)
+  replaced the blanket local pause with a scope for the two existing knowledge
+  hooks. Ordinary HTTP traffic ran overdue reconciliation and a post/page flush
+  after the default 180-second debounce: two documents/chunks, zero deletions,
+  empty buffer. Other 16 scheduled hook buckets remain paused and unchanged;
+  deferred cleanup/monitoring is still a local environment concern. The advanced
+  cursor remains intact with no currently eligible sources beyond it; a nonempty
+  full-corpus sweep is unproven. Pseudo-Cron needs site traffic and running local
+  services. Do not remove the scope or run all Cron to test knowledge.
   The corpus recovery changed indexes; the follow-on safety slice changes Cloud/
   Addon code. Neither operation writes WordPress article content. Owner: Cloud index/repair and Addon delivery; Eval Lab
   measures comparable relevance, Toolbox retains editor regression. No
