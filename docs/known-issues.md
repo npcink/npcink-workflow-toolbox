@@ -51,37 +51,29 @@ with the closing commit or PR for one release cycle, then prune.
   See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md). These older
   actions are conditional on current feature visibility/pauses; the focused
   next action is recorded above.
-- **Recommendation corpus recovery and refresh safety (Cloud / Addon).**
-  Original-site 502 is resolved. Both editor actions pass real-Cloud editing
-  acceptance on the original site; the earlier isolated fixture evidence
-  remains historical. The [2026-10-28 diagnosis](recommendation-coverage-diagnosis-2026-10-28.md)
-  establishes 100/1,999 public post/page coverage (5.00%), with 1,899 missing.
-  Status 169/188 includes 69 media; type sum 233 additionally includes 64
-  intentionally isolated documents. October 19 successful refreshes deleted old
-  entries with no replacement indexing; historical inputs have expired, so the
-  upstream trigger remains unknown. Current collection reads 1,999/1,999.
-  Disabled local Cron and the advanced reconciliation cursor hinder recovery;
-  neither proves the original deletion cause. Preserve legitimate withdrawal
-  semantics while distinguishing failed/partial delivery, then recover through
-  bounded existing delivery and verify source-key coverage. No shared index or
-  configuration was changed by this diagnosis; quota is not exhausted.
-  Owner: Cloud index/status and Addon delivery; Eval Lab measures comparable
-  samples, Toolbox retains editor regression. No per-article human labels.
-  Source: [original-site acceptance](recommendation-original-site-acceptance-2026-10-28.md).
-- **Recovery checkpoint / Docker outage (2026-10-28).** The earlier claim that
-  quota was not exhausted checked only the site ceiling. Historical affected
-  runs bind to Free's 100-document plan; the operator upgraded to Agency's
-  10,000. Addon additive refresh confirmed 1,505 new public documents, reaching
-  at least 1,605/1,999, with zero failed/skipped/deleted documents in 61 runs.
-  M4 Docker startup stalled; `run_ad5e8b35be5b4fd098edd855348cf06b` (25 sources)
-  has an unknown outcome, and 394 sources remain unconfirmed. Preserve this
-  run identity and inspect it before resubmission. Host restart authorization
-  was requested. Source: [recovery record](recommendation-corpus-recovery-2026-10-28.md).
-  The old corpus count is historical; complete coverage, preserved rows and
-  both retrieval probes still need final verification. WordPress source
-  fingerprints match. Cloud refresh must also protect existing content when
-  account quota would prevent replacement; this operational recovery has not
-  fixed that code path.
+- **Refresh replacement safety and automatic delivery (Cloud / Addon).**
+  The original 100/1,999 corpus gap is resolved by the
+  [2026-10-28 bounded recovery](recommendation-corpus-recovery-2026-10-28.md):
+  1,999/1,999 public sources, 2,217 public chunks, empty source-set differences,
+  original 233 documents / 266 chunks and WordPress source fingerprints
+  preserved. Historical Free plan decisions limit vectors to 100; the operator
+  upgraded to Agency's 10,000. The earlier site-only `quota=ok` conclusion did
+  not exclude account quota. Delete-before-quota order remains unfixed and can
+  discard old indexes when replacement is prevented; expired historical input
+  bodies still limit the root-cause claim. Preserve legitimate withdrawals,
+  validate delivery/input and replacement capacity before destructive cleanup,
+  and test quota failure without losing existing data.
+  Docker outage is resolved by an authorized restart with no deployment or
+  index/volume deletion. The old run committed 11/25 documents, was repaired
+  through the existing audited Cloud action, and only missing keys were sent.
+  The [checkpoint](recommendation-corpus-recovery-evidence-2026-10-28.json)
+  remains historical; [final evidence](recommendation-corpus-recovery-final-evidence-2026-10-28.json)
+  records completion. Local Cron guard and advanced reconciliation cursor
+  remain; future automatic incremental delivery and guard removal need scoped
+  verification. This recovery changed index contents, not source code or
+  WordPress articles. Owner: Cloud index/repair and Addon delivery; Eval Lab
+  measures comparable relevance, Toolbox retains editor regression. No
+  per-article human labels are required.
 - **Site Knowledge status comparison truncation (Toolbox).** The public status
   producer allows 1,000 local IDs, but the generic recursive sanitizer caps
   request arrays at 80; the live reply confirms `indexed_post_ids_requested=80`.

@@ -115,32 +115,27 @@ ordinary generation and Site Knowledge remain available. See
 
 ## Open Debt (top items)
 
-- **2026-10-28 original-site acceptance:** both body-link Apply/Undo/native
-  draft save and related-reading insert/Undo/save/reload pass with real Cloud
-  candidates on restored `magick-ai.local`; see the
-  [acceptance record](recommendation-original-site-acceptance-2026-10-28.md).
-  The subsequent [coverage diagnosis](recommendation-coverage-diagnosis-2026-10-28.md)
-  confirms only 100 of 1,999 public post/page sources in the searchable SQL
-  collection (5.00%; 1,899 missing). Status 169 includes 69 media; 233 also
-  includes 64 intentionally isolated historical documents. October 19 refresh
-  runs deleted old entries without replacing them; their expired inputs prevent
-  identifying the exact upstream trigger. Current Addon collection reads all
-  1,999 sources. Next: Addon/Cloud refresh safety and bounded recovery, then
+- **2026-10-28 original-site acceptance and corpus recovery:** both body-link
+  Apply/Undo/native draft save and related-reading insert/Undo/save/reload passed
+  on restored `magick-ai.local`; see [acceptance](recommendation-original-site-acceptance-2026-10-28.md).
+  After the operator upgraded Free (100 documents) to Agency (10,000), bounded
+  Addon delivery restored all **1,999/1,999 public post/page documents** and
+  2,217 public chunks. Final source-set differences are empty; all original
+  233 documents / 266 chunks and WordPress source fingerprints are preserved.
+  The operator-authorized Docker restart recovered the same Cloud revision;
+  one interrupted run committed 11 documents before audited failure repair,
+  then only the remaining 383 keys were delivered. There were 77 successful
+  runs plus that interrupted run, not zero failed runs. See
+  [recovery and lessons](recommendation-corpus-recovery-2026-10-28.md) and
+  [final receipt](recommendation-corpus-recovery-final-evidence-2026-10-28.json);
+  the earlier [checkpoint](recommendation-corpus-recovery-evidence-2026-10-28.json)
+  remains historical. Account quota and delete-before-quota order strongly
+  explain the earlier 100-document reduction; expired historical inputs limit
+  certainty. Next: Cloud refresh safety and Addon incremental/Cron acceptance,
   Toolbox status request/response truncation (80 versus intended 1,000 IDs),
-  then comparable Eval Lab relevance evidence. No index/runtime recovery or
-  quality improvement is established. The same diagnosis records Typecho/Astro
-  readiness gaps; only WordPress is implemented and accepted today.
-- **Same-day recovery checkpoint:** the operator upgraded Free to Agency.
-  Historical commercial decisions bind the affected runs to `free_v1` (100
-  vector documents), while the current plan is 10,000; the earlier site-only
-  quota diagnosis missed this independent account limit. Existing Addon
-  additive refresh has confirmed 1,505 new public documents in 61 batches,
-  reaching at least 1,605/1,999 (80.29%), with no failures, quota skips or
-  deletions. M4 Docker VM startup then stalled; one 25-source run is unresolved,
-  and 394 sources remain unconfirmed. See the
-  [recovery checkpoint](recommendation-corpus-recovery-2026-10-28.md) before
-  resuming. Docker restart needs the explicit host-change authorization already
-  requested; full coverage, retained-row checks and retrieval probes remain open.
+  then comparable AI-led Eval Lab relevance evidence. Coverage restoration is
+  not semantic-quality improvement or human adoption. Typecho/Astro remain
+  unimplemented; see [cross-platform diagnosis](recommendation-coverage-diagnosis-2026-10-28.md).
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for
   manual choice. The editor now shows up to eight non-weak candidates in their
   existing order, with open/copy actions regardless of anchor eligibility.

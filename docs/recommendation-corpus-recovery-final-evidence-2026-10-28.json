@@ -1,0 +1,662 @@
+{
+  "evidence_class": "developer_recovery_and_read_only_probe",
+  "observed_before": "2026-10-28T03:51:18.674754+00:00",
+  "observed_after": "2026-10-28T04:58:47.333795+00:00",
+  "site_url": "https://magick-ai.local",
+  "site_id_sha256": "b5e6f64fae932f1a8dff4bfb9ae62a8d41facc371fbdd0c4b22c4c29d572728e",
+  "cloud_runtime_revision": "1bc9435b5ce3de2b2094c7b8f1c27adfba0aa8ee",
+  "runtime_dirty": false,
+  "plan_evidence": {
+    "plans": [
+      {
+        "plan_id": "agency",
+        "plan_version_id": "agency_v1",
+        "tier_id": "agency",
+        "max_vector_documents": "10000"
+      },
+      {
+        "plan_id": "free",
+        "plan_version_id": "free_v1",
+        "tier_id": "free",
+        "max_vector_documents": "100"
+      }
+    ],
+    "current_subscription": {
+      "status": "active",
+      "plan_id": "agency",
+      "plan_version_id": "agency_v1",
+      "started_at": "2026-09-30 00:00:00+00:00",
+      "created_at": "2026-07-23 11:21:24.025373+00:00",
+      "updated_at": "2026-10-28 03:49:50.522740+00:00",
+      "tier_id": "agency",
+      "metadata_vector_limit": "10000",
+      "entitlement_vector_limit": null,
+      "policy_vector_limit": null
+    },
+    "historical_run_decisions": [
+      {
+        "created_at": "2026-10-19 06:51:49.763618+00:00",
+        "request_kind": "execute",
+        "decision": "allow",
+        "decision_code": "commercial.allowed",
+        "plan_version_id": "free_v1",
+        "run_id": "run_a82e4030963549da81fd84609b047aaf"
+      },
+      {
+        "created_at": "2026-10-19 12:09:21.406754+00:00",
+        "request_kind": "execute",
+        "decision": "allow",
+        "decision_code": "commercial.allowed",
+        "plan_version_id": "free_v1",
+        "run_id": "run_597e315eff254bf2aec302ed34e410ec"
+      }
+    ],
+    "historical_skip_counters_retained": false
+  },
+  "before": {
+    "public_total": 1999,
+    "covered_public": 100,
+    "missing_public": 1899,
+    "coverage_percent": 5.0,
+    "document_groups": [
+      {
+        "source_type": "media",
+        "post_type": "attachment",
+        "post_status": "publish",
+        "count": 69
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "publish",
+        "count": 1
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "stale",
+        "count": 14
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "publish",
+        "count": 99
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "stale",
+        "count": 50
+      }
+    ],
+    "chunk_groups": [
+      {
+        "source_type": "media",
+        "post_type": "attachment",
+        "post_status": "publish",
+        "count": 69
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "publish",
+        "count": 1
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "stale",
+        "count": 16
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "publish",
+        "count": 118
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "stale",
+        "count": 62
+      }
+    ],
+    "public_post_page_chunks": 119
+  },
+  "after": {
+    "public_total": 1999,
+    "covered_public": 1999,
+    "missing_public": 0,
+    "extra_public": 0,
+    "coverage_percent": 100.0,
+    "document_groups": [
+      {
+        "source_type": "media",
+        "post_type": "attachment",
+        "post_status": "publish",
+        "count": 69
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "publish",
+        "count": 33
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "stale",
+        "count": 14
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "publish",
+        "count": 1966
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "stale",
+        "count": 50
+      }
+    ],
+    "chunk_groups": [
+      {
+        "source_type": "media",
+        "post_type": "attachment",
+        "post_status": "publish",
+        "count": 69
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "publish",
+        "count": 33
+      },
+      {
+        "source_type": "page",
+        "post_type": "page",
+        "post_status": "stale",
+        "count": 16
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "publish",
+        "count": 2184
+      },
+      {
+        "source_type": "post",
+        "post_type": "post",
+        "post_status": "stale",
+        "count": 62
+      }
+    ],
+    "embedding_groups": [
+      {
+        "source_type": "media",
+        "post_status": "publish",
+        "embedding_model": "ollama-m4-embedding:qwen3-embedding:0.6b",
+        "dimensions": 1024,
+        "chunks": 69
+      },
+      {
+        "source_type": "page",
+        "post_status": "publish",
+        "embedding_model": "ollama-m4-embedding:qwen3-embedding:0.6b",
+        "dimensions": 1024,
+        "chunks": 33
+      },
+      {
+        "source_type": "page",
+        "post_status": "stale",
+        "embedding_model": "ollama-m4-embedding:qwen3-embedding:0.6b",
+        "dimensions": 1024,
+        "chunks": 16
+      },
+      {
+        "source_type": "post",
+        "post_status": "publish",
+        "embedding_model": "ollama-m4-embedding:qwen3-embedding:0.6b",
+        "dimensions": 1024,
+        "chunks": 2184
+      },
+      {
+        "source_type": "post",
+        "post_status": "stale",
+        "embedding_model": "ollama-m4-embedding:qwen3-embedding:0.6b",
+        "dimensions": 1024,
+        "chunks": 62
+      }
+    ],
+    "eligible_documents_without_chunks": 0,
+    "backend": [
+      {
+        "vector_backend": "postgres_json",
+        "embedding_model": "qwen3-embedding:0.6b",
+        "runs": 77
+      }
+    ],
+    "public_post_page_chunks": 2217
+  },
+  "set_digests": {
+    "format": "sha256 of type:id lines sorted by type then numeric id, no trailing newline",
+    "local_public": "21e566156691cf0ff6129b4a0ee234365d3ef29039dec903bdf2db2c1ec27792",
+    "cloud_public_before": "7d3c8d5a590e88590d36c174c3a4b1271296f52b686f7b1c6c4f9b79df00204e",
+    "cloud_public_after": "21e566156691cf0ff6129b4a0ee234365d3ef29039dec903bdf2db2c1ec27792"
+  },
+  "preservation": {
+    "original_document_rows_compared": 233,
+    "original_document_rows_unchanged": true,
+    "protected_digest_captured_after_initial_batches": true,
+    "protected_digest_method": "PostgreSQL md5 of ordered concatenated md5(to_jsonb(row)::text), for original 233 document source IDs; observation equality only",
+    "protected_documents": {
+      "digest": "4da30f7511d26e26f4a336868c621b0e",
+      "count": 233
+    },
+    "protected_chunks": {
+      "digest": "74fc029e431eb5de0f06135c9e5f3d4e",
+      "count": 266
+    },
+    "wordpress_source_fingerprint_before": {
+      "count": 2340,
+      "source_fingerprint": "aca7e5f335903f6cf956992015ed25e3dfb5d7e0f0e1af4d12880a2e48cad8db"
+    },
+    "wordpress_source_fingerprint_after": {
+      "count": 2340,
+      "source_fingerprint": "aca7e5f335903f6cf956992015ed25e3dfb5d7e0f0e1af4d12880a2e48cad8db"
+    },
+    "wordpress_posts_written": false,
+    "cron_guard_changed": false
+  },
+  "delivery": {
+    "transport": "existing Addon site_knowledge_sync.v1 refresh",
+    "requested_cleanup_post_ids": 0,
+    "new_public_documents": 1899,
+    "successful_batches": 77,
+    "failed_documents": 0,
+    "skipped_due_to_quota": 0,
+    "deleted_entries": 0,
+    "embedding_provider": "ollama-m4-embedding",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "documents_in_successful_runs": 1888,
+    "interrupted_run": {
+      "run_id": "run_ad5e8b35be5b4fd098edd855348cf06b",
+      "action": "mark_stale_running_failed",
+      "before_status": "running",
+      "after_status": "failed",
+      "summary": {
+        "repair_action": "mark_stale_running_failed",
+        "state_transition": "running->failed",
+        "operator_reason": "Docker VM process loss interrupted this content recovery run; the old worker is gone after the operator-authorized Docker restart.",
+        "operator_evidence": "Run remained running across Docker outage and restart. Read-only SQL found 11 of 25 source documents committed. No cleanup IDs were supplied. Old worker container process terminated. Preserve committed rows and resend only still-missing keys."
+      },
+      "documents_committed_before_interruption": 11,
+      "requested_documents": 25,
+      "unknown_run_replayed": false
+    },
+    "docker_restart": {
+      "operator_authorized": true,
+      "performed": true,
+      "deployment_changed": false,
+      "volumes_deleted": false,
+      "indexes_deleted_or_rebuilt": false
+    },
+    "successful_runs_before_restart": 61,
+    "successful_runs_after_restart": 16,
+    "resumed_runs": [
+      {
+        "offset": 0,
+        "count": 25,
+        "run_id": "run_d8211634298942aabe8a88f0e7a43ae8",
+        "indexed_chunks": 28
+      },
+      {
+        "offset": 25,
+        "count": 25,
+        "run_id": "run_2e416c2313fc4029a8acb5773ceaa2fd",
+        "indexed_chunks": 27
+      },
+      {
+        "offset": 50,
+        "count": 25,
+        "run_id": "run_a4e726cae265448cab3d8525268c955b",
+        "indexed_chunks": 28
+      },
+      {
+        "offset": 75,
+        "count": 25,
+        "run_id": "run_edace51a74f541efb1db11a9aee283c9",
+        "indexed_chunks": 25
+      },
+      {
+        "offset": 100,
+        "count": 25,
+        "run_id": "run_995fc787a0d949009962b3ee7b6adbc7",
+        "indexed_chunks": 26
+      },
+      {
+        "offset": 125,
+        "count": 25,
+        "run_id": "run_c36228e7b5c54aaca3045d8097e91645",
+        "indexed_chunks": 25
+      },
+      {
+        "offset": 150,
+        "count": 25,
+        "run_id": "run_a70000e6fd884e958b508c57d752bcc5",
+        "indexed_chunks": 27
+      },
+      {
+        "offset": 175,
+        "count": 25,
+        "run_id": "run_a9e5c2b590a64e498ffa7e2bb62bcbbf",
+        "indexed_chunks": 30
+      },
+      {
+        "offset": 200,
+        "count": 25,
+        "run_id": "run_dda75cbe82364400b4dcc0e480f8120b",
+        "indexed_chunks": 27
+      },
+      {
+        "offset": 225,
+        "count": 25,
+        "run_id": "run_3a726f4bf3a64cdc80588ab492280deb",
+        "indexed_chunks": 30
+      },
+      {
+        "offset": 250,
+        "count": 25,
+        "run_id": "run_7f54700eb0314ca28bb91f87314c6e17",
+        "indexed_chunks": 28
+      },
+      {
+        "offset": 275,
+        "count": 25,
+        "run_id": "run_2780c4c204634a8b89d7f66bea60fcb4",
+        "indexed_chunks": 33
+      },
+      {
+        "offset": 300,
+        "count": 25,
+        "run_id": "run_dc3e317ae89b4f2e845025c82f8135d7",
+        "indexed_chunks": 32
+      },
+      {
+        "offset": 325,
+        "count": 25,
+        "run_id": "run_84c8db9c481a4504b7ae55e27b26455d",
+        "indexed_chunks": 27
+      },
+      {
+        "offset": 350,
+        "count": 25,
+        "run_id": "run_b2092e8ff3b14323911bc911371ab6fc",
+        "indexed_chunks": 27
+      },
+      {
+        "offset": 375,
+        "count": 8,
+        "run_id": "run_a163c19a58fe4a578d84106d3968c67c",
+        "indexed_chunks": 10
+      }
+    ],
+    "counter_scope": "failed_documents, skipped_due_to_quota and deleted_entries above summarize the 77 succeeded runs; interrupted run is recorded separately"
+  },
+  "retrieval_probes": {
+    "evidence_class": "developer_read_only_probe",
+    "valid_public_sources": 6,
+    "successful_requests": 12,
+    "all_cloud_ready": true,
+    "all_cache_miss": true,
+    "all_no_wordpress_write": true,
+    "query_embedding_model": "ollama-m4-embedding:qwen3-embedding:0.6b",
+    "all_indexed_models_match_query": true,
+    "semantic_quality_improvement_claimed": false,
+    "human_adoption_events_sent": false,
+    "historical_before": [
+      {
+        "source_post_id": 6624,
+        "intent": "internal_links",
+        "candidate_count": 3,
+        "run_id": "run_c839dcb885b647529b036fc52faf5e0b"
+      },
+      {
+        "source_post_id": 6624,
+        "intent": "related_content",
+        "candidate_count": 3,
+        "run_id": "run_98e035f20e2242ccbbf9583573e0e46f"
+      },
+      {
+        "source_post_id": 21776,
+        "intent": "internal_links",
+        "candidate_count": 1,
+        "run_id": "run_0532a1aa57994d6ca087d98033b1becf"
+      },
+      {
+        "source_post_id": 21776,
+        "intent": "related_content",
+        "candidate_count": 1,
+        "run_id": "run_5f7339fc720146a380b42acd011c88ea"
+      },
+      {
+        "source_post_id": 22055,
+        "intent": "internal_links",
+        "candidate_count": 1,
+        "run_id": "run_00d02b582a5b4ba2a3177a6c21fd9858"
+      },
+      {
+        "source_post_id": 22055,
+        "intent": "related_content",
+        "candidate_count": 1,
+        "run_id": "run_4234423afcad4a18abaedc3ce1db3b12"
+      }
+    ],
+    "after": [
+      {
+        "source_post_id": 6624,
+        "intent": "internal_links",
+        "run_id": "run_5a08d0de3b4b437882f389cf3d7934be",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          5131,
+          18046,
+          18370,
+          14760,
+          3871,
+          13635,
+          4889,
+          7928
+        ]
+      },
+      {
+        "source_post_id": 6624,
+        "intent": "related_content",
+        "run_id": "run_019ef2eb1b4f4ad2a1023d5c9ee21e85",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          5131,
+          18046,
+          18370,
+          14760,
+          3871,
+          13635,
+          4889,
+          7928
+        ]
+      },
+      {
+        "source_post_id": 7957,
+        "intent": "internal_links",
+        "run_id": "run_1d68856204cc481f921744e611745409",
+        "candidate_count": 0,
+        "candidate_source": "no_evidence",
+        "target_post_ids": []
+      },
+      {
+        "source_post_id": 7957,
+        "intent": "related_content",
+        "run_id": "run_063d55dc5e5245f9ac7a7f751ca45e05",
+        "candidate_count": 0,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": []
+      },
+      {
+        "source_post_id": 21776,
+        "intent": "internal_links",
+        "run_id": "run_38784a117422419e9e425e0d6fb05680",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          280875,
+          6101,
+          14700,
+          10015,
+          14928,
+          9759,
+          8971,
+          10790
+        ]
+      },
+      {
+        "source_post_id": 21776,
+        "intent": "related_content",
+        "run_id": "run_77bd88a8c50340e8923fb7208f5d4b91",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          6101,
+          14700,
+          10015,
+          14928,
+          278469,
+          280875,
+          8971,
+          10790
+        ]
+      },
+      {
+        "source_post_id": 22055,
+        "intent": "internal_links",
+        "run_id": "run_39351f8731944e3fa43743eb0865feb2",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          21764,
+          4686,
+          3487,
+          14787,
+          726,
+          15039,
+          9244,
+          9128
+        ]
+      },
+      {
+        "source_post_id": 22055,
+        "intent": "related_content",
+        "run_id": "run_bb9d3e73360841e09b56ed15a8e87f69",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          4686,
+          3487,
+          21764,
+          14787,
+          9128,
+          15039,
+          9951,
+          726
+        ]
+      },
+      {
+        "source_post_id": 19025,
+        "intent": "internal_links",
+        "run_id": "run_22ef417513024dae83b8cd6d6f52fcd4",
+        "candidate_count": 1,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          20974
+        ]
+      },
+      {
+        "source_post_id": 19025,
+        "intent": "related_content",
+        "run_id": "run_67fab831ff734ff998afdd8d9aa44bda",
+        "candidate_count": 1,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          20974
+        ]
+      },
+      {
+        "source_post_id": 21764,
+        "intent": "internal_links",
+        "run_id": "run_1d7459f0bb7e4af284d0539ca9935901",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          10015,
+          7915,
+          20010,
+          19773,
+          5400,
+          277254,
+          18458,
+          10082
+        ]
+      },
+      {
+        "source_post_id": 21764,
+        "intent": "related_content",
+        "run_id": "run_7cc7e90870094c6fb3a90a292f8fd802",
+        "candidate_count": 8,
+        "candidate_source": "cloud_vector",
+        "target_post_ids": [
+          10015,
+          7915,
+          20010,
+          19773,
+          5400,
+          18458,
+          10082,
+          11692
+        ]
+      }
+    ],
+    "healthy_abstention_source_post_id": 7957,
+    "retained_invalid_attempts": [
+      {
+        "source_post_id": 10680,
+        "intent": "internal_links",
+        "http_status": 403,
+        "code": "npcink_toolbox_editor_post_context_forbidden",
+        "reason": "source ID absent from actual site",
+        "replacement_source_post_id": 21764
+      },
+      {
+        "source_post_id": 10680,
+        "intent": "related_content",
+        "http_status": 403,
+        "code": "npcink_toolbox_editor_post_context_forbidden",
+        "reason": "source ID absent from actual site",
+        "replacement_source_post_id": 21764
+      }
+    ]
+  },
+  "limitations": [
+    "Historical quota is strongly supported by plan bindings and delete-before-quota code order; original request bodies and per-run quota skip counts are absent.",
+    "Corpus completeness is not semantic-quality improvement or human adoption.",
+    "Cloud refresh safety, status truncation and Cron/automatic delivery remain separate follow-up work."
+  ],
+  "historical_checkpoint": {
+    "path": "recommendation-corpus-recovery-evidence-2026-10-28.json",
+    "sha256": "27a00e1495dd9e3d264e59eae6b3e0e5ba9451c1a4e49c649d10421bddec4737"
+  },
+  "public_chunk_scope": "post_status=publish AND source_type IN ('post','page'); media and stale groups are excluded from public post/page counts"
+}
