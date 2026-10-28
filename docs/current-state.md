@@ -130,6 +130,17 @@ ordinary generation and Site Knowledge remain available. See
   then comparable Eval Lab relevance evidence. No index/runtime recovery or
   quality improvement is established. The same diagnosis records Typecho/Astro
   readiness gaps; only WordPress is implemented and accepted today.
+- **Same-day recovery checkpoint:** the operator upgraded Free to Agency.
+  Historical commercial decisions bind the affected runs to `free_v1` (100
+  vector documents), while the current plan is 10,000; the earlier site-only
+  quota diagnosis missed this independent account limit. Existing Addon
+  additive refresh has confirmed 1,505 new public documents in 61 batches,
+  reaching at least 1,605/1,999 (80.29%), with no failures, quota skips or
+  deletions. M4 Docker VM startup then stalled; one 25-source run is unresolved,
+  and 394 sources remain unconfirmed. See the
+  [recovery checkpoint](recommendation-corpus-recovery-2026-10-28.md) before
+  resuming. Docker restart needs the explicit host-change authorization already
+  requested; full coverage, retained-row checks and retrieval probes remain open.
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for
   manual choice. The editor now shows up to eight non-weak candidates in their
   existing order, with open/copy actions regardless of anchor eligibility.

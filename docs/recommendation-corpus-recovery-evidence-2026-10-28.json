@@ -1,0 +1,787 @@
+{
+  "evidence_class": "developer_recovery_checkpoint",
+  "state": "blocked_docker_unavailable",
+  "cloud_runtime_revision": "1bc9435b5ce3de2b2094c7b8f1c27adfba0aa8ee",
+  "cloud_runtime_dirty": false,
+  "site_id_sha256": "b5e6f64fae932f1a8dff4bfb9ae62a8d41facc371fbdd0c4b22c4c29d572728e",
+  "plan_evidence": {
+    "plans": [
+      {
+        "plan_id": "agency",
+        "plan_version_id": "agency_v1",
+        "tier_id": "agency",
+        "max_vector_documents": "10000"
+      },
+      {
+        "plan_id": "free",
+        "plan_version_id": "free_v1",
+        "tier_id": "free",
+        "max_vector_documents": "100"
+      }
+    ],
+    "current_subscription": {
+      "status": "active",
+      "plan_id": "agency",
+      "plan_version_id": "agency_v1",
+      "started_at": "2026-09-30 00:00:00+00:00",
+      "created_at": "2026-07-23 11:21:24.025373+00:00",
+      "updated_at": "2026-10-28 03:49:50.522740+00:00",
+      "tier_id": "agency",
+      "metadata_vector_limit": "10000",
+      "entitlement_vector_limit": null,
+      "policy_vector_limit": null
+    },
+    "historical_run_decisions": [
+      {
+        "created_at": "2026-10-19 06:51:49.763618+00:00",
+        "request_kind": "execute",
+        "decision": "allow",
+        "decision_code": "commercial.allowed",
+        "plan_version_id": "free_v1",
+        "run_id": "run_a82e4030963549da81fd84609b047aaf"
+      },
+      {
+        "created_at": "2026-10-19 12:09:21.406754+00:00",
+        "request_kind": "execute",
+        "decision": "allow",
+        "decision_code": "commercial.allowed",
+        "plan_version_id": "free_v1",
+        "run_id": "run_597e315eff254bf2aec302ed34e410ec"
+      }
+    ],
+    "historical_quota_skip_counters_retained": false
+  },
+  "before": {
+    "public_total": 1999,
+    "confirmed_public_covered": 100,
+    "missing_public": 1899,
+    "coverage_percent": 5.0
+  },
+  "confirmed_checkpoint": {
+    "public_total_at_start": 1999,
+    "confirmed_public_covered": 1605,
+    "confirmed_coverage_percent": 80.29,
+    "new_public_documents": 1505,
+    "completed_batches": 61,
+    "last_confirmed_run_id": "run_f8e93081bdde4948ba329623fff90cf9",
+    "last_reported_active_documents": 1674,
+    "failed_documents": 0,
+    "skipped_due_to_quota": 0,
+    "deleted_entries": 0,
+    "pending_unconfirmed_sources": 394
+  },
+  "pending_batch": {
+    "offset": 1505,
+    "count": 25,
+    "run_id": "run_ad5e8b35be5b4fd098edd855348cf06b",
+    "last_known_status": "queued",
+    "result_unknown_due_to_outage": true,
+    "must_inspect_run_and_current_source_keys_before_any_resubmission": true
+  },
+  "source_preservation": {
+    "wordpress_fingerprint_before": {
+      "count": 2340,
+      "source_fingerprint": "aca7e5f335903f6cf956992015ed25e3dfb5d7e0f0e1af4d12880a2e48cad8db"
+    },
+    "wordpress_fingerprint_at_checkpoint": {
+      "count": 2340,
+      "source_fingerprint": "aca7e5f335903f6cf956992015ed25e3dfb5d7e0f0e1af4d12880a2e48cad8db"
+    },
+    "unchanged": true,
+    "cron_guard_changed": false,
+    "final_cloud_row_preservation_not_verified": true
+  },
+  "completed_runs": [
+    {
+      "offset": 0,
+      "count": 5,
+      "run_id": "run_15b8de2eaf224575864afe8bbac72367",
+      "indexed_chunks": 6,
+      "accepted_documents": 5,
+      "indexed_documents": 5,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 5,
+      "count": 25,
+      "run_id": "run_c961fff7085342888a69ff59e5745893",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 30,
+      "count": 25,
+      "run_id": "run_837765e208ca4f8f9c2a14399b96038e",
+      "indexed_chunks": 30,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 55,
+      "count": 25,
+      "run_id": "run_aec15f6a3ddd4a2ab1a4511347af27ac",
+      "indexed_chunks": 33,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 80,
+      "count": 25,
+      "run_id": "run_58ab6d058e1b497baec534ea532a0c79",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 105,
+      "count": 25,
+      "run_id": "run_dd8b333e0fab44e7b9062e5e08b5e976",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 130,
+      "count": 25,
+      "run_id": "run_12f1c76355a3463db5fb5f83fae38984",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 155,
+      "count": 25,
+      "run_id": "run_c1616a86d9524dbb8f697c76d82e736a",
+      "indexed_chunks": 30,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 180,
+      "count": 25,
+      "run_id": "run_6c191da1104b48aa82a0fc2d58fede9d",
+      "indexed_chunks": 30,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 205,
+      "count": 25,
+      "run_id": "run_f2459c0d14c444e3ba5cb8432188660b",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 230,
+      "count": 25,
+      "run_id": "run_5858c4df8f0e47e694121c5f72d216f0",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 255,
+      "count": 25,
+      "run_id": "run_d0b86bc3277b4893be5f3c0ce415f1c6",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 280,
+      "count": 25,
+      "run_id": "run_bbcdd29c2a77453ba4c07605d4c7a2aa",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 305,
+      "count": 25,
+      "run_id": "run_ce18bb3e95ba444381580b44635d6221",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 330,
+      "count": 25,
+      "run_id": "run_0df30ffb014a4161b2a71c94f0e972a4",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 355,
+      "count": 25,
+      "run_id": "run_d370f3a4187b4fa1bd4e8f29ac5f580b",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 380,
+      "count": 25,
+      "run_id": "run_9d9755c753e04f648d2f59ab9de833ae",
+      "indexed_chunks": 32,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 405,
+      "count": 25,
+      "run_id": "run_5fd17e52bf0247adba76ad1333c95490",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 430,
+      "count": 25,
+      "run_id": "run_e4615be3882e48a9bcb14d45c0d9d2eb",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 455,
+      "count": 25,
+      "run_id": "run_283cc89799e946beaf0a2fc9c62c6d8a",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 480,
+      "count": 25,
+      "run_id": "run_e5a980c560df4eb59f1322fe4b97281b",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 505,
+      "count": 25,
+      "run_id": "run_50025da7571b4959bbc873c3411cbe9e",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 530,
+      "count": 25,
+      "run_id": "run_daeb1ee580194e7abfbee105fdc58ffe",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 555,
+      "count": 25,
+      "run_id": "run_52a35ddbbc8140c9a0c9af76a7ef861d",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 580,
+      "count": 25,
+      "run_id": "run_7cad507575c948318d103069496b4e7f",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 605,
+      "count": 25,
+      "run_id": "run_58a84434e69747e19b66fe0dec04a761",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 630,
+      "count": 25,
+      "run_id": "run_a1bc091ae2ce4861a7a94e3c0c3a049e",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 655,
+      "count": 25,
+      "run_id": "run_3305dfde8d22403f848de4401f4bdcbe",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 680,
+      "count": 25,
+      "run_id": "run_9dd8e5cb064e4b4d96c15063e3ba5210",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 705,
+      "count": 25,
+      "run_id": "run_11c91314332743c5b87e664a1f584e38",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 730,
+      "count": 25,
+      "run_id": "run_396ab18d36154e538ffe19af9e96aaf7",
+      "indexed_chunks": 25,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 755,
+      "count": 25,
+      "run_id": "run_66293a7d85a04da8b17cccc43d90f82d",
+      "indexed_chunks": 25,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 780,
+      "count": 25,
+      "run_id": "run_31eafc30649249978964f52c313145cf",
+      "indexed_chunks": 25,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 805,
+      "count": 25,
+      "run_id": "run_e81802dd1b024b19ba31a950619c3194",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 830,
+      "count": 25,
+      "run_id": "run_3ae86af49d9144a8ab66a026557eeffb",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 855,
+      "count": 25,
+      "run_id": "run_c55c3ebf052d45da9fe47acde0250e19",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 880,
+      "count": 25,
+      "run_id": "run_aeb6b86fd8a64e7b967c144edf65c61a",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 905,
+      "count": 25,
+      "run_id": "run_445271864f2147e795dec35b21595267",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 930,
+      "count": 25,
+      "run_id": "run_b03f8ef0d724470d8fc04608840fa741",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 955,
+      "count": 25,
+      "run_id": "run_53be1cf7de85409ba6b64cfd100921e0",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 980,
+      "count": 25,
+      "run_id": "run_b7317dae1fa444b4b95ef7c640aaf656",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1005,
+      "count": 25,
+      "run_id": "run_072472df55bf481094a9f728e8b97e6d",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1030,
+      "count": 25,
+      "run_id": "run_f5f835f4247c47e681528247bc2b29f1",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1055,
+      "count": 25,
+      "run_id": "run_9ee37bfcdbbd4e77876757edae330ad3",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1080,
+      "count": 25,
+      "run_id": "run_6d470e1965e544abb1d10133abefb8de",
+      "indexed_chunks": 25,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1105,
+      "count": 25,
+      "run_id": "run_340b60add56b46ec856a486051c97496",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1130,
+      "count": 25,
+      "run_id": "run_f94b298e0d124d7e839271812e550261",
+      "indexed_chunks": 29,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1155,
+      "count": 25,
+      "run_id": "run_19526aa0ff48438ab3ececb47fbf5612",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1180,
+      "count": 25,
+      "run_id": "run_0f7bd2a9f5734dad891cf671232f2e1c",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1205,
+      "count": 25,
+      "run_id": "run_13a705ff68e449c3819b73441a975e29",
+      "indexed_chunks": 30,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1230,
+      "count": 25,
+      "run_id": "run_82fc999418874f95a82b1e318bd64ec5",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1255,
+      "count": 25,
+      "run_id": "run_613d5d08f0ad404abc0bbe2cbc0af021",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1280,
+      "count": 25,
+      "run_id": "run_31bac2cf57c24cbb8028bcf2101e8de6",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1305,
+      "count": 25,
+      "run_id": "run_c5c11dc2c16b4cc5b7cd70d5de9eee3e",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1330,
+      "count": 25,
+      "run_id": "run_d69f565d644944b483cc21ef9d040ab7",
+      "indexed_chunks": 30,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1355,
+      "count": 25,
+      "run_id": "run_475b9ad9ed304233961c0ea0d8564c55",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1380,
+      "count": 25,
+      "run_id": "run_f766e67563714d3384c4e360f3d1796a",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1405,
+      "count": 25,
+      "run_id": "run_aa6c7231d56f40b39cfb1eb653cf393e",
+      "indexed_chunks": 27,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1430,
+      "count": 25,
+      "run_id": "run_bfa4d548b9204393aaedb8806c3a124a",
+      "indexed_chunks": 30,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1455,
+      "count": 25,
+      "run_id": "run_11ee73c919ac466b825eef172d8fee34",
+      "indexed_chunks": 28,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    },
+    {
+      "offset": 1480,
+      "count": 25,
+      "run_id": "run_f8e93081bdde4948ba329623fff90cf9",
+      "indexed_chunks": 26,
+      "accepted_documents": 25,
+      "indexed_documents": 25,
+      "failed_documents": 0,
+      "skipped_due_to_quota": 0,
+      "deleted_entries": 0
+    }
+  ],
+  "outage": {
+    "observed_at": "2026-10-28T04:14:51Z",
+    "host_ssh_available": true,
+    "api_health_timed_out": true,
+    "docker_ping_timed_out": true,
+    "docker_vm_boot_waiting_for": [
+      "vsock",
+      "disk",
+      "eth0",
+      "fs",
+      "resolv.conf"
+    ],
+    "docker_restart_performed_by_this_session": false
+  },
+  "remaining_checks": [
+    "Resolve the pending run without blind duplicate submission.",
+    "Complete source-key comparison and original-row/vector preservation checks after delivery.",
+    "Run both recommendation intents on the complete corpus."
+  ],
+  "human_adoption_or_semantic_quality_claimed": false
+}
