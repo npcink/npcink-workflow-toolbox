@@ -79,6 +79,25 @@ automation module is an isolated exception recorded in
 `docs/boundary-exceptions.md` and ADR-004/ADR-005, not default Toolbox runtime
 ownership.
 
+### Site Knowledge status comparison bounds
+
+For the exact `npcink-cloud/site-knowledge-status` / `site_knowledge_status.v1`
+pair, the provider service preserves up to 1,000 normalized `input.post_ids`
+through transport and up to 1,000 positive integer `coverage.indexed_post_ids`
+through response normalization. This is a field-specific exception to the
+generic 80-item recursive bound; other fields, abilities and debug redaction
+retain their existing limits. Missing, malformed or oversized indexed-ID lists
+are not projected as partial evidence. The existing REST guard also requires
+`indexed_post_ids_requested` to match the local manifest before producing any
+article verdicts. An explicitly empty valid list can mean none are indexed.
+
+The administrator status route compares at most the 1,000 most recently
+modified published, password-free posts/pages. It is a bounded comparison,
+not whole-library pagination or a whole-site coverage ratio. Cloud counts may
+include other source types. Cloud remains index truth; this projection never
+refreshes/rebuilds indexes or changes article content. See
+[the status round-trip acceptance](recommendation-status-bounds-2026-10-28.md).
+
 Feature ownership and plugin split decisions should follow
 [Feature Ownership And Plugin Boundary](feature-ownership-and-plugin-boundary.md).
 New AI features should usually become Cloud capabilities, Ability contracts,

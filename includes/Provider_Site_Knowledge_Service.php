@@ -18,6 +18,8 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
+	private const STATUS_POST_IDS_LIMIT = 1000;
+
 	private Provider_Client $client;
 
 	public function __construct( Settings $settings, Provider_Client $client ) {
@@ -96,7 +98,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 		$payload = array(
 			'contract_version'       => 'site_knowledge_status.v1',
 			'include_coverage'       => ! empty( $input['include_coverage'] ),
-			'post_ids'               => array_slice( $this->sanitize_absint_list( $input['post_ids'] ?? array() ), 0, 1000 ),
+			'post_ids'               => array_slice( $this->sanitize_absint_list( $input['post_ids'] ?? array() ), 0, self::STATUS_POST_IDS_LIMIT ),
 			'media_attachment_ids'   => array_slice( $this->sanitize_absint_list( $input['media_attachment_ids'] ?? array() ), 0, 20 ),
 			'write_posture'          => 'suggestion_only',
 			'direct_wordpress_write' => false,
@@ -110,6 +112,47 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 			'site_knowledge_status',
 			'site_knowledge_status'
 		);
+	}
+
+
+	/**
+	 * Keep the status manifest's contract bound through the shared transport.
+	 * All other fields and Site Knowledge abilities retain generic bounds.
+	 */
+	public function sanitize_runtime_input( array $input, string $ability_name, string $contract_version ): array {
+		$sanitized = $this->sanitize_payload( $input );
+		if ( $this->is_status_contract( $ability_name, $contract_version ) ) {
+			$sanitized['post_ids'] = array_slice( $this->sanitize_absint_list( $input['post_ids'] ?? array() ), 0, self::STATUS_POST_IDS_LIMIT );
+		}
+		return $sanitized;
+	}
+
+
+	private function is_status_contract( string $ability_name, string $contract_version ): bool {
+		return 'npcink-cloud/site-knowledge-status' === $ability_name && 'site_knowledge_status.v1' === $contract_version;
+	}
+
+
+	private function sanitize_coverage( array $coverage, array $runtime_payload ): array {
+		$sanitized = $this->sanitize_payload( $coverage );
+		if ( ! $this->is_status_contract( (string) ( $runtime_payload['ability_name'] ?? '' ), (string) ( $runtime_payload['contract_version'] ?? '' ) ) ) {
+			return $sanitized;
+		}
+
+		// A malformed or oversized receipt must not become a partial ID list
+		// that marks the remaining local articles as not indexed.
+		unset( $sanitized['indexed_post_ids'] );
+		$ids = $coverage['indexed_post_ids'] ?? null;
+		if ( ! is_array( $ids ) || count( $ids ) > self::STATUS_POST_IDS_LIMIT ) {
+			return $sanitized;
+		}
+		foreach ( $ids as $id ) {
+			if ( ( ! is_int( $id ) && ! ( is_string( $id ) && ctype_digit( $id ) ) ) || 0 >= (int) $id ) {
+				return $sanitized;
+			}
+		}
+		$sanitized['indexed_post_ids'] = $this->sanitize_absint_list( $ids );
+		return $sanitized;
 	}
 
 
@@ -169,7 +212,7 @@ final class Provider_Site_Knowledge_Service extends Provider_Client_Support {
 				'status'               => sanitize_key( (string) ( $result['status'] ?? ( $response['status'] ?? 'unknown' ) ) ),
 				'run_id'               => sanitize_text_field( (string) ( $response['run_id'] ?? ( ( $response['data']['run_id'] ?? null ) ?: ( $result['run_id'] ?? '' ) ) ) ),
 				'results'              => $results,
-				'coverage'             => is_array( $result['coverage'] ?? null ) ? $this->sanitize_payload( $result['coverage'] ) : array(),
+				'coverage'             => is_array( $result['coverage'] ?? null ) ? $this->sanitize_coverage( $result['coverage'], $runtime_payload ) : array(),
 				'media_evidence_items' => is_array( $result['media_evidence_items'] ?? null ) ? $this->sanitize_item_url_fields( $this->sanitize_payload( $result['media_evidence_items'] ), 3 ) : array(),
 				'sync'                 => is_array( $result['sync'] ?? null ) ? $this->sanitize_payload( $result['sync'] ) : array(),
 				'progress'             => is_array( $result['progress'] ?? null ) ? $this->sanitize_payload( $result['progress'] ) : array(),

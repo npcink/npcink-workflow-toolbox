@@ -234,6 +234,9 @@ function apply_filters( string $hook, $value, ...$args ) {
 		$site_knowledge_runtime = is_array( $args[0] ?? null ) ? $args[0] : array();
 		$npcink_toolbox_progressive_site_knowledge_inputs[] = is_array( $site_knowledge_runtime['input'] ?? null ) ? $site_knowledge_runtime['input'] : array();
 		if ( 'npcink-cloud/site-knowledge-status' === (string) ( $args[1] ?? '' ) ) {
+			if ( isset( $GLOBALS['npcink_toolbox_status_coverage_fixture'] ) ) {
+				return array( 'status' => 'ok', 'data' => array( 'result' => array( 'status' => 'ready', 'coverage' => $GLOBALS['npcink_toolbox_status_coverage_fixture'] ) ) );
+			}
 			if ( 'error' === ( $npcink_toolbox_site_knowledge_status_mode ?? '' ) ) {
 				return new WP_Error( 'npcink_toolbox_site_knowledge_status_failed', 'Cloud status unavailable', array( 'status' => 503 ) );
 			}
@@ -647,6 +650,74 @@ if ( is_array( $metadata ) ) {
 	npcink_toolbox_provider_services_assert( array() === array_diff( $ability_ids, array( 'npcink-abilities-toolkit/update-post', 'npcink-abilities-toolkit/set-post-terms' ) ), 'Metadata apply plan targets only update-post and set-post-terms abilities.' );
 	npcink_toolbox_provider_services_assert( false !== strpos( wp_json_encode( $metadata ), '"create_missing":false' ) || in_array( 'npcink-abilities-toolkit/set-post-terms', $ability_ids, true ), 'Metadata apply plan keeps existing-terms-only semantics on the Toolkit path.' );
 }
+
+// ---- Site Knowledge status round trip -----------------------------------
+
+$status_bridge = new Npcink_Toolbox\Rest_Site_Knowledge_Bridges( $client );
+$status_projection = new ReflectionMethod( $status_bridge, 'site_knowledge_article_index_statuses' );
+$status_projection->setAccessible( true );
+$status_service = new Npcink_Toolbox\Provider_Site_Knowledge_Service( $settings, $client );
+foreach ( array( 80, 81, 1000, 1001 ) as $status_size ) {
+	$status_ids = range( 10000, 10000 + $status_size - 1 );
+	$compared_ids = array_slice( $status_ids, 0, 1000 );
+	$GLOBALS['npcink_toolbox_status_coverage_fixture'] = array(
+		'indexed_post_ids' => $compared_ids,
+		'indexed_post_ids_requested' => count( $compared_ids ),
+		'unrelated_items' => range( 1, 100 ),
+	);
+	$status_response = $client->get_site_knowledge_status( array( 'post_ids' => $status_ids, 'include_coverage' => true ) );
+	$status_sent = end( $npcink_toolbox_progressive_site_knowledge_inputs );
+	npcink_toolbox_provider_services_assert( $compared_ids === $status_sent['post_ids'] && $compared_ids === $status_response['coverage']['indexed_post_ids'], "Status round trip preserves the bounded manifest for {$status_size} input IDs." );
+	npcink_toolbox_provider_services_assert( 80 === count( $status_response['coverage']['unrelated_items'] ), 'Unrelated coverage arrays retain the generic 80-item limit.' );
+}
+
+// Reuse the real REST row projection with a bounded local-row cache fixture.
+$status_rows = array_map( static fn( int $id ): array => array( 'post_id' => $id, 'title' => 'Fixture article', 'url' => 'https://example.test/article/' . $id, 'modified_gmt' => '' ), $compared_ids );
+$status_cache_key = 'npcink_toolbox_site_knowledge_rows_' . md5( count( $compared_ids ) . '||' . md5( implode( ',', $compared_ids ) ) );
+set_transient( $status_cache_key, $status_rows, 300 );
+$status_projected = $status_projection->invoke( $status_bridge, $status_response, $compared_ids );
+npcink_toolbox_provider_services_assert( 1000 === count( $status_projected ) && array( 'indexed' ) === array_values( array_unique( array_column( $status_projected, 'status' ) ) ), 'All 1,000 indexed articles remain indexed beyond row 80.' );
+
+foreach ( array( 'missing', 'non_array', 'nested', 'boolean', 'zero', 'oversized', 'mismatched', 'empty', 'subset' ) as $receipt_case ) {
+	$coverage = array( 'indexed_post_ids_requested' => 1000, 'indexed_post_ids' => $compared_ids );
+	if ( 'missing' === $receipt_case ) {
+		unset( $coverage['indexed_post_ids'] );
+	} elseif ( 'non_array' === $receipt_case ) {
+		$coverage['indexed_post_ids'] = 'invalid';
+	} elseif ( in_array( $receipt_case, array( 'nested', 'boolean', 'zero' ), true ) ) {
+		$coverage['indexed_post_ids'][999] = 'nested' === $receipt_case ? array( 10999 ) : ( 'boolean' === $receipt_case ? true : 0 );
+	} elseif ( 'oversized' === $receipt_case ) {
+		$coverage['indexed_post_ids'][] = 99999;
+	} elseif ( 'mismatched' === $receipt_case ) {
+		$coverage['indexed_post_ids_requested'] = 80;
+	} elseif ( 'empty' === $receipt_case ) {
+		$coverage['indexed_post_ids'] = array();
+	} elseif ( 'subset' === $receipt_case ) {
+		$coverage['indexed_post_ids'] = array_slice( $compared_ids, 500 );
+	}
+	$GLOBALS['npcink_toolbox_status_coverage_fixture'] = $coverage;
+	$status_response = $client->get_site_knowledge_status( array( 'post_ids' => $compared_ids ) );
+	$projected = $status_projection->invoke( $status_bridge, $status_response, $compared_ids );
+	if ( in_array( $receipt_case, array( 'empty', 'subset' ), true ) ) {
+		$expected_indexed = 'subset' === $receipt_case ? 500 : 0;
+		npcink_toolbox_provider_services_assert( 1000 === count( $projected ) && $expected_indexed === count( array_filter( $projected, static fn( array $row ): bool => 'indexed' === $row['status'] ) ), "Complete {$receipt_case} Cloud evidence distinguishes indexed from not indexed." );
+	} else {
+		npcink_toolbox_provider_services_assert( array() === $projected, "The {$receipt_case} receipt suppresses article verdicts." );
+	}
+}
+unset( $GLOBALS['npcink_toolbox_status_coverage_fixture'] );
+$client->get_site_knowledge_status( array( 'post_ids' => array( 5, '5', 0, 9 ), 'media_attachment_ids' => range( 1, 21 ) ) );
+$status_sent = end( $npcink_toolbox_progressive_site_knowledge_inputs );
+npcink_toolbox_provider_services_assert( array( 5, 9 ) === $status_sent['post_ids'] && range( 1, 20 ) === $status_sent['media_attachment_ids'], 'The public status producer normalizes IDs and retains the 20-media-ID cap.' );
+
+foreach ( array( array( 'npcink-cloud/site-knowledge-search', 'site_knowledge_status.v1' ), array( 'npcink-cloud/site-knowledge-status', 'site_knowledge_search.v1' ) ) as $wrong_contract ) {
+	$bounded = $status_service->sanitize_runtime_input( array( 'post_ids' => range( 1, 1000 ), 'nested' => array( 'post_ids' => range( 1, 1000 ) ) ), $wrong_contract[0], $wrong_contract[1] );
+	npcink_toolbox_provider_services_assert( 80 === count( $bounded['post_ids'] ) && 80 === count( $bounded['nested']['post_ids'] ), 'Both exact ability and status contract are required to widen the manifest bound.' );
+	$normalized = $status_service->normalize_site_knowledge_cloud_response( array( 'coverage' => array( 'indexed_post_ids' => range( 1, 1000 ) ) ), 'site_knowledge_results', 'site_knowledge_context', array( 'ability_name' => $wrong_contract[0], 'contract_version' => $wrong_contract[1] ) );
+	npcink_toolbox_provider_services_assert( 80 === count( $normalized['coverage']['indexed_post_ids'] ), 'Other response contracts retain generic bounds.' );
+}
+$bounded = $status_service->sanitize_runtime_input( array( 'post_ids' => array( 5, '5', 0, 9 ), 'media_attachment_ids' => range( 1, 20 ), 'nested' => array( 'post_ids' => range( 1, 1000 ) ) ), 'npcink-cloud/site-knowledge-status', 'site_knowledge_status.v1' );
+npcink_toolbox_provider_services_assert( array( 5, 9 ) === $bounded['post_ids'] && 20 === count( $bounded['media_attachment_ids'] ) && 80 === count( $bounded['nested']['post_ids'] ), 'Status preserves ID normalization and media bounds without widening nested fields.' );
 
 // ---- Provider_Hosted_AI_Service ------------------------------------------
 
