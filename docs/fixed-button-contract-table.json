@@ -124,6 +124,22 @@
       "direct_wordpress_write": false
     },
     {
+      "button_id": "related_reading",
+      "label": "Related Reading",
+      "surface": "editor_content_support",
+      "source_contracts": [
+        "related_reading_candidates.v1",
+        "native_editor_commit"
+      ],
+      "runtime_owner": "npcink_cloud_via_cloud_addon",
+      "write_lane": "native_editor_commit",
+      "handoff_owner": "wordpress_native_save",
+      "adapter_parity_status": "partial_contract_reuse",
+      "source_file": "assets/editor-content-support.js",
+      "source_marker": "Insert selected reading",
+      "direct_wordpress_write": false
+    },
+    {
       "button_id": "article_image_alt",
       "label": "Image ALT Review",
       "surface": "editor_content_support",

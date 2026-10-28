@@ -63,7 +63,9 @@ weak 候选仍在次级折叠区，不因这次定位调整变成高相关候选
 
 1. 从当前文章标题、摘要、正文和必要的用户指令组成查询及上下文。
 2. 现有编辑器“站内引用建议”通过 `internal_links` 流程获取 Cloud Site Knowledge
-   候选及 Toolkit 投影；历史独立 `related_content` 编辑器入口保持停用。
+   候选及 Toolkit 投影。另有“相关阅读”操作，使用 `related_content` 全文检索，
+   作者勾选后插入普通 Gutenberg 阅读列表；见 [编辑器契约](related-reading-editor-v1.md)。
+   两者分别解决正文短语链接和读者继续阅读。
 3. Cloud 负责向量召回、公开文档过滤、合并、相关性及排序；Toolbox 不实现第二套排序。
 4. WordPress 投影核验本地目标，并保留 `candidate_relevance` 与
    `can_apply_to_editor` 两种不同含义。浏览器继续核对当前可见正文的插入资格。

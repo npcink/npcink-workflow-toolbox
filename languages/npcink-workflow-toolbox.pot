@@ -9949,3 +9949,51 @@ msgstr ""
 #: assets/editor-content-support.js
 msgid "Insertion details"
 msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Body links"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Related reading"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Choose useful articles and insert a reading list at the end of this draft."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Find links for the draft text or choose articles for a related reading list."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Insert selected reading"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Undo reading list"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Related reading is unavailable. Try again later."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Select articles to insert at the end of this draft. Save normally when you are ready."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Reading list added to the editor. Save normally when you are ready."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Reading list removed from the editor."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The reading list was changed or is locked. Use the editor Undo control to preserve your edits."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Could not insert the reading list. Check for existing links, changed articles or editor restrictions, then refresh recommendations."
+msgstr ""

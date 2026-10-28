@@ -46,7 +46,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		if ( 'format_content' === $intent ) {
 			return Editor_Content_Format::request( $request );
 		}
-		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'polish_notes', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'internal_links', 'image_candidates', 'image_alt_suggestions', 'publish_preflight' ), true ) ) {
+		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'polish_notes', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'internal_links', 'related_content', 'image_candidates', 'image_alt_suggestions', 'publish_preflight' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_editor_support_intent',
 				__( 'A supported editor content-support intent is required.', 'npcink-workflow-toolbox' ),
@@ -62,6 +62,9 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				__( 'You are not allowed to use this post as editor content-support context.', 'npcink-workflow-toolbox' ),
 				array( 'status' => 403 )
 			);
+		}
+		if ( 'related_content' === $intent ) {
+			$context['context_scope'] = 'full_article';
 		}
 		if ( 'source_adaptation_review' === $intent ) {
 			$writing_pack_context = $this->editor_writing_pack_context( $request, $context );
@@ -156,6 +159,12 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 		if ( 'internal_links' === $intent ) {
 			$result['sections']['internal_links'] = $this->editor_internal_link_candidates( $context, $query );
+		}
+
+		if ( 'related_content' === $intent ) {
+			$result['sections']['related_content'] = $this->editor_related_reading_candidates( $context, $query );
+			$result['final_write_path']            = 'native_editor_commit';
+			$result['handoff']['final_writes']     = 'wordpress_native_save';
 		}
 
 		if ( 'image_candidates' === $intent ) {
@@ -1623,6 +1632,59 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'policy' => 'related_context_for_summary_and_term_review_only_no_new_facts_no_writes',
 			'items'  => array_values( array_filter( $context_items, static fn( array $item ): bool => '' !== (string) ( $item['title'] ?? '' ) || 0 < absint( $item['post_id'] ?? 0 ) ) ),
 		);
+	}
+
+	private function editor_related_reading_candidates( array $context, string $query ): array {
+		$section = $this->editor_support_section(
+			$this->editor_cached_site_knowledge(
+				array(
+					'query'           => $query,
+					'intent'          => 'related_content',
+					'current_post_id' => absint( $context['post_id'] ?? 0 ),
+					'max_results'     => 8,
+				)
+			)
+		);
+		$items   = array();
+		$seen    = array();
+		if ( 'ready' === ( $section['status'] ?? '' ) ) {
+			foreach ( array_slice( self::editor_related_content_items( $section ), 0, 8 ) as $item ) {
+				$post_id = absint( $item['post_id'] ?? ( $item['id'] ?? 0 ) );
+				if ( $post_id < 1 || $post_id === absint( $context['post_id'] ?? 0 ) || isset( $seen[ $post_id ] ) || 'weak' === ( $item['candidate_relevance'] ?? '' ) || ! current_user_can( 'read_post', $post_id ) ) {
+					continue;
+				}
+				// Author-scoped routes expose only verified public local destinations.
+				$post = get_post( $post_id );
+				if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, array( 'post', 'page' ), true ) || '' !== (string) $post->post_password ) {
+					continue;
+				}
+				$url   = esc_url_raw( (string) get_permalink( $post_id ), array( 'http', 'https' ) );
+				$title = sanitize_text_field( (string) $post->post_title );
+				if ( '' === $url || '' === $title ) {
+					continue;
+				}
+				$seen[ $post_id ]   = true;
+				$item['post_id']    = $post_id;
+				$item['id']         = (string) $post_id;
+				$item['title']      = $title;
+				$item['url']        = $url;
+				$item['target_url'] = $url;
+				$item['target_ref'] = array(
+					'post_id'   => $post_id,
+					'url'       => $url,
+					'status'    => 'publish',
+					'post_type' => $post->post_type,
+				);
+				$items[]            = $item;
+			}
+		}
+		$section['results'] = $items;
+		unset( $section['items'] );
+		$section['artifact_type']          = 'related_reading_candidates.v1';
+		$section['candidate_source']       = 'ready' === ( $section['status'] ?? '' ) ? 'cloud_vector' : '';
+		$section['write_posture']          = 'suggestion_only';
+		$section['direct_wordpress_write'] = false;
+		return Recommendation_Metadata::project_section( $section, 'related_content' );
 	}
 
 	private function editor_internal_link_candidates( array $context, string $query ): array {

@@ -98,6 +98,12 @@ taxonomy creation, external/background execution, cross-post insertion,
 backend content patching, or another governed batch. Those operations remain
 `core_proposal_required`.
 
+The operator-approved [related-reading editor contract](related-reading-editor-v1.md)
+also permits one explicit insertion of up to eight reviewed article links as
+ordinary editable heading/list blocks in the current article. This uses the
+same native-editor lane, not a frontend dynamic recommendation system. It never
+saves or writes another article.
+
 ## Plugin-Admin Batch Boundary
 
 Batch surfaces may submit reviewed plans to Core, then must stop and navigate

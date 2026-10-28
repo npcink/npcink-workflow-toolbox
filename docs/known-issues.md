@@ -51,6 +51,14 @@ with the closing commit or PR for one release cycle, then prune.
   See [Ranking Baseline v1](recommendation-ranking-baseline-v1.md). These older
   actions are conditional on current feature visibility/pauses; the focused
   next action is recorded above.
+- **Related-reading insertion is implemented (2026-10-28).** The two editor
+  actions now distinguish body links from an author-selected reading list.
+  Target checks and real Gutenberg insert/Undo/native save pass in an isolated
+  WordPress 7.1.3 sandbox with deterministic retrieval fixtures. This closes
+  the missing list-insertion behavior, not semantic-quality or deployment debt.
+  `magick-ai.local` returned HTTP 502 during this acceptance run; no original-site
+  deployment or real-corpus improvement is claimed. See
+  [the accepted contract and evidence](related-reading-editor-v1.md).
 - **Recommendation relevance and anchor naturalness (Cloud ranking owner).**
   Independent human gold remains absent; AI-led development continues under
   the operator's 2026-10-26 decision above. The 2026-10-17 twelve-article developer
