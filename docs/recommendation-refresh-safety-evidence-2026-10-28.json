@@ -1,0 +1,126 @@
+{
+  "contract_version": "recommendation_refresh_safety_closeout.v1",
+  "observed_at": "2026-10-28T06:00:18.498153+00:00",
+  "scope": "Site Knowledge refresh persistence safety and explicit withdrawal delivery; no ranking change",
+  "sources": {
+    "cloud": {
+      "pr": "https://github.com/npcink/npcink-ai-cloud/pull/1304",
+      "reviewed_head": "f641f429714aedd1058b2ff976d4cdbe08d82fca",
+      "merge_state": "merged",
+      "merge_sha": "d32e95cec73167ba69ee1470616e5380e218a23f"
+    },
+    "addon": {
+      "pr": "https://github.com/npcink/npcink-cloud-addon/pull/335",
+      "reviewed_head": "87d08f7abb9501c876d65b2173ed013e10567f3f",
+      "merge_state": "merged",
+      "merge_sha": "fc9bdc880b7991c591b81b6d6bab13dea31c2f12"
+    }
+  },
+  "gates": {
+    "cloud_focused_pytest": {
+      "passed": 267,
+      "failed": 0,
+      "warning": "Existing Starlette httpx deprecation"
+    },
+    "cloud_targeted_ruff_mypy": "passed",
+    "cloud_release_policy": "passed",
+    "m4_focused_pytest": {
+      "passed": 23,
+      "failed": 0
+    },
+    "addon_full_contracts": "passed",
+    "addon_phpstan": "passed",
+    "addon_wporg": "passed",
+    "addon_composer_validate": "passed",
+    "addon_pot_freshness": "passed",
+    "php80_test_compatibility": "Reflection setAccessible fix committed; final required CI passed",
+    "cross_repo_matrix": {
+      "result": "passed",
+      "scope": [
+        "npcink-ai-cloud",
+        "npcink-cloud-addon"
+      ],
+      "cloud_exact_ci_revision": "f641f429714aedd1058b2ff976d4cdbe08d82fca",
+      "merged_tree_identical_to_reviewed_head": true,
+      "m4_authority": "Separate clean-master promotion/status/signed smoke; matrix does not deploy"
+    }
+  },
+  "review": {
+    "policy": "2026-10-27 local Qwen advisory only; deterministic CI remains required",
+    "cloud": {
+      "receipt_sha256": "a7ae23dac4d7c437c6692a5884d02504cacf3e9deeeae2c8c99a0262404fde54",
+      "findings": 3,
+      "triage": "3 accept with evidence/contract limitations"
+    },
+    "addon": {
+      "receipt_sha256": "283f78c990e70c9f70802615b7f72f306bc8b99588c0be20b173766c7c39eab3",
+      "findings": 5,
+      "triage": "5 accept with evidence/retained limitations"
+    },
+    "generated_binary_handling": "Local helper copy skips .mo supplementary UTF-8 decoding; full committed binary diff retained and canonical exact-diff verifier passed"
+  },
+  "runtime": {
+    "candidate_revision": "f641f429714aedd1058b2ff976d4cdbe08d82fca",
+    "candidate_dirty": false,
+    "accepted_state": "accepted",
+    "production_deployed": false,
+    "actual_vector_backend": "postgres_json",
+    "external_vector_evidence": "local fake only",
+    "accepted_revision": "d32e95cec73167ba69ee1470616e5380e218a23f",
+    "accepted_dirty": false,
+    "promotion_pr": 1304,
+    "signed_status_smoke": "ok/succeeded",
+    "accepted_unrelated_rows_unchanged": true,
+    "accepted_wordpress_source_unchanged": true
+  },
+  "real_runs": [
+    {
+      "run_id": "run_9d6ed7059d03484086caee804943dedd",
+      "path": "existing Addon public article refresh",
+      "status": "succeeded",
+      "indexed_documents": 1,
+      "indexed_chunks": 1,
+      "deleted_entries": 0
+    },
+    {
+      "run_id": "run_d229e02e1d9c4394a49fe8f1543b3809",
+      "path": "save handler -> existing buffer -> scheduled named Site Knowledge Cron -> Cloud",
+      "status": "succeeded",
+      "indexed_documents": 1,
+      "indexed_chunks": 1,
+      "deleted_entries": 0
+    }
+  ],
+  "preservation": {
+    "public_posts": 1966,
+    "public_pages": 33,
+    "public_documents": 1999,
+    "public_post_page_chunks": 2217,
+    "wordpress_source_rows": 2340,
+    "wordpress_source_fingerprint": "aca7e5f335903f6cf956992015ed25e3dfb5d7e0f0e1af4d12880a2e48cad8db",
+    "wordpress_source_unchanged": true,
+    "excluded_refreshed_source_id": 21764,
+    "unrelated_document_rows": 2131,
+    "unrelated_document_digest": "894de30799ec73e7459db5594d7b815c",
+    "unrelated_chunk_rows": 2363,
+    "unrelated_chunk_digest": "8600db7542725d523aaa61b3e8e85892",
+    "unrelated_rows_unchanged": true
+  },
+  "remaining": [
+    "Global local Cron guard still active; unrelated overdue backup/trash/draft/history cleanup effects need bounded exit plan",
+    "Full unattended reconciliation cycle unproven; cursor preserved",
+    "Existing buffer is not CAS across concurrent PHP requests; overflow/retry loss remains observable",
+    "Toolbox request/response status arrays still truncate 80 vs intended 1000 IDs",
+    "Comparable AI-led Eval Lab relevance evidence remains next; no human per-article labels required",
+    "No distributed SQL/vector transaction; explicit rebuild retains destructive semantics"
+  ],
+  "cleanup": {
+    "addon_topic_remote": "deleted",
+    "addon_topic_local": "deleted",
+    "addon_primary": "clean detached at merged origin/master; unrelated divergent local master and old docs branch preserved",
+    "cloud_topic": "Merged; tree identical to master; own branch and auxiliary worktree cleanup performed after matrix",
+    "toolbox_primary_chat_worktree": "Retained because app primary checkout cannot be archived",
+    "unrelated_cloud_primary": "Unrelated dirty files/worktrees preserved"
+  },
+  "raw_evidence": "Primary Toolbox checkout tests/artifacts/refresh-safety-closeout-2026-10-28; SHA-256 manifest; ignored local evidence, not portable fixtures"
+}
