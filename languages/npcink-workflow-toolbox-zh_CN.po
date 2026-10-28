@@ -10455,3 +10455,51 @@ msgstr "推荐文章"
 #: assets/editor-content-support.js
 msgid "Insertion details"
 msgstr "插入说明"
+
+#: assets/editor-content-support.js
+msgid "Body links"
+msgstr "正文内链"
+
+#: assets/editor-content-support.js
+msgid "Related reading"
+msgstr "相关阅读"
+
+#: assets/editor-content-support.js
+msgid "Choose useful articles and insert a reading list at the end of this draft."
+msgstr "选择适合的文章，在当前草稿末尾插入相关阅读列表。"
+
+#: assets/editor-content-support.js
+msgid "Find links for the draft text or choose articles for a related reading list."
+msgstr "为正文查找内链，或选择文章插入相关阅读列表。"
+
+#: assets/editor-content-support.js
+msgid "Insert selected reading"
+msgstr "插入所选相关阅读"
+
+#: assets/editor-content-support.js
+msgid "Undo reading list"
+msgstr "撤销相关阅读列表"
+
+#: assets/editor-content-support.js
+msgid "Related reading is unavailable. Try again later."
+msgstr "相关阅读暂时不可用，请稍后重试。"
+
+#: assets/editor-content-support.js
+msgid "Select articles to insert at the end of this draft. Save normally when you are ready."
+msgstr "选择文章插入当前草稿末尾，确认后按平常方式保存。"
+
+#: assets/editor-content-support.js
+msgid "Reading list added to the editor. Save normally when you are ready."
+msgstr "相关阅读列表已加入编辑器，确认后按平常方式保存。"
+
+#: assets/editor-content-support.js
+msgid "Reading list removed from the editor."
+msgstr "已从编辑器撤销相关阅读列表。"
+
+#: assets/editor-content-support.js
+msgid "The reading list was changed or is locked. Use the editor Undo control to preserve your edits."
+msgstr "相关阅读列表已被修改或锁定，请使用编辑器的撤销功能，以保留您的编辑。"
+
+#: assets/editor-content-support.js
+msgid "Could not insert the reading list. Check for existing links, changed articles or editor restrictions, then refresh recommendations."
+msgstr "无法插入相关阅读列表。请检查已有链接、目标文章变化或编辑器限制，然后刷新推荐。"

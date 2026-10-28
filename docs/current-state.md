@@ -118,6 +118,9 @@ ordinary generation and Site Knowledge remain available. See
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for
   manual choice. The editor now shows up to eight non-weak candidates in their
   existing order, with open/copy actions regardless of anchor eligibility.
+  A separate Related reading action now retrieves full-article candidates for
+  author-selected native Gutenberg reading-list insertion; see
+  [the editor contract](related-reading-editor-v1.md).
   Apply remains optional and uses the existing live safety checks; its source
   preview stays visible. Perfect anchors, exact resource identity for every
   candidate and model unanimity are not prerequisites for manual recommendation
@@ -173,7 +176,7 @@ ordinary generation and Site Knowledge remain available. See
    only the summary/taxonomy cached-flow orchestrators remain).
 3. `assets/admin.js` (8.2k) and remaining `Admin_Page.php` clusters
    (review-set tools, media derivative controls, content context form).
-4. Editor intent convergence shipped 2026-10-07: twelve-intent editor
+4. Editor intent convergence shipped 2026-10-07: thirteen-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
 5. PHPStan baseline ratchet (121 findings across 86 baseline patterns; shrinks with cluster splits).

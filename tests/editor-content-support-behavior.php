@@ -432,7 +432,14 @@ function get_posts( array $args ): array {
 	);
 }
 
+function get_permalink( int $post_id ): string {
+	return 'https://example.test/reading-' . $post_id;
+}
+
 function get_post( int $post_id ) {
+	if ( isset( $GLOBALS['npcink_toolbox_reading_posts'][ $post_id ] ) ) {
+		return (object) $GLOBALS['npcink_toolbox_reading_posts'][ $post_id ];
+	}
 	if ( 31 === $post_id ) {
 		return (object) array( 'ID' => 31, 'post_type' => 'attachment', 'post_title' => 'AI workflow diagram', 'post_excerpt' => 'Recommendation workflow', 'post_content' => 'Fast recommendation pipeline' );
 	}
@@ -692,6 +699,42 @@ foreach ( array( 'healthy_v2', 'failed_v2', 'legacy_empty' ) as $mode ) {
 }
 unset( $GLOBALS['npcink_toolbox_abstention_test_result'] );
 $npcink_toolbox_progressive_transients = $before_abstention_transients;
+
+// Related reading reuses full-article retrieval and verifies each local target.
+$reading_transients = $npcink_toolbox_progressive_transients;
+$GLOBALS['npcink_toolbox_simulated_editable_post_ids'] = array( 31, 88, 89, 90, 91, 92, 93, 94 );
+$GLOBALS['npcink_toolbox_reading_posts'] = array();
+foreach ( array( 88, 89, 90, 91, 92, 93, 94 ) as $id ) {
+	$GLOBALS['npcink_toolbox_reading_posts'][ $id ] = array( 'ID' => $id, 'post_type' => 'post', 'post_status' => 'publish', 'post_password' => '', 'post_title' => 'Verified article ' . $id );
+}
+$GLOBALS['npcink_toolbox_reading_posts'][89]['post_status'] = 'draft';
+$GLOBALS['npcink_toolbox_reading_posts'][90]['post_password'] = 'protected';
+$GLOBALS['npcink_toolbox_reading_posts'][91]['post_type'] = 'attachment';
+$GLOBALS['npcink_toolbox_reading_posts'][94]['post_type'] = 'page';
+foreach ( array( 'ready', 'failed' ) as $reading_status ) {
+	$npcink_toolbox_progressive_transients = array();
+	$GLOBALS['npcink_toolbox_abstention_test_result'] = array( 'status' => $reading_status, 'results' => array_map( static function ( $id ) {
+		return array( 'post_id' => $id, 'title' => 'Untrusted cloud title', 'url' => 'https://outside.test/', 'candidate_relevance' => 92 === $id ? 'weak' : 'strong' );
+	}, array( 88, 89, 90, 91, 92, 93, 94, 95 ) ) );
+	$reading = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'related_content', 'post_id' => 31, 'context_scope' => 'selected_text', 'selected_text' => 'UNRELATED_SELECTION_ONLY' ) + $npcink_toolbox_editor_flow_draft );
+	$data = $reading['data'];
+	$section = $data['sections']['related_content'];
+	npcink_toolbox_editor_flow_assert( 'full_article' === $data['post_context']['context_scope'] && false === strpos( $data['query'], 'UNRELATED_SELECTION_ONLY' ), 'Related reading uses the full article even when a selection is supplied.' );
+	npcink_toolbox_editor_flow_assert( 'native_editor_commit' === $data['final_write_path'] && 'wordpress_native_save' === $data['handoff']['final_writes'] && false === $data['direct_wordpress_write'], 'Related reading is suggestion-only with an explicit native-editor handoff.' );
+	if ( 'ready' === $reading_status ) {
+		npcink_toolbox_editor_flow_assert( array( 88, 93, 94 ) === array_column( $section['results'], 'post_id' ), 'Related reading excludes unpublished, protected, unsupported, weak and unreadable targets without changing order.' );
+		npcink_toolbox_editor_flow_assert( 'Verified article 88' === $section['results'][0]['title'] && 'https://example.test/reading-88' === $section['results'][0]['url'] && 'page' === $section['results'][2]['target_ref']['post_type'], 'Related reading uses canonical local titles, URLs and target types.' );
+	} else {
+		npcink_toolbox_editor_flow_assert( array() === $section['results'] && '' === $section['candidate_source'], 'Unavailable Cloud evidence cannot become selectable related reading.' );
+	}
+}
+// Self and duplicate ids cannot be inserted as separate recommendations.
+$npcink_toolbox_progressive_transients = array();
+$GLOBALS['npcink_toolbox_abstention_test_result'] = array( 'status' => 'ready', 'results' => array( array( 'post_id' => 31 ), array( 'post_id' => 88 ), array( 'post_id' => 88 ) ) );
+$reading = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'related_content', 'post_id' => 31 ) + $npcink_toolbox_editor_flow_draft );
+npcink_toolbox_editor_flow_assert( array( 88 ) === array_column( $reading['data']['sections']['related_content']['results'], 'post_id' ), 'Related reading excludes self and repeated target ids.' );
+unset( $GLOBALS['npcink_toolbox_abstention_test_result'], $GLOBALS['npcink_toolbox_reading_posts'], $GLOBALS['npcink_toolbox_simulated_editable_post_ids'] );
+$npcink_toolbox_progressive_transients = $reading_transients;
 
 // 7. Image candidates fail closed when Cloud transport is unavailable.
 $images = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'image_candidates' ) + $npcink_toolbox_editor_flow_draft );

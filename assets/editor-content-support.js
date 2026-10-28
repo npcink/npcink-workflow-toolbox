@@ -28,6 +28,7 @@
 		internalLinkSavedStateChanged,
 		internalLinkSourcePreview,
 	} = (typeof window !== 'undefined' && window.NpcinkToolboxInternalLinkHelpers) || {};
+	const { relatedReadingSelection, buildRelatedReadingGroup, relatedReadingCanUndo } = (typeof window !== 'undefined' && window.NpcinkToolboxRelatedReading) || {};
 	const toolboxAudioPreferences = (typeof window !== 'undefined' && window.NpcinkToolboxAudioPreferences) || {};
 	const {
 		isAudioIntent,
@@ -335,7 +336,7 @@
 		{
 			intent: 'internal_links',
 			label: __('Site citation suggestions', 'npcink-workflow-toolbox'),
-			description: __('Find related published articles, then separate safe internal links from reference-only suggestions.', 'npcink-workflow-toolbox'),
+			description: __('Find links for the draft text or choose articles for a related reading list.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft plus related Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Existing-post refs, anchor hints, relevance notes', 'npcink-workflow-toolbox'),
@@ -344,6 +345,13 @@
 			runtimeLabel: __('Toolkit review artifact; optional Cloud Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			writePostureLabel: __('Explicit editor Apply only; no automatic save or publish', 'npcink-workflow-toolbox'),
 			blockedLabel: __('Blocked when the draft has too little context or related content evidence is unavailable.', 'npcink-workflow-toolbox'),
+		},
+		{
+			intent: 'related_content',
+			defaultVisible: false,
+			label: __('Related reading', 'npcink-workflow-toolbox'),
+			description: __('Choose useful articles and insert a reading list at the end of this draft.', 'npcink-workflow-toolbox'),
+			group: 'review_handoff',
 		},
 		{
 			intent: 'image_alt_suggestions',
@@ -2273,8 +2281,9 @@
 		if (value === 'tag_suggestions') {
 			return __('Tag suggestions', 'npcink-workflow-toolbox');
 		}
+		if (value === 'related_content') return __('Related reading', 'npcink-workflow-toolbox');
 		if (value === 'internal_links') {
-			return __('Site citation suggestions', 'npcink-workflow-toolbox');
+			return __('Body links', 'npcink-workflow-toolbox');
 		}
 		return formatMetaLabel(value);
 	}
@@ -2283,6 +2292,7 @@
 		if (value === 'source_adaptation_review') {
 			return __('Builds a reviewable writing pack from URL, manual, or mixed inputs. Reviewed sections may load only into an empty editor; nothing is saved or published automatically.', 'npcink-workflow-toolbox');
 		}
+		if (value === 'related_content') return __('Select articles to insert at the end of this draft. Save normally when you are ready.', 'npcink-workflow-toolbox');
 		if (value === 'internal_links') {
 			return __('Finds related published articles and identifies which ones have a safe exact placement in the current draft.', 'npcink-workflow-toolbox');
 		}
@@ -4934,6 +4944,7 @@
 			'tag_suggestions',
 			'category_suggestions',
 			'internal_links',
+			'related_content',
 			'polish_notes',
 		].indexOf(intent) >= 0;
 	}
@@ -5622,7 +5633,10 @@
 				id: sourceId || String(index + 1),
 				candidateRank: index + 1,
 				scoreBucket: item && item.score_bucket || 'unknown',
-				title,
+				title: plainTextFromHtml(title),
+				targetPostId: Number(item && item.target_ref && item.target_ref.post_id || 0),
+				targetStatus: String(item && item.target_ref && item.target_ref.status || ''),
+				targetPostType: String(item && item.target_ref && item.target_ref.post_type || ''),
 				targetUrl: readableItemText(item && (item.target_url || item.url || item.permalink || item.link || item.source_url), ''),
 				detail: readableItemText(item && (item.reason || item.excerpt || item.snippet || item.content_excerpt), ''),
 				candidateRelevance: internalLinkContractValue(item && item.candidate_relevance),
@@ -6565,10 +6579,14 @@
 	function renderRelatedContentCandidateSection(section, controls) {
 		const candidates = relatedContentCandidateItems(section).slice(0, 8);
 		const actionControls = controls && controls.relatedContent ? controls.relatedContent : {};
+		const selectable = section && section.artifact_type === 'related_reading_candidates.v1' && section.status === 'ready';
+		const selected = actionControls.selected || {};
+		const chosenCount = candidates.filter((item) => selected[item.id]).length;
 		return createElement(
 			'section',
 			{ className: 'npcink-toolbox-editor-support__candidate-group' },
-			createElement('h4', null, __('Related articles', 'npcink-workflow-toolbox')),
+			createElement('h4', null, __('Related reading', 'npcink-workflow-toolbox')),
+			section && section.status !== 'ready' ? createElement(Notice, { status: 'warning', isDismissible: false }, section.message || __('Related reading is unavailable. Try again later.', 'npcink-workflow-toolbox')) : null,
 			candidates.length ? createElement(
 				'ul',
 				{ className: 'npcink-toolbox-editor-support__internal-link-list' },
@@ -6581,7 +6599,11 @@
 						createElement(
 							'div',
 							{ className: 'npcink-toolbox-editor-support__internal-link-main' },
-							createElement('strong', null, item.title),
+							selectable ? createElement(CheckboxControl, {
+								label: item.title, checked: Boolean(selected[item.id]),
+								disabled: Boolean(actionControls.running), __nextHasNoMarginBottom: true,
+								onChange: (checked) => actionControls.toggle && actionControls.toggle(item, checked),
+							}) : createElement('strong', null, item.title),
 							item.candidateRelevance ? createElement('div', { className: 'npcink-toolbox-editor-support__internal-link-meta' }, createElement('span', null, recommendationRelevanceLabel(item.candidateRelevance))) : null,
 							item.detail ? createElement('p', null, truncateText(item.detail, 120)) : null
 						),
@@ -6609,6 +6631,12 @@
 					);
 				})
 			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No related content returned.', 'npcink-workflow-toolbox')),
+			selectable && candidates.length ? createElement(Button, {
+				type: 'button', variant: 'primary', disabled: !chosenCount || Boolean(actionControls.running),
+				onClick: actionControls.insert,
+			}, __('Insert selected reading', 'npcink-workflow-toolbox')) : null,
+			selectable && candidates.length ? createElement('small', { className: 'npcink-toolbox-editor-support__candidate-policy' }, __('Changes stay in the visible editor until you save or publish.', 'npcink-workflow-toolbox')) : null,
+			actionControls.undo ? createElement(Button, { type: 'button', variant: 'secondary', onClick: actionControls.undo }, __('Undo reading list', 'npcink-workflow-toolbox')) : null,
 			actionControls.status ? createElement(Notice, { status: actionControls.status.status || 'info', isDismissible: false }, actionControls.status.message || '') : null
 		);
 	}
@@ -7390,6 +7418,9 @@
 			const [internalLinkStatus, setInternalLinkStatus] = useState(null);
 			const [relatedContentRunning, setRelatedContentRunning] = useState('');
 			const [relatedContentStatus, setRelatedContentStatus] = useState(null);
+			const [relatedReadingSelected, setRelatedReadingSelected] = useState({});
+			const [relatedReadingUndo, setRelatedReadingUndo] = useState(null);
+			const relatedReadingRequestRef = useRef(0);
 			const [internalLinkUndo, setInternalLinkUndo] = useState(null);
 			const [internalLinkSelection, setInternalLinkSelection] = useState({});
 			const [internalLinkBatchMode, setInternalLinkBatchMode] = useState(false);
@@ -7445,6 +7476,7 @@
 				progressiveMountedRef.current = true;
 				return () => {
 					progressiveMountedRef.current = false;
+					relatedReadingRequestRef.current += 1;
 					progressiveRequestSeqRef.current += 1;
 				};
 			}, []);
@@ -7725,6 +7757,8 @@
 			}
 
 			async function runFlow(intent, options) {
+				relatedReadingRequestRef.current += 1;
+				setRelatedContentRunning('');
 				if (isAudioIntent(intent)) { return; } // Release pause; retained audio playback is independent.
 					const runOptions = options && typeof options === 'object' ? options : {};
 					if (intent === 'image_candidates') {
@@ -7783,6 +7817,10 @@
 				setAudioPlaybackErrors({});
 					setInternalLinkRunning('');
 					setInternalLinkStatus(null);
+					if (intent === 'related_content') {
+						setRelatedReadingSelected({});
+						setRelatedContentStatus(null);
+					}
 					if (intent === 'internal_links') {
 						setInternalLinkSelection({});
 						setInternalLinkBatchMode(false);
@@ -7811,6 +7849,7 @@
 							const blockEditorSelector = data.select && data.select('core/block-editor');
 							runContext.selected_text = internalLinkSelectedText(blockEditorSelector) || String(runContext.selected_text || '').trim();
 						}
+						if (intent === 'related_content') runContext.context_scope = 'full_article';
 						const paragraphIntegrityBefore = intent === 'polish_notes'
 							? currentEditorContentIntegritySnapshot(runContext.content, runContext.post_id)
 							: null;
@@ -8392,6 +8431,64 @@
 			} finally {
 				setRelatedContentRunning('');
 			}
+		}
+
+		function toggleRelatedReading(candidate, checked) {
+			setRelatedReadingSelected((current) => Object.assign({}, current, { [candidate.id]: checked }));
+		}
+
+		async function insertRelatedReading() {
+			const token = ++relatedReadingRequestRef.current;
+			const section = result && result.sections && result.sections.related_content;
+			const sourcePostId = Number(result && result.post_context && result.post_context.post_id);
+			const candidates = relatedContentCandidateItems(section).slice(0, 8);
+			const selected = candidates.filter((item) => relatedReadingSelected[item.id]).map((item) => item.id);
+			setRelatedContentRunning('reading:insert');
+			let targetReadTimer = null;
+			try {
+				if (!section || section.artifact_type !== 'related_reading_candidates.v1' || section.status !== 'ready' || section.candidate_source !== 'cloud_vector') throw new Error('missing_evidence');
+				if (typeof window.AbortController !== 'function') throw new Error('editor_unavailable');
+				const targetReadController = new window.AbortController();
+				targetReadTimer = window.setTimeout(() => targetReadController.abort(), 15000);
+				// Re-read publication state via the ordinary read-only WordPress REST API.
+				await Promise.all(selected.map(async (id) => {
+					const item = candidates.find((candidate) => candidate.id === id);
+					if (!['post', 'page'].includes(item.targetPostType) || !Number.isInteger(item.targetPostId) || item.targetPostId < 1) throw new Error('invalid_target');
+					const target = await wp.apiFetch({ path: '/wp/v2/' + (item.targetPostType === 'page' ? 'pages/' : 'posts/') + item.targetPostId + '?context=view&_fields=id,status,type,link,content.protected', signal: targetReadController.signal });
+					if (target.id !== item.targetPostId || target.status !== 'publish' || target.type !== item.targetPostType || !target.content || target.content.protected !== false || canonicalInternalLinkUrl(target.link) !== canonicalInternalLinkUrl(item.targetUrl)) throw new Error('target_changed');
+				}));
+				if (token !== relatedReadingRequestRef.current) return;
+				const selector = data.select('core/block-editor');
+				const postId = Number(data.select('core/editor').getCurrentPostId());
+				const checked = relatedReadingSelection(candidates, selected, selector.getBlocks(), postId, sourcePostId, richText);
+				const types = ['core/group', 'core/heading', 'core/list', 'core/list-item'];
+				const allowed = selector.getSettings().allowedBlockTypes;
+				if (checked.reason || !selector.canInsertBlockType('core/group') || (allowed !== true && (!Array.isArray(allowed) || types.some((type) => !allowed.includes(type)))) || typeof blocks.serialize !== 'function') throw new Error('editor_changed');
+				const group = buildRelatedReadingGroup(checked.items, __('Related reading', 'npcink-workflow-toolbox'), createBlock);
+				const snapshot = blocks.serialize([group]);
+				data.dispatch('core/block-editor').insertBlocks([group], selector.getBlocks().length);
+				if (!selector.getBlock(group.clientId)) throw new Error('insertion_rejected');
+				setRelatedReadingUndo({ postId, clientId: group.clientId, snapshot });
+				setRelatedReadingSelected({});
+				setRelatedContentStatus({ status: 'success', message: __('Reading list added to the editor. Save normally when you are ready.', 'npcink-workflow-toolbox') });
+			} catch (insertError) {
+				if (token === relatedReadingRequestRef.current) setRelatedContentStatus({ status: 'warning', message: __('Could not insert the reading list. Check for existing links, changed articles or editor restrictions, then refresh recommendations.', 'npcink-workflow-toolbox') });
+			} finally {
+				if (targetReadTimer !== null) window.clearTimeout(targetReadTimer);
+				if (token === relatedReadingRequestRef.current) setRelatedContentRunning('');
+			}
+		}
+
+		function undoRelatedReading() {
+			const selector = data.select('core/block-editor');
+			const postId = Number(data.select('core/editor').getCurrentPostId());
+			if (!relatedReadingCanUndo(selector.getBlocks(), relatedReadingUndo, postId, blocks.serialize) || !selector.canRemoveBlocks([relatedReadingUndo.clientId])) {
+				setRelatedContentStatus({ status: 'warning', message: __('The reading list was changed or is locked. Use the editor Undo control to preserve your edits.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			data.dispatch('core/block-editor').removeBlocks([relatedReadingUndo.clientId]);
+			setRelatedReadingUndo(null);
+			setRelatedContentStatus({ status: 'success', message: __('Reading list removed from the editor.', 'npcink-workflow-toolbox') });
 		}
 
 		function toggleInternalLinkCandidate(candidate, checked) {
@@ -10071,6 +10168,10 @@
 					open: openInternalLinkCandidate,
 				},
 				relatedContent: {
+					selected: relatedReadingSelected,
+					toggle: toggleRelatedReading,
+					insert: insertRelatedReading,
+					undo: relatedReadingUndo ? undoRelatedReading : null,
 					running: relatedContentRunning,
 					status: relatedContentStatus,
 					copy: copyRelatedContentCandidate,
@@ -10130,7 +10231,7 @@
 			const showResultView = supportView === 'result';
 				const rerunInstruction = rerunIntent ? String(flowInstructions[rerunIntent] || '') : '';
 				const isAudioRerun = isAudioIntent(rerunIntent);
-				const isCitationRerun = rerunIntent === 'internal_links';
+				const isCitationRerun = ['internal_links', 'related_content'].includes(rerunIntent);
 
 		return createElement(
 			Fragment,
@@ -10320,6 +10421,7 @@
 														__('Current status: ', 'npcink-workflow-toolbox') + sourceWorkflowStatusLabel
 													) : null
 										),
+										createElement('div', { className: 'npcink-toolbox-editor-support__flow-actions' },
 										createElement(
 											Button,
 											{
@@ -10327,9 +10429,14 @@
 												isBusy: running === flow.intent,
 												disabled: Boolean(running),
 											onClick: () => flow.intent === 'source_adaptation_review' ? openSourceAdaptationReview() : runFlow(flow.intent),
-												'aria-label': flowActionLabel + ' ' + flow.label,
+												'aria-label': flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel + ' ' + flow.label,
 											},
-											flowActionLabel
+											flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel
+										),
+										flow.intent === 'internal_links' ? createElement(Button, {
+											type: 'button', variant: 'secondary', disabled: Boolean(running),
+											onClick: () => runFlow('related_content'),
+										}, __('Related reading', 'npcink-workflow-toolbox')) : null
 										)
 									);
 								}

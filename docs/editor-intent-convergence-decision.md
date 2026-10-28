@@ -5,6 +5,11 @@ with the prose-quality fold into `publish_preflight`; option 2 of the record.
 Restoring any retired intent requires a new boundary decision naming its
 operator surface.
 
+2026-10-28 amendment: `related_content` is explicitly restored for the
+operator-approved [related-reading selection and insertion surface](related-reading-editor-v1.md).
+The editor allowlist now has thirteen intents. The ten retirements below remain
+retired; this amendment does not restore any other legacy surface.
+
 Date proposed: 2026-10-07. Accepted: 2026-10-07.
 
 ## Problem

@@ -3298,3 +3298,9 @@
 		justify-content: flex-start;
 	}
 }
+
+.npcink-toolbox-editor-support__flow-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}

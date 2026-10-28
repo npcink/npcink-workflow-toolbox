@@ -36,6 +36,7 @@ js_bundles=(
 	"assets/editor-content-support.js"
 	"assets/editor-content-support/text-utils.js"
 	"assets/editor-content-support/internal-links.js"
+	"assets/editor-content-support/related-reading.js"
 	"assets/editor-content-support/audio-preferences.js"
 )
 

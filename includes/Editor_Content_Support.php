@@ -43,10 +43,11 @@ final class Editor_Content_Support {
 			$this->asset_version( $style_path )
 		);
 
-		$format_path         = $this->asset_path( 'assets/editor-content-format.js' );
-		$text_utils_path     = $this->asset_path( 'assets/editor-content-support/text-utils.js' );
-		$internal_links_path = $this->asset_path( 'assets/editor-content-support/internal-links.js' );
-		$audio_part_path     = $this->asset_path( 'assets/editor-content-support/audio-preferences.js' );
+		$format_path          = $this->asset_path( 'assets/editor-content-format.js' );
+		$text_utils_path      = $this->asset_path( 'assets/editor-content-support/text-utils.js' );
+		$internal_links_path  = $this->asset_path( 'assets/editor-content-support/internal-links.js' );
+		$audio_part_path      = $this->asset_path( 'assets/editor-content-support/audio-preferences.js' );
+		$related_reading_path = $this->asset_path( 'assets/editor-content-support/related-reading.js' );
 
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-format',
@@ -78,6 +79,14 @@ final class Editor_Content_Support {
 		);
 
 		wp_enqueue_script(
+			'npcink-toolbox-editor-content-support-related-reading',
+			NPCINK_TOOLBOX_URL . $related_reading_path,
+			array( 'npcink-toolbox-editor-content-support-internal-links' ),
+			$this->asset_version( $related_reading_path ),
+			true
+		);
+
+		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support-audio',
 			NPCINK_TOOLBOX_URL . $audio_part_path,
 			array( 'wp-i18n', 'wp-element', 'wp-components' ),
@@ -93,7 +102,7 @@ final class Editor_Content_Support {
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support',
 			NPCINK_TOOLBOX_URL . $script_path,
-			array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
+			array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-related-reading', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
 			$this->asset_version( $script_path ),
 			true
 		);
