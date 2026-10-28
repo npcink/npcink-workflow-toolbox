@@ -18,6 +18,7 @@ Start from the active documents below before changing code.
 - [Current State](current-state.md)
 - [Known Issues](known-issues.md)
 - [Related Reading Editor v1](related-reading-editor-v1.md) — author-selected Gutenberg reading-list insertion.
+- [原站文章推荐验收 — 2026-10-28](recommendation-original-site-acceptance-2026-10-28.md) — real Cloud retrieval, editor Apply/Undo/save, preserved failed attempts and coverage follow-up.
 - [Editor Intent Convergence Decision](editor-intent-convergence-decision.md)
 - [Platform Governance Index](platform/README.md)
 - [Cross-Repo Platform Governance History](platform/cross-repo-platform-governance-history-2026-07-08.md)

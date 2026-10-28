@@ -32,6 +32,7 @@
         "test:editor-progressive-js": "php tests/smoke-editor-progressive-js-contract.php",
         "test:recommendation-metadata": "php tests/recommendation-metadata-behavior.php",
         "smoke:related-reading-browser": "node tests/smoke-related-reading-browser.mjs",
+        "smoke:related-reading-real-site-browser": "node tests/smoke-related-reading-real-site-browser.mjs",
         "test:related-reading-editor-js": "node tests/related-reading-editor-behavior.mjs",
         "test:internal-link-editor-js": "node tests/internal-link-editor-behavior.mjs",
         "test:text-utils-inert-extraction": "node tests/text-utils-inert-extraction-behavior.mjs",

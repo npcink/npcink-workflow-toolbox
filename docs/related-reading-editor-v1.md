@@ -1,6 +1,9 @@
 # Related reading in the current editor v1
 
-Status: accepted by the operator on 2026-10-28; implementation in this change.
+Status: accepted and implemented on 2026-10-28 (PR #335).
+Real-Cloud original-site acceptance subsequently passed; see the
+[2026-10-28 record](recommendation-original-site-acceptance-2026-10-28.md)
+for actual candidates, failed attempts, editing results and coverage limitations.
 
 ## Two jobs
 
@@ -85,4 +88,5 @@ NODE_PATH=/absolute/node_modules composer smoke:related-reading-browser
 The script creates only named temporary draft/target posts, uses a short-lived
 random login helper, and removes both helper and posts in `finally`. Never aim
 this fixture smoke at a public production site. Original-site real-content use
-remains the operator's normal-use feedback step, without per-article labeling.
+now has the separate real-Cloud acceptance above. Operator feedback remains
+normal use, without per-article labeling.

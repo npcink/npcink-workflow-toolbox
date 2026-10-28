@@ -115,6 +115,15 @@ ordinary generation and Site Knowledge remain available. See
 
 ## Open Debt (top items)
 
+- **2026-10-28 original-site acceptance:** both body-link Apply/Undo/native
+  draft save and related-reading insert/Undo/save/reload pass with real Cloud
+  candidates on restored `magick-ai.local`; see the
+  [acceptance record](recommendation-original-site-acceptance-2026-10-28.md).
+  Next priority is Cloud/Addon corpus coverage and count reconciliation:
+  1,966 published local posts versus status 169 documents / 188 chunks,
+  type-count sum 233 and recommendation pool 119 chunks. Definitions are not
+  aligned; no exact coverage percentage or quality improvement is established.
+  No indexing/runtime changes or human labeling were required for this smoke.
 - **2026-10-28 recommendation priority:** deliver useful ranked articles for
   manual choice. The editor now shows up to eight non-weak candidates in their
   existing order, with open/copy actions regardless of anchor eligibility.
