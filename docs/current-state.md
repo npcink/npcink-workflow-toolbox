@@ -5,7 +5,14 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-28.
+Last reviewed: 2026-10-29.
+
+**Recommendation/research chat closeout:** the
+[2026-10-29 audit](session-research-closeout-2026-10-29.md) verifies 48 attached
+PRs merged and records evidence preservation, stopped trials and remaining owners.
+Use its current handoff before replaying historical plans. Model-method limits,
+article-review/effect-verification design and CMS adapters remain conditional or
+deferred work; the frozen 0.6B trial does not describe the concurrent Cloud 8B index.
 
 SEO/AEO/GEO specialist product entrypoints are paused in the current candidate;
 generic content assistance, original configuration and historical data remain.

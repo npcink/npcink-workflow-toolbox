@@ -17,6 +17,8 @@ Start from the active documents below before changing code.
 
 - [Current State](current-state.md)
 - [Known Issues](known-issues.md)
+- [推荐与模型研究会话关闭审计 — 2026-10-29](session-research-closeout-2026-10-29.md) — 48 merged PRs, ignored-evidence preservation, conditional research and remaining owners; runtime acceptance remains separate.
+- [会话源码收尾精简回执 — 2026-10-29](session-research-closeout-evidence-2026-10-29.json) — merge SHAs, default-branch ancestry and live topic-head checks; excludes raw article/provider evidence.
 - [Related Reading Editor v1](related-reading-editor-v1.md) — author-selected Gutenberg reading-list insertion.
 - [原站文章推荐验收 — 2026-10-28](recommendation-original-site-acceptance-2026-10-28.md) — real Cloud retrieval, editor Apply/Undo/save, preserved failed attempts and coverage follow-up.
 - [推荐语料覆盖诊断与跨平台准备 — 2026-10-28](recommendation-coverage-diagnosis-2026-10-28.md) — confirmed 100/1,999 coverage, historical refresh deletion evidence, bounded recovery gates and Typecho/Astro readiness gaps; historical pre-recovery counts.

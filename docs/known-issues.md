@@ -13,6 +13,17 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Open
 
+- **Recommendation/model-research closeout and conditional follow-up (2026-10-29).**
+  The [current chat audit](session-research-closeout-2026-10-29.md) verifies its
+  48 attached PRs merged; this is not a claim that every historical problem is fixed.
+  [Eval's method handoff](https://github.com/npcink/npcink-eval-lab/blob/main/docs/reranker-research-handoff-2026-10-29.md)
+  owns the stopped Laya/rerank trials, scoring/equivalence limits and concrete-use
+  restart conditions. Cloud owns current-model/index acceptance; the 0.6B shortlist
+  trial does not validate the concurrent 8B index. Toolbox owns display/editor
+  regression; Typecho/Astro still require their own CMS adapter contracts and
+  acceptance. No new inference, deployment or per-article human annotation is
+  scheduled by this handoff. Existing article-assistance, site-effect, Cron and
+  store-failure debt below remains with its named owner.
 - **Five-session follow-up ownership (2026-10-26).** The
   [closeout audit](session-closeout-audit-2026-10-26.md) supersedes historical
   branch states and already-resolved Cloud/Apply blockers. The focused next

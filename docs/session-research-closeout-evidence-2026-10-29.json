@@ -1,0 +1,534 @@
+{
+  "kind": "current_chat_attached_pr_source_closeout_not_runtime_acceptance",
+  "checked_at_utc": "2026-10-29T04:31:59.690840+00:00",
+  "scope": "48 attached PRs across four repos before this closeout-document PR; earlier five-chat audit remains historical evidence",
+  "pull_count": 48,
+  "repositories": [
+    {
+      "repository": "npcink-workflow-toolbox",
+      "default_branch": {"name": "master", "target": {"oid": "2a9ce1ca65149bc90ca8ce9456ce035b7ce85b8b"}},
+      "pulls": [
+        {
+          "number": 328,
+          "state": "MERGED",
+          "mergedAt": "2026-10-26T09:09:32Z",
+          "headRefName": "codex/session-closeout-20261026",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "80927f9d8e0adc8826b0c6eeec8d7dba96f55e55"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 329,
+          "state": "MERGED",
+          "mergedAt": "2026-10-26T09:40:48Z",
+          "headRefName": "codex/ai-led-evaluation-handoff-20261026",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "6e4d705c6d21448c94dffbd346f943f7d66fd120"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 330,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T01:39:39Z",
+          "headRefName": "codex/internal-link-preview-occurrence-20261027",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "2ff18492630af157144f6a8f80a0853b0b85eaf9"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 331,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T04:55:33Z",
+          "headRefName": "codex/internal-link-solution-caption-20261027",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "343fabc2585f48cc621d8c26b89a796066fff8ef"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 332,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T05:16:51Z",
+          "headRefName": "codex/holdout-status-closeout-20261027",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "eb6719f2bcbd863b80c09d15a767a88c3d78b41e"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 333,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T10:15:17Z",
+          "headRefName": "codex/local-qwen-review",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "bafc2dbe5f606a77ecb0c883f42001ba5dde0da8"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 334,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T01:45:51Z",
+          "headRefName": "codex/article-first-recommendations",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "879fde883d67a543cc827c4159a50cad3f1dd3fa"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 335,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T02:42:01Z",
+          "headRefName": "codex/related-reading-editor",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "ab0255a120603dc5d5dc2ec3e7bf885fe0b243cb"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 336,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T03:13:06Z",
+          "headRefName": "codex/original-site-recommendation-acceptance",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "98ed7ae47e76a1f97ec04e91ee58e3a06a608209"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 337,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T03:33:54Z",
+          "headRefName": "codex/recommendation-coverage-diagnosis",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "30716277f61bad267befd9aec39aad024c7c0a1f"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 338,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T04:23:29Z",
+          "headRefName": "codex/recommendation-corpus-recovery",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "7372f959bda1c058780e351b84b9c33532af5afa"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 339,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T05:06:23Z",
+          "headRefName": "codex/recommendation-recovery-completion",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "97840c4e6992d415ffffb81d4222ea9a5dea58e1"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 340,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T06:03:46Z",
+          "headRefName": "codex/site-knowledge-safety-closeout",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "92a55b149c45bfbd8875ae45702f3052857acc71"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 341,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T06:34:48Z",
+          "headRefName": "codex/knowledge-cron-recovery",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "a9d37f7285536277f6bb545a460f256285720879"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 342,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T06:49:32Z",
+          "headRefName": "codex/site-knowledge-status-bounds",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "2a9ce1ca65149bc90ca8ce9456ce035b7ce85b8b"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        }
+      ],
+      "live_heads": {"master": "2a9ce1ca65149bc90ca8ce9456ce035b7ce85b8b"}
+    },
+    {
+      "repository": "npcink-eval-lab",
+      "default_branch": {"name": "main", "target": {"oid": "41498eebf8373182c28d946b56572711e2b1bac2"}},
+      "pulls": [
+        {
+          "number": 123,
+          "state": "MERGED",
+          "mergedAt": "2026-10-26T09:41:42Z",
+          "headRefName": "codex/ai-led-recommendation-evaluation-20261026",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "1d7e181118204e73d08865a0b0ba3f9b1e1b5597"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 124,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T01:40:37Z",
+          "headRefName": "codex/internal-link-preview-evidence-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "719acd0d78c6dd3178254d19774011b96132d566"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 125,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T01:57:29Z",
+          "headRefName": "codex/site-recommendation-baseline-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "306a312682f27b74e1a474f840aeda37cd2a323d"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 126,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T03:35:54Z",
+          "headRefName": "codex/site-baseline-development-probes-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "f922a7dda7297b7bc16672169903aa472ab9b29c"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 127,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T04:12:53Z",
+          "headRefName": "codex/editor-context-baseline-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "414c09a670ffa926073b3eadc9d45f0ec1323b26"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 129,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T04:55:43Z",
+          "headRefName": "codex/solution-caption-evidence-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "0cd54328a4a6c3c2b976080aa084e918120ac11e"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 130,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T05:15:52Z",
+          "headRefName": "codex/holdout-evidence-closeout-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "442d14fe0a7eb8096654238442eea28d779f847d"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 131,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T05:53:47Z",
+          "headRefName": "codex/semantic-link-study-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "bf5bbc05efdf3a98cd81af752f39dc09b3c6ff4a"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 132,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T06:36:17Z",
+          "headRefName": "codex/link-context-preview-handoff-20261027",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "2f46eb32370c8cc441af2a4d8fc903516eed064a"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 133,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T07:04:52Z",
+          "headRefName": "codex/link-document-reference-evidence",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "14d2a0acbdb2850d4275673351d2d3c91cc224ea"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 134,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T07:50:02Z",
+          "headRefName": "codex/link-source-support-protocol",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "c8faf46d6da3271c251cd57cb47241e7a1b38474"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 135,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T08:42:07Z",
+          "headRefName": "codex/link-vector-purpose-contrast",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "688cb5277df1ee7ad87e792a5db2e78ab762e9c6"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 136,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T09:27:59Z",
+          "headRefName": "codex/anchor-recall-measurement",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "221516cc3348a3141a3d7f4b3b5a5943d77efb92"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 137,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T10:19:33Z",
+          "headRefName": "codex/anchor-context-evidence",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "ff3695c0385fe4209175529dce1a69101a0c3665"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 138,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T10:47:25Z",
+          "headRefName": "codex/qualified-anchor-recall",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "b6bd22139d4f5368efdc7e778d00d86bb7ed6b99"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 139,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T11:28:43Z",
+          "headRefName": "codex/destination-task-evidence",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "9769db42c519ee32b607c14ec7e1e69e112dfd1e"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 140,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T01:43:53Z",
+          "headRefName": "codex/manual-recommendation-priority",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "84019e4fe6bb930198b2a66395ddb0ea70b2b3bd"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 143,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T07:25:24Z",
+          "headRefName": "codex/recovered-corpus-relevance",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "5a4b5038a24aa17f5d76df27db459d38510e1f5e"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 144,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T08:01:11Z",
+          "headRefName": "codex/manual-choice-ranking-check",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "81a2e6ceabf5895e47508ef1147513ff3b9737dd"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 145,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T08:25:34Z",
+          "headRefName": "codex/m4-reranker-capability",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "289e27050c311614229fd2ea6feb32bcd285da97"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 146,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T09:18:40Z",
+          "headRefName": "codex/reranker-method-clarification",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "5e47d0e2e27b44ba6e2f4f7c5de9ee043c3f5101"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 147,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T09:34:01Z",
+          "headRefName": "codex/reranker-open-source-methods",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "19a46f7fe0c2e924c8d152c4a5612da16b4e5653"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 148,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T09:58:55Z",
+          "headRefName": "codex/ollama-ranking-comparison",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "d49dcb5c6db2a528bb44a447dd2c914c593c6d14"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 149,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T10:35:54Z",
+          "headRefName": "codex/ollama-independent-validation",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "a0e3f1a2e0af38bd067ae71dc7f2a8275ed0bd45"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 150,
+          "state": "MERGED",
+          "mergedAt": "2026-10-29T01:10:35Z",
+          "headRefName": "codex/reranker-research-handoff",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "329fc79ae12edd49cd914c2670c999c75d07c75e"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 152,
+          "state": "MERGED",
+          "mergedAt": "2026-10-29T03:16:26Z",
+          "headRefName": "codex/model-use-case-research",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "6f2cfaf68586d08c45f655cc969723f5f8869c69"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 153,
+          "state": "MERGED",
+          "mergedAt": "2026-10-29T03:50:52Z",
+          "headRefName": "codex/passage-rerank-screen",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "2c9ab900dc4e945bc14f5b5671117afdb2eaf146"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 154,
+          "state": "MERGED",
+          "mergedAt": "2026-10-29T04:08:54Z",
+          "headRefName": "codex/research-discussion-lessons",
+          "baseRefName": "main",
+          "mergeCommit": {"oid": "41498eebf8373182c28d946b56572711e2b1bac2"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        }
+      ],
+      "live_heads": {"main": "41498eebf8373182c28d946b56572711e2b1bac2"}
+    },
+    {
+      "repository": "npcink-ai-cloud",
+      "default_branch": {"name": "master", "target": {"oid": "d9185146c5c0592a6d1a01ceeafc1b12e7665b0b"}},
+      "pulls": [
+        {
+          "number": 1294,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T06:36:13Z",
+          "headRefName": "codex/internal-link-context-preview-20261027",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "bdbeb9392a6f86667e9e9f3cb3676df9809c0444"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 1298,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T10:22:46Z",
+          "headRefName": "codex/link-recall-quality",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "b08a1c79dae6a6529fe60a43e786dc10bd4c0b25"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 1300,
+          "state": "MERGED",
+          "mergedAt": "2026-10-27T11:37:46Z",
+          "headRefName": "codex/link-short-title-anchor",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "1bc9435b5ce3de2b2094c7b8f1c27adfba0aa8ee"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        },
+        {
+          "number": 1304,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T05:57:48Z",
+          "headRefName": "codex/site-knowledge-refresh-safety",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "d32e95cec73167ba69ee1470616e5380e218a23f"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        }
+      ],
+      "live_heads": {"codex/ollama-provider-grouping": "70b3fda2c4c6b2e545a4dc8888879f5e0d20ef12", "master": "d9185146c5c0592a6d1a01ceeafc1b12e7665b0b", "production": "16747c401d2d1fc9d07bfbf5c530d3aca4a9cfa4"}
+    },
+    {
+      "repository": "npcink-cloud-addon",
+      "default_branch": {"name": "master", "target": {"oid": "fc9bdc880b7991c591b81b6d6bab13dea31c2f12"}},
+      "pulls": [
+        {
+          "number": 335,
+          "state": "MERGED",
+          "mergedAt": "2026-10-28T05:55:20Z",
+          "headRefName": "codex/site-knowledge-explicit-withdrawal",
+          "baseRefName": "master",
+          "mergeCommit": {"oid": "fc9bdc880b7991c591b81b6d6bab13dea31c2f12"},
+          "head_branch_exists_remote": false,
+          "merge_is_ancestor": true
+        }
+      ],
+      "live_heads": {"master": "fc9bdc880b7991c591b81b6d6bab13dea31c2f12"}
+    }
+  ],
+  "ignored_evidence_preservation": {
+    "file_count": 334,
+    "total_file_bytes": 14103710,
+    "all_files_match": true,
+    "archive_repo_relative": "tests/artifacts/session-closeout-2026-10-29/link-recall-quality-artifacts",
+    "manifest_repo_relative": "tests/artifacts/session-closeout-2026-10-29/evidence-preservation.json",
+    "git_backup": false
+  },
+  "worktree_at_preflight": {
+    "repo": "npcink-workflow-toolbox",
+    "managed_name": "link-recall-quality",
+    "head": "2a9ce1ca65149bc90ca8ce9456ce035b7ce85b8b",
+    "tracked_and_untracked_clean": true,
+    "ignored_paths": ["tests/artifacts/", "vendor/"],
+    "archive_state": "pending after this document PR merge; final local receipt is authoritative"
+  },
+  "other_tasks_preserved": ["Cloud worktrees, branches and modified/untracked files", "Addon divergent local master and docs/playground-bootstrap-flake-note", "production branches and recoverable retired refs"],
+  "runtime_probed_this_audit": false
+}
