@@ -146,6 +146,8 @@ Start from the active documents below before changing code.
 - [Internal-link Anchor Eligibility v3](internal-link-anchor-eligibility-v3.md)
 - [Summary Eval](summary-eval.md)
 - [Site Ops Cloud Analysis Contract](site-ops-cloud-analysis-contract.md)
+- [本站公开资料问答合同与开发验收](site-content-answer-v1.md) — 已注册能力、原文引用、权限与失败边界。
+- [公开资料问答开发证据 — 2026-10-30](site-content-answer-development-evidence-2026-10-30.json) — PC 页面、真实问答与受控失败验证。
 - [Site Knowledge Vector Operations Contract](site-knowledge-vector-operations-contract.md)
 
 ## Media And Site Operations

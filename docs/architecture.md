@@ -1009,3 +1009,12 @@ Disallowed:
 - Toolbox treating vector search as complete RAG/indexing ownership.
 - Toolbox importing image candidates into the media library or setting featured
   images without a Core proposal.
+
+## Public site answers
+
+`Site_Content_Answer` is the bounded single-question Ability callback shared by
+Smart Ask and `POST /wp-json/npcink-toolbox/v1/site-knowledge/answers`. The REST facade executes the
+registered Ability. Cloud Addon projects that registration; Cloud retrieves
+`site_knowledge_evidence` and validates exact quotes. Toolbox validates the
+reply envelope and renders answer/source text without model-controlled links.
+See [contract](site-content-answer-v1.md); this adds no runtime ownership.

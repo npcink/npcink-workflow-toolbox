@@ -1,0 +1,120 @@
+{
+  "contract": "site_content_answer_development_evidence.v1",
+  "date": "2026-10-30",
+  "environment": "Local WordPress and M4 development",
+  "source_state": "candidate worktree before exact-diff commit; final committed source/CI recorded by PR",
+  "runtime_prerequisites": {
+    "cloud_prs": [
+      1317,
+      1322,
+      1323
+    ],
+    "addon_prs": [
+      336,
+      337
+    ]
+  },
+  "route": "/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask",
+  "page_model": "existing Smart Ask single-question workbench",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 1000,
+      "height": 900
+    }
+  ],
+  "states": [
+    "real answer with partial warning",
+    "controlled browser-only 503"
+  ],
+  "geometry": [
+    {
+      "width": 1440,
+      "overflow": false,
+      "question": "OneBlog 主题的错误页面为什么返回 Nginx 默认404？本站文章给出的 error_page 404 处理办法是什么？请逐字引用原文。",
+      "status": "建议已生成（未写入 WordPress）。",
+      "run_id": "run_feac8c2b1b724d67bc66ebc07d471e67",
+      "sources": [
+        {
+          "href": "https://magick-ai.local/oneblog-typecho-text-blog-theme-simple-literary-writing-records/",
+          "rel": "noopener noreferrer"
+        },
+        {
+          "href": "https://magick-ai.local/oneblog-typecho-text-blog-theme-simple-literary-writing-records/",
+          "rel": "noopener noreferrer"
+        },
+        {
+          "href": "https://magick-ai.local/oneblog-typecho-text-blog-theme-simple-literary-writing-records/",
+          "rel": "noopener noreferrer"
+        }
+      ],
+      "source_visible": true,
+      "partial_visible": true,
+      "primary_actions": 1
+    },
+    {
+      "width": 1000,
+      "overflow": false,
+      "primary_actions": 1
+    }
+  ],
+  "controlled_failure": {
+    "width": 1000,
+    "overflow": false,
+    "question_kept": true,
+    "sources_hidden": true,
+    "answer_cleared": true,
+    "button_enabled": true,
+    "run_id": "run_ui_failure_fixture",
+    "status": "站点资料暂时无法检索，请稍后重试。"
+  },
+  "rules": {
+    "route_page_model": "pass",
+    "pc_viewports": "pass",
+    "horizontal_overflow": "pass",
+    "one_page_title": "pass",
+    "ask_workbench_reachable": "pass",
+    "one_primary_per_region": "pass",
+    "text_status": "pass",
+    "nearby_actions": "pass",
+    "selected_focus_disabled": "pass",
+    "dialog_focus": "not_applicable",
+    "loading_failure_retry_context": "pass",
+    "unexplained_errors": "pass"
+  },
+  "network": {
+    "toolbox_js_css": 200,
+    "actual_answer_http": 200,
+    "actual_answer_duration_ms": 18500,
+    "intentional_fixture_http": 503
+  },
+  "console_errors": [
+    "Expected resource 503 from controlled failure fixture"
+  ],
+  "page_errors": [],
+  "screenshots": [
+    {
+      "file": "answer-1000.png",
+      "sha256": "138672f90380dff64743d2466627a831755d9bcc80ca86f584a66177a342df92"
+    },
+    {
+      "file": "answer-1440.png",
+      "sha256": "40eb0ee7524ba019e5485f01203d03b781816595a81bee413133df7d1660fb85"
+    },
+    {
+      "file": "failure-1000.png",
+      "sha256": "eff8bb980fecbd95a2ebf4b5b96758dc32e119da6e10b27121af473f46bf741b"
+    }
+  ],
+  "human_acceptance": "unmeasured",
+  "production": "not deployed",
+  "natural_adoption": "unmeasured",
+  "review_items": [
+    "Current examples do not establish semantic accuracy for the corpus.",
+    "All-site completeness is not implied by current-source quote validation.",
+    "Local 2B vision two-image interactive batch timed out."
+  ]
+}

@@ -9997,3 +9997,67 @@ msgstr ""
 #: assets/editor-content-support.js
 msgid "Could not insert the reading list. Check for existing links, changed articles or editor restrictions, then refresh recommendations."
 msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Public site content"
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Source references"
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Answer from site content"
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Answer one question using indexed public posts and pages, with verified source references and no WordPress writes."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Administrator permission required."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Only a question is accepted."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Enter a question of up to 2000 characters."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Connect an updated Npcink Cloud Addon before asking about site content."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "No sufficient public-site evidence was found. Try a more specific question or check that the source has been delivered."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "The site content index is not ready. Try again after delivery completes."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Site evidence could not be retrieved. Try again later."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "The answer did not include verified source references. Please try again."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "The site-answer ability is unavailable."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Some retrieved material is partial or has unknown completeness. Check the original content."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Cited sources were delivered in full. Review the answer against the sources."
+msgstr ""
+
+#: includes/Site_Content_Answer.php
+msgid "Searching public site content and preparing an answer…"
+msgstr ""

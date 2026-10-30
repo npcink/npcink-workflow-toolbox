@@ -10503,3 +10503,67 @@ msgstr "相关阅读列表已被修改或锁定，请使用编辑器的撤销功
 #: assets/editor-content-support.js
 msgid "Could not insert the reading list. Check for existing links, changed articles or editor restrictions, then refresh recommendations."
 msgstr "无法插入相关阅读列表。请检查已有链接、目标文章变化或编辑器限制，然后刷新推荐。"
+
+#: includes/Site_Content_Answer.php
+msgid "Public site content"
+msgstr "本站公开内容"
+
+#: includes/Site_Content_Answer.php
+msgid "Source references"
+msgstr "原文依据"
+
+#: includes/Site_Content_Answer.php
+msgid "Answer from site content"
+msgstr "根据本站资料回答"
+
+#: includes/Site_Content_Answer.php
+msgid "Answer one question using indexed public posts and pages, with verified source references and no WordPress writes."
+msgstr "根据已索引的公开文章和页面回答一个问题，附带已核验的原文依据，不修改 WordPress 内容。"
+
+#: includes/Site_Content_Answer.php
+msgid "Administrator permission required."
+msgstr "需要管理员权限。"
+
+#: includes/Site_Content_Answer.php
+msgid "Only a question is accepted."
+msgstr "此入口仅接受问题。"
+
+#: includes/Site_Content_Answer.php
+msgid "Enter a question of up to 2000 characters."
+msgstr "请输入不超过 2000 个字符的问题。"
+
+#: includes/Site_Content_Answer.php
+msgid "Connect an updated Npcink Cloud Addon before asking about site content."
+msgstr "请先连接已更新的 Npcink Cloud Addon，再根据本站资料提问。"
+
+#: includes/Site_Content_Answer.php
+msgid "No sufficient public-site evidence was found. Try a more specific question or check that the source has been delivered."
+msgstr "没有找到足够的本站公开资料。请细化问题，或检查原文是否已交付。"
+
+#: includes/Site_Content_Answer.php
+msgid "The site content index is not ready. Try again after delivery completes."
+msgstr "本站内容索引尚未就绪，请在交付完成后重试。"
+
+#: includes/Site_Content_Answer.php
+msgid "Site evidence could not be retrieved. Try again later."
+msgstr "暂时无法检索本站资料，请稍后重试。"
+
+#: includes/Site_Content_Answer.php
+msgid "The answer did not include verified source references. Please try again."
+msgstr "回答未通过原文依据核验，请重试。"
+
+#: includes/Site_Content_Answer.php
+msgid "The site-answer ability is unavailable."
+msgstr "本站资料问答能力暂不可用。"
+
+#: includes/Site_Content_Answer.php
+msgid "Some retrieved material is partial or has unknown completeness. Check the original content."
+msgstr "部分检索资料未完整交付或完整性未知，请核对原文。"
+
+#: includes/Site_Content_Answer.php
+msgid "Cited sources were delivered in full. Review the answer against the sources."
+msgstr "所引用的资料已完整交付，请对照原文审阅回答。"
+
+#: includes/Site_Content_Answer.php
+msgid "Searching public site content and preparing an answer…"
+msgstr "正在检索本站公开资料并准备回答…"

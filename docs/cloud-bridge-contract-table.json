@@ -7,6 +7,42 @@
   "default_direct_wordpress_write": false,
   "bridges": [
     {
+      "bridge_id": "site-content-answer",
+      "local_entrypoints": [
+        "/site-knowledge/answers",
+        "npcink-toolbox/answer-site-content"
+      ],
+      "source_owner": "cloud_site_knowledge_bridge",
+      "cloud_owner": "cloud_site_knowledge",
+      "execution_path": "npcink_cloud_addon_execute_registered_ai_task_runtime",
+      "cloud_ability": "npcink-toolbox/answer-site-content",
+      "contract_version": "cloud_connector_runtime.v1",
+      "result_contracts": [
+        "grounded_answer_evidence.v1"
+      ],
+      "execution_pattern": "inline",
+      "data_classification": "public_site_content",
+      "storage_mode": "result_only",
+      "retention_ttl_seconds": 86400,
+      "provider_secret_owner": "cloud_managed",
+      "write_posture": "suggestion_only",
+      "final_write_path": "operator_review_only",
+      "direct_wordpress_write": false,
+      "toolbox_control_plane_owner": false,
+      "toolbox_must_not_own": [
+        "embedding_provider",
+        "vector_storage",
+        "collection_lifecycle",
+        "rerank_runtime",
+        "indexing_jobs",
+        "stale_index_policy"
+      ],
+      "source_markers": [
+        "npcink_cloud_addon_execute_registered_ai_task_runtime",
+        "grounded_answer_evidence.v1"
+      ]
+    },
+    {
       "bridge_id": "editor-content-format",
       "local_entrypoints": ["/editor/content-support:format_content"],
       "source_owner": "toolbox_editor",

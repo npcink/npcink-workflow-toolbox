@@ -804,3 +804,14 @@ The connector surface must not become provider billing, quota, key-rotation,
 request-log, marketplace, provider-routing, vector-provider, or vector
 lifecycle ownership. Those are Cloud or future connector-owner concerns, not
 the Toolbox MVP settings surface.
+
+## Public-site factual answers
+
+`POST /site-knowledge/answers` and the administrator-only Smart Ask option consumes the existing Cloud-owned Site
+Knowledge index through the registered `npcink-toolbox/answer-site-content`
+ability. Toolbox sends only the question and its declared task contract; Cloud
+retrieves consented public post/page passages, verifies citation identity and exact
+quotes, and returns suggestion-only content. This is separate from deidentified
+insight packs; their no-body rule remains unchanged. No local corpus collection,
+index lifecycle, model routing, queue, writes or approvals are introduced.
+See [the API and evidence contract](site-content-answer-v1.md).
