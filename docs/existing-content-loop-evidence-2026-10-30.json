@@ -4,6 +4,7 @@
   "environment": "Local WordPress and M4 development",
   "source": {
     "toolbox": "d4fb0af09b2e3a64ebe9777f789d35528c404eb6",
+    "addon_mounted_head": "923e5fa2a59c9a554024e23b0255959075d90351",
     "addon_merge": "cc312720",
     "cloud_accepted": "8a6a978893f46a4c4b129cc9bceb9327cf6d312a"
   },
