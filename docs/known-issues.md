@@ -13,6 +13,20 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Open
 
+- **Content-loop remaining acceptance (WordPress AI / Addon / Cloud, 2026-10-30).**
+  [Three-article developer acceptance and dispositions](existing-content-loop-acceptance-2026-10-30.md)
+  closes this batch's summary/title/rewrite/native-save and browser-only title
+  retry checks; representative quality, natural usage and adoption feedback
+  remain separate. Cloud owns the 2B vision route's multi-image/large-image
+  30-second limitation; original-file backup recovery is required for the 69
+  metadata-only images. Keep the existing public-site answer option bounded;
+  stop expansion until an actual factual-lookup consumer exists. The operator
+  owns pending backend visual acceptance. Retain missing/unverified old
+  worktrees and live Local/M4 mounts until their exact cleanup conditions are
+  proven. CMS source integration is tracked by Cloud #1327; see the dated
+  record for independently measured local/M4/CI/merge states. No upload format,
+  second CMS, local runtime or production deployment is authorized by this debt.
+
 - **Recommendation/model-research closeout and conditional follow-up (2026-10-29).**
   The [current chat audit](session-research-closeout-2026-10-29.md) verifies its
   48 attached PRs merged; this is not a claim that every historical problem is fixed.
