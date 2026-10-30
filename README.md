@@ -21,6 +21,10 @@ The editor's `整理` action now requests an inline Cloud-formatted body and app
 validated text to the visible Gutenberg editor with undo, without invoking save
 or publish. See [Content formatting](docs/editor-content-format-v1.md) for its
 bounded paragraph/list/line-break repairs and fail-closed contract.
+Formatting preserves words, numbers, symbols, punctuation, links and multimedia;
+only bounded layout and CJK/Latin-or-digit spacing may change. Publish preflight
+provides author-only punctuation hints, bounded coverage and evidence navigation,
+with stale-report warnings; see [Article review report](docs/article-review-report-v1.md).
 
 Media recognition continuation ownership and failure recovery are documented in [Media Recognition Continuation](docs/media-recognition-continuation.md).
 

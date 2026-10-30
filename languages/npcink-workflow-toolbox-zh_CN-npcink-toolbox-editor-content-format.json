@@ -34,7 +34,8 @@
       "The formatting result needs review. The original text is unchanged.": ["整理结果需要复核，原文未改动。"],
       "The formatting status is inconsistent. The original text is unchanged.": ["整理状态不一致，原文未改动。"],
       "This formatting has been undone.": ["已撤销本次整理。"],
-      "Undo this text formatting": ["撤销本次整理"]
+      "Undo this text formatting": ["撤销本次整理"],
+      "Formatting only adjusts spacing and layout. Words, punctuation, links, and media are preserved; corrections are for you to make.": ["整理仅调整间距和版式，保留原文字词、标点、链接及多媒体；内容错误请您自行修改。"]
     }
   }
 }

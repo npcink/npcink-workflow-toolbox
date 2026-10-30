@@ -191,12 +191,19 @@ final class Editor_Content_Format {
 	}
 
 	public static function only_inserted_spaces( string $source, string $candidate ): bool {
+		// Validate the Cloud spacing contract; never split a word, number or symbol.
+		$source_chars    = preg_split( '//u', $source, -1, PREG_SPLIT_NO_EMPTY );
+		$candidate_chars = preg_split( '//u', $candidate, -1, PREG_SPLIT_NO_EMPTY );
+		if ( false === $source_chars || false === $candidate_chars ) {
+			return false;
+		}
 		$i      = 0;
-		$length = strlen( $source );
-		for ( $j = 0, $end = strlen( $candidate ); $j < $end; ++$j ) {
-			if ( $i < $length && $source[ $i ] === $candidate[ $j ] ) {
+		$length = count( $source_chars );
+		foreach ( $candidate_chars as $j => $char ) {
+			if ( $i < $length && $source_chars[ $i ] === $char ) {
 				++$i;
-			} elseif ( ' ' !== $candidate[ $j ] ) {
+			} elseif ( ' ' !== $char || ( $candidate_chars[ $j + 1 ] ?? null ) !== ( $source_chars[ $i ] ?? null )
+				|| 1 !== preg_match( '/^(?:[\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}][A-Za-z0-9]|[A-Za-z0-9][\x{3400}-\x{4dbf}\x{4e00}-\x{9fff}])$/u', ( $source_chars[ $i - 1 ] ?? '' ) . ( $source_chars[ $i ] ?? '' ) ) ) {
 				return false;
 			}
 		}

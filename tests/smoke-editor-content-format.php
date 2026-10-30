@@ -20,11 +20,15 @@ $source = "<!-- wp:paragraph -->\r\n<p>中文AI工具 &amp; 测试<strong>加粗
 $candidate = str_replace( array( '中文AI工具', '加粗AI' ), array( '中文 AI 工具', '加粗 AI' ), $source );
 format_assert( Editor_Content_Format::valid_result( $source, format_result( $source, $candidate ) ), 'Safe spacing preserves markup and CRLF.' );
 format_assert( Editor_Content_Format::valid_result( $source, format_result( $source, $source ) ), 'Unchanged result is accepted.' );
+foreach ( array( array( 'WordPress', 'Word Press' ), array( '12.50%', '1 2.50%' ), array( 'A-B', 'A -B' ), array( '中文AI', '中文  AI' ) ) as $spacing ) {
+	format_assert( ! Editor_Content_Format::only_inserted_spaces( $spacing[0], $spacing[1] ), 'Reject spacing inside a word, number, symbol or repeated insertion.' );
+}
 foreach ( array(
 	str_replace( '中文', '修改', $source ),
 	str_replace( '<p>', '<p onclick="alert(1)">', $source ),
 	str_replace( 'wp:paragraph', 'wp: paragraph', $source ),
 	str_replace( "\r\n", "\n", $source ),
+	str_replace( '。', '！', $source ),
 ) as $index => $invalid ) {
 	if ( $source === $invalid ) { continue; }
 	format_assert( ! Editor_Content_Format::valid_result( $source, format_result( $source, $invalid ) ), 'Reject mutation ' . $index );
@@ -86,6 +90,8 @@ foreach ( array( str_replace( '中文AI', '中文 AI', $rich_candidate ), str_re
 foreach ( array(
 	str_replace( '/buy', '/other', $struct_candidate ),
 	str_replace( '价格：12', '价格：13', $struct_candidate ),
+	str_replace( '价格：12', '价格:12', $struct_candidate ),
+	str_replace( '介绍。', '介绍！', $struct_candidate ),
 	str_replace( '<li>', '<li onclick="alert(1)">', $struct_candidate ),
 	str_replace( '<a href="/buy">详情</a>', '<a href="/buy">详 情</a>', $struct_candidate ),
 	$struct_candidate . '<!-- wp:image --><img src="/new"/><!-- /wp:image -->',
@@ -94,6 +100,21 @@ foreach ( array(
 	$bad['candidate'] = $invalid;
 	$bad['candidate_sha256'] = hash( 'sha256', $invalid );
 	format_assert( ! Editor_Content_Format::valid_result( $struct_source, $bad ), 'v2 rejects changed links, numbers, attributes and media.' );
+}
+foreach ( array( 'audio', 'video', 'embed', 'image', 'gallery', 'vendor/custom' ) as $name ) {
+	$media = '<!-- wp:' . $name . ' {"url":"https://example.test/original","caption":"原文，标点。。"} /-->';
+	$with_media = $struct_source . $media;
+	$preserved = $v2;
+	$preserved['source_sha256'] = hash( 'sha256', $with_media );
+	$preserved['candidate'] = $struct_candidate . $media;
+	$preserved['candidate_sha256'] = hash( 'sha256', $preserved['candidate'] );
+	format_assert( Editor_Content_Format::valid_result( $with_media, $preserved ), 'v2 preserves protected block ' . $name );
+	foreach ( array( str_replace( 'original', 'replacement', $preserved['candidate'] ), str_replace( '标点。。', '标点。', $preserved['candidate'] ) ) as $invalid ) {
+		$bad = $preserved;
+		$bad['candidate'] = $invalid;
+		$bad['candidate_sha256'] = hash( 'sha256', $invalid );
+		format_assert( ! Editor_Content_Format::valid_result( $with_media, $bad ), 'v2 refuses URL or caption correction in ' . $name );
+	}
 }
 $request->set_header( 'Content-Type', 'application/json' );
 $request->set_body( wp_json_encode( array( 'intent' => 'format_content', 'post_id' => 1, 'content' => $source ) ) );

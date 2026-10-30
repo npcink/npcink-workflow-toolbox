@@ -250,6 +250,8 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'excerpt'                    => sanitize_textarea_field( (string) $request->get_param( 'excerpt' ) ),
 			'content_text'               => wp_trim_words( $content, 220, '' ),
 			'content_full_text'          => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $content, self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS ) ),
+			'article_review_input_chars' => $this->editor_text_length( $content ),
+			'article_review_truncated'   => $this->editor_text_length( $content ) > self::EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS,
 			'content_audio_text'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( Rest_Editor_Audio_Text::editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), Rest_Editor_Audio_Text::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
 			'selected_text'              => wp_trim_words( sanitize_textarea_field( $selected_text ), 110, '' ),
 			'selected_block_text'        => wp_trim_words( sanitize_textarea_field( $selected_block_text ), 110, '' ),
@@ -1947,6 +1949,17 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				__( 'Paragraph %d', 'npcink-workflow-toolbox' ),
 				$index + 1
 			);
+			if ( 1 === preg_match( '/(?:，{2,}|、{2,}|；{2,}|：{2,}|。{2,})/u', $paragraph ) ) {
+				$items[] = $this->editor_article_checkup_issue(
+					'punctuation_review_' . ( $index + 1 ),
+					'punctuation',
+					'info',
+					$location,
+					$paragraph,
+					__( 'Repeated punctuation may need review.', 'npcink-workflow-toolbox' ),
+					__( 'Check whether the punctuation is intentional. Only you can correct it; formatting will not change words, symbols, or punctuation.', 'npcink-workflow-toolbox' )
+				);
+			}
 
 			if ( $length >= 220 ) {
 				$items[] = $this->editor_article_checkup_issue(
@@ -2049,6 +2062,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$items[] = $semantic_item;
 		}
 
+		$issue_count = count( $items );
 		if ( empty( $items ) ) {
 			$items[] = $this->editor_article_checkup_issue(
 				'no_blocking_local_issue',
@@ -2061,8 +2075,37 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			);
 		}
 
+		$shown_items = array_slice( $items, 0, 12 );
+		foreach ( $shown_items as &$item ) {
+			$matches  = array();
+			$evidence = $item['evidence'];
+			foreach ( $context['content_blocks'] ?? array() as $block ) {
+				$block_text = sanitize_text_field( $block['text'] ?? '' );
+				if ( '' !== $evidence && false !== strpos( $block_text, $evidence ) ) {
+					$matches[] = array(
+						'client_id'   => $block['client_id'],
+						'occurrences' => substr_count( $block_text, $evidence ),
+					);
+				}
+			}
+			$item['source_location'] = count( $matches ) === 1 && 1 === $matches[0]['occurrences']
+				? array(
+					'status'    => 'matched',
+					'client_id' => $matches[0]['client_id'],
+					'excerpt'   => $evidence,
+				)
+				: array( 'status' => 'unavailable' );
+		}
+		unset( $item );
+		$paragraph_count = count( $this->editor_article_checkup_paragraphs( $text, PHP_INT_MAX ) );
+		$sentence_count  = count( $this->editor_article_checkup_sentences( $text, PHP_INT_MAX ) );
+		$checked_chars   = $this->editor_text_length( $text );
+		$input_chars     = max( $checked_chars, (int) ( $context['article_review_input_chars'] ?? $checked_chars ) );
+		$truncated       = ! empty( $context['article_review_truncated'] );
+
 		return array(
 			'artifact_type'          => 'article_checkup.v1',
+			'report_contract'        => 'article_review_report.v1',
 			'composition_role'       => 'full_draft_review',
 			'candidate_contract'     => 'article_checkup_issue.v1',
 			'status'                 => 'ready',
@@ -2072,10 +2115,24 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'direct_wordpress_write' => false,
 			'format_consistency'     => $format_consistency,
 			'semantic_consistency'   => $semantic_consistency,
-			'items'                  => array_slice( $items, 0, 12 ),
+			'items'                  => $shown_items,
+			'coverage'               => array(
+				'scope'                      => 'bounded_local_heuristics',
+				'input_text_characters'      => $input_chars,
+				'context_text_characters'    => $checked_chars,
+				'context_truncated'          => $truncated,
+				'paragraphs_in_context'      => $paragraph_count,
+				'paragraphs_checked'         => count( $paragraphs ),
+				'sentences_in_context'       => $sentence_count,
+				'semantic_sentences_checked' => min( 80, $sentence_count ),
+				'issues_found'               => $issue_count,
+				'issues_shown'               => min( 12, $issue_count ),
+				'partial'                    => $truncated || $paragraph_count > 24 || $sentence_count > 80 || $issue_count > 12,
+				'not_checked'                => array( 'comprehensive_grammar', 'general_cross_paragraph_logic', 'body_risk_classification', 'factual_verification' ),
+			),
 			'summary'                => array(
 				'paragraph_count'            => count( $paragraphs ),
-				'issue_count'                => count( $items ),
+				'issue_count'                => $issue_count,
 				'format_consistency_count'   => count( $format_items ),
 				'semantic_consistency_count' => count( $semantic_items ),
 				'cloud_calls'                => false,
@@ -2084,7 +2141,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		);
 	}
 
-	private function editor_article_checkup_paragraphs( string $text ): array {
+	private function editor_article_checkup_paragraphs( string $text, int $limit = 24 ): array {
 		$normalized = preg_replace( "/\r\n?/", "\n", $text );
 		$parts      = preg_split( "/\n{2,}|(?<=[。！？!?])\s+(?=\\S)/u", is_string( $normalized ) ? $normalized : $text );
 		$paragraphs = array();
@@ -2094,7 +2151,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				continue;
 			}
 			$paragraphs[] = $paragraph;
-			if ( count( $paragraphs ) >= 24 ) {
+			if ( count( $paragraphs ) >= $limit ) {
 				break;
 			}
 		}
@@ -2217,7 +2274,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		);
 	}
 
-	private function editor_article_checkup_sentences( string $text ): array {
+	private function editor_article_checkup_sentences( string $text, int $limit = 80 ): array {
 		$normalized = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $text ) ) ?: '' );
 		if ( '' === $normalized ) {
 			return array();
@@ -2231,7 +2288,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				continue;
 			}
 			$sentences[] = $sentence;
-			if ( count( $sentences ) >= 80 ) {
+			if ( count( $sentences ) >= $limit ) {
 				break;
 			}
 		}

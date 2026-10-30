@@ -638,6 +638,37 @@ npcink_toolbox_editor_flow_assert( isset( $empty_context['error'] ) && 'npcink_t
 $no_selection = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'polish_notes' ) + $npcink_toolbox_editor_flow_draft );
 npcink_toolbox_editor_flow_assert( isset( $no_selection['error'] ) && 'npcink_toolbox_missing_editor_selection' === $no_selection['error']->get_error_code(), 'Paragraph review without a selection is rejected.' );
 
+// Local report coverage and locations must describe the actual bounded check.
+$review_service = new Npcink_Toolbox\Rest_Editor_Content_Support( $client, $preflight );
+$review_context = new ReflectionMethod( $review_service, 'editor_post_context' );
+$review_method  = new ReflectionMethod( $review_service, 'editor_article_checkup_section' );
+if ( PHP_VERSION_ID < 80100 ) {
+	$review_context->setAccessible( true );
+	$review_method->setAccessible( true );
+}
+$review_text    = '原文，，标点只提示。';
+$review_input   = array( 'title' => '文章', 'excerpt' => '摘要', 'content' => $review_text, 'content_blocks' => array( array( 'client_id' => 'review-block', 'block_name' => 'core/paragraph', 'text' => $review_text ) ) );
+$review_report  = $review_method->invoke( $review_service, $review_context->invoke( $review_service, new WP_REST_Request( $review_input ) ) );
+$punctuation    = array_values( array_filter( $review_report['items'], static fn( array $item ): bool => 'punctuation' === $item['type'] ) )[0];
+npcink_toolbox_editor_flow_assert( 'article_review_report.v1' === $review_report['report_contract'] && false === $review_report['direct_wordpress_write'], 'Article review extends the existing preflight artifact without a writer or new intent.' );
+npcink_toolbox_editor_flow_assert( 'review-block' === $punctuation['source_location']['client_id'] && $review_text === $punctuation['evidence'], 'Punctuation is quoted unchanged with a unique source block for navigation.' );
+npcink_toolbox_editor_flow_assert( 'operator_review_only_no_insert' === $punctuation['action_policy'] && ! isset( $punctuation['replacement'] ) && $review_text === $review_input['content'], 'Punctuation review never supplies an executable correction or mutates its input.' );
+$review_input['content_blocks'][] = array( 'client_id' => 'duplicate-block', 'block_name' => 'core/paragraph', 'text' => $review_text );
+$ambiguous = $review_method->invoke( $review_service, $review_context->invoke( $review_service, new WP_REST_Request( $review_input ) ) );
+npcink_toolbox_editor_flow_assert( 'unavailable' === $ambiguous['items'][0]['source_location']['status'], 'Repeated source evidence does not navigate to an arbitrary block.' );
+$paragraphs = array();
+for ( $i = 0; $i < 30; ++$i ) {
+	$paragraphs[] = "第{$i}段，，保留原文。第二句。第三句。第四句。";
+}
+$bounded = $review_method->invoke( $review_service, array( 'title' => '文章', 'excerpt' => '摘要', 'content_full_text' => implode( "\n\n", $paragraphs ) ) );
+npcink_toolbox_editor_flow_assert( 24 === $bounded['coverage']['paragraphs_checked'] && 30 === $bounded['coverage']['paragraphs_in_context'] && 80 === $bounded['coverage']['semantic_sentences_checked'] && 120 === $bounded['coverage']['sentences_in_context'], 'Report distinguishes 24 of 30 paragraphs and 80 of 120 sentences.' );
+npcink_toolbox_editor_flow_assert( true === $bounded['coverage']['partial'] && 12 === $bounded['coverage']['issues_shown'] && $bounded['coverage']['issues_found'] > 12 && in_array( 'body_risk_classification', $bounded['coverage']['not_checked'], true ), 'Report discloses issue truncation and unimplemented content-risk checking.' );
+$long_input = array( 'title' => 'Article', 'excerpt' => 'Summary', 'content' => str_repeat( 'unchanged ', 4000 ) );
+$limited = $review_method->invoke( $review_service, $review_context->invoke( $review_service, new WP_REST_Request( $long_input ) ) );
+npcink_toolbox_editor_flow_assert( true === $limited['coverage']['context_truncated'] && $limited['coverage']['input_text_characters'] > $limited['coverage']['context_text_characters'], 'Report reveals the 30,000-character context limit before claiming coverage.' );
+$clear = $review_method->invoke( $review_service, array( 'title' => 'Article', 'excerpt' => 'Summary', 'content_full_text' => 'A short note.' ) );
+npcink_toolbox_editor_flow_assert( 0 === $clear['coverage']['issues_found'] && 0 === $clear['coverage']['issues_shown'] && 0 === $clear['summary']['issue_count'], 'A no-findings notice is not counted as a finding or a comprehensive pass.' );
+
 // A2. Audio intents are paused at the REST editor path before generation or transport.
 foreach ( array( 'article_narration', 'article_audio_summary' ) as $audio_intent ) {
 	$paused_audio = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => $audio_intent ) + $npcink_toolbox_editor_flow_draft );

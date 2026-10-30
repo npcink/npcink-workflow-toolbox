@@ -1325,7 +1325,13 @@
       "Photo by %s": ["摄影师：%s"],
       "Try again": ["重试"],
       "The previous image is no longer in the refreshed results. Its SEO fields were discarded; select a candidate to continue.": ["之前的图片已不在刷新后的结果中。其 SEO 字段已丢弃，请选择候选图片继续。"],
-      "The selected image and its SEO fields were cleared for the new hosted-image request.": ["已为新的托管图片请求清除当前图片及其 SEO 字段。"]
+      "The selected image and its SEO fields were cleared for the new hosted-image request.": ["已为新的托管图片请求清除当前图片及其 SEO 字段。"],
+      "Punctuation": ["符号标点"],
+      "Local hints only. Comprehensive grammar, cross-paragraph logic, content risk, and facts have not been verified. You make all text and punctuation corrections.": ["仅提供本地规则提示，尚未完成全面语句、跨段逻辑、内容风险和事实核验。文字及标点均由您自行修改。"],
+      "Checked %1$d of %2$d context paragraphs and %3$d of %4$d context sentences; showing %5$d of %6$d findings.": ["段落规则已检查上下文中 %2$d 段里的 %1$d 段，语义规则已检查 %4$d 句里的 %3$d 句；共 %6$d 条提示，显示 %5$d 条。"],
+      "Only the beginning of this article was checked; the remaining text was outside the review limit.": ["仅检查了文章开头部分，其余正文超出本次检查范围。"],
+      "Locate in draft": ["定位到正文"],
+      "The draft changed after this check. These findings are out of date; run publish preflight again.": ["正文或文章信息已在检查后修改，当前提示已过期，请重新运行发布预检。"]
     }
   }
 }

@@ -10061,3 +10061,30 @@ msgstr ""
 #: includes/Site_Content_Answer.php
 msgid "Searching public site content and preparing an answer…"
 msgstr ""
+
+msgid "Repeated punctuation may need review."
+msgstr ""
+
+msgid "Check whether the punctuation is intentional. Only you can correct it; formatting will not change words, symbols, or punctuation."
+msgstr ""
+
+msgid "Formatting only adjusts spacing and layout. Words, punctuation, links, and media are preserved; corrections are for you to make."
+msgstr ""
+
+msgid "Punctuation"
+msgstr ""
+
+msgid "Local hints only. Comprehensive grammar, cross-paragraph logic, content risk, and facts have not been verified. You make all text and punctuation corrections."
+msgstr ""
+
+msgid "Checked %1$d of %2$d context paragraphs and %3$d of %4$d context sentences; showing %5$d of %6$d findings."
+msgstr ""
+
+msgid "Only the beginning of this article was checked; the remaining text was outside the review limit."
+msgstr ""
+
+msgid "Locate in draft"
+msgstr ""
+
+msgid "The draft changed after this check. These findings are out of date; run publish preflight again."
+msgstr ""
