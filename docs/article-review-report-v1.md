@@ -59,6 +59,11 @@ local snapshot; there is no durable review or approval store.
 
 ## Subsequent analysis work
 
+The [reference research](article-review-reference-research-2026-10-30.md),
+[consumer contract draft](article-review-cloud-contract-draft-v1.md) and
+[synthetic evaluation seeds](article-review-evaluation-seeds-v1.json) prepare
+that work. They do not register a Cloud contract or turn any deferred check on.
+
 Generic grammar, cross-paragraph logic and body-risk classification need an
 explicit Cloud/Addon's analysis contract and evaluated useful positives and
 false positives before becoming implemented checks. Preserve the same issue,

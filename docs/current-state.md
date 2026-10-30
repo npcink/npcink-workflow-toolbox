@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-29.
+Last reviewed: 2026-10-30.
 
 **Recommendation/research chat closeout:** the
 [2026-10-29 audit](session-research-closeout-2026-10-29.md) verifies 48 attached
@@ -193,6 +193,10 @@ ordinary generation and Site Knowledge remain available. See
   deterministic before/after site verification remain deferred in
   [Known Issues](known-issues.md). Formatting preserves words, punctuation and
   media; it changes only bounded layout and CJK/Latin-or-digit spacing.
+  The [reference research](article-review-reference-research-2026-10-30.md)
+  now informs a [Cloud consumer contract draft](article-review-cloud-contract-draft-v1.md)
+  and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). These are
+  preparation only; no new Cloud checker, model-quality result or runtime is enabled.
 
 - Recommendation anchor eligibility now has an active
   [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical
