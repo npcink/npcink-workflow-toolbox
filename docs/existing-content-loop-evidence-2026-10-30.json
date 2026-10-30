@@ -1,0 +1,70 @@
+{
+  "contract": "existing_content_loop_development_evidence.v1",
+  "date": "2026-10-30",
+  "environment": "Local WordPress and M4 development",
+  "source": {
+    "toolbox": "d4fb0af09b2e3a64ebe9777f789d35528c404eb6",
+    "addon_merge": "cc312720",
+    "cloud_accepted": "8a6a978893f46a4c4b129cc9bceb9327cf6d312a"
+  },
+  "entry_owner": "WordPress AI plugin",
+  "samples": [
+    {
+      "source_id": 280979,
+      "draft_id": 282994,
+      "summary_http": 200,
+      "title_http": 200,
+      "title_saved": true,
+      "source_body_sha256": "1c36a99f17e8869832708cedaf827f487962fec713ce82cf0591f427edbcf6a4"
+    },
+    {
+      "source_id": 19025,
+      "draft_id": 282995,
+      "summary_http": 200,
+      "title_http": 200,
+      "title_saved": false,
+      "source_body_sha256": "4d91cc2431617b57210f943a06ed010194aed2005834522474950831c7895917"
+    },
+    {
+      "source_id": 280875,
+      "draft_id": 282996,
+      "summary_http": 200,
+      "rewrite_http": 200,
+      "rewrite_saved": true,
+      "source_body_sha256": "8a000f4c222bdae7403687bd1b9d2f0a65e55ce0001795d729810aedb9638f1a"
+    }
+  ],
+  "persistence": {
+    "excerpt_empty_before_first_native_save": true,
+    "rewrite_database_body_unchanged_after_accept_before_native_save": true,
+    "native_save_readback_passed": true,
+    "three_original_titles_excerpts_bodies_unchanged": true,
+    "three_disposable_drafts_recoverable_in_trash": true
+  },
+  "failure": {
+    "scope": "title UI only",
+    "injection": "browser-only HTTP 503 fixture",
+    "old_candidate_retained": true,
+    "retry_available": true,
+    "interception_removed": true,
+    "real_retry_http": 200,
+    "real_provider_outage_exercised": false
+  },
+  "representative_quality": "unmeasured",
+  "natural_usage_and_feedback": "not established by this developer batch",
+  "human_acceptance": "pending",
+  "production": "not deployed",
+  "private_artifact_sha256": {
+    "browser-282994.json": "490a42de634002d20b132cb2eac3837e8a086513303da94aa23c6d08cd9fb073",
+    "browser-282995-summary.json": "42241e7613af1359a5edff11daee3b84d511604b1cd771a31bd27f7ce82d5ea7",
+    "browser-282995-title.json": "5cbdec1d4f9668c1f88a843cc2e9cd0ad0207ed5339b7683245ca2376eedb15a",
+    "browser-282996-summary.json": "0a64b3a84e1e12d4c71b9d45f030c2b856b60c2c238f0ae8ceb7a76d74cef068",
+    "browser-282996-rewrite.json": "7e44ab7632f32194cf30070208e0b498ca990e9d9237263c7001baca1dbb6e6e",
+    "title-failure-recovery-282995.json": "fcc3a104d66840c89afe9c61f8d920c08e65929774dd8b091634b6e5969ddc53",
+    "database-readback.json": "affa0dbf87bd20be954c84bd19b2344f147120c17418518d61f402b4e58b4b8b",
+    "fixture-cleanup.json": "a7116c2804be1011142dfdf8c1e32e48e896a130180190361cc7d93bf52b5ba3",
+    "rewrite-preview-282996.jpg": "d9ced4f1799c109231148503b86ceee58963ae24570b1163b4a32bd29d140bff",
+    "rewrite-saved-282996.jpg": "5e58f9b2985560a13fe30ca9afce95af77acdfbc600dc3d51e31f2a867bbad71",
+    "title-failure-282995.jpg": "e17fabab04319ce055a7651d48ae04234fe456423ff4202e801f9c666cdfa9d5"
+  }
+}

@@ -150,6 +150,7 @@ Start from the active documents below before changing code.
 - [Summary Eval](summary-eval.md)
 - [Site Ops Cloud Analysis Contract](site-ops-cloud-analysis-contract.md)
 - [本站公开资料问答合同与开发验收](site-content-answer-v1.md) — 已注册能力、原文引用、权限与失败边界。
+- [现有内容辅助链路验收与后续处置（2026-10-30）](existing-content-loop-acceptance-2026-10-30.md)及[无正文开发证据](existing-content-loop-evidence-2026-10-30.json) — WordPress AI 摘要/标题/改写、原生保存、失败重试；CMS、图片、问答、视觉接受和工作区的分别处置。
 - [公开资料问答开发证据 — 2026-10-30](site-content-answer-development-evidence-2026-10-30.json) — PC 页面、真实问答与受控失败验证。
 - [Site Knowledge Vector Operations Contract](site-knowledge-vector-operations-contract.md)
 

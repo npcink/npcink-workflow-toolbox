@@ -7,6 +7,14 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-10-30.
 
+**Existing content loop, 2026-10-30:** the real WordPress AI plugin's three
+summaries, two titles, selected-paragraph rewrite, native-save readback and
+browser-only title failure/real retry passed; originals were unchanged and
+disposable drafts were trashed. See [acceptance and dispositions](existing-content-loop-acceptance-2026-10-30.md)
+for the separate CMS handoff, image limitations, optional site-answer scope,
+human visual acceptance and conservative worktree retention. This is developer
+evidence, not natural usage, production release or new upload/CMS support.
+
 **Recommendation/research chat closeout:** the
 [2026-10-29 audit](session-research-closeout-2026-10-29.md) verifies 48 attached
 PRs merged and records evidence preservation, stopped trials and remaining owners.
