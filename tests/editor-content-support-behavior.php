@@ -642,6 +642,10 @@ npcink_toolbox_editor_flow_assert( isset( $no_selection['error'] ) && 'npcink_to
 $review_service = new Npcink_Toolbox\Rest_Editor_Content_Support( $client, $preflight );
 $review_context = new ReflectionMethod( $review_service, 'editor_post_context' );
 $review_method  = new ReflectionMethod( $review_service, 'editor_article_checkup_section' );
+if ( PHP_VERSION_ID < 80100 ) {
+	$review_context->setAccessible( true );
+	$review_method->setAccessible( true );
+}
 $review_text    = '原文，，标点只提示。';
 $review_input   = array( 'title' => '文章', 'excerpt' => '摘要', 'content' => $review_text, 'content_blocks' => array( array( 'client_id' => 'review-block', 'block_name' => 'core/paragraph', 'text' => $review_text ) ) );
 $review_report  = $review_method->invoke( $review_service, $review_context->invoke( $review_service, new WP_REST_Request( $review_input ) ) );

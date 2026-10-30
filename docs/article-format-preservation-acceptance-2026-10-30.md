@@ -69,6 +69,9 @@ documentation-only contract rerun: 4,505 assertions),
 `composer lint:standards`, `composer analyse:php`, Composer metadata,
 `composer check:wporg`, real WordPress tokenizer smoke, browser smoke and
 `git diff --check`. Existing PHP 8.5/WP-CLI deprecation notices remain.
+The initial PR CI run found a PHP 8.0-only private-reflection test failure;
+the test fixture now explicitly enables reflection access on PHP below 8.1.
+Production behavior and the implementation hashes are unchanged by that fix.
 
 Continue with a scoped Cloud analysis contract and evaluated useful positives
 and false positives for language/logic/risk suggestions. Keep corrections
