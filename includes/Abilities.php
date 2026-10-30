@@ -122,6 +122,33 @@ final class Abilities {
 					'write_posture'      => 'candidate_only_core_approval_required',
 				)
 			),
+			'npcink-toolbox/answer-site-content'           => $this->definition(
+				__( 'Answer from site content', 'npcink-workflow-toolbox' ),
+				__( 'Answer one question using indexed public posts and pages, with verified source references and no WordPress writes.', 'npcink-workflow-toolbox' ),
+				array( 'question' ),
+				array( $this, 'answer_site_content' ),
+				'cap.toolbox.admin',
+				array(
+					'data_classification'     => 'public_site_content',
+					'composition_role'        => 'site_content_answer',
+					'provider_execution'      => 'cloud_runtime_via_addon',
+					'npcink_ai_task_contract' => array(
+						'task'                 => 'site_answer',
+						'task_family'          => 'analysis',
+						'context_requirements' => array( 'site_knowledge_evidence' ),
+						'constraints'          => array( 'json_object', 'source_grounded' ),
+					),
+				),
+				array(
+					'question' => array(
+						'type'      => 'string',
+						'minLength' => 1,
+						'maxLength' => 2000,
+					),
+				),
+				Site_Content_Answer::output_schema(),
+				false
+			),
 			'npcink-toolbox/search-site-knowledge'         => $this->definition(
 				__( 'Search Site Knowledge', 'npcink-workflow-toolbox' ),
 				__( 'Search Cloud-managed site knowledge for semantic search, related content, writing context, internal links, or refresh suggestions without writing WordPress content.', 'npcink-workflow-toolbox' ),
@@ -345,7 +372,7 @@ final class Abilities {
 		);
 	}
 
-	private function definition( string $label, string $description, array $required, callable $callback, string $required_scope, array $meta = array(), array $input_properties = array() ): array {
+	private function definition( string $label, string $description, array $required, callable $callback, string $required_scope, array $meta = array(), array $input_properties = array(), array $output_schema = array(), bool $allow_extra_input = true ): array {
 		$default_meta = array(
 			'show_in_rest'             => true,
 			'readonly'                 => true,
@@ -375,9 +402,9 @@ final class Abilities {
 				'type'                 => 'object',
 				'properties'           => $properties,
 				'required'             => $required,
-				'additionalProperties' => true,
+				'additionalProperties' => $allow_extra_input,
 			),
-			'output_schema'             => array(
+			'output_schema'             => $output_schema ?: array(
 				'type'                 => 'object',
 				'additionalProperties' => true,
 			),
@@ -406,6 +433,10 @@ final class Abilities {
 
 	public function generate_image_candidate( $input = array() ) {
 		return $this->client->run_ai_image_generation( is_array( $input ) ? $input : array() );
+	}
+
+	public function answer_site_content( $input = array() ) {
+		return Site_Content_Answer::answer( $input );
 	}
 
 	public function search_site_knowledge( $input = array() ) {

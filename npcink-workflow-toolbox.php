@@ -98,6 +98,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Admin_Page.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Content_Support.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Article_Audio_Playback.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Dashboard_Widget.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Site_Content_Answer.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Abilities.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Plugin.php';
 

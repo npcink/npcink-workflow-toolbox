@@ -1,9 +1,11 @@
 """Local review rejects stale, incomplete, untriaged and provider-failed evidence."""
 import copy
 import importlib.util
+import io
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 import urllib.error
 from unittest.mock import patch
@@ -63,6 +65,25 @@ class LocalReviewTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'new output required'):
                 reviewer.run('base','head',output,Path('unused'))
             self.assertEqual(output.read_text(),'preserve')
+
+    def test_binary_translation_keeps_full_diff_without_utf8_snapshot(self):
+        diff = b'Binary translation change\nGIT binary patch\nliteral 4\n'
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {
+            'content': json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); config = root/'config.json'; output = root/'review.json'
+            config.write_text(json.dumps(dict(model='qwen3.8-max',
+                url='https://example.invalid/v1', auth_token='not-a-real-token')))
+            def git_result(*args):
+                return b'languages/test.mo\0' if args[0] == 'diff' else b'\xde\x12\x04\x95'
+            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, diff)), patch.object(
+                    reviewer, 'git', side_effect=git_result) as git_mock, patch.object(
+                    reviewer.subprocess, 'run', return_value=SimpleNamespace(returncode=0)), patch.object(
+                    reviewer.urllib.request, 'urlopen', return_value=io.BytesIO(response)) as request:
+                reviewer.run('base', 'head', output, config)
+            self.assertFalse(any(call.args[0] == 'show' for call in git_mock.call_args_list))
+            self.assertIn(diff.decode(), json.loads(request.call_args.args[0].data)['messages'][1]['content'])
+            self.assertTrue(json.loads(output.read_text())['success'])
 
 
 if __name__=='__main__':unittest.main()

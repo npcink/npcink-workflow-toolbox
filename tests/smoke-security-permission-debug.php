@@ -143,6 +143,7 @@ require_once $root . '/includes/Rest_Content_Structure_Insight_Bridges.php';
 require_once $root . '/includes/Rest_Page_Quality_Insight_Bridges.php';
 require_once $root . '/includes/Rest_Environment_Performance_Insight_Bridges.php';
 require_once $root . '/includes/Rest_Controller.php';
+require_once $root . '/includes/Site_Content_Answer.php';
 require_once $root . '/includes/Abilities.php';
 require_once $root . '/includes/Editor_Content_Support.php';
 
