@@ -232,6 +232,13 @@ described above.
 
 == Changelog ==
 
+= Unreleased =
+
+* Formatting preserves words, numbers, punctuation, links and multimedia;
+  only bounded layout and CJK/Latin-or-digit spacing may change.
+* Publish preflight shows bounded coverage, manual punctuation hints,
+  unique-evidence navigation and stale-report warnings. It never corrects text.
+
 = 0.6.0 =
 
 * Security: every post-context read now requires edit_post permission

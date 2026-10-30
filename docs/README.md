@@ -124,6 +124,8 @@ Start from the active documents below before changing code.
 - [Editor Progressive Recommendations Trial](editor-progressive-recommendations-trial.md)
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
+- [Article review report v1](article-review-report-v1.md) — bounded coverage, evidence navigation and author-only correction.
+- [Formatting preservation acceptance (2026-10-30)](article-format-preservation-acceptance-2026-10-30.md) and [body-free evidence](article-format-preservation-evidence-2026-10-30.json).
 - [Editor Content Format V1](editor-content-format-v1.md)
 - [Editor Content Support Recommendation Review](editor-content-support-recommendation-review.md)
 - [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)

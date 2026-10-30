@@ -37,8 +37,11 @@ with the closing commit or PR for one release cycle, then prune.
   worksheets separate from independent gold. No production rollout or ranking
   campaign follows from this handoff.
 - **Article assistance follow-up (Toolbox editor / Cloud analysis).** Formatting
-  is merged (#141); fresh browser preservation/Undo evidence and unified
-  publish-preflight issue locations remain follow-up work. Generic cross-
+  is merged (#141); the 2026-10-30 preservation/report slice adds bounded coverage, unique-evidence
+  issue navigation, stale-result warnings and punctuation hints. The
+  [dated acceptance](article-format-preservation-acceptance-2026-10-30.md)
+  records browser success and 12 unchanged saved sources, including two safely
+  rejected compatibility cases (280942, 280861); it does not certify production. Generic cross-
   paragraph logic and body risk classification are not delivered. Reuse the
   current preflight/paragraph-review surface after a scoped contract; no new
   editor intent, hidden save or automatic publishing block is authorized.

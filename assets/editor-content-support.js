@@ -2142,6 +2142,7 @@
 			metadata_suggestions: __('Metadata suggestions', 'npcink-workflow-toolbox'),
 			summary_terms_optimization: __('Metadata optimization', 'npcink-workflow-toolbox'),
 			clarity: __('Clarity', 'npcink-workflow-toolbox'),
+			punctuation: __('Punctuation', 'npcink-workflow-toolbox'),
 			structure: __('Structure', 'npcink-workflow-toolbox'),
 			fact_gap: __('Fact gap', 'npcink-workflow-toolbox'),
 			tone: __('Tone', 'npcink-workflow-toolbox'),
@@ -4706,12 +4707,13 @@
 				evidence_refs: item.evidence_refs || [],
 				id: item.id || String(index),
 				group_key: rawType,
+				source_location: item.source_location || null,
 			};
 		}).filter((item) => item.name || item.detail);
 	}
 
 	function articleCheckupGroups(items) {
-		const order = ['clarity', 'fact_gap', 'tone', 'structure', 'format', 'semantic_consistency', 'other'];
+		const order = ['clarity', 'punctuation', 'fact_gap', 'tone', 'structure', 'format', 'semantic_consistency', 'other'];
 		const buckets = {};
 		(Array.isArray(items) ? items : []).forEach((item) => {
 			const key = order.indexOf(item.group_key) >= 0 ? item.group_key : 'other';
@@ -4729,19 +4731,43 @@
 			}));
 	}
 
-	function renderArticleCheckupItems(section) {
+	function locateArticleReviewIssue(location) {
+		if (!location || location.status !== 'matched' || !location.excerpt) return;
+		const selector = data.select('core/block-editor');
+		const block = selector && selector.getBlock(location.client_id);
+		const text = block ? plainTextFromHtml(internalLinkBlockContent(block)).replace(/\s+/g, ' ').trim() : '';
+		const excerpt = String(location.excerpt).replace(/\s+/g, ' ').trim();
+		if (!text.includes(excerpt) || text.indexOf(excerpt) !== text.lastIndexOf(excerpt)) return;
+		data.dispatch('core/block-editor').selectBlock(location.client_id);
+	}
+
+	function renderArticleCheckupItems(section, controls) {
 		const items = articleCheckupItems(section);
+		const coverage = section.coverage || {};
 		if (!items.length) {
 			return renderItems(items, __('No high-confidence local article checkup issues were found.', 'npcink-workflow-toolbox'));
 		}
 		return createElement(
 			'div',
 			{ className: 'npcink-toolbox-editor-support__article-checkup-groups' },
+			createElement('p', null, __('Local hints only. Comprehensive grammar, cross-paragraph logic, content risk, and facts have not been verified. You make all text and punctuation corrections.', 'npcink-workflow-toolbox')),
+			coverage.scope ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, sprintf(
+				__('Checked %1$d of %2$d context paragraphs and %3$d of %4$d context sentences; showing %5$d of %6$d findings.', 'npcink-workflow-toolbox'),
+				coverage.paragraphs_checked, coverage.paragraphs_in_context, coverage.semantic_sentences_checked, coverage.sentences_in_context, coverage.issues_shown, coverage.issues_found
+			)) : null,
+			coverage.context_truncated ? createElement('p', null, __('Only the beginning of this article was checked; the remaining text was outside the review limit.', 'npcink-workflow-toolbox')) : null,
 			articleCheckupGroups(items).map((group) => createElement(
 				'section',
 				{ key: group.key, className: 'npcink-toolbox-editor-support__article-checkup-group' },
 				createElement('h5', null, group.label),
-				renderItems(group.items, '')
+				createElement('ul', null, group.items.map((item) => createElement('li', { key: item.id },
+					createElement('strong', null, item.name),
+					createElement('p', null, item.detail),
+					item.source_location?.status === 'matched' ? createElement(Button, {
+						variant: 'link', disabled: Boolean(controls?.articleReview?.stale),
+						onClick: () => { if (!controls?.articleReview?.stale) locateArticleReviewIssue(item.source_location); },
+					}, __('Locate in draft', 'npcink-workflow-toolbox')) : null
+				)))
 			))
 		);
 	}
@@ -7162,10 +7188,11 @@
 				}
 
 				if (hasPreflightReview) {
+					if (metadataHandoffControls?.articleReview?.stale) blocks.push(createElement(Notice, { key: 'article-review-stale', status: 'warning', isDismissible: false }, __('The draft changed after this check. These findings are out of date; run publish preflight again.', 'npcink-workflow-toolbox')));
 					blocks.push(renderPreflightSummaryPanel(payload, metadataHandoffControls));
 					blocks.push(renderDiscoverabilityMediaSection(metadataHandoffControls, sections.image_alt_suggestions));
 					if (sections.local_article_checkup) {
-						blocks.push(renderArticleCheckupItems(sections.local_article_checkup));
+						blocks.push(renderArticleCheckupItems(sections.local_article_checkup, metadataHandoffControls));
 					}
 				}
 
@@ -7324,6 +7351,7 @@
 		}, []);
 		const [running, setRunning] = useState('');
 		const [result, setResult] = useState(null);
+		const [articleReviewSource, setArticleReviewSource] = useState(null);
 		const [error, setError] = useState('');
 		const [requestNotice, setRequestNotice] = useState(null);
 		const [supportView, setSupportView] = useState('menu');
@@ -7853,6 +7881,9 @@
 						const paragraphIntegrityBefore = intent === 'polish_notes'
 							? currentEditorContentIntegritySnapshot(runContext.content, runContext.post_id)
 							: null;
+						const reviewSource = intent === 'publish_preflight' ? {
+							post_id: runContext.post_id, content: runContext.content, title: runContext.title, excerpt: runContext.excerpt,
+						} : null;
 						const currentWritingPack = result && result.sections && result.sections.article_writing_pack ? result.sections.article_writing_pack : null;
 						const reviewedWritingPack = intent === 'source_adaptation_review' && sourceStage === 'draft' ? reviewedWritingPackFromEditor(currentWritingPack, writingPackBrief) : null;
 						if (intent === 'source_adaptation_review' && sourceStage === 'draft' && (!reviewedWritingPack || (!writingPackConfirmed && !runOptions.confirmWritingPack))) {
@@ -7963,6 +7994,7 @@
 								}),
 							});
 						}
+						if (reviewSource) setArticleReviewSource(reviewSource);
 						const returnedWritingPack = flowResult && flowResult.sections ? flowResult.sections.article_writing_pack : null;
 						if (returnedWritingPack && flowResult.artifact_type === 'article_writing_pack.v1') {
 							setWritingPackBrief(writingPackBriefFromArtifact(returnedWritingPack));
@@ -10127,6 +10159,7 @@
 					: (sourceExtractionReady ? __('Source ready', 'npcink-workflow-toolbox') : __('Not started', 'npcink-workflow-toolbox')));
 		const isContextualParagraphResult = contextualResult && rerunIntent === 'polish_notes';
 		const resultControls = {
+			articleReview: { stale: !articleReviewSource || ['post_id', 'content', 'title', 'excerpt'].some((key) => postContext[key] !== articleReviewSource[key]) },
 			intent: activeFlowIntent || (result && result.intent) || '',
 			showHandoff: ['summary_terms_optimization', 'category_suggestions', 'tag_suggestions'].indexOf(activeFlowIntent) >= 0,
 			selection: metadataHandoffSelection,

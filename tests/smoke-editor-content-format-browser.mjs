@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules'] }));
@@ -9,7 +9,8 @@ const root = process.env.WP_PATH || '/Users/muze/Local Sites/magick-toolbox/app/
 const php = process.env.WP_CLI_PHP || '/Users/muze/Library/Application Support/Local/lightning-services/php-8.2.29+0/bin/darwin-arm64/bin/php';
 const socket = process.env.WP_DB_SOCKET || '/Users/muze/Library/Application Support/Local/run/0rmB6u8JC/mysql/mysqld.sock';
 function cli(args) {
-	return execFileSync(php, ['-d', `mysqli.default_socket=${socket}`, '/opt/homebrew/bin/wp', `--path=${root}`, '--no-color', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+	const bootstrap = process.env.FORMAT_TOOLBOX_BOOTSTRAP;
+	return execFileSync(php, ['-d', 'display_errors=stderr', '-d', `mysqli.default_socket=${socket}`, '/opt/homebrew/bin/wp', `--path=${root}`, '--no-color', ...(bootstrap ? ['--skip-plugins=npcink-workflow-toolbox', `--require=${bootstrap}`] : []), ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 }
 const auth = JSON.parse(cli(['eval', '$u=get_users(array("role"=>"administrator","number"=>1))[0]; $e=time()+1800; $t=WP_Session_Tokens::get_instance($u->ID)->create($e); echo wp_json_encode(array("user"=>$u->ID,"token"=>$t,"cookie"=>wp_generate_auth_cookie($u->ID,$e,"logged_in",$t),"admin_cookie"=>wp_generate_auth_cookie($u->ID,$e,"auth",$t),"admin_name"=>AUTH_COOKIE,"name"=>LOGGED_IN_COOKIE,"url"=>home_url()));']));
 const sourcePostId = Number(process.env.FORMAT_SOURCE_POST_ID || 0);
@@ -33,15 +34,30 @@ await context.addCookies([{ ...secureAuth, url: auth.url, httpOnly: true, sameSi
 	diagnosticPage = page;
 	const errors = [];
 	const writes = [];
+	const blockedPreferences = [];
 	page.on('pageerror', (error) => errors.push(error.message));
+	// Serve this checkout's assets even when the host PHP realpath cache still
+	// names the previous worktree after a temporary plugin mount.
+	await page.route('**/npcink-workflow-toolbox/assets/**', (route) => {
+		const relative = new URL(route.request().url()).pathname.split('/npcink-workflow-toolbox/')[1].replace(/\.min\.(js|css)$/, '.$1');
+		return route.fulfill({ path: new URL('../' + relative, import.meta.url).pathname });
+	});
 	await page.route('**/wp-json/wp/v2/**', async (route) => {
-		if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(route.request().method())) { writes.push(route.request().url()); return route.abort(); }
+		if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(route.request().method())) {
+			const url = route.request().url();
+			(new URL(url).pathname.endsWith('/users/me') ? blockedPreferences : writes).push(url);
+			return route.abort();
+		}
 		return route.continue();
 	});
 	await page.goto(`${auth.url}/wp-admin/post.php?post=${postId}&action=edit`, { waitUntil: 'domcontentloaded' });
 	assert.ok(!page.url().includes('wp-login.php'), 'Temporary admin session must reach the editor.');
 	await page.waitForFunction(() => window.wp?.data?.select('core/editor')?.getCurrentPostId());
 	await page.waitForFunction(() => window.NpcinkToolboxContentFormat && wp.plugins.getPlugin('npcink-toolbox-editor-content-support'));
+	for (const handle of ['npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support']) {
+		const messages = JSON.parse(readFileSync(new URL(`../languages/npcink-workflow-toolbox-zh_CN-${handle}.json`, import.meta.url), 'utf8')).locale_data.messages;
+		await page.evaluate((messages) => wp.i18n.setLocaleData(messages, 'npcink-workflow-toolbox'), messages);
+	}
 	await page.evaluate(() => {
 		wp.data.dispatch('core/editor').lockPostAutosaving('content-format-smoke');
 		if (wp.data.select('core/preferences')?.get('core/edit-post', 'welcomeGuide')) wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
@@ -56,12 +72,20 @@ await context.addCookies([{ ...secureAuth, url: auth.url, httpOnly: true, sameSi
 		const blocks = wp.blocks.parse(source);
 		const result = { contract_version: 'content_format_candidate.v2', format: 'html', status: 'CHANGED', candidate,
 			visible_characters_preserved: true, direct_wordpress_write: false, persisted: false };
-		if (!NpcinkToolboxContentFormat.prepare(blocks, source, result).length) throw new Error('Native list fixture must prepare.');
-		for (const bad of [candidate.replace('/buy', '/other'), candidate.replace('介绍', '删改'), candidate.replace('<li>', '<li onclick="alert(1)">')]) {
+		try {
+			if (!NpcinkToolboxContentFormat.prepare(blocks, source, result).length) throw new Error('Native list fixture must prepare.');
+		} catch (error) {
+			throw new Error(error.message + ' Fixture schemas: ' + JSON.stringify({ before: blocks, after: wp.blocks.parse(candidate) }));
+		}
+		for (const bad of [candidate.replace('/buy', '/other'), candidate.replace('介绍', '删改'), candidate.replace('介绍。', '介绍！'), candidate.replace('地址：', '地址:'), candidate.replace('<li>', '<li onclick="alert(1)">')]) {
 			let rejected = false;
 			try { NpcinkToolboxContentFormat.prepare(blocks, source, { ...result, candidate: bad }); } catch { rejected = true; }
 			if (!rejected) throw new Error('Unsafe structure candidate accepted.');
 		}
+		const attributedBlocks = [wp.blocks.createBlock('core/paragraph', { content: blocks[0].attributes.content, dropCap: true })];
+		let attributedRejected = false;
+		try { NpcinkToolboxContentFormat.prepare(attributedBlocks, wp.blocks.serialize(attributedBlocks), result); } catch { attributedRejected = true; }
+		if (!attributedRejected) throw new Error('Non-default paragraph attributes lost during structure formatting.');
 		const richSource = '<!-- wp:paragraph -->\n<p>原文<strong>重点</strong>。<code>中文AI</code>保持。</p>\n<!-- /wp:paragraph -->';
 		const richCandidate = richSource.replace('。<code>', '。</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p><code>');
 		if (!NpcinkToolboxContentFormat.prepare(wp.blocks.parse(richSource), richSource, { ...result, candidate: richCandidate }).length) throw new Error('Safe rich paragraph split rejected.');
@@ -172,8 +196,49 @@ await context.addCookies([{ ...secureAuth, url: auth.url, httpOnly: true, sameSi
 	assert.ok(box && box.x >= 0 && box.x + box.width <= 391);
 	await page.screenshot({ path: new URL('../build/smoke/content-format-mobile.png', import.meta.url).pathname, fullPage: true });
 	console.log('PASS: Formatting control fits mobile viewport.');
+
+	// Render PHP-generated local review through the real editor; no Cloud
+	// analysis is claimed or called for this fixture.
+	await page.setViewportSize({ width: 1440, height: 1000 });
+	await page.evaluate(() => {
+		const block = wp.data.select('core/block-editor').getBlocks().find((item) => item.name === 'core/paragraph');
+		wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, { content: '这段原文，，标点须由作者修改。' });
+		const editor = wp.data.dispatch('core/editor');
+		(editor.openGeneralSidebar ? editor : wp.data.dispatch('core/edit-post')).openGeneralSidebar('npcink-toolbox-editor-content-support/npcink-content-support-sidebar');
+	});
+	await page.unroute('**/editor/content-support*');
+	await page.route('**/editor/content-support*', async (route) => {
+		const input = route.request().postDataJSON();
+		if (input?.intent !== 'publish_preflight') return route.continue();
+		const encoded = Buffer.from(JSON.stringify(input)).toString('base64');
+		const report = cli(['eval', `$input=json_decode(base64_decode("${encoded}"),true); $preflight=new Npcink_Toolbox\\Publish_Preflight_Service(); $service=new Npcink_Toolbox\\Rest_Editor_Content_Support(new Npcink_Toolbox\\Provider_Client(new Npcink_Toolbox\\Settings()),$preflight); $request=new WP_REST_Request(); foreach($input as $key=>$value) $request->set_param($key,$value); $context=(new ReflectionMethod($service,"editor_post_context"))->invoke($service,$request); $review=(new ReflectionMethod($service,"editor_article_checkup_section"))->invoke($service,$context); echo wp_json_encode(array("artifact_type"=>"editor_content_support_flow","intent"=>"publish_preflight","sections"=>$preflight->build_sections($context,array(),array(),$review)));`]);
+		return route.fulfill({ status: 200, contentType: 'application/json', body: report });
+	});
+	const beforeReview = await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
+	await page.getByRole('button', { name: / 发布预检$/ }).click();
+	const review = page.locator('.npcink-toolbox-editor-support__article-checkup-groups');
+	await review.waitFor();
+	assert.match(await review.innerText(), /符号标点|重复标点/);
+	assert.match(await review.innerText(), /已检查上下文/);
+	assert.match(await review.innerText(), /尚未完成全面语句/);
+	await review.getByRole('button', { name: '定位到正文', exact: true }).first().click();
+	assert.equal(await page.evaluate(() => wp.data.select('core/block-editor').getSelectedBlock()?.name), 'core/paragraph');
+	assert.equal(await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent()), beforeReview);
+	await page.evaluate(() => {
+		const block = wp.data.select('core/block-editor').getSelectedBlock();
+		wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, { content: block.attributes.content + '作者继续编辑。' });
+	});
+	await page.locator('.components-notice__content').getByText('正文或文章信息已在检查后修改，当前提示已过期，请重新运行发布预检。', { exact: true }).waitFor();
+	assert.ok(await review.getByRole('button', { name: '定位到正文', exact: true }).first().isDisabled());
+	await page.screenshot({ path: new URL('../build/smoke/article-review-stale.png', import.meta.url).pathname, fullPage: true });
+	assert.deepEqual(writes, []);
+	assert.deepEqual(errors, []);
+	assert.equal(JSON.parse(cli(['post', 'get', String(postId), '--fields=post_content', '--format=json'])).post_content, source);
+	console.log('PASS: Local PHP report shows punctuation and bounded coverage, navigates without editing, and disables stale locations; database unchanged.');
+	console.log(`Blocked native editor preference requests: ${blockedPreferences.length}; no preference writes were allowed.`);
 } catch (error) {
 	if (diagnosticPage) console.log('Formatting notice:', await diagnosticPage.locator('.npcink-toolbox-editor-format').innerText().catch(() => 'not available'));
+	if (diagnosticPage) console.log('Editor script readiness:', await diagnosticPage.evaluate(() => ({ format: Boolean(window.NpcinkToolboxContentFormat), plugin: Boolean(window.wp?.plugins?.getPlugin('npcink-toolbox-editor-content-support')), scripts: Array.from(document.scripts).map((script) => script.src).filter((url) => url.includes('editor-content')) })));
 	throw error;
 } finally {
 	if (browser) await browser.close();

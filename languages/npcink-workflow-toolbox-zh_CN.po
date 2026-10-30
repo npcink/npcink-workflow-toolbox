@@ -10567,3 +10567,30 @@ msgstr "所引用的资料已完整交付，请对照原文审阅回答。"
 #: includes/Site_Content_Answer.php
 msgid "Searching public site content and preparing an answer…"
 msgstr "正在检索本站公开资料并准备回答…"
+
+msgid "Repeated punctuation may need review."
+msgstr "重复标点可能需要复核。"
+
+msgid "Check whether the punctuation is intentional. Only you can correct it; formatting will not change words, symbols, or punctuation."
+msgstr "请确认重复标点是否有意保留。如需纠正，请您自行修改；整理不会改动字词、符号或标点。"
+
+msgid "Formatting only adjusts spacing and layout. Words, punctuation, links, and media are preserved; corrections are for you to make."
+msgstr "整理仅调整间距和版式，保留原文字词、标点、链接及多媒体；内容错误请您自行修改。"
+
+msgid "Punctuation"
+msgstr "符号标点"
+
+msgid "Local hints only. Comprehensive grammar, cross-paragraph logic, content risk, and facts have not been verified. You make all text and punctuation corrections."
+msgstr "仅提供本地规则提示，尚未完成全面语句、跨段逻辑、内容风险和事实核验。文字及标点均由您自行修改。"
+
+msgid "Checked %1$d of %2$d context paragraphs and %3$d of %4$d context sentences; showing %5$d of %6$d findings."
+msgstr "段落规则已检查上下文中 %2$d 段里的 %1$d 段，语义规则已检查 %4$d 句里的 %3$d 句；共 %6$d 条提示，显示 %5$d 条。"
+
+msgid "Only the beginning of this article was checked; the remaining text was outside the review limit."
+msgstr "仅检查了文章开头部分，其余正文超出本次检查范围。"
+
+msgid "Locate in draft"
+msgstr "定位到正文"
+
+msgid "The draft changed after this check. These findings are out of date; run publish preflight again."
+msgstr "正文或文章信息已在检查后修改，当前提示已过期，请重新运行发布预检。"

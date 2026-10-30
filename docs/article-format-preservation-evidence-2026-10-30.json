@@ -1,0 +1,157 @@
+{
+  "cases": [
+    {
+      "post_id": 2701,
+      "status": "PARTIAL",
+      "inserted_spaces": 12,
+      "structural_changes": 5,
+      "source_sha256": "5e9f349728b9177f6fb50d778f77abe9444cb91987c0e3e082cb06a2a9c60894",
+      "candidate_sha256": "dc3853a67873a2a14ea4de1c90a848f90b8b1c3c722fdfb0d679609b24bc58dc",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 282639,
+      "status": "UNCHANGED",
+      "inserted_spaces": 0,
+      "structural_changes": 0,
+      "source_sha256": "234fba3eb610809c39dde66221799a2b30a924b1b5314d29d8bf53fa14ee3e16",
+      "candidate_sha256": "234fba3eb610809c39dde66221799a2b30a924b1b5314d29d8bf53fa14ee3e16",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280982,
+      "status": "PARTIAL",
+      "inserted_spaces": 4,
+      "structural_changes": 0,
+      "source_sha256": "066b0b6b8392d9a0545d8a7fe2ced2d3ca5d896bc01157cf95de858d619faec9",
+      "candidate_sha256": "f72450e1fad8eff8004c52e4bd9096bf216bcf3b50b8dcb6e0bbc1b5e7652d24",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280979,
+      "status": "REVIEW",
+      "inserted_spaces": 0,
+      "structural_changes": 0,
+      "source_sha256": "1c36a99f17e8869832708cedaf827f487962fec713ce82cf0591f427edbcf6a4",
+      "candidate_sha256": "1c36a99f17e8869832708cedaf827f487962fec713ce82cf0591f427edbcf6a4",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280965,
+      "status": "PARTIAL",
+      "inserted_spaces": 2,
+      "structural_changes": 0,
+      "source_sha256": "de5dd34d9a35767a8a284492618274da96e80fd42555c5e09419c014dc063d02",
+      "candidate_sha256": "22798263ec37de6f0881089547943825b81c3f6924d1e0bf556684e3c03a7029",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280942,
+      "status": "BLOCKED",
+      "reason": "npcink_content_format_candidate",
+      "source_sha256": "590f727214be519ea95a77d1d3456ed0aee530db7da278aba14c491d4019783a",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280931,
+      "status": "REVIEW",
+      "inserted_spaces": 0,
+      "structural_changes": 0,
+      "source_sha256": "2a302eca7e90c83c77caf1b672972f04e66c95bbd5761f6ccd4d27426f13aafb",
+      "candidate_sha256": "2a302eca7e90c83c77caf1b672972f04e66c95bbd5761f6ccd4d27426f13aafb",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280907,
+      "status": "PARTIAL",
+      "inserted_spaces": 5,
+      "structural_changes": 0,
+      "source_sha256": "20cce05868129871782c7e8f5620856e60e059e7d6404e801851407d61eee59b",
+      "candidate_sha256": "5325b3c2cd97bf0a991c67e7c6f8fdec026118db7faf5bdd1294b87b61ac39bb",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280875,
+      "status": "PARTIAL",
+      "inserted_spaces": 2,
+      "structural_changes": 0,
+      "source_sha256": "8a000f4c222bdae7403687bd1b9d2f0a65e55ce0001795d729810aedb9638f1a",
+      "candidate_sha256": "30fbe08d1a0339dcdc798581f17f9c558f5f39e7e41857d7cc457d3597d2c229",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280861,
+      "status": "BLOCKED",
+      "reason": "npcink_content_format_candidate",
+      "source_sha256": "a17e41be20143f64449add6e2be878143127442ff13778c84814aacd40bbb6e1",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280838,
+      "status": "PARTIAL",
+      "inserted_spaces": 12,
+      "structural_changes": 0,
+      "source_sha256": "9311914ea904513be7fa75a0df1433286ddfe45138bdba22d697edbbf8424c13",
+      "candidate_sha256": "81bc77c5d02497a7ed931cec107b713857b96ba1354bea75d6d9ebbea42abf99",
+      "database_unchanged": true
+    },
+    {
+      "post_id": 280374,
+      "status": "PARTIAL",
+      "inserted_spaces": 8,
+      "structural_changes": 0,
+      "source_sha256": "0ad2306ca3fd9eedfaec183489be8daf1837c92a17db298389d0e0c669c2caf0",
+      "candidate_sha256": "28442d42d060ac04ddb30c85d7b94392f291a567b3b42eaba3e05b202141ddfa",
+      "database_unchanged": true
+    }
+  ],
+  "article_count": 12,
+  "network": "real_signed_cloud_formatting",
+  "wordpress_source_writes": 0,
+  "contract": "article_format_preservation_acceptance.v1",
+  "date": "2026-10-30",
+  "source_base": "70b4907ae52112f212111b310e444f28d64ca5f3",
+  "site": "https://magick-ai.local",
+  "implementation_sha256": {
+    "assets/editor-content-format.js": "a3ccf9a77647110ed8ff3907210be3b5556b57979e9418560112e28a4ba964c7",
+    "assets/editor-content-support.js": "0e1eb4b1601a564a177381b0ca55469fa1cb729f41e2f3c97f0f0d4cf230582a",
+    "includes/Editor_Content_Format.php": "3b0d55f928c9768388f5571a984c532ac94b6f12b58d3647996c6242bec03584",
+    "includes/Rest_Editor_Content_Support.php": "5ef59e8a3155b1523b88fa83e9762bb12994693e57dde3d81094d4fece7f7c7a"
+  },
+  "result_counts": {
+    "PARTIAL": 7,
+    "UNCHANGED": 1,
+    "REVIEW": 2,
+    "BLOCKED": 2
+  },
+  "browser": {
+    "fixture": "long-paragraph-table-code",
+    "final_disposable_draft": 282992,
+    "signed_cloud_formatting": true,
+    "task_assets_intercepted": true,
+    "report": "task PHP-generated local review fixture; no Cloud analysis",
+    "passed": [
+      "protected block identity",
+      "idempotence",
+      "native undo/redo",
+      "one-shot undo",
+      "stale response rejection",
+      "Cloud failure preservation",
+      "mobile fit",
+      "punctuation hints",
+      "coverage disclosure",
+      "navigation without editing",
+      "stale navigation disabled"
+    ],
+    "post_write_requests": 0,
+    "blocked_native_preference_requests": 2,
+    "page_errors": 0,
+    "draft_and_temporary_session_deleted": true
+  },
+  "limits": [
+    "Not production deployment or independent author acceptance",
+    "Two source-compatibility blocks reproduce on source_base",
+    "Browser REST uses existing site PHP; task PHP separately exercised through WP CLI/tokenizer and report fixture",
+    "No Cloud grammar, general logic or body-risk classifier implemented"
+  ]
+}

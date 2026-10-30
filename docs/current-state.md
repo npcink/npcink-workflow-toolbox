@@ -187,9 +187,12 @@ ordinary generation and Site Knowledge remain available. See
   119 chunks and a dirty source receipt; it is historical, not a fresh status
   check. Further retrieval comparison needs a named runtime/corpus from its owner; old ranking outcomes are not comparable
   on that reduced corpus. No shared runtime or index was changed this cycle.
-- Unified article-review improvements and deterministic before/after site
-  verification remain deferred in [Known Issues](known-issues.md). Existing
-  formatting is merged (#141); its historical candidate evidence is retained.
+- The [article review report](article-review-report-v1.md) adds bounded local
+  coverage, evidence navigation and author-only punctuation review to existing
+  publish preflight. Generic grammar, cross-paragraph logic, body risk and
+  deterministic before/after site verification remain deferred in
+  [Known Issues](known-issues.md). Formatting preserves words, punctuation and
+  media; it changes only bounded layout and CJK/Latin-or-digit spacing.
 
 - Recommendation anchor eligibility now has an active
   [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical

@@ -4,6 +4,25 @@ Status: source implementation merged in Toolbox PR #141 (2026-09-08).
 The roadmap includes formatting in 0.2.0. Dated candidate evidence below is
 historical; it does not certify today's runtime, production or human acceptance.
 
+## Operator preservation requirement — 2026-10-30
+
+Formatting only adjusts spacing and layout. It must not correct, add, remove,
+reorder or rewrite words, digits, symbols or punctuation, even when an error
+looks obvious. Existing text whitespace is preserved; the only permitted
+inserted text space is a single CJK/Latin-or-digit boundary space. Splitting
+Latin words, numbers or symbol sequences with spaces is forbidden.
+
+Paragraph/list/BR layout changes remain bounded by v2. Links (including labels
+and attributes), images, galleries, audio, video, embeds, captions, code, tables
+and custom blocks remain protected. Source or block-identity changes during a
+request, including a quick edit followed by Undo, invalidate its result.
+Toolbox validates every candidate independently in PHP and the editor.
+
+Suspected wording or punctuation errors belong in the existing publish-preflight
+review report, with source evidence for the author to inspect and correct.
+There is no correction action in formatting or review, no hidden save and no
+publishing block. See [article review report](article-review-report-v1.md).
+
 ## Current Structure Contract v2
 
 Addon now requests `content_format_request.v2`; Cloud retains v1 spacing-only

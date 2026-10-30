@@ -15,7 +15,8 @@
 		let i = 0;
 		for (let j = 0; j < candidate.length; j++) {
 			if (i < source.length && source[i] === candidate[j]) i++;
-			else if (candidate[j] !== ' ') return false;
+			else if (candidate[j] !== ' ' || candidate[j + 1] !== source[i]
+				|| !/^(?:[\u3400-\u4dbf\u4e00-\u9fff][A-Za-z0-9]|[A-Za-z0-9][\u3400-\u4dbf\u4e00-\u9fff])$/.test((source[i - 1] || '') + (source[i] || ''))) return false;
 		}
 		return i === source.length;
 	}
@@ -92,8 +93,11 @@
 				}
 				doc.body.childNodes.forEach((node) => walk(node));
 			}
-			const plain = (block, keys) => Object.entries(block.attributes).every(([key, value]) => keys.includes(key)
-				|| (key === 'values' && value === '') || (['dropCap', 'ordered', 'reversed'].includes(key) && value === false));
+			const plain = (block, keys) => Object.entries(block.attributes).every(([key, value]) => {
+				const schema = wp.blocks.getBlockType(block.name)?.attributes?.[key];
+				return keys.includes(key) || (key === 'values' && value === '') || (['dropCap', 'ordered', 'reversed'].includes(key) && value === false)
+					|| (schema && Object.prototype.hasOwnProperty.call(schema, 'default') && JSON.stringify(value) === JSON.stringify(schema.default));
+			});
 			for (const block of blocks) {
 				if (block.isValid === false) throw new Error(t('The formatting result contains invalid blocks.'));
 				if (block.name === 'core/paragraph' && plain(block, ['content']) && !block.innerBlocks.length) inline(block.attributes.content);
@@ -154,16 +158,13 @@
 			setBusy(true);
 			setNotice(null);
 			const timeout = window.setTimeout(() => controller.abort(), 35000);
-			// Any content or article change during the request invalidates this response,
-			// including edits that the author subsequently undoes back to the same text.
-			// Snapshotting on every store change would re-serialize the whole article on
-			// each keystroke while waiting, so poll at a bounded interval instead.
+			// Observe block references without serializing on each keystroke. Even a
+			// quick edit followed by undo invalidates the in-flight result.
 			let stale = false;
-			const stopStaleWatch = () => { if (staleWatcher) { window.clearInterval(staleWatcher); staleWatcher = null; } };
-			let staleWatcher = window.setInterval(() => {
-				const current = snapshot();
-				if (current.postId !== source.postId || current.content !== source.content || current.identity !== source.identity) stale = true;
-			}, 500);
+			const stopStaleWatch = wp.data.subscribe(() => {
+				if (wp.data.select('core/editor').getCurrentPostId() !== source.postId
+					|| wp.data.select('core/block-editor').getBlocks() !== source.blocks) stale = true;
+			});
 			try {
 				const config = window.NpcinkToolboxEditorSupport;
 				const result = await wp.apiFetch({
@@ -172,7 +173,9 @@
 					data: { intent: 'format_content', post_id: source.postId, content: source.content },
 				});
 				if (active.current !== controller) return;
-				if (stale || result.post_id !== source.postId) throw new Error(t('The article changed while waiting. This result was not applied.'));
+				const current = snapshot();
+				if (stale || result.post_id !== source.postId || current.postId !== source.postId
+					|| current.content !== source.content || current.identity !== source.identity) throw new Error(t('The article changed while waiting. This result was not applied.'));
 				const updates = prepare(source.blocks, source.content, result);
 				stopStaleWatch();
 				if (updates.length) {
@@ -207,6 +210,7 @@
 		}
 
 		return h('div', { className: 'npcink-toolbox-editor-format' },
+			h('p', null, t('Formatting only adjusts spacing and layout. Words, punctuation, links, and media are preserved; corrections are for you to make.')),
 			h('div', { className: 'npcink-toolbox-editor-support__flow' },
 				h(Button, { variant: 'secondary', icon: 'editor-alignleft', 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
 				undo ? h(Button, { icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),

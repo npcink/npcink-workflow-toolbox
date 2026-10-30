@@ -386,7 +386,13 @@ suggestions, compact outline support, selection-only paragraph review, and
 summary/category/tag review support. Article checkup is a full-draft diagnostic
 surface for sentence density, fact-gap, tone, structure, semantic consistency,
 and format issues; it must point to review locations and editing direction
-without rewriting, inserting, or replacing body text. They must stay lightweight
+without rewriting, inserting, or replacing body text. They obey the
+[bounded review report](article-review-report-v1.md): punctuation
+corrections belong to the author, evidence navigation only selects an existing
+block, and partial or stale findings cannot claim a comprehensive check.
+Formatting preserves words, digits, symbols, punctuation, links and multimedia;
+it may adjust only the bounded layout and CJK/Latin-or-digit spacing contract.
+These helpers must stay lightweight
 and must not be presented as one-click long-form article generation. Default
 draft-support results must include a small quality
 contract: expected output shape, operator review checklist, and reject-if rules
