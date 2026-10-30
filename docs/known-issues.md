@@ -45,6 +45,11 @@ with the closing commit or PR for one release cycle, then prune.
   paragraph logic and body risk classification are not delivered. Reuse the
   current preflight/paragraph-review surface after a scoped contract; no new
   editor intent, hidden save or automatic publishing block is authorized.
+  [Reference research](article-review-reference-research-2026-10-30.md), a
+  [consumer contract draft](article-review-cloud-contract-draft-v1.md) and
+  [synthetic seeds](article-review-evaluation-seeds-v1.json) are prepared; the
+  next implementation owner is Cloud/Addon for the language-only slice, then
+  Toolbox report consumption. Model evaluation and runtime acceptance remain open.
   Source: [five-session audit](session-closeout-audit-2026-10-26.md).
 - **Site-effect verification remains a deferred design (Toolbox / Cloud).**
   Existing Smart Ask consumes bounded deidentified packs. Deterministic

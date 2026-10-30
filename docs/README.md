@@ -125,6 +125,7 @@ Start from the active documents below before changing code.
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
 - [Article review report v1](article-review-report-v1.md) — bounded coverage, evidence navigation and author-only correction.
+- [文章审阅同行/开源调研](article-review-reference-research-2026-10-30.md)、[Cloud 检查消费方契约草案](article-review-cloud-contract-draft-v1.md)与[中文合成验证种子](article-review-evaluation-seeds-v1.json) — 尚未启用 Cloud 检查。
 - [Formatting preservation acceptance (2026-10-30)](article-format-preservation-acceptance-2026-10-30.md) and [body-free evidence](article-format-preservation-evidence-2026-10-30.json).
 - [Editor Content Format V1](editor-content-format-v1.md)
 - [Editor Content Support Recommendation Review](editor-content-support-recommendation-review.md)
