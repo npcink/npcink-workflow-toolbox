@@ -17,6 +17,33 @@ $npcink_toolbox_progressive_writing_pack_inputs = array();
 $npcink_toolbox_progressive_site_knowledge_inputs = array();
 $npcink_toolbox_progressive_source_reader_calls = 0;
 $npcink_toolbox_progressive_source_reader_mode = 'ready';
+$npcink_toolbox_article_review_response = array(
+	'status' => 'ok',
+	'run_id' => 'article-review-test-run',
+	'data'   => array(
+		'result' => array(
+			'contract_version'  => 'article_review_cloud_result.v1',
+			'snapshot_sha256'   => '',
+			'checks'            => array(
+				'language'     => array( 'status' => 'completed', 'reason_code' => 'none' ),
+				'logic'        => array( 'status' => 'not_checked', 'reason_code' => 'not_supported' ),
+				'content_risk' => array( 'status' => 'not_checked', 'reason_code' => 'not_supported' ),
+			),
+			'findings'          => array(),
+			'invalid_finding_count' => 0,
+			'result_limit_reached'  => false,
+		),
+	),
+);
+
+if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_article_review_runtime' ) ) {
+	function npcink_cloud_addon_execute_toolbox_article_review_runtime( array $request, string $trace_id = '', string $idempotency_key = '' ): array {
+		global $npcink_toolbox_article_review_response;
+		$response = $npcink_toolbox_article_review_response;
+		$response['data']['result']['snapshot_sha256'] = (string) ( $request['snapshot_sha256'] ?? '' );
+		return $response;
+	}
+}
 
 if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
@@ -778,6 +805,23 @@ $preflight_run = npcink_toolbox_editor_flow_call( $controller, array( 'intent' =
 npcink_toolbox_editor_flow_assert( isset( $preflight_run['data'] ), 'Publish preflight returns a flow response.' );
 npcink_toolbox_editor_flow_assert_flow_contract( $preflight_run['data'], 'publish_preflight', 'Publish preflight' );
 npcink_toolbox_editor_flow_assert( empty( $preflight_run['data']['sections']['discoverability'] ) && ! isset( $preflight_run['data']['sections']['seo_handoff'] ), 'Publish preflight omits specialist candidates and SEO handoff.' );
+
+$review_response_backup = $npcink_toolbox_article_review_response;
+$npcink_toolbox_article_review_response['data']['result']['findings'] = array(
+	array(
+		'id' => 'f1', 'kind' => 'punctuation', 'reason' => '请核对重复标点。', 'review_direction' => '请作者人工确认是否有意。',
+		'evidence' => array( array( 'block_ref' => 'b1', 'start' => 2, 'end' => 4, 'quote' => '，，' ) ),
+		'action_policy' => 'operator_review_only_no_insert',
+	),
+);
+$cloud_review = npcink_toolbox_editor_flow_call( $controller, array(
+	'intent' => 'publish_preflight', 'title' => '', 'excerpt' => '', 'content' => '原文，，保留。',
+	'content_blocks' => array( array( 'client_id' => 'cloud-review-block', 'block_name' => 'core/paragraph', 'text' => '原文，，保留。' ) ),
+) );
+$cloud_section = $cloud_review['data']['sections']['article_language_review'];
+npcink_toolbox_editor_flow_assert( 'ready' === $cloud_section['status'] && 'completed' === $cloud_section['checks']['language']['status'] && 'not_checked' === $cloud_section['checks']['logic']['status'], 'Cloud article review is exposed as a separate language-only preflight section.' );
+npcink_toolbox_editor_flow_assert( '，，' === $cloud_section['items'][0]['evidence'] && 'cloud-review-block' === $cloud_section['items'][0]['source_location']['client_id'] && 'operator_review_only_no_insert' === $cloud_section['items'][0]['action_policy'], 'Cloud article review independently verifies the original quote and keeps navigation review-only.' );
+$npcink_toolbox_article_review_response = $review_response_backup;
 
 // 9. No default-button intent performed any WordPress write, and none of them
 //    fired a hosted-AI writing-pack/draft request or an external source-reader

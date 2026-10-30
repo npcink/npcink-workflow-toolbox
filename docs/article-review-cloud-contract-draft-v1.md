@@ -1,9 +1,11 @@
 # Cloud 文章检查消费方契约草案 v1
 
-状态：2026-10-30，Toolbox 消费方设计草案，尚未注册、接线或部署。
+状态：2026-10-30，Cloud/Addon 契约已在候选分支实现，Toolbox 已接入候选只读
+报告；三仓均未合并、未部署、未完成生产验收。
 文中的 `article_review_cloud_request.v1` / `article_review_cloud_result.v1`
-是拟议名称，不是活跃 Cloud/Add-on 契约、Ability、工作流或第三种摘要包。
-所有者实现前须在 Cloud/Addon 审核并落成同一接口与测试，不从本文件推定可调用。
+是当前候选分支上的契约名称，不代表已发布的工作流或第三种摘要包。Cloud
+后端、Addon facade 和 Toolbox 消费方必须以同一 revision 的测试结果为准，
+不能从文档推定生产可调用。
 调研依据见[一手来源与取舍](article-review-reference-research-2026-10-30.md)。
 
 ## 目标与职责
@@ -248,7 +250,6 @@ Cloud 结果拟作为独立只读区段加入现有发布预检，不覆盖
 
 ## 本轮变更与回退
 
-本轮仅 Toolbox 文档、样本和索引，`includes/`、`assets/`、Cloud、Addon、
-运行时/模型配置均不改变；没有活跃公共协议变化，无跨仓发布矩阵需求。
-文档静态门、JSON/样本位置一致性和 `composer test:all` 验证的是准备材料，
-不验证模型质量。删除/撤销本轮文档即可回退，不涉及数据库或文章迁移。
+本轮实现仅增加 Cloud/Addon transport 与 Toolbox 只读报告消费；没有数据库、
+文章迁移、自动修改或发布路径。Cloud 端已验证结构化证据，Addon 与 Toolbox
+仍需各自门禁和跨仓 exact-SHA 复核；模型质量与作者采纳率仍未被本轮证明。

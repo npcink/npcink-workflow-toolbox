@@ -1,7 +1,8 @@
 # Article review report v1
 
-Status: bounded local implementation, 2026-10-30. Not a Cloud grammar/risk
-delivery, production deployment or independent author acceptance receipt.
+Status: bounded local implementation plus candidate Cloud language integration on
+the `codex/article-review-toolbox` branch, 2026-10-30. The Cloud backend and
+Addon facade are separate candidates; nothing here is merged or deployed.
 
 ## Surface and preservation
 
@@ -16,6 +17,16 @@ issue, edit_direction, evidence_refs and `operator_review_only_no_insert`.
 Repeated Chinese punctuation is a possible issue, never an automatic verdict.
 All wording, symbol and punctuation corrections belong to the author.
 Neither review nor formatting returns an executable correction action.
+
+The additive `sections.article_language_review` candidate uses the same
+`publish_preflight` route. It accepts only the fixed Cloud result contract,
+rechecks the snapshot hash and UTF-16 evidence locally, and exposes quote,
+reason, review direction and optional read-only location. Logic and body-risk
+checks remain explicitly `not_checked`; Cloud or evidence failure leaves the
+local section usable and reports the Cloud section as unavailable/partial.
+
+The UI labels this area “Cloud 中文语句提示（只读）”. It has no Apply/Replace
+control and disables location after the existing stale article guard fires.
 
 Formatting remains a separate layout action under
 [the formatting contract](editor-content-format-v1.md). It preserves words,

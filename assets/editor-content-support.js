@@ -4772,6 +4772,33 @@
 		);
 	}
 
+	function renderArticleLanguageReviewItems(section, controls) {
+		const items = articleCheckupItems(section);
+		const checks = section && section.checks ? section.checks : {};
+		const stale = Boolean(controls?.articleReview?.stale);
+		const blocks = [
+			createElement('p', null, __('Cloud 中文语句提示（只读）：作者自行判断并人工修改。报告不会自动更正、插入、保存或发布正文。', 'npcink-workflow-toolbox')),
+			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('本次只检查语句、标点、重复表达和指代疑点；逻辑与内容风险尚未检查。报告过期后不能定位到草稿，请重新运行发布前检查。', 'npcink-workflow-toolbox')),
+		];
+		if (section.status === 'unavailable') {
+			return createElement('div', { className: 'npcink-toolbox-editor-support__article-language-review' }, blocks.concat(createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, section.message || __('Cloud 中文语句提示暂不可用。', 'npcink-workflow-toolbox'))));
+		}
+		blocks.push(createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, sprintf(__('语句检查：%1$s；逻辑：%2$s；内容风险：%3$s。', 'npcink-workflow-toolbox'), formatMetaLabel(checks.language?.status || 'unknown'), formatMetaLabel(checks.logic?.status || 'not_checked'), formatMetaLabel(checks.content_risk?.status || 'not_checked'))));
+		if (stale) blocks.push(createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('草稿已变化，当前报告只能阅读，不能定位。', 'npcink-workflow-toolbox')));
+		if (!items.length) blocks.push(createElement('p', null, __('Cloud 没有返回可核对的语句提示。', 'npcink-workflow-toolbox')));
+		items.forEach((item) => {
+			blocks.push(createElement('article', { key: item.id, className: 'npcink-toolbox-editor-support__article-language-review-item' },
+				createElement('strong', null, item.name),
+				item.detail ? createElement('p', null, item.detail) : null,
+				item.source_location?.status === 'matched' ? createElement(Button, {
+					variant: 'link', disabled: stale,
+					onClick: () => { if (!stale) locateArticleReviewIssue(item.source_location); },
+				}, __('Locate in draft', 'npcink-workflow-toolbox')) : null
+			));
+		});
+		return createElement('div', { className: 'npcink-toolbox-editor-support__article-language-review' }, blocks);
+	}
+
 	function audioGenerationItems(section) {
 		const audio = section && section.audio && typeof section.audio === 'object' ? section.audio : (section || {});
 		const items = Array.isArray(audio.items) ? audio.items : (Array.isArray(audio.audios) ? audio.audios : []);
@@ -7193,6 +7220,9 @@
 					blocks.push(renderDiscoverabilityMediaSection(metadataHandoffControls, sections.image_alt_suggestions));
 					if (sections.local_article_checkup) {
 						blocks.push(renderArticleCheckupItems(sections.local_article_checkup, metadataHandoffControls));
+					}
+					if (sections.article_language_review) {
+						blocks.push(renderArticleLanguageReviewItems(sections.article_language_review, metadataHandoffControls));
 					}
 				}
 

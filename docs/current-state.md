@@ -204,7 +204,10 @@ ordinary generation and Site Knowledge remain available. See
   The [reference research](article-review-reference-research-2026-10-30.md)
   now informs a [Cloud consumer contract draft](article-review-cloud-contract-draft-v1.md)
   and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). These are
-  preparation only; no new Cloud checker, model-quality result or runtime is enabled.
+  The Cloud checker, Addon facade, and Toolbox report consumer now exist only as
+  candidate branches (`codex/article-review-language`,
+  `codex/article-review-addon`, and `codex/article-review-toolbox`); none is
+  merged or deployed, and the candidate checks only Chinese language evidence.
 
 - Recommendation anchor eligibility now has an active
   [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical
