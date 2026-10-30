@@ -2297,7 +2297,11 @@ toolbox_assert( 'npcink-workflow-toolbox' === (string) ( $cloud_bridge_table['lo
 $cloud_bridge_rows = is_array( $cloud_bridge_table['bridges'] ?? null ) ? $cloud_bridge_table['bridges'] : array();
 toolbox_assert( ! empty( $cloud_bridge_rows ), 'Cloud bridge contract table contains bridge rows.' );
 $cloud_bridge_ids    = array();
-$cloud_bridge_source = $client . $rest . $abilities . $auto_sync . $architecture_doc . $boundary_doc . $connector_exposure_doc . file_get_contents( $root . '/includes/Editor_Content_Format.php' );
+$site_answer_source = (string) file_get_contents( $root . '/includes/Site_Content_Answer.php' );
+toolbox_assert( false !== strpos( $abilities, "'context_requirements' => array( 'site_knowledge_evidence' )" ) && false !== strpos( $rest, '$ability->execute( $request->get_json_params() )' ), 'Site content answers execute the registered evidence-required ability.' );
+toolbox_assert( false !== strpos( $site_answer_source, "current_user_can( 'manage_options' )" ) && false !== strpos( $site_answer_source, "array_diff( array_keys( \$input ), array( 'question' ) )" ), 'Site content answers retain administrator permission and reject input overrides.' );
+toolbox_assert( false !== strpos( $admin_js, 'answerEl.textContent = answer' ) && false !== strpos( $admin_js, 'url.origin === window.location.origin' ) && false !== strpos( $admin_js, 'quote.textContent' ), 'Site content answers render inert answer and quotes with same-origin source links.' );
+$cloud_bridge_source = $site_answer_source . $client . $rest . $abilities . $auto_sync . $architecture_doc . $boundary_doc . $connector_exposure_doc . file_get_contents( $root . '/includes/Editor_Content_Format.php' );
 foreach ( $cloud_bridge_rows as $cloud_bridge_row ) {
 	$bridge_id          = (string) ( $cloud_bridge_row['bridge_id'] ?? '' );
 	$cloud_bridge_ids[] = $bridge_id;

@@ -7762,6 +7762,8 @@
 			const runIdEl = root.querySelector('[data-toolbox-smart-ask-run-id]');
 			const metaEl = root.querySelector('[data-toolbox-smart-ask-meta]');
 			const packSelect = root.querySelector('[data-toolbox-smart-ask-pack]');
+			const sourcesEl = root.querySelector('[data-toolbox-smart-ask-sources]');
+			const completenessEl = root.querySelector('[data-toolbox-smart-ask-completeness]');
 			if (!packSelect || !button || !questionField || !statusEl || !resultEl || !answerEl || !runIdEl) {
 				return;
 			}
@@ -7777,9 +7779,47 @@
 					questionField.value = nextDefault;
 				}
 				lastDefault = nextDefault;
+				resetSources();
 				resultEl.hidden = true;
 				setStatus('', '');
 			});
+
+			const resetSources = () => {
+				if (sourcesEl) { sourcesEl.hidden = true; sourcesEl.querySelector('ol').replaceChildren(); }
+				if (completenessEl) { completenessEl.hidden = true; completenessEl.textContent = ''; }
+			};
+			const renderSources = (body) => {
+				resetSources();
+				if (!sourcesEl || !completenessEl || !body.grounded_evidence) { return; }
+				const evidence = body.grounded_evidence;
+				const sources = Array.isArray(evidence.sources) ? evidence.sources : [];
+				const citations = Array.isArray(body.citations) ? body.citations : [];
+				citations.forEach((citation) => {
+					const source = sources.find((item) => item.id === citation.id);
+					if (!source) { return; }
+					const item = document.createElement('li');
+					const title = document.createElement('span');
+					title.textContent = String(source.title || t('Source references'));
+					item.append(title);
+					try {
+						const url = new URL(source.url);
+						if (url.origin === window.location.origin && ['http:', 'https:'].includes(url.protocol)) {
+							const link = document.createElement('a');
+							link.href = url.href; link.textContent = t('Read source');
+							link.target = '_blank'; link.rel = 'noopener noreferrer';
+							item.append(document.createTextNode(' · '), link);
+						}
+					} catch (_) { /* An invalid source URL is never made clickable. */ }
+					const quote = document.createElement('blockquote');
+					quote.textContent = String(citation.quote || ''); item.append(quote);
+					sourcesEl.querySelector('ol').append(item);
+				});
+				sourcesEl.hidden = false;
+				completenessEl.textContent = evidence.status === 'partial'
+					? t('Some retrieved material is partial or has unknown completeness. Check the original content.')
+					: t('Cited sources were delivered in full. Review the answer against the sources.');
+				completenessEl.hidden = false;
+			};
 
 			let inFlight = false;
 			const idleLabel = button.textContent;
@@ -7867,9 +7907,10 @@
 				}
 
 				setBusy(true);
-				setStatus(t('In progress: building the pack and asking Cloud…'), 'is-pending');
+				setStatus(endpoint === 'site-knowledge/answers' ? t('Searching public site content and preparing an answer…') : t('In progress: building the pack and asking Cloud…'), 'is-pending');
 				resultEl.hidden = true;
 				setMarkdownContent(answerEl, '');
+				resetSources();
 				runIdEl.textContent = '';
 				if (metaEl) {
 					metaEl.textContent = '';
@@ -7883,18 +7924,25 @@
 					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
 					runIdEl.textContent = runId || '—';
 					// run_id / pack_run_id live in the folded support details only.
-					setMarkdownContent(answerEl, answer || t('(empty answer)'));
+					const grounded = endpoint === 'site-knowledge/answers';
+					answerEl.style.whiteSpace = grounded ? 'pre-wrap' : '';
+					if (grounded) { answerEl.textContent = answer; renderSources(body); }
+					else { setMarkdownContent(answerEl, answer || t('(empty answer)')); }
 					if (metaEl) {
 						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · '); // inside support <details>
 					}
 					resultEl.hidden = false;
-					if (body && body.ok && answer) {
+					if (body && (body.ok || body.grounded_evidence) && answer) {
 						setStatus(t('Suggestion ready (no WordPress write).'), 'is-ok');
 					} else {
 						setStatus(t('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'), 'is-warning');
 					}
 				} catch (error) {
-					resultEl.hidden = true;
+					resetSources();
+					answerEl.textContent = '';
+					const failedRun = String((error && error.data && error.data.run_id) || '');
+					runIdEl.textContent = failedRun;
+					resultEl.hidden = !failedRun;
 					const busySlot = isBusySlotError(error);
 					setStatus(formatAskError(error), busySlot ? 'is-warning' : 'is-error');
 				} finally {

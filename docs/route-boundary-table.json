@@ -661,6 +661,18 @@
       "write_posture": "suggestion_only",
       "direct_wordpress_write": false,
       "boundary_note": "Site Profile Ask: local environment_performance_insight_pack.v1 plus hosted_ai_content_support.v1 via Addon Runtime Client execute_runtime; manage_options. Suggestion-only; omits Cloud-rejected extras; no paused Site Ops Cloud detail; no WordPress writes or Core proposals."
+    },
+    {
+      "route": "/site-knowledge/answers",
+      "documented_route": "/site-knowledge/answers",
+      "methods": [
+        "POST"
+      ],
+      "scope": "cap.toolbox.admin",
+      "owner": "cloud_site_knowledge_bridge",
+      "write_posture": "suggestion_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Single public-site grounded answer through a registered Ability and Addon; verified citations only, no WordPress writes."
     }
   ]
 }

@@ -629,6 +629,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				'endpoint'         => 'environment-performance/insight-pack-qa',
 				'default_question' => __( '根据这份环境与性能相关摘要，站长先检查哪 1–3 件事更合适？用大白话，不要假装做过测速。', 'npcink-workflow-toolbox' ),
 			),
+			'site_content'            => array(
+				'label'            => __( 'Public site content', 'npcink-workflow-toolbox' ),
+				'contract'         => 'grounded_answer_evidence.v1',
+				'endpoint'         => 'site-knowledge/answers',
+				'default_question' => '',
+			),
 		);
 	}
 
@@ -745,6 +751,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<div class="npcink-toolbox__result-notice" data-toolbox-smart-ask-status aria-live="polite" hidden></div>
 			<div data-toolbox-smart-ask-result hidden>
 				<div class="npcink-toolbox__markdown" data-toolbox-smart-ask-answer></div>
+				<p data-toolbox-smart-ask-completeness hidden></p>
+				<section data-toolbox-smart-ask-sources hidden><h3><?php esc_html_e( 'Source references', 'npcink-workflow-toolbox' ); ?></h3><ol></ol></section>
 				<details class="npcink-toolbox__support-meta"><summary><?php esc_html_e( 'Details for support', 'npcink-workflow-toolbox' ); ?></summary>
 					<p class="description">run_id: <code data-toolbox-smart-ask-run-id></code> · <span data-toolbox-smart-ask-meta></span></p>
 				</details>

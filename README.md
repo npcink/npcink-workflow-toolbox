@@ -308,6 +308,7 @@ registered.
 - `GET /wp-json/npcink-toolbox/v1/environment-performance/insight-pack` (local `environment_performance_insight_pack.v1` inventory only; `manage_options`; no secrets/paths; no Lighthouse; no WordPress writes)
 - `POST /wp-json/npcink-toolbox/v1/environment-performance/insight-pack-qa` (Smart Ask pack 4: local inventory + hosted_ai_content_support.v1; `manage_options`; suggestion-only; not a speed test)
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/search`
+- `POST /wp-json/npcink-toolbox/v1/site-knowledge/answers`
 - `POST /wp-json/npcink-toolbox/v1/site-knowledge/sync` (refresh-only bounded
   Cloud request; no rebuild/delete, indexing lifecycle, local queue, or
   collection controls)
@@ -948,3 +949,9 @@ composer test:all
 ```
 
 The current gate runs PHP syntax linting and static contract checks.
+
+### Answers from public site content
+
+Smart Ask → Public site content uses the registered, administrator-only
+`npcink-toolbox/answer-site-content` ability through Cloud Addon. Answers include
+verified source references; see [contract and acceptance](docs/site-content-answer-v1.md).

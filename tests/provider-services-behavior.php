@@ -791,6 +791,7 @@ $pause_pack = $pause_client->build_ai_article_writing_pack(
 );
 npcink_toolbox_progressive_assert( is_array( $pause_pack ) && ! isset( $pause_pack['discoverability_brief']['seo'] ) && ! in_array( 'geo_summary', array_column( $pause_pack['suggested_article_structure'], 'section' ), true ), 'General writing preparation remains available without specialist brief sections or GEO instructions.' );
 
+require_once dirname( __DIR__ ) . '/includes/Site_Content_Answer.php';
 require_once dirname( __DIR__ ) . '/includes/Abilities.php';
 function wp_register_ability( $id, $definition ) { $GLOBALS['pause_native_abilities'][] = $id; }
 function npcink_abilities_toolkit_register_readonly( $id, $definition ) { $GLOBALS['pause_helper_abilities'][] = $id; }

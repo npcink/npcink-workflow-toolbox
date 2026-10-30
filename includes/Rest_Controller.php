@@ -106,6 +106,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->post( '/web-search/test', 'web_search_test' );
 		$this->post( '/web-search/diagnostics', 'web_search_diagnostics' );
 		$this->post( '/site-knowledge/search', 'site_knowledge_search' );
+		$this->post( '/site-knowledge/answers', 'site_content_answer' );
 		$this->post( '/site-knowledge/sync', 'site_knowledge_sync' );
 		$this->post( '/site-media/index-batch', 'site_media_index_batch' );
 		$this->post( '/agent-feedback', 'agent_feedback' );
@@ -290,6 +291,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/site-ops/insight-pack'                   => 'cap.toolbox.admin',
 			'/site-ops/insight-pack-qa'                => 'cap.toolbox.admin',
 			'/site-knowledge/status'                   => 'cap.toolbox.knowledge.read',
+			'/site-knowledge/answers'                  => 'cap.toolbox.admin',
 			'/site-knowledge/search'                   => 'cap.toolbox.knowledge.search',
 			'/site-knowledge/sync'                     => 'cap.toolbox.knowledge.sync',
 			'/site-media/index-batch'                  => 'cap.toolbox.knowledge.sync',
@@ -355,6 +357,20 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function content_structure_insight_pack( WP_REST_Request $request ) {
 		return $this->content_structure_bridges->content_structure_insight_pack( $request );
+	}
+
+	public function site_content_answer( WP_REST_Request $request ) {
+		$ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( Site_Content_Answer::ABILITY ) : null;
+		if ( ! $ability ) {
+			return new WP_Error( 'npcink_toolbox_site_answer_unavailable', __( 'The site-answer ability is unavailable.', 'npcink-workflow-toolbox' ), array( 'status' => 503 ) );
+		}
+		$result = $ability->execute( $request->get_json_params() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		$response = rest_ensure_response( $result );
+		$response->header( 'Cache-Control', 'no-store' );
+		return $response;
 	}
 
 	public function content_structure_insight_pack_qa( WP_REST_Request $request ) {

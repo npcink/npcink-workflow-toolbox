@@ -9,6 +9,11 @@
         "lang": "zh_CN",
         "plural-forms": "nplurals=1; plural=0;"
       },
+      "Source references": ["原文依据"],
+      "Read source": ["阅读原文"],
+      "Some retrieved material is partial or has unknown completeness. Check the original content.": ["部分检索资料未完整交付或完整性未知，请核对原文。"],
+      "Cited sources were delivered in full. Review the answer against the sources.": ["所引用的资料已完整交付，请对照原文审阅回答。"],
+      "Searching public site content and preparing an answer…": ["正在检索本站公开资料并准备回答…"],
       "Ended": ["已结束"],
       "Did not finish": ["没有完成"],
       "Runs in Npcink Cloud.": ["在 Npcink Cloud 中进行。"],

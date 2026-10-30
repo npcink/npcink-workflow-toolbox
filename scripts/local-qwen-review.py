@@ -75,10 +75,10 @@ def run(base, head, output, config):
         if re.search(r'(^|/)(\.env(?:\.|$)|\.deploy-secrets/)|\.(pem|key)$', name):
             raise ValueError('secret-like changed path is not review input')
         exists = subprocess.run(['git', 'cat-file', '-e', frozen['head_sha'] + ':' + name], capture_output=True).returncode == 0
-        if exists:
+        if exists and Path(name).suffix in {'.py', '.sh', '.php', '.js'}:
             content = git('show', frozen['head_sha'] + ':' + name).decode('utf-8', errors='strict')
             context += ('\n\nFILE ' + name + '\n' + content
-                        if len(content) <= 30000 and Path(name).suffix in {'.py', '.sh', '.php', '.js'}
+                        if len(content) <= 30000
                         else '\n\nFILE ' + name + ': complete diff above; no supplementary snapshot.')
     if len(context) > 220000 or '\0' in context:
         raise ValueError('review exceeds text budget; split the change')
