@@ -7,6 +7,12 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-10-31.
 
+**Article review closeout:** start with the
+[2026-10-31 audit](article-review-session-closeout-2026-10-31.md) for merged PRs,
+source/worktree cleanup, intentional local Addon overlay and remaining owners.
+Future editor review work follows the
+[delivery rules and lessons](article-review-delivery-lessons-v1.md).
+
 **Existing content loop, 2026-10-30:** the real WordPress AI plugin's three
 summaries, two titles, selected-paragraph rewrite, native-save readback and
 browser-only title failure/real retry passed; originals were unchanged and

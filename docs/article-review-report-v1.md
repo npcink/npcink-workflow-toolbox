@@ -1,10 +1,11 @@
 # Article review report v1
 
-Status: bounded local implementation plus candidate Cloud language integration on
-the `codex/article-review-toolbox` branch, 2026-10-30. The Cloud backend and
-Addon facade are separate candidates. None is merged. Earlier M4 evidence names
-the Cloud candidate only; it does not mean the WordPress candidates or production
-were deployed. See [integration acceptance](article-language-integration-acceptance-2026-10-30.md).
+Status: local report and bounded Chinese Cloud language review are merged as of
+2026-10-31 (Toolbox #345/#349, Addon #338, Cloud #1331). Installed editor
+acceptance and durable local installation passed; see the
+[closeout](article-review-session-closeout-2026-10-31.md). Logic/content-risk
+remain disabled. The [2026-10-30 integration acceptance](article-language-integration-acceptance-2026-10-30.md)
+is a historical candidate checkpoint, not current delivery state or production acceptance.
 
 ## Surface and preservation
 
@@ -20,7 +21,7 @@ Repeated Chinese punctuation is a possible issue, never an automatic verdict.
 All wording, symbol and punctuation corrections belong to the author.
 Neither review nor formatting returns an executable correction action.
 
-The additive `sections.article_language_review` candidate uses the same
+The additive `sections.article_language_review` section uses the same
 `publish_preflight` route. It accepts only the fixed Cloud result contract,
 rechecks the snapshot hash and UTF-16 evidence locally, and exposes quote,
 reason, review direction and optional read-only location. Logic and body-risk
@@ -37,7 +38,7 @@ Formatting remains a separate layout action under
 numbers, symbols, punctuation, links and multimedia. Review only selects an
 existing block; it never edits it, saves or blocks publishing.
 
-## Cloud candidate snapshot
+## Cloud language snapshot
 
 Only explicit `publish_preflight` sends `article_review_snapshot`; other intents
 keep their existing context. This separate snapshot preserves original whitespace,
@@ -101,8 +102,8 @@ local snapshot; there is no durable review or approval store.
 The [reference research](article-review-reference-research-2026-10-30.md),
 [consumer contract draft](article-review-cloud-contract-draft-v1.md) and
 [synthetic evaluation seeds](article-review-evaluation-seeds-v1.json) prepare
-the language candidate and later work. The language contract is implemented on
-the named candidates; logic/content-risk remain disabled.
+the delivered language slice and later work. The language contract is merged and
+locally installed; logic/content-risk remain disabled.
 
 General language-quality acceptance, cross-paragraph logic and body-risk
 classification still need bounded evaluation and, for the latter two, an explicit
