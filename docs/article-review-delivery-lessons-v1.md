@@ -1,6 +1,6 @@
 # Article Review Delivery Rules and Lessons v1
 
-Status: active for Toolbox formatting and read-only review work, 2026-10-31.
+Status: active for Toolbox formatting and read-only review work, updated 2026-11-01.
 These rules refine the existing boundary and development workflow; they do not
 authorize new checks, writes, infrastructure or product releases.
 
@@ -11,8 +11,12 @@ authorize new checks, writes, infrastructure or product releases.
 - [x] 排版只调整允许的布局/边界空格，保留原文、标点、符号、链接及多媒体。
 - [x] 中文语句检查只给可核对的原句、疑点、方向与定位，作者自行修改。
 - [x] 原样快照、严格 schema、偏移复核、过期保护、脱密证据和真实安装验收。
-- [ ] 通用跨段逻辑、正文风险、广泛准确率、真实 OSS 写入支持及生产发布。
-  这些是另有所有者的后续工作，不把它们伪装成本切片已实现能力。
+- [x] 两个排版兼容案例已修复；中文扩大评估保留原始误报和标签错误。
+- [x] 有界逻辑/成人内容语境提示已合入并通过真实安装验收，见
+  [2026-11-01 验收](article-review-context-acceptance-2026-11-01.md)。24 例首轮
+  保留 1 例超时，不把不可用算作零提示通过。
+- [ ] 通用准确率、独立作者反馈、未覆盖的内容风险类别、真实 OSS 写入/备份/恢复及生产发布。
+  成人语境提示不能代表全面内容安全检查。
 
 ### 发现的问题与改进
 
@@ -68,10 +72,21 @@ authorize new checks, writes, infrastructure or product releases.
     被忽略的验收材料。主工作区受应用保护时保留并说明，不绕过保护；其他
     会话、安装源码、本地未合并补丁都列明所有者和用途。
 
+## 本轮新增经验（2026-11-01）
+
+- 严格成对引文能核对坐标与分析范围，不能证明模型推断正确；语义实用性需单独审阅。
+- 模型“完成”只是声明本次有界分析完成。部分、拒绝和不可用不能折算成成功；
+  初始 24 例的新闻超时必须保留，即使以后传输修复通过也不能回填为质量通过。
+- 模型执行期限与 HTTP 接收期限需要错开。实测 30 秒/30 秒会丢失超时回执和
+  run_id；文章审阅接收余量改为 40 秒，模型仍 30 秒、零重试、无 fallback。
+- PHP 行号移动也会改变 POT 源引用。提交前按需要运行 i18n:check；本轮 CI 首次
+  发现 POT 陈旧，已保留失败并刷新引用，不以重跑掩盖缺少文件的提交。
+- 冻结标签、初始结果、后续诊断分别记账；审阅器的假设性建议必须核对真实 guard，
+  不为消除意见而放宽隐私、证据或检查选择规则。
+
 ## 下次重点关注
 
-从 [当前收尾记录](article-review-session-closeout-2026-10-31.md) 和
-`docs/current-state.md` 进入，不重放历史候选计划。优先保持人工修改与原文
-保护，再按普通作者反馈改进中文提示；逻辑/风险、两个排版兼容案例和真实 OSS
-接线各自另定范围。继续检查规范状态漂移及共享环境变更，不能把“可以关会话”
-解释成全平台遗留问题已全部解决。
+从[最新验收](article-review-context-acceptance-2026-11-01.md)、当前状态和问题清单
+进入，不重放旧候选计划。后续优先处理普通作者反馈，再有界扩充长文/真实语境
+样本；不自动重跑整批模型评估。保持人工修改、原文保护和本地安装 overlay。
+真实 OSS 写入/备份/恢复及生产发布继续按用户决定延后。

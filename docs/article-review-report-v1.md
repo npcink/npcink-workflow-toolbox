@@ -1,11 +1,10 @@
 # Article review report v1
 
-Status: local report and bounded Chinese Cloud language review are merged as of
-2026-10-31 (Toolbox #345/#349, Addon #338, Cloud #1331). Installed editor
-acceptance and durable local installation passed; see the
-[closeout](article-review-session-closeout-2026-10-31.md). Logic/content-risk
-remain disabled. The [2026-10-30 integration acceptance](article-language-integration-acceptance-2026-10-30.md)
-is a historical candidate checkpoint, not current delivery state or production acceptance.
+Status: bounded local report plus Cloud language/logic/adult-context hints are
+merged as of 2026-11-01 (Toolbox #359, Addon #339, Cloud #1335; Addon #340
+handles timeout receipt margin). See the [current acceptance](article-review-context-acceptance-2026-11-01.md)
+and [strict extension contract](article-review-context-v1.md). Older language-only
+acceptances remain historical compatibility evidence, not production proof.
 
 ## Surface and preservation
 
@@ -24,11 +23,13 @@ Neither review nor formatting returns an executable correction action.
 The additive `sections.article_language_review` section uses the same
 `publish_preflight` route. It accepts only the fixed Cloud result contract,
 rechecks the snapshot hash and UTF-16 evidence locally, and exposes quote,
-reason, review direction and optional read-only location. Logic and body-risk
-checks remain explicitly `not_checked`; Cloud or evidence failure leaves the
-local section usable and reports the Cloud section as unavailable/partial.
+reason, review direction and optional read-only locations. The current collector
+requests language, logic and content_risk explicitly; old snapshots without checks
+stay language-only with other categories not_checked. Logic requires verified
+scope and paired evidence; content_risk is limited to adult sexual context hints.
+Cloud or evidence failure leaves local checks usable and discloses category state.
 
-The UI labels this area “Cloud 中文语句提示（只读）”. It has no Apply/Replace
+The UI labels this area “Cloud 文章审阅（只读）”. It has no Apply/Replace
 control. A dedicated editor subscription increments a monotonic change generation;
 location stays disabled after an edit, including edit/Undo with identical final
 text, changed block ids, a different post, and edits while the request is in flight.
@@ -57,8 +58,8 @@ Toolbox and Addon compute the same compact JSON identity as Cloud, preserving
 Unicode, slashes and U+2028/U+2029. Addon places `contract_version` only in the
 runtime envelope, never inside Cloud `input`. Each explicit call gets a fresh
 Addon idempotency key; there is no background retry or indefinite text-hash replay.
-The consumer accepts the strict language-only result shape and verifies every
-evidence range. One invalid evidence invalidates its whole finding. Quotes are
+The consumer accepts the strict requested-category result shape, preserves the
+language-only baseline and verifies every evidence range. One invalid evidence invalidates its whole finding. Quotes are
 rendered directly as escaped text with whitespace preserved, never through the
 legacy normalized item renderer. Repeated quotes remain readable without location.
 
@@ -97,22 +98,20 @@ out of date and disables its navigation; rerunning preflight refreshes it.
 Results arriving after an edit are also shown as stale. Reloading loses this
 local snapshot; there is no durable review or approval store.
 
-## Subsequent analysis work
+## Analysis scope and remaining work
 
-The [reference research](article-review-reference-research-2026-10-30.md),
-[consumer contract draft](article-review-cloud-contract-draft-v1.md) and
-[synthetic evaluation seeds](article-review-evaluation-seeds-v1.json) prepare
-the delivered language slice and later work. The language contract is merged and
-locally installed; logic/content-risk remain disabled.
+The [extension contract](article-review-context-v1.md) is current authority for
+logic kinds, distinct quotes/scope, adult-context taxonomy and per-category
+completion/refusal/partial states. Read-only hints cannot certify semantics,
+external facts, safety or permission to publish. Local `not_checked` coverage
+above describes only local heuristics; Cloud category status is separate.
 
-General language-quality acceptance, cross-paragraph logic and body-risk
-classification still need bounded evaluation and, for the latter two, an explicit
-Cloud/Addon analysis contract and evaluated useful positives and
-false positives before becoming implemented checks. Preserve the same issue,
-scope, location and freshness semantics, active no-store/privacy policy and
-manual correction boundary. Medical, educational, news and literary context
-must not become automatic publishing blocks. No new editor intent, third pack,
-media optimization restoration or OSS integration follows from this contract.
+The [24-case developer screen](article-review-context-acceptance-2026-11-01.md)
+includes useful positives and normal controls but is not independent gold or a
+general accuracy estimate. One news control timed out and remains unvalidated.
+Medical, educational, news and literary context never creates an automatic
+publishing block. No new editor intent, third pack, media optimization restoration
+or OSS integration follows from this contract.
 
 ## Verification and rollback
 
@@ -127,9 +126,9 @@ fixture/source ids and cleanup, and distinguish real signed Cloud formatting
 from local/fixture review evidence. Revert this slice to remove additive report
 fields and guards; no article or schema migration is required.
 
-## 2026-11-01 logic/context-risk candidate
+## 2026-11-01 logic/context-risk extension
 
 [Compatible extension](article-review-context-v1.md) adds requested category
 statuses, strict logic scope and context-sensitive adult-content hints to the
 same preflight section. Language-only input and all manual-edit boundaries remain.
-Runtime/model/browser evidence is separate from source implementation.
+[Runtime/model/browser acceptance](article-review-context-acceptance-2026-11-01.md) is recorded separately from source implementation.

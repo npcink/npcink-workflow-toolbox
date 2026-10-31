@@ -1,5 +1,9 @@
 # Chinese language quality evaluation — 2026-11-01
 
+后续状态：下文 56 次原始结果保持不变。后续 Cloud 逻辑/语境扩展已收紧文风提示，
+原误报句及两个新正常控制在冻结 24 例首轮中均零提示；见
+[后续验收](article-review-context-acceptance-2026-11-01.md)。这不是重跑或覆盖原批结果。
+
 Module: existing read-only language review. Started 2026-10-31, completed
 2026-11-01. This is bounded developer evidence using synthetic text, not
 independent gold, customer acceptance, broad real-article accuracy or release.

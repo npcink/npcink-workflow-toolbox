@@ -1,8 +1,10 @@
 # Article review logic and context-risk delivery v1
 
-Status: development source candidate, 2026-11-01; runtime, merge and model
-acceptance are separate evidence states. Extends the existing signed article
-review runtime and keeps language-only requests/results compatible.
+Status: merged in Toolbox #359, Addon #339 and Cloud #1335, 2026-11-01.
+The [development acceptance](article-review-context-acceptance-2026-11-01.md)
+separates model, installed browser, clean-master M4 and source evidence. The
+24-case initial screen retains one unavailable news control. Production and
+broad accuracy remain unverified. Language-only requests/results stay compatible.
 
 ## Contract and compatibility
 
@@ -107,4 +109,8 @@ to partial resolved the test. No failure is omitted as a successful first run.
 Cloud doc reachability was additionally attempted after the local month rollover;
 it reports seven unrelated October root-doc retention entries. They were not
 moved or relabeled in this module; focused Python/type/API gates passed.
-Live M4/model/browser acceptance remains a separate next gate at this checkpoint.
+This paragraph is the historical source/offline checkpoint. Subsequent real-model,
+installed-browser, no-store audit and merged-master evidence are recorded in the
+[2026-11-01 acceptance](article-review-context-acceptance-2026-11-01.md).
+Addon #340 adds ten seconds of HTTP receipt headroom without extending the
+30-second model budget or retrying a failed quality case.
