@@ -94,7 +94,45 @@ await context.addCookies([{ ...secureAuth, url: auth.url, httpOnly: true, sameSi
 			try { NpcinkToolboxContentFormat.prepare(wp.blocks.parse(richSource), richSource, { ...result, candidate: bad }); } catch { rejected = true; }
 			if (!rejected) throw new Error('Inline code or emphasis mutation accepted.');
 		}
+		// Heading/quote spacing uses the v1 protection rules, while legacy HTML
+		// stays opaque and does not block a safe structural change elsewhere.
+		const paragraph = (content) => wp.blocks.createBlock('core/paragraph', { content });
+		const fixed = [wp.blocks.createBlock('core/heading', { level: 3, content: '标题AI<a href="/keep">链接AI</a>' }),
+			wp.blocks.createBlock('core/quote', {}, [paragraph('引用AI。。')])];
+		for (const opaque of [paragraph('<span class="legacy">中文AI。。</span>'),
+			...wp.blocks.parse('<!-- wp:paragraph -->\n<p>中文<strong>AI</p>\n<!-- /wp:paragraph -->')]) {
+			const before = [opaque, ...fixed, paragraph('前文。后文。')];
+			const original = wp.blocks.serialize(before);
+			const next = wp.blocks.serialize([opaque, ...fixed, paragraph('前文。'), paragraph('后文。')])
+				.replace('标题AI', '标题 AI').replace('引用AI', '引用 AI');
+			const prepared = NpcinkToolboxContentFormat.prepare(before, original, { ...result, candidate: next });
+			if (prepared[0].after[0] !== opaque) throw new Error('Opaque block identity changed.');
+			for (const bad of [next.replace('中文AI。。', '中文 AI。。'), next.replace('链接AI', '链接 AI'),
+				next.replace('/keep', '/other'), next.replace('引用 AI。。', '引用 AI。'), next.replace('<h3', '<h3 data-new="x"')]) {
+				if (bad === next) continue;
+				let rejected = false;
+				try { NpcinkToolboxContentFormat.prepare(before, original, { ...result, candidate: bad }); } catch { rejected = true; }
+				if (!rejected) throw new Error('Legacy/heading/quote mutation accepted.');
+			}
+		}
 	});
+	if (process.env.FORMAT_COMPATIBILITY_INPUT) {
+		const cases = JSON.parse(readFileSync(process.env.FORMAT_COMPATIBILITY_INPUT, 'utf8'));
+		if (process.env.FORMAT_COMPATIBILITY_CANONICAL_OUTPUT) {
+			const canonical = await page.evaluate((cases) => cases.map(({ id, source }) => ({ id, source: wp.blocks.serialize(wp.blocks.parse(source)) })), cases);
+			writeFileSync(process.env.FORMAT_COMPATIBILITY_CANONICAL_OUTPUT, JSON.stringify(canonical), { mode: 0o600 });
+		} else {
+		const checked = await page.evaluate((cases) => cases.map(({ id, source, result }) => {
+			const blocks = wp.blocks.parse(source);
+			const original = wp.blocks.serialize(blocks);
+			if (original !== source) throw new Error('Compatibility source requires native-editor serialization: ' + id);
+			const updates = NpcinkToolboxContentFormat.prepare(blocks, source, { ...result, persisted: false });
+			if (!updates.length || wp.blocks.serialize(blocks) !== source) throw new Error('Compatibility source changed or useful result missing: ' + id);
+			return { id, accepted: true, source_unchanged: true };
+		}), cases);
+		console.log('Compatibility browser evidence:', JSON.stringify(checked));
+		}
+	}
 	const notice = page.locator('.npcink-toolbox-editor-format .components-notice__content');
 	try { await button.waitFor({ timeout: 10000 }); } catch (error) {
 		console.log('Editor diagnostic:', await page.locator('.npcink-toolbox-editor-format').evaluate((el) => el.outerHTML), errors);

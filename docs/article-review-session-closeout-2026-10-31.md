@@ -32,6 +32,10 @@ the later run passed). Cloud required checks passed; conditionally irrelevant
 production/full-matrix jobs were skipped, not counted as newly executed tests.
 The closeout documentation PR is a separate final delivery after these nine.
 
+Follow-on: the [formatting compatibility verification](article-format-compatibility-2026-10-31.md)
+subsequently addresses the two validator refusals below; this dated closeout
+retains their original disposition.
+
 ## Historical issues and actual remaining work
 
 | Item | Disposition / owner |

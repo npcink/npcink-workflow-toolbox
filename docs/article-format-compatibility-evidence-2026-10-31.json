@@ -1,0 +1,59 @@
+{
+  "contract": "article_format_compatibility_evidence.v1",
+  "cases": [
+    {
+      "post_id": 280942,
+      "editor_source_sha256": "0de590c01bdc194b9cc2f9e973c4b27985a2d5819e3405464a3a04c82790c879",
+      "saved_source_sha256": "590f727214be519ea95a77d1d3456ed0aee530db7da278aba14c491d4019783a",
+      "candidate_sha256": "8698ad6ed162e1758ecfb69a4d73e530a7e5ea62c84ed4844c0a2fa5f3de3c5c",
+      "status": "PARTIAL",
+      "structural_changes": 1,
+      "inserted_spaces": 0,
+      "php_valid": true,
+      "browser_native_candidate_valid": true,
+      "database_unchanged": true,
+      "run_id": null
+    },
+    {
+      "post_id": 280861,
+      "editor_source_sha256": "a17e41be20143f64449add6e2be878143127442ff13778c84814aacd40bbb6e1",
+      "saved_source_sha256": "a17e41be20143f64449add6e2be878143127442ff13778c84814aacd40bbb6e1",
+      "candidate_sha256": "671d513471054280fcc7184f383f23aa50755110867d5f2ca6941bae653c71a7",
+      "status": "PARTIAL",
+      "structural_changes": 1,
+      "inserted_spaces": 42,
+      "php_valid": true,
+      "browser_native_candidate_valid": true,
+      "database_unchanged": true,
+      "run_id": null
+    }
+  ],
+  "network": "real_signed_addon_cloud_formatting",
+  "cloud_source_revision": "not_independently_recorded_no_deployment",
+  "model_calls": 0,
+  "wordpress_source_writes": 0,
+  "date": "2026-10-31",
+  "source_base": "9797229717d6e478685aa322407dee09b1ee6fec",
+  "browser": {
+    "sources": "native_editor_serialization_of_two_public_saved_articles",
+    "candidate_source": "offline_existing_cloud_formatter; exact candidate hashes matched subsequent signed calls",
+    "assets": "task assets intercepted, installed PHP unchanged",
+    "preservation_fixture_signed_cloud": true,
+    "unsafe_mutations_rejected": true,
+    "undo_redo_stale_failure_mobile_passed": true,
+    "post_write_requests": 0,
+    "page_errors": 0,
+    "blocked_native_preferences": 2,
+    "synthetic_drafts_and_sessions_cleaned": true
+  },
+  "implementation_sha256": {
+    "assets/editor-content-format.js": "36f3b4fed8c5f94034c1cdf53bddbddc85c3cdef943a44094cb34e0e325e0868",
+    "includes/Editor_Content_Format.php": "ac8bdeaaabbd4f379073b2b527bdecda587c3697de7b7085089b88a8d469f2e4"
+  },
+  "limits": [
+    "Developer evidence, not production or independent author acceptance",
+    "Opaque legacy/invalid HTML remains unchanged; not repaired",
+    "Saved database and native editor serializations differ; each was validated separately",
+    "No Cloud/Add-on source, shared M4 deployment, provider settings, OSS or production changes"
+  ]
+}

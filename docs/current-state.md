@@ -7,6 +7,11 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-10-31.
 
+**Formatting compatibility follow-up:** the two known validator refusals now
+pass preserved-block and fixed-layout spacing checks; see the
+[2026-10-31 verification](article-format-compatibility-2026-10-31.md).
+Unsupported legacy HTML remains opaque, and all corrections stay manual.
+
 **Article review closeout:** start with the
 [2026-10-31 audit](article-review-session-closeout-2026-10-31.md) for merged PRs,
 source/worktree cleanup, intentional local Addon overlay and remaining owners.
