@@ -3,13 +3,16 @@ import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { mkdirSync, readFileSync } from 'node:fs';
 
+for (const key of ['WP_PATH', 'WP_CLI_PHP', 'WP_CLI_BIN', 'WP_DB_SOCKET', 'ARTICLE_REVIEW_PYTHON', 'ARTICLE_REVIEW_ADDON_ROOT', 'ARTICLE_REVIEW_CLOUD_ROOT']) {
+	assert.ok(process.env[key], `Set ${key} before running this optional Local browser acceptance script.`);
+}
 const require = createRequire(import.meta.url);
-const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules'] }));
-const root = process.env.WP_PATH || '/Users/muze/Local Sites/magick-ai/app/public';
-const php = process.env.WP_CLI_PHP || '/Users/muze/Library/Application Support/Local/lightning-services/php-8.2.29+0/bin/darwin-arm64/bin/php';
-const socket = process.env.WP_DB_SOCKET || '/Users/muze/Library/Application Support/Local/run/s63K4c8XP/mysql/mysqld.sock';
+const { chromium } = require(require.resolve('playwright', process.env.NODE_PATH ? { paths: [process.env.NODE_PATH] } : undefined));
+const root = process.env.WP_PATH;
+const php = process.env.WP_CLI_PHP;
+const socket = process.env.WP_DB_SOCKET;
 function cli(args) {
-	return execFileSync(php, ['-d', 'display_errors=stderr', '-d', `mysqli.default_socket=${socket}`, '/opt/homebrew/bin/wp', `--path=${root}`, '--no-color', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+	return execFileSync(php, ['-d', 'display_errors=stderr', '-d', `mysqli.default_socket=${socket}`, process.env.WP_CLI_BIN, `--path=${root}`, '--no-color', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 }
 const auth = JSON.parse(cli(['eval', '$u=get_users(array("role"=>"administrator","number"=>1))[0]; $e=time()+1800; $t=WP_Session_Tokens::get_instance($u->ID)->create($e); echo wp_json_encode(array("user"=>$u->ID,"token"=>$t,"cookie"=>wp_generate_auth_cookie($u->ID,$e,"logged_in",$t),"admin_cookie"=>wp_generate_auth_cookie($u->ID,$e,"auth",$t),"admin_name"=>AUTH_COOKIE,"name"=>LOGGED_IN_COOKIE,"url"=>home_url()));']));
 const source = '<!-- wp:paragraph -->\n<p>合成原始草稿，不保存浏览器中的测试编辑。</p>\n<!-- /wp:paragraph -->';

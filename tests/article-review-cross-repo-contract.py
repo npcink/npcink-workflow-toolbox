@@ -1,7 +1,9 @@
 """Optional offline bridge: real Toolbox -> Addon -> Cloud validator/finalizer -> Toolbox.
 
 Uses only synthetic input and the existing PHP behavior-test stubs. No HTTP/model
-call, WordPress site, credentials, or runtime evidence is implied.
+call, WordPress site, credentials, or runtime evidence is implied. The consumer
+loads the behavior harness and deliberately uses its array-parameter
+WP_REST_Request stub; it does not instantiate the real WordPress REST class.
 """
 import argparse
 import json

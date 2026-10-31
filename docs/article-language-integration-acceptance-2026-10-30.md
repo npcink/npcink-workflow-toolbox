@@ -93,8 +93,8 @@ node tests/smoke-article-language-review-browser.mjs
 ```
 
 Export the three `ARTICLE_REVIEW_*` variables for the browser script as well.
-Its Local defaults can be replaced with `WP_PATH`, `WP_CLI_PHP`, `WP_DB_SOCKET`
-and `NODE_PATH`. It creates/deletes only its own synthetic draft/session and
+Set `WP_PATH`, `WP_CLI_PHP`, `WP_CLI_BIN`, `WP_DB_SOCKET` and a resolvable
+Playwright dependency (`NODE_PATH` when needed) explicitly. It creates/deletes only its own synthetic draft/session and
 blocks browser post writes. The shared `vendor` installations were used through
 ignored worktree symlinks for deterministic PHP tooling.
 

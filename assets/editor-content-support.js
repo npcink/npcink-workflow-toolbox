@@ -4813,9 +4813,19 @@
 
 	function articleReviewEditorIdentity() {
 		const editor = data.select('core/editor');
-		const blockEditor = data.select('core/block-editor');
-		const ids = (blocks) => (blocks || []).map((block) => [block.clientId, block.name, ids(block.innerBlocks)]);
-		return JSON.stringify([editor.getCurrentPostId(), editor.getEditedPostAttribute('title'), editor.getEditedPostAttribute('excerpt'), editor.getEditedPostAttribute('content'), ids(blockEditor.getBlocks())]);
+		// Gutenberg selectors memoize immutable blocks. Reference changes catch
+		// replacements and edits without serializing a full article on every dispatch.
+		return {
+			postId: editor.getCurrentPostId(),
+			title: editor.getEditedPostAttribute('title'),
+			excerpt: editor.getEditedPostAttribute('excerpt'),
+			content: editor.getEditedPostAttribute('content'),
+			blocks: data.select('core/block-editor').getBlocks(),
+		};
+	}
+
+	function articleReviewIdentityMatches(before, after) {
+		return Boolean(before && after && ['postId', 'title', 'excerpt', 'content', 'blocks'].every((key) => before[key] === after[key]));
 	}
 
 	function renderArticleLanguageReviewItems(section, controls) {
@@ -7434,11 +7444,12 @@
 		const [running, setRunning] = useState('');
 		const [result, setResult] = useState(null);
 		const [articleReviewSource, setArticleReviewSource] = useState(null);
-		const articleReviewRevision = useRef({ identity: articleReviewEditorIdentity(), generation: 0 });
+		const articleReviewRevision = useRef(null);
+		if (!articleReviewRevision.current) articleReviewRevision.current = { identity: articleReviewEditorIdentity(), generation: 0 };
 		const [, setArticleReviewGeneration] = useState(0);
 		useEffect(() => data.subscribe(() => {
 			const identity = articleReviewEditorIdentity();
-			if (identity !== articleReviewRevision.current.identity) {
+			if (!articleReviewIdentityMatches(identity, articleReviewRevision.current.identity)) {
 				articleReviewRevision.current = { identity, generation: articleReviewRevision.current.generation + 1 };
 				setArticleReviewGeneration(articleReviewRevision.current.generation);
 			}
@@ -10251,8 +10262,8 @@
 		const isContextualParagraphResult = contextualResult && rerunIntent === 'polish_notes';
 		const resultControls = {
 			articleReview: {
-				stale: !articleReviewSource || articleReviewSource.generation !== articleReviewRevision.current.generation || articleReviewSource.identity !== articleReviewEditorIdentity(),
-				isCurrent: () => Boolean(articleReviewSource && articleReviewSource.generation === articleReviewRevision.current.generation && articleReviewSource.identity === articleReviewEditorIdentity()),
+				stale: !articleReviewSource || articleReviewSource.generation !== articleReviewRevision.current.generation || !articleReviewIdentityMatches(articleReviewSource.identity, articleReviewEditorIdentity()),
+				isCurrent: () => Boolean(articleReviewSource && articleReviewSource.generation === articleReviewRevision.current.generation && articleReviewIdentityMatches(articleReviewSource.identity, articleReviewEditorIdentity())),
 			},
 			intent: activeFlowIntent || (result && result.intent) || '',
 			showHandoff: ['summary_terms_optimization', 'category_suggestions', 'tag_suggestions'].indexOf(activeFlowIntent) >= 0,
