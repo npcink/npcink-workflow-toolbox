@@ -33,9 +33,10 @@ provider bindings and credentials were not changed.
 
 Consequently this proves the installed development versions work together; it
 does **not** mean the shared site's old/missing mounts now provide this feature.
-For ongoing author use, a separate local installation closeout must choose durable
-checkouts containing the merged changes and reconcile other active plugin work.
-It must preserve the image-timeout session's settings and source work.
+The later [local installation closeout](article-language-local-install-2026-10-31.md)
+retains durable primary mounts and preserves the image-timeout session's settings
+and source work. The restored-mount limitation above describes this earlier
+temporary acceptance, not the subsequent installed state.
 
 Each browser attempt created only a synthetic draft and one temporary login
 session, removed in `finally`. The passing run observed zero post-write attempts,

@@ -1,0 +1,166 @@
+{
+  "contract": "article_language_durable_local_install_evidence.v1",
+  "date": "2026-10-31T14:53:04.028Z",
+  "toolbox_revision": "63f6a0756361f2ae4a399eed4c3f10dde300a804",
+  "addon_revision": "7c1483c3fbf7139931c5848272d206358adfe0b6",
+  "preflight_requests": 1,
+  "progressive_requests": 1,
+  "run_id": "run_6ac8845aa8e3459db86f3ad34f2274a2",
+  "status": "partial",
+  "findings": 1,
+  "kinds": [
+    "punctuation"
+  ],
+  "invalid_findings": 0,
+  "checks": {
+    "language": {
+      "status": "completed",
+      "reason_code": "none"
+    },
+    "logic": {
+      "status": "not_checked",
+      "reason_code": "not_supported"
+    },
+    "content_risk": {
+      "status": "not_checked",
+      "reason_code": "not_supported"
+    }
+  },
+  "actual_installed_assets_verified": [
+    "editor-content-format.js",
+    "editor-content-support.js"
+  ],
+  "substituted_results": false,
+  "injected_assets": false,
+  "exact_utf16_quotes": true,
+  "excluded_code_and_image": true,
+  "read_only_navigation": true,
+  "edit_undo_retires_report": true,
+  "editor_title_excerpt_content_unchanged": true,
+  "database_fixture_unchanged": true,
+  "post_write_attempts": 0,
+  "blocked_preference_attempts": 0,
+  "page_errors": 0,
+  "customer_content_sent": false,
+  "production_deployed": false,
+  "disposable_draft_deleted": true,
+  "temporary_session_destroyed": true,
+  "installation": {
+    "scope": "local WordPress only",
+    "durable_primary_mounts": true,
+    "toolbox_relative_state": "master matched origin/master at acceptance",
+    "addon_base_master": "e8f7d7e748eeb3538e7937566ba670ad3f3bc775",
+    "addon_local_overlay": "7c1483c3fbf7139931c5848272d206358adfe0b6",
+    "addon_no_upstream": true,
+    "addon_commits_above_master": 1,
+    "preserved_old_overlay": "b75a944b38958a7f09a493389378635e1690b94d",
+    "equivalent_published_vision_candidate": "4654f9b",
+    "timeout_runtime_test_readme_patch_identical": true,
+    "ratchet_conflicts_resolved_additively": true,
+    "credentials_toolbox_settings_active_plugins_fingerprints_unchanged": true,
+    "vision_timeout_mu_bytes_unchanged": true,
+    "local_vision_timeout_seconds": 180,
+    "source_changes_pushed_or_merged": false
+  },
+  "transport": {
+    "local_launchagent": "com.npcink.cloud-m4-dev-tunnel",
+    "login_startup": true,
+    "keepalive": true,
+    "managed_restart_and_liveness_passed": true,
+    "remote_config_changed": false
+  },
+  "cloud": {
+    "observed_revision": "34496a70ac8509d6875b0b663ac038d9253ce206",
+    "observed_branch": "ui/admin-subscriptions-quiet-20261030",
+    "observed_acceptance_state": "candidate",
+    "observed_source_dirty": false,
+    "includes_merged_language_review": "7002bd56f080bf3fa045fbe3132e9b7a13ee093f",
+    "deployed_or_promoted_by_this_session": false,
+    "provider_configuration_changed": false
+  },
+  "attempts": [
+    {
+      "stage": "first_installed_recheck",
+      "result": "tunnel_unavailable",
+      "run_created": false,
+      "cleanup_passed": true
+    },
+    {
+      "stage": "after_tunnel_recovery",
+      "result": "provider.network_error",
+      "run_id": "run_a4e8813264fb4d28a7af9167622aebb5",
+      "cleanup_passed": true
+    },
+    {
+      "stage": "after_read_only_provider_connectivity_probes",
+      "result": "passed",
+      "run_id": "run_6ac8845aa8e3459db86f3ad34f2274a2",
+      "cleanup_passed": true
+    }
+  ],
+  "durable_model_runs": [
+    {
+      "run_id": "run_a4e8813264fb4d28a7af9167622aebb5",
+      "status": "failed",
+      "error_code": "provider.network_error",
+      "input_omitted": true,
+      "ciphertext_absent": true,
+      "result_omitted": false,
+      "provider_calls": 1,
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "provider_ids": [
+        "openai"
+      ],
+      "retry_counts": [
+        0
+      ],
+      "fallback_used": false,
+      "usage_events": 2,
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "result_null": true
+    },
+    {
+      "run_id": "run_6ac8845aa8e3459db86f3ad34f2274a2",
+      "status": "succeeded",
+      "error_code": null,
+      "input_omitted": true,
+      "ciphertext_absent": true,
+      "result_omitted": true,
+      "provider_calls": 1,
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "provider_ids": [
+        "openai"
+      ],
+      "retry_counts": [
+        0
+      ],
+      "fallback_used": false,
+      "usage_events": 6,
+      "tokens_in": 352,
+      "tokens_out": 70
+    }
+  ],
+  "verification": {
+    "addon_full_suite": "passed",
+    "addon_phpstan": "passed",
+    "central_matrix_toolbox_addon_full_suites": "passed",
+    "matrix_cloud_runtime_acceptance_requested": false,
+    "matrix_existing_cli_deprecations_observed": true,
+    "remaining_synthetic_drafts": 0
+  },
+  "addon_local_qwen": {
+    "model": "qwen3.8-max",
+    "receipt_sha256": "eb53e023bca844a8009b70c92c1514d0e190fdfbe85ae424a85d3372e7c341c6",
+    "head_sha": "7c1483c3fbf7139931c5848272d206358adfe0b6",
+    "finding_ids": [
+      "F1",
+      "F2"
+    ],
+    "dispositions_documented": true
+  }
+}

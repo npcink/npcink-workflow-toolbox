@@ -210,9 +210,11 @@ ordinary generation and Site Knowledge remain available. See
   The [installed editor acceptance](article-language-installed-acceptance-2026-10-31.md)
   now also passes real enqueued assets, real REST/Cloud output, exact quotes,
   read-only navigation and edit/Undo invalidation on a disposable draft.
-  Temporary local plugin mounts were restored: the shared site's original
-  Toolbox target is missing and its Addon is older, so durable local installation
-  remains necessary before ordinary author use. This is bounded developer
+  The subsequent [durable local installation](article-language-local-install-2026-10-31.md)
+  fixes the missing Toolbox mount, retains primary checkout paths and the existing
+  Addon vision-timeout overlay, and maintains the local development tunnel.
+  Real editor acceptance passed after recorded transport failures; no M4 promotion
+  or provider changes occurred. This is bounded developer
   evidence, not broad accuracy, human adoption or production deployment.
   Logic/content-risk remain disabled.
   See [delivery acceptance](article-language-delivery-acceptance-2026-10-31.md)
