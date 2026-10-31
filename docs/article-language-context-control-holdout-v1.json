@@ -1,0 +1,111 @@
+{
+  "contract": "article_language_quality_cases.v1",
+  "language": "zh-CN",
+  "checks": [
+    "language"
+  ],
+  "source_policy": "synthetic_no_customer_content",
+  "label_policy": "predeclared_development_expectations_not_independent_gold",
+  "metrics_policy": "hint_requires_expected_kind_and_verified_quote; no_hint_requires_zero_items; protocol_and_transport_failures_reported_separately",
+  "acceptance_target": {
+    "positive_case_hit_rate_at_least": 0.8,
+    "negative_case_false_alarm_rate_at_most": 0.1,
+    "invalid_quotes": 0,
+    "automatic_writes": 0
+  },
+  "cases": [
+    {
+      "id": "fresh-tech-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文介绍网站文章的维护流程。管理员应先查看目录，确认本次需要核对的文章范围。工具提供的提示仅供参考，最终判断由作者作出。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "检查链接时，应区分站内链接和外部引用。链接文字需要说明目标内容，避免读者无法判断点击后的去向。图片说明应与文章语境一致，不能仅根据文件名推断图片含义。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "WordPress 保存仍由作者触发，API 只读取当前文章的可见文本。检查结果不包含自动替换指令，作者可以根据需要修改，也可以保留原稿。"
+        }
+      ]
+    },
+    {
+      "id": "fresh-medical-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文属于健康教育材料，介绍常规检查前的准备事项。读者可以提前了解流程，并向医护人员说明自己的既往病史。不同检查项目的准备要求可能不同，应以医疗机构的具体说明为准。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "检查结果需要结合病史和症状解读。单个指标超出参考范围，并不等于已经确诊某种疾病。医生会根据实际情况判断是否需要进一步检查。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "文中的一般性说明不能替代个体化诊疗。遇到不清楚的项目时，应向负责检查或接诊的医护人员咨询。"
+        }
+      ]
+    },
+    {
+      "id": "fresh-education-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本节课程介绍人体发育的基础知识，面向接受健康教育的学生。教材使用规范术语，教师应结合课程要求讲解，并为学生保留提问时间。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "学生可以提出不理解的术语，教师应说明术语在教材中的具体含义。课堂讨论应围绕学习目标展开，尊重每位参与者。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "课后练习用于帮助学生整理概念。对于超出课程范围的个人健康问题，教师可以建议学生向合适的专业人员咨询。"
+        }
+      ]
+    },
+    {
+      "id": "fresh-finance-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文说明预算表的阅读方法。表格将计划数与实际数分列展示，便于读者比较同一项目在相同统计期间内的金额。核对时，应先确认币种、单位和时间范围。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "预算金额为 1,200.50 元，实际支出为 1,180.50 元。两项金额使用相同币种，并保留两位小数。附注说明了费用所属的月份。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "读者可以根据表格标题和附注理解这些数值。对于没有列明的项目，不应仅凭本表推断其收支情况。"
+        }
+      ]
+    }
+  ],
+  "purpose": "New predeclared controls replace four mislabeled repeated-boilerplate context fixtures; original calls and labels remain recorded."
+}

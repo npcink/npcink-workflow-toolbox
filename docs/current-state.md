@@ -7,6 +7,11 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-10-31.
 
+**Language quality follow-up:** the [2026-11-01 evaluation](article-language-quality-evaluation-2026-11-01.md)
+records 56 explicit synthetic calls: 20/20 basic positive hits, one false alarm
+among 20 basic controls, separate context-label errors and fresh controls.
+General accuracy is not certified; style-only warnings need Cloud follow-up.
+
 **Formatting compatibility follow-up:** the two known validator refusals now
 pass preserved-block and fixed-layout spacing checks; see the
 [2026-10-31 verification](article-format-compatibility-2026-10-31.md).
