@@ -1,0 +1,346 @@
+{
+  "contract": "article_language_delivery_evidence.v1",
+  "date": "2026-10-31",
+  "scope": "six synthetic Chinese language cases; isolated real WordPress classes → signed Addon → M4 Cloud → configured hosted model → actual Toolbox quote validation",
+  "production_deployed": false,
+  "wordpress_plugins_activated": false,
+  "shared_plugin_symlinks_changed": false,
+  "wordpress_content_writes": 0,
+  "customer_content_sent": false,
+  "source": {
+    "toolbox_tested": "4ba84709e7bb754dc0ea88f37371dc0ccf1f4d0f",
+    "toolbox_merged": "d5b153dfc7798a971abfab93238625c431e705bd",
+    "toolbox_pr": 349,
+    "addon_tested": "b44189ce4327bd8df04e42256130fb29a470c7c7",
+    "addon_merged": "e8f7d7e748eeb3538e7937566ba670ad3f3bc775",
+    "addon_pr": 338,
+    "cloud_tested": "d9d668c4c07613d96b525f91535f4471db6ae574",
+    "cloud_pr": 1331,
+    "cloud_merged": "7002bd56f080bf3fa045fbe3132e9b7a13ee093f",
+    "cloud_candidate_tree_equals_merged": true
+  },
+  "m4": {
+    "candidate_revision": "d9d668c4c07613d96b525f91535f4471db6ae574",
+    "candidate_source_dirty": false,
+    "accepted_revision": null,
+    "promotion_attempt": {
+      "source_revision": "7002bd56f080bf3fa045fbe3132e9b7a13ee093f",
+      "source_clean": true,
+      "pr": 1331,
+      "exit_code": 75,
+      "result": "blocked_active_shared_operation_lock",
+      "lock_owner": "separate image-timeout acceptance session",
+      "lock_removed": false
+    }
+  },
+  "live_cases": [
+    {
+      "case_id": "language-punctuation",
+      "expectation": "hint",
+      "observed_kinds": [
+        "punctuation"
+      ],
+      "expectation_met": true,
+      "run_id": "run_427177be4fb8470e8fe70d069a510969",
+      "status": "ready",
+      "invalid_finding_count": 0,
+      "elapsed_seconds": 6.171,
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "durable": {
+        "run_id": "run_427177be4fb8470e8fe70d069a510969",
+        "status": "succeeded",
+        "input_omitted": true,
+        "ciphertext_absent": true,
+        "result_omitted": true,
+        "provider_calls": 1,
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "provider_ids": [
+          "openai"
+        ],
+        "retry_counts": [
+          0
+        ],
+        "fallback_used": false,
+        "usage_events": 6,
+        "tokens_in": 294,
+        "tokens_out": 128
+      }
+    },
+    {
+      "case_id": "language-redundancy",
+      "expectation": "hint",
+      "observed_kinds": [
+        "redundancy"
+      ],
+      "expectation_met": true,
+      "run_id": "run_44a0d3b0c9ac48299e4c5acadd5794c5",
+      "status": "ready",
+      "invalid_finding_count": 0,
+      "elapsed_seconds": 3.325,
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "durable": {
+        "run_id": "run_44a0d3b0c9ac48299e4c5acadd5794c5",
+        "status": "succeeded",
+        "input_omitted": true,
+        "ciphertext_absent": true,
+        "result_omitted": true,
+        "provider_calls": 1,
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "provider_ids": [
+          "openai"
+        ],
+        "retry_counts": [
+          0
+        ],
+        "fallback_used": false,
+        "usage_events": 6,
+        "tokens_in": 293,
+        "tokens_out": 89
+      }
+    },
+    {
+      "case_id": "language-reference",
+      "expectation": "hint",
+      "observed_kinds": [
+        "reference"
+      ],
+      "expectation_met": true,
+      "run_id": "run_ebdc760b14844b679d70b2fe1cd4f968",
+      "status": "ready",
+      "invalid_finding_count": 0,
+      "elapsed_seconds": 5.663,
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "durable": {
+        "run_id": "run_ebdc760b14844b679d70b2fe1cd4f968",
+        "status": "succeeded",
+        "input_omitted": true,
+        "ciphertext_absent": true,
+        "result_omitted": true,
+        "provider_calls": 1,
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "provider_ids": [
+          "openai"
+        ],
+        "retry_counts": [
+          0
+        ],
+        "fallback_used": false,
+        "usage_events": 6,
+        "tokens_in": 294,
+        "tokens_out": 126
+      }
+    },
+    {
+      "case_id": "language-normal",
+      "expectation": "no_hint",
+      "observed_kinds": [],
+      "expectation_met": true,
+      "run_id": "run_346c9718a3fe4fb89839aefb86a8276a",
+      "status": "ready",
+      "invalid_finding_count": 0,
+      "elapsed_seconds": 2.401,
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "durable": {
+        "run_id": "run_346c9718a3fe4fb89839aefb86a8276a",
+        "status": "succeeded",
+        "input_omitted": true,
+        "ciphertext_absent": true,
+        "result_omitted": true,
+        "provider_calls": 1,
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "provider_ids": [
+          "openai"
+        ],
+        "retry_counts": [
+          0
+        ],
+        "fallback_used": false,
+        "usage_events": 6,
+        "tokens_in": 300,
+        "tokens_out": 10
+      }
+    },
+    {
+      "case_id": "language-style-intent",
+      "expectation": "no_hint",
+      "observed_kinds": [],
+      "expectation_met": true,
+      "run_id": "run_797a09b564724a8ab5fb1eecdd527df3",
+      "status": "ready",
+      "invalid_finding_count": 0,
+      "elapsed_seconds": 2.082,
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "durable": {
+        "run_id": "run_797a09b564724a8ab5fb1eecdd527df3",
+        "status": "succeeded",
+        "input_omitted": true,
+        "ciphertext_absent": true,
+        "result_omitted": true,
+        "provider_calls": 1,
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "provider_ids": [
+          "openai"
+        ],
+        "retry_counts": [
+          0
+        ],
+        "fallback_used": false,
+        "usage_events": 6,
+        "tokens_in": 297,
+        "tokens_out": 10
+      }
+    },
+    {
+      "case_id": "protocol-unicode",
+      "expectation": "hint",
+      "observed_kinds": [
+        "punctuation"
+      ],
+      "expectation_met": true,
+      "run_id": "run_2534503dde334e12bbd6e0fed589939a",
+      "status": "ready",
+      "invalid_finding_count": 0,
+      "elapsed_seconds": 3.166,
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "durable": {
+        "run_id": "run_2534503dde334e12bbd6e0fed589939a",
+        "status": "succeeded",
+        "input_omitted": true,
+        "ciphertext_absent": true,
+        "result_omitted": true,
+        "provider_calls": 1,
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "provider_ids": [
+          "openai"
+        ],
+        "retry_counts": [
+          0
+        ],
+        "fallback_used": false,
+        "usage_events": 6,
+        "tokens_in": 290,
+        "tokens_out": 73
+      }
+    }
+  ],
+  "synthetic_seed_sha256": "80bc4e4f9cb6c2e3b6e030cd4fe79f748d8bceccda1603f2da697aae3cf6ac1f",
+  "local_harness_sha256": "e3f31a00025b6d0bf223860a34abafa1286a7576e9c2378a9cff6139b35a51f1",
+  "limitations": [
+    "Six seed cases are developer usefulness evidence, not independent gold or a general accuracy estimate.",
+    "CLI loaded candidate plugin classes after WordPress boot; shared browser mounts and plugin activation were not changed.",
+    "Browser interaction was independently verified with controlled offline provider output.",
+    "Provider-side data retention was not verified.",
+    "Logic and content-risk stay not_checked/not_supported."
+  ],
+  "verification": {
+    "toolbox_full_suite": "passed",
+    "addon_full_suite": "passed",
+    "initial_three_repo_matrix": "failed_only_cloud_backend_check_pending",
+    "cloud_exact_sha_matrix_final": {
+      "source_revision": "d9d668c4c07613d96b525f91535f4471db6ae574",
+      "gate_status": "passed",
+      "gate_exit": 0,
+      "gate_authority": "github_ci",
+      "required_checks": [
+        "backend",
+        "frontend",
+        "Secret scan",
+        "Analyze (python)",
+        "Analyze (javascript-typescript)"
+      ]
+    },
+    "browser": "passed_controlled_offline_output",
+    "cloud_focused_tests": 54,
+    "format_preservation": "unchanged_formatter; no original text or media mutations"
+  }
+}

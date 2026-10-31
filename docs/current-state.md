@@ -5,7 +5,7 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-30.
+Last reviewed: 2026-10-31.
 
 **Existing content loop, 2026-10-30:** the real WordPress AI plugin's three
 summaries, two titles, selected-paragraph rewrite, native-save readback and
@@ -203,14 +203,15 @@ ordinary generation and Site Knowledge remain available. See
   media; it changes only bounded layout and CJK/Latin-or-digit spacing.
   The [reference research](article-review-reference-research-2026-10-30.md)
   now informs a [Cloud consumer contract draft](article-review-cloud-contract-draft-v1.md)
-  and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). The Cloud checker, Addon facade, and Toolbox report consumer now exist only as
-  candidate branches (`codex/article-review-language`,
-  `codex/article-review-addon`, and `codex/article-review-toolbox`); none is
-  merged. Earlier M4 evidence covers the Cloud candidate only, not WordPress
-  deployment or production. The candidate checks only Chinese language evidence.
-  See [integration acceptance](article-language-integration-acceptance-2026-10-30.md)
-  for exact-text, stale-report, offline bridge/browser gates and the unpushed
-  Cloud SHA source-gate limitation.
+  and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). Chinese language
+  review is now merged in Toolbox #349, Addon #338 and Cloud #1331. Six synthetic
+  cases passed real WordPress-class → signed Addon → M4 Cloud/model → Toolbox
+  evidence validation, including useful positives and two zero-hint controls.
+  This is bounded developer evidence, not broad accuracy, installed shared-browser
+  acceptance or production deployment. Logic/content-risk remain disabled.
+  See [delivery acceptance](article-language-delivery-acceptance-2026-10-31.md)
+  for exact source, CI, M4, durable no-store checks and the separate browser proof;
+  the 2026-10-30 unpushed-SHA checkpoint is historical.
 
 - Recommendation anchor eligibility now has an active
   [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical

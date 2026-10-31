@@ -126,6 +126,7 @@ Start from the active documents below before changing code.
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
 - [Article review report v1](article-review-report-v1.md) — bounded coverage, evidence navigation and author-only correction.
 - [Article language integration acceptance (2026-10-30)](article-language-integration-acceptance-2026-10-30.md) and [body-free receipt](article-language-integration-evidence-2026-10-30.json) — exact-text, offline bridge/browser acceptance; Cloud GitHub source gate remains unfulfilled.
+- [Chinese language review delivery (2026-10-31)](article-language-delivery-acceptance-2026-10-31.md) and [body-free delivery evidence](article-language-delivery-evidence-2026-10-31.json) — merged source, exact-SHA CI, real signed/model checks and separate M4 acceptance state.
 - [文章审阅同行/开源调研](article-review-reference-research-2026-10-30.md)、[Cloud 检查消费方契约草案](article-review-cloud-contract-draft-v1.md)与[中文合成验证种子](article-review-evaluation-seeds-v1.json) — 已有未发布的语句检查候选；逻辑与内容风险仍未启用。
 - [Formatting preservation acceptance (2026-10-30)](article-format-preservation-acceptance-2026-10-30.md) and [body-free evidence](article-format-preservation-evidence-2026-10-30.json).
 - [Editor Content Format V1](editor-content-format-v1.md)
