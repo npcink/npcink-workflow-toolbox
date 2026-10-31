@@ -50,30 +50,24 @@ with the closing commit or PR for one release cycle, then prune.
   Preserve the frozen-v1 hold, exclude developer traffic, and keep candidate-review
   worksheets separate from independent gold. No production rollout or ranking
   campaign follows from this handoff.
-- **Article assistance follow-up (Toolbox editor / Cloud analysis).** Formatting
-  is merged (#141); the 2026-10-30 preservation/report slice adds bounded coverage, unique-evidence
-  issue navigation, stale-result warnings and punctuation hints. The
-  [dated acceptance](article-format-preservation-acceptance-2026-10-30.md)
-  records browser success and 12 unchanged saved sources, including two safely
-  rejected compatibility cases (280942, 280861); it does not certify production. Generic cross-
-  paragraph logic and body risk classification are not delivered. Reuse the
-  current preflight/paragraph-review surface after a scoped contract; no new
-  editor intent, hidden save or automatic publishing block is authorized.
-  [Reference research](article-review-reference-research-2026-10-30.md), a
-  [consumer contract draft](article-review-cloud-contract-draft-v1.md) and
-  [synthetic seeds](article-review-evaluation-seeds-v1.json) are prepared; the
-  language-only slice is now merged across Cloud/Addon/Toolbox, with six seeded
-  signed/model cases, installed editor acceptance and durable local installation
-  passed. See the [current closeout](article-review-session-closeout-2026-10-31.md)
-  and [delivery rules/lessons](article-review-delivery-lessons-v1.md).
-  The [56-call developer evaluation](article-language-quality-evaluation-2026-11-01.md)
-  meets its basic screen but retains one style-only false alarm; four context
-  label errors and fresh controls are recorded separately. Cloud prompt work
-  should suppress modifier/coordination style nitpicks.
-  Broad Chinese accuracy, independent author feedback, general cross-paragraph
-  logic, content-risk analysis and production acceptance remain open; those
-  are not prerequisites to closing the delivered language slice.
-  Source: [five-session audit](session-closeout-audit-2026-10-26.md).
+- **Article assistance follow-up (Toolbox editor / Cloud analysis).** The
+  [two formatting refusals](article-format-compatibility-2026-10-31.md) are resolved
+  by protected opaque-block/fixed-layout handling (#356); original words,
+  punctuation, links and media remain protected. The
+  [56-call language evaluation](article-language-quality-evaluation-2026-11-01.md)
+  (#358) retains one genuine style-only false alarm and four initial label errors.
+  Its style regression and fresh controls passed the later frozen screen.
+  [Logic/context-risk delivery](article-review-context-acceptance-2026-11-01.md)
+  is merged in Toolbox #359 / Addon #339 / Cloud #1335: 9/9 useful positives,
+  14 completed negative controls without hints, one news control unavailable at
+  the 30-second provider deadline. It is not a passed news-context result.
+  Addon #340 adds receipt headroom, not retries or a longer model deadline.
+  Real installed browser/no-store audit passed. Remaining: independent author
+  feedback, general Chinese/long-article quality, untested content-risk categories,
+  and availability under real workloads. Only ordinary future feedback should
+  trigger more bounded evaluation; no full batch or silent retries are scheduled.
+  Review remains author-only; no hidden saves or publication block.
+  Real OSS writes/backup/restore and production release are explicitly deferred.
 - **Site-effect verification remains a deferred design (Toolbox / Cloud).**
   Existing Smart Ask consumes bounded deidentified packs. Deterministic
   before/after measurement, reviewed method references and comparable black-box

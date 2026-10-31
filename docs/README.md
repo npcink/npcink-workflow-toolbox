@@ -272,3 +272,5 @@ afterwards an archived record is edited only to fix link targets.
 - [推荐不推荐规则 v2](recommendation-abstention-v2.md)：Cloud 版本消费、健康空结果与 metadata-only 反馈。
 
 - [Logic/context-risk contract](article-review-context-v1.md), [frozen synthetic cases](article-review-context-cases-v1.json).
+
+- [Article logic/context-risk acceptance (2026-11-01)](article-review-context-acceptance-2026-11-01.md) — merged sources, frozen 24-call outcomes including one timeout, installed editor, no-store audit and closeout; [body-free evidence](article-review-context-evidence-2026-11-01.json).

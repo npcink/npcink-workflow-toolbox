@@ -5,17 +5,22 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-10-31.
+Last reviewed: 2026-11-01.
 
-**Logic/context-risk candidate:** the [compatible extension](article-review-context-v1.md)
-adds explicit checks to the existing read-only preflight section, strict two-quote
-logic scope, contextual adult-content hints and independent status disclosure.
-Source/offline browser evidence does not establish live-model or production acceptance.
+**Article review follow-up delivered:** formatting compatibility (#356), language
+quality evidence (#358), and the [logic/context-risk extension](article-review-context-v1.md)
+(#359 / Addon #339 / Cloud #1335) are merged. See the
+[2026-11-01 acceptance](article-review-context-acceptance-2026-11-01.md): 9/9 positive
+hits, 14 completed zero-hint controls, one timed-out news control retained as
+unavailable; real installed editor and 25-run no-store audit passed. Addon #340
+adds timeout-receipt transport margin. Broader accuracy, author feedback, OSS
+real writes/backup/restore and production release remain separate.
 
 **Language quality follow-up:** the [2026-11-01 evaluation](article-language-quality-evaluation-2026-11-01.md)
 records 56 explicit synthetic calls: 20/20 basic positive hits, one false alarm
 among 20 basic controls, separate context-label errors and fresh controls.
-General accuracy is not certified; style-only warnings need Cloud follow-up.
+General accuracy is not certified; the later Cloud extension suppresses style-only
+warnings and its original/fresh style controls passed; see current acceptance.
 
 **Formatting compatibility follow-up:** the two known validator refusals now
 pass preserved-block and fixed-layout spacing checks; see the
@@ -216,31 +221,18 @@ ordinary generation and Site Knowledge remain available. See
   119 chunks and a dirty source receipt; it is historical, not a fresh status
   check. Further retrieval comparison needs a named runtime/corpus from its owner; old ranking outcomes are not comparable
   on that reduced corpus. No shared runtime or index was changed this cycle.
-- The [article review report](article-review-report-v1.md) adds bounded local
-  coverage, evidence navigation and author-only punctuation review to existing
-  publish preflight. Generic grammar, cross-paragraph logic, body risk and
-  deterministic before/after site verification remain deferred in
-  [Known Issues](known-issues.md). Formatting preserves words, punctuation and
-  media; it changes only bounded layout and CJK/Latin-or-digit spacing.
-  The [reference research](article-review-reference-research-2026-10-30.md)
-  now informs a [Cloud consumer contract draft](article-review-cloud-contract-draft-v1.md)
-  and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). Chinese language
-  review is now merged in Toolbox #349, Addon #338 and Cloud #1331. Six synthetic
-  cases passed real WordPress-class → signed Addon → M4 Cloud/model → Toolbox
-  evidence validation, including useful positives and two zero-hint controls.
-  The [installed editor acceptance](article-language-installed-acceptance-2026-10-31.md)
-  now also passes real enqueued assets, real REST/Cloud output, exact quotes,
-  read-only navigation and edit/Undo invalidation on a disposable draft.
-  The subsequent [durable local installation](article-language-local-install-2026-10-31.md)
-  fixes the missing Toolbox mount, retains primary checkout paths and the existing
-  Addon vision-timeout overlay, and maintains the local development tunnel.
-  Real editor acceptance passed after recorded transport failures; no M4 promotion
-  or provider changes occurred. This is bounded developer
-  evidence, not broad accuracy, human adoption or production deployment.
-  Logic/content-risk remain disabled.
-  See [delivery acceptance](article-language-delivery-acceptance-2026-10-31.md)
-  for exact source, CI, accepted clean-master M4, durable no-store checks and the separate browser proof;
-  the 2026-10-30 unpushed-SHA checkpoint is historical.
+- The [article review report](article-review-report-v1.md) keeps formatting and
+  read-only language/logic/context-risk hints separate. Two historical formatting
+  refusals now pass protected compatibility checks (#356). The 56-call language
+  screen (#358) retains its original style-only false alarm and label mistakes;
+  that sentence and fresh style controls passed the later extension screen.
+  Toolbox #359, Addon #339 and Cloud #1335 deliver the compatible three-check
+  contract; Addon #340 adds HTTP receipt margin while keeping a 30-second model
+  budget and no retries. See [current acceptance](article-review-context-acceptance-2026-11-01.md)
+  for exact source/runtime, 24 initial model calls (one timeout), installed editor,
+  no-store audit and cleanup. Adult-context hints are not comprehensive content
+  risk, external fact checking or publication approval. Independent author value,
+  general accuracy, real OSS writes/backup/restore and production remain open.
 
 - Recommendation anchor eligibility now has an active
   [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical

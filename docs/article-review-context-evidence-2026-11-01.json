@@ -1,0 +1,1532 @@
+{
+  "contract": "article_review_context_acceptance_evidence.v1",
+  "date": "2026-11-01",
+  "source_policy": "synthetic_no_customer_content",
+  "scope": "bounded_developer_screen_not_independent_gold",
+  "fixture_sha256": "16aa0827a75d2220a4fa9482731c96c6fb799466c5301d45e73a11e0f4a6c786",
+  "targets": {
+    "positive_case_hit_min": 0.8,
+    "negative_case_false_alarm_max": 0.1,
+    "invalid_quote_ranges_max": 0,
+    "wordpress_writes_max": 0
+  },
+  "sources": {
+    "toolbox_candidate": "1de1114e02aca2838e7c1e8eac99f8be47705b17",
+    "toolbox_merge": "c4b2534b15b42036d8e48d8676021eb523384b45",
+    "addon_base_merge": "b80de5ff19b246692186a7e0fc5379edc4bc6c45",
+    "addon_installed_during_model_and_browser": "665b5a6fac2de8aecc3393e4828d206d8c76f899",
+    "cloud_candidate": "13ecb4a11eabc3f422c3203e1b8f64aca06292d3",
+    "cloud_merge": "b37618d830a08b19c141c39a160d3d071aed032c",
+    "m4_candidate_clean": true,
+    "m4_candidate_bundle_sha256": "cb8ceb375379a00d9fce01f6cb74cbe043ba95eb595cc13f38141725e222e309",
+    "addon_timeout_candidate": "d60bbe34d44611e2006014b42de2af7ba64bc754",
+    "addon_timeout_merge": "7249a210f7653bccb0f712d6eb40ba452b2e9b9b",
+    "addon_final_installed_local_overlay": "ae0a3d4145ed3a172e2190ffdf432c992c869862",
+    "addon_local_overlay_recovery_ref": "refs/local-install/20261101-context-review-final-vision",
+    "m4_accepted_revision": "b37618d830a08b19c141c39a160d3d071aed032c",
+    "m4_accepted_clean": true,
+    "m4_accepted_branch": "master",
+    "m4_promotion_pr": 1335,
+    "m4_accepted_bundle_sha256": "ec10684cc1d2e6eef457c15285535cb06b44a668a0c1d5cb996b95a5cd5f6476",
+    "cloud_candidate_and_merge_tree": "a6544933131e18f7014a19f015812d81bba87723"
+  },
+  "pull_requests": {
+    "toolbox": "https://github.com/npcink/npcink-workflow-toolbox/pull/359",
+    "addon": "https://github.com/npcink/npcink-cloud-addon/pull/339",
+    "cloud": "https://github.com/npcink/npcink-ai-cloud/pull/1335",
+    "addon_timeout": "https://github.com/npcink/npcink-cloud-addon/pull/340"
+  },
+  "metrics": {
+    "calls": 24,
+    "returned_completed_reports": 23,
+    "positive_cases": 9,
+    "positive_expected_kind_hits": 9,
+    "negative_cases": 15,
+    "negative_completed_without_hints": 14,
+    "negative_false_alarms": 0,
+    "negative_unavailable": 1,
+    "invalid_quote_ranges": 0,
+    "quality_retries": 0,
+    "wordpress_source_writes": 0,
+    "median_elapsed_seconds": 4.5435,
+    "max_elapsed_seconds": 30.007
+  },
+  "cases": [
+    {
+      "case_id": "logic-contradiction",
+      "group": "logic",
+      "expectation": "hint",
+      "expected_kinds": [
+        "contradiction"
+      ],
+      "observed_kinds": [
+        "contradiction"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_efab6c762ad540a7a4f7d164ee9b0cb2",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 7.249,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "logic-numeric",
+      "group": "logic",
+      "expectation": "hint",
+      "expected_kinds": [
+        "numeric_consistency"
+      ],
+      "observed_kinds": [
+        "numeric_consistency"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_b09e61b58fbd49c5bbe7be6a9f4b556e",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 4.852,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "logic-inference",
+      "group": "logic",
+      "expectation": "hint",
+      "expected_kinds": [
+        "inference_gap"
+      ],
+      "observed_kinds": [
+        "inference_gap"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_62fea9b3c8c04faa81f1c800956208e3",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 6.501,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "logic-verification",
+      "group": "logic",
+      "expectation": "hint",
+      "expected_kinds": [
+        "needs_verification"
+      ],
+      "observed_kinds": [
+        "needs_verification"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_bf31e04563d94e619c2d60b44bfb5a02",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 12.118,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "logic-within-numeric",
+      "group": "logic",
+      "expectation": "hint",
+      "expected_kinds": [
+        "numeric_consistency"
+      ],
+      "observed_kinds": [
+        "numeric_consistency"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_0c02a53f776444f2877bedf7c496fa91",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 5.422,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "logic-year-control",
+      "group": "logic",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_f203c02d94d64462a9e37b3fd7a747dc",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 2.745,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "logic-unit-control",
+      "group": "logic",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_a80bcf971009464880581f3d0c5e8f4d",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 6.147,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "logic-sample-control",
+      "group": "logic",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_9f00c96581bf4341b3562ee6c3137ff5",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.126,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "logic-qualified-control",
+      "group": "logic",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_f5f05e0b18d645d18f87b123a538ae3f",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.283,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "logic-hypothesis-control",
+      "group": "logic",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_bc443e25b1724f28baf3d7a27f755a6a",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 25.706,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "logic-opinion-control",
+      "group": "logic",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_a2c29f8e8d1f4965a5d547e8e8801074",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.806,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "risk-commercial-one",
+      "group": "content_risk",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sexual_context_review"
+      ],
+      "observed_kinds": [
+        "sexual_context_review"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_7b1bf5c0ac0c414898577854f401d7a9",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 5.528,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "risk-commercial-two",
+      "group": "content_risk",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sexual_context_review"
+      ],
+      "observed_kinds": [
+        "sexual_context_review"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_b0a5b224b6c34e129cdec3b4095a203a",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 13.448,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "risk-medical-control",
+      "group": "content_risk",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_c52fd4e9801d40e89224a5d1de532e1d",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.532,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "risk-education-control",
+      "group": "content_risk",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_aac8995d58144d81bd30b8d3c776dc93",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.193,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "risk-news-control",
+      "group": "content_risk",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "unavailable",
+      "checks": {
+        "language": {
+          "status": "unavailable",
+          "reason_code": "unavailable"
+        },
+        "logic": {
+          "status": "unavailable",
+          "reason_code": "unavailable"
+        },
+        "content_risk": {
+          "status": "unavailable",
+          "reason_code": "unavailable"
+        }
+      },
+      "expected_outcome": false,
+      "run_id": "run_31b8cc0e052f47eb8862e13d75acfa64",
+      "client_received_run_id": false,
+      "calls": 1,
+      "elapsed_seconds": 30.007,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": null,
+      "developer_semantic_disposition": "unavailable_not_quality_pass"
+    },
+    {
+      "case_id": "risk-literary-control",
+      "group": "content_risk",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_ce229f5aaf104d35bf425cd267cbdb69",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.126,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "language-style-regression",
+      "group": "language",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_4e296cc1726b4783a2eb0466e1142fbb",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 4.341,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "language-coordination-control",
+      "group": "language",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_b2f4cd21e79e472f82e92d0763d39d6d",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.034,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "language-modifier-control",
+      "group": "language",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_0b18247280654d7db9c5353839705909",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 2.629,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "language-punctuation",
+      "group": "language",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "observed_kinds": [
+        "punctuation"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_1c4f6fdc61c0452cb92eaf6a305172f1",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 4.746,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "instruction-control",
+      "group": "protocol",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_1937c74d61e740958657ba8789ec9af5",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 4.917,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    },
+    {
+      "case_id": "language-only-compatibility",
+      "group": "language",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "observed_kinds": [
+        "punctuation"
+      ],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        },
+        "content_risk": {
+          "status": "not_checked",
+          "reason_code": "not_supported"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_23434b81c97541f0bc44cd44f2ef144e",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 3.79,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "useful_expected_hint"
+    },
+    {
+      "case_id": "normal-commercial-control",
+      "group": "content_risk",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "observed_kinds": [],
+      "status": "ready",
+      "checks": {
+        "language": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "logic": {
+          "status": "completed",
+          "reason_code": "none"
+        },
+        "content_risk": {
+          "status": "completed",
+          "reason_code": "none"
+        }
+      },
+      "expected_outcome": true,
+      "run_id": "run_06624a11805847789ea81dc4035f8a9e",
+      "client_received_run_id": true,
+      "calls": 1,
+      "elapsed_seconds": 2.984,
+      "invalid_findings": 0,
+      "exact_utf16_quotes_verified": true,
+      "developer_semantic_disposition": "no_false_alarm_in_completed_report"
+    }
+  ],
+  "installed_browser": {
+    "contract": "article_language_installed_browser_evidence.v1",
+    "date": "2026-10-31T16:50:30.234Z",
+    "toolbox_revision": "1de1114e02aca2838e7c1e8eac99f8be47705b17",
+    "addon_revision": "665b5a6fac2de8aecc3393e4828d206d8c76f899",
+    "preflight_requests": 1,
+    "progressive_requests": 1,
+    "run_id": "run_9dd3bf9b078e4859b80865610bb918d9",
+    "status": "partial",
+    "findings": 2,
+    "kinds": [
+      "punctuation",
+      "numeric_consistency"
+    ],
+    "invalid_findings": 0,
+    "checks": {
+      "language": {
+        "status": "completed",
+        "reason_code": "none"
+      },
+      "logic": {
+        "status": "completed",
+        "reason_code": "none"
+      },
+      "content_risk": {
+        "status": "completed",
+        "reason_code": "none"
+      }
+    },
+    "actual_installed_assets_verified": [
+      "editor-content-format.js",
+      "editor-content-support.js"
+    ],
+    "substituted_results": false,
+    "injected_assets": false,
+    "exact_utf16_quotes": true,
+    "excluded_code_and_image": true,
+    "read_only_navigation": true,
+    "edit_undo_retires_report": true,
+    "editor_title_excerpt_content_unchanged": true,
+    "database_fixture_unchanged": true,
+    "post_write_attempts": 0,
+    "blocked_preference_attempts": 0,
+    "page_errors": 0,
+    "customer_content_sent": false,
+    "production_deployed": false,
+    "disposable_draft_deleted": true,
+    "temporary_session_destroyed": true
+  },
+  "no_store_audit": {
+    "contract": "article_review_live_no_store_audit.v1",
+    "read_only_transaction": true,
+    "rows": [
+      {
+        "run_id": "run_efab6c762ad540a7a4f7d164ee9b0cb2",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 645,
+        "tokens_out": 291,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_b09e61b58fbd49c5bbe7be6a9f4b556e",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 643,
+        "tokens_out": 255,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_62fea9b3c8c04faa81f1c800956208e3",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 649,
+        "tokens_out": 313,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_bf31e04563d94e619c2d60b44bfb5a02",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 626,
+        "tokens_out": 369,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_0c02a53f776444f2877bedf7c496fa91",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 625,
+        "tokens_out": 283,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_f203c02d94d64462a9e37b3fd7a747dc",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 619,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_a80bcf971009464880581f3d0c5e8f4d",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 621,
+        "tokens_out": 106,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_9f00c96581bf4341b3562ee6c3137ff5",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 647,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_f5f05e0b18d645d18f87b123a538ae3f",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 646,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_bc443e25b1724f28baf3d7a27f755a6a",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 619,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_a2c29f8e8d1f4965a5d547e8e8801074",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 620,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_7b1bf5c0ac0c414898577854f401d7a9",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 617,
+        "tokens_out": 235,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_b0a5b224b6c34e129cdec3b4095a203a",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 615,
+        "tokens_out": 383,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_c52fd4e9801d40e89224a5d1de532e1d",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 652,
+        "tokens_out": 92,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_aac8995d58144d81bd30b8d3c776dc93",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 628,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_ce229f5aaf104d35bf425cd267cbdb69",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 622,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_4e296cc1726b4783a2eb0466e1142fbb",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 605,
+        "tokens_out": 100,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_b2f4cd21e79e472f82e92d0763d39d6d",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 603,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_0b18247280654d7db9c5353839705909",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 605,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_1c4f6fdc61c0452cb92eaf6a305172f1",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 601,
+        "tokens_out": 117,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_1937c74d61e740958657ba8789ec9af5",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 635,
+        "tokens_out": 117,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_23434b81c97541f0bc44cd44f2ef144e",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 348,
+        "tokens_out": 82,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_06624a11805847789ea81dc4035f8a9e",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 623,
+        "tokens_out": 49,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      },
+      {
+        "run_id": "run_31b8cc0e052f47eb8862e13d75acfa64",
+        "status": "failed",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": false,
+        "durable_result_null": true,
+        "error_message_absent": false,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "metered_cost": 0.0,
+        "usage_events": 2
+      },
+      {
+        "run_id": "run_9dd3bf9b078e4859b80865610bb918d9",
+        "status": "succeeded",
+        "data_classification": "pii",
+        "storage_mode": "no_store",
+        "durable_input_empty": true,
+        "encrypted_input_absent": true,
+        "durable_result_omitted": true,
+        "durable_result_null": false,
+        "error_message_absent": true,
+        "article_or_review_text_found": false,
+        "provider_calls": 1,
+        "retry_count": 0,
+        "fallback_used": false,
+        "providers": [
+          "openai"
+        ],
+        "models": [
+          "gpt-6.1-sol"
+        ],
+        "tokens_in": 734,
+        "tokens_out": 381,
+        "metered_cost": 0.0,
+        "usage_events": 6
+      }
+    ]
+  },
+  "limitations": [
+    "One news control timed out and has no quality verdict; it remains failed in the original screen.",
+    "Developer-selected synthetic cases are not independent gold or general Chinese accuracy.",
+    "Context-risk covers adult sexual commercial/context hints only, not all content-safety categories.",
+    "Evidence validation proves quote identity and scope, not semantic correctness or external facts.",
+    "Upstream provider retention and billing were not independently verified.",
+    "No production deployment, WordPress.org release or real OSS writes/backup/restore."
+  ],
+  "verification": {
+    "toolbox_test_all": "passed, including final docs checkout",
+    "addon_test_all": "passed, including timeout patch and final installed overlay",
+    "addon_phpstan": "passed",
+    "addon_i18n_check": "passed after POT source references refreshed",
+    "m4_focused_tests": 73,
+    "first_matrix": {
+      "toolbox": "passed",
+      "addon": "passed",
+      "cloud_merged_sha": "needs_validation: backend missing"
+    },
+    "cloud_followup_matrix": {
+      "source_revision": "13ecb4a11eabc3f422c3203e1b8f64aca06292d3",
+      "authority": "github_ci",
+      "status": "passed",
+      "tree_equals_merge": true
+    },
+    "php_gates_repeated_after_matrix_missing_cloud_check": false,
+    "initial_addon_release_ci_failure": "POT source references stale; retained and fixed",
+    "cloud_pr_body_check": "latest passed; one earlier same-name run cancelled when superseded",
+    "existing_warnings": "Unrelated Starlette/httpx deprecation and PHP dynamic-property deprecation warnings observed; gates passed."
+  },
+  "closeout": {
+    "cloud_auxiliary_worktree_removed": true,
+    "addon_auxiliary_worktree_removed": true,
+    "feature_topic_recovery_refs_preserved": true,
+    "installed_primary_paths_retained": true,
+    "preexisting_vision_overlay_preserved_and_not_pushed": true,
+    "protected_toolbox_task_worktree_retained": true,
+    "other_owners_worktrees_untouched": true,
+    "documentation_closeout_branch": "published and cleaned separately after this receipt commit; final self-referential commit state is not embedded"
+  }
+}

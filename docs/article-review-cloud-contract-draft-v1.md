@@ -1,22 +1,15 @@
 # Cloud 文章检查消费方契约草案 v1
 
-2026-11-01：逻辑/风险扩展已进入源代码候选，严格字段与兼容方式以
-[本次扩展契约](article-review-context-v1.md) 为准。下文的“仅 language”描述
-保留为此前已交付的兼容基线；不能据此宣称新候选已完成运行或生产验收。
-
-状态：2026-10-31，中文 language 切片已合入 Toolbox #349、Addon #338、
-Cloud #1331，并通过真实安装编辑器验收和长期本地安装；见
-[会话收尾](article-review-session-closeout-2026-10-31.md)。逻辑/内容风险仍未启用，
-未做生产或 WordPress.org 发布。文件名保留 draft 以兼容历史引用；下文扩展设计仍是草案。
-文中的 `article_review_cloud_request.v1` / `article_review_cloud_result.v1`
-是已实现语言切片的契约名称，不代表新增工作流或第三种摘要包。Cloud
-后端、Addon facade 和 Toolbox 消费方必须以同一 revision 的测试结果为准，
-不能从文档推定生产可调用。
+2026-11-01：逻辑/风险兼容扩展已合入 Toolbox #359、Addon #339、Cloud #1335。
+严格字段与状态以[扩展契约](article-review-context-v1.md)为准，实际证据见
+[开发验收](article-review-context-acceptance-2026-11-01.md)。下文的“仅 language”
+保留为旧客户端兼容基线，不表示当前三项检查关闭，也不能据此推定生产可调用。
+文件名保留 draft 以兼容历史引用；早期总体示例不能替代当前严格 schema。
 调研依据见[一手来源与取舍](article-review-reference-research-2026-10-30.md)。
 
-## 当前已实现的语言切片
+## 旧客户端兼容的语言切片
 
-当前切片仅接受 `checks=["language"]`，不接受逻辑或内容风险请求。
+该兼容基线仅接受 `checks=["language"]`，不接受逻辑或内容风险请求。
 Cloud `input` 只含 `snapshot_sha256/language/checks/offset_unit/blocks`；
 `contract_version=article_review_cloud_request.v1` 位于外层 runtime envelope。
 Addon 的公开 facade 接受含契约名的本地请求，验证后移除 input 中的契约名。
@@ -32,7 +25,7 @@ Addon 的公开 facade 接受含契约名的本地请求，验证后移除 input
 代次失效机制已在候选接线中实现；见[当前消费实现](article-review-report-v1.md)
 及[离线跨仓/浏览器验收](article-language-integration-acceptance-2026-10-30.md)。
 下文包含早期的**总体设计与后续扩展提案**，尤其逻辑/风险的状态、字段与示例，
-不得据此放宽当前严格语言 schema。逻辑示例不是当前可执行请求。
+不得据此放宽当前严格 schema。扩展请求以当前契约及冻结样本为准。
 
 ## 目标与职责
 
