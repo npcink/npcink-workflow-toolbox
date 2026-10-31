@@ -2,7 +2,7 @@
 
 本轮把中文语句提示从离线候选推进到真实签名链路的小样本验收。
 Toolbox #349、Addon #338、Cloud #1331 均已通过受保护检查并合入。
-Cloud 精确候选 SHA 的 GitHub 源码门已通过；M4 晋升状态单独列明。
+Cloud 精确候选 SHA 的 GitHub 源码门已通过；M4 已晋升为干净 master 验收版本。
 
 产品边界不变：排版只处理版式，保留文字、符号、标点、链接与多媒体。
 语句检查只展示原样引文、位置、疑点和核对方向；作者自行判断并手动修改。
@@ -18,7 +18,7 @@ Cloud 精确候选 SHA 的 GitHub 源码门已通过；M4 晋升状态单独列�
 | Addon | PR [#338](https://github.com/npcink/npcink-cloud-addon/pull/338), merged `e8f7d7e` | PHP 8.0/8.2/8.4, WordPress AI blocking lanes, PHPStan and release static gates passed; POT freshness failure was fixed before merge |
 | Cloud | PR [#1331](https://github.com/npcink/npcink-ai-cloud/pull/1331), tested `d9d668c4`, merged `7002bd56` | Local changed Python quality/type gates, 42 review tests and 12 result-normalization regressions passed; required CI and exact-SHA GitHub matrix passed |
 | M4 candidate | Clean `d9d668c4` | Sync and service health passed; real signed review calls passed |
-| M4 accepted | Promotion attempted from clean master `7002bd56`, exit 75 | Separate active image-timeout acceptance owns the shared operation lock; no lock was removed and no accepted-master state is claimed |
+| M4 accepted | Clean master `7002bd56`, promotion PR #1331 | Retry passed after the shared lock was released; status is accepted, API/frontend/database/Redis health and signed WordPress connectivity passed |
 | Production / WordPress release | No operation | No production deployment or WordPress.org release |
 
 Local Qwen findings were triaged with source/test evidence. Fixes include portable
@@ -80,10 +80,16 @@ was still pending. A subsequent Cloud-only exact-SHA matrix passed at
 `d9d668c4`; its tree is identical to merged `7002bd56`. The old source-gate
 limitation is therefore resolved without repeating both unchanged PHP suites.
 
-Next: after the current image-timeout owner releases the shared M4 lane, run
-`m4:preview:promote -- --pr 1331` from clean current master and verify status plus
-signed connectivity. No extra full model batch is needed: the tested candidate
-and merged revision have identical Git trees. Then verify the installed editor surface
+The first clean-master promotion attempt exited 75 while the separate image-timeout
+acceptance owned the operation lock. After that lock was released, promotion
+succeeded from current clean master `7002bd56`. Status confirms
+`acceptance_state=accepted`, `promotion_pr=1331`, `source_branch=master`, and
+`source_dirty=false`. The HTTP liveness receipt reports the same revision.
+One real signed Addon entitlement read passed after promotion, with zero provider
+calls and zero WordPress writes. No lock was removed. No extra model batch was
+needed: the tested candidate and merged revision have identical Git trees.
+
+Next: verify the installed editor surface
 and use ordinary author feedback to improve Chinese
 language usefulness. Do not enable logic/content-risk or automatic correction.
 OSS remains outside this language-review slice; its remote media write modes
