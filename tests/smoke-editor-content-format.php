@@ -116,6 +116,37 @@ foreach ( array( 'audio', 'video', 'embed', 'image', 'gallery', 'vendor/custom' 
 		format_assert( ! Editor_Content_Format::valid_result( $with_media, $bad ), 'v2 refuses URL or caption correction in ' . $name );
 	}
 }
+// Regression: one opaque/invalid paragraph must not block safe siblings.
+foreach ( array( '<span class="legacy">中文AI。。</span>', '<strong>中文AI', '<a href="/keep">中文AI' ) as $opaque ) {
+	$opaque_block = '<!-- wp:paragraph --><p>' . $opaque . '</p><!-- /wp:paragraph -->';
+	$mixed_source = $opaque_block . $rich_source;
+	$mixed_result = $rich_result;
+	$mixed_result['source_sha256'] = hash( 'sha256', $mixed_source );
+	$mixed_result['candidate'] = $opaque_block . $rich_candidate;
+	$mixed_result['candidate_sha256'] = hash( 'sha256', $mixed_result['candidate'] );
+	format_assert( Editor_Content_Format::valid_result( $mixed_source, $mixed_result ), 'v2 treats unsupported/unbalanced paragraphs as opaque while formatting siblings.' );
+	foreach ( array( '中文 AI', '中文AI。', '更改AI' ) as $changed ) {
+		$bad = $mixed_result;
+		$bad['candidate'] = str_replace( $opaque_block, str_replace( '中文AI', $changed, $opaque_block ), $bad['candidate'] );
+		$bad['candidate_sha256'] = hash( 'sha256', $bad['candidate'] );
+		format_assert( ! Editor_Content_Format::valid_result( $mixed_source, $bad ), 'Opaque paragraphs reject spacing, punctuation and text mutations.' );
+	}
+}
+$fixed_source = '<!-- wp:heading {"level":3} --><h3>标题AI<a href="/keep">链接AI</a></h3><!-- /wp:heading -->'
+	. '<!-- wp:quote --><blockquote class="wp-block-quote"><!-- wp:paragraph --><p>引用AI。。</p><!-- /wp:paragraph --></blockquote><!-- /wp:quote -->';
+$fixed_candidate = str_replace( array( '标题AI', '引用AI' ), array( '标题 AI', '引用 AI' ), $fixed_source );
+$fixed_result = $rich_result;
+$fixed_result['source_sha256'] = hash( 'sha256', $fixed_source . $rich_source );
+$fixed_result['candidate'] = $fixed_candidate . $rich_candidate;
+$fixed_result['candidate_sha256'] = hash( 'sha256', $fixed_result['candidate'] );
+$fixed_result['inserted_spaces'] = 2;
+format_assert( Editor_Content_Format::valid_result( $fixed_source . $rich_source, $fixed_result ), 'v2 accepts v1-safe heading/quote spacing alongside structural changes.' );
+foreach ( array( array( '链接AI', '链接 AI' ), array( '/keep', '/other' ), array( '。。', '。' ), array( '<h3>', '<h3 class="new">' ), array( '引用 AI', '改写 AI' ) ) as $mutation ) {
+	$bad = $fixed_result;
+	$bad['candidate'] = str_replace( $mutation[0], $mutation[1], $bad['candidate'] );
+	$bad['candidate_sha256'] = hash( 'sha256', $bad['candidate'] );
+	format_assert( ! Editor_Content_Format::valid_result( $fixed_source . $rich_source, $bad ), 'Fixed-layout blocks retain links, punctuation, attributes and words.' );
+}
 $request->set_header( 'Content-Type', 'application/json' );
 $request->set_body( wp_json_encode( array( 'intent' => 'format_content', 'post_id' => 1, 'content' => $source ) ) );
 wp_set_current_user( 0 );

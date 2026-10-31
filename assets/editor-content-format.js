@@ -63,6 +63,28 @@
 		return updates;
 	}
 
+	// A fixed-layout heading/quote still uses the existing v1 spacing guard.
+	function spacingPreserved(source, candidate) {
+		if (source === candidate) return true;
+		try {
+			prepare(wp.blocks.parse(source), source, { contract_version: 'content_format_candidate.v1', format: 'html',
+				status: source === candidate ? 'UNCHANGED' : 'CHANGED', candidate,
+				visible_characters_preserved: true, direct_wordpress_write: false, persisted: false });
+		} catch { return false; }
+		const parse = (html) => new DOMParser().parseFromString(html, 'text/html').body;
+		const attributes = (node) => JSON.stringify(Array.from(node.attributes).map((a) => [a.name, a.value]).sort());
+		const editable = ['BODY', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'STRONG', 'EM', 'B', 'I', 'S', 'DEL', 'BR'];
+		function same(before, after) {
+			if (before.nodeType !== after.nodeType) return false;
+			if (before.nodeType === 3) return onlyInsertedSpaces(before.nodeValue, after.nodeValue);
+			if (before.nodeType !== 1) return before.nodeValue === after.nodeValue;
+			if (before.tagName !== after.tagName || attributes(before) !== attributes(after)) return false;
+			if (!editable.includes(before.tagName)) return before.outerHTML === after.outerHTML;
+			return before.childNodes.length === after.childNodes.length && Array.from(before.childNodes).every((node, i) => same(node, after.childNodes[i]));
+		}
+		return same(parse(source), parse(candidate));
+	}
+
 	function prepareStructure(sourceBlocks, source, result) {
 		if (result.format !== 'html' || result.visible_characters_preserved !== true || result.direct_wordpress_write !== false
 			|| result.persisted !== false || typeof result.candidate !== 'string' || result.candidate.length > 200000
@@ -80,6 +102,8 @@
 				else tokens.push([kind, value]);
 			};
 			function inline(html) {
+				const result = [];
+				const append = (kind, value) => result.push([kind, value]);
 				const doc = new DOMParser().parseFromString(html, 'text/html');
 				function walk(node, linked = false) {
 					if (node.nodeType === 3) { append(linked ? 'protected_text' : 'text', node.nodeValue); return; }
@@ -92,6 +116,7 @@
 					append('close', node.tagName);
 				}
 				doc.body.childNodes.forEach((node) => walk(node));
+				return result;
 			}
 			const plain = (block, keys) => Object.entries(block.attributes).every(([key, value]) => {
 				const schema = wp.blocks.getBlockType(block.name)?.attributes?.[key];
@@ -99,12 +124,21 @@
 					|| (schema && Object.prototype.hasOwnProperty.call(schema, 'default') && JSON.stringify(value) === JSON.stringify(schema.default));
 			});
 			for (const block of blocks) {
-				if (block.isValid === false) throw new Error(t('The formatting result contains invalid blocks.'));
-				if (block.name === 'core/paragraph' && plain(block, ['content']) && !block.innerBlocks.length) inline(block.attributes.content);
+				const raw = wp.blocks.serialize([block]);
+				if (block.isValid === false) { append('protected', raw); continue; }
+				let fragments;
+				if (block.name === 'core/paragraph' && plain(block, ['content']) && !block.innerBlocks.length) fragments = [block.attributes.content];
 				else if (block.name === 'core/list' && plain(block, []) && !block.attributes.ordered
 					&& block.innerBlocks.every((item) => item.name === 'core/list-item' && item.isValid !== false && plain(item, ['content']) && !item.innerBlocks.length)) {
-					block.innerBlocks.forEach((item) => inline(item.attributes.content));
-				} else append('protected', wp.blocks.serialize([block]));
+					fragments = block.innerBlocks.map((item) => item.attributes.content);
+				} else {
+					append(permitted.includes(block.name) && !['core/code', 'core/preformatted'].includes(block.name) && !block.attributes.metadata ? 'spacing' : 'protected', raw);
+					continue;
+				}
+				let projected;
+				try { projected = fragments.flatMap(inline); }
+				catch { append('protected', raw); continue; }
+				projected.forEach(([kind, value]) => append(kind, value));
 			}
 			return tokens;
 		}
@@ -112,7 +146,7 @@
 		const afterTokens = projection(after);
 		if (beforeTokens.length !== afterTokens.length || beforeTokens.some(([kind, value], index) => {
 			const next = afterTokens[index];
-			return kind !== next[0] || (kind === 'text' ? !onlyInsertedSpaces(value, next[1]) : value !== next[1]);
+			return kind !== next[0] || (kind === 'text' ? !onlyInsertedSpaces(value, next[1]) : kind === 'spacing' ? !spacingPreserved(value, next[1]) : value !== next[1]);
 		})) throw new Error(t('The formatting result changed the original or protected content. The original text is unchanged.'));
 		const originals = new Map();
 		sourceBlocks.forEach((block) => {

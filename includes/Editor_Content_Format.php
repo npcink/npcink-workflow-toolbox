@@ -76,14 +76,12 @@ final class Editor_Content_Format {
 			? ( $source === $candidate ? 'REVIEW' : 'PARTIAL' )
 			: ( $source === $candidate ? 'UNCHANGED' : 'CHANGED' );
 		if ( $expected_status !== $result['status']
-			|| strlen( $candidate ) - strlen( $source ) !== ( $result['inserted_spaces'] ?? null )
-			|| ! self::only_inserted_spaces( $source, $candidate ) ) {
+			|| strlen( $candidate ) - strlen( $source ) !== ( $result['inserted_spaces'] ?? null ) ) {
 			return false;
 		}
 		// Mask editable text using WordPress's tokenizer, retaining exact markup,
 		// comments, attributes and protected text. This validates, not formats.
-		return self::protected_blocks_unchanged( parse_blocks( $source ), parse_blocks( $candidate ) )
-			&& self::markup_fingerprint( $source ) === self::markup_fingerprint( $candidate );
+		return self::spacing_preserved( $source, $candidate );
 	}
 
 	private static function protected_blocks_unchanged( array $before, array $after ): bool {
@@ -125,7 +123,8 @@ final class Editor_Content_Format {
 			return false; }
 		foreach ( $before as $index => $token ) {
 			$next = $after[ $index ];
-			if ( $token[0] !== $next[0] || ( 'text' === $token[0] ? ! self::only_inserted_spaces( $token[1], $next[1] ) : $token !== $next ) ) {
+			if ( $token[0] !== $next[0] || ( 'text' === $token[0] ? ! self::only_inserted_spaces( $token[1], $next[1] )
+				: ( 'spacing' === $token[0] ? ! self::spacing_preserved( $token[1], $next[1] ) : $token !== $next ) ) ) {
 				return false; }
 		}
 		return true;
@@ -155,39 +154,66 @@ final class Editor_Content_Format {
 						$fragments[] = $match[1];
 					}
 				} else {
-					$append( 'protected', serialize_block( $block ) );
+					$spacing = in_array( $block['blockName'], array( 'core/paragraph', 'core/heading', 'core/list', 'core/list-item', 'core/quote' ), true )
+						&& ! isset( $block['attrs']['metadata'] );
+					$append( $spacing ? 'spacing' : 'protected', serialize_block( $block ) );
 					continue; }
-				foreach ( $fragments as $html ) {
-					$parser = new WP_HTML_Tag_Processor( $html );
-					$stack  = array();
-					while ( $parser->next_token() ) {
-						$type = $parser->get_token_type();
-						if ( '#text' === $type ) {
-							$append( array_intersect( array( 'A', 'CODE' ), $stack ) ? 'protected_text' : 'text', $parser->get_modifiable_text() );
-							continue; }
-						if ( '#tag' !== $type ) {
-							return false; }
-						$tag   = $parser->get_tag();
-						$attrs = array();
-						foreach ( $parser->get_attribute_names_with_prefix( '' ) ?? array() as $name ) {
-							$attrs[ $name ] = $parser->get_attribute( $name ); }
-						ksort( $attrs );
-						if ( 'BR' === $tag && ! $attrs && ! $parser->is_tag_closer() ) {
-							continue; }
-						if ( ! in_array( $tag, array( 'A', 'STRONG', 'EM', 'B', 'I', 'S', 'DEL', 'CODE' ), true ) ) {
-							return false; }
-						if ( $parser->is_tag_closer() ) {
-							if ( array_pop( $stack ) !== $tag ) {
-												return false; }
-						} else {
-										$stack[] = $tag; }
-						$append( 'tag', array( $tag, $parser->is_tag_closer(), $attrs ) );
-					}
-					if ( $stack ) {
-						return false; }
+				$inline = self::inline_projection( $fragments );
+				if ( false === $inline ) {
+					// An unsupported fragment is opaque, not a reason to reject safe siblings.
+					$append( 'protected', serialize_block( $block ) );
+					continue;
+				}
+				foreach ( $inline as $token ) {
+					$append( $token[0], $token[1] );
 				}
 		}
 		return $tokens;
+	}
+
+	/** Unsupported or unbalanced inline HTML must remain byte-identical. */
+	private static function inline_projection( array $fragments ) {
+		$tokens = array();
+		foreach ( $fragments as $html ) {
+			$parser = new WP_HTML_Tag_Processor( $html );
+			$stack  = array();
+			while ( $parser->next_token() ) {
+				$type = $parser->get_token_type();
+				if ( '#text' === $type ) {
+					$tokens[] = array( array_intersect( array( 'A', 'CODE' ), $stack ) ? 'protected_text' : 'text', $parser->get_modifiable_text() );
+					continue; }
+				if ( '#tag' !== $type ) {
+					return false; }
+				$tag   = $parser->get_tag();
+				$attrs = array();
+				foreach ( $parser->get_attribute_names_with_prefix( '' ) ?? array() as $name ) {
+					$attrs[ $name ] = $parser->get_attribute( $name ); }
+				ksort( $attrs );
+				if ( 'BR' === $tag && ! $attrs && ! $parser->is_tag_closer() ) {
+					continue; }
+				if ( ! in_array( $tag, array( 'A', 'STRONG', 'EM', 'B', 'I', 'S', 'DEL', 'CODE' ), true ) ) {
+					return false; }
+				if ( $parser->is_tag_closer() ) {
+					if ( array_pop( $stack ) !== $tag ) {
+						return false; }
+				} else {
+					$stack[] = $tag; }
+				$tokens[] = array( 'tag', array( $tag, $parser->is_tag_closer(), $attrs ) );
+			}
+			if ( $stack ) {
+				return false; }
+		}
+		return $tokens;
+	}
+
+	/** Reuse the v1 spacing guard for blocks whose layout must not change. */
+	private static function spacing_preserved( string $source, string $candidate ): bool {
+		if ( $source === $candidate ) {
+			return true;
+		}
+		return self::only_inserted_spaces( $source, $candidate )
+			&& self::protected_blocks_unchanged( parse_blocks( $source ), parse_blocks( $candidate ) )
+			&& self::markup_fingerprint( $source ) === self::markup_fingerprint( $candidate );
 	}
 
 	public static function only_inserted_spaces( string $source, string $candidate ): bool {

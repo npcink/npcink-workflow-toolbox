@@ -62,6 +62,21 @@ idempotence, undo/redo and failure preservation. Its ignored
 Screenshots must also match the operator's structural reference. Scores are
 development evidence, never user acceptance or write authority.
 
+### Compatibility guard follow-up — 2026-10-31
+
+Unsupported or unbalanced plain-paragraph inline fragments are compared as
+opaque complete blocks. They may remain untouched while a safe sibling is
+split; any change to the opaque fragment still fails. Native invalid blocks
+remain opaque in the browser and retain their original identity.
+
+Headings, quotes and attributed supported blocks retain their complete layout.
+Only the existing v1-safe CJK/Latin-or-digit spacing may change inside them;
+PHP rechecks exact markup, attributes and protected subtrees, and the browser
+rechecks block attributes and protected inline nodes. Links, code, media,
+metadata-bound blocks, original whitespace and punctuation remain protected.
+No Cloud formatting rule, Addon request or backend write is added.
+See [compatibility verification](article-format-compatibility-2026-10-31.md).
+
 ### Structure Candidate Evidence, 2026-09-08
 
 M4 bundle `fa41e2aa60ecfb82f1a2e07cb273c81f86fe88742fde8ab5bb6641364f727d67`

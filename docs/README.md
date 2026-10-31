@@ -131,6 +131,7 @@ Start from the active documents below before changing code.
 - [Durable local language-review installation (2026-10-31)](article-language-local-install-2026-10-31.md) and [body-free receipt](article-language-local-install-evidence-2026-10-31.json) — primary mounts retained, local vision timeout preserved, managed development tunnel and real editor recheck passed.
 - [Article review session closeout (2026-10-31)](article-review-session-closeout-2026-10-31.md) — verified merged PRs, cleanup and explicit remaining owners; [delivery rules and lessons](article-review-delivery-lessons-v1.md) govern follow-up work.
 - [文章审阅同行/开源调研](article-review-reference-research-2026-10-30.md)、[Cloud 检查消费方契约草案](article-review-cloud-contract-draft-v1.md)与[中文合成验证种子](article-review-evaluation-seeds-v1.json) — 中文语句切片已合并并本地安装；逻辑与内容风险仍未启用，生产发布未执行。
+- [Formatting compatibility follow-up (2026-10-31)](article-format-compatibility-2026-10-31.md) and [body-free receipt](article-format-compatibility-evidence-2026-10-31.json) — two known validator refusals resolved with opaque blocks and v1-safe heading/quote spacing.
 - [Formatting preservation acceptance (2026-10-30)](article-format-preservation-acceptance-2026-10-30.md) and [body-free evidence](article-format-preservation-evidence-2026-10-30.json).
 - [Editor Content Format V1](editor-content-format-v1.md)
 - [Editor Content Support Recommendation Review](editor-content-support-recommendation-review.md)
