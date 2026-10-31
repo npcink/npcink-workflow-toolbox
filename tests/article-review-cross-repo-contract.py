@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--addon-root', type=Path, required=True)
 parser.add_argument('--cloud-root', type=Path, required=True)
 parser.add_argument('--php', default='php')
+parser.add_argument('--extended', action='store_true', help='Include logic and risk offline bridge cases')
 parser.add_argument('--browser', action='store_true', help='Read synthetic browser payload on stdin; return report JSON')
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
@@ -73,13 +74,29 @@ def bridge(payload):
                 {'block_ref': block.block_ref, 'quote': quote, 'occurrence': 0}],
                 'reason': '重复标点可能有意，请结合上下文核对。',
                 'review_direction': '请作者确认是否符合表达意图。'})
-    result = build_result({'output_text': json.dumps({'findings': findings[:12]}, ensure_ascii=False)}, runtime['input_payload'])
+    if 'logic' in snapshot.checks:
+        bodies = [b for b in snapshot.blocks if b.kind == 'body' and '总支出' in b.text]
+        if len(bodies) >= 2:
+            findings.append({'kind': 'numeric_consistency', 'scope': 'across_blocks',
+                'evidence': [{'block_ref': b.block_ref, 'quote': b.text, 'occurrence': 0} for b in bodies[:2]],
+                'reason': '合成离线协议用例：同一口径的数字需作者核对。', 'review_direction': '核对原始账目。'})
+    if 'content_risk' in snapshot.checks:
+        for b in snapshot.blocks:
+            if '成人色情' in b.text:
+                findings.append({'kind': 'sexual_context_review', 'context': 'commercial',
+                    'evidence': [{'block_ref': b.block_ref, 'quote': b.text, 'occurrence': 0}],
+                    'reason': '合成离线协议用例：成人内容推广需结合站点政策人工复核。',
+                    'review_direction': '由作者判断语境和适用政策。'})
+    raw = {'findings': findings[:12]}
+    if snapshot.checks != ['language']:
+        raw['checks'] = {c: {'status': 'completed', 'reason_code': 'none'} for c in snapshot.checks}
+    result = build_result({'output_text': json.dumps(raw, ensure_ascii=False)}, runtime['input_payload'])
     projected = php(consumer_php, {'payload': payload, 'response': {'status': 'ok',
         'run_id': 'synthetic-offline-bridge', 'data': {'result': result}}}, root)
     section = projected['section']
     assert section['status'] in ('ready', 'partial')
     assert len(section['items']) == len(result['findings'])
-    assert section['checks']['logic']['status'] == 'not_checked'
+    assert section['checks']['logic']['status'] == ('completed' if 'logic' in snapshot.checks else 'not_checked')
     assert section['direct_wordpress_write'] is False
     return section, projected['sections']
 
@@ -96,3 +113,15 @@ else:
         if text.count('，，') > 1:
             assert section['items'][0]['source_location']['status'] == 'unavailable'
     print('PASS: four synthetic Toolbox/Addon/Cloud round trips; exact Unicode, UTF-16, repeated quotes, zero findings and read-only projection.')
+
+if args.extended:
+    cases = [
+        ['2025年甲项目总支出10万元。', '同年同一项目总支出12万元。'],
+        ['成人色情影片付费点播。'],
+    ]
+    for texts in cases:
+        section, _ = bridge({'article_review_snapshot': {'checks': ['language', 'logic', 'content_risk'],
+            'blocks': [{'kind': 'body', 'client_id': f'synthetic-{i}', 'text': t} for i, t in enumerate(texts)],
+            'coverage': {'eligible': len(texts)}}})
+        assert section['items'] and section['items'][0]['check'] in ('logic', 'content_risk')
+    print('PASS: extended logic/risk round trips keep category, two exact body locations and context.')

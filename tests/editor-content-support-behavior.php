@@ -898,6 +898,57 @@ foreach ( $bad_findings as $bad ) {
 }
 $npcink_toolbox_article_review_response = new WP_Error( 'cloud_unavailable', 'unavailable' );
 npcink_toolbox_editor_flow_assert( 'unavailable' === $run_review( $review_payload )['status'], 'Cloud failure degrades only its advisory language section.' );
+// Explicit extended callers preserve check identity and every original evidence span.
+$extended_payload = $review_payload;
+$extended_payload['article_review_snapshot']['checks'] = array( 'language', 'logic', 'content_risk' );
+$extended_payload['article_review_snapshot']['blocks'] = array(
+    array( 'kind' => 'body', 'client_id' => 'logic-a', 'text' => '2025年总支出是10万元。' ),
+    array( 'kind' => 'body', 'client_id' => 'logic-b', 'text' => '上述同一年同一项目的总支出是12万元。' ),
+);
+$extended_result = $base_result;
+$extended_result['snapshot_sha256'] = '';
+foreach ( array( 'language', 'logic', 'content_risk' ) as $check ) {
+    $extended_result['checks'][ $check ] = array( 'status' => 'completed', 'reason_code' => 'none' );
+}
+$logic_item = $base_finding;
+$logic_item['check'] = 'logic'; $logic_item['kind'] = 'contradiction'; $logic_item['scope'] = 'across_blocks';
+$logic_item['evidence'] = array(
+    array( 'block_ref' => 'b1', 'start' => 5, 'end' => 14, 'quote' => '总支出是10万元。' ),
+    array( 'block_ref' => 'b2', 'start' => 10, 'end' => 19, 'quote' => '总支出是12万元。' ),
+);
+$extended_result['findings'] = array( $logic_item );
+$npcink_toolbox_article_review_response = array( 'data' => array( 'result' => $extended_result ) );
+$section = $run_review( $extended_payload );
+npcink_toolbox_editor_flow_assert( 1 === count( $section['items'] ) && 'logic-b' === $section['items'][0]['evidence_refs'][1]['client_id'], 'Cross-paragraph logic retains two independently verified author-only locations.' );
+$sent = end( $GLOBALS['npcink_toolbox_article_review_inputs'] );
+npcink_toolbox_editor_flow_assert( $sent['checks'] === array( 'language', 'logic', 'content_risk' ), 'Explicit checks reach the fixed Addon facade without changing old callers.' );
+foreach ( array( 'duplicate', 'single_body', 'missing_scope', 'wrong_context', 'forged' ) as $case ) {
+    $bad = $logic_item;
+    if ( 'duplicate' === $case ) { $bad['evidence'][1] = $bad['evidence'][0]; }
+    if ( 'single_body' === $case ) { $bad['evidence'][1] = array( 'block_ref' => 'b1', 'start' => 0, 'end' => 5, 'quote' => '2025年' ); }
+    if ( 'missing_scope' === $case ) { unset( $bad['scope'] ); }
+    if ( 'wrong_context' === $case ) { $bad['context'] = 'unknown'; }
+    if ( 'forged' === $case ) { $bad['evidence'][1]['quote'] = '伪造'; }
+    $npcink_toolbox_article_review_response['data']['result'] = $extended_result;
+    $npcink_toolbox_article_review_response['data']['result']['findings'] = array( $bad );
+    $section = $run_review( $extended_payload );
+    npcink_toolbox_editor_flow_assert( 'partial' === $section['status'] && empty( $section['items'] ), 'Invalid semantic scope, duplicate or forged logic evidence cannot be displayed.' );
+}
+$npcink_toolbox_article_review_response['data']['result'] = $extended_result;
+$npcink_toolbox_article_review_response['data']['result']['findings'] = array();
+$npcink_toolbox_article_review_response['data']['result']['checks']['content_risk'] = array( 'status' => 'refused', 'reason_code' => 'provider_refused' );
+$section = $run_review( $extended_payload );
+npcink_toolbox_editor_flow_assert( 'partial' === $section['status'] && 'refused' === $section['checks']['content_risk']['status'], 'Risk refusal remains separate from completed language/logic and zero findings.' );
+$before_calls = count( $GLOBALS['npcink_toolbox_article_review_inputs'] );
+$bad = $extended_payload; $bad['article_review_snapshot']['checks'] = array( 'logic', 'language' );
+npcink_toolbox_editor_flow_assert( 'unavailable' === $run_review( $bad )['status'] && $before_calls === count( $GLOBALS['npcink_toolbox_article_review_inputs'] ), 'Unsorted check selection cannot call Cloud.' );
+$npcink_toolbox_article_review_response = new WP_Error( 'cloud_failure', 'private provider text', array( 'cloud_error_code' => 'provider.timeout' ) );
+$section = $run_review( $extended_payload );
+npcink_toolbox_editor_flow_assert( 'failed' === $section['checks']['logic']['status'] && 'timeout' === $section['checks']['logic']['reason_code'] && false === strpos( json_encode( $section ), 'private provider text' ), 'Timeout is disclosed without provider prose, retry or a misleading zero-hint success.' );
+
+$npcink_toolbox_article_review_response = new WP_Error( 'cloud_failure', 'private refusal prose', array( 'cloud_error_code' => 'provider.content_filtered' ) );
+$section = $run_review( $extended_payload );
+npcink_toolbox_editor_flow_assert( 'refused' === $section['checks']['content_risk']['status'] && false === strpos( json_encode( $section ), 'private refusal prose' ), 'Normalized provider content-filter refusal remains distinct from failure or a completed risk check.' );
 $npcink_toolbox_article_review_response = $review_response_backup;
 
 // 9. No default-button intent performed any WordPress write, and none of them

@@ -118,7 +118,12 @@ try {
 			return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Offline cross-repository bridge failed.' }) });
 		}
 		if (mode === 'unavailable') report.sections.article_language_review = { status: 'unavailable', message: 'Cloud 中文语句提示暂不可用；本地发布前检查仍可继续。' };
+		if (mode === 'refused') {
+			report.sections.article_language_review.status = 'partial';
+			report.sections.article_language_review.checks.content_risk = { status: 'refused', reason_code: 'provider_refused' };
+		}
 		if (mode === 'partial') {
+			report.sections.article_language_review.status = 'partial';
 			report.sections.article_language_review.invalid_finding_count = 1;
 			report.sections.article_language_review.result_limit_reached = true;
 		}
@@ -144,7 +149,7 @@ try {
 	assert.equal(await review.locator('blockquote').evaluate((node) => getComputedStyle(node).whiteSpace), 'pre-wrap');
 	assert.equal(await review.getByRole('button').count(), 1);
 	assert.equal(await review.getByRole('textbox').count(), 0);
-	assert.match(await review.innerText(), /逻辑.*not.checked|逻辑.*尚未检查|逻辑.*Not checked/);
+	assert.match(await review.innerText(), /逻辑：本次范围分析完成/);
 	await locate().click();
 	assert.equal(await page.evaluate(() => wp.data.select('core/block-editor').getSelectedBlock()?.name), 'core/paragraph');
 	assert.equal(await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent()), original);
@@ -178,11 +183,28 @@ try {
 	assert.ok(await locate().isDisabled());
 	console.log('PASS: in-flight draft edit leaves the returned report stale.');
 
+	// Every cross-paragraph quote gets its own read-only location and expires together.
+	await page.evaluate(() => wp.data.dispatch('core/block-editor').resetBlocks([
+		wp.blocks.createBlock('core/paragraph', { content: '2025年甲项目总支出10万元。' }),
+		wp.blocks.createBlock('core/paragraph', { content: '同年同一项目总支出12万元。' }),
+	]));
+	await start(); await locate().waitFor();
+	assert.equal(await review.getByRole('button').count(), 2);
+	const crossOriginal = await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
+	await review.getByRole('button').nth(1).click();
+	assert.match(await page.evaluate(() => wp.data.select('core/block-editor').getSelectedBlock().attributes.content), /12万元/);
+	assert.equal(await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent()), crossOriginal);
+	await page.evaluate(() => wp.data.dispatch('core/editor').editPost({ excerpt: '更新摘要' }));
+	await page.waitForFunction(() => [...document.querySelectorAll('.npcink-toolbox-editor-support__article-language-review button')].every((button) => button.disabled));
+	console.log('PASS: both cross-paragraph locations are read-only and expire together.');
 	mode = 'partial';
 	await start(); await locate().waitFor();
 	assert.match(await review.innerText(), /已隐藏 1 条/);
 	assert.match(await review.innerText(), /数量上限/);
 	assert.match(await review.innerText(), /部分内容|不完整/);
+	mode = 'refused';
+	await start(); await locate().waitFor();
+	assert.match(await review.innerText(), /成人内容语境风险：未能分析（拒绝）/);
 	mode = 'unavailable';
 	const beforeUnavailable = await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
 	await start();

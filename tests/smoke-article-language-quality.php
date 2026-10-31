@@ -6,7 +6,7 @@ $output=getenv('NPCINK_ARTICLE_QUALITY_OUTPUT');
 $selected=array_filter(explode(',',getenv('NPCINK_ARTICLE_QUALITY_IDS')?:''));
 if (!$fixture || !$output || file_exists($output)) throw new RuntimeException('New output and frozen fixture required');
 $source=json_decode(file_get_contents($fixture),true,512,JSON_THROW_ON_ERROR);
-if (($source['contract']??'')!=='article_language_quality_cases.v1'||($source['source_policy']??'')!=='synthetic_no_customer_content'||($source['checks']??null)!==array('language')||count($source['cases'])>64) throw new RuntimeException('Bounded synthetic fixture required');
+if (!in_array(($source['contract']??''),array('article_language_quality_cases.v1','article_review_quality_cases.v1'),true)||($source['source_policy']??'')!=='synthetic_no_customer_content'||!in_array(($source['checks']??null),array(array('language'),array('language','logic','content_risk')),true)||count($source['cases'])>64) throw new RuntimeException('Bounded synthetic fixture required');
 $ids=array_column($source['cases'],'id');
 if (count($ids)!==count(array_unique($ids)) || array_diff($selected,$ids)) throw new RuntimeException('Unique known case ids required');
 $requests=array();
@@ -25,10 +25,13 @@ foreach($source['cases'] as $case){
     if($selected&&!in_array($case['id'],$selected,true))continue;
     $blocks=array_map(static fn($b)=>array('kind'=>$b['kind'],'text'=>$b['text'],'client_id'=>'synthetic-'.$b['block_ref']),$case['blocks']);
     $request=new WP_REST_Request('POST','/npcink-toolbox/v1/editor/content-support');
-    $request->set_param('article_review_snapshot',array('blocks'=>$blocks,'coverage'=>array('eligible'=>count($blocks),'excluded'=>0,'omitted'=>0,'truncated'=>0)));
+    $request->set_param('article_review_snapshot',array('checks'=>$case['checks']??$source['checks'],'blocks'=>$blocks,'coverage'=>array('eligible'=>count($blocks),'excluded'=>0,'omitted'=>0,'truncated'=>0)));
     $before=count($requests);$started=microtime(true);$report=$method->invoke($service,$request);
     $types=array_column($report['items'],'type');
-    $usable=in_array($report['status'],array('ready','partial'),true);
+    $usable=in_array($report['status'],array('ready','partial'),true)&&($report['invalid_finding_count']??0)===0;
+    foreach($case['checks']??$source['checks'] as $check){
+        if(($report['checks'][$check]['status']??'')!=='completed')$usable=false;
+    }
     $hit=$usable&&($case['expectation']==='hint'?(bool)array_intersect($case['expected_kinds'],$types):count($types)===0);
     $row=array('case_id'=>$case['id'],'group'=>$case['group'],'expectation'=>$case['expectation'],'calls'=>count($requests)-$before,'elapsed_seconds'=>round(microtime(true)-$started,3),'expected_outcome'=>$hit,'report'=>$report);
     $results[]=$row;
