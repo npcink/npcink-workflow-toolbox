@@ -126,3 +126,10 @@ checks, then `composer test:all`. Browser receipts must name source revision,
 fixture/source ids and cleanup, and distinguish real signed Cloud formatting
 from local/fixture review evidence. Revert this slice to remove additive report
 fields and guards; no article or schema migration is required.
+
+## 2026-11-01 logic/context-risk candidate
+
+[Compatible extension](article-review-context-v1.md) adds requested category
+statuses, strict logic scope and context-sensitive adult-content hints to the
+same preflight section. Language-only input and all manual-edit boundaries remain.
+Runtime/model/browser evidence is separate from source implementation.

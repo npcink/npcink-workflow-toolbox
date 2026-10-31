@@ -1973,10 +1973,22 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		);
 	}
 
+	/** Old callers omit checks and retain language-only behavior. */
+	private function editor_article_review_checks( WP_REST_Request $request ): array {
+		$snapshot = $request->get_param( 'article_review_snapshot' );
+		$checks   = is_array( $snapshot ) && array_key_exists( 'checks', $snapshot ) ? $snapshot['checks'] : array( 'language' );
+		$allowed  = array( 'language', 'logic', 'content_risk' );
+		if ( ! is_array( $checks ) || empty( $checks ) || array_filter( $checks, 'is_string' ) !== $checks || array_values( array_intersect( $allowed, $checks ) ) !== $checks ) {
+			return array();
+		}
+		return $checks;
+	}
+
 	private function editor_article_cloud_language_review( WP_REST_Request $request ): array {
-		$source_blocks = $this->editor_article_review_blocks_from_request( $request );
-		$blocks        = array();
-		$block_map     = array();
+		$requested_checks = $this->editor_article_review_checks( $request );
+		$source_blocks    = $this->editor_article_review_blocks_from_request( $request );
+		$blocks           = array();
+		$block_map        = array();
 		foreach ( $source_blocks as $source ) {
 			$ref  = (string) ( $source['block_ref'] ?? '' );
 			$text = (string) ( $source['text'] ?? '' );
@@ -1990,7 +2002,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			);
 			$block_map[ $ref ] = $source;
 		}
-		$canonical       = json_encode( array( 'article_review_cloud_request.v1', 'zh-CN', array( 'language' ), array_map( static fn( array $block ): array => array( $block['block_ref'], $block['kind'], $block['text'] ), $blocks ) ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS );
+		$canonical       = json_encode( array( 'article_review_cloud_request.v1', 'zh-CN', $requested_checks, array_map( static fn( array $block ): array => array( $block['block_ref'], $block['kind'], $block['text'] ), $blocks ) ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS );
 		$snapshot_sha256 = is_string( $canonical ) ? hash( 'sha256', $canonical ) : '';
 		$base            = array(
 			'artifact_type'          => 'article_language_review.v1',
@@ -2019,36 +2031,52 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'invalid_finding_count'  => 0,
 			'run_id'                 => '',
 		);
-		if ( '' === $snapshot_sha256 || empty( $blocks ) || ! function_exists( 'npcink_cloud_addon_execute_toolbox_article_review_runtime' ) ) {
+		foreach ( $requested_checks as $check ) {
+			$base['checks'][ $check ] = array(
+				'status'      => 'unavailable',
+				'reason_code' => 'unavailable',
+			);
+		}
+		if ( empty( $requested_checks ) || '' === $snapshot_sha256 || empty( $blocks ) || ! function_exists( 'npcink_cloud_addon_execute_toolbox_article_review_runtime' ) ) {
 			$base['status']  = 'unavailable';
-			$base['message'] = __( 'Cloud 中文语句提示暂不可用；本地发布前检查仍可继续。', 'npcink-workflow-toolbox' );
+			$base['message'] = __( 'Cloud 文章审阅暂不可用；本地发布前检查仍可继续。', 'npcink-workflow-toolbox' );
 			return $base;
 		}
 		$cloud_request = array(
 			'contract_version' => 'article_review_cloud_request.v1',
 			'snapshot_sha256'  => $snapshot_sha256,
 			'language'         => 'zh-CN',
-			'checks'           => array( 'language' ),
+			'checks'           => $requested_checks,
 			'offset_unit'      => 'utf16_code_units',
 			'blocks'           => $blocks,
 		);
 		$response      = npcink_cloud_addon_execute_toolbox_article_review_runtime( $cloud_request );
 		if ( is_wp_error( $response ) ) {
+			$error_data = $response->get_error_data();
+			$timed_out  = is_array( $error_data ) && 'provider.timeout' === ( $error_data['cloud_error_code'] ?? '' );
+			$refused    = is_array( $error_data ) && 'provider.content_filtered' === ( $error_data['cloud_error_code'] ?? '' );
+			foreach ( $requested_checks as $check ) {
+				$base['checks'][ $check ] = array(
+					'status'      => $timed_out ? 'failed' : ( $refused ? 'refused' : 'unavailable' ),
+					'reason_code' => $timed_out ? 'timeout' : ( $refused ? 'provider_refused' : 'unavailable' ),
+				);
+			}
+			$base['run_id']  = is_array( $error_data ) ? sanitize_text_field( (string) ( $error_data['cloud_error_data']['run_id'] ?? '' ) ) : '';
 			$base['status']  = 'unavailable';
-			$base['message'] = __( 'Cloud 中文语句提示暂不可用；本地发布前检查仍可继续。', 'npcink-workflow-toolbox' );
+			$base['message'] = __( 'Cloud 文章审阅暂不可用；本地发布前检查仍可继续。', 'npcink-workflow-toolbox' );
 			return $base;
 		}
 		$result = is_array( $response['data']['result'] ?? null ) ? $response['data']['result'] : array();
-		if ( ! $this->editor_article_review_valid_result( $result, $snapshot_sha256 ) ) {
+		if ( ! $this->editor_article_review_valid_result( $result, $snapshot_sha256, $requested_checks ) ) {
 			$base['status']  = 'unavailable';
-			$base['message'] = __( 'Cloud 中文语句报告未通过本地完整性核对；请重新运行发布前检查。', 'npcink-workflow-toolbox' );
+			$base['message'] = __( 'Cloud 文章报告未通过本地完整性核对；请重新运行发布前检查。', 'npcink-workflow-toolbox' );
 			return $base;
 		}
 		$items                 = array();
 		$invalid               = (int) ( $result['invalid_finding_count'] ?? 0 );
 		$allowed_evidence_keys = array( 'block_ref', 'start', 'end', 'quote' );
 		foreach ( array_slice( $result['findings'], 0, 12 ) as $finding ) {
-			if ( ! $this->editor_article_review_valid_finding( $finding ) ) {
+			if ( ! $this->editor_article_review_valid_finding( $finding ) || ! in_array( $finding['check'], $requested_checks, true ) || ! in_array( $result['checks'][ $finding['check'] ]['status'], array( 'completed', 'partial' ), true ) ) {
 				++$invalid;
 				continue;
 			}
@@ -2074,7 +2102,10 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 					);
 				}
 			}
-			if ( empty( $verified ) || count( $verified ) !== count( $finding['evidence'] ) ) {
+			$distinct  = array_unique( array_map( static fn( array $e ): string => $e['quote'], $verified ) );
+			$refs      = array_unique( array_column( $verified, 'block_ref' ) );
+			$body_refs = array_filter( $refs, static fn( string $ref ): bool => 'body' === ( $block_map[ $ref ]['kind'] ?? '' ) );
+			if ( empty( $verified ) || count( $verified ) !== count( $finding['evidence'] ) || ( in_array( $finding['kind'], array( 'contradiction', 'numeric_consistency', 'inference_gap' ), true ) && count( $distinct ) < 2 ) || ( 'across_blocks' === ( $finding['scope'] ?? '' ) && count( $body_refs ) < 2 ) || ( 'within_block' === ( $finding['scope'] ?? '' ) && 1 !== count( $refs ) ) ) {
 				++$invalid;
 				continue;
 			}
@@ -2084,6 +2115,9 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				'id'              => 'f' . ( count( $items ) + 1 ),
 				'type'            => $type,
 				'group_key'       => $type,
+				'check'           => $finding['check'],
+				'scope'           => $finding['scope'] ?? '',
+				'context'         => $finding['context'] ?? '',
 				'severity'        => 'warning',
 				'issue'           => sanitize_textarea_field( (string) $finding['reason'] ),
 				'edit_direction'  => sanitize_textarea_field( (string) $finding['review_direction'] ),
@@ -2097,7 +2131,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				) : array( 'status' => 'unavailable' ),
 			);
 		}
-		$base['status']                   = ( 'partial' === $result['checks']['language']['status'] || 0 < $invalid || ! empty( $base['coverage']['partial'] ) || $result['result_limit_reached'] ) ? 'partial' : 'ready';
+		$base['status']                   = ( count( array_filter( $requested_checks, static fn( string $check ): bool => 'completed' !== $result['checks'][ $check ]['status'] ) ) > 0 || 0 < $invalid || ! empty( $base['coverage']['partial'] ) || $result['result_limit_reached'] ) ? 'partial' : 'ready';
 		$base['checks']                   = array_intersect_key( $result['checks'], array_flip( array( 'language', 'logic', 'content_risk' ) ) );
 		$base['items']                    = $items;
 		$base['invalid_finding_count']    = $invalid;
@@ -2113,7 +2147,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		return count( $value ) === count( $keys ) && ! array_diff( array_keys( $value ), $keys );
 	}
 
-	private function editor_article_review_valid_result( array $result, string $hash ): bool {
+	private function editor_article_review_valid_result( array $result, string $hash, array $requested_checks = array( 'language' ) ): bool {
 		if ( ! $this->editor_article_review_exact_keys( $result, array( 'contract_version', 'snapshot_sha256', 'checks', 'findings', 'invalid_finding_count', 'result_limit_reached' ) ) || 'article_review_cloud_result.v1' !== $result['contract_version'] || $hash !== $result['snapshot_sha256'] || ! is_array( $result['checks'] ) || ! is_array( $result['findings'] ) || ! is_int( $result['invalid_finding_count'] ) || $result['invalid_finding_count'] < 0 || ! is_bool( $result['result_limit_reached'] ) || count( $result['findings'] ) > 12 ) {
 			return false;
 		}
@@ -2124,11 +2158,12 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			return false;
 		}
 		foreach ( $result['checks'] as $key => $check ) {
-			if ( ! is_array( $check ) || ! $this->editor_article_review_exact_keys( $check, array( 'status', 'reason_code' ) ) ) {
+			if ( ! is_array( $check ) || ! $this->editor_article_review_exact_keys( $check, array( 'status', 'reason_code' ) ) || ! is_string( $check['status'] ) || ! is_string( $check['reason_code'] ) ) {
 				return false;
 			}
-			if ( 'language' === $key ) {
-				if ( ! ( ( 'completed' === $check['status'] && 'none' === $check['reason_code'] ) || ( 'partial' === $check['status'] && 'invalid_output' === $check['reason_code'] ) ) ) {
+			if ( in_array( $key, $requested_checks, true ) ) {
+				$pair = $check['status'] . '/' . $check['reason_code'];
+				if ( ! in_array( $pair, array( 'completed/none', 'partial/invalid_output', 'partial/analysis_incomplete', 'refused/provider_refused' ), true ) ) {
 					return false;
 				}
 			} elseif ( 'not_checked' !== $check['status'] || 'not_supported' !== $check['reason_code'] ) {
@@ -2139,7 +2174,18 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 	}
 
 	private function editor_article_review_valid_finding( $finding ): bool {
-		if ( ! is_array( $finding ) || ! $this->editor_article_review_exact_keys( $finding, array( 'id', 'check', 'kind', 'severity', 'evidence', 'reason', 'review_direction', 'uncertainty', 'action_policy' ) ) ) {
+		$check = is_array( $finding ) ? ( $finding['check'] ?? '' ) : '';
+		$keys  = array( 'id', 'check', 'kind', 'severity', 'evidence', 'reason', 'review_direction', 'uncertainty', 'action_policy' );
+		$kinds = array(
+			'language'     => array( 'sentence', 'punctuation', 'reference', 'redundancy' ),
+			'logic'        => array( 'contradiction', 'numeric_consistency', 'inference_gap', 'needs_verification' ),
+			'content_risk' => array( 'sexual_context_review' ),
+		);
+		if ( 'logic' === $check ) {
+			$keys[] = 'scope'; }
+		if ( 'content_risk' === $check ) {
+			$keys[] = 'context'; }
+		if ( ! is_array( $finding ) || ! $this->editor_article_review_exact_keys( $finding, $keys ) || ! is_string( $check ) || ! isset( $kinds[ $check ] ) ) {
 			return false;
 		}
 		foreach ( array(
@@ -2151,14 +2197,17 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				return false;
 			}
 		}
-		return 'language' === $finding['check'] && 'warning' === $finding['severity'] && 'context_needed' === $finding['uncertainty'] && 'operator_review_only_no_insert' === $finding['action_policy'] && in_array( $finding['kind'], array( 'sentence', 'punctuation', 'reference', 'redundancy' ), true ) && is_array( $finding['evidence'] ) && count( $finding['evidence'] ) >= 1 && count( $finding['evidence'] ) <= 3 && array_keys( $finding['evidence'] ) === range( 0, count( $finding['evidence'] ) - 1 );
+		if ( ( 'logic' === $check && ! in_array( $finding['scope'], array( 'within_block', 'across_blocks' ), true ) ) || ( 'content_risk' === $check && ! in_array( $finding['context'], array( 'medical', 'educational', 'news', 'literary', 'commercial', 'unknown' ), true ) ) ) {
+			return false;
+		}
+		return 'warning' === $finding['severity'] && 'context_needed' === $finding['uncertainty'] && 'operator_review_only_no_insert' === $finding['action_policy'] && in_array( $finding['kind'], $kinds[ $check ], true ) && is_array( $finding['evidence'] ) && count( $finding['evidence'] ) >= 1 && count( $finding['evidence'] ) <= 3 && array_keys( $finding['evidence'] ) === range( 0, count( $finding['evidence'] ) - 1 );
 	}
 
 	private function editor_article_review_coverage( WP_REST_Request $request, int $checked ): array {
 		$snapshot = $request->get_param( 'article_review_snapshot' );
 		$coverage = is_array( $snapshot ) && is_array( $snapshot['coverage'] ?? null ) ? $snapshot['coverage'] : array();
 		$result   = array(
-			'scope'          => 'cloud_language_only',
+			'scope'          => 'cloud_requested_text_checks',
 			'blocks_checked' => $checked,
 			'partial'        => 0 === $checked,
 		);

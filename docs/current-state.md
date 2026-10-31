@@ -7,6 +7,11 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-10-31.
 
+**Logic/context-risk candidate:** the [compatible extension](article-review-context-v1.md)
+adds explicit checks to the existing read-only preflight section, strict two-quote
+logic scope, contextual adult-content hints and independent status disclosure.
+Source/offline browser evidence does not establish live-model or production acceptance.
+
 **Language quality follow-up:** the [2026-11-01 evaluation](article-language-quality-evaluation-2026-11-01.md)
 records 56 explicit synthetic calls: 20/20 basic positive hits, one false alarm
 among 20 basic controls, separate context-label errors and fresh controls.
