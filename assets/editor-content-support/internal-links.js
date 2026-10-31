@@ -451,14 +451,11 @@
 	}
 	function dedupeInternalLinkCandidates(items) {
 		const seenTargets = {};
-		const seenPlacements = {};
 		return (Array.isArray(items) ? items : []).filter((item) => {
 			const target = canonicalInternalLinkUrl(item && item.targetUrl);
-			const match = item && item.sourceMatch || {};
-			const placement = [String(match.block_client_id || ''), String(match.matched_text || '').toLocaleLowerCase()].join(':');
-			if ((target && seenTargets[target]) || (placement !== ':' && seenPlacements[placement])) return false;
+			// Shared placement is an Apply conflict, not a duplicate article.
+			if (target && seenTargets[target]) return false;
 			if (target) seenTargets[target] = true;
-			if (placement !== ':') seenPlacements[placement] = true;
 			return true;
 		});
 	}
