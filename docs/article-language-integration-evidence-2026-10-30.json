@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-30T13:00:06.671688+00:00",
+  "scope": "synthetic_offline_contract_and_browser_acceptance",
+  "sources": {
+    "toolbox_code_revision": "830ec2d46383b9110fbc892a239f0b6a25614b36",
+    "addon_revision": "cf11b22d0e0dfe94e4c9094d312aad8b29f73ae2",
+    "cloud_revision": "57670ed7f6cefd0567eed1e99657e1a2fcde44c3"
+  },
+  "source_sha256": {
+    "assets/editor-content-support.js": "70aba18bbc9c279fbd3cacd10caa75d173aa775cdb5ae705869b8b293a8c4c27",
+    "includes/Rest_Editor_Content_Support.php": "1220f697217ffc3377747e96a3a246ea63d91bf1175cf35e9faafc08ff07df8f",
+    "tests/editor-content-support-behavior.php": "e13f1b8916646043a14b02fc7bd26966fa2b7eaca0ec2adb5038428f1977afc7",
+    "tests/run.php": "234c6bea137a1b09af04f286cf98f35dfbdcbbc0f01b1d2962d15d1196373762",
+    "tests/article-review-cross-repo-contract.py": "53bd9531489ad493b788f02174e0ecc460b2cc13945c39ec689fcef94228b9e9",
+    "tests/smoke-article-language-review-browser.mjs": "f36515b2e69258ebcd26905c1608cf2f7cbc12e881838f00e6bfea752795a5e3"
+  },
+  "matrix": {
+    "overall_exit": 1,
+    "cloud_m4": false,
+    "results": [
+      {
+        "name": "npcink-workflow-toolbox",
+        "branch": "codex/article-review-toolbox...origin/master [ahead 2]",
+        "dirty_count": 0,
+        "gate_authority": "local",
+        "gate_status": "passed",
+        "gate_exit": 0
+      },
+      {
+        "name": "npcink-cloud-addon",
+        "branch": "codex/article-review-addon...origin/master [ahead 2]",
+        "dirty_count": 0,
+        "gate_authority": "local",
+        "gate_status": "passed",
+        "gate_exit": 0
+      },
+      {
+        "name": "npcink-ai-cloud",
+        "branch": "codex/article-review-language...origin/master [ahead 1, behind 3]",
+        "dirty_count": 0,
+        "gate_authority": "github_ci",
+        "gate_status": "blocked_environment",
+        "gate_exit": 75
+      }
+    ]
+  },
+  "cloud_source_diagnostic": {
+    "http_status": 422,
+    "reason": "No commit found for SHA",
+    "published": false
+  },
+  "checks": {
+    "toolbox_full_suite": "passed",
+    "addon_full_suite": "passed",
+    "toolbox_phpcs": "passed",
+    "toolbox_phpstan": "passed",
+    "addon_phpstan": "passed",
+    "composer_metadata": "passed",
+    "diff_check": "passed",
+    "addon_playground": "passed",
+    "offline_cross_repo_cases": 4,
+    "offline_cross_repo_result": "passed",
+    "browser_result": "passed",
+    "browser_post_write_requests": 0,
+    "browser_page_errors": 0,
+    "last_fixture_id": 283011,
+    "last_fixture_source_unchanged": true,
+    "last_fixture_deleted": true,
+    "last_fixture_session_destroyed": true,
+    "remaining_exact_title_test_drafts": 0
+  },
+  "limits": {
+    "browser_assets": "candidate_injected_into_real_gutenberg_only",
+    "php_host": "existing_behavior_test_stubs",
+    "provider_output": "synthetic",
+    "signed_cloud_transport_verified_this_session": false,
+    "model_quality_acceptance": false,
+    "production_acceptance": false,
+    "logic": "not_checked",
+    "content_risk": "not_checked",
+    "pr_published": false,
+    "merged": false,
+    "deployed_this_session": false
+  },
+  "content_retention": {
+    "request_body_in_receipt": false,
+    "response_body_in_receipt": false,
+    "auth_material_in_receipt": false
+  }
+}

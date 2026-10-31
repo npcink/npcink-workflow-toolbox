@@ -203,8 +203,14 @@ ordinary generation and Site Knowledge remain available. See
   media; it changes only bounded layout and CJK/Latin-or-digit spacing.
   The [reference research](article-review-reference-research-2026-10-30.md)
   now informs a [Cloud consumer contract draft](article-review-cloud-contract-draft-v1.md)
-  and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). These are
-  preparation only; no new Cloud checker, model-quality result or runtime is enabled.
+  and [24 synthetic seeds](article-review-evaluation-seeds-v1.json). The Cloud checker, Addon facade, and Toolbox report consumer now exist only as
+  candidate branches (`codex/article-review-language`,
+  `codex/article-review-addon`, and `codex/article-review-toolbox`); none is
+  merged. Earlier M4 evidence covers the Cloud candidate only, not WordPress
+  deployment or production. The candidate checks only Chinese language evidence.
+  See [integration acceptance](article-language-integration-acceptance-2026-10-30.md)
+  for exact-text, stale-report, offline bridge/browser gates and the unpushed
+  Cloud SHA source-gate limitation.
 
 - Recommendation anchor eligibility now has an active
   [v3 contract](internal-link-anchor-eligibility-v3.md) extending the historical

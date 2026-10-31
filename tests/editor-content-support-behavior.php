@@ -17,6 +17,37 @@ $npcink_toolbox_progressive_writing_pack_inputs = array();
 $npcink_toolbox_progressive_site_knowledge_inputs = array();
 $npcink_toolbox_progressive_source_reader_calls = 0;
 $npcink_toolbox_progressive_source_reader_mode = 'ready';
+$npcink_toolbox_article_review_response = array(
+	'status' => 'ok',
+	'run_id' => 'article-review-test-run',
+	'data'   => array(
+		'result' => array(
+			'contract_version'  => 'article_review_cloud_result.v1',
+			'snapshot_sha256'   => '',
+			'checks'            => array(
+				'language'     => array( 'status' => 'completed', 'reason_code' => 'none' ),
+				'logic'        => array( 'status' => 'not_checked', 'reason_code' => 'not_supported' ),
+				'content_risk' => array( 'status' => 'not_checked', 'reason_code' => 'not_supported' ),
+			),
+			'findings'          => array(),
+			'invalid_finding_count' => 0,
+			'result_limit_reached'  => false,
+		),
+	),
+);
+
+if ( ! function_exists( 'npcink_cloud_addon_execute_toolbox_article_review_runtime' ) ) {
+	function npcink_cloud_addon_execute_toolbox_article_review_runtime( array $request, string $trace_id = '', string $idempotency_key = '' ) {
+		global $npcink_toolbox_article_review_response;
+		$GLOBALS['npcink_toolbox_article_review_inputs'][] = $request;
+		$response = $npcink_toolbox_article_review_response;
+		if ( is_wp_error( $response ) ) { return $response; }
+		if ( '' === ( $response['data']['result']['snapshot_sha256'] ?? null ) ) {
+			$response['data']['result']['snapshot_sha256'] = (string) ( $request['snapshot_sha256'] ?? '' );
+		}
+		return $response;
+	}
+}
 
 if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
@@ -778,6 +809,72 @@ $preflight_run = npcink_toolbox_editor_flow_call( $controller, array( 'intent' =
 npcink_toolbox_editor_flow_assert( isset( $preflight_run['data'] ), 'Publish preflight returns a flow response.' );
 npcink_toolbox_editor_flow_assert_flow_contract( $preflight_run['data'], 'publish_preflight', 'Publish preflight' );
 npcink_toolbox_editor_flow_assert( empty( $preflight_run['data']['sections']['discoverability'] ) && ! isset( $preflight_run['data']['sections']['seo_handoff'] ), 'Publish preflight omits specialist candidates and SEO handoff.' );
+
+$review_response_backup = $npcink_toolbox_article_review_response;
+$npcink_toolbox_article_review_response['data']['result']['findings'] = array(
+	array(
+		'id' => 'f1', 'check' => 'language', 'severity' => 'warning', 'uncertainty' => 'context_needed', 'kind' => 'punctuation', 'reason' => '请核对重复标点。', 'review_direction' => '请作者人工确认是否有意。',
+		'evidence' => array( array( 'block_ref' => 'b1', 'start' => 2, 'end' => 4, 'quote' => '，，' ) ),
+		'action_policy' => 'operator_review_only_no_insert',
+	),
+);
+$cloud_review = npcink_toolbox_editor_flow_call( $controller, array(
+	'intent' => 'publish_preflight', 'title' => '', 'excerpt' => '', 'content' => '原文，，保留。',
+	'article_review_snapshot' => array( 'blocks' => array( array( 'client_id' => 'cloud-review-block', 'kind' => 'body', 'text' => '原文，，保留。' ) ), 'coverage' => array( 'eligible' => 1, 'excluded' => 0, 'omitted' => 0, 'truncated' => 0 ) ),
+) );
+$cloud_section = $cloud_review['data']['sections']['article_language_review'];
+npcink_toolbox_editor_flow_assert( 'ready' === $cloud_section['status'] && 'completed' === $cloud_section['checks']['language']['status'] && 'not_checked' === $cloud_section['checks']['logic']['status'], 'Cloud article review is exposed as a separate language-only preflight section.' );
+npcink_toolbox_editor_flow_assert( '，，' === $cloud_section['items'][0]['evidence'] && 'cloud-review-block' === $cloud_section['items'][0]['source_location']['client_id'] && 'operator_review_only_no_insert' === $cloud_section['items'][0]['action_policy'], 'Cloud article review independently verifies the original quote and keeps navigation review-only.' );
+
+$valid_review = $npcink_toolbox_article_review_response;
+$review_payload = array(
+	'intent' => 'publish_preflight', 'title' => '', 'content' => '😀原文，，保留。',
+	'article_review_snapshot' => array( 'blocks' => array( array( 'client_id' => 'cloud-review-block', 'kind' => 'body', 'text' => "😀原文，，  保留。\n<x>\u{2028}" ) ), 'coverage' => array( 'eligible' => 1 ) ),
+);
+$npcink_toolbox_article_review_response['data']['result']['findings'][0]['evidence'][0]['start'] = 4;
+$npcink_toolbox_article_review_response['data']['result']['findings'][0]['evidence'][0]['end'] = 6;
+$valid_review = $npcink_toolbox_article_review_response;
+$run_review = static function ( array $payload ) use ( $controller ): array {
+	return npcink_toolbox_editor_flow_call( $controller, $payload )['data']['sections']['article_language_review'];
+};
+$emoji_review = $run_review( $review_payload );
+npcink_toolbox_editor_flow_assert( 'ready' === $emoji_review['status'] && '，，' === $emoji_review['items'][0]['evidence'], 'Emoji before evidence uses UTF-16 units even without mbstring.' );
+$sent = end( $GLOBALS['npcink_toolbox_article_review_inputs'] );
+npcink_toolbox_editor_flow_assert( $sent['blocks'][0]['text'] === $review_payload['article_review_snapshot']['blocks'][0]['text'], 'Cloud snapshot preserves exact whitespace, line separators and visible angle brackets.' );
+$canonical = json_encode( array( 'article_review_cloud_request.v1', 'zh-CN', array( 'language' ), array( array( 'b1', 'body', $sent['blocks'][0]['text'] ) ) ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS );
+npcink_toolbox_editor_flow_assert( hash( 'sha256', $canonical ) === $sent['snapshot_sha256'], 'Canonical snapshot keeps Unicode line separators literal for the Cloud identity.' );
+$before_calls = count( $GLOBALS['npcink_toolbox_article_review_inputs'] );
+$legacy = $run_review( array( 'intent' => 'publish_preflight', 'title' => 'Only legacy title', 'content' => '正文' ) );
+npcink_toolbox_editor_flow_assert( 'unavailable' === $legacy['status'] && $before_calls === count( $GLOBALS['npcink_toolbox_article_review_inputs'] ), 'A missing exact snapshot cannot silently fall back to title-only review.' );
+$bad_results = array();
+$base_result = $valid_review['data']['result'];
+$bad_results[] = $base_result + array( 'replacement' => 'bad' );
+$bad = $base_result; $bad['snapshot_sha256'] = str_repeat( '0', 64 ); $bad_results[] = $bad;
+$bad = $base_result; $bad['checks']['language']['status'] = 'failed'; $bad_results[] = $bad;
+$bad = $base_result; $bad['checks']['logic']['status'] = 'completed'; $bad_results[] = $bad;
+$bad = $base_result; $bad['result_limit_reached'] = 'false'; $bad_results[] = $bad;
+$bad = $base_result; unset( $bad['checks']['language']['reason_code'] ); $bad_results[] = $bad;
+foreach ( $bad_results as $bad ) {
+	$npcink_toolbox_article_review_response = $valid_review;
+	$npcink_toolbox_article_review_response['data']['result'] = $bad;
+	npcink_toolbox_editor_flow_assert( 'unavailable' === $run_review( $review_payload )['status'], 'Malformed or unsupported check status is never presented as a successful report.' );
+}
+$bad_findings = array();
+$base_finding = $base_result['findings'][0];
+$bad = $base_finding; unset( $bad['check'] ); $bad_findings[] = $bad;
+$bad = $base_finding; $bad['replacement'] = 'bad'; $bad_findings[] = $bad;
+$bad = $base_finding; $bad['reason'] = str_repeat( '长', 601 ); $bad_findings[] = $bad;
+$bad = $base_finding; $bad['evidence'][] = array( 'block_ref' => 'b1', 'start' => 0, 'end' => 2, 'quote' => '伪造' ); $bad_findings[] = $bad;
+$bad = $base_finding; $bad['evidence'][0]['start'] = '4'; $bad_findings[] = $bad;
+foreach ( $bad_findings as $bad ) {
+	$npcink_toolbox_article_review_response = $valid_review;
+	$npcink_toolbox_article_review_response['data']['result']['findings'] = array( $bad );
+	$section = $run_review( $review_payload );
+	npcink_toolbox_editor_flow_assert( 'partial' === $section['status'] && empty( $section['items'] ) && 1 === $section['invalid_finding_count'], 'One invalid field or evidence hides the entire finding and declares incomplete coverage.' );
+}
+$npcink_toolbox_article_review_response = new WP_Error( 'cloud_unavailable', 'unavailable' );
+npcink_toolbox_editor_flow_assert( 'unavailable' === $run_review( $review_payload )['status'], 'Cloud failure degrades only its advisory language section.' );
+$npcink_toolbox_article_review_response = $review_response_backup;
 
 // 9. No default-button intent performed any WordPress write, and none of them
 //    fired a hosted-AI writing-pack/draft request or an external source-reader

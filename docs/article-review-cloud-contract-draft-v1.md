@@ -1,10 +1,33 @@
 # Cloud 文章检查消费方契约草案 v1
 
-状态：2026-10-30，Toolbox 消费方设计草案，尚未注册、接线或部署。
+状态：2026-10-30，Cloud/Addon 契约已在候选分支实现，Toolbox 已接入候选只读
+报告；三仓均未合并、未完成生产验收。此前 M4 证据仅对应命名的 Cloud
+候选，不代表 Addon/Toolbox 已部署；本轮未同步或部署任何运行环境。
 文中的 `article_review_cloud_request.v1` / `article_review_cloud_result.v1`
-是拟议名称，不是活跃 Cloud/Add-on 契约、Ability、工作流或第三种摘要包。
-所有者实现前须在 Cloud/Addon 审核并落成同一接口与测试，不从本文件推定可调用。
+是当前候选分支上的契约名称，不代表已发布的工作流或第三种摘要包。Cloud
+后端、Addon facade 和 Toolbox 消费方必须以同一 revision 的测试结果为准，
+不能从文档推定生产可调用。
 调研依据见[一手来源与取舍](article-review-reference-research-2026-10-30.md)。
+
+## 当前已实现的候选切片
+
+当前候选仅接受 `checks=["language"]`，不接受逻辑或内容风险请求。
+Cloud `input` 只含 `snapshot_sha256/language/checks/offset_unit/blocks`；
+`contract_version=article_review_cloud_request.v1` 位于外层 runtime envelope。
+Addon 的公开 facade 接受含契约名的本地请求，验证后移除 input 中的契约名。
+
+结果精确字段为 `contract_version/snapshot_sha256/checks/findings/invalid_finding_count/result_limit_reached`。
+`language` 仅为 `completed/none` 或 `partial/invalid_output`；`logic` 与
+`content_risk` 固定 `not_checked/not_supported`。提示只接受
+`sentence/punctuation/reference/redundancy`，`check=language`、
+`severity=warning`、`uncertainty=context_needed` 和固定只读 action policy。
+无效身份/结构使整个 Cloud 区段不可用，无效引文使整条提示隐藏且报告部分完成。
+
+独立 `article_review_snapshot`、原样采集、运行前说明、覆盖计数和单调编辑
+代次失效机制已在候选接线中实现；见[当前消费实现](article-review-report-v1.md)
+及[离线跨仓/浏览器验收](article-language-integration-acceptance-2026-10-30.md)。
+下文包含早期的**总体设计与后续扩展提案**，尤其逻辑/风险的状态、字段与示例，
+不得据此放宽当前严格语言 schema。逻辑示例不是当前可执行请求。
 
 ## 目标与职责
 
@@ -77,7 +100,7 @@ Cloud 仅看到不含站点身份的 `block_ref`。标题/摘要如需检查，�
 失效；实现必须使用订阅/变更代次检测，不能只在响应时比较最后的字符串。
 
 现有 `content_blocks` 已经去标签/清理/截断，不能直接冒充这份原样快照。
-采集器、Addon 验证与 Cloud 验证实现及其公共 schema 属于后续接线工作。
+当前候选已使用独立采集器和严格 Addon/Cloud schema；后续扩展仍须另行验证。
 
 ## 拟议结果与证据
 
@@ -248,7 +271,6 @@ Cloud 结果拟作为独立只读区段加入现有发布预检，不覆盖
 
 ## 本轮变更与回退
 
-本轮仅 Toolbox 文档、样本和索引，`includes/`、`assets/`、Cloud、Addon、
-运行时/模型配置均不改变；没有活跃公共协议变化，无跨仓发布矩阵需求。
-文档静态门、JSON/样本位置一致性和 `composer test:all` 验证的是准备材料，
-不验证模型质量。删除/撤销本轮文档即可回退，不涉及数据库或文章迁移。
+本轮实现仅增加 Cloud/Addon transport 与 Toolbox 只读报告消费；没有数据库、
+文章迁移、自动修改或发布路径。Cloud 端已验证结构化证据，Addon 与 Toolbox
+仍需各自门禁和跨仓 exact-SHA 复核；模型质量与作者采纳率仍未被本轮证明。

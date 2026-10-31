@@ -297,7 +297,7 @@
 		{
 			intent: 'publish_preflight',
 			label: __('Publish preflight', 'npcink-workflow-toolbox'),
-			description: __('Check missing fields and compare related existing posts for duplicate-risk before publishing.', 'npcink-workflow-toolbox'),
+			description: __('检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读中文语句提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft, editor fields, Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Preflight checks, duplicate-risk refs, SEO handoff preview', 'npcink-workflow-toolbox'),
@@ -4731,12 +4731,12 @@
 			}));
 	}
 
-	function locateArticleReviewIssue(location) {
+	function locateArticleReviewIssue(location, exact = false) {
 		if (!location || location.status !== 'matched' || !location.excerpt) return;
 		const selector = data.select('core/block-editor');
 		const block = selector && selector.getBlock(location.client_id);
-		const text = block ? plainTextFromHtml(internalLinkBlockContent(block)).replace(/\s+/g, ' ').trim() : '';
-		const excerpt = String(location.excerpt).replace(/\s+/g, ' ').trim();
+		const text = block ? (exact ? articleReviewPlainText(block.attributes?.content ?? block.attributes?.value ?? '') : plainTextFromHtml(internalLinkBlockContent(block)).replace(/\s+/g, ' ').trim()) : '';
+		const excerpt = exact ? String(location.excerpt) : String(location.excerpt).replace(/\s+/g, ' ').trim();
 		if (!text.includes(excerpt) || text.indexOf(excerpt) !== text.lastIndexOf(excerpt)) return;
 		data.dispatch('core/block-editor').selectBlock(location.client_id);
 	}
@@ -4770,6 +4770,95 @@
 				)))
 			))
 		);
+	}
+
+	// This projection is separate from legacy normalized context. Never normalize quotes.
+	function articleReviewPlainText(html) {
+		const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+		doc.querySelectorAll('script,style,template,noscript').forEach((node) => node.remove());
+		doc.querySelectorAll('br').forEach((node) => node.replaceWith(doc.createTextNode('\n')));
+		return doc.body.textContent || '';
+	}
+
+	function articleReviewSnapshot(editor, blocks) {
+		const snapshot = { blocks: [], coverage: { eligible: 0, excluded: 0, omitted: 0, truncated: 0 } };
+		let total = 0;
+		const add = (kind, text, clientId = '') => {
+			if (!/\S/u.test(text)) return;
+			snapshot.coverage.eligible++;
+			if (snapshot.blocks.length >= 80 || total >= 30000) { snapshot.coverage.omitted++; return; }
+			let end = Math.min(text.length, 1600, 30000 - total);
+			if (end < text.length && /[\uD800-\uDBFF]/.test(text[end - 1])) end--;
+			if (end < text.length) snapshot.coverage.truncated++;
+			const bounded = text.slice(0, end);
+			if (!/\S/u.test(bounded)) { snapshot.coverage.omitted++; return; }
+			snapshot.blocks.push({ kind, text: bounded, client_id: clientId });
+			total += bounded.length;
+		};
+		add('title', String(editor.getEditedPostAttribute('title') || ''));
+		add('excerpt', articleReviewPlainText(editor.getEditedPostAttribute('excerpt')));
+		const visit = (items) => (items || []).forEach((block) => {
+			if (['core/group', 'core/columns', 'core/column', 'core/quote', 'core/list'].includes(block.name)) {
+				if (block.innerBlocks?.length) visit(block.innerBlocks);
+				else if (block.name === 'core/quote') add('body', articleReviewPlainText(block.attributes?.value), block.clientId);
+				else snapshot.coverage.excluded++;
+			} else if (['core/paragraph', 'core/heading', 'core/list-item', 'core/verse'].includes(block.name)) {
+				add('body', articleReviewPlainText(block.attributes?.content), block.clientId);
+				if (block.innerBlocks?.length) visit(block.innerBlocks);
+			} else snapshot.coverage.excluded++;
+		});
+		visit(blocks);
+		return snapshot;
+	}
+
+	function articleReviewEditorIdentity() {
+		const editor = data.select('core/editor');
+		// Gutenberg selectors memoize immutable blocks. Reference changes catch
+		// replacements and edits without serializing a full article on every dispatch.
+		return {
+			postId: editor.getCurrentPostId(),
+			title: editor.getEditedPostAttribute('title'),
+			excerpt: editor.getEditedPostAttribute('excerpt'),
+			content: editor.getEditedPostAttribute('content'),
+			blocks: data.select('core/block-editor').getBlocks(),
+		};
+	}
+
+	function articleReviewIdentityMatches(before, after) {
+		return Boolean(before && after && ['postId', 'title', 'excerpt', 'content', 'blocks'].every((key) => before[key] === after[key]));
+	}
+
+	function renderArticleLanguageReviewItems(section, controls) {
+		const items = Array.isArray(section?.items) ? section.items : [];
+		const checks = section?.checks || {};
+		const stale = Boolean(controls?.articleReview?.stale);
+		const coverage = section?.coverage || {};
+		const blocks = [
+			createElement('p', null, __('Cloud 中文语句提示（只读）：作者自行判断并人工修改。报告不会自动更正、插入、保存或发布正文。', 'npcink-workflow-toolbox')),
+			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('本次只检查语句、标点、重复表达和指代疑点；逻辑与内容风险尚未检查。报告过期后不能定位到草稿，请重新运行发布前检查。', 'npcink-workflow-toolbox')),
+		];
+		if (section.status === 'unavailable') {
+			return createElement('div', { className: 'npcink-toolbox-editor-support__article-language-review' }, blocks.concat(createElement('p', null, section.message || __('Cloud 中文语句提示暂不可用。', 'npcink-workflow-toolbox'))));
+		}
+		blocks.push(createElement('p', null, sprintf(__('语句检查：%1$s；逻辑：%2$s；内容风险：%3$s。', 'npcink-workflow-toolbox'), formatMetaLabel(checks.language?.status || 'unknown'), formatMetaLabel(checks.logic?.status || 'not_checked'), formatMetaLabel(checks.content_risk?.status || 'not_checked'))));
+		blocks.push(createElement('p', null, sprintf(__('已提交 %1$d 个文本块；排除 %2$d 个块，省略 %3$d 个文本块，截短 %4$d 个文本块。', 'npcink-workflow-toolbox'), coverage.blocks_checked || 0, coverage.excluded || 0, coverage.omitted || 0, coverage.truncated || 0)));
+		if (section.status === 'partial' || coverage.partial) blocks.push(createElement('p', null, __('本次仅覆盖部分内容或返回结果不完整，不能据此判断全文没有问题。', 'npcink-workflow-toolbox')));
+		if (section.invalid_finding_count) blocks.push(createElement('p', null, sprintf(__('已隐藏 %d 条无法完整核对的提示。', 'npcink-workflow-toolbox'), section.invalid_finding_count)));
+		if (section.result_limit_reached) blocks.push(createElement('p', null, __('已达到本次提示数量上限。', 'npcink-workflow-toolbox')));
+		if (stale) blocks.push(createElement('p', null, __('草稿已变化，当前报告只能阅读，不能定位。', 'npcink-workflow-toolbox')));
+		if (!items.length) blocks.push(createElement('p', null, __('Cloud 没有返回可核对的语句提示。', 'npcink-workflow-toolbox')));
+		items.forEach((item) => {
+			blocks.push(createElement('article', { key: item.id, className: 'npcink-toolbox-editor-support__article-language-review-item' },
+				...(item.evidence_refs || []).map((ref, index) => createElement('blockquote', { key: index, style: { whiteSpace: 'pre-wrap' } }, ref.quote)),
+				createElement('p', null, item.issue),
+				createElement('p', null, item.edit_direction),
+				item.source_location?.status === 'matched' ? createElement(Button, {
+					variant: 'link', disabled: stale,
+					onClick: () => { if (!stale && controls.articleReview.isCurrent()) locateArticleReviewIssue(item.source_location, true); },
+				}, __('Locate in draft', 'npcink-workflow-toolbox')) : null
+			));
+		});
+		return createElement('div', { className: 'npcink-toolbox-editor-support__article-language-review' }, blocks);
 	}
 
 	function audioGenerationItems(section) {
@@ -7194,6 +7283,9 @@
 					if (sections.local_article_checkup) {
 						blocks.push(renderArticleCheckupItems(sections.local_article_checkup, metadataHandoffControls));
 					}
+					if (sections.article_language_review) {
+						blocks.push(renderArticleLanguageReviewItems(sections.article_language_review, metadataHandoffControls));
+					}
 				}
 
 			if (sections.checks && !hasPreflightReview) {
@@ -7352,6 +7444,17 @@
 		const [running, setRunning] = useState('');
 		const [result, setResult] = useState(null);
 		const [articleReviewSource, setArticleReviewSource] = useState(null);
+		const articleReviewRevision = useRef(null);
+		if (!articleReviewRevision.current) articleReviewRevision.current = { identity: articleReviewEditorIdentity(), generation: 0 };
+		const [, setArticleReviewGeneration] = useState(0);
+		useEffect(() => data.subscribe(() => {
+			const identity = articleReviewEditorIdentity();
+			if (!articleReviewIdentityMatches(identity, articleReviewRevision.current.identity)) {
+				articleReviewRevision.current = { identity, generation: articleReviewRevision.current.generation + 1 };
+				setArticleReviewGeneration(articleReviewRevision.current.generation);
+			}
+		}), []);
+
 		const [error, setError] = useState('');
 		const [requestNotice, setRequestNotice] = useState(null);
 		const [supportView, setSupportView] = useState('menu');
@@ -7881,9 +7984,7 @@
 						const paragraphIntegrityBefore = intent === 'polish_notes'
 							? currentEditorContentIntegritySnapshot(runContext.content, runContext.post_id)
 							: null;
-						const reviewSource = intent === 'publish_preflight' ? {
-							post_id: runContext.post_id, content: runContext.content, title: runContext.title, excerpt: runContext.excerpt,
-						} : null;
+						const reviewSource = intent === 'publish_preflight' ? { ...articleReviewRevision.current, identity: articleReviewEditorIdentity() } : null;
 						const currentWritingPack = result && result.sections && result.sections.article_writing_pack ? result.sections.article_writing_pack : null;
 						const reviewedWritingPack = intent === 'source_adaptation_review' && sourceStage === 'draft' ? reviewedWritingPackFromEditor(currentWritingPack, writingPackBrief) : null;
 						if (intent === 'source_adaptation_review' && sourceStage === 'draft' && (!reviewedWritingPack || (!writingPackConfirmed && !runOptions.confirmWritingPack))) {
@@ -7902,6 +8003,7 @@
 							source_stage: intent === 'source_adaptation_review' ? sourceStage : '',
 						force_refresh: intent === 'source_adaptation_review' && sourceStage === 'extract' && Boolean(runOptions.forceRefresh),
 				});
+					if (intent === 'publish_preflight') payload.article_review_snapshot = articleReviewSnapshot(data.select('core/editor'), data.select('core/block-editor').getBlocks());
 					if (intent === 'image_alt_suggestions') {
 						const allOccurrences = Array.isArray(runContext.media_items) ? runContext.media_items : [];
 						const occurrenceOffset = Math.max(0, Number(runOptions.altOffset || 0));
@@ -10159,7 +10261,10 @@
 					: (sourceExtractionReady ? __('Source ready', 'npcink-workflow-toolbox') : __('Not started', 'npcink-workflow-toolbox')));
 		const isContextualParagraphResult = contextualResult && rerunIntent === 'polish_notes';
 		const resultControls = {
-			articleReview: { stale: !articleReviewSource || ['post_id', 'content', 'title', 'excerpt'].some((key) => postContext[key] !== articleReviewSource[key]) },
+			articleReview: {
+				stale: !articleReviewSource || articleReviewSource.generation !== articleReviewRevision.current.generation || !articleReviewIdentityMatches(articleReviewSource.identity, articleReviewEditorIdentity()),
+				isCurrent: () => Boolean(articleReviewSource && articleReviewSource.generation === articleReviewRevision.current.generation && articleReviewIdentityMatches(articleReviewSource.identity, articleReviewEditorIdentity())),
+			},
 			intent: activeFlowIntent || (result && result.intent) || '',
 			showHandoff: ['summary_terms_optimization', 'category_suggestions', 'tag_suggestions'].indexOf(activeFlowIntent) >= 0,
 			selection: metadataHandoffSelection,
