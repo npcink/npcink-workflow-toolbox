@@ -741,6 +741,30 @@ npcink_toolbox_editor_flow_assert( isset( $links['data']['sections']['internal_l
 npcink_toolbox_editor_flow_assert( 'https://example.test/toolkit-target/' === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_safe_candidate_url( array( 'source' => array( 'target_url' => 'https://example.test/toolkit-target/' ) ) ), 'Internal-link service resolves the Toolkit artifact source.target_url fallback on the server.' );
 npcink_toolbox_editor_flow_assert( 'https://example.test/toolkit-url/' === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_safe_candidate_url( array( 'source' => array( 'url' => 'https://example.test/toolkit-url/' ) ) ), 'Internal-link service resolves the Toolkit artifact source.url fallback on the server.' );
 
+// Resolver anchor/graph priority must not replace Cloud article order.
+$cloud_order_evidence = array(
+	array( 'post_id' => 101, 'url' => 'https://example.test/first', 'candidate_relevance' => 'strong' ),
+	array( 'post_id' => 102, 'url' => 'https://example.test/second', 'candidate_relevance' => 'review' ),
+	array( 'post_id' => 103, 'url' => 'https://example.test/third', 'candidate_relevance' => 'strong' ),
+);
+$resolver_order_items = array(
+	array( 'target_post_id' => 102, 'title' => 'Second article', 'anchor_or_context' => 'Specific anchor', 'source_match' => array( 'matched_text' => 'Specific anchor', 'expected_text' => 'Specific anchor', 'block_client_id' => 'block-1', 'block_name' => 'core/paragraph', 'text_offset' => 0 ) ),
+	array( 'target_post_id' => 901, 'title' => 'Unmatched first' ),
+	array( 'target_post_id' => 101, 'title' => 'First article without anchor' ),
+	array( 'target_post_id' => 0, 'title' => 'URL fallback', 'source' => array( 'target_url' => 'https://example.test/third' ) ),
+	array( 'target_post_id' => 902, 'title' => 'Unmatched second' ),
+	array( 'target_post_id' => 102, 'title' => 'Second article alternate placement' ),
+);
+$cloud_order_items = Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_merge_cloud_relevance( $resolver_order_items, $cloud_order_evidence );
+npcink_toolbox_editor_flow_assert( array( 'First article without anchor', 'Second article', 'Second article alternate placement', 'URL fallback', 'Unmatched first', 'Unmatched second' ) === array_column( $cloud_order_items, 'title' ), 'Cloud order survives resolver priority; duplicate placements and unmatched fallback items remain stable.' );
+npcink_toolbox_editor_flow_assert( array( 'strong', 'review', 'review', 'strong' ) === array_column( array_slice( $cloud_order_items, 0, 4 ), 'candidate_relevance' ), 'Relevance follows the same ID/URL identity as Cloud order.' );
+npcink_toolbox_editor_flow_assert( $resolver_order_items[0]['source_match'] === $cloud_order_items[1]['source_match'], 'Restoring article order preserves the resolver source match.' );
+$cloud_order_candidates = Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_recommendation_candidates( $cloud_order_items, true );
+npcink_toolbox_editor_flow_assert( 'First article without anchor' === $cloud_order_candidates[0]['label'] && 'strong' === $cloud_order_candidates[0]['candidate_relevance'] && false === $cloud_order_candidates[0]['can_apply_to_editor'], 'A first-ranked relevant article without a safe anchor remains first and copy/open only.' );
+npcink_toolbox_editor_flow_assert( $resolver_order_items === Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_merge_cloud_relevance( $resolver_order_items, array() ), 'Without Cloud evidence the local fallback order and fields stay unchanged.' );
+$duplicate_cloud_order = Npcink_Toolbox\Rest_Editor_Internal_Links::editor_internal_link_merge_cloud_relevance( $resolver_order_items, array_merge( $cloud_order_evidence, array( $cloud_order_evidence[0] ) ) );
+npcink_toolbox_editor_flow_assert( $cloud_order_items === $duplicate_cloud_order, 'Repeated Cloud identities retain their first evidence position.' );
+
 // A healthy explicit v2 abstention bypasses an absent Toolkit, never a Cloud failure.
 $before_abstention_transients = $npcink_toolbox_progressive_transients;
 foreach ( array( 'healthy_v2', 'failed_v2', 'legacy_empty' ) as $mode ) {
