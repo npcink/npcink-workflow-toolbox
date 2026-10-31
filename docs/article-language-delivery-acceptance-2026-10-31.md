@@ -91,8 +91,10 @@ needed: the tested candidate and merged revision have identical Git trees.
 
 The later [installed editor acceptance](article-language-installed-acceptance-2026-10-31.md)
 now verifies real enqueued assets, actual preflight/Cloud output and read-only
-editor behavior. Temporary mounts were restored; durable local installation is
-still needed for ordinary author use. Then use author feedback to improve Chinese
+editor behavior. Temporary mounts were restored in that earlier test; the later
+[durable local installation](article-language-local-install-2026-10-31.md) now
+provides the feature through primary checkouts while preserving local vision
+work. Use ordinary author feedback to improve Chinese
 language usefulness. Do not enable logic/content-risk or automatic correction.
 OSS remains outside this language-review slice; its remote media write modes
 still need verified third-party adapter capabilities and governed execution.
