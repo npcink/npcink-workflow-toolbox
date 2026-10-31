@@ -22,7 +22,7 @@
   "m4": {
     "candidate_revision": "d9d668c4c07613d96b525f91535f4471db6ae574",
     "candidate_source_dirty": false,
-    "accepted_revision": null,
+    "accepted_revision": "7002bd56f080bf3fa045fbe3132e9b7a13ee093f",
     "promotion_attempt": {
       "source_revision": "7002bd56f080bf3fa045fbe3132e9b7a13ee093f",
       "source_clean": true,
@@ -31,6 +31,25 @@
       "result": "blocked_active_shared_operation_lock",
       "lock_owner": "separate image-timeout acceptance session",
       "lock_removed": false
+    },
+    "accepted_state": "accepted",
+    "source_branch": "master",
+    "accepted_source_dirty": false,
+    "promotion_pr": 1331,
+    "promotion_retry": {
+      "exit_code": 0,
+      "operation_lock_released_before_start": true,
+      "lock_removed": false,
+      "http_liveness": "ok",
+      "api_frontend_database_redis_health": "healthy",
+      "post_promotion_signed_read": {
+        "ok": true,
+        "requests": 1,
+        "signed": true,
+        "error_code": "",
+        "provider_calls": 0,
+        "wordpress_writes": 0
+      }
     }
   },
   "live_cases": [

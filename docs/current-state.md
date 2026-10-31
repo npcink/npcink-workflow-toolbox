@@ -210,7 +210,7 @@ ordinary generation and Site Knowledge remain available. See
   This is bounded developer evidence, not broad accuracy, installed shared-browser
   acceptance or production deployment. Logic/content-risk remain disabled.
   See [delivery acceptance](article-language-delivery-acceptance-2026-10-31.md)
-  for exact source, CI, M4, durable no-store checks and the separate browser proof;
+  for exact source, CI, accepted clean-master M4, durable no-store checks and the separate browser proof;
   the 2026-10-30 unpushed-SHA checkpoint is historical.
 
 - Recommendation anchor eligibility now has an active
