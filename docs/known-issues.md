@@ -66,6 +66,10 @@ with the closing commit or PR for one release cycle, then prune.
   signed/model cases, installed editor acceptance and durable local installation
   passed. See the [current closeout](article-review-session-closeout-2026-10-31.md)
   and [delivery rules/lessons](article-review-delivery-lessons-v1.md).
+  The [56-call developer evaluation](article-language-quality-evaluation-2026-11-01.md)
+  meets its basic screen but retains one style-only false alarm; four context
+  label errors and fresh controls are recorded separately. Cloud prompt work
+  should suppress modifier/coordination style nitpicks.
   Broad Chinese accuracy, independent author feedback, general cross-paragraph
   logic, content-risk analysis and production acceptance remain open; those
   are not prerequisites to closing the delivered language slice.

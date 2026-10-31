@@ -1,0 +1,578 @@
+{
+  "contract": "article_language_quality_cases.v1",
+  "language": "zh-CN",
+  "checks": [
+    "language"
+  ],
+  "source_policy": "synthetic_no_customer_content",
+  "label_policy": "predeclared_development_expectations_not_independent_gold",
+  "metrics_policy": "hint_requires_expected_kind_and_verified_quote; no_hint_requires_zero_items; protocol_and_transport_failures_reported_separately",
+  "acceptance_target": {
+    "positive_case_hit_rate_at_least": 0.8,
+    "negative_case_false_alarm_rate_at_most": 0.1,
+    "invalid_quotes": 0,
+    "automatic_writes": 0
+  },
+  "cases": [
+    {
+      "id": "punctuation-positive-1",
+      "group": "punctuation",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "请按顺序完成登记，，随后到服务台领取材料。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-positive-2",
+      "group": "punctuation",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "系统更新已完成，，请重新登录查看结果。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-positive-3",
+      "group": "punctuation",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本次培训安排在周五举行，，地点为二楼会议室。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-positive-4",
+      "group": "punctuation",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "请先备份数据，再执行导入；；导入后核对记录数量。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-positive-5",
+      "group": "punctuation",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "😀请核对原句，，  保留这里的空白。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-positive-1",
+      "group": "redundancy",
+      "expectation": "hint",
+      "expected_kinds": [
+        "redundancy"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "活动开始前，请提前预先准备好报名材料。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-positive-2",
+      "group": "redundancy",
+      "expectation": "hint",
+      "expected_kinds": [
+        "redundancy"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "我们将再次重新重复检查这一问题。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-positive-3",
+      "group": "redundancy",
+      "expectation": "hint",
+      "expected_kinds": [
+        "redundancy"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "参会人数大约有三十人左右。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-positive-4",
+      "group": "redundancy",
+      "expectation": "hint",
+      "expected_kinds": [
+        "redundancy"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "目前为止，这项功能至今仍然还没有完成。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-positive-5",
+      "group": "redundancy",
+      "expectation": "hint",
+      "expected_kinds": [
+        "redundancy"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "这一措施的目的是为了提高服务效率。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-positive-1",
+      "group": "sentence",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sentence"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "通过这次培训，使我们掌握了新的操作方法。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-positive-2",
+      "group": "sentence",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sentence"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "由于系统进行了升级，使导出速度明显提高。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-positive-3",
+      "group": "sentence",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sentence"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "能否顺利完成任务，关键在于团队的协作能力很强。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-positive-4",
+      "group": "sentence",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sentence"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "这份报告的内容和数据都非常丰富而且准确无误的。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-positive-5",
+      "group": "sentence",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sentence"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "我们应当认真解决和发现工作中存在的问题。"
+        }
+      ]
+    },
+    {
+      "id": "reference-positive-1",
+      "group": "reference",
+      "expectation": "hint",
+      "expected_kinds": [
+        "reference"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "张明对李强说，他的方案已经通过审核。"
+        }
+      ]
+    },
+    {
+      "id": "reference-positive-2",
+      "group": "reference",
+      "expectation": "hint",
+      "expected_kinds": [
+        "reference"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "小王把自己的电脑借给小李，因为他的电脑坏了。"
+        }
+      ]
+    },
+    {
+      "id": "reference-positive-3",
+      "group": "reference",
+      "expectation": "hint",
+      "expected_kinds": [
+        "reference"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "经理告诉助理，她下周需要去参加会议。"
+        }
+      ]
+    },
+    {
+      "id": "reference-positive-4",
+      "group": "reference",
+      "expectation": "hint",
+      "expected_kinds": [
+        "reference"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "父亲接过儿子的书包，说他的肩膀有些酸。"
+        }
+      ]
+    },
+    {
+      "id": "reference-positive-5",
+      "group": "reference",
+      "expectation": "hint",
+      "expected_kinds": [
+        "reference"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "甲公司与乙公司签署了协议，随后它宣布扩大投资。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-control-1",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "请按顺序完成登记，随后到服务台领取材料。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-control-2",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "标题刻意写作“等等……再等等”，保留停顿效果。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-control-3",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "作者在原稿中写了“，，”，本文仅引用这一标点示例。"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-control-4",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "他说：“你确定吗？”我回答：“确定。”"
+        }
+      ]
+    },
+    {
+      "id": "punctuation-control-5",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "版本 v2.1.0 已发布，兼容 PHP 8.2 和 WordPress 7.1。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-control-1",
+      "group": "redundancy",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "活动开始前，请准备好报名材料。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-control-2",
+      "group": "redundancy",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "第一次检查失败后，我们重新检查了数据。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-control-3",
+      "group": "redundancy",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "参会人数约为三十人。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-control-4",
+      "group": "redundancy",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "这项功能目前还没有完成。"
+        }
+      ]
+    },
+    {
+      "id": "redundancy-control-5",
+      "group": "redundancy",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "这一措施旨在提高服务效率。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-control-1",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "通过这次培训，我们掌握了新的操作方法。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-control-2",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "系统升级后，导出速度明显提高。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-control-3",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "能否完成任务，取决于团队能否有效协作。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-control-4",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "这份报告内容丰富，数据准确。"
+        }
+      ]
+    },
+    {
+      "id": "sentence-control-5",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "我们应当认真发现并解决工作中存在的问题。"
+        }
+      ]
+    },
+    {
+      "id": "reference-control-1",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "张明对李强说：“你的方案已经通过审核。”"
+        }
+      ]
+    },
+    {
+      "id": "reference-control-2",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "小李的电脑坏了，因此小王把自己的电脑借给小李。"
+        }
+      ]
+    },
+    {
+      "id": "reference-control-3",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "经理告诉助理：“请你下周去参加会议。”"
+        }
+      ]
+    },
+    {
+      "id": "reference-control-4",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "父亲说自己的肩膀有些酸，随后接过儿子的书包。"
+        }
+      ]
+    },
+    {
+      "id": "reference-control-5",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "甲公司与乙公司签署协议后，甲公司宣布扩大投资。"
+        }
+      ]
+    }
+  ]
+}

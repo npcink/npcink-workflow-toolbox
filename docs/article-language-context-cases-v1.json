@@ -1,0 +1,288 @@
+{
+  "contract": "article_language_quality_cases.v1",
+  "language": "zh-CN",
+  "checks": [
+    "language"
+  ],
+  "source_policy": "synthetic_no_customer_content",
+  "label_policy": "predeclared_development_expectations_not_independent_gold",
+  "metrics_policy": "hint_requires_expected_kind_and_verified_quote; no_hint_requires_zero_items; protocol_and_transport_failures_reported_separately",
+  "acceptance_target": {
+    "positive_case_hit_rate_at_least": 0.8,
+    "negative_case_false_alarm_rate_at_most": 0.1,
+    "invalid_quotes": 0,
+    "automatic_writes": 0
+  },
+  "cases": [
+    {
+      "id": "context-tech-punctuation",
+      "group": "punctuation",
+      "expectation": "hint",
+      "expected_kinds": [
+        "punctuation"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "接口返回的数据只在内存中使用。😀请核对结果，，  保留原有空白。 下一步由作者决定。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。"
+        }
+      ]
+    },
+    {
+      "id": "context-news-redundancy",
+      "group": "redundancy",
+      "expectation": "hint",
+      "expected_kinds": [
+        "redundancy"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "报道梳理了公共图书馆的服务调整。新开放的阅览区域提供预约座位，读者可以查询开放时间。报道梳理了公共图书馆的服务调整。新开放的阅览区域提供预约座位，读者可以查询开放时间。报道梳理了公共图书馆的服务调整。新开放的阅览区域提供预约座位，读者可以查询开放时间。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "为了筹备开馆活动，工作人员需要提前预先准备好导览材料。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "馆方表示，预约规则以现场公告为准。"
+        }
+      ]
+    },
+    {
+      "id": "context-education-sentence",
+      "group": "sentence",
+      "expectation": "hint",
+      "expected_kinds": [
+        "sentence"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "培训分为示范和练习两个阶段。讲师先展示操作步骤，学员再独立完成练习。培训分为示范和练习两个阶段。讲师先展示操作步骤，学员再独立完成练习。培训分为示范和练习两个阶段。讲师先展示操作步骤，学员再独立完成练习。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "通过本次培训，使学员掌握了基础操作方法。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "课后资料仅用于复习，不能代替实际练习。"
+        }
+      ]
+    },
+    {
+      "id": "context-multi-reference",
+      "group": "reference",
+      "expectation": "hint",
+      "expected_kinds": [
+        "reference"
+      ],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "王明与李华分别提交了方案，两人均参加了评审会议。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "王明告诉李华，他的方案将于下周公布。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "会议记录会发送给两位提交人，请分别核对本人信息。"
+        }
+      ]
+    },
+    {
+      "id": "context-tech-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "接口只读取当前文章的可见文本。WordPress 保存仍由作者触发，API 不会自动写入正文。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "本文介绍站点内容维护的日常流程。管理员先核对文章目录，再检查链接和图片说明。所有建议都由作者判断，工具仅负责展示信息。操作完成后，作者仍需通读全文，确认原有观点和材料得到了保留。"
+        }
+      ]
+    },
+    {
+      "id": "context-medical-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文属于健康教育材料，介绍常规检查的流程。具体诊断和治疗应由医生结合个人情况决定。本文属于健康教育材料，介绍常规检查的流程。具体诊断和治疗应由医生结合个人情况决定。本文属于健康教育材料，介绍常规检查的流程。具体诊断和治疗应由医生结合个人情况决定。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "检查结果需要结合病史解读。单个指标超出参考范围，并不等于已经确诊某种疾病。"
+        }
+      ]
+    },
+    {
+      "id": "context-education-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本节课程介绍人体发育的基础知识，面向接受健康教育的学生。教材使用规范术语，教师应结合课程要求讲解。本节课程介绍人体发育的基础知识，面向接受健康教育的学生。教材使用规范术语，教师应结合课程要求讲解。本节课程介绍人体发育的基础知识，面向接受健康教育的学生。教材使用规范术语，教师应结合课程要求讲解。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "学生可以提出不理解的术语，教师应说明术语在教材中的具体含义。"
+        }
+      ]
+    },
+    {
+      "id": "context-literature-control",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "以下是一段文学作品的表达示例。作者有意使用反复和省略号来表现等待中的情绪，不将其当作普通说明文。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "“等等……再等等。”他在心里默念，窗外的雨仍未停。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "讨论重点是表达效果，引用文字保留作者原来的写法。"
+        }
+      ]
+    },
+    {
+      "id": "context-news-control",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "甲公司与乙公司召开了联合说明会，两家公司分别介绍了各自的工作。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "甲公司负责人说：“甲公司将在下月公布方案。”乙公司负责人随后介绍了乙公司的安排。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "这里分别指明了公司名称，相关材料将在各自的公告栏公开。"
+        }
+      ]
+    },
+    {
+      "id": "context-across-block-reference-control",
+      "group": "reference",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "王明正在整理自己的设计方案。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "他说，这份方案将在下周提交。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "李华将在月底参加评审，目前尚未提交方案。"
+        }
+      ]
+    },
+    {
+      "id": "context-quoted-control",
+      "group": "punctuation",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本段讨论重复标点的识别方法，示例不构成需要自动纠正的正文错误。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "示例字符串为“原文，，保留”。其中两个逗号用于测试，必须原样保留。"
+        },
+        {
+          "block_ref": "b3",
+          "kind": "body",
+          "text": "软件应给出可核对的证据，用户再判断是否需要修改。"
+        }
+      ]
+    },
+    {
+      "id": "context-finance-control",
+      "group": "sentence",
+      "expectation": "no_hint",
+      "expected_kinds": [],
+      "blocks": [
+        {
+          "block_ref": "b1",
+          "kind": "body",
+          "text": "本文说明预算表的阅读方法。计划数与实际数分列展示，便于读者核对统计口径。本文说明预算表的阅读方法。计划数与实际数分列展示，便于读者核对统计口径。本文说明预算表的阅读方法。计划数与实际数分列展示，便于读者核对统计口径。"
+        },
+        {
+          "block_ref": "b2",
+          "kind": "body",
+          "text": "预算金额为 1,200.50 元，实际支出为 1,180.50 元。金额使用相同币种，并保留两位小数。"
+        }
+      ]
+    }
+  ],
+  "purpose": "Supplementary unseen context/length controls after a successful 8-case screen; labels frozen before these calls."
+}

@@ -2074,6 +2074,15 @@ toolbox_assert( false !== strpos( $editor_format_source, 'inline_projection( $fr
 
 
 $article_review_contract = (string) file_get_contents( $root . '/docs/article-review-report-v1.md' );
+$article_quality_counts = array( 'article-language-quality-cases-v1.json' => 40, 'article-language-context-cases-v1.json' => 12, 'article-language-context-control-holdout-v1.json' => 4 );
+$article_quality_receipt = json_decode( (string) file_get_contents( $root . '/docs/article-language-quality-evidence-2026-10-31.json' ), true );
+foreach ( $article_quality_counts as $fixture_name => $expected_count ) {
+	$fixture_path = $root . '/docs/' . $fixture_name;
+	$fixture = json_decode( (string) file_get_contents( $fixture_path ), true );
+	toolbox_assert( 'synthetic_no_customer_content' === $fixture['source_policy'] && array( 'language' ) === $fixture['checks'] && $expected_count === count( $fixture['cases'] ) && hash_file( 'sha256', $fixture_path ) === $article_quality_receipt['fixtures'][ 'docs/' . $fixture_name ], 'Language quality fixture remains frozen, bounded and synthetic: ' . $fixture_name );
+}
+toolbox_assert( 56 === count( $article_quality_receipt['cases'] ) && 1 === $article_quality_receipt['metrics']['baseline_negative_false_alarms'] && 4 === $article_quality_receipt['metrics']['context_fixture_label_errors'] && 0 === $article_quality_receipt['metrics']['invalid_quote_ranges'], 'Language quality evidence preserves the false alarm, bad original labels and exact-quote outcomes without claiming general accuracy.' );
+
 toolbox_assert( false !== strpos( $rest, "'report_contract'        => 'article_review_report.v1'" ) && false !== strpos( $rest, "'coverage'" ) && false !== strpos( $rest, "'source_location'" ) && false !== strpos( $article_review_contract, 'operator_review_only_no_insert' ), 'Article review discloses bounded coverage and evidence locations without correction or a new intent.' );
 toolbox_assert( false !== strpos( $rest, 'article_language_review' ) && false !== strpos( $rest, 'article_review_cloud_request.v1' ) && false !== strpos( $rest, 'article_review_cloud_result.v1' ) && false !== strpos( $rest, 'utf16_code_units' ) && false !== strpos( $rest, 'npcink_cloud_addon_execute_toolbox_article_review_runtime' ) && false !== strpos( $rest, 'article_review_match_evidence' ), 'Cloud article language review stays on the existing publish preflight route with bounded snapshot and locally verified UTF-16 evidence.' );
 toolbox_assert( false !== strpos( $rest, "get_param( 'article_review_snapshot' )" ) && false === strpos( $rest, "'article_review_blocks'      =>" ) && false !== strpos( (string) file_get_contents( $root . '/assets/editor-content-support.js' ), 'articleReviewRevision.current.generation + 1' ), 'Exact article snapshots are preflight-only and every observed editor revision permanently retires the old report.' );
