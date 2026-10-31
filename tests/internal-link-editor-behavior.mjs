@@ -201,7 +201,8 @@ const deduped = helpers.dedupeInternalLinkCandidates([
 	{ targetUrl: 'https://EXAMPLE.test/a#top', sourceMatch: { block_client_id: 'two', matched_text: 'Beta' } },
 	{ targetUrl: 'https://example.test/b', sourceMatch: { block_client_id: 'one', matched_text: 'Alpha' } },
 ]);
-assert.equal(deduped.length, 1);
+assert.equal(deduped.length, 2, 'Different targets sharing a source phrase remain separate recommendations.');
+assert.deepEqual(Array.from(deduped, (item) => item.targetUrl), ['https://example.test/a/', 'https://example.test/b'], 'Canonical duplicate targets collapse while article order stays stable.');
 
 const undo = { appliedContent: prepared.appliedContent };
 assert.equal(helpers.canUndoInternalLink({ attributes: { content: prepared.appliedContent } }, undo), true);
@@ -376,6 +377,16 @@ const overlappingResult = helpers.prepareInternalLinkBatchApplication([
 ], [batchBlock], richText);
 assert.equal(overlappingResult.applied_count, 0);
 assert.deepEqual(Array.from(overlappingResult.items, (item) => item.reason_codes[0]), ['overlap_conflict', 'overlap_conflict']);
+
+const sharedPlacementCandidates = helpers.dedupeInternalLinkCandidates([
+	alphaCandidate,
+	{ ...alphaCandidate, id: 'alternative', targetPostId: 3012, targetUrl: 'https://example.test/alternative/' },
+]);
+assert.equal(sharedPlacementCandidates.length, 2, 'Both articles remain available for manual choice.');
+const sharedPlacementResult = helpers.prepareInternalLinkBatchApplication(sharedPlacementCandidates, [batchBlock], richText);
+assert.equal(sharedPlacementResult.applied_count, 0, 'Showing both articles does not permit overlapping insertion.');
+assert.deepEqual(Array.from(sharedPlacementResult.items, (item) => item.reason_codes[0]), ['overlap_conflict', 'overlap_conflict']);
+assert.equal(helpers.prepareInternalLinkBatchApplication([sharedPlacementCandidates[1]], [batchBlock], richText).applied_count, 1, 'Either alternative can still be explicitly selected on its own.');
 
 const overLimitResult = helpers.prepareInternalLinkBatchApplication(Array.from({ length: 9 }, (_, index) => ({ ...alphaCandidate, id: 'limit-' + index })), [batchBlock], richText);
 assert.equal(overLimitResult.applied_count, 0);
