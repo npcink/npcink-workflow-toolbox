@@ -19,35 +19,53 @@ defined( 'ABSPATH' ) || exit;
 final class Rest_Editor_Internal_Links {
 
 	public static function editor_internal_link_merge_cloud_relevance( array $items, array $evidence ): array {
+		if ( empty( $evidence ) ) {
+			return $items;
+		}
+
+		$evidence   = array_values( $evidence );
 		$by_post_id = array();
 		$by_url     = array();
-		foreach ( $evidence as $evidence_item ) {
+		foreach ( $evidence as $rank => $evidence_item ) {
 			$post_id = absint( $evidence_item['post_id'] ?? 0 );
 			$url     = self::editor_internal_link_safe_candidate_url( $evidence_item );
-			if ( $post_id > 0 ) {
-				$by_post_id[ $post_id ] = $evidence_item;
+			if ( $post_id > 0 && ! isset( $by_post_id[ $post_id ] ) ) {
+				$by_post_id[ $post_id ] = $rank;
 			}
-			if ( '' !== $url ) {
-				$by_url[ $url ] = $evidence_item;
+			if ( '' !== $url && ! isset( $by_url[ $url ] ) ) {
+				$by_url[ $url ] = $rank;
 			}
 		}
 
-		foreach ( $items as &$item ) {
+		$ordered   = array();
+		$unmatched = array();
+		foreach ( $items as $item ) {
 			$post_id = absint( $item['target_post_id'] ?? 0 );
 			$url     = self::editor_internal_link_safe_candidate_url( $item );
-			$match   = $post_id > 0 && isset( $by_post_id[ $post_id ] )
+			$rank    = $post_id > 0 && isset( $by_post_id[ $post_id ] )
 				? $by_post_id[ $post_id ]
-				: ( '' !== $url && isset( $by_url[ $url ] ) ? $by_url[ $url ] : array() );
-			if ( empty( $match ) ) {
+				: ( '' !== $url && isset( $by_url[ $url ] ) ? $by_url[ $url ] : null );
+			if ( null === $rank ) {
+				$unmatched[] = $item;
 				continue;
 			}
+			$match = $evidence[ $rank ];
 			if ( array_key_exists( 'candidate_relevance', $match ) ) {
 				$item['candidate_relevance'] = $match['candidate_relevance'];
 			}
+			$ordered[ $rank ][] = $item;
 		}
-		unset( $item );
 
-		return $items;
+		// Cloud owns article ranking; local anchor/graph priority only informs placement.
+		ksort( $ordered, SORT_NUMERIC );
+		$items = array();
+		foreach ( $ordered as $placements ) {
+			foreach ( $placements as $item ) {
+				$items[] = $item;
+			}
+		}
+
+		return array_merge( $items, $unmatched );
 	}
 
 	public static function editor_internal_link_safe_candidate_url( array $item ): string {

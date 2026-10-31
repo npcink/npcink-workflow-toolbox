@@ -71,6 +71,18 @@ weak 候选仍在次级折叠区，不因这次定位调整变成高相关候选
    `can_apply_to_editor` 两种不同含义。浏览器继续核对当前可见正文的插入资格。
 5. 编辑器按第 3 节展示候选，由用户决定打开、复制或明确添加；最终仅由正常保存持久化。
 
+2026-10-31 顺序修正：Toolkit 的锚点或链接图优先级曾把 Cloud 第六篇文章
+提升为编辑器第一篇。Toolbox 现在按 Cloud 证据中的文章 ID、URL 回退身份恢复
+候选顺序，再投影插入资格；`items` 与可见候选使用同一顺序，原始
+`toolkit_artifact` 保留诊断输入。同一文章的多个位置保持原顺序，重复 Cloud
+身份采用首次位置，未匹配的本地候选稳定放在后面；没有 Cloud 证据时保持原本地顺序。
+这不修改 Cloud 分数、相关性标签或召回，也不因缺少锚点删除文章。
+
+当前 8B 路径的六篇真实文章、两个意图共 12 次请求均成功。保存响应的零 HTTP
+回放确认候选集合及每篇插入资格不变，六组相关阅读和两篇空结果对照不变。
+这是既有开发样本上的顺序回归，不是独立语义准确率或生产发布验收；仍可能存在
+Cloud 相关性误判。详见 [Eval Lab 阶段记录](https://github.com/npcink/npcink-eval-lab/blob/main/docs/link-recommendation-current-8b-order-2026-10-31.md)。
+
 当前相关代码：
 
 - `includes/Rest_Editor_Internal_Links.php`：候选投影与安全过滤。

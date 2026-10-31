@@ -1821,6 +1821,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 		$items                                 = is_array( $artifact['items'] ?? null ) ? $artifact['items'] : array();
 		$items                                 = Rest_Editor_Internal_Links::editor_internal_link_merge_cloud_relevance( $items, $related_content_evidence );
+		$artifact['items']                     = $items;
 		$artifact['input_scope']               = Rest_Editor_Flow_Cache::editor_input_scope( $context );
 		$artifact['source_ability_id']         = $abstained ? '' : 'npcink-abilities-toolkit/resolve-internal-link-targets';
 		$artifact['source_knowledge']          = $source_knowledge;
