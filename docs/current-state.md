@@ -207,8 +207,14 @@ ordinary generation and Site Knowledge remain available. See
   review is now merged in Toolbox #349, Addon #338 and Cloud #1331. Six synthetic
   cases passed real WordPress-class → signed Addon → M4 Cloud/model → Toolbox
   evidence validation, including useful positives and two zero-hint controls.
-  This is bounded developer evidence, not broad accuracy, installed shared-browser
-  acceptance or production deployment. Logic/content-risk remain disabled.
+  The [installed editor acceptance](article-language-installed-acceptance-2026-10-31.md)
+  now also passes real enqueued assets, real REST/Cloud output, exact quotes,
+  read-only navigation and edit/Undo invalidation on a disposable draft.
+  Temporary local plugin mounts were restored: the shared site's original
+  Toolbox target is missing and its Addon is older, so durable local installation
+  remains necessary before ordinary author use. This is bounded developer
+  evidence, not broad accuracy, human adoption or production deployment.
+  Logic/content-risk remain disabled.
   See [delivery acceptance](article-language-delivery-acceptance-2026-10-31.md)
   for exact source, CI, accepted clean-master M4, durable no-store checks and the separate browser proof;
   the 2026-10-30 unpushed-SHA checkpoint is historical.

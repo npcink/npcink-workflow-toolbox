@@ -1,0 +1,118 @@
+{
+  "contract": "article_language_installed_browser_evidence.v1",
+  "date": "2026-10-31T14:16:01.861Z",
+  "toolbox_revision": "f94618809d07a963864e3415e48de4b4e87de13f",
+  "addon_revision": "b44189ce4327bd8df04e42256130fb29a470c7c7",
+  "preflight_requests": 1,
+  "progressive_requests": 1,
+  "run_id": "run_dd489d1d0db3495197380695de6b496b",
+  "status": "partial",
+  "findings": 1,
+  "kinds": [
+    "punctuation"
+  ],
+  "invalid_findings": 0,
+  "checks": {
+    "language": {
+      "status": "completed",
+      "reason_code": "none"
+    },
+    "logic": {
+      "status": "not_checked",
+      "reason_code": "not_supported"
+    },
+    "content_risk": {
+      "status": "not_checked",
+      "reason_code": "not_supported"
+    }
+  },
+  "actual_installed_assets_verified": [
+    "editor-content-format.js",
+    "editor-content-support.js"
+  ],
+  "substituted_results": false,
+  "injected_assets": false,
+  "exact_utf16_quotes": true,
+  "excluded_code_and_image": true,
+  "read_only_navigation": true,
+  "edit_undo_retires_report": true,
+  "editor_title_excerpt_content_unchanged": true,
+  "database_fixture_unchanged": true,
+  "post_write_attempts": 0,
+  "blocked_preference_attempts": 0,
+  "page_errors": 0,
+  "customer_content_sent": false,
+  "production_deployed": false,
+  "disposable_draft_deleted": true,
+  "temporary_session_destroyed": true,
+  "cloud_revision": "7002bd56f080bf3fa045fbe3132e9b7a13ee093f",
+  "source_note": "Runtime files unchanged from the listed Toolbox HEAD; optional harness and documentation were the only local changes.",
+  "temporary_plugin_mounts_restored": true,
+  "active_plugin_option_changed": false,
+  "shared_site_durable_installation_complete": false,
+  "attempts": [
+    {
+      "stage": "initial_mount",
+      "result": "sidebar_registration_timeout",
+      "preflight_sent": false,
+      "fixture_and_session_cleaned": true
+    },
+    {
+      "stage": "request_accounting",
+      "result": "harness_counted_local_progressive_request",
+      "run_id": "run_53ab02326c484b7b94bc0f330e088135",
+      "acceptance_passed": false,
+      "fixture_and_session_cleaned": true
+    },
+    {
+      "stage": "installed_acceptance",
+      "result": "passed",
+      "run_id": "run_dd489d1d0db3495197380695de6b496b",
+      "fixture_and_session_cleaned": true
+    }
+  ],
+  "durable_language_runs": [
+    {
+      "run_id": "run_53ab02326c484b7b94bc0f330e088135",
+      "status": "succeeded",
+      "input_omitted": true,
+      "ciphertext_absent": true,
+      "result_omitted": true,
+      "provider_calls": 1,
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "provider_ids": [
+        "openai"
+      ],
+      "retry_counts": [
+        0
+      ],
+      "fallback_used": false,
+      "usage_events": 6,
+      "tokens_in": 352,
+      "tokens_out": 72
+    },
+    {
+      "run_id": "run_dd489d1d0db3495197380695de6b496b",
+      "status": "succeeded",
+      "input_omitted": true,
+      "ciphertext_absent": true,
+      "result_omitted": true,
+      "provider_calls": 1,
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "provider_ids": [
+        "openai"
+      ],
+      "retry_counts": [
+        0
+      ],
+      "fallback_used": false,
+      "usage_events": 6,
+      "tokens_in": 352,
+      "tokens_out": 124
+    }
+  ]
+}

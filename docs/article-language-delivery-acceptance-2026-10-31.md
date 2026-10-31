@@ -89,8 +89,10 @@ One real signed Addon entitlement read passed after promotion, with zero provide
 calls and zero WordPress writes. No lock was removed. No extra model batch was
 needed: the tested candidate and merged revision have identical Git trees.
 
-Next: verify the installed editor surface
-and use ordinary author feedback to improve Chinese
+The later [installed editor acceptance](article-language-installed-acceptance-2026-10-31.md)
+now verifies real enqueued assets, actual preflight/Cloud output and read-only
+editor behavior. Temporary mounts were restored; durable local installation is
+still needed for ordinary author use. Then use author feedback to improve Chinese
 language usefulness. Do not enable logic/content-risk or automatic correction.
 OSS remains outside this language-review slice; its remote media write modes
 still need verified third-party adapter capabilities and governed execution.
