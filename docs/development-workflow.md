@@ -29,6 +29,12 @@ Then state the focused module and boundary before editing.
 
 ## Default Gate
 
+Article-formatting/review work also follows
+[Article Review Delivery Rules and Lessons](article-review-delivery-lessons-v1.md):
+preserve original content, distinguish fixture/CLI/installed-browser evidence,
+bind runtime claims to source receipts, and refresh canonical status pages at
+closeout. Branch cleanup must preserve active installations and other chats.
+
 Run:
 
 ```bash

@@ -62,8 +62,13 @@ with the closing commit or PR for one release cycle, then prune.
   [Reference research](article-review-reference-research-2026-10-30.md), a
   [consumer contract draft](article-review-cloud-contract-draft-v1.md) and
   [synthetic seeds](article-review-evaluation-seeds-v1.json) are prepared; the
-  next implementation owner is Cloud/Addon for the language-only slice, then
-  Toolbox report consumption. Model evaluation and runtime acceptance remain open.
+  language-only slice is now merged across Cloud/Addon/Toolbox, with six seeded
+  signed/model cases, installed editor acceptance and durable local installation
+  passed. See the [current closeout](article-review-session-closeout-2026-10-31.md)
+  and [delivery rules/lessons](article-review-delivery-lessons-v1.md).
+  Broad Chinese accuracy, independent author feedback, general cross-paragraph
+  logic, content-risk analysis and production acceptance remain open; those
+  are not prerequisites to closing the delivered language slice.
   Source: [five-session audit](session-closeout-audit-2026-10-26.md).
 - **Site-effect verification remains a deferred design (Toolbox / Cloud).**
   Existing Smart Ask consumes bounded deidentified packs. Deterministic

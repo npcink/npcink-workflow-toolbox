@@ -1,17 +1,18 @@
 # Cloud 文章检查消费方契约草案 v1
 
-状态：2026-10-30，Cloud/Addon 契约已在候选分支实现，Toolbox 已接入候选只读
-报告；三仓均未合并、未完成生产验收。此前 M4 证据仅对应命名的 Cloud
-候选，不代表 Addon/Toolbox 已部署；本轮未同步或部署任何运行环境。
+状态：2026-10-31，中文 language 切片已合入 Toolbox #349、Addon #338、
+Cloud #1331，并通过真实安装编辑器验收和长期本地安装；见
+[会话收尾](article-review-session-closeout-2026-10-31.md)。逻辑/内容风险仍未启用，
+未做生产或 WordPress.org 发布。文件名保留 draft 以兼容历史引用；下文扩展设计仍是草案。
 文中的 `article_review_cloud_request.v1` / `article_review_cloud_result.v1`
-是当前候选分支上的契约名称，不代表已发布的工作流或第三种摘要包。Cloud
+是已实现语言切片的契约名称，不代表新增工作流或第三种摘要包。Cloud
 后端、Addon facade 和 Toolbox 消费方必须以同一 revision 的测试结果为准，
 不能从文档推定生产可调用。
 调研依据见[一手来源与取舍](article-review-reference-research-2026-10-30.md)。
 
-## 当前已实现的候选切片
+## 当前已实现的语言切片
 
-当前候选仅接受 `checks=["language"]`，不接受逻辑或内容风险请求。
+当前切片仅接受 `checks=["language"]`，不接受逻辑或内容风险请求。
 Cloud `input` 只含 `snapshot_sha256/language/checks/offset_unit/blocks`；
 `contract_version=article_review_cloud_request.v1` 位于外层 runtime envelope。
 Addon 的公开 facade 接受含契约名的本地请求，验证后移除 input 中的契约名。
