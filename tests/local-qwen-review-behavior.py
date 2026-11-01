@@ -96,6 +96,20 @@ class LocalReviewTests(unittest.TestCase):
             self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response).hexdigest())
             self.assertNotIn('P9', failure.read_text())
 
+    def test_transport_error_writes_safe_failure_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config=root/'config.json';output=root/'review.json';failure=Path(str(output)+'.failure.json')
+            config.write_text(json.dumps(dict(model='qwen3.8-max',url='https://example.invalid/v1',auth_token='not-a-real-token')))
+            with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
+                    reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
+                    reviewer.urllib.request,'urlopen',side_effect=ConnectionResetError('provider endpoint detail')):
+                with self.assertRaisesRegex(ValueError,'Qwen transport failed; no review delivered') as error:
+                    reviewer.run('base','head',output,config)
+            self.assertNotIn('provider endpoint detail', str(error.exception))
+            receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['failure']['code'], 'provider_transport_error')
+            self.assertIsNone(receipt['response'])
+
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'review.json';output.write_text('preserve')

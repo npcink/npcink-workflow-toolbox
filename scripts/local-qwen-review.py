@@ -209,6 +209,11 @@ def run(base, head, output, config):
         write_failure_receipt(output, frozen, model, 'response_contract_invalid', 'response',
                               str(error), response_body, response_complete=response_complete)
         raise
+    except OSError:
+        write_failure_receipt(output, frozen, model, 'provider_transport_error', 'provider',
+                              'provider connection failed', response_body,
+                              response_complete=response_complete)
+        raise ValueError('Qwen transport failed; no review delivered') from None
     receipt = dict(contract='local_qwen_code_review.v1', success=True, model=model,
                    **frozen, review=review)
     output.parent.mkdir(parents=True, exist_ok=True)
