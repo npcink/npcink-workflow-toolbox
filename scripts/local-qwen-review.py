@@ -109,13 +109,16 @@ def write_failure_receipt(output, frozen, model, code, path, message, response_b
         },
         'response': response_metadata(response_body, response_complete),
     }
-    try:
-        with failure_path.open('x', encoding='utf-8') as handle:
-            json.dump(receipt, handle, ensure_ascii=False, indent=2)
-            handle.write('\n')
-    except FileExistsError:
-        raise ValueError('failure receipt already exists; use a new output path') from None
-    return failure_path
+    for index in range(100):
+        candidate = failure_path if index == 0 else Path(str(failure_path) + '.' + str(index))
+        try:
+            with candidate.open('x', encoding='utf-8') as handle:
+                json.dump(receipt, handle, ensure_ascii=False, indent=2)
+                handle.write('\n')
+            return candidate
+        except FileExistsError:
+            continue
+    raise ValueError('unable to create a unique failure receipt')
 
 
 def verify(receipt, body, expected_head):
@@ -243,7 +246,7 @@ def run(base, head, output, config):
                               'provider request timed out', response_body,
                               response_complete=response_complete)
         raise ValueError('Qwen request timed out; no review delivered') from None
-    except OSError:
+    except (urllib.error.URLError, ConnectionError):
         if not provider_started:
             raise
         write_failure_receipt(output, frozen, model, 'provider_transport_error', 'provider',

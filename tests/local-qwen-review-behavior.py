@@ -150,6 +150,16 @@ class LocalReviewTests(unittest.TestCase):
             self.assertFalse(receipt['response']['hash_complete'])
             self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response[:4096]).hexdigest())
 
+    def test_existing_failure_receipt_gets_a_unique_sidecar(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output=Path(directory)/'review.json';first=Path(str(output)+'.failure.json')
+            first.write_text('previous')
+            created=reviewer.write_failure_receipt(output, FROZEN, 'qwen3.8-max',
+                                                   'provider_transport_error', 'provider',
+                                                   'provider connection failed')
+            self.assertEqual(created, Path(str(first)+'.1'))
+            self.assertEqual(first.read_text(), 'previous')
+
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'review.json';output.write_text('preserve')
