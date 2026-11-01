@@ -17,6 +17,7 @@ Start from the active documents below before changing code.
 
 - [Current State](current-state.md)
 - [Known Issues](known-issues.md)
+- [Article / OSS referenced-chat closeout (2026-11-01)](article-oss-session-closeout-2026-11-01.md) — historical issue dispositions, 19 merged PRs, four OSS commits, verified topic cleanup and explicit retained resources/owners.
 - [推荐与模型研究会话关闭审计 — 2026-10-29](session-research-closeout-2026-10-29.md) — 48 merged PRs, ignored-evidence preservation, conditional research and remaining owners; runtime acceptance remains separate.
 - [会话源码收尾精简回执 — 2026-10-29](session-research-closeout-evidence-2026-10-29.json) — merge SHAs, default-branch ancestry and live topic-head checks; excludes raw article/provider evidence.
 - [Related Reading Editor v1](related-reading-editor-v1.md) — author-selected Gutenberg reading-list insertion.
@@ -131,7 +132,7 @@ Start from the active documents below before changing code.
 - [Durable local language-review installation (2026-10-31)](article-language-local-install-2026-10-31.md) and [body-free receipt](article-language-local-install-evidence-2026-10-31.json) — primary mounts retained, local vision timeout preserved, managed development tunnel and real editor recheck passed.
 - [Chinese language quality evaluation (2026-11-01)](article-language-quality-evaluation-2026-11-01.md), [body-free receipt](article-language-quality-evidence-2026-10-31.json), [40 basic cases](article-language-quality-cases-v1.json), [original context cases](article-language-context-cases-v1.json) and [fresh controls](article-language-context-control-holdout-v1.json) — bounded signed/model results with one style false alarm and four explicit fixture-label errors.
 - [Article review session closeout (2026-10-31)](article-review-session-closeout-2026-10-31.md) — verified merged PRs, cleanup and explicit remaining owners; [delivery rules and lessons](article-review-delivery-lessons-v1.md) govern follow-up work.
-- [文章审阅同行/开源调研](article-review-reference-research-2026-10-30.md)、[Cloud 检查消费方契约草案](article-review-cloud-contract-draft-v1.md)与[中文合成验证种子](article-review-evaluation-seeds-v1.json) — 中文语句切片已合并并本地安装；逻辑与内容风险仍未启用，生产发布未执行。
+- [文章审阅同行/开源调研](article-review-reference-research-2026-10-30.md)、[Cloud 检查消费方契约草案](article-review-cloud-contract-draft-v1.md)与[中文合成验证种子](article-review-evaluation-seeds-v1.json) — 保留早期设计依据；中文语句及有界逻辑/成人语境提示均已合并并本地验收，当前以[扩展契约](article-review-context-v1.md)为准，生产发布未执行。
 - [Formatting compatibility follow-up (2026-10-31)](article-format-compatibility-2026-10-31.md) and [body-free receipt](article-format-compatibility-evidence-2026-10-31.json) — two known validator refusals resolved with opaque blocks and v1-safe heading/quote spacing.
 - [Formatting preservation acceptance (2026-10-30)](article-format-preservation-acceptance-2026-10-30.md) and [body-free evidence](article-format-preservation-evidence-2026-10-30.json).
 - [Editor Content Format V1](editor-content-format-v1.md)
