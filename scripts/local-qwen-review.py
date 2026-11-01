@@ -45,6 +45,10 @@ class ProviderHTTPError(ValueError):
         self.status = status
 
 
+class ResponseSizeError(ValueError):
+    """The provider response exceeded the bounded read budget."""
+
+
 def validate_review(data):
     if not isinstance(data, dict) or not isinstance(data.get('summary'), str) or not data['summary'].strip():
         raise ReviewValidationError('summary_missing', 'summary', 'review summary required')
@@ -179,7 +183,7 @@ def run(base, head, output, config):
                 if len(response_body) > 2_000_000:
                     response_complete = False
                     response_body = response_body[:2_000_000]
-                    raise ValueError('Qwen response exceeds 2000000 bytes')
+                    raise ResponseSizeError('Qwen response exceeds 2000000 bytes')
                 raw = json.loads(response_body)
         except urllib.error.HTTPError as error:
             raise ProviderHTTPError(error.code) from None
@@ -207,10 +211,17 @@ def run(base, head, output, config):
                               response_complete=response_complete)
         raise ValueError('provider response was not valid JSON') from None
     except (KeyError, IndexError, TypeError):
+        if not provider_started:
+            raise
         write_failure_receipt(output, frozen, model, 'response_shape_invalid', 'response',
                               'provider response shape was invalid', response_body,
                               response_complete=response_complete)
         raise ValueError('provider response shape was invalid') from None
+    except ResponseSizeError:
+        write_failure_receipt(output, frozen, model, 'response_oversized', 'response',
+                              'provider response exceeded the bounded read budget', response_body,
+                              response_complete=response_complete)
+        raise ValueError('Qwen response exceeds 2000000 bytes') from None
     except ValueError as error:
         if not provider_started:
             raise

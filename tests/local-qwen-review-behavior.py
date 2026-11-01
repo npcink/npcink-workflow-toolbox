@@ -143,6 +143,7 @@ class LocalReviewTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'Qwen response exceeds 2000000 bytes'):
                     reviewer.run('base','head',output,config)
             receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['failure']['code'], 'response_oversized')
             self.assertEqual(receipt['response']['bytes'], 2_000_000)
             self.assertFalse(receipt['response']['complete'])
             self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response[:2_000_000]).hexdigest())
