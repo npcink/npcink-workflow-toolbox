@@ -132,6 +132,21 @@ class LocalReviewTests(unittest.TestCase):
             self.assertEqual(receipt['failure']['code'], 'provider_timeout')
             self.assertNotIn('timeout detail', failure.read_text())
 
+    def test_oversized_response_records_only_the_consumed_prefix(self):
+        response = b'x' * 2_000_001
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config=root/'config.json';output=root/'review.json';failure=Path(str(output)+'.failure.json')
+            config.write_text(json.dumps(dict(model='qwen3.8-max',url='https://example.invalid/v1',auth_token='not-a-real-token')))
+            with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
+                    reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
+                    reviewer.urllib.request,'urlopen',return_value=io.BytesIO(response)):
+                with self.assertRaisesRegex(ValueError,'Qwen response exceeds 2000000 bytes'):
+                    reviewer.run('base','head',output,config)
+            receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['response']['bytes'], 2_000_000)
+            self.assertFalse(receipt['response']['complete'])
+            self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response[:2_000_000]).hexdigest())
+
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'review.json';output.write_text('preserve')

@@ -178,6 +178,7 @@ def run(base, head, output, config):
                 response_body = response.read(2_000_001)
                 if len(response_body) > 2_000_000:
                     response_complete = False
+                    response_body = response_body[:2_000_000]
                     raise ValueError('Qwen response exceeds 2000000 bytes')
                 raw = json.loads(response_body)
         except urllib.error.HTTPError as error:
@@ -214,7 +215,8 @@ def run(base, head, output, config):
         if not provider_started:
             raise
         write_failure_receipt(output, frozen, model, 'response_contract_invalid', 'response',
-                              str(error), response_body, response_complete=response_complete)
+                              'provider response failed the review contract', response_body,
+                              response_complete=response_complete)
         raise
     except TimeoutError:
         if not provider_started:
