@@ -81,8 +81,6 @@ def response_metadata(response_body, complete=True):
 def write_failure_receipt(output, frozen, model, code, path, message, response_body=None, provider_status=None, response_complete=True):
     """Persist safe diagnostics without retaining provider output or headers."""
     failure_path = Path(str(output) + '.failure.json')
-    if failure_path.exists():
-        raise ValueError('failure receipt already exists; use a new output path')
     failure_path.parent.mkdir(parents=True, exist_ok=True)
     receipt = {
         'contract': 'local_qwen_code_review_failure.v1',
@@ -100,9 +98,12 @@ def write_failure_receipt(output, frozen, model, code, path, message, response_b
         },
         'response': response_metadata(response_body, response_complete),
     }
-    with failure_path.open('x', encoding='utf-8') as handle:
-        json.dump(receipt, handle, ensure_ascii=False, indent=2)
-        handle.write('\n')
+    try:
+        with failure_path.open('x', encoding='utf-8') as handle:
+            json.dump(receipt, handle, ensure_ascii=False, indent=2)
+            handle.write('\n')
+    except FileExistsError:
+        raise ValueError('failure receipt already exists; use a new output path') from None
     return failure_path
 
 

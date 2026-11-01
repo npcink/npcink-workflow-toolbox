@@ -30,9 +30,9 @@ may still be hosted. It does not promise on-device model inference.
 When a provider response cannot satisfy the review contract, the command exits
 non-zero and writes a sidecar at `<output>.failure.json`. The sidecar contains
 only the immutable Git identity, model name, safe validation code/path, provider
-HTTP status when available, and response byte count/hash. Transport failures
+HTTP status when available, and raw response byte count/hash. Transport failures
 use a fixed error code and omit connection details. It never stores the
-provider body, headers, credentials, or a successful review receipt. The sidecar
+provider body text, headers, credentials, or a successful review receipt. The sidecar
 is diagnostic evidence and cannot be passed to the publisher as `--local-review`.
 
 Toolbox publisher accepts `--local-review` and verifies the exact diff and PR
