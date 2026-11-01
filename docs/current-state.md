@@ -7,6 +7,11 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-01.
 
+**Referenced article / OSS chats:** the [2026-11-01 closeout audit](article-oss-session-closeout-2026-11-01.md)
+maps both histories to 19 merged PRs, four OSS commits, live topic-head checks,
+retained installations and other owners' worktrees. Both chats may close;
+real OSS operations remain deferred, and global branch/worktree cleanup is not claimed.
+
 **Article review follow-up delivered:** formatting compatibility (#356), language
 quality evidence (#358), and the [logic/context-risk extension](article-review-context-v1.md)
 (#359 / Addon #339 / Cloud #1335) are merged. See the

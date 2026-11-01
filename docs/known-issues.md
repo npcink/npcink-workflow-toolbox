@@ -71,6 +71,17 @@ with the closing commit or PR for one release cycle, then prune.
   trigger more bounded evaluation; no full batch or silent retries are scheduled.
   Review remains author-only; no hidden saves or publication block.
   Real OSS writes/backup/restore and production release are explicitly deferred.
+- **OSS/offload real-operation acceptance (site storage / Toolkit / Adapter / Core).**
+  The [two-chat closeout audit](article-oss-session-closeout-2026-11-01.md)
+  verifies the four original storage-preflight commits in master. Detection,
+  fail-closed guards, sanitized shim evidence and mock planning are delivered;
+  actual remote read/write/backup/restore and CDN consistency are deferred.
+  On an explicit restart, the site owner names the real offload plugin and
+  disposable media, then verifies local-file retention and read readiness.
+  Toolkit/Adapter/Core owners must prove governed replacement, backup/restore,
+  drift and cache behavior with storage evidence before enabling each mode.
+  Keep unsupported modes blocked and the media-optimization pause effective;
+  Toolbox must not acquire an OSS SDK, credentials or a parallel media writer.
 - **Site-effect verification remains a deferred design (Toolbox / Cloud).**
   Existing Smart Ask consumes bounded deidentified packs. Deterministic
   before/after measurement, reviewed method references and comparable black-box
