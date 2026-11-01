@@ -110,6 +110,28 @@ class LocalReviewTests(unittest.TestCase):
             self.assertEqual(receipt['failure']['code'], 'provider_transport_error')
             self.assertIsNone(receipt['response'])
 
+    def test_config_json_error_is_not_mislabeled_as_provider_response(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config=root/'config.json';output=root/'review.json'
+            config.write_text('{not-json')
+            with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(reviewer,'git',return_value=b''):
+                with self.assertRaisesRegex(ValueError,'local Qwen config is not valid JSON'):
+                    reviewer.run('base','head',output,config)
+            self.assertFalse(Path(str(output)+'.failure.json').exists())
+
+    def test_timeout_writes_a_distinct_failure_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config=root/'config.json';output=root/'review.json';failure=Path(str(output)+'.failure.json')
+            config.write_text(json.dumps(dict(model='qwen3.8-max',url='https://example.invalid/v1',auth_token='not-a-real-token')))
+            with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
+                    reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
+                    reviewer.urllib.request,'urlopen',side_effect=TimeoutError('timeout detail')):
+                with self.assertRaisesRegex(ValueError,'Qwen request timed out; no review delivered'):
+                    reviewer.run('base','head',output,config)
+            receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['failure']['code'], 'provider_timeout')
+            self.assertNotIn('timeout detail', failure.read_text())
+
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'review.json';output.write_text('preserve')

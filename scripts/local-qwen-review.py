@@ -129,6 +129,7 @@ def run(base, head, output, config):
     model = None
     response_body = None
     response_complete = True
+    provider_started = False
     try:
         frozen, diff = snapshot(base, head)
         if not diff:
@@ -170,6 +171,7 @@ def run(base, head, output, config):
             raise TimeoutError('local Qwen request exceeded 180 seconds')
         signal.signal(signal.SIGALRM, deadline)
         signal.alarm(180)
+        provider_started = True
         try:
             with urllib.request.urlopen(req, timeout=180) as response:
                 response_body = response.read(2_000_001)
@@ -196,6 +198,8 @@ def run(base, head, output, config):
                               'provider returned an HTTP error', provider_status=error.status)
         raise
     except json.JSONDecodeError:
+        if not provider_started:
+            raise ValueError('local Qwen config is not valid JSON') from None
         write_failure_receipt(output, frozen, model, 'response_json_invalid', 'response',
                               'provider response was not valid JSON', response_body,
                               response_complete=response_complete)
@@ -206,10 +210,21 @@ def run(base, head, output, config):
                               response_complete=response_complete)
         raise ValueError('provider response shape was invalid') from None
     except ValueError as error:
+        if not provider_started:
+            raise
         write_failure_receipt(output, frozen, model, 'response_contract_invalid', 'response',
                               str(error), response_body, response_complete=response_complete)
         raise
+    except TimeoutError:
+        if not provider_started:
+            raise
+        write_failure_receipt(output, frozen, model, 'provider_timeout', 'provider',
+                              'provider request timed out', response_body,
+                              response_complete=response_complete)
+        raise ValueError('Qwen request timed out; no review delivered') from None
     except OSError:
+        if not provider_started:
+            raise
         write_failure_receipt(output, frozen, model, 'provider_transport_error', 'provider',
                               'provider connection failed', response_body,
                               response_complete=response_complete)
