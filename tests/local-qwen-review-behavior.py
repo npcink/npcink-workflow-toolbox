@@ -160,6 +160,20 @@ class LocalReviewTests(unittest.TestCase):
             self.assertEqual(created, Path(str(first)+'.1'))
             self.assertEqual(first.read_text(), 'previous')
 
+    def test_incomplete_response_has_a_distinct_failure_code(self):
+        response = json.dumps({'choices': [{'finish_reason': 'length', 'message': {'content': '{}'}}]}).encode()
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config=root/'config.json';output=root/'review.json';failure=Path(str(output)+'.failure.json')
+            config.write_text(json.dumps(dict(model='qwen3.8-max',url='https://example.invalid/v1',auth_token='not-a-real-token')))
+            with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
+                    reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
+                    reviewer.urllib.request,'urlopen',return_value=io.BytesIO(response)):
+                with self.assertRaisesRegex(ValueError,'incomplete Qwen response'):
+                    reviewer.run('base','head',output,config)
+            receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['failure']['code'], 'response_incomplete')
+            self.assertNotIn('provider_status', receipt['failure'])
+
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'review.json';output.write_text('preserve')

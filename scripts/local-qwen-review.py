@@ -49,6 +49,10 @@ class ResponseSizeError(ValueError):
     """The provider response exceeded the bounded read budget."""
 
 
+class IncompleteResponseError(ValueError):
+    """The provider stopped without delivering a complete review response."""
+
+
 def validate_review(data):
     if not isinstance(data, dict) or not isinstance(data.get('summary'), str) or not data['summary'].strip():
         raise ReviewValidationError('summary_missing', 'summary', 'review summary required')
@@ -105,10 +109,11 @@ def write_failure_receipt(output, frozen, model, code, path, message, response_b
             'code': code,
             'path': path,
             'message': message,
-            'provider_status': provider_status,
         },
         'response': response_metadata(response_body, response_complete),
     }
+    if provider_status is not None:
+        receipt['failure']['provider_status'] = provider_status
     for index in range(100):
         candidate = failure_path if index == 0 else Path(str(failure_path) + '.' + str(index))
         try:
@@ -202,7 +207,7 @@ def run(base, head, output, config):
             signal.signal(signal.SIGALRM, previous_handler)
         choice = raw['choices'][0]
         if choice.get('finish_reason') != 'stop':
-            raise ValueError('incomplete Qwen response')
+            raise IncompleteResponseError('incomplete Qwen response')
         review = json.loads(choice['message']['content'])
         validate_review(review)
     except ReviewValidationError as error:
@@ -232,6 +237,11 @@ def run(base, head, output, config):
                               'provider response exceeded the bounded read budget', response_body,
                               response_complete=response_complete)
         raise ValueError('Qwen response exceeds 2000000 bytes') from None
+    except IncompleteResponseError:
+        write_failure_receipt(output, frozen, model, 'response_incomplete', 'response',
+                              'provider response was incomplete', response_body,
+                              response_complete=response_complete)
+        raise ValueError('incomplete Qwen response') from None
     except ValueError as error:
         if not provider_started:
             raise

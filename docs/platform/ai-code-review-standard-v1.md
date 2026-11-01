@@ -32,7 +32,7 @@ non-zero and writes a sidecar at `<output>.failure.json` (or a numeric suffix if
 that path already exists). The sidecar contains the `contract`, `success:false`,
 `recorded_at`, immutable Git identity, model name, a `failure` object with safe
 code/path/message and optional provider HTTP status, plus `response` metadata.
-Response metadata contains consumed byte count, a SHA-256 hash of at most the
+Response metadata contains retained byte count, a SHA-256 hash of at most the
 first 4 KB, the hashed-byte count, and completeness flags. The hash supports
 diagnostic correlation; it does not store or reconstruct the response body text.
 An oversized response records only the consumed prefix and marks it incomplete.
