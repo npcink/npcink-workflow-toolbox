@@ -47,9 +47,23 @@ class LocalReviewTests(unittest.TestCase):
             receipt['review']['findings']=findings
             with self.assertRaises(ValueError): self.verify(receipt)
 
+    def test_invalid_finding_reports_a_safe_contract_path(self):
+        for finding, code, path in [
+                ({'id': 'F1', 'priority': 'P2', 'file': 'x', 'problem': 'x', 'fix': 'x'}, 'finding_id_duplicate', 'findings[1].id'),
+                ({'id': 'bad', 'priority': 'P2', 'file': 'x', 'problem': 'x', 'fix': 'x'}, 'finding_id_invalid', 'findings[0].id'),
+                ({'id': 'F1', 'priority': 'P9', 'file': 'x', 'problem': 'x', 'fix': 'x'}, 'finding_priority_invalid', 'findings[0].priority'),
+                ({'id': 'F1', 'priority': 'P2', 'file': '', 'problem': 'x', 'fix': 'x'}, 'finding_field_missing', 'findings[0].file'),
+        ]:
+            receipt = copy.deepcopy(self.receipt)
+            receipt['review']['findings'] = [self.receipt['review']['findings'][0], finding] if code == 'finding_id_duplicate' else [finding]
+            with self.subTest(code=code), self.assertRaises(reviewer.ReviewValidationError) as raised:
+                reviewer.validate_review(receipt['review'])
+            self.assertEqual(raised.exception.code, code)
+            self.assertEqual(raised.exception.path, path)
+
     def test_provider_error_does_not_write_pass_receipt_or_leak_body(self):
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);config=root/'config.json';output=root/'review.json'
+            root=Path(directory);config=root/'config.json';output=root/'review.json';failure=Path(str(output)+'.failure.json')
             config.write_text(json.dumps(dict(provider='qwen',custom_providers=dict(qwen=dict(
                 model='qwen3.8-max',url='https://example.invalid/v1',auth_token='not-a-real-token')))))
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
@@ -58,6 +72,29 @@ class LocalReviewTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'Qwen HTTP 400; no review delivered') as error:
                     reviewer.run('base','head',output,config)
             self.assertNotIn('secret',str(error.exception));self.assertFalse(output.exists())
+            receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['failure']['code'], 'provider_http_error')
+            self.assertEqual(receipt['failure']['provider_status'], 400)
+            self.assertNotIn('secret', failure.read_text())
+
+    def test_invalid_provider_findings_write_only_safe_failure_metadata(self):
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content': json.dumps({
+            'summary': 'Reviewed', 'findings': [{'id': 'F1', 'priority': 'P9', 'file': 'x', 'problem': 'x', 'fix': 'x'}]})}}]}).encode()
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);config=root/'config.json';output=root/'review.json';failure=Path(str(output)+'.failure.json')
+            config.write_text(json.dumps(dict(model='qwen3.8-max',url='https://example.invalid/v1',auth_token='not-a-real-token')))
+            with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
+                    reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
+                    reviewer.urllib.request,'urlopen',return_value=io.BytesIO(response)):
+                with self.assertRaisesRegex(ValueError,'finding priority is invalid'):
+                    reviewer.run('base','head',output,config)
+            self.assertFalse(output.exists())
+            receipt=json.loads(failure.read_text())
+            self.assertEqual(receipt['failure']['code'], 'finding_priority_invalid')
+            self.assertEqual(receipt['failure']['path'], 'findings[0].priority')
+            self.assertEqual(receipt['response']['bytes'], len(response))
+            self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response).hexdigest())
+            self.assertNotIn('P9', failure.read_text())
 
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
