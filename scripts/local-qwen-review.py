@@ -79,7 +79,14 @@ def response_metadata(response_body, complete=True):
         return None
     if isinstance(response_body, str):
         response_body = response_body.encode('utf-8')
-    return {'bytes': len(response_body), 'sha256': hashlib.sha256(response_body).hexdigest(), 'complete': complete}
+    hash_body = response_body[:4096]
+    return {
+        'bytes': len(response_body),
+        'sha256': hashlib.sha256(hash_body).hexdigest(),
+        'hash_bytes': len(hash_body),
+        'complete': complete,
+        'hash_complete': len(hash_body) == len(response_body),
+    }
 
 
 def write_failure_receipt(output, frozen, model, code, path, message, response_body=None, provider_status=None, response_complete=True):

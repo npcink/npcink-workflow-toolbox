@@ -146,7 +146,9 @@ class LocalReviewTests(unittest.TestCase):
             self.assertEqual(receipt['failure']['code'], 'response_oversized')
             self.assertEqual(receipt['response']['bytes'], 2_000_000)
             self.assertFalse(receipt['response']['complete'])
-            self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response[:2_000_000]).hexdigest())
+            self.assertEqual(receipt['response']['hash_bytes'], 4096)
+            self.assertFalse(receipt['response']['hash_complete'])
+            self.assertEqual(receipt['response']['sha256'], __import__('hashlib').sha256(response[:4096]).hexdigest())
 
     def test_existing_output_not_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
