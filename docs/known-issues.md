@@ -60,7 +60,10 @@ with the closing commit or PR for one release cycle, then prune.
   [Logic/context-risk delivery](article-review-context-acceptance-2026-11-01.md)
   is merged in Toolbox #359 / Addon #339 / Cloud #1335: 9/9 useful positives,
   14 completed negative controls without hints, one news control unavailable at
-  the 30-second provider deadline. It is not a passed news-context result.
+  the 30-second provider deadline. That initial outcome is not changed. A later
+  explicit one-call news recheck passed all three checks with zero hints in
+  3.345 seconds; [separate evidence](article-news-control-recheck-evidence-2026-11-01.json)
+  closes the missing news-result probe, not general availability or accuracy.
   Addon #340 adds receipt headroom, not retries or a longer model deadline.
   Real installed browser/no-store audit passed. Remaining: independent author
   feedback, general Chinese/long-article quality, untested content-risk categories,
