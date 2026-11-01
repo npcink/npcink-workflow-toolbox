@@ -1,0 +1,101 @@
+{
+  "contract": "article_news_control_recheck_evidence.v1",
+  "date": "2026-11-01",
+  "scope": "one_explicit_followup_after_transport_fix_not_original_batch",
+  "case_id": "risk-news-control",
+  "fixture_sha256": "16aa0827a75d2220a4fa9482731c96c6fb799466c5301d45e73a11e0f4a6c786",
+  "original_batch": {
+    "cases": 24,
+    "completed": 23,
+    "news_outcome": "provider_timeout_no_quality_verdict",
+    "outcome_changed": false,
+    "original_run_id": "run_31b8cc0e052f47eb8862e13d75acfa64"
+  },
+  "followup": {
+    "run_id": "run_23197e023d374c31ba95d9c9e0fd28c4",
+    "status": "ready",
+    "checks": {
+      "language": {
+        "status": "completed",
+        "reason_code": "none"
+      },
+      "logic": {
+        "status": "completed",
+        "reason_code": "none"
+      },
+      "content_risk": {
+        "status": "completed",
+        "reason_code": "none"
+      }
+    },
+    "findings": 0,
+    "invalid_findings": 0,
+    "expected_outcome": true,
+    "elapsed_seconds": 3.345,
+    "explicit_attempts": 1,
+    "automatic_retries": 0,
+    "wordpress_source_writes": 0,
+    "signed_no_store_request": {
+      "signed": true,
+      "no_store": true,
+      "retry_max": 0,
+      "checks": [
+        "language",
+        "logic",
+        "content_risk"
+      ]
+    }
+  },
+  "sources": {
+    "toolbox": {
+      "head": "b9bd81ba368fe18b4c165ab39799622ed970f695",
+      "dirty": false
+    },
+    "addon": {
+      "head": "ae0a3d4145ed3a172e2190ffdf432c992c869862",
+      "dirty": false
+    },
+    "cloud_ops": {
+      "head": "f3843095ca61a34ffd2cc9598fe0c54e0efd8421",
+      "dirty": false
+    }
+  },
+  "runtime": {
+    "revision": "f3843095ca61a34ffd2cc9598fe0c54e0efd8421",
+    "dirty": false,
+    "health_same_before_after": true,
+    "descends_from_accepted_article_review_merge": true,
+    "article_review_contract_and_provider_execution_files_unchanged_since_article_merge": true
+  },
+  "live_readonly_audit": {
+    "run_id": "run_23197e023d374c31ba95d9c9e0fd28c4",
+    "status": "succeeded",
+    "read_only_transaction": true,
+    "data_classification": "pii",
+    "storage_mode": "no_store",
+    "durable_input_empty": true,
+    "encrypted_input_absent": true,
+    "durable_result_omitted": true,
+    "error_message_absent": true,
+    "source_canary_found": false,
+    "provider_calls": 1,
+    "retry_count": 0,
+    "fallback_used": false,
+    "providers": [
+      "openai"
+    ],
+    "models": [
+      "gpt-6.1-sol"
+    ],
+    "provider_latency_ms": [
+      3051
+    ]
+  },
+  "raw_result_sha256": "ca9e181bb57a5ef30b77d68ebb3d67ff621fd15a83dddba6a0362b895fb65f84",
+  "limitations": [
+    "One separate successful call does not revise the original 23/24 completion count.",
+    "No general accuracy, latency SLO, provider-retention or production claim.",
+    "Model execution budget remains 30 seconds, HTTP receipt wait remains 40 seconds.",
+    "Future user-visible timeouts stay unavailable; the author may initiate a new check. No automatic retry or model change."
+  ]
+}

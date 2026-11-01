@@ -274,3 +274,4 @@ afterwards an archived record is edited only to fix link targets.
 - [Logic/context-risk contract](article-review-context-v1.md), [frozen synthetic cases](article-review-context-cases-v1.json).
 
 - [Article logic/context-risk acceptance (2026-11-01)](article-review-context-acceptance-2026-11-01.md) — merged sources, frozen 24-call outcomes including one timeout, installed editor, no-store audit and closeout; [body-free evidence](article-review-context-evidence-2026-11-01.json).
+- [News-control follow-up evidence (2026-11-01)](article-news-control-recheck-evidence-2026-11-01.json) — one explicit successful recheck after the transport fix; preserves the original 23/24 initial completion count.

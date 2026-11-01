@@ -13,7 +13,10 @@ quality evidence (#358), and the [logic/context-risk extension](article-review-c
 [2026-11-01 acceptance](article-review-context-acceptance-2026-11-01.md): 9/9 positive
 hits, 14 completed zero-hint controls, one timed-out news control retained as
 unavailable; real installed editor and 25-run no-store audit passed. Addon #340
-adds timeout-receipt transport margin. Broader accuracy, author feedback, OSS
+adds timeout-receipt transport margin. A later explicit single news-control
+recheck completed in 3.345 seconds with zero hints and a live no-store/zero-retry
+audit; the original 23/24 initial completion count remains unchanged.
+Broader accuracy, author feedback, OSS
 real writes/backup/restore and production release remain separate.
 
 **Language quality follow-up:** the [2026-11-01 evaluation](article-language-quality-evaluation-2026-11-01.md)
