@@ -14,6 +14,16 @@ defined( 'ABSPATH' ) || exit;
 
 final class Provider_Client extends Provider_Client_Support {
 
+	private Provider_Media_Recognition_Service $media_recognition_service;
+
+	private Provider_Image_Source_Service $image_source_service;
+
+	private Provider_Article_Audio_Service $article_audio_service;
+
+	private Provider_Site_Ops_Cloud_Service $site_ops_cloud_service;
+
+	private Provider_Agent_Feedback_Service $agent_feedback_service;
+
 	private Provider_Nightly_Inspection_Service $nightly;
 
 	private Provider_Ai_Image_Service $ai_image;
