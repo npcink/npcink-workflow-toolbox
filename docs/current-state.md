@@ -7,6 +7,18 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-02.
 
+**Operator dispositions — 2026-11-02:** accept the 69 historical images without
+original files as metadata-only; do not recover or replenish them. Retain the
+local development 2B model's large/multiple-image failures as historical evidence,
+but stop local capacity optimization/benchmarking. Production will use an online
+model API; the local results establish neither its readiness nor a production
+blocker. OSS/offload real-operation acceptance and site-effect verification are
+deferred out of the current queue until the operator resumes them. See
+[image dispositions](existing-content-loop-acceptance-2026-10-30.md#图片遗留问题)
+and [Known Issues](known-issues.md). Site Check dimension folding is already
+implemented by #313; the [IA ledger](admin-ia-open-todos-2026-10-23.md) now records
+that closure instead of scheduling another UI change.
+
 **Current delivery order:** the operator accepted sequential follow-up on
 2026-11-02: align active documentation, then concentrate on useful related
 articles for manual selection through the existing AI-led Eval Lab loop.

@@ -171,18 +171,23 @@ No timeout, fallback policy or production model selection was relaxed.
 
 All 69 legacy metadata-only image IDs were checked against the actual local
 attachment paths and recorded variants: zero originals and zero usable variants
-exist on this restored development site. Keep them metadata-only. Recovery from
-an external backup remains unresolved; never label matching vector dimensions
+exist on this restored development site. Recovery from an external backup was
+unresolved at the 2026-10-30 acceptance. Never label matching vector dimensions
 as pixel coverage. The factual-answer option itself still accepts only public
 post/page evidence.
+
+**Operator disposition — 2026-11-02:** accept the 69 missing originals without
+recovery or replenishment; keep those images metadata-only and close the backup
+dependency. The 2B failures above remain local development evidence. Stop local
+large/multiple-image capacity optimization/benchmarking and remove it as a
+production blocker. Production will use an online model API; verify the actual
+image path when integrating it, without treating these local tests as production
+acceptance or scheduling another local capacity campaign. See the
+[dated disposition](existing-content-loop-acceptance-2026-10-30.md#图片遗留问题).
 
 ## Remaining acceptance
 
 - Natural operator/customer use and representative answer quality remain open;
   the supplied examples and technical gates cannot establish adoption.
-- The development 2B vision route is not accepted for two-image interactive
-  batches; production provider readiness requires its own acceptance.
-- Recover the 69 original images from a separately available backup before
-  upgrading their vectors. No such backup was established in this session.
 - Source publication/CI and the central matrix are recorded at closeout;
   WordPress.org packaging/release and production deployment are separate.

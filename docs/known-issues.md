@@ -36,9 +36,11 @@ with the closing commit or PR for one release cycle, then prune.
   [Three-article developer acceptance and dispositions](existing-content-loop-acceptance-2026-10-30.md)
   closes this batch's summary/title/rewrite/native-save and browser-only title
   retry checks; representative quality, natural usage and adoption feedback
-  remain separate. Cloud owns the 2B vision route's multi-image/large-image
-  30-second limitation; original-file backup recovery is required for the 69
-  metadata-only images. Keep the existing public-site answer option bounded;
+  remain separate. The 2026-11-02 operator disposition below closes original-file
+  recovery for the 69 metadata-only images and removes local 2B capacity work
+  from the current queue; historical failures remain recorded. Production is
+  planned to use an online model API, whose capability is not established by
+  those local results. Keep the existing public-site answer option bounded;
   stop expansion until an actual factual-lookup consumer exists. The operator
   owns pending backend visual acceptance. Retain missing/unverified old
   worktrees and live Local/M4 mounts until their exact cleanup conditions are
@@ -95,6 +97,8 @@ with the closing commit or PR for one release cycle, then prune.
   verifies the four original storage-preflight commits in master. Detection,
   fail-closed guards, sanitized shim evidence and mock planning are delivered;
   actual remote read/write/backup/restore and CDN consistency are deferred.
+  The operator reaffirmed postponement on 2026-11-02: this is outside the current
+  delivery queue and resumes only when explicitly requested.
   On an explicit restart, the site owner names the real offload plugin and
   disposable media, then verifies local-file retention and read readiness.
   Toolkit/Adapter/Core owners must prove governed replacement, backup/restore,
@@ -102,6 +106,8 @@ with the closing commit or PR for one release cycle, then prune.
   Keep unsupported modes blocked and the media-optimization pause effective;
   Toolbox must not acquire an OSS SDK, credentials or a parallel media writer.
 - **Site-effect verification remains a deferred design (Toolbox / Cloud).**
+  The operator reaffirmed postponement on 2026-11-02: no implementation or
+  verification is scheduled now; resume only on an explicit operator request.
   Existing Smart Ask consumes bounded deidentified packs. Deterministic
   before/after measurement, reviewed method references and comparable black-box
   rechecks still need their own evidence contracts. Environment inventory is
@@ -317,6 +323,21 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **Historical-image recovery and local vision capacity work — disposed 2026-11-02.**
+  The operator accepts all 69 images without originals/registered variants as
+  metadata-only, with no recovery or replenishment planned. They retain no
+  pixel-coverage claim. Local development 2B large/multiple-image timeouts stay
+  as historical failures; local capacity optimization/benchmarking is no longer
+  a task or a production blocker. Production will use an online model API; its
+  actual integration is a separate future acceptance, not passed by these tests.
+  Source: [dated image disposition](existing-content-loop-acceptance-2026-10-30.md#图片遗留问题).
+- **Site Check L3 dimension folding — already delivered by #313.**
+  Source commit `6b395f0b660ec1c9ddc9bb5e69368c3cfa0ecc8e` keeps the overview
+  visible and places the detailed tabs inside the default-closed “More scan
+  views” disclosure. The 2026-11-02 source check closes the stale IA TODO;
+  [current IA and ledger](admin-ia-site-and-ask-v1.md) reflect the existing UI.
+  This reconciliation makes no new runtime or installed-site acceptance claim.
 
 - **Distinct recommendation choices and ACF task qualification — closed in
   source and recorded development acceptance, 2026-11-01.** Toolbox #357
