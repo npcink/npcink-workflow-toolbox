@@ -181,24 +181,61 @@ class LocalReviewTests(unittest.TestCase):
                 reviewer.run('base','head',output,Path('unused'))
             self.assertEqual(output.read_text(),'preserve')
 
-    def test_binary_translation_keeps_full_diff_without_utf8_snapshot(self):
-        diff = b'Binary translation change\nGIT binary patch\nliteral 4\n'
-        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {
-            'content': json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+    def test_binary_context_is_bounded_and_receipt_binds_every_byte(self):
+        import os
+        import subprocess
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); config = root/'config.json'; output = root/'review.json'
-            config.write_text(json.dumps(dict(model='qwen3.8-max',
-                url='https://example.invalid/v1', auth_token='not-a-real-token')))
-            def git_result(*args):
-                return b'languages/test.mo\0' if args[0] == 'diff' else b'\xde\x12\x04\x95'
-            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, diff)), patch.object(
-                    reviewer, 'git', side_effect=git_result) as git_mock, patch.object(
-                    reviewer.subprocess, 'run', return_value=SimpleNamespace(returncode=0)), patch.object(
-                    reviewer.urllib.request, 'urlopen', return_value=io.BytesIO(response)) as request:
-                reviewer.run('base', 'head', output, config)
-            self.assertFalse(any(call.args[0] == 'show' for call in git_mock.call_args_list))
-            self.assertIn(diff.decode(), json.loads(request.call_args.args[0].data)['messages'][1]['content'])
-            self.assertTrue(json.loads(output.read_text())['success'])
+            root = Path(directory)
+            def actual_git(*args):
+                return subprocess.check_output(['git', *args], cwd=root)
+            actual_git('init', '-q')
+            actual_git('config', 'user.email', 'test@example.invalid')
+            actual_git('config', 'user.name', 'Test')
+            (root/'asset.png').write_bytes(b'\0' + os.urandom(300000))
+            (root/'source.py').write_text('before = 1\n')
+            actual_git('add', 'asset.png', 'source.py')
+            actual_git('commit', '-qm', 'base')
+            base = actual_git('rev-parse', 'HEAD').decode().strip()
+            (root/'asset.png').write_bytes(b'\0' + os.urandom(300000))
+            (root/'source.py').write_text('after = 2\n')
+            actual_git('add', 'asset.png', 'source.py')
+            actual_git('commit', '-qm', 'head')
+            with patch.object(reviewer, 'git', side_effect=actual_git):
+                frozen, diff = reviewer.snapshot(base, 'HEAD')
+                context, binaries = reviewer.review_context(frozen)
+                self.assertGreater(len(diff), 220000)
+                self.assertLess(len(context), 2000)
+                self.assertNotIn('GIT binary patch', context)
+                self.assertIn('-before = 1', context)
+                self.assertIn('+after = 2', context)
+                self.assertIn('BINARY CONTENT NOT REVIEWED', context)
+                self.assertEqual(binaries, ['asset.png'])
+                self.assertIn(actual_git('rev-parse', 'HEAD:asset.png').decode().strip(), context)
+                receipt = dict(contract='local_qwen_code_review.v1', success=True,
+                               model='qwen3.8-max', **frozen,
+                               review=dict(summary='Reviewed text; binary separate', findings=[]))
+                reviewer.verify(receipt, '', frozen['head_sha'])
+                (root/'asset.png').write_bytes(b'changed\0')
+                actual_git('add', 'asset.png'); actual_git('commit', '-qm', 'changed binary')
+                changed, _ = reviewer.snapshot(base, 'HEAD')
+                self.assertNotEqual(changed['diff_sha256'], frozen['diff_sha256'])
+                with self.assertRaises(ValueError):
+                    reviewer.verify(receipt, '', changed['head_sha'])
+                actual_git('rm', 'asset.png'); actual_git('commit', '-qm', 'delete binary')
+                deleted, _ = reviewer.snapshot(base, 'HEAD')
+                deleted_context, deleted_binaries = reviewer.review_context(deleted)
+                self.assertEqual(deleted_binaries, ['asset.png'])
+                self.assertIn('deleted file mode', deleted_context)
+
+    def test_text_budget_still_blocks_without_provider_call(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(
+                reviewer, 'snapshot', return_value=(FROZEN, b'diff')), patch.object(
+                reviewer, 'git', return_value=b''), patch.object(
+                reviewer, 'review_context', return_value=('x'*220001, [])), patch.object(
+                reviewer.urllib.request, 'urlopen') as request:
+            with self.assertRaisesRegex(ValueError, 'review exceeds text budget'):
+                reviewer.run('base', 'head', Path(directory)/'review.json', Path('unused'))
+            request.assert_not_called()
 
 
 if __name__=='__main__':unittest.main()

@@ -28,6 +28,25 @@ def snapshot(base, head):
             'diff_sha256': hashlib.sha256(diff).hexdigest()}, diff
 
 
+def review_context(frozen):
+    """Keep all text hunks; binary payloads need separate content verification."""
+    base, head = frozen['base_sha'], frozen['head_sha']
+    context = git('diff', '--no-ext-diff', '--no-textconv', '--full-index',
+                  '--no-renames', base, head, '--').decode('utf-8', errors='strict')
+    binary_files = []
+    stats = git('diff', '--no-ext-diff', '--no-textconv', '--no-renames',
+                '--numstat', '-z', base, head, '--')
+    for entry in filter(None, stats.split(b'\0')):
+        added, removed, path = entry.split(b'\t', 2)
+        if added == removed == b'-':
+            binary_files.append(path.decode('utf-8', errors='strict'))
+    if binary_files:
+        context += ('\nBINARY CONTENT NOT REVIEWED. Git blob identities are in the diff; '
+                    'separate visual/format verification is required for: '
+                    + json.dumps(binary_files, ensure_ascii=False) + '\n')
+    return context, binary_files
+
+
 class ReviewValidationError(ValueError):
     """A provider response failed the review response contract."""
 
@@ -154,10 +173,11 @@ def run(base, head, output, config):
         frozen, diff = snapshot(base, head)
         if not diff:
             raise ValueError('nonempty committed diff required')
-        # The full diff is mandatory. Complete small-file snapshots supplement it;
-        # large files are explicitly diff-only, never silently truncated.
+        # The receipt hashes the full binary diff. Qwen receives every text hunk
+        # plus binary identities, not opaque base85 payloads and reverse patches.
+        # Complete small-file snapshots supplement it; large files are diff-only.
         names = git('diff', '--name-only', '-z', frozen['base_sha'], frozen['head_sha'], '--').decode().split('\0')
-        context = diff.decode('utf-8', errors='strict')
+        context, binary_files = review_context(frozen)
         for name in filter(None, names):
             if re.search(r'(^|/)(\.env(?:\.|$)|\.deploy-secrets/)|\.(pem|key)$', name):
                 raise ValueError('secret-like changed path is not review input')
@@ -264,7 +284,7 @@ def run(base, head, output, config):
                               response_complete=response_complete)
         raise ValueError('Qwen transport failed; no review delivered') from None
     receipt = dict(contract='local_qwen_code_review.v1', success=True, model=model,
-                   **frozen, review=review)
+                   **frozen, review=review, binary_content_not_reviewed=binary_files)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open('x') as f:
         json.dump(receipt, f, ensure_ascii=False, indent=2)
