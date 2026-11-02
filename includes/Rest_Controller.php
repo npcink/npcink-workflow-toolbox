@@ -17,7 +17,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	private Settings $settings;
 	private Provider_Client $client;
-	private Publish_Preflight_Service $publish_preflight;
 	private Rest_Nightly_Inspection_Bridges $nightly_bridges;
 	private Rest_Web_Search_Bridges $web_search_bridges;
 	private Rest_Site_Knowledge_Bridges $site_knowledge_bridges;
@@ -85,7 +84,6 @@ final class Rest_Controller extends Rest_Controller_Support {
 	public function __construct( Settings $settings, Provider_Client $client, Publish_Preflight_Service $publish_preflight ) {
 		$this->settings                        = $settings;
 		$this->client                          = $client;
-		$this->publish_preflight               = $publish_preflight;
 		$this->nightly_bridges                 = new Rest_Nightly_Inspection_Bridges( $settings, $client );
 		$this->web_search_bridges              = new Rest_Web_Search_Bridges( $client );
 		$this->site_knowledge_bridges          = new Rest_Site_Knowledge_Bridges( $client );
@@ -339,6 +337,9 @@ final class Rest_Controller extends Rest_Controller_Support {
 		return $this->media_optimization_bridges->media_optimization_health();
 	}
 
+	/**
+	 * @return WP_REST_Response|WP_Error
+	 */
 	public function image_candidates( WP_REST_Request $request ) {
 		return $this->surface_bridges->image_candidates( $request );
 	}

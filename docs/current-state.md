@@ -158,7 +158,7 @@ ordinary generation and Site Knowledge remain available. See
   pure part files under `assets/editor-content-support/` behind frozen
   `window.NpcinkToolbox*` namespaces.
 - `assets/admin.js` — admin bundle (~9.1k lines; split owed).
-- `tests/run.php` — static contract suite (4,547 assertions on 2026-11-02, needles pin
+- `tests/run.php` — static contract suite (4,548 assertions on 2026-11-02, needles pin
   exact source strings; aggregation helpers keep them file-portable).
 - `docs/route-boundary-table.json`, `ability-boundary-table.json`,
   `cloud-bridge-contract-table.json`, `fixed-button-contract-table.json` —
@@ -312,8 +312,8 @@ ordinary generation and Site Knowledge remain available. See
 4. Editor intent convergence shipped 2026-10-07: thirteen-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
-5. PHPStan baseline ratchet (106 findings across 79 baseline patterns after the
-   2026-11-02 Provider property and site-helper response fixes; reduce verified causes,
+5. PHPStan baseline ratchet (102 findings across 77 baseline patterns after the
+   2026-11-02 Provider and REST maintenance fixes; reduce verified causes,
    not just move findings with cluster splits).
 6. Guided onboarding tour awaiting the operator trial answers
    (`docs/onboarding-tour-design-v1.md`); "Core proposal" terminology

@@ -213,6 +213,12 @@ helpers also cap connection time, response size, and total request time so
 future connector calls do not silently occupy PHP workers for a long default
 timeout.
 
+The image-candidate REST facade and bridge return `WP_REST_Response|WP_Error`:
+disabled/search-input/provider failures retain error codes and HTTP status data;
+provider error data passes through the existing safe-diagnostic allowlist.
+The REST facade passes preflight directly to the editor service without storing
+an unused second property.
+
 The current provider client is deliberately small. Future durable connector
 ownership may move to connector plugins if quotas, billing, logs, multi-provider
 routing, or key rotation become product requirements.

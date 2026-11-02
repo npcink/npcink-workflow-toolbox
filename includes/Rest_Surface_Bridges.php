@@ -86,9 +86,9 @@ final class Rest_Surface_Bridges extends Rest_Controller_Support {
 	}
 
 	/**
-	 * Performs a live, read-only Cloud readiness check before media processing.
+	 * Returns read-only image candidates or a validation/provider error.
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 
 	public function image_candidates( WP_REST_Request $request ) {
