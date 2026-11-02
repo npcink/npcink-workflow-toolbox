@@ -115,22 +115,10 @@ parameters:
 			path: includes/Media_Recognition_Continuation.php
 
 		-
-			message: '#^Property Npcink_Toolbox\\Provider_Agent_Feedback_Service\:\:\$client is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: includes/Provider_Agent_Feedback_Service.php
-
-		-
 			message: '#^Variable \$post_title on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
 			path: includes/Provider_Ai_Image_Service.php
-
-		-
-			message: '#^Property Npcink_Toolbox\\Provider_Article_Audio_Service\:\:\$client is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: includes/Provider_Article_Audio_Service.php
 
 		-
 			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'

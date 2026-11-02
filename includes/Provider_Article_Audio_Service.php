@@ -13,13 +13,6 @@ defined( 'ABSPATH' ) || exit;
 
 final class Provider_Article_Audio_Service extends Provider_Client_Support {
 
-	private Provider_Client $client;
-
-	public function __construct( Settings $settings, Provider_Client $client ) {
-		parent::__construct( $settings );
-		$this->client = $client;
-	}
-
 	public function run_audio_generation( array $input ) {
 		if ( Settings::cloud_feature_paused( 'audio_generation' ) ) {
 			return Settings::cloud_feature_pause_error( 'audio_generation' );

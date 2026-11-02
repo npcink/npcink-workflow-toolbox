@@ -133,11 +133,11 @@ final class Provider_Client extends Provider_Client_Support {
 
 		$this->image_source_service = new Provider_Image_Source_Service( $settings, $this );
 
-		$this->article_audio_service = new Provider_Article_Audio_Service( $settings, $this );
+		$this->article_audio_service = new Provider_Article_Audio_Service( $settings );
 
 		$this->site_ops_cloud_service = new Provider_Site_Ops_Cloud_Service( $settings );
 
-		$this->agent_feedback_service = new Provider_Agent_Feedback_Service( $settings, $this );
+		$this->agent_feedback_service = new Provider_Agent_Feedback_Service( $settings );
 
 		$this->nightly = new Provider_Nightly_Inspection_Service( $settings );
 

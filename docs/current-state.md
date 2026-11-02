@@ -157,7 +157,8 @@ ordinary generation and Site Knowledge remain available. See
 - `assets/editor-content-support.js` — editor bundle (~10.7k lines) plus
   pure part files under `assets/editor-content-support/` behind frozen
   `window.NpcinkToolbox*` namespaces.
-- `assets/admin.js` — admin bundle (~9.1k lines; split owed).
+- `assets/admin.js` — admin bundle (~9.1k lines; split when product work
+  touches a qualified cluster).
 - `tests/run.php` — static contract suite (4,548 assertions on 2026-11-02, needles pin
   exact source strings; aggregation helpers keep them file-portable).
 - `docs/route-boundary-table.json`, `ability-boundary-table.json`,
@@ -294,6 +295,11 @@ ordinary generation and Site Knowledge remain available. See
   implementation remain the comparison; consult Eval Lab release acceptance
   evidence before treating the recommendation feature as ready to release.
 
+Maintenance disposition, 2026-11-02: the file sizes below are an inventory.
+A concrete feature/defect and a bounded dependency cluster must justify the next
+split; there is no automatic weekly split quota. Keep behavior fixes separate
+from structural changes. See [the maintenance ledger](known-issues.md).
+
 0. The UX delivery arc in PRs #257–#263 is merged. Browser verification is
    complete for Site Check. Recommendation stage 0 now passes through the
    actual M4-backed Cloud route. Toolkit anchor-hint consumption is fixed by
@@ -312,7 +318,7 @@ ordinary generation and Site Knowledge remain available. See
 4. Editor intent convergence shipped 2026-10-07: thirteen-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
-5. PHPStan baseline ratchet (102 findings across 77 baseline patterns after the
+5. PHPStan baseline ratchet (100 findings across 75 baseline patterns after the
    2026-11-02 Provider and REST maintenance fixes; reduce verified causes,
    not just move findings with cluster splits).
 6. Guided onboarding tour awaiting the operator trial answers
