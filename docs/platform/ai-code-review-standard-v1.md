@@ -27,6 +27,14 @@ provider retry; split an oversized change. Local means the review is initiated
 and recorded on the developer machine; the existing configured Qwen endpoint
 may still be hosted. It does not promise on-device model inference.
 
+The diff hash always covers the complete Git binary patch. Provider input
+contains every text hunk and full Git blob identities for binary changes;
+opaque base85 payloads and reverse binary patches are not model review text.
+Receipts list these paths under `binary_content_not_reviewed`. Record separate
+visual or format verification for those assets in the PR; a zero-finding model
+receipt does not certify binary contents. The 220,000-character text budget
+continues to reject oversized text changes without truncation.
+
 When a provider response cannot satisfy the review contract, the command exits
 non-zero and writes a sidecar at `<output>.failure.json` (or a numeric suffix if
 that path already exists). The sidecar contains the `contract`, `success:false`,
