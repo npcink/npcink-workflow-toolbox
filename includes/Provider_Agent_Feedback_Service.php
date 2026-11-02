@@ -13,13 +13,6 @@ defined( 'ABSPATH' ) || exit;
 
 final class Provider_Agent_Feedback_Service extends Provider_Client_Support {
 
-	private Provider_Client $client;
-
-	public function __construct( Settings $settings, Provider_Client $client ) {
-		parent::__construct( $settings );
-		$this->client = $client;
-	}
-
 	public function submit_agent_feedback( array $input ) {
 		$payload = $this->agent_feedback_payload( $input );
 		if ( is_wp_error( $payload ) ) {

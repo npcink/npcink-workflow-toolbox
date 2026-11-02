@@ -73,6 +73,10 @@ Status: MVP architecture.
 | `assets/editor-content-support/internal-links.js` | Pure internal-link cluster (canonical URLs, batch preflight, editor policy, transaction preparation, undo checks, telemetry snapshots, dedupe, source previews) behind `window.NpcinkToolboxInternalLinkHelpers`; rich-text APIs arrive as parameters. |
 | `assets/editor-content-support.css` | Compact editor-side layout for the content-support panel. |
 
+The audio and Agent feedback provider services use the Settings-only support
+constructor. Neither service calls back into `Provider_Client`, so neither
+retains a facade dependency.
+
 `Site_Knowledge_Auto_Sync` is a compatibility projection only; it must never
 become local indexing lifecycle ownership or a Toolbox queue. The bundled local
 automation module is an isolated exception recorded in

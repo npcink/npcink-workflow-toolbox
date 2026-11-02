@@ -265,12 +265,14 @@ with the closing commit or PR for one release cycle, then prune.
   Check render cluster from `Admin_Page.php` into
   `Admin_Page_Site_Ops_Panel` (4,620 -> 2,762 facade lines) with portable
   admin-page assertion sources. Still owed, deferred until product work
-  per the just-in-time refactoring decision as amended 2026-10-08
-  (acceleration agreement: a product session may carry one cluster
-  extraction, or one dedicated split session may run per week): the remaining
+  per the just-in-time refactoring decision. The 2026-11-02 operator disposition
+  makes these a conditional inventory: choose one cluster only when a concrete
+  feature or defect touches it, its callers/boundary are understood, and existing
+  behavior can be verified. The optional 2026-10-08 accelerated cadence does not
+  create a weekly split quota. Remaining:
   `editor-content-support.js` clusters (image candidates, preflight,
   progressive, draft flows), `includes/Rest_Editor_Content_Support.php`
-  (~6.5k), `assets/admin.js` (~8.2k), and the remaining `Admin_Page.php`
+  (~3.2k), `assets/admin.js` (~9.1k), and the remaining `Admin_Page.php`
   clusters (review-set tools, media derivative controls, content context
   form), following [Provider Split Refactor Standard v1](platform/provider-split-refactor-standard-v1.md)
   (portable assertion sources first; part files must carry no
@@ -288,8 +290,8 @@ with the closing commit or PR for one release cycle, then prune.
   qualify each under the archive policy in
   [the documentation index](README.md) and move them only together with
   the links that reference them.
-- **The extracted editor content-support service is being sub-divided**
-  under the split standard with the amended 2026-10-08 cadence. Landed
+- **Extracted editor content-support service — remaining splits are conditional**
+  under the split standard and the 2026-11-02 demand-driven disposition. Landed
   2026-10-08: paragraph-check and audio-text static clusters (session 1),
   the shared flow-cache base (Rest_Editor_Flow_Cache, chained through
   Rest_Controller_Support, carrying the transient cache, the
@@ -316,7 +318,7 @@ with the closing commit or PR for one release cycle, then prune.
   Remaining: the summary and taxonomy cached-flow orchestrators,
   inheriting the cache base and movable with the same pattern.
 - **PHPStan baseline ratchet** (2026-10-06; tooling refreshed in PR #262):
-  102 remaining level-5 findings across 77 baseline patterns, verified on
+  100 remaining level-5 findings across 75 baseline patterns, verified on
   2026-11-02. Declaring the five already-constructed Provider service properties
   removes 13 undefined-property findings from the previous 121/86 baseline.
   Passing the existing taxonomy/tag and internal-link review sets to response
@@ -324,7 +326,14 @@ with the closing commit or PR for one release cycle, then prune.
   paths are covered by deterministic response fixtures without model calls.
   Correcting the image-candidate return PHPDoc removes three type findings;
   dropping the unused REST facade preflight property removes one more. The
-  constructor still passes preflight directly to the editor service.
+  constructor still passes preflight directly to the editor service. Removing
+  the unused audio/feedback facade dependencies removes the final two
+  only-written-property findings. Total reduction this maintenance pass: 21
+  findings and 11 baseline patterns; no rules or defensive checks were weakened.
+  Delivered slices: [#368](https://github.com/npcink/npcink-workflow-toolbox/pull/368),
+  [#369](https://github.com/npcink/npcink-workflow-toolbox/pull/369), and
+  [#370](https://github.com/npcink/npcink-workflow-toolbox/pull/370), followed by
+  the audio/feedback dependency cleanup.
   Keep the level and defensive input checks; remove only findings whose causes
   are fixed. Moving code between files does not count as reducing debt.
   The 12 unused-method candidates remain in the baseline (mostly `Admin_Page`
