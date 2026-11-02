@@ -1,13 +1,34 @@
 # Product Positioning
 
-Media Library optimization uses a simple default flow: choose a time and image-type range, inspect representative Cloud-qualified samples, confirm once, then watch foreground progress and use batch history for restore. Encoding choices, quality thresholds, fingerprints, Providers, and Artifact details stay out of the default surface. Single-image import, replacement, and restore use the Adapter/Core/Toolkit governed path.
-
-Status: active for the first Toolbox build.
+Status: active product contract; availability reviewed 2026-11-02.
 
 Npcink Workflow Toolbox is the WordPress operator-facing AI workflow surface:
 it gives site owners and editors fixed buttons for Cloud-managed web search,
 Cloud-managed image-source candidates, Cloud-managed site knowledge abilities,
 and repeatable AI-assisted content-support workflows.
+
+## Current Focus And Availability
+
+The current delivery priority is useful related-article candidates for manual
+selection in the WordPress editor. Follow the
+[recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md)
+and its AI-led evaluation loop. Candidate relevance and safe link insertion
+are separate acceptance questions. The operator uses the product, provides
+ordinary feedback, and makes final decisions; developer evidence is not human
+adoption evidence.
+
+The admin surface has **Start**, **Site & Ask**, and **Image Handling** tabs;
+Site Profile, Smart Ask, and the folded local Site Check live under Site & Ask.
+See the [current IA](admin-ia-site-and-ask-v1.md).
+SEO/AEO/GEO specialist entrypoints, Cloud inspection/site analysis, new audio
+generation, and media optimization remain paused under the
+[specialist pause](seo-specialist-pause-implementation-2026-10-18.md) and
+[runtime pause policy](reversible-feature-pauses-v1.md). Local checks, existing
+audio playback, backup recovery, ordinary content/image/ALT assistance, and
+Site Knowledge remain available. Retained contracts below do not enable
+paused features. Source, developer acceptance, packages, production, and
+ordinary usage must be reported separately; [Current State](current-state.md)
+records the latest release evidence.
 
 ## One-Sentence Positioning
 
@@ -120,13 +141,12 @@ and `npcink_toolbox_ability_permission`.
    and receive `article_writing_pack.v1`: a bounded, source-grounded planning
    artifact with inferred audience, priorities, facts, overlap, angle, and
    outline, without generating, inserting, or publishing an article body.
-9. Treat `media_optimization_v1` as the fixed governed media optimization
-   workflow, improving the Media Library image actions and Batch Optimize
-   Images surface rather than creating a duplicate runner.
-10. Retain the Site Check compatibility route for bounded local review while it
-   is hidden from the default operator UI pending a clearer problem statement,
-   action model, and acceptance loop. The retained route preserves its bounded
-   ranked decision list without expanding Toolbox runtime or write ownership.
+9. Retain the paused `media_optimization_v1` fixed workflow and its backup
+   recovery contracts without creating a duplicate runner or enabling new
+   optimization work.
+10. Offer bounded local Site Check review in the folded Site & Ask section.
+   Keep its ranked decision list and check-to-Ask link without expanding
+   Toolbox runtime or write ownership. Legacy Site Check URLs remain compatible.
 11. Preserve Core and Abilities boundaries for final WordPress writes.
 
 ## Non-Goals
@@ -181,7 +201,8 @@ the editor may explicitly map reviewed sections into native blocks only when the
 current Gutenberg body is empty, with persistence left to normal WordPress save.
 Any later governed cross-object or automated write still belongs outside Toolbox.
 
-Media optimization is the first fixed governed media workflow. The default
+Media optimization is the first fixed governed media workflow; new planning
+and execution are currently paused. Its retained default
 Media Library Optimization surface follows ADR-015: Toolbox freezes an exact
 SHA-256 manifest, shows representative Cloud-qualified samples, and records one
 present-administrator confirmation before delegating each replacement or restore
@@ -201,13 +222,18 @@ same Toolkit plan and Adapter execution profile.
 
 High-frequency article support belongs in the WordPress post editor as a
 Toolbox-owned panel, not only on the standalone Toolbox admin page. The editor
-panel defaults to fixed flows for publish preflight, internal-link candidates,
-current-article contextual ALT review, and image candidates. Article narration
-and article audio summary remain callable compatibility flows but are
-temporarily hidden from the default menu. Summary, category, tag, outline,
-discoverability, and article-checkup remain supported route or rendering paths,
-not default visible buttons. They must keep the same suggestion-only and
-Core-governed write posture as the admin surface. Related existing-post review
+panel defaults to fixed flows for writing-pack preparation, publish preflight,
+existing-category and existing-tag suggestions, internal-link candidates,
+related reading, current-article contextual ALT review, and image candidates.
+New article narration and audio-summary requests are paused. The standalone
+generic editor title, summary, outline, discoverability, article-checkup, and
+combined taxonomy intents are retired under the
+[editor intent decision](editor-intent-convergence-decision.md); local
+article-checkup signals remain inside publish preflight. Ordinary title,
+summary, and selected-text rewrite entrypoints belong to the WordPress AI
+plugin; see the [existing-content acceptance](existing-content-loop-acceptance-2026-10-30.md).
+Suggestions keep the native-editor or governed-handoff boundary appropriate
+to their target. Related existing-post review
 belongs inside publish preflight duplicate-risk checks and the unified site
 citation flow rather than a separate editor intent. Site citation candidates
 are manual review aids, publish preflight is a unified advisory
@@ -240,15 +266,13 @@ Detailed brief fields and evidence remain behind optional/advanced disclosure.
 Navigation or metadata-only reader output stops before hosted planning and can
 never be confirmed into a draft.
 
-For the current article only, an author clicking the editor's reviewed SEO,
-external-image adoption, or article-audio adoption action is the approval step.
-Toolbox creates the Core proposal and stores only its bounded proposal id on the
-draft. Adapter/Abilities execution begins after the next successful native
-Publish or Update, never on the adoption click itself. Attempted intents are
-removed after that save and failures stay visible in Core without an automatic
-retry loop. The private control metadata never enters the native Gutenberg post
-payload, and completion does not trigger a second article save. This narrow
-editor handoff does not apply to batch admin actions.
+Reviewed current-article values may enter visible, editable Gutenberg state
+under ADR-006 and become durable only through the author's normal WordPress
+save. A governed handoff submits the reviewed plan through Adapter to Core,
+shows its receipt and review link, and stops. Toolbox does not store execution
+intents on the draft or execute a proposal after Publish or Update. The former
+proposal-intent and post-save execution bridge was removed; see
+[ADR-006](decisions/ADR-006-native-editor-commit-and-governed-batch-handoff.md).
 
 The contextual ALT exception is editor-state only: one administrator action
 generates and automatically fills missing `core/image` ALT in Gutenberg memory

@@ -5,7 +5,29 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-01.
+Last reviewed: 2026-11-02.
+
+**Current delivery order:** the operator accepted sequential follow-up on
+2026-11-02: align active documentation, then concentrate on useful related
+articles for manual selection through the existing AI-led Eval Lab loop.
+Simplify observed editor friction and reduce one justified code cluster at a
+time, with separate behavior/refactor changes and evidence for each delivery.
+See the [active sequence](roadmap.md#current-delivery-order--2026-11-02) and
+[recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md),
+including its 2026-11-01 recommendation follow-up. Historical ranking/model
+trials are not the current runtime; production and natural usage remain separate.
+
+**Recommendation follow-up reconciled:** Toolbox #357 preserves distinct
+article choices at a shared placement. Cloud #1333 fixes the procedural
+`只需` wording that bypassed ACF task qualification; its accepted M4 merge SHA
+and exact-SHA source checks are recorded in
+[Eval Lab's 2026-11-01 follow-up](https://github.com/npcink/npcink-eval-lab/blob/e4d7359b0e2dbc428abd463d7a1b90cefd68a82d/docs/link-recommendation-followup-2026-11-01.md).
+Twelve saved-response replays and 59 focused Cloud tests support those fixes;
+the follow-up made zero new live recommendation requests and did not exercise
+Apply/save. Those two defects and the old running-source gap are closed for
+the recorded revisions. General quality, unreturned recall, natural adoption,
+fresh transport and production remain separate. Reproduce concrete ordinary-use
+feedback before another quality correction; do not repeat the closed fixes.
 
 **Referenced article / OSS chats:** the [2026-11-01 closeout audit](article-oss-session-closeout-2026-11-01.md)
 maps both histories to 19 merged PRs, four OSS commits, live topic-head checks,
@@ -107,19 +129,19 @@ ordinary generation and Site Knowledge remain available. See
   `Rest_Editor_Content_Support.php`.
 - `includes/Provider_Client.php` — provider facade; cluster services in
   `Provider_*_Service.php` over abstract `Provider_Client_Support.php`.
-- `includes/Admin_Page.php` — admin page facade (2.7k lines);
+- `includes/Admin_Page.php` — admin page facade (~3.0k lines);
   `Admin_Page_Site_Ops_Panel.php` holds the extracted Site Check render
   cluster (parent class).
 - `includes/Rest_Editor_Content_Support.php` — editor content-support
-  service (~3.0k lines) plus eight static sibling clusters and the
+  service (~3.2k lines) plus eight static sibling clusters and the
   `Rest_Editor_Media_Alt` instance service over the shared
   `Rest_Editor_Flow_Cache` base; only the summary/taxonomy cached-flow
   orchestrators remain inside the facade.
-- `assets/editor-content-support.js` — editor bundle (10.6k lines) plus
+- `assets/editor-content-support.js` — editor bundle (~10.7k lines) plus
   pure part files under `assets/editor-content-support/` behind frozen
   `window.NpcinkToolbox*` namespaces.
-- `assets/admin.js` — admin bundle (8.2k lines; split owed).
-- `tests/run.php` — static contract suite (4,424 assertions on 2026-10-26, needles pin
+- `assets/admin.js` — admin bundle (~9.1k lines; split owed).
+- `tests/run.php` — static contract suite (4,546 assertions on 2026-11-02, needles pin
   exact source strings; aggregation helpers keep them file-portable).
 - `docs/route-boundary-table.json`, `ability-boundary-table.json`,
   `cloud-bridge-contract-table.json`, `fixed-button-contract-table.json` —
@@ -265,10 +287,10 @@ ordinary generation and Site Knowledge remain available. See
    are conditional backlog under the current UI/feature pauses; they do not
    authorize production observation, hidden surfaces or Cloud scheduling.
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
-   draft) still inside the 10.6k main bundle.
-2. `Rest_Editor_Content_Support.php` sub-division (~3.0k facade lines;
+   draft) still inside the ~10.7k main bundle.
+2. `Rest_Editor_Content_Support.php` sub-division (~3.2k facade lines;
    only the summary/taxonomy cached-flow orchestrators remain).
-3. `assets/admin.js` (8.2k) and remaining `Admin_Page.php` clusters
+3. `assets/admin.js` (~9.1k) and remaining `Admin_Page.php` clusters
    (review-set tools, media derivative controls, content context form).
 4. Editor intent convergence shipped 2026-10-07: thirteen-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before

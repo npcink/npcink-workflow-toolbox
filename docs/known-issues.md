@@ -13,6 +13,25 @@ with the closing commit or PR for one release cycle, then prune.
 
 ## Open
 
+- **Sequential product follow-up (Toolbox / Eval Lab / Cloud, 2026-11-02).**
+  The operator accepted the [current delivery order](roadmap.md#current-delivery-order--2026-11-02):
+  correct active-document drift, then prioritize useful related-article
+  candidates for manual choice. The next quality slice must reuse the
+  [recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md)
+  and its 2026-11-01 follow-up, name source/runtime/model/corpus, compare useful
+  Top 5/8 candidates as well as obvious irrelevance and misses, and fix only a
+  reproduced issue. Eval Lab owns comparable evaluation; Cloud owns retrieval;
+  Toolbox owns editor projection and regression. Ordinary operator feedback
+  informs the work without a mandatory human annotation worksheet. UI changes
+  follow observed friction; cluster splits remain separate focused changes.
+  Completion requires bounded quality evidence and applicable editor regression,
+  followed by separately recorded PR/merge, runtime, package, and release states.
+  The two recorded ordering/display and qualification fixes are integrated;
+  follow concrete accepted/rejected recommendations from ordinary use before
+  another correction. This ledger does not schedule a new model campaign merely
+  because general accuracy remains unproven. Existing pauses and the
+  no-new-pack scope remain effective.
+
 - **Content-loop remaining acceptance (WordPress AI / Addon / Cloud, 2026-10-30).**
   [Three-article developer acceptance and dispositions](existing-content-loop-acceptance-2026-10-30.md)
   closes this batch's summary/title/rewrite/native-save and browser-only title
@@ -147,6 +166,10 @@ with the closing commit or PR for one release cycle, then prune.
   ratio. This explains missing status rows, not the earlier Cloud corpus loss
   or ranking quality. Production release acceptance remains separate.
 - **Recommendation relevance and anchor naturalness (Cloud ranking owner).**
+  First consult the [2026-11-01 follow-up](https://github.com/npcink/npcink-eval-lab/blob/e4d7359b0e2dbc428abd463d7a1b90cefd68a82d/docs/link-recommendation-followup-2026-11-01.md):
+  shared-placement candidate hiding and the ACF procedural-price mismatch are
+  fixed, and the accepted Cloud merge has exact-SHA source checks. Historical
+  findings below retain their original versions and do not reopen those fixes.
   Independent human gold remains absent; AI-led development continues under
   the operator's 2026-10-26 decision above. The 2026-10-17 twelve-article developer
   regression found weak related results for the short promotion and broad
@@ -294,6 +317,16 @@ with the closing commit or PR for one release cycle, then prune.
   baseline (mostly `Admin_Page` media-derivative render helpers).
 
 ## Recently Closed
+
+- **Distinct recommendation choices and ACF task qualification — closed in
+  source and recorded development acceptance, 2026-11-01.** Toolbox #357
+  (`31d926d8`) deduplicates by canonical target URL while preserving placement
+  conflict checks for explicit insertion. Cloud #1333 (`d3880d05`) requires
+  monetary evidence for ambiguous `只需`/`仅需` promotion prefixes and retains
+  useful field-development alternatives. Eval Lab's follow-up above records
+  twelve saved-response replays, 59 focused tests, accepted M4 source, unchanged
+  model/corpus, and exact-SHA CI. No fresh retrieval, Apply/save, natural-use
+  accuracy or production release is claimed.
 
 - **Internal-link candidate cluster and S2 URL fallback — closed 2026-10-14.**
   Candidate shaping, Toolkit delegation, graph evidence, and exact-anchor

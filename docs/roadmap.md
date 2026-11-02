@@ -1,13 +1,15 @@
 # Roadmap
 
-Status: planning baseline with release anchors.
+Status: active delivery order and historical capability stages; reviewed 2026-11-02.
 
 ## Release Anchors
 
 Shipped versions keep their scope facts here so the stage lists below stay
 target language rather than implied status. Stage 0 is complete; the
-stages remain the forward-looking contract list. Open debt lives in
-[Known Issues](known-issues.md), not here.
+stages retain the capability sequence and accepted contracts, rather than a
+fresh queue of unimplemented work. Open debt lives in
+[Known Issues](known-issues.md). Source acceptance and WordPress.org releases
+are separate; see [Current State](current-state.md) for dated evidence.
 
 - **0.1.x (2026-06)** — Stage 0 plus the first Stage 1/2 surfaces:
   status, image-source, site-knowledge, and content-context surfaces, the
@@ -29,23 +31,57 @@ stages remain the forward-looking contract list. Open debt lives in
   the provider client split into cluster services behind the facade, and
   full zh_CN catalog coverage.
 
-### 0.4.0 Candidates (undecided)
+- **0.4.0** — taxonomy/tag and internal-link review sets completed the
+  five-review-set arc; the REST facade split and route-scope coverage contract
+  shipped. WordPress.org SVN revision 3730454 is recorded in Known Issues.
+- **0.5.0–0.5.3** — editor intent convergence, Site Knowledge owner/status
+  rows, permission feedback, Cloud review-set payload fixes, adoption tally,
+  inert text extraction, and editor-service splits. See the versioned
+  [changelog](../readme.txt); its review-tool history does not override today's
+  local Qwen policy.
+- **0.6.0** — the 2026-10-11 security/performance hardening release (PRs
+  #242–#247), including object-read authorization, URL protocol validation,
+  bounded/coalesced requests, per-user caching, and minified assets.
+  Current State records WordPress.org SVN revision 3739544.
 
-Collected from the 2026-09/10 closeouts and the 2026-10-03 systematic
-review; none of this is committed scope until a session picks it up with
-its own boundary check:
+## Current Delivery Order — 2026-11-02
 
-- taxonomy/tag and internal-link review sets (review-set order items 2
-  and 3);
-- the sixteen non-default editor intent convergence decision (resolved
-  2026-10-07 by the accepted editor intent convergence retirement);
-- a full guided fresh-install onboarding tour;
-- Site Knowledge status owner-matrix rows and the author/admin error
-  audience split;
-- staged structure splits for `editor-content-support.js`,
-  `Rest_Controller.php`, `admin.js`, and `Admin_Page.php` under the
-  Provider Split Refactor Standard;
-- a `rest_route_scope()` full-coverage static contract.
+The operator accepted this sequence for the existing product. Each change is
+one focused, reviewable module on the latest master; move to the next slice
+after its own gates and publication. Do not wait for all technical debt to
+disappear before delivering a useful slice.
+
+1. Align active product/development documents with the accepted write lanes,
+   feature pauses, release evidence, and local Qwen policy.
+2. Concentrate on useful related-article candidates for manual selection.
+   Eval Lab reuses existing real samples, names source/runtime/model/corpus
+   revisions, and compares useful Top 5/8 results, obvious irrelevance, and
+   missed candidates. Candidate relevance and safe insertion remain separate.
+   The development agent handles evaluation, disagreements, fixes, and
+   regression; the operator supplies ordinary usage feedback and final decisions.
+   Follow the [active recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md),
+   including its 2026-11-01 display/qualification fixes and accepted-source
+   evidence, before replaying older experiments. The next correction follows
+   concrete ordinary-use feedback; reuse existing evidence before scheduling
+   another live retrieval or semantic-judge round.
+3. Simplify the existing editor path where observed failures justify a change;
+   verify review/open/select, explicit adoption, undo, native save, and readback
+   as applicable. Preserve the three-tab admin IA and existing pack selector.
+4. Reduce maintenance debt with one justified cluster extraction per focused
+   change under the [split standard](platform/provider-split-refactor-standard-v1.md).
+   Keep refactoring separate from behavior changes and shrink the PHPStan
+   baseline when actual findings disappear.
+
+Every slice records its tests, exact-diff local Qwen review, PR/merge state,
+and any installed/runtime/package acceptance separately. Required deterministic
+CI remains in place; production and natural usage are distinct evidence levels.
+Known Issues owns unfinished items and their next actions.
+
+The [specialist pause](seo-specialist-pause-implementation-2026-10-18.md) and
+[runtime pauses](reversible-feature-pauses-v1.md) still govern the stages below.
+Their historical media optimization, new audio, and Cloud inspection targets
+do not restore those entrypoints. Ordinary title/summary/rewrite work reuses the
+WordPress AI plugin's [accepted path](existing-content-loop-acceptance-2026-10-30.md).
 
 ## Completed Priority - Platform Contract Convergence
 
@@ -95,7 +131,7 @@ Target features:
   candidates, and internal-link context.
 - Media brief button.
 - Content Context form for SEO, AEO, and GEO guidance.
-- Hidden Site Check compatibility route for a manual local `site_ops_insight_pack.v1` that presents
+- Folded Site Check section under Site & Ask for a manual local `site_ops_insight_pack.v1` that presents
   a current-run ranked review list across content, approved-comment, media,
   taxonomy, Site Context, and Cloud readiness findings, then routes the operator
   to manual handling, existing fixed workflows, or optional Cloud detail.
@@ -106,20 +142,22 @@ Target features:
   Cloud is ready, an administrator may explicitly run Cloud detail for a
   suggestion-only `site_ops_cloud_analysis_result.v1`, without Toolbox owning a
   local queue, run table, scheduler truth, Core proposal, or WordPress write.
-  It is not a default operator entry until its problem statement, action model,
-  and acceptance loop are ready for another review.
+  The local report links to Smart Ask under the current three-tab IA; the old
+  standalone tab survives only as a compatible deep link. Cloud detail remains
+  paused independently of local Site Check and the accepted Ask pack channel.
 - Post editor Content Support panel for default Npcink review and handoff
   buttons: URL-reference article writing pack, publish preflight,
   internal-link candidates, current-article
-  contextual ALT review, image candidates, and article audio candidates. The
+  contextual ALT review, and image candidates; new article audio is paused. The
   ALT flow keeps each image occurrence separate, uses nearby article context
   first, and automatically fills missing block ALT after Core audit. When useful
   context is absent, the existing Cloud visual-evidence runtime may run silently
   once as a non-blocking fallback. Existing ALT and media-library ALT remain
-  unchanged; native WordPress save is still required. Generic AI-plugin-style intents such as local
-  article checkup, title suggestions, outline support, discoverability,
-  summary suggestions, category suggestions, tag suggestions, and comment-reply suggestions remain compatible
-  route/result paths, not default visible buttons. Selection-only paragraph
+  unchanged; native WordPress save is still required. Standalone generic editor
+  title, summary, outline, discoverability, article-checkup, comment-reply, and
+  combined-taxonomy intents are retired. Existing-category and existing-tag
+  suggestions remain supported; local article-checkup signals live in preflight.
+  Selection-only paragraph
   checks belong in the selected-block toolbar beside paragraph image
   suggestions. Related existing-post review belongs inside publish preflight
   duplicate-risk checks and internal-link candidates rather than a separate
@@ -192,8 +230,8 @@ Target features:
 
 Rules:
 
-- every write-like action outside ADR-006 `native_editor_commit` creates or
-  prepares a Core proposal;
+- write-like actions outside ADR-006 `native_editor_commit` create or prepare
+  a Core proposal unless a specific accepted ADR defines a narrower lane;
 - Toolbox does not bypass Core approval;
 - proposal payloads use real WordPress ability ids.
 - batch plans are review sets, not Toolbox-owned queues or automation workers.
@@ -218,19 +256,22 @@ Target features:
 - internal-link and old-article refresh suggestions from Cloud-managed site
   context.
 
-Open decision:
+Established ownership:
 
-- whether Cloud-owned vector indexing is implemented directly in Cloud service
-  APIs or through a future `npcink-knowledge` connector, while Toolbox stays
-  the local Ability exposure surface.
-- which embedding provider owns text-to-vector conversion.
+- Cloud owns embedding execution, vector storage, indexing, reranking, and
+  lifecycle; Addon owns the verified WordPress delivery bridge. Toolbox keeps
+  local ability exposure, bounded explicit requests, and returned status.
+- Model/provider/storage implementation choices remain with Cloud and do not
+  reopen indexing ownership inside Toolbox.
 
 ## Stage 4 - Productized Workflow Buttons
 
 Goal: add repeatable operator flows without creating a workflow runtime.
 
-The productized button layer now includes read-only ability surface metadata and
-the Overview **System status / Workflow readiness** summary. This keeps default entries,
+The productized button layer retains read-only ability surface metadata and
+the historical Overview **System status / Workflow readiness** summary contract.
+The three-tab IA removed the redundant health summary from the Start page;
+retained metadata keeps default entries,
 route-only compatibility, runtime owner, handoff path, and overlap policy
 visible to operators and maintainers without becoming a generic Abilities
 Explorer, provider picker, request log, connector approval surface, second
@@ -257,7 +298,7 @@ Candidate buttons:
   site-context vector rerank, candidate dedupe, quality/watermark filters,
   license evidence, risk tags, and media SEO suggestions.
 
-The next batch candidate starts with a review-only P0:
+The historical first batch candidate was the review-only P0:
 `media_alt_caption_review_set.v1`. It extends the existing AI Site Helpers
 media ALT suggestions response with bounded eligibility, selected items,
 blocked reasons, retry guidance, and an explicit no-write posture. It defaults
@@ -270,8 +311,8 @@ Toolbox until a separate boundary decision exists.
 Before extracting any reusable logic to Toolkit, run the
 [Media ALT/Caption Toolkit Validation Plan](media-alt-caption-toolkit-validation-plan.md).
 
-The media optimization operator trial has accepted the current low-risk flow.
-The preferred follow-up order remains:
+The media optimization operator trial has accepted the current low-risk flow;
+new optimization is now paused. The historical review-set delivery order was:
 
 1. media ALT and caption review set;
 2. taxonomy and tag review set;
@@ -338,7 +379,7 @@ and should stay in Cloud Batch Runtime result detail and reviewed Core handoff; 
 ## Deferred Decisions
 
 - provider connector split;
-- vector store ownership;
+- future Cloud-internal vector implementation choices, without changing ownership;
 - request log ownership;
 - cost and quota display;
 - multisite behavior;

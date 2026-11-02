@@ -1,6 +1,6 @@
 # Development Workflow
 
-Status: active for the first Toolbox build.
+Status: active; startup and review policy aligned 2026-11-02.
 
 ## Start A Session
 
@@ -10,22 +10,22 @@ Run:
 git status --short --branch
 ```
 
-Read:
+Read `AGENTS.md`, `docs/current-state.md`, and `docs/boundary.md`, then the
+module-specific contract linked by Current State. Read deeper documents on
+demand: product work uses `docs/product-positioning.md` and `docs/roadmap.md`;
+structural work uses `docs/architecture.md`; shared-boundary work also uses
+`docs/platform/README.md`, `docs/cross-repo-boundary-matrix.md`,
+`docs/boundary-exceptions.md`, `docs/adversarial-boundary-review.md`, and
+`docs/adversarial-boundary-findings-triage.md`. ADR-001 and the relevant later
+ADRs explain accepted decisions. Historical handoffs are evidence, not the
+current task queue.
 
-- `README.md`
-- `docs/product-positioning.md`
-- `docs/boundary.md`
-- `docs/architecture.md`
-- `docs/roadmap.md`
-- `docs/platform/README.md`
-- `docs/cross-repo-boundary-matrix.md`
-- `docs/boundary-exceptions.md`
-- `docs/adversarial-boundary-review.md`
-- `docs/adversarial-boundary-findings-triage.md`
-- `docs/decisions/ADR-001-toolbox-as-product-surface.md`
-- `docs/decisions/ADR-003-local-admin-consent-boundary.md`
-
-Then state the focused module and boundary before editing.
+Then state the focused module, relevant boundary, and intended narrow gate
+before editing. Create topic branches from the latest `origin/master`, keep
+one module per session, and preserve other chats' worktrees and installations.
+Current pauses in `docs/reversible-feature-pauses-v1.md` and
+`docs/seo-specialist-pause-implementation-2026-10-18.md` apply to all optional
+runtime smokes documented below; retained commands do not authorize restoration.
 
 ## Default Gate
 
@@ -41,7 +41,9 @@ Run:
 composer test:all
 ```
 
-This runs PHP syntax linting and static contract checks.
+This runs PHP syntax linting, static contracts, deterministic PHP/JS behavior
+tests, and the configured isolated smoke fixtures. Optional installed-browser,
+WordPress, and live Cloud acceptance remain separate evidence.
 
 For a focused redline vocabulary check, run:
 
@@ -129,28 +131,29 @@ This gate is not a new product feature. Do not add summary/category/tag
 generation, a second write path, a local queue, workflow runtime, Cloud
 WordPress writes, or Core final execution to satisfy it.
 
-## Local OpenCodeReview Lane
+## Local Qwen Review
 
-Use the local machine configuration for an early review before publishing:
+The [active review policy](platform/ai-code-review-standard-v1.md) follows the
+2026-10-27 operator decision: local Qwen is the advisory review lane; required
+deterministic CI checks remain mandatory. Cloud AI review and the earlier
+OpenCodeReview lane are retired.
+
+After committing the focused diff, run one bounded review using a new receipt
+path outside the tracked source tree:
 
 ```bash
-composer ocr:config-check
-composer ocr:local
+python3 scripts/local-qwen-review.py --base origin/master --head HEAD --output /tmp/local-qwen-review.json
 ```
 
-The command reads `~/.opencodereview/config.json`, or the path supplied through
-`OCR_CONFIG_PATH`, and keeps provider credentials out of output and source
-control. The default review is the bounded `origin/master..HEAD` range; pass
-explicit `ocr review` flags after `composer ocr:local --` when a different
-range or format is needed.
+The receipt binds the base/head SHAs and diff hash. Triage every finding in the
+PR body with a `fix:` or `accept:` disposition and record the model and receipt
+hash. Material fixes require a fresh review of the final committed diff; failed,
+truncated, or stale responses do not pass. Keep credentials and raw receipts
+outside Git. Local describes where review is initiated and recorded; the
+configured Qwen endpoint may be hosted.
 
-The local lane does not replace the publisher's exact-head GitHub review gate.
-GitHub Actions has an isolated filesystem, so its model variable and secrets
-are a separately synchronized mirror. `composer ocr:config-check` validates
-the model/flag values and secret presence, and shows only secret update
-timestamps. It cannot compare secret contents because GitHub never returns
-them. After rotating the local endpoint or key, update the GitHub secrets and
-rerun the check before publishing.
+Publish with `--local-review <receipt.json>`. Do not wait for or rerun cloud AI
+review, re-enable its workflow, or synchronize CI model secrets for this lane.
 
 ## Commit Scope Gate
 
@@ -352,7 +355,8 @@ and publish with a completed copy of the checked-in PR template:
 ```bash
 composer pr:publish -- \
   --title "fix: describe the focused change" \
-  --body-file /absolute/path/to/completed-pr-body.md
+  --body-file /absolute/path/to/completed-pr-body.md \
+  --local-review /absolute/path/to/local-qwen-review.json
 ```
 
 The command validates the shared `Scope`, `Boundary`, `Verification`, and
