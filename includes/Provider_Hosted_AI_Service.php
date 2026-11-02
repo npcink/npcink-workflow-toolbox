@@ -611,7 +611,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			return $handled;
 		}
 		if ( is_array( $handled ) ) {
-			return $this->normalize_hosted_ai_site_helper_response( $handled, $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample, $flagged_media_sample );
+			return $this->normalize_hosted_ai_site_helper_response( $handled, $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample, $flagged_media_sample, $taxonomy_tag_review_set, $internal_link_review_set );
 		}
 		if ( 'media_alt_suggestions' === $intent ) {
 			return $this->client->local_media_alt_caption_review_response( $runtime_payload, $media_alt_caption_review_set );
@@ -638,7 +638,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			return $response;
 		}
 
-		return $this->normalize_hosted_ai_site_helper_response( is_array( $response ) ? $response : array(), $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample, $flagged_media_sample );
+		return $this->normalize_hosted_ai_site_helper_response( is_array( $response ) ? $response : array(), $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample, $flagged_media_sample, $taxonomy_tag_review_set, $internal_link_review_set );
 	}
 
 	private function hosted_ai_dependency_message(): string {
@@ -760,7 +760,7 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 	}
 
 
-	private function normalize_hosted_ai_site_helper_response( array $response, array $runtime_payload, string $intent, array $local_review_set = array(), array $comment_sample = array(), array $flagged_media_sample = array() ): array {
+	private function normalize_hosted_ai_site_helper_response( array $response, array $runtime_payload, string $intent, array $local_review_set = array(), array $comment_sample = array(), array $flagged_media_sample = array(), array $taxonomy_tag_review_set = array(), array $internal_link_review_set = array() ): array {
 		$result                        = $this->extract_cloud_runtime_result( $response );
 		$output_text                   = sanitize_textarea_field(
 			(string) (
@@ -807,8 +807,8 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 				'reject_if'                     => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
 				'media_alt_caption_review_set'  => 'media_alt_suggestions' === $intent ? $this->sanitize_payload( $local_review_set ) : array(),
 				'comment_moderation_review_set' => 'comment_moderation_suggestions' === $intent ? $this->sanitize_payload( $comment_moderation_review_set ) : array(),
-				'internal_link_review_set'      => $internal_link_review_set,
-				'taxonomy_tag_review_set'       => $taxonomy_tag_review_set,
+				'internal_link_review_set'      => 'internal_link_suggestions' === $intent ? $this->sanitize_payload( $internal_link_review_set ) : array(),
+				'taxonomy_tag_review_set'       => 'taxonomy_tag_suggestions' === $intent ? $this->sanitize_payload( $taxonomy_tag_review_set ) : array(),
 				'flagged_media_review_set'      => 'flagged_media_suggestions' === $intent ? $this->sanitize_payload( $flagged_media_review_set ) : array(),
 				'write_posture'                 => 'suggestion_only',
 				'final_write_path'              => 'core_proposal_required',

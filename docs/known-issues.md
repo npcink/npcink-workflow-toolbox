@@ -316,9 +316,12 @@ with the closing commit or PR for one release cycle, then prune.
   Remaining: the summary and taxonomy cached-flow orchestrators,
   inheriting the cache base and movable with the same pattern.
 - **PHPStan baseline ratchet** (2026-10-06; tooling refreshed in PR #262):
-  108 remaining level-5 findings across 81 baseline patterns, verified on
+  106 remaining level-5 findings across 79 baseline patterns, verified on
   2026-11-02. Declaring the five already-constructed Provider service properties
   removes 13 undefined-property findings from the previous 121/86 baseline.
+  Passing the existing taxonomy/tag and internal-link review sets to response
+  normalization removes two undefined-variable findings; both filter and Addon
+  paths are covered by deterministic response fixtures without model calls.
   Keep the level and defensive input checks; remove only findings whose causes
   are fixed. Moving code between files does not count as reducing debt.
   The 12 unused-method candidates remain in the baseline (mostly `Admin_Page`

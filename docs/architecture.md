@@ -173,6 +173,14 @@ runtime execution phase. It has no runtime job table, scheduler, worker, lease
 store, retry processor, dead-letter processor, persistence path, Cloud call,
 Core proposal creation, or WordPress write path.
 
+## Site-helper response scope
+
+The hosted site-helper filter and Addon success paths pass the already-built
+local taxonomy/tag and internal-link review sets into response normalization.
+Only the matching intent exposes its sanitized set; unrelated sets remain empty.
+This scope fix preserves bounded samples and blocked-item posture; it does not
+add Cloud suggestion decoding, change ranking, or grant WordPress writes.
+
 ## Provider Path
 
 Current MVP provider flow:
