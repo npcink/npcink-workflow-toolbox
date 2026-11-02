@@ -15,7 +15,7 @@
 │     ├── 站点画像（简报表单）
 │     ├── 智能提问（pack 选择器保留）
 │     └── 站点检查（折叠区；当前检查 / 定期巡检 L2）
-│           └── 结果维度 tab（L3，留给后续折叠）
+│           └── 更多扫描视图（L3，默认折叠；展开后显示结果维度 tab）
 └── 图片处理           toolbox_tab=tools
       └── 工具组 / 工具（L2，不动）
 ```
@@ -73,6 +73,16 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 
 去掉顶栏「站点检查」。当前检查 + 定期巡检收入「站点与提问」下部折叠区；检查 → 提问 CTA 保留。
 
+## 结果维度折叠（已由 #313 实现，2026-11-02 复核）
+
+本地检查生成预览后，默认展示概览和下一步操作；「内容 / 媒体 / 评论 / 结构 /
+问题清单 / 证据 / 高级」页签收入「更多扫描视图」，点击才展开。Cloud detail 仍受
+既有暂停条件控制。源码是 `includes/Admin_Page.php` 中的
+`<details class="npcink-toolbox__ops-dimension-fold">`，没有 `open` 属性；
+交付提交 `6b395f0b660ec1c9ddc9bb5e69368c3cfa0ecc8e`（[#313](https://github.com/npcink/npcink-workflow-toolbox/pull/313)）。
+这只是详细结果的呈现方式，不改变检查项目、评分或模型调用。原待办已销账；本次
+仅复核源码并更新文档，没有改 UI，也未重新验收安装站点。
+
 ## 开放待办
 
-会话遗留与旁路清单见 [admin-ia-open-todos-2026-10-23.md](admin-ia-open-todos-2026-10-23.md)（L3 折叠、单框选包、生产 Cloud 部署决策、year-0020、英文 toast 移交、orphan runs、mid-sync 502）。
+会话遗留与旁路清单见 [admin-ia-open-todos-2026-10-23.md](admin-ia-open-todos-2026-10-23.md)（L3 折叠已关闭；其余为单框选包、生产 Cloud 部署决策、year-0020、英文 toast 移交、orphan runs、mid-sync 502）。
