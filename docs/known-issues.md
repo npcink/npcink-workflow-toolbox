@@ -315,13 +315,14 @@ with the closing commit or PR for one release cycle, then prune.
   service per session 5's boundary). The service sits at ~3.0k lines.
   Remaining: the summary and taxonomy cached-flow orchestrators,
   inheriting the cache base and movable with the same pattern.
-- **PHPStan baseline ratchet** (2026-10-06; tooling refreshed in PR #262): the
-  121 remaining level-5 findings across 86 baseline patterns live in
-  `phpstan-baseline.neon` after the phpcbf pass and
-  promotion to required. The baseline exists to shrink: when a cluster
-  split or cleanup removes a finding class, regenerate the baseline and
-  the ratchet holds. The 16 unused-method candidates remain in the
-  baseline (mostly `Admin_Page` media-derivative render helpers).
+- **PHPStan baseline ratchet** (2026-10-06; tooling refreshed in PR #262):
+  108 remaining level-5 findings across 81 baseline patterns, verified on
+  2026-11-02. Declaring the five already-constructed Provider service properties
+  removes 13 undefined-property findings from the previous 121/86 baseline.
+  Keep the level and defensive input checks; remove only findings whose causes
+  are fixed. Moving code between files does not count as reducing debt.
+  The 12 unused-method candidates remain in the baseline (mostly `Admin_Page`
+  media-derivative render helpers); inspect actual call sites before removal.
 
 ## Recently Closed
 

@@ -312,7 +312,9 @@ ordinary generation and Site Knowledge remain available. See
 4. Editor intent convergence shipped 2026-10-07: thirteen-intent editor
    allowlist; see `docs/editor-intent-convergence-decision.md` before
    adding any new editor intent.
-5. PHPStan baseline ratchet (121 findings across 86 baseline patterns; shrinks with cluster splits).
+5. PHPStan baseline ratchet (108 findings across 81 baseline patterns after the
+   2026-11-02 Provider service-property declarations; reduce verified causes,
+   not just move findings with cluster splits).
 6. Guided onboarding tour awaiting the operator trial answers
    (`docs/onboarding-tour-design-v1.md`); "Core proposal" terminology
    standard cross-repo rollout. (The 2026-10-11 security/performance
