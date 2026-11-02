@@ -34,11 +34,24 @@ if ( ! class_exists( 'WP_Error' ) ) {
 			return $this->code;
 		}
 
-		public function get_error_message(): string {
+		public function get_error_codes(): array {
+			return '' === $this->code ? array() : array( $this->code );
+		}
+
+		public function add( string $code, string $message ): void {
+			$this->code = $code;
+			$this->message = $message;
+		}
+
+		public function add_data( array $data, string $code = '' ): void {
+			$this->data = $data;
+		}
+
+		public function get_error_message( string $code = '' ): string {
 			return $this->message;
 		}
 
-		public function get_error_data(): array {
+		public function get_error_data( string $code = '' ): array {
 			return $this->data;
 		}
 	}
@@ -167,7 +180,14 @@ function get_option( string $key, $default = false ) {
 	return $GLOBALS['npcink_toolbox_pause_options'][ $key ] ?? $default;
 }
 
+function get_current_user_id(): int {
+	return 7;
+}
+
 function apply_filters( string $hook, $value, ...$args ) {
+	if ( 'npcink_toolbox_image_source_cloud_request' === $hook && isset( $GLOBALS['npcink_toolbox_image_source_error'] ) ) {
+		return $GLOBALS['npcink_toolbox_image_source_error'];
+	}
 	if ( 'npcink_toolbox_hosted_ai_site_helper_cloud_request' === $hook && 'filter' === ( $GLOBALS['npcink_toolbox_site_helper_transport'] ?? '' ) ) {
 		return array( 'run_id' => 'site-helper-filter-run', 'result' => array( 'output_text' => 'Review only.' ) );
 	}
@@ -331,8 +351,8 @@ function is_wp_error( $value ): bool {
 	return $value instanceof WP_Error;
 }
 
-function rest_ensure_response( $value ): WP_REST_Response {
-	return $value instanceof WP_REST_Response ? $value : new WP_REST_Response( $value );
+function rest_ensure_response( $value ): WP_REST_Response|WP_Error {
+	return $value instanceof WP_REST_Response || $value instanceof WP_Error ? $value : new WP_REST_Response( $value );
 }
 
 function get_object_taxonomies( string $post_type ): array {
@@ -799,6 +819,20 @@ $GLOBALS['npcink_toolbox_site_knowledge_status_mode'] = 'error';
 $site_media_error = $client->image_candidates( 'AI workflow diagram', array( 'provider' => 'site_media', 'per_page' => 5 ) );
 npcink_toolbox_provider_services_assert( is_array( $site_media_error ), 'Site-media search survives a failing evidence status call without a fatal (regression: WP_Error status).' );
 npcink_toolbox_provider_services_assert( 'ready' === (string) ( $site_media_error['status'] ?? '' ), 'Site-media search keeps its Cloud search status when the evidence status call fails.' );
+
+// REST image-source errors retain their status and safe diagnostics.
+$GLOBALS['npcink_toolbox_pause_options']['npcink_toolbox_settings'] = array( 'enable_image_source' => false );
+$disabled_images = $controller->image_candidates( new WP_REST_Request( array( 'query' => 'diagram' ) ) );
+npcink_toolbox_provider_services_assert( $disabled_images instanceof WP_Error && 'npcink_toolbox_disabled' === $disabled_images->get_error_code() && 403 === $disabled_images->get_error_data()['status'], 'Disabled image search returns a 403 error.' );
+unset( $GLOBALS['npcink_toolbox_pause_options']['npcink_toolbox_settings'] );
+$missing_query = $controller->image_candidates( new WP_REST_Request() );
+npcink_toolbox_provider_services_assert( $missing_query instanceof WP_Error && 'npcink_toolbox_missing_query' === $missing_query->get_error_code() && 400 === $missing_query->get_error_data()['status'], 'A missing image query returns a 400 error.' );
+$GLOBALS['npcink_toolbox_image_source_error'] = new WP_Error( 'fixture_image_source_unavailable', 'Temporarily unavailable.', array( 'status' => 503, 'request_id' => 'fixture-safe-id', 'raw_payload' => array( 'private' => 'omit this diagnostic' ) ) );
+$provider_error = $controller->image_candidates( new WP_REST_Request( array( 'query' => 'diagram', 'refresh_variant' => 'failure' ) ) );
+npcink_toolbox_provider_services_assert( $provider_error instanceof WP_Error && 'fixture_image_source_unavailable' === $provider_error->get_error_code() && array( 'status' => 503, 'request_id' => 'fixture-safe-id' ) === $provider_error->get_error_data(), 'Provider failures stay errors and retain only safe diagnostics.' );
+unset( $GLOBALS['npcink_toolbox_image_source_error'] );
+$successful_images = $controller->image_candidates( new WP_REST_Request( array( 'query' => 'AI workflow diagram', 'provider' => 'site_media' ) ) );
+npcink_toolbox_provider_services_assert( $successful_images instanceof WP_REST_Response && ! empty( $successful_images->get_data()['images'] ), 'Successful image search returns a REST response with candidates.' );
 
 echo "Provider services behavior checks passed.\n";
 
