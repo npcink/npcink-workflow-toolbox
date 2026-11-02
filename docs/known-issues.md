@@ -14,22 +14,23 @@ with the closing commit or PR for one release cycle, then prune.
 ## Open
 
 - **Sequential product follow-up (Toolbox / Eval Lab / Cloud, 2026-11-02).**
-  The operator accepted the [current delivery order](roadmap.md#current-delivery-order--2026-11-02):
-  correct active-document drift, then prioritize useful related-article
-  candidates for manual choice. The next quality slice must reuse the
-  [recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md)
-  and its 2026-11-01 follow-up, name source/runtime/model/corpus, compare useful
-  Top 5/8 candidates as well as obvious irrelevance and misses, and fix only a
-  reproduced issue. Eval Lab owns comparable evaluation; Cloud owns retrieval;
-  Toolbox owns editor projection and regression. Ordinary operator feedback
-  informs the work without a mandatory human annotation worksheet. UI changes
-  follow observed friction; cluster splits remain separate focused changes.
+  The operator accepted the [current delivery order](roadmap.md#current-delivery-order--2026-11-02),
+  but the recommendation development slice is now **parked for this internal
+  development stage**. The frozen ranking baseline, real Cloud/editor checks,
+  offline replays, cross-model reviews and the ordering/qualification fixes are
+  already complete for the current revisions. Follow the [canonical evaluation
+  disposition](recommendation-eval.md#internal-development-disposition--2026-11-02)
+  and the [recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md)
+  before restarting; the former defines the no-repeat rule and restart triggers.
+  Eval Lab owns comparable
+  evaluation; Cloud owns retrieval; Toolbox owns editor projection and
+  regression. Keep the remaining quality claim as `insufficient_real_gold`.
   Completion requires bounded quality evidence and applicable editor regression,
   followed by separately recorded PR/merge, runtime, package, and release states.
   The two recorded ordering/display and qualification fixes are integrated;
   follow concrete accepted/rejected recommendations from ordinary use before
-  another correction. This ledger does not schedule a new model campaign merely
-  because general accuracy remains unproven. Existing pauses and the
+  another correction when such use exists. This ledger does not schedule a new
+  model campaign merely because general accuracy remains unproven. Existing pauses and the
   no-new-pack scope remain effective.
 
 - **Content-loop remaining acceptance (WordPress AI / Addon / Cloud, 2026-10-30).**

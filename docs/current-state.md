@@ -41,6 +41,11 @@ the recorded revisions. General quality, unreturned recall, natural adoption,
 fresh transport and production remain separate. Reproduce concrete ordinary-use
 feedback before another quality correction; do not repeat the closed fixes.
 
+**Recommendation evaluation disposition — 2026-11-02:** current internal
+development evidence is complete for this stage. Keep the versions frozen and
+label the remaining claim `insufficient_real_gold`; the no-repeat rule and
+restart triggers are defined in the [canonical evaluation disposition](recommendation-eval.md#internal-development-disposition--2026-11-02).
+
 **Referenced article / OSS chats:** the [2026-11-01 closeout audit](article-oss-session-closeout-2026-11-01.md)
 maps both histories to 19 merged PRs, four OSS commits, live topic-head checks,
 retained installations and other owners' worktrees. Both chats may close;

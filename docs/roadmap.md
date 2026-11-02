@@ -53,17 +53,12 @@ disappear before delivering a useful slice.
 
 1. Align active product/development documents with the accepted write lanes,
    feature pauses, release evidence, and local Qwen policy.
-2. Concentrate on useful related-article candidates for manual selection.
-   Eval Lab reuses existing real samples, names source/runtime/model/corpus
-   revisions, and compares useful Top 5/8 results, obvious irrelevance, and
-   missed candidates. Candidate relevance and safe insertion remain separate.
-   The development agent handles evaluation, disagreements, fixes, and
-   regression; the operator supplies ordinary usage feedback and final decisions.
-   Follow the [active recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md),
-   including its 2026-11-01 display/qualification fixes and accepted-source
-   evidence, before replaying older experiments. The next correction follows
-   concrete ordinary-use feedback; reuse existing evidence before scheduling
-   another live retrieval or semantic-judge round.
+2. Keep the current related-article and internal-link baseline frozen for the
+   internal development stage. Existing checks, replays, reviews and the
+   2026-11-01 fixes are complete for the recorded revisions. Apply the
+   [canonical evaluation disposition](recommendation-eval.md#internal-development-disposition--2026-11-02)
+   before restarting work; candidate relevance and safe insertion remain
+   separate.
 3. Simplify the existing editor path where observed failures justify a change;
    verify review/open/select, explicit adoption, undo, native save, and readback
    as applicable. Preserve the three-tab admin IA and existing pack selector.

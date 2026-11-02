@@ -100,6 +100,11 @@ Cloud 相关性误判。详见 [Eval Lab 阶段记录](https://github.com/npcink
 下一轮先收集并复现普通使用中具体的有用、无关或遗漏案例，再选择单项修正；
 不因尚无全局准确率而重启已停止的模型实验、扩库或重复已关闭的缺陷。
 
+**内部开发阶段重复评估防护 — 2026-11-02：** 当前记录版本的基线、真实
+Cloud/编辑器验收、固定样本回放、离线候选评审以及顺序/资格修复已经完成。
+没有真实用户时，质量状态保持 `insufficient_real_gold`；完整的禁止重复评估规则和
+恢复触发条件见 [推荐评估规范](recommendation-eval.md#internal-development-disposition--2026-11-02)。
+
 当前相关代码：
 
 - `includes/Rest_Editor_Internal_Links.php`：候选投影与安全过滤。

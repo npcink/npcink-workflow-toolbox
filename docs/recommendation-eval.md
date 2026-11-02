@@ -23,6 +23,24 @@ Start with a small useful feature and collect real denominators:
 Provider-backed evaluation must be explicitly requested. Dry runs and
 deterministic fixtures remain the normal inner loop.
 
+## Internal Development Disposition — 2026-11-02
+
+The current internal development stage has already completed the maintained
+evaluation work for the recorded revisions: deterministic contract checks,
+real Cloud/editor consumer acceptance, fixed-sample replays, offline candidate
+review and the associated ordering/qualification regressions. Do not restart
+another 3–10-case cycle, six-article screen, model vote, reranker trial,
+corpus expansion or feedback UI just because real-user feedback is unavailable.
+Those activities would repeat existing evidence. Keep the current ranking and
+model versions frozen and report the remaining claim as `insufficient_real_gold`.
+
+Resume only when one of these changes the question: a concrete new
+accepted/rejected/missed recommendation, a runtime/model/corpus/weight revision,
+or a real-user/pilot observation window. Reuse the existing evidence, state the
+new question and run only the smallest relevant regression. Developer smoke,
+saved responses and AI agreement remain development evidence; they do not become
+user adoption or human gold by repetition.
+
 ## Quality Families
 
 Related Articles and Internal Links must stay separate:
@@ -53,9 +71,11 @@ are behavior signals, not automatic relevance labels.
 
 ## Staged Evaluation
 
-1. Validate deterministic fixtures and GPT/Grok blind-review wiring on 3 to 10
-   cases.
-2. Ship the minimal actions and observe whether people use them.
+1. Maintain the already-validated deterministic fixtures and GPT/Grok
+   blind-review wiring; rerun only when the runtime or evaluation contract
+   changes.
+2. Ship the minimal actions and observe whether people use them when a real
+   user or pilot window exists.
 3. If use exists, sample representative success, failure, disagreement, and
    empty-result cases for independent human review.
 4. Grow toward 30 independently reviewed query articles and freeze a stable
