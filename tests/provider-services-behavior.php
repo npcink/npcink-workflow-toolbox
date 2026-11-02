@@ -168,6 +168,10 @@ function get_option( string $key, $default = false ) {
 }
 
 function apply_filters( string $hook, $value, ...$args ) {
+	if ( 'npcink_toolbox_hosted_ai_site_helper_cloud_request' === $hook && 'filter' === ( $GLOBALS['npcink_toolbox_site_helper_transport'] ?? '' ) ) {
+		return array( 'run_id' => 'site-helper-filter-run', 'result' => array( 'output_text' => 'Review only.' ) );
+	}
+
 	if ( in_array( $hook, array( 'npcink_toolbox_web_search_runtime_payload', 'npcink_toolbox_site_knowledge_runtime_payload', 'npcink_toolbox_hosted_ai_runtime_payload', 'npcink_toolbox_cloud_data_classification' ), true ) ) {
 		return $value;
 	}
@@ -464,7 +468,33 @@ function get_posts( array $args ): array {
 	);
 }
 
+class WP_Post {
+	public int $ID = 902;
+	public string $post_title = 'Sparse public article';
+	public string $post_excerpt = 'Bounded public excerpt';
+	public string $post_content = 'Public article without links.';
+}
+
+class WP_Query {
+	public array $posts;
+
+	public function __construct( array $args ) {
+		$this->posts = empty( $GLOBALS['npcink_toolbox_site_helper_transport'] ) ? array() : array( 902 );
+	}
+}
+
+function wp_get_post_terms( int $post_id, string $taxonomy, array $args ): array {
+	return array();
+}
+
+function npcink_cloud_addon_execute_toolbox_site_helper_runtime( array $payload, string $trace_id, string $idempotency_key ): array {
+	return array( 'run_id' => 'site-helper-addon-run', 'result' => array( 'output_text' => 'Review only.' ) );
+}
+
 function get_post( int $post_id ) {
+	if ( 902 === $post_id ) {
+		return new WP_Post();
+	}
 	if ( 31 === $post_id ) {
 		return (object) array( 'ID' => 31, 'post_type' => 'attachment', 'post_title' => 'AI workflow diagram', 'post_excerpt' => 'Recommendation workflow', 'post_content' => 'Fast recommendation pipeline' );
 	}
@@ -724,6 +754,28 @@ npcink_toolbox_provider_services_assert( array( 5, 9 ) === $bounded['post_ids'] 
 // 5. Hosted AI content support rejects unknown intents before runtime calls.
 $bad_intent = $hosted_ai->run_hosted_ai_content_support( array( 'intent' => 'not_a_hosted_intent' ) );
 npcink_toolbox_provider_services_assert( $bad_intent instanceof WP_Error && 'npcink_toolbox_invalid_hosted_ai_intent' === $bad_intent->get_error_code(), 'Hosted AI content support rejects unknown intents.' );
+
+// Both successful transport paths must retain the locally built review sets.
+set_error_handler( static function ( int $severity, string $message, string $file, int $line ): bool {
+	throw new ErrorException( $message, 0, $severity, $file, $line );
+} );
+try {
+	foreach ( array( 'filter', 'addon' ) as $transport ) {
+		$GLOBALS['npcink_toolbox_site_helper_transport'] = $transport;
+		foreach ( array( 'taxonomy_tag_suggestions' => 'taxonomy_tag_review_set', 'internal_link_suggestions' => 'internal_link_review_set' ) as $intent => $field ) {
+			$response = $client->run_hosted_ai_site_helper( array( 'intent' => $intent ) );
+			$review = $response[ $field ] ?? array();
+			npcink_toolbox_provider_services_assert( $field . '.v1' === ( $review['contract_version'] ?? '' ), "The {$transport} path preserves the {$field} contract." );
+			npcink_toolbox_provider_services_assert( 1 === ( $review['eligibility_summary']['sampled_post_count'] ?? 0 ) && 902 === ( $review['blocked_items'][0]['post_id'] ?? 0 ), "The {$transport} path retains the bounded sample in {$field}." );
+			npcink_toolbox_provider_services_assert( array() === ( $review['selected_items'] ?? null ) && false === ( $review['direct_wordpress_write'] ?? true ), 'No unsupported suggestions or WordPress writes are fabricated.' );
+			$other = 'taxonomy_tag_review_set' === $field ? 'internal_link_review_set' : 'taxonomy_tag_review_set';
+			npcink_toolbox_provider_services_assert( array() === $response[ $other ], 'The unrelated review set stays empty.' );
+		}
+	}
+} finally {
+	unset( $GLOBALS['npcink_toolbox_site_helper_transport'] );
+	restore_error_handler();
+}
 
 // 6. Site-helper quality contracts expose a fail-closed review contract.
 $quality = $hosted_ai->hosted_ai_site_helper_quality_contract( 'media_alt_suggestions' );
