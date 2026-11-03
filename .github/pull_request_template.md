@@ -26,7 +26,7 @@
 
 ## AI Review Triage
 
-Filled in after the local Qwen review of the exact committed diff;
+Filled in after the local AI review (Qwen or DeepSeek) of the exact committed diff;
 `composer pr:publish` verifies this section before requesting auto-merge.
 Use `--local-review <receipt.json>` when publishing. Record the model and receipt hash.
 One line per finding id from the local review:

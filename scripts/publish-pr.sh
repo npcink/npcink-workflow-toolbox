@@ -10,7 +10,7 @@ Usage:
 
 Publishes the current clean topic branch, creates a pull request from a
 completed body contract, and requests squash auto-merge after required checks
-and local Qwen exact-diff review + finding triage.
+and local AI exact-diff review + finding triage.
 EOF
 }
 
@@ -93,7 +93,7 @@ repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || fail 'run inside a G
 cd "${repo_root}"
 
 [ -f scripts/local-qwen-review.py ] \
-	|| fail 'local Qwen review script not found'
+	|| fail 'local AI review script not found'
 
 # Publishing reaches github.com over the network. When a local VPN exposes an
 # HTTP proxy on a moving port, detect the working port instead of failing on
@@ -443,15 +443,15 @@ if [ -n "${existing_pr}" ]; then
 fi
 
 
-# Local Qwen is authoritative for advisory review. Never discover/rerun Cloud
+# Local AI is authoritative for advisory review. Never discover/rerun Cloud
 # reviews. Read the live PR body and bind both review and PR to this exact head.
 review_body="$(mktemp)"
 trap 'rm -f "$review_body"' EXIT
 retry_network gh pr view "${pr_number}" --json body --jq '.body // ""' > "$review_body"
 python3 scripts/local-qwen-review.py --verify "$local_review" --head "$head_sha" --body-file "$review_body" \
-    || fail 'local Qwen review or finding triage is incomplete; auto-merge NOT requested'
+    || fail 'local AI review or finding triage is incomplete; auto-merge NOT requested'
 [ "$(gh pr view "$pr_number" --json headRefOid --jq .headRefOid)" = "$head_sha" ] \
-    || fail 'PR head changed after local Qwen review'
+    || fail 'PR head changed after local AI review'
 
 # The squash subject is pinned to "<title> (#<number>)" so the merged commit
 # message always derives from the pull request's own live title, never from

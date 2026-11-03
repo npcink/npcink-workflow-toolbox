@@ -56,16 +56,16 @@ The publishing command rejects a production body that does not contain that
 exact operator approval sentence. This does not grant approval; it only
 preserves the existing human release gate.
 
-## Local Qwen policy — 2026-10-27
+## Local AI review policy — 2026-11-03
 
-The operator retired cloud AI review. Toolbox now requires a local Qwen receipt
-via `--local-review <path>`; include that option in the preview and publish
+The operator retired cloud AI review. Toolbox now requires a local AI review
+receipt (Qwen or DeepSeek) via `--local-review <path>`; include that option in the preview and publish
 commands below. See the active policy in
 [AI Code Review Standard](ai-code-review-standard-v1.md). Local receipt and
 finding triage replace cloud delivery polling; required CI is unchanged.
 The inventory hash identifies the updated Toolbox publisher. Other enrolled
 publishers retain their checked-in revisions until their focused adoption;
-use their explicit exception option with local Qwen evidence during transition,
+use their explicit exception option with local AI review evidence during transition,
 never retry or wait for a cloud review.
 
 ## Standard Flow

@@ -31,6 +31,57 @@ class LocalReviewTests(unittest.TestCase):
         self.verify()
         self.verify(body='## AI Review Triage\n- [x] F1 fix: regression added\n## Risk\n')
 
+    def test_deepseek_review_keeps_identity_completeness_and_triage_checks(self):
+        receipt = copy.deepcopy(self.receipt)
+        receipt['model'] = 'deepseek-v4.1-flash-1017'
+        self.verify(receipt)
+        for key, value in [('base_sha', 'd'*40), ('head_sha', 'd'*40),
+                           ('diff_sha256', 'e'*64), ('success', False)]:
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self.verify(dict(receipt, **{key: value}))
+        with self.assertRaises(ValueError):
+            self.verify(receipt, body='## AI Review Triage\n')
+        receipt['review']['findings'] = None
+        with self.assertRaises(ValueError):
+            self.verify(receipt)
+
+    def test_configured_deepseek_request_generates_verifiable_receipt(self):
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content':
+            json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); config = root/'config.json'; output = root/'review.json'
+            config.write_text(json.dumps(dict(provider='qwen-shared', custom_providers={
+                'qwen-shared': dict(model='deepseek-v4.1-flash-1017',
+                                    url='https://example.invalid/v1', auth_token='not-a-real-token')})))
+            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, b'diff')), patch.object(
+                    reviewer, 'git', return_value=b''), patch.object(reviewer.urllib.request,
+                    'urlopen', return_value=io.BytesIO(response)) as request:
+                reviewer.run('base', 'head', output, config)
+                sent = json.loads(request.call_args.args[0].data)
+                self.assertEqual(sent['model'], 'deepseek-v4.1-flash-1017')
+                request.assert_called_once()
+                receipt = json.loads(output.read_text())
+                self.assertEqual(receipt['model'], sent['model'])
+                reviewer.verify(receipt, '', FROZEN['head_sha'])
+            self.assertFalse(Path(str(output)+'.failure.json').exists())
+            self.assertNotIn('not-a-real-token', output.read_text())
+
+    def test_unsupported_model_rejected_before_provider_call(self):
+        for model in ['other-model', '', None, 123, 'deepseek\nother', ' deepseek-v4']:
+            with self.subTest(model=model), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory); config = root/'config.json'; output = root/'review.json'
+                config.write_text(json.dumps(dict(model=model, url='https://example.invalid/v1',
+                                                 auth_token='not-a-real-token')))
+                with patch.object(reviewer, 'snapshot', return_value=(FROZEN, b'diff')), patch.object(
+                        reviewer, 'git', return_value=b''), patch.object(
+                        reviewer.urllib.request, 'urlopen') as request:
+                    with self.assertRaises(ValueError):
+                        reviewer.run('base', 'head', output, config)
+                    request.assert_not_called()
+                with self.assertRaises(ValueError):
+                    self.verify(dict(self.receipt, model=model))
+                self.assertFalse(output.exists())
+
     def test_wrong_head_diff_model_and_failed_review_rejected(self):
         for key, value in [('head_sha','d'*40), ('diff_sha256','e'*64), ('model','other'), ('success',False)]:
             receipt = dict(self.receipt, **{key:value})
@@ -69,7 +120,7 @@ class LocalReviewTests(unittest.TestCase):
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
                 reviewer,'git',return_value=b''), patch.object(reviewer.urllib.request,'urlopen',side_effect=
                     urllib.error.HTTPError('https://example.invalid',400,'secret-provider-body',{},None)):
-                with self.assertRaisesRegex(ValueError,'Qwen HTTP 400; no review delivered') as error:
+                with self.assertRaisesRegex(ValueError,'AI HTTP 400; no review delivered') as error:
                     reviewer.run('base','head',output,config)
             self.assertNotIn('secret',str(error.exception));self.assertFalse(output.exists())
             receipt=json.loads(failure.read_text())
@@ -103,7 +154,7 @@ class LocalReviewTests(unittest.TestCase):
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
                     reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
                     reviewer.urllib.request,'urlopen',side_effect=ConnectionResetError('provider endpoint detail')):
-                with self.assertRaisesRegex(ValueError,'Qwen transport failed; no review delivered') as error:
+                with self.assertRaisesRegex(ValueError,'AI transport failed; no review delivered') as error:
                     reviewer.run('base','head',output,config)
             self.assertNotIn('provider endpoint detail', str(error.exception))
             receipt=json.loads(failure.read_text())
@@ -115,7 +166,7 @@ class LocalReviewTests(unittest.TestCase):
             root=Path(directory);config=root/'config.json';output=root/'review.json'
             config.write_text('{not-json')
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(reviewer,'git',return_value=b''):
-                with self.assertRaisesRegex(ValueError,'local Qwen config is not valid JSON'):
+                with self.assertRaisesRegex(ValueError,'local AI config is not valid JSON'):
                     reviewer.run('base','head',output,config)
             self.assertFalse(Path(str(output)+'.failure.json').exists())
 
@@ -126,7 +177,7 @@ class LocalReviewTests(unittest.TestCase):
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
                     reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
                     reviewer.urllib.request,'urlopen',side_effect=TimeoutError('timeout detail')):
-                with self.assertRaisesRegex(ValueError,'Qwen request timed out; no review delivered'):
+                with self.assertRaisesRegex(ValueError,'AI request timed out; no review delivered'):
                     reviewer.run('base','head',output,config)
             receipt=json.loads(failure.read_text())
             self.assertEqual(receipt['failure']['code'], 'provider_timeout')
@@ -140,7 +191,7 @@ class LocalReviewTests(unittest.TestCase):
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
                     reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
                     reviewer.urllib.request,'urlopen',return_value=io.BytesIO(response)):
-                with self.assertRaisesRegex(ValueError,'Qwen response exceeds 2000000 bytes'):
+                with self.assertRaisesRegex(ValueError,'AI response exceeds 2000000 bytes'):
                     reviewer.run('base','head',output,config)
             receipt=json.loads(failure.read_text())
             self.assertEqual(receipt['failure']['code'], 'response_oversized')
@@ -168,7 +219,7 @@ class LocalReviewTests(unittest.TestCase):
             with patch.object(reviewer,'snapshot',return_value=(FROZEN,b'diff')), patch.object(
                     reviewer,'git',return_value=b''), patch.object(reviewer.subprocess,'run',return_value=SimpleNamespace(returncode=0)), patch.object(
                     reviewer.urllib.request,'urlopen',return_value=io.BytesIO(response)):
-                with self.assertRaisesRegex(ValueError,'incomplete Qwen response'):
+                with self.assertRaisesRegex(ValueError,'incomplete AI response'):
                     reviewer.run('base','head',output,config)
             receipt=json.loads(failure.read_text())
             self.assertEqual(receipt['failure']['code'], 'response_incomplete')
