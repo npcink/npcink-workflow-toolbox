@@ -131,11 +131,11 @@ This gate is not a new product feature. Do not add summary/category/tag
 generation, a second write path, a local queue, workflow runtime, Cloud
 WordPress writes, or Core final execution to satisfy it.
 
-## Local Qwen Review
+## Local AI Review
 
 The [active review policy](platform/ai-code-review-standard-v1.md) follows the
-2026-10-27 operator decision: local Qwen is the advisory review lane; required
-deterministic CI checks remain mandatory. Cloud AI review and the earlier
+2026-11-03 operator decision: the configured Qwen or DeepSeek model provides
+local advisory review; required deterministic CI checks remain mandatory. Cloud AI review and the earlier
 OpenCodeReview lane are retired.
 
 After committing the focused diff, run one bounded review using a new receipt
@@ -150,7 +150,9 @@ PR body with a `fix:` or `accept:` disposition and record the model and receipt
 hash. Material fixes require a fresh review of the final committed diff; failed,
 truncated, or stale responses do not pass. Keep credentials and raw receipts
 outside Git. Local describes where review is initiated and recorded; the
-configured Qwen endpoint may be hosted.
+configured review endpoint may be hosted. The script path and v1 receipt
+contract names retain their original Qwen spelling for compatibility; each
+receipt records the actual model used.
 
 Publish with `--local-review <receipt.json>`. Do not wait for or rerun cloud AI
 review, re-enable its workflow, or synchronize CI model secrets for this lane.

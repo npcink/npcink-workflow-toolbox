@@ -154,8 +154,9 @@ Default gate:
 composer test:all
 ```
 
-Local Qwen review is the advisory review policy as of the 2026-10-27 operator
-decision. Do not wait for or rerun cloud AI review. Use
+Local AI review uses the configured Qwen or DeepSeek model under the
+2026-11-03 operator decision. The legacy script path remains compatible.
+Do not wait for or rerun cloud AI review. Use
 `python3 scripts/local-qwen-review.py --base origin/master --head HEAD --output <new-local-receipt.json>`
 and publish with `--local-review <receipt.json>`. Bind the exact committed diff,
 triage every finding, and keep required deterministic CI checks. See the active

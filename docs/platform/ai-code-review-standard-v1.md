@@ -2,15 +2,17 @@
 
 Status: active.
 
-## Active policy — 2026-10-27 operator decision
+## Active policy — 2026-11-03 operator decision
 
 The operator retired GitHub/cloud AI review because its failures and waiting
-cost exceed its value. **Use local Qwen review for subsequent development.**
+cost exceed its value (2026-10-27). On 2026-11-03 the operator selected
+DeepSeek after updating the machine API key and model. **Use locally initiated
+AI review with the configured Qwen or DeepSeek model.**
 This section supersedes every cloud delivery/wait/retry requirement below;
 the rest of this document is historical implementation and lessons.
 Deterministic required CI checks remain mandatory.
 
-Run the bounded, single-call local reviewer using the existing machine Qwen
+Run the bounded, single-call local reviewer using the existing machine review
 configuration (credentials stay outside Git):
 
 ```bash
@@ -18,13 +20,23 @@ python3 scripts/local-qwen-review.py --base origin/master --head HEAD --output /
 composer pr:publish -- --title "..." --body-file /tmp/pr.md --local-review /tmp/local-qwen-review.json
 ```
 
+The provider and model come from `~/.opencodereview/config.json`; a provider
+label such as `qwen-shared` does not select the model family. Request generation
+and receipt verification accept Qwen and DeepSeek model ids (case-insensitive
+`qwen` or `deepseek` prefix followed by letters, digits, dots, underscores or
+hyphens); other or malformed models fail closed. The script path, Composer
+command and `local_qwen_code_review.v1` / failure contract names retain their
+legacy spelling for consumer compatibility. They record the actual model,
+including `deepseek-v4.1-flash-1017`, rather than relabeling it as Qwen. This
+policy change does not relax exact-diff binding, complete findings or triage.
+
 The receipt binds base SHA, head SHA, diff hash, model and complete findings.
 Keep raw receipts locally and record model/receipt hash plus one `fix:` or
 `accept:` line per finding under `## AI Review Triage`. A failed, truncated,
 stale or malformed response is not a passed review. Material code fixes need
 a fresh review of the final committed diff. No silent truncation or automatic
 provider retry; split an oversized change. Local means the review is initiated
-and recorded on the developer machine; the existing configured Qwen endpoint
+and recorded on the developer machine; the existing configured review endpoint
 may still be hosted. It does not promise on-device model inference.
 
 The diff hash always covers the complete Git binary patch. Provider input

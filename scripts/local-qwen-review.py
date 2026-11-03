@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One local Qwen review invocation, or verify its immutable Git-tree receipt.
+"""One local AI review invocation, or verify its immutable Git-tree receipt.
 
 Uses the existing machine OCR provider configuration; never prints credentials.
 This is development evidence, not a signature, approval store, or runtime gate.
@@ -60,7 +60,7 @@ class ProviderHTTPError(ValueError):
     """An HTTP response failed before a review could be decoded."""
 
     def __init__(self, status):
-        super().__init__('Qwen HTTP ' + str(status) + '; no review delivered')
+        super().__init__('AI HTTP ' + str(status) + '; no review delivered')
         self.status = status
 
 
@@ -145,11 +145,15 @@ def write_failure_receipt(output, frozen, model, code, path, message, response_b
     raise ValueError('unable to create a unique failure receipt')
 
 
+def supported_model(model):
+    return isinstance(model, str) and re.fullmatch(r'(?:qwen|deepseek)[a-z0-9._-]*', model, re.I) is not None
+
+
 def verify(receipt, body, expected_head):
     if (receipt.get('contract') != 'local_qwen_code_review.v1' or receipt.get('success') is not True
-            or not isinstance(receipt.get('model'), str) or not receipt['model'].casefold().startswith('qwen')
+            or not supported_model(receipt.get('model'))
             or receipt.get('head_sha') != expected_head):
-        raise ValueError('successful Qwen review for exact head required')
+        raise ValueError('successful AI review for exact head required')
     frozen, _ = snapshot(receipt['base_sha'], expected_head)
     if any(receipt.get(k) != v for k, v in frozen.items()):
         raise ValueError('reviewed Git diff changed')
@@ -173,7 +177,7 @@ def run(base, head, output, config):
         frozen, diff = snapshot(base, head)
         if not diff:
             raise ValueError('nonempty committed diff required')
-        # The receipt hashes the full binary diff. Qwen receives every text hunk
+        # The receipt hashes the full binary diff. AI receives every text hunk
         # plus binary identities, not opaque base85 payloads and reverse patches.
         # Complete small-file snapshots supplement it; large files are diff-only.
         names = git('diff', '--name-only', '-z', frozen['base_sha'], frozen['head_sha'], '--').decode().split('\0')
@@ -194,8 +198,8 @@ def run(base, head, output, config):
         model = provider.get('model', settings.get('model', ''))
         endpoint = provider.get('url', settings.get('url', '')).rstrip('/')
         token = provider.get('api_key') or provider.get('auth_token') or settings.get('api_key') or settings.get('auth_token')
-        if not model.casefold().startswith('qwen') or not endpoint or not token:
-            raise ValueError('existing machine Qwen provider must be configured')
+        if not supported_model(model) or not endpoint or not token:
+            raise ValueError('configured Qwen or DeepSeek provider required')
         if not endpoint.endswith('/chat/completions'):
             endpoint += '/chat/completions'
         request = {'model': model, 'temperature': 0, 'max_tokens': 7000,
@@ -208,7 +212,7 @@ def run(base, head, output, config):
         # runs on the POSIX authoring workstation and enforces both budgets.
         previous_handler = signal.getsignal(signal.SIGALRM)
         def deadline(signum, frame):
-            raise TimeoutError('local Qwen request exceeded 180 seconds')
+            raise TimeoutError('local AI request exceeded 180 seconds')
         signal.signal(signal.SIGALRM, deadline)
         signal.alarm(180)
         provider_started = True
@@ -218,7 +222,7 @@ def run(base, head, output, config):
                 if len(response_body) > 2_000_000:
                     response_complete = False
                     response_body = response_body[:2_000_000]
-                    raise ResponseSizeError('Qwen response exceeds 2000000 bytes')
+                    raise ResponseSizeError('AI response exceeds 2000000 bytes')
                 raw = json.loads(response_body)
         except urllib.error.HTTPError as error:
             raise ProviderHTTPError(error.code) from None
@@ -227,7 +231,7 @@ def run(base, head, output, config):
             signal.signal(signal.SIGALRM, previous_handler)
         choice = raw['choices'][0]
         if choice.get('finish_reason') != 'stop':
-            raise IncompleteResponseError('incomplete Qwen response')
+            raise IncompleteResponseError('incomplete AI response')
         review = json.loads(choice['message']['content'])
         validate_review(review)
     except ReviewValidationError as error:
@@ -240,7 +244,7 @@ def run(base, head, output, config):
         raise
     except json.JSONDecodeError:
         if not provider_started:
-            raise ValueError('local Qwen config is not valid JSON') from None
+            raise ValueError('local AI config is not valid JSON') from None
         write_failure_receipt(output, frozen, model, 'response_json_invalid', 'response',
                               'provider response was not valid JSON', response_body,
                               response_complete=response_complete)
@@ -256,12 +260,12 @@ def run(base, head, output, config):
         write_failure_receipt(output, frozen, model, 'response_oversized', 'response',
                               'provider response exceeded the bounded read budget', response_body,
                               response_complete=response_complete)
-        raise ValueError('Qwen response exceeds 2000000 bytes') from None
+        raise ValueError('AI response exceeds 2000000 bytes') from None
     except IncompleteResponseError:
         write_failure_receipt(output, frozen, model, 'response_incomplete', 'response',
                               'provider response was incomplete', response_body,
                               response_complete=response_complete)
-        raise ValueError('incomplete Qwen response') from None
+        raise ValueError('incomplete AI response') from None
     except ValueError as error:
         if not provider_started:
             raise
@@ -275,21 +279,21 @@ def run(base, head, output, config):
         write_failure_receipt(output, frozen, model, 'provider_timeout', 'provider',
                               'provider request timed out', response_body,
                               response_complete=response_complete)
-        raise ValueError('Qwen request timed out; no review delivered') from None
+        raise ValueError('AI request timed out; no review delivered') from None
     except (urllib.error.URLError, ConnectionError):
         if not provider_started:
             raise
         write_failure_receipt(output, frozen, model, 'provider_transport_error', 'provider',
                               'provider connection failed', response_body,
                               response_complete=response_complete)
-        raise ValueError('Qwen transport failed; no review delivered') from None
+        raise ValueError('AI transport failed; no review delivered') from None
     receipt = dict(contract='local_qwen_code_review.v1', success=True, model=model,
                    **frozen, review=review, binary_content_not_reviewed=binary_files)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open('x') as f:
         json.dump(receipt, f, ensure_ascii=False, indent=2)
         f.write('\n')
-    print('Local Qwen review saved: ' + str(output) + '; findings=' + str(len(review['findings'])))
+    print('Local AI review saved: ' + str(output) + '; findings=' + str(len(review['findings'])))
 
 
 def main():
@@ -306,7 +310,7 @@ def main():
             p.error('--verify requires --body-file')
         head = git('rev-parse', '--verify', args.head + '^{commit}').decode().strip()
         verify(json.loads(args.verify.read_text()), args.body_file.read_text(), head)
-        print('Local Qwen exact-diff review and triage verified')
+        print('Local AI exact-diff review and triage verified')
     else:
         if not args.base or not args.output:
             p.error('--base and --output required')
