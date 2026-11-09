@@ -7,14 +7,23 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Plugin Check query-policy repair — 2026-11-09:** the two sampling-query errors
+and five hook/uninstall warnings are resolved in the current source. Population
+and sample queries honor host filters; output rechecks planned membership,
+published post/page status and uniqueness. Sample notes name the actual scope;
+public hooks and uninstall semantics remain compatible. Installed Plugin Check,
+full deterministic gates and six read-only WordPress filtering cases pass. See
+[diagnosis and acceptance limits](wordpress-org-release-gate.md#plugin-check-query-policy-repair--2026-11-09).
+Final ZIP installation/upgrade and publication remain separate work.
+
 **Frozen-feature release containment — 2026-11-09:** source drafting now returns
 HTTP 409 before source/model work, including direct hosted-provider calls.
 Its retained UI module and JED are packaged for recovery but not enqueued while
 paused. Release builds validate both copied files and the final ZIP against a
 runtime inventory, excluding local screenshots/reports/logs/caches/archives.
 See the [approved scope](development-freeze-2026-11-09.md#2026-11-09-frozen-feature-release-containment).
-Installed Plugin Check still fails on two pre-existing sampling-query policy
-errors, reproduced identically on `origin/master`; see [Known Issues](known-issues.md).
+That baseline reproduced two sampling-query policy errors; the focused repair
+above closes them and the five warnings. See [Known Issues](known-issues.md).
 This is source/package verification, not a new WordPress.org release.
 
 **Article check convergence — 2026-11-09:** the operator approved four default

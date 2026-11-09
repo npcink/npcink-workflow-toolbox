@@ -20,20 +20,6 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
-- **Installed Plugin Check package policy errors (Toolbox content-structure/page-quality pack queries, 2026-11-09).**
-  The release-containment slice reproduces two
-  `WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters`
-  errors at `Content_Structure_Insight_Builder.php:167` and
-  `Page_Quality_Insight_Builder.php:168`, with five existing warnings. The
-  working distribution and `origin/master` at `54f95edc` return identical
-  findings. Source guards, full deterministic tests and runtime inventory pass,
-  but WordPress.org package acceptance is not established. Next bounded action
-  before publication: audit why these two sampling queries suppress filters,
-  preserve their scoping/no-store guarantees, then repair or explicitly justify
-  the policy and rerun installed Plugin Check. Do not silently flip the flags
-  in an unrelated editor/packaging change. Source:
-  [containment verification](development-freeze-2026-11-09.md#containment-verification--2026-11-09).
-
 - **Local/Cloud media identity mismatch (Addon / Cloud projection, WordPress attachment truth, 2026-11-09).**
   The [timeout follow-up](site-media-timeout-followup-2026-11-09.md) traced a
   successful Cloud search and repaired the browser deadline mismatch (see
@@ -376,6 +362,18 @@ and repeated research stay frozen under the decision's restart rules.
   media-derivative render helpers); inspect actual call sites before removal.
 
 ## Recently Closed
+
+- **Installed Plugin Check package policy findings (Toolbox, 2026-11-09).**
+  Source repair [`db02bd1b`](https://github.com/npcink/npcink-workflow-toolbox/commit/db02bd1b216152ed233dc71fe0abb23e1da1f561)
+  clears the two population-query errors and all five hook/uninstall warnings
+  reproduced at baseline `859bf9b0`. Both sampling queries honor host filters;
+  final samples remain unique planned published posts/pages. Public hook IDs,
+  clamp limits and prefix-bounded uninstall cleanup stay compatible. Installed
+  Plugin Check, focused tests and six real read-only filtering cases pass;
+  no upstream HTTP or database mutation. See
+  [diagnosis and verification](wordpress-org-release-gate.md#plugin-check-query-policy-repair--2026-11-09).
+  This is source/distribution-check closure, not final ZIP installation/upgrade
+  or WordPress.org release acceptance.
 
 - **Premature site-media browser timeout (Toolbox editor, 2026-11-09).**
   [Follow-up trace and repair](site-media-timeout-followup-2026-11-09.md): Cloud

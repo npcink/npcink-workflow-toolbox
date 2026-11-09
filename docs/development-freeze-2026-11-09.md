@@ -28,6 +28,12 @@ see [release packaging](wordpress-org-submission.md#release-package). Frozen sou
 code is retained; development evidence is excluded. No production deployment or
 WordPress.org publication is performed by these changes.
 
+Same-day follow-up: the two Plugin Check errors and five warnings recorded
+below are now repaired; installed distribution checks and six read-only host-
+filter cases pass. See the [query-policy repair](wordpress-org-release-gate.md#plugin-check-query-policy-repair--2026-11-09).
+The original failure receipt remains historical evidence; final candidate
+installation/upgrade and publication are still separate from this repair.
+
 ### Containment verification — 2026-11-09
 
 - `composer test:all` (4,572 static contracts plus behavior/JS/package gates),
