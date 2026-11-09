@@ -76,7 +76,7 @@ npcink_fixed_button_check( ! empty( $editor_registered_parts ) && $editor_disk_p
 foreach ( $editor_registered_parts as $editor_registered_part ) {
 	$editor_source .= "\n" . (string) file_get_contents( $root . '/assets/editor-content-support/' . $editor_registered_part );
 }
-$editor_block  = preg_match( '/const flows = \[(.*?)\n\t\];\n\n\tconst flowGroups/s', $editor_source, $editor_match ) ? $editor_match[1] : '';
+$editor_block  = preg_match( '/const flows = \[(.*?)\n\t\];/s', $editor_source, $editor_match ) ? $editor_match[1] : '';
 preg_match_all( "/\n\s*intent:\s*'([^']+)'/", $editor_block, $editor_intents );
 $editor_table_count = count( array_filter( $buttons, static fn( array $button ): bool => 'editor_content_support' === ( $button['surface'] ?? '' ) ) );
 npcink_fixed_button_check( $editor_table_count === count( array_unique( $editor_intents[1] ?? array() ) ), 'Every committed editor flow has one fixed-button contract row' );

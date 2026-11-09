@@ -244,11 +244,10 @@
 		}
 
 		return h('div', { className: 'npcink-toolbox-editor-format npcink-toolbox-editor-support__flow' },
-			h('div', { className: 'npcink-toolbox-editor-support__flow-main' }, h('strong', null, t('Body formatting'))),
+			h('div', { className: 'npcink-toolbox-editor-support__flow-main' }, h('strong', { title: t('Adjust spacing and layout only.') }, t('Body formatting'))),
 			h('div', { className: 'npcink-toolbox-editor-support__flow-actions' },
-				h(Button, { variant: 'secondary', 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
+				h(Button, { variant: 'secondary', title: t('Adjust spacing and layout only.'), 'aria-description': t('Adjust spacing and layout only.'), 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
 				undo ? h(Button, { variant: 'tertiary', icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),
-			h('p', { className: 'npcink-toolbox-editor-support__flow-description' }, t('Adjust spacing and layout only.')),
 			notice ? h(Notice, { className: 'npcink-toolbox-editor-support__flow-feedback', status: notice.status, isDismissible: true, onRemove: () => setNotice(null) }, notice.text) : null);
 	}
 

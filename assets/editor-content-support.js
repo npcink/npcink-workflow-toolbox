@@ -418,21 +418,6 @@
 		},
 	];
 
-	const flowGroups = [
-		{
-			id: 'research_adaptation',
-			label: __('Research and adapt', 'npcink-workflow-toolbox'),
-		},
-		{
-			id: 'review_handoff',
-			label: __('Review and handoff', 'npcink-workflow-toolbox'),
-		},
-		{
-			id: 'audio_candidates',
-			label: __('Article audio candidates', 'npcink-workflow-toolbox'),
-		},
-		];
-
 	const defaultFlows = flows.filter((flow) => flow.defaultVisible !== false && !isAudioIntent(flow.intent));
 
 	function flowByIntent(intent) {
@@ -10542,57 +10527,45 @@
 							openProgressiveRecommendation,
 							() => runProgressivePrefetch(progressiveRecommendationKey(postContext), true)
 						),
-						flowGroups.filter((group) => defaultFlows.some((flow) => flow.group === group.id)).map((group) => createElement(
-							'section',
-							{ className: 'npcink-toolbox-editor-support__flow-group', key: group.id },
-							createElement('h4', null, group.label),
-							defaultFlows.filter((flow) => flow.group === group.id).map((flow) =>
-								{
-										if (flow.intent === 'format_content') return window.NpcinkToolboxContentFormat ? createElement(window.NpcinkToolboxContentFormat.Control, { key: flow.intent, disabled: Boolean(running) }) : null;
-										const flowActionLabel = flow.intent === 'image_candidates'
-											? __('Open', 'npcink-workflow-toolbox')
-											: (flow.intent === 'source_adaptation_review'
-												? ((sourceExtractionReady || sourceAdaptationComplete || sourceDraftComplete) ? __('Continue', 'npcink-workflow-toolbox') : __('Start', 'npcink-workflow-toolbox'))
-												: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox')));
-										return createElement(
-										'div',
-										{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : ''), key: flow.intent },
-										createElement(
-											'div',
-													{ className: 'npcink-toolbox-editor-support__flow-main' },
-													createElement('strong', null, flow.label),
-													flow.intent === 'source_adaptation_review' && (sourceExtractionComplete || sourceAdaptationComplete || sourceDraftComplete) ? createElement(
-														'small',
-														{ className: 'npcink-toolbox-editor-support__flow-status' },
-														__('Current status: ', 'npcink-workflow-toolbox') + sourceWorkflowStatusLabel
-													) : null
-										),
-										createElement('div', { className: 'npcink-toolbox-editor-support__flow-actions' },
-										createElement(
-											Button,
-											{
-												variant: 'secondary',
-												isBusy: running === flow.intent,
-												disabled: Boolean(running),
-											onClick: () => flow.intent === 'source_adaptation_review' ? openSourceAdaptationReview() : runFlow(flow.intent),
-												'aria-label': flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel + ' ' + flow.label,
-											},
-											flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel
-										),
-										flow.intent === 'internal_links' ? createElement(Button, {
-											type: 'button', variant: 'secondary', disabled: Boolean(running),
-											onClick: () => runFlow('related_content'),
-										}, __('Related reading', 'npcink-workflow-toolbox')) : null
-										),
-										createElement('p', { className: 'npcink-toolbox-editor-support__flow-description' }, flow.description),
-										flow.details ? createElement('details', { className: 'npcink-toolbox-editor-support__flow-help' },
-											createElement('summary', null, __('Check scope and data use', 'npcink-workflow-toolbox')),
-											createElement('p', null, flow.details)
-										) : null
-									);
-								}
-							)
-						))
+						defaultFlows.map((flow) => {
+							if (flow.intent === 'format_content') return window.NpcinkToolboxContentFormat ? createElement(window.NpcinkToolboxContentFormat.Control, { key: flow.intent, disabled: Boolean(running) }) : null;
+							const flowActionLabel = flow.intent === 'image_candidates'
+								? __('Open', 'npcink-workflow-toolbox')
+								: (flow.intent === 'source_adaptation_review'
+									? ((sourceExtractionReady || sourceAdaptationComplete || sourceDraftComplete) ? __('Continue', 'npcink-workflow-toolbox') : __('Start', 'npcink-workflow-toolbox'))
+									: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox')));
+							return createElement(
+								'div',
+								{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : ''), key: flow.intent },
+								createElement('div', { className: 'npcink-toolbox-editor-support__flow-main' },
+									createElement('strong', { title: flow.description }, flow.label),
+									flow.intent === 'source_adaptation_review' && (sourceExtractionComplete || sourceAdaptationComplete || sourceDraftComplete) ? createElement(
+										'small',
+										{ className: 'npcink-toolbox-editor-support__flow-status' },
+										__('Current status: ', 'npcink-workflow-toolbox') + sourceWorkflowStatusLabel
+									) : null
+								),
+								createElement('div', { className: 'npcink-toolbox-editor-support__flow-actions' },
+									createElement(Button, {
+										variant: 'secondary',
+										title: flow.description,
+										'aria-description': flow.description,
+										isBusy: running === flow.intent,
+										disabled: Boolean(running),
+										onClick: () => flow.intent === 'source_adaptation_review' ? openSourceAdaptationReview() : runFlow(flow.intent),
+										'aria-label': flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel + ' ' + flow.label,
+									}, flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel),
+									flow.intent === 'internal_links' ? createElement(Button, {
+										type: 'button', variant: 'secondary', disabled: Boolean(running),
+										onClick: () => runFlow('related_content'),
+									}, __('Related reading', 'npcink-workflow-toolbox')) : null
+								),
+								flow.details ? createElement('details', { className: 'npcink-toolbox-editor-support__flow-help' },
+									createElement('summary', null, __('Check scope and data use', 'npcink-workflow-toolbox')),
+									createElement('p', null, flow.details)
+								) : null
+							);
+						})
 					)
 				)
 				),
