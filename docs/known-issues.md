@@ -11,12 +11,23 @@ Rule: every entry names its owner surface and its source record. Do not
 resolve an entry by deleting it silently; move it to "Recently Closed"
 with the closing commit or PR for one release cycle, then prune.
 
+**Work admission — 2026-11-09:** apply the accepted
+[development freeze](development-freeze-2026-11-09.md) before selecting an item.
+This ledger preserves unresolved debt and historical evidence; older "next"
+actions do not automatically enter the current queue. Maintain supported
+behavior and safety/compatibility fixes. Expansion, paused-feature restoration
+and repeated research stay frozen under the decision's restart rules.
+
 ## Open
 
-- **Sequential product follow-up (Toolbox / Eval Lab / Cloud, 2026-11-02).**
-  The operator accepted the [current delivery order](roadmap.md#current-delivery-order--2026-11-02),
-  but the recommendation development slice is now **parked for this internal
-  development stage**. The frozen ranking baseline, real Cloud/editor checks,
+- **Editor-loop maintenance and frozen recommendation follow-up (Toolbox, 2026-11-09).**
+  Follow the [maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
+  Next action: preserve ordinary use and reproduce a concrete editor failure
+  or suggestion issue when one is reported; otherwise keep the baseline stable.
+  Completion evidence for a repair is the smallest affected regression and
+  applicable native-save/readback check, with source, merge, runtime and release
+  states reported separately. Recommendation expansion remains parked.
+  The frozen ranking baseline, real Cloud/editor checks,
   offline replays, cross-model reviews and the ordering/qualification fixes are
   already complete for the current revisions. Follow the [canonical evaluation
   disposition](recommendation-eval.md#internal-development-disposition--2026-11-02)
@@ -25,8 +36,8 @@ with the closing commit or PR for one release cycle, then prune.
   Eval Lab owns comparable
   evaluation; Cloud owns retrieval; Toolbox owns editor projection and
   regression. Keep the remaining quality claim as `insufficient_real_gold`.
-  Completion requires bounded quality evidence and applicable editor regression,
-  followed by separately recorded PR/merge, runtime, package, and release states.
+  A later admitted quality correction requires bounded new evidence and
+  applicable editor regression; no evaluation is scheduled by this debt alone.
   The two recorded ordering/display and qualification fixes are integrated;
   follow concrete accepted/rejected recommendations from ordinary use before
   another correction when such use exists. This ledger does not schedule a new

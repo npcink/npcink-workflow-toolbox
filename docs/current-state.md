@@ -5,7 +5,16 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-02.
+Last reviewed: 2026-11-09.
+
+**Active development freeze — 2026-11-09:** the operator accepted the
+[freeze and maintenance scope](development-freeze-2026-11-09.md). Concentrate
+on concrete failures in the existing article editor loop; freeze new feature,
+pack, provider, ranking and research expansion. Keep existing available flows,
+default-hidden entries, runtime pauses, data and recovery paths as they are.
+Missing ordinary-use feedback does not schedule more evaluation. Old debt and
+historical next actions below are conditional inventory, not an active queue;
+apply the freeze's admission and restart rules before selecting work.
 
 **Operator dispositions — 2026-11-02:** accept the 69 historical images without
 original files as metadata-only; do not recover or replenish them. Retain the
@@ -19,15 +28,13 @@ and [Known Issues](known-issues.md). Site Check dimension folding is already
 implemented by #313; the [IA ledger](admin-ia-open-todos-2026-10-23.md) now records
 that closure instead of scheduling another UI change.
 
-**Current delivery order:** the operator accepted sequential follow-up on
-2026-11-02: align active documentation, then concentrate on useful related
-articles for manual selection through the existing AI-led Eval Lab loop.
-Simplify observed editor friction and reduce one justified code cluster at a
-time, with separate behavior/refactor changes and evidence for each delivery.
-See the [active sequence](roadmap.md#current-delivery-order--2026-11-02) and
-[recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md),
-including its 2026-11-01 recommendation follow-up. Historical ranking/model
-trials are not the current runtime; production and natural usage remain separate.
+**Current delivery order:** follow the
+[2026-11-09 maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
+Preserve ordinary use, reproduce a concrete editor failure or suggestion issue,
+then make one bounded repair with applicable regression. Recommendation ranking
+and model versions remain frozen under the existing evaluation disposition;
+technical cleanup requires a justified affected cluster. Production and natural
+usage remain separate from developer evidence.
 
 **Recommendation follow-up reconciled:** Toolbox #357 preserves distinct
 article choices at a shared placement. Cloud #1333 fixes the procedural

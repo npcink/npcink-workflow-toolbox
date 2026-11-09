@@ -17,6 +17,13 @@ Every new AI development session should start with:
 4. Briefly report the current module, relevant boundary, and intended focused
    gate before editing.
 
+**Active development freeze — 2026-11-09:** follow
+`docs/development-freeze-2026-11-09.md` before selecting work. Maintain the
+existing article editor loop and necessary safety/compatibility fixes; freeze
+feature expansion and repeated evaluation without new evidence. Existing
+runtime pauses and default-hidden entries remain effective. Old TODOs do not
+authorize new work; bounded repairs need no additional unfreeze approval.
+
 Cross-repo compatibility is governed by
 https://github.com/npcink/npcink-ai-cloud/blob/master/docs/compatibility-matrix.md;
 do not add Addon `version_compare` checks.
@@ -31,7 +38,9 @@ do not expect local prefix traces to grep Cloud logs directly.
 - **内容结构摘要（第二包）：** `docs/content-structure-pack-cloud-qa-cli.md`；
   `scripts/content-structure-pack-cloud-qa.sh`；后台 **智能提问** → 选择「内容结构」
   （`POST …/content-structure/insight-pack-qa`；不要去「图片处理」）。
-勿走已暂停的 `cloud_inspection`；不开第三包；排障优先带 Cloud `run_id`。
+源码已包含巡检、内容结构、页面质量、环境清单四包，以及独立的「本站公开内容」问答。
+冻结新增包与编排；保留现有入口，不为本次冻结重新验收或恢复功能。
+勿走已暂停的 `cloud_inspection`；排障优先带 Cloud `run_id`。
 
 ## Product Boundary
 

@@ -1,6 +1,6 @@
 # Development Workflow
 
-Status: active; startup and review policy aligned 2026-11-02.
+Status: active; development freeze aligned 2026-11-09.
 
 ## Start A Session
 
@@ -19,6 +19,14 @@ structural work uses `docs/architecture.md`; shared-boundary work also uses
 `docs/adversarial-boundary-findings-triage.md`. ADR-001 and the relevant later
 ADRs explain accepted decisions. Historical handoffs are evidence, not the
 current task queue.
+
+Before choosing a slice, apply the
+[development freeze and maintenance scope](development-freeze-2026-11-09.md).
+An old TODO, missing ordinary-use feedback or a large file alone does not
+authorize development. Concrete supported-behavior and safety/compatibility
+repairs may proceed within existing contracts; feature expansion and paused
+restoration follow the decision's explicit restart rules. Preserve existing
+four-pack Smart Ask and separate public-content answers without expanding them.
 
 Then state the focused module, relevant boundary, and intended narrow gate
 before editing. Create topic branches from the latest `origin/master`, keep

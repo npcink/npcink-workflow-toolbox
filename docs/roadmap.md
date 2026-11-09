@@ -1,6 +1,10 @@
 # Roadmap
 
-Status: active delivery order and historical capability stages; reviewed 2026-11-02.
+Status: maintenance under the accepted development freeze; reviewed 2026-11-09.
+
+The [2026-11-09 freeze](development-freeze-2026-11-09.md) governs work admission.
+Historical stages below retain capability and contract context; they do not
+authorize feature expansion or restoration of paused/hidden surfaces.
 
 ## Release Anchors
 
@@ -44,30 +48,31 @@ are separate; see [Current State](current-state.md) for dated evidence.
   bounded/coalesced requests, per-user caching, and minified assets.
   Current State records WordPress.org SVN revision 3739544.
 
-## Current Delivery Order — 2026-11-02
+## Current Delivery Order — 2026-11-09
 
-The operator accepted this sequence for the existing product. Each change is
-one focused, reviewable module on the latest master; move to the next slice
-after its own gates and publication. Do not wait for all technical debt to
-disappear before delivering a useful slice.
+The operator accepted a maintenance period, superseding the 2026-11-02 delivery
+sequence. Keep existing available flows and data, runtime pauses and default
+visibility. Work on one focused module from the latest master.
 
-1. Align active product/development documents with the accepted write lanes,
-   feature pauses, release evidence, and local Qwen policy.
-2. Keep the current related-article and internal-link baseline frozen for the
-   internal development stage. Existing checks, replays, reviews and the
-   2026-11-01 fixes are complete for the recorded revisions. Apply the
-   [canonical evaluation disposition](recommendation-eval.md#internal-development-disposition--2026-11-02)
-   before restarting work; candidate relevance and safe insertion remain
-   separate.
-3. Simplify the existing editor path where observed failures justify a change;
-   verify review/open/select, explicit adoption, undo, native save, and readback
-   as applicable. Preserve the three-tab admin IA and existing pack selector.
-4. Reduce maintenance debt with one justified cluster extraction per focused
-   change under the [split standard](platform/provider-split-refactor-standard-v1.md).
-   Keep refactoring separate from behavior changes and shrink the PHPStan
-   baseline when actual findings disappear.
+1. Address security, authorization, privacy, data-integrity, necessary
+   compatibility and release defects in supported behavior.
+2. Preserve the current article editor loop. Reproduce a concrete ordinary-use
+   failure or suggestion issue, then repair only the affected behavior and
+   verify review/select, adoption, undo, native save and readback as applicable.
+3. Keep related-article/internal-link ranking and model versions frozen under
+   the [evaluation disposition](recommendation-eval.md#internal-development-disposition--2026-11-02).
+   Missing user evidence does not trigger another model/replay campaign.
+4. Admit technical cleanup only for a justified affected dependency cluster
+   under the [split standard](platform/provider-split-refactor-standard-v1.md).
+   Keep it separate from behavior changes; no split or PHPStan-reduction quota.
 
-Every slice records its tests, exact-diff local Qwen review, PR/merge state,
+Writing-pack expansion, Smart Ask packs/orchestration, site-check dimensions,
+providers, bulk review/execution, new models/CMS adapters and commercial or
+dashboard expansion stay frozen. The maintained feature matrix and bounded
+restart rules live in the freeze record. No concrete new issue means no new
+development slice is required.
+
+Every slice records its tests, configured exact-diff local AI review, PR/merge state,
 and any installed/runtime/package acceptance separately. Required deterministic
 CI remains in place; production and natural usage are distinct evidence levels.
 Known Issues owns unfinished items and their next actions.
