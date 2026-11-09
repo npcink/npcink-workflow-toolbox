@@ -8,6 +8,8 @@ a canonical contract doc disagree, the contract doc wins.
 Last reviewed: 2026-11-09.
 
 **Editor sidebar simplification — 2026-11-09:** at the operator's request,
+formatting now uses the same titled row as the other tools: Body formatting,
+compact Format/Undo actions on the right, full-width help and feedback below.
 category/tag menu and preflight shortcuts are hidden because the WordPress AI
 plugin covers them; their REST/runtime compatibility and permissions remain
 intact. The menu drops

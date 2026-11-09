@@ -10672,3 +10672,6 @@ msgstr "仅整理间距和版式。"
 
 msgid "Editor defaults are source drafting, preflight, links, and images. ALT review is in preflight; category and tag shortcuts are hidden."
 msgstr "编辑器默认提供资料起草、发布预检、内链与配图。ALT 审阅位于发布预检中；分类和标签快捷入口已隐藏。"
+
+msgid "Body formatting"
+msgstr "正文整理"
