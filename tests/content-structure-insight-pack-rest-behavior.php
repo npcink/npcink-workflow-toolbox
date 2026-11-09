@@ -403,6 +403,11 @@ $GLOBALS['content_structure_query_calls'] = array();
 $query_builder = new $builder_cls();
 $query_ids = new ReflectionMethod( $builder_cls, 'collect_public_ids_by_date' );
 $query_sample = new ReflectionMethod( $builder_cls, 'collect_public_sample' );
+// PHP 8.0 requires explicit private access; later versions grant it automatically.
+if ( PHP_VERSION_ID < 80100 ) {
+	$query_ids->setAccessible( true );
+	$query_sample->setAccessible( true );
+}
 $query_rows = $query_sample->invoke( $query_builder, $builder_cls::plan_strata( $query_ids->invoke( $query_builder ), 60 ) );
 content_structure_rest_assert( array( 11 ) === array_column( $query_rows, 'object_id' ), 'Filtered samples retain only unique planned published post/page objects.' );
 foreach ( $GLOBALS['content_structure_query_calls'] as $query_args ) {
