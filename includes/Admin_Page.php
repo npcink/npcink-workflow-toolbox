@@ -554,7 +554,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
-			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Check and optimize Media Library images. Other AI suggestions still require human review.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Ask about your site, run local checks, and review image ALT drafts. AI suggestions require human review.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php
 			if ( ! $cloud_ready ) {
 				$this->render_cloud_runtime_notice();
@@ -742,11 +742,13 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					<?php endforeach; ?>
 				</select>
 			</p>
+			<p class="description"><?php esc_html_e( 'The four summaries use deidentified site data without article bodies. Public site content searches only delivered public articles. Environment and performance lists configuration; it does not run a speed test.', 'npcink-workflow-toolbox' ); ?></p>
 			<label for="npcink-toolbox-smart-ask-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
 			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" data-toolbox-smart-ask-question><?php echo esc_textarea( $question ); ?></textarea>
 			<p class="npcink-toolbox__ops-status-actions" style="margin-top:10px;">
 				<button type="button" class="button button-primary" data-toolbox-smart-ask-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
-				<span class="description"><?php esc_html_e( 'Administrator permission required. May take up to about 45 seconds.', 'npcink-workflow-toolbox' ); ?></span>
+				<button type="button" class="button" data-toolbox-smart-ask-stop hidden><?php esc_html_e( 'Stop waiting', 'npcink-workflow-toolbox' ); ?></button>
+				<span class="description"><?php esc_html_e( 'Administrator permission required. Usually ready within about 45 seconds. Stopping the wait does not cancel Cloud processing.', 'npcink-workflow-toolbox' ); ?></span>
 			</p>
 			<div class="npcink-toolbox__result-notice" data-toolbox-smart-ask-status aria-live="polite" hidden></div>
 			<div data-toolbox-smart-ask-result hidden>
@@ -840,7 +842,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			array(
 				'id'     => 'images',
 				'title'  => __( 'Go edit images', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Review ALT text, optimize images, or manage watermarks.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Preview image ALT drafts and review image settings. Media optimization is paused.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Image Handling', 'npcink-workflow-toolbox' ),
 				'tab'    => 'tools',
 			),
@@ -949,7 +951,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				/* translators: %d: getting-started step number. */
 				'title'  => sprintf( __( 'Step %d', 'npcink-workflow-toolbox' ), 3 ),
 				'label'  => __( 'Try your first image task', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Check optimizable Media Library images and review Cloud-qualified previews before anything changes.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Select a small Media Library sample and preview ALT drafts. This step does not update media.', 'npcink-workflow-toolbox' ),
 				'url'    => add_query_arg(
 					array(
 						'page'        => self::MENU_SLUG,
@@ -1887,7 +1889,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			),
 			'image-text-review'    => array(
 				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media.', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media. To apply ALT to the current article, use Image ALT Review in the editor Publish preflight results.', 'npcink-workflow-toolbox' ),
 			),
 			'image-flagged-review' => array(
 				'title'       => __( 'Flagged Media', 'npcink-workflow-toolbox' ),

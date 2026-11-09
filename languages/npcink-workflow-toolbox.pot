@@ -10088,3 +10088,60 @@ msgstr ""
 
 msgid "The draft changed after this check. These findings are out of date; run publish preflight again."
 msgstr ""
+
+msgid "The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support."
+msgstr ""
+
+msgid "Article images"
+msgstr ""
+
+msgid "Find images in this site's Media Library, search external sources, or generate a candidate for this article."
+msgstr ""
+
+msgid "Generate ALT drafts from nearby article context. Review and confirm to apply to this draft's image blocks, then save or update in WordPress. Media Library ALT is unchanged."
+msgstr ""
+
+msgid "Ask about your site, run local checks, and review image ALT drafts. AI suggestions require human review."
+msgstr ""
+
+msgid "Preview image ALT drafts and review image settings. Media optimization is paused."
+msgstr ""
+
+msgid "Select a small Media Library sample and preview ALT drafts. This step does not update media."
+msgstr ""
+
+msgid "Inspect and edit ALT drafts locally. This stage does not submit or update media. To apply ALT to the current article, use Image ALT Review in the editor Publish preflight results."
+msgstr ""
+
+msgid "Review these suggestions in the WordPress Categories or Tags panel and select existing terms there. Creating a Core review proposal requires administrator permission."
+msgstr ""
+
+msgid "The four summaries use deidentified site data without article bodies. Public site content searches only delivered public articles. Environment and performance lists configuration; it does not run a speed test."
+msgstr ""
+
+msgid "Stop waiting"
+msgstr ""
+
+msgid "Administrator permission required. Usually ready within about 45 seconds. Stopping the wait does not cancel Cloud processing."
+msgstr ""
+
+msgid "The request took too long. Cloud may still be processing; wait before asking again."
+msgstr ""
+
+msgid "Stopped waiting. Cloud may still be processing; wait before asking again."
+msgstr ""
+
+msgid "Use the current article context to search the site Media Library or external sources, or generate an image candidate. Review a candidate before choosing how to use it."
+msgstr ""
+
+msgid "Choose an article image candidate"
+msgstr ""
+
+msgid "图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。"
+msgstr ""
+
+msgid "Review existing WordPress categories that match this draft."
+msgstr ""
+
+msgid "Review existing WordPress tags that match this draft."
+msgstr ""

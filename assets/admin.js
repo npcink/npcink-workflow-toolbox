@@ -450,7 +450,7 @@
 		}
 		const profileTextInputMatch = text.match(/^profile '([^']+)' expects 'text', received ''$/);
 		if (profileTextInputMatch) {
-			return t('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.');
+			return t('The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.');
 		}
 
 		return text;
@@ -570,7 +570,7 @@
 		return String(base || '').replace(/\/$/, '') + '/' + String(path || '').replace(/^\//, '');
 	}
 
-	async function postJson(base, path, payload) {
+	async function postJson(base, path, payload, signal) {
 		const response = await fetch(joinRestUrl(base, path), {
 			method: 'POST',
 			headers: {
@@ -578,6 +578,7 @@
 				'X-WP-Nonce': config.nonce || '',
 			},
 			body: JSON.stringify(payload || {}),
+			signal,
 		});
 		const body = await response.json().catch(() => ({}));
 		if (!response.ok) {
@@ -3214,7 +3215,7 @@
 		}
 		if (sections.image_candidates) {
 			if (sections.image_candidates.status === 'error') {
-				result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', sections.image_candidates.message || 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'));
+				result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', sections.image_candidates.message || 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.'));
 			} else {
 				renderImageList(result, sections.image_candidates.images || sections.image_candidates.image_candidates || sections.image_candidates.candidates);
 			}
@@ -6787,7 +6788,7 @@
 			section.appendChild(meta);
 		}
 		if (nightlyCloudTerminal(payload) && !nightlyCloudSucceeded(payload)) {
-			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'));
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.'));
 		} else if (nightlyCloudResultStatus(payload) === 'partially_succeeded') {
 			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Some items did not finish. Check the failed items, then try them again.'));
 		} else if (!nightlyCloudTerminal(payload)) {
@@ -6978,7 +6979,7 @@
 				renderNightlyCloudBatchPayload(root, payload, 'Nightly check started', 'The check started, but this page stopped waiting for it. Refresh later to see the result.');
 				const result = root.querySelector('.npcink-toolbox__result');
 				if (result) {
-					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', formatErrorMessage(followupError, 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.')));
+					result.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', formatErrorMessage(followupError, 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.')));
 				}
 				return payload;
 			}
@@ -6989,7 +6990,7 @@
 			renderNightlyCloudBatchPayload(root, statusPayload || payload, 'Nightly check still running', 'The check is still running in Npcink Cloud. Refresh later to see the result; nothing runs on your site.');
 			return statusPayload || payload;
 		} catch (error) {
-			renderErrorResult(root, error, 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.');
+			renderErrorResult(root, error, 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.');
 			return null;
 		} finally {
 			setNightlyCloudBusy(root, false, button);
@@ -7755,6 +7756,7 @@
 	function initSmartAsk() {
 		document.querySelectorAll('[data-toolbox-smart-ask]').forEach((root) => {
 			const button = root.querySelector('[data-toolbox-smart-ask-submit]');
+			const stopButton = root.querySelector('[data-toolbox-smart-ask-stop]');
 			const questionField = root.querySelector('[data-toolbox-smart-ask-question]');
 			const statusEl = root.querySelector('[data-toolbox-smart-ask-status]');
 			const resultEl = root.querySelector('[data-toolbox-smart-ask-result]');
@@ -7822,6 +7824,7 @@
 			};
 
 			let inFlight = false;
+			let activeRequest = null;
 			const idleLabel = button.textContent;
 
 			const setStatus = (message, kind) => {
@@ -7842,7 +7845,15 @@
 				questionField.disabled = busy;
 				packSelect.disabled = busy;
 				button.textContent = busy ? t('In progress…') : idleLabel;
+				if (stopButton) {
+					stopButton.hidden = !busy;
+				}
 			};
+			if (stopButton) {
+				stopButton.addEventListener('click', () => {
+					if (activeRequest) activeRequest.controller.abort();
+				});
+			}
 
 			const isBusySlotError = (error) => {
 				const data = (error && error.data) || {};
@@ -7916,8 +7927,15 @@
 					metaEl.textContent = '';
 				}
 
+				const request = { controller: new AbortController(), timedOut: false };
+				activeRequest = request;
+				const timeout = setTimeout(() => {
+					request.timedOut = true;
+					request.controller.abort();
+				}, 90000);
 				try {
-					const body = await postJson(config.restUrl, endpoint, { question });
+					const body = await postJson(config.restUrl, endpoint, { question }, request.controller.signal);
+					if (request.controller.signal.aborted) throw new Error('aborted');
 					const runId = String((body && body.run_id) || '');
 					const answer = String((body && body.answer) || '');
 					const packRunId = String((body && body.pack_run_id) || '');
@@ -7935,17 +7953,26 @@
 					if (body && (body.ok || body.grounded_evidence) && answer) {
 						setStatus(t('Suggestion ready (no WordPress write).'), 'is-ok');
 					} else {
-						setStatus(t('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.'), 'is-warning');
+						setStatus(t('The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.'), 'is-warning');
 					}
 				} catch (error) {
+					if (request.controller.signal.aborted) {
+						setStatus(request.timedOut
+							? t('The request took too long. Cloud may still be processing; wait before asking again.')
+							: t('Stopped waiting. Cloud may still be processing; wait before asking again.'), 'is-warning');
+						return;
+					}
 					resetSources();
 					answerEl.textContent = '';
-					const failedRun = String((error && error.data && error.data.run_id) || '');
+					const errorData = error && error.data || {};
+					const failedRun = String(errorData.run_id || errorData.diagnostic && errorData.diagnostic.run_id || '');
 					runIdEl.textContent = failedRun;
 					resultEl.hidden = !failedRun;
 					const busySlot = isBusySlotError(error);
 					setStatus(formatAskError(error), busySlot ? 'is-warning' : 'is-error');
 				} finally {
+					clearTimeout(timeout);
+					activeRequest = null;
 					setBusy(false);
 				}
 			});

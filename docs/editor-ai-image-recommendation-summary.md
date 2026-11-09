@@ -12,7 +12,7 @@ Toolbox, Cloud, Adapter, and Core work.
 
 The editor image recommendation surface has two different jobs:
 
-- **AI recommended featured image**: uses the current article title, excerpt,
+- **Article images** (renamed 2026-11-09): uses the current article title, excerpt,
   and article context to recommend source images or generate AI image
   candidates for the post featured image.
 - **Paragraph image icon**: uses the selected paragraph or block as the primary
@@ -215,7 +215,7 @@ grid or a compact loading indicator.
 
 The final layout direction is:
 
-- modal title remains simple: `AI recommended featured image`;
+- modal title remains simple: `Article images` (2026-11-09; candidate sources and adoption boundaries unchanged);
 - left side is the image grid;
 - right side is the mode switch, input/prompt controls, selected actions, and
   collapsed details;

@@ -161,7 +161,15 @@ Localizing a capability flag and hiding adoption/handoff buttons for
 editor-role users would mask the permission seam instead of documenting it.
 The server-side boundary stays authoritative either way; the first scoped
 version documents that those actions surface permission errors for
-editor-role users. Deferred as UX polish.
+editor-role users. Initially deferred as UX polish.
+
+**2026-11-09 operator-approved maintenance:** the category/tag metadata results
+now explain manual selection in WordPress to users without the default
+workflow-suggest capability, instead of exposing a proposal form they cannot
+submit. The browser receives a conservative default-capability flag and also
+guards submission. This is visibility guidance, not authorization: REST host
+filters remain authoritative, and no route capability is broadened. Other
+adoption/handoff surfaces and the deferred proposal-role policy are unchanged.
 
 ### Split capabilities per intent inside the editor route
 

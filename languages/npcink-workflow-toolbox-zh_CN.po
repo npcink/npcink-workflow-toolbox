@@ -10594,3 +10594,60 @@ msgstr "定位到正文"
 
 msgid "The draft changed after this check. These findings are out of date; run publish preflight again."
 msgstr "正文或文章信息已在检查后修改，当前提示已过期，请重新运行发布预检。"
+
+msgid "The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support."
+msgstr "AI 请求没有成功。请稍后再试；若一直失败，请提供「给客服的信息」中显示的运行编号（如有）。"
+
+msgid "Article images"
+msgstr "文章配图"
+
+msgid "Find images in this site's Media Library, search external sources, or generate a candidate for this article."
+msgstr "从本站媒体库或外部来源找图，也可为当前文章生成候选图片。"
+
+msgid "Generate ALT drafts from nearby article context. Review and confirm to apply to this draft's image blocks, then save or update in WordPress. Media Library ALT is unchanged."
+msgstr "根据图片附近的文章内容生成 ALT 草稿。审阅确认后可应用到当前草稿的图片区块，再通过 WordPress 保存或更新。媒体库 ALT 不变。"
+
+msgid "Ask about your site, run local checks, and review image ALT drafts. AI suggestions require human review."
+msgstr "提问了解本站、运行本地检查、审阅图片 ALT 草稿。AI 建议需由人工审阅。"
+
+msgid "Preview image ALT drafts and review image settings. Media optimization is paused."
+msgstr "预览图片 ALT 草稿、查看图片设置。媒体优化当前暂停。"
+
+msgid "Select a small Media Library sample and preview ALT drafts. This step does not update media."
+msgstr "选择少量媒体库图片，预览 ALT 草稿。此步骤不会更新媒体。"
+
+msgid "Inspect and edit ALT drafts locally. This stage does not submit or update media. To apply ALT to the current article, use Image ALT Review in the editor Publish preflight results."
+msgstr "在本地查看和编辑 ALT 草稿，本阶段不会提交或更新媒体。若要应用到当前文章，请使用编辑器发布预检结果中的「图片 ALT 审阅」。"
+
+msgid "Review these suggestions in the WordPress Categories or Tags panel and select existing terms there. Creating a Core review proposal requires administrator permission."
+msgstr "请对照建议，在 WordPress 的分类或标签面板中手动选择现有条目。创建 Core 审核提案需要管理员权限。"
+
+msgid "The four summaries use deidentified site data without article bodies. Public site content searches only delivered public articles. Environment and performance lists configuration; it does not run a speed test."
+msgstr "四类摘要使用脱密站点数据，不包含文章正文。「本站公开内容」仅检索已交付的公开文章。「环境与性能」展示配置情况，不会进行实际测速。"
+
+msgid "Stop waiting"
+msgstr "停止等待"
+
+msgid "Administrator permission required. Usually ready within about 45 seconds. Stopping the wait does not cancel Cloud processing."
+msgstr "需要管理员权限，通常约 45 秒内返回。停止等待不会取消 Cloud 正在进行的处理。"
+
+msgid "The request took too long. Cloud may still be processing; wait before asking again."
+msgstr "请求等待超时，Cloud 可能仍在处理，请稍后再提问。"
+
+msgid "Stopped waiting. Cloud may still be processing; wait before asking again."
+msgstr "已停止等待，Cloud 可能仍在处理，请稍后再提问。"
+
+msgid "Use the current article context to search the site Media Library or external sources, or generate an image candidate. Review a candidate before choosing how to use it."
+msgstr "根据当前文章内容搜索本站媒体库、外部来源，或生成候选图片。先审阅候选，再选择用途。"
+
+msgid "Choose an article image candidate"
+msgstr "选择文章配图候选"
+
+msgid "图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。"
+msgstr "图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。"
+
+msgid "Review existing WordPress categories that match this draft."
+msgstr "审阅与当前草稿匹配的现有 WordPress 分类。"
+
+msgid "Review existing WordPress tags that match this draft."
+msgstr "审阅与当前草稿匹配的现有 WordPress 标签。"
