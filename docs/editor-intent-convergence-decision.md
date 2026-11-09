@@ -28,6 +28,9 @@ uses the full row width for help. Detailed preflight scope is collapsed under
 "Check scope and data use"; the visible summary still states that plain article
 text is sent to Cloud. Draft workflow status appears only after progress, while
 source review, empty-editor adoption, freshness and write boundaries remain.
+Formatting uses the same titled action row as the other tools, with compact
+Format/Undo controls to the right and full-width help/feedback below. This
+follow-up changes only its presentation; formatting and undo logic is unchanged.
 
 ## Problem
 

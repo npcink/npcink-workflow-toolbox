@@ -243,12 +243,13 @@
 			setNotice({ status: 'info', text: t('This formatting has been undone.') });
 		}
 
-		return h('div', { className: 'npcink-toolbox-editor-format' },
+		return h('div', { className: 'npcink-toolbox-editor-format npcink-toolbox-editor-support__flow' },
+			h('div', { className: 'npcink-toolbox-editor-support__flow-main' }, h('strong', null, t('Body formatting'))),
+			h('div', { className: 'npcink-toolbox-editor-support__flow-actions' },
+				h(Button, { variant: 'secondary', 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
+				undo ? h(Button, { variant: 'tertiary', icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),
 			h('p', { className: 'npcink-toolbox-editor-support__flow-description' }, t('Adjust spacing and layout only.')),
-			h('div', { className: 'npcink-toolbox-editor-support__flow' },
-				h(Button, { variant: 'secondary', icon: 'editor-alignleft', 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
-				undo ? h(Button, { icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),
-			notice ? h(Notice, { status: notice.status, isDismissible: true, onRemove: () => setNotice(null) }, notice.text) : null);
+			notice ? h(Notice, { className: 'npcink-toolbox-editor-support__flow-feedback', status: notice.status, isDismissible: true, onRemove: () => setNotice(null) }, notice.text) : null);
 	}
 
 	window.NpcinkToolboxContentFormat = { Control, prepare, onlyInsertedSpaces };

@@ -1379,6 +1379,7 @@ toolbox_assert( array() === $missing_admin_js_translations, 'Bundled zh_CN admin
 $format_js   = file_get_contents( $root . '/assets/editor-content-format.js' );
 $format_json = file_get_contents( $root . '/languages/npcink-workflow-toolbox-zh_CN-npcink-toolbox-editor-content-format.json' );
 toolbox_assert( false !== $format_json && null !== json_decode( $format_json, true ) && false !== strpos( $format_json, '"Format text": ["整理"]' ) && false !== strpos( $format_json, '"Formatting text": ["整理中"]' ) && false !== strpos( $format_json, '"Undo this text formatting": ["撤销本次整理"]' ), 'Bundled zh_CN editor format script translation JSON is valid and covers the format button labels.' );
+toolbox_assert( false !== strpos( $format_json, '"Body formatting": ["正文整理"]' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-format.js' ), 'npcink-toolbox-editor-format npcink-toolbox-editor-support__flow' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-format.js' ), 'npcink-toolbox-editor-support__flow-actions' ), 'Formatting uses the same titled action row as other sidebar tools with its own translated heading.' );
 preg_match_all( '/\bt\(\s*(["\'])((?:\\\\.|(?!\1).)*)\1\s*\)/s', (string) $format_js, $format_js_translation_matches );
 $missing_format_js_translations = array();
 foreach ( array_unique( $format_js_translation_matches[2] ?? array() ) as $format_js_msgid ) {
