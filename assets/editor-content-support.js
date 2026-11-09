@@ -10562,7 +10562,6 @@
 								),
 								flow.details ? createElement('details', { className: 'npcink-toolbox-editor-support__flow-help' },
 									createElement('summary', null, __('Check scope and data use', 'npcink-workflow-toolbox')),
-									createElement('p', null, flow.description),
 									createElement('p', null, flow.details)
 								) : null
 							);
