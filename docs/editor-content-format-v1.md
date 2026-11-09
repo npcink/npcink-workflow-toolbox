@@ -222,3 +222,64 @@ drafts 281060 and 19 and their temporary sessions were removed. Screenshots
 were inspected. JS protection regressions and all five WordPress repository
 gates passed. Cloud exact-clean-SHA acceptance remains pending, not green.
 No paid model call, account change, merge, promotion or production action occurred.
+
+## Focused maintenance — 2026-11-09
+
+Routine formatting outcomes use a compact inline status below the existing
+Format/Undo row. Changed results report the existing v1/v2 spacing/structure
+counters; partial results disclose skipped protected content without implying
+that the whole article was processed. Unchanged and skipped-only outcomes are
+distinct. Failures retain the dismissible warning Notice and leave the editor
+unchanged. Undo uses the same conflict guard and one editor transaction.
+
+“View formatting details” is a native keyboard-operable disclosure. It shows
+spacing insertions and changed before/after counts of paragraphs, native list
+items and BR elements derived from independently validated editor blocks.
+These net counts are not per-operation counts; `structural_changes` remains the
+Cloud repair count. Details contain no copied article body or persisted history.
+Tool descriptions still show up to two lines with trailing expansion.
+
+Cloud v2's bounded maintenance also recognizes missing breaks in a consistent
+repeated `*`, `-`, `+` or `•` list, including after Chinese sentence punctuation.
+At least two existing BR-delimited markers must establish the same list context;
+literal markers are preserved. A paragraph already containing three or more
+BR-separated distinct Chinese `标签：值` fields with short single-line values
+may become native list items. Empty/duplicate labels, sentence-like values,
+attributed BR, nested/attributed paragraphs and ambiguous markers are excluded.
+Long-paragraph splitting keeps its existing conservative sentence/length rules.
+No new request/result contract, local formatting engine or Addon change is needed.
+
+Reference decisions (inspected public source, no new runtime dependency):
+
+- [pangu.js DOM walker](https://github.com/vinta/pangu.js/blob/999a58e990adfa7c46ece881d57d4e828f66e06e/src/browser/dom/dom-walker.ts):
+  reuse the principle of protecting code/preformatted/input content and limiting
+  spacing to eligible text. Its browser auto-walker is not loaded into Gutenberg;
+  Toolbox keeps the stricter existing CJK/Latin-digit insertion contract.
+- [CommonMark list items](https://github.com/commonmark/commonmark-spec/blob/8a5f7646e9f67c3004f023d262b3e6b596afc2ed/spec.txt#L4122),
+  [hard breaks](https://github.com/commonmark/commonmark-spec/blob/8a5f7646e9f67c3004f023d262b3e6b596afc2ed/spec.txt#L9247)
+  and [soft breaks](https://github.com/commonmark/commonmark-spec/blob/8a5f7646e9f67c3004f023d262b3e6b596afc2ed/spec.txt#L9397):
+  use explicit repeated markers and existing hard boundaries as evidence. Do not
+  turn arbitrary source newlines into paragraphs, remove literal list markers,
+  or treat Gutenberg HTML as Markdown.
+- [WordPress persistent action feedback](https://developer.wordpress.org/block-editor/reference-guides/components/notice/)
+  and [Gutenberg snackbar accessibility discussion](https://github.com/WordPress/gutenberg/issues/16549):
+  keep the result next to its visible action, announce it politely and let the
+  author open details at their own pace. No second global snackbar or automatic
+  dismissal is added. Current WPDS component guidance was consulted; no dependency
+  on the newer `@wordpress/ui` package is introduced.
+
+Local fixtures and installed browser checks are development evidence. Cloud
+source merge, exact-SHA CI, M4 acceptance, production and human visual acceptance
+remain separate; deploying new Cloud rules needs explicit host authorization.
+
+Development verification for this maintenance: `composer test:all`, Composer
+metadata, coding standards, PHPStan and WordPress.org guards passed. Cloud's
+focused formatting domain/API suite passed 108 tests, plus changed-file Ruff
+and mypy. Installed zh_CN/en_US browser checks at 1440px/900px PC widths passed
+50 offline Cloud-engine → real PHP-validator → editor runs across spacing,
+metadata lists, restored BR, long paragraphs, partial, unchanged, skipped-only,
+idempotent repeats and controlled failure. Keyboard details, two-line basic
+help, native block validity, Undo and unchanged database content passed;
+temporary drafts, login sessions and locale observers were removed. Screenshots
+and the local receipt are under ignored `output/playwright/format-feedback-*`.
+These runs make no live Cloud or model calls and do not prove runtime rollout.

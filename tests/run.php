@@ -1380,7 +1380,7 @@ $format_js   = file_get_contents( $root . '/assets/editor-content-format.js' );
 $format_json = file_get_contents( $root . '/languages/npcink-workflow-toolbox-zh_CN-npcink-toolbox-editor-content-format.json' );
 toolbox_assert( false !== $format_json && null !== json_decode( $format_json, true ) && false !== strpos( $format_json, '"Format text": ["整理"]' ) && false !== strpos( $format_json, '"Formatting text": ["整理中"]' ) && false !== strpos( $format_json, '"Undo this text formatting": ["撤销本次整理"]' ), 'Bundled zh_CN editor format script translation JSON is valid and covers the format button labels.' );
 toolbox_assert( false !== strpos( $format_json, '"Body formatting": ["正文整理"]' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-format.js' ), 'npcink-toolbox-editor-format npcink-toolbox-editor-support__flow' ) && false !== strpos( file_get_contents( $root . '/assets/editor-content-format.js' ), 'npcink-toolbox-editor-support__flow-actions' ), 'Formatting uses the same titled action row as other sidebar tools with its own translated heading.' );
-preg_match_all( '/\bt\(\s*(["\'])((?:\\\\.|(?!\1).)*)\1\s*\)/s', (string) $format_js, $format_js_translation_matches );
+preg_match_all( '/\b(?:t|countText)\(\s*(["\'])((?:\\\\.|(?!\1).)*)\1/s', (string) $format_js, $format_js_translation_matches );
 $missing_format_js_translations = array();
 foreach ( array_unique( $format_js_translation_matches[2] ?? array() ) as $format_js_msgid ) {
 	$normalized_format_msgid = stripcslashes( $format_js_msgid );
@@ -1389,6 +1389,7 @@ foreach ( array_unique( $format_js_translation_matches[2] ?? array() ) as $forma
 	}
 }
 toolbox_assert( array() === $missing_format_js_translations, 'Bundled zh_CN editor format script translation JSON covers every literal format t() string: ' . implode( ' | ', array_slice( $missing_format_js_translations, 0, 8 ) ) );
+toolbox_assert( false !== strpos( $format_js, "role: 'status'" ) && false !== strpos( $format_js, "h('details'" ) && false !== strpos( $format_js, 'View formatting details' ) && false !== strpos( $format_js, 'formatFeedback(source.blocks, result, updates.length > 0)' ) && false === strpos( $format_js, "status: 'success'" ), 'Formatting reports validated results as compact accessible status with optional metrics instead of a full success Notice.' );
 toolbox_assert( false === strpos( (string) $format_js, "'整理'" ) && false === strpos( (string) $format_js, 'savePost(' ) && false === strpos( (string) $format_js, 'localStorage' ), 'Editor format script keeps UI copy behind the Toolbox text domain and preserves the no-persistence contract.' );
 toolbox_assert( false !== strpos( (string) $format_js, 'wp.data.subscribe' ) && false !== strpos( (string) $format_js, 'getBlocks() !== source.blocks' ) && false !== strpos( (string) $format_js, 'current.content !== source.content' ), 'Editor formatting watches block references without per-keystroke serialization and checks exact content again before applying.' );
 $editor_format_php = file_get_contents( $root . '/includes/Editor_Content_Format.php' );

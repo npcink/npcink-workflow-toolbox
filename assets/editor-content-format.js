@@ -11,6 +11,58 @@
 		return __(String(text), 'npcink-workflow-toolbox');
 	}
 
+	function countText(text, ...values) {
+		return t(text).replace(/%(?:(\d+)\$)?d/g, (_, index) => String(values[index ? Number(index) - 1 : 0]));
+	}
+
+	// Describe validated blocks, never infer formatting operations from net counts.
+	function layoutCounts(blocks) {
+		const counts = { paragraphs: 0, items: 0, breaks: 0 };
+		function visit(items) {
+			items.forEach((block) => {
+				if (block.name === 'core/paragraph') counts.paragraphs++;
+				if (block.name === 'core/list-item') counts.items++;
+				if (typeof block.attributes.content === 'string') {
+					const doc = new DOMParser().parseFromString(block.attributes.content, 'text/html');
+					counts.breaks += doc.body.querySelectorAll('br').length;
+				}
+				visit(block.innerBlocks || []);
+			});
+		}
+		visit(blocks);
+		return counts;
+	}
+
+	function formatFeedback(sourceBlocks, result, changed) {
+		const skipped = result.protected_content_skipped || ['PARTIAL', 'REVIEW'].includes(result.status);
+		const spaces = result.inserted_spaces;
+		const structure = result.structural_changes || 0;
+		const metrics = [];
+		if (changed) {
+			metrics.push(countText('Spacing insertions: %d', spaces));
+			const before = layoutCounts(sourceBlocks);
+			const after = layoutCounts(wp.blocks.parse(result.candidate));
+			if (before.paragraphs !== after.paragraphs) metrics.push(countText('Paragraphs: %1$d → %2$d', before.paragraphs, after.paragraphs));
+			if (before.items !== after.items) metrics.push(countText('List items: %1$d → %2$d', before.items, after.items));
+			if (before.breaks !== after.breaks) metrics.push(countText('Line breaks: %1$d → %2$d', before.breaks, after.breaks));
+		}
+		return { status: 'info', compact: true, skipped, metrics, text: changed
+			? countText('Formatted · spacing: %1$d · layout: %2$d', spaces, structure)
+			: (skipped ? t('No changes; some content was skipped.') : t('The article body needs no changes.')) };
+	}
+
+	function Feedback({ notice, onRemove }) {
+		if (!notice.compact) return h(Notice, { className: 'npcink-toolbox-editor-support__flow-feedback', status: notice.status, isDismissible: true, onRemove }, notice.text);
+		return h('div', { className: 'npcink-toolbox-editor-support__flow-feedback npcink-toolbox-editor-format__feedback' },
+			h('div', null,
+				h('p', null, notice.text),
+				notice.skipped && notice.metrics?.length ? h('p', null, t('Protected content was skipped.')) : null),
+			notice.metrics ? h('details', null, h('summary', null, t('View formatting details')),
+				notice.metrics.length ? h('ul', null, notice.metrics.map((metric) => h('li', { key: metric }, metric))) : null,
+				h('p', null, t('Words and punctuation are preserved. Links, media, code, and tables are protected.')),
+				h('p', null, t('Review the layout in the editor before saving.'))) : null);
+	}
+
 	function onlyInsertedSpaces(source, candidate) {
 		let i = 0;
 		for (let j = 0; j < candidate.length; j++) {
@@ -233,16 +285,13 @@
 				if (stale || result.post_id !== source.postId || current.postId !== source.postId
 					|| current.content !== source.content || current.identity !== source.identity) throw new Error(t('The article changed while waiting. This result was not applied.'));
 				const updates = prepare(source.blocks, source.content, result);
+				const feedback = formatFeedback(source.blocks, result, updates.length > 0);
 				stopStaleWatch();
 				if (updates.length) {
 					apply(updates, 'after');
 					setUndo({ postId: source.postId, content: snapshot().content, identity: snapshot().identity, updates });
-					setNotice({ status: 'success', text: result.contract_version === 'content_format_candidate.v2'
-						? (result.structural_changes > 0 ? t('Paragraphs, lists, or line breaks were formatted; links and media stay unchanged.') : t('Text spacing was adjusted; paragraphs and lists stay unchanged.'))
-						: (result.status === 'PARTIAL' ? t('Formattable text was formatted; protected content stays unchanged.') : t('The article body has been formatted.')) });
-				} else {
-					setNotice({ status: 'info', text: result.status === 'REVIEW' ? t('Formattable text needs no changes; the remaining content was skipped. The original text is unchanged.') : t('The article body needs no changes.') });
 				}
+				setNotice(feedback);
 			} catch (error) {
 				if (active.current === controller) setNotice({ status: 'warning', text: error.name === 'AbortError' ? t('The formatting request timed out. The original text is unchanged.') : (error.message || t('Formatting failed. The original text is unchanged.')) });
 			} finally {
@@ -262,7 +311,7 @@
 			}
 			apply(undo.updates, 'before');
 			setUndo(null);
-			setNotice({ status: 'info', text: t('This formatting has been undone.') });
+			setNotice({ status: 'info', compact: true, text: t('This formatting has been undone.') });
 		}
 
 		return h('div', { className: 'npcink-toolbox-editor-format npcink-toolbox-editor-support__flow' },
@@ -271,8 +320,11 @@
 				h(Button, { variant: 'secondary', title: t('Adjust spacing and layout only.'), 'aria-description': t('Adjust spacing and layout only.'), 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
 				undo ? h(Button, { variant: 'tertiary', icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),
 			h(Description, { text: t('Adjust spacing and layout only.') }),
-			notice ? h(Notice, { className: 'npcink-toolbox-editor-support__flow-feedback', status: notice.status, isDismissible: true, onRemove: () => setNotice(null) }, notice.text) : null);
+			notice ? h(Feedback, { notice, onRemove: () => setNotice(null) }) : null,
+			// Keep the live region mounted before its text changes. It occupies no row.
+			h('span', { className: 'screen-reader-text', role: 'status', 'aria-live': 'polite', 'aria-atomic': true },
+				notice?.compact ? notice.text + (notice.skipped && notice.metrics?.length ? ' ' + t('Protected content was skipped.') : '') : ''));
 	}
 
-	window.NpcinkToolboxContentFormat = { Control, Description, prepare, onlyInsertedSpaces };
+	window.NpcinkToolboxContentFormat = { Control, Description, prepare, onlyInsertedSpaces, formatFeedback };
 })(window.wp);

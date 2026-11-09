@@ -12,8 +12,9 @@ the menu uses flat titled action rows without group subtitles. Each tool keeps
 its basic introduction visible, limited to two lines; overflowing text has an
 Expand control at the end of the second line and Collapse after expansion.
 Preflight includes scope and Cloud data-use copy in the same expandable text.
-Formatting keeps compact Format/Undo controls on the right and full-width
-feedback below. Category/tag shortcuts remain hidden with compatibility and
+Formatting keeps compact Format/Undo controls on the right. Routine results
+use a small inline status with counts and optional formatting details; failures
+retain warning notices. See the [formatting maintenance contract](editor-content-format-v1.md#focused-maintenance--2026-11-09). Category/tag shortcuts remain hidden with compatibility and
 permissions intact. See the
 [visibility amendment](editor-intent-convergence-decision.md#2026-11-09-sidebar-visibility-amendment).
 Installed zh_CN/en_US checks at 248px verify two-line previews, trailing toggle
