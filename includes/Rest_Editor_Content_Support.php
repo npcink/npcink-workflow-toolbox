@@ -2245,148 +2245,30 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 	private function editor_article_checkup_section( array $context ): array {
 		$text       = trim( (string) ( $context['content_full_text'] ?? $context['content_text'] ?? '' ) );
-		$title      = trim( (string) ( $context['title'] ?? '' ) );
-		$excerpt    = trim( (string) ( $context['excerpt'] ?? '' ) );
 		$paragraphs = $this->editor_article_checkup_paragraphs( $text );
 		$items      = array();
 
+		// Only concrete punctuation evidence is active; broad editorial rules are retired.
 		foreach ( $paragraphs as $index => $paragraph ) {
-			$length           = $this->editor_text_length( $paragraph );
-			$sentence_parts   = preg_split( '/[。！？!?；;]+/u', $paragraph );
-			$longest_sentence = 0;
-			foreach ( is_array( $sentence_parts ) ? $sentence_parts : array() as $sentence ) {
-				$longest_sentence = max( $longest_sentence, $this->editor_text_length( trim( (string) $sentence ) ) );
-			}
 			$location = sprintf(
 				/* translators: %d: paragraph number. */
 				__( 'Paragraph %d', 'npcink-workflow-toolbox' ),
 				$index + 1
 			);
-			if ( 1 === preg_match( '/(?:，{2,}|、{2,}|；{2,}|：{2,}|。{2,})/u', $paragraph ) ) {
+			if ( 1 === preg_match( '/.{0,40}(?:，{2}|、{2}|；{2}|：{2}|。{2}).{0,40}/u', $paragraph, $punctuation_evidence ) ) {
 				$items[] = $this->editor_article_checkup_issue(
 					'punctuation_review_' . ( $index + 1 ),
 					'punctuation',
 					'info',
 					$location,
-					$paragraph,
+					$punctuation_evidence[0],
 					__( 'Repeated punctuation may need review.', 'npcink-workflow-toolbox' ),
 					__( 'Check whether the punctuation is intentional. Only you can correct it; formatting will not change words, symbols, or punctuation.', 'npcink-workflow-toolbox' )
 				);
 			}
-
-			if ( $length >= 220 ) {
-				$items[] = $this->editor_article_checkup_issue(
-					'paragraph_too_long_' . ( $index + 1 ),
-					'format',
-					'warning',
-					$location,
-					$paragraph,
-					__( 'Paragraph is dense and may be hard to scan.', 'npcink-workflow-toolbox' ),
-					__( 'Consider splitting the paragraph by claim, condition, or conclusion. Keep the editor responsible for the final wording.', 'npcink-workflow-toolbox' )
-				);
-			}
-
-			if ( $longest_sentence >= 95 ) {
-				$items[] = $this->editor_article_checkup_issue(
-					'long_sentence_' . ( $index + 1 ),
-					'clarity',
-					'warning',
-					$location,
-					$paragraph,
-					__( 'One sentence carries too many clauses.', 'npcink-workflow-toolbox' ),
-					__( 'Review whether the sentence should be broken into shorter factual steps before publishing.', 'npcink-workflow-toolbox' )
-				);
-			}
-
-			if ( 1 === preg_match( '/(\d|万|倍|%|百分|快|慢|耗时|性能|测试|经测试|同等|相当|无明显|明显|适合)/u', $paragraph ) ) {
-				$items[] = $this->editor_article_checkup_issue(
-					'fact_claim_' . ( $index + 1 ),
-					'fact_gap',
-					'warning',
-					$location,
-					$paragraph,
-					__( 'The paragraph contains a metric, comparison, performance, or scope claim.', 'npcink-workflow-toolbox' ),
-					__( 'Verify the source, test condition, comparison object, and applicable scope. Do not let Toolbox turn one observed result into a universal fact.', 'npcink-workflow-toolbox' )
-				);
-			}
-
-			if ( 1 === preg_match( '/(绝对|完全|一键|显著|极大|领先|革命性|无敌|完美|保证)/u', $paragraph ) ) {
-				$items[] = $this->editor_article_checkup_issue(
-					'tone_risk_' . ( $index + 1 ),
-					'tone',
-					'info',
-					$location,
-					$paragraph,
-					__( 'Tone may read stronger than the supporting evidence.', 'npcink-workflow-toolbox' ),
-					__( 'Review whether the claim should be softened or tied to a specific condition.', 'npcink-workflow-toolbox' )
-				);
-			}
-
-			foreach ( $this->editor_article_checkup_structure_glue_issues( $paragraph, $index + 1, $location ) as $structure_issue ) {
-				$items[] = $structure_issue;
-			}
-		}
-
-		$word_count  = str_word_count( $text );
-		$text_length = $this->editor_text_length( $text );
-		if ( '' === $title ) {
-			$items[] = $this->editor_article_checkup_issue(
-				'missing_title',
-				'structure',
-				'error',
-				__( 'Title', 'npcink-workflow-toolbox' ),
-				'',
-				__( 'The article title is missing.', 'npcink-workflow-toolbox' ),
-				__( 'Add a human-reviewed title before running title or metadata handoff actions.', 'npcink-workflow-toolbox' )
-			);
-		}
-		if ( '' === $excerpt && ( $word_count >= 120 || $text_length >= 360 ) ) {
-			$items[] = $this->editor_article_checkup_issue(
-				'missing_excerpt',
-				'structure',
-				'warning',
-				__( 'Excerpt', 'npcink-workflow-toolbox' ),
-				'',
-				__( 'The article has enough body content but no excerpt.', 'npcink-workflow-toolbox' ),
-				__( 'Review whether a summary suggestion should be generated, then accept it manually before saving.', 'npcink-workflow-toolbox' )
-			);
-		}
-		if ( count( $paragraphs ) >= 5 && ! $this->editor_article_checkup_has_heading_signal( $text ) ) {
-			$items[] = $this->editor_article_checkup_issue(
-				'missing_heading_structure',
-				'structure',
-				'info',
-				__( 'Full article', 'npcink-workflow-toolbox' ),
-				'',
-				__( 'The draft is long enough to need scan-friendly structure, but no obvious heading signal was found.', 'npcink-workflow-toolbox' ),
-				__( 'Review whether section headings, lists, or clearer paragraph grouping would help readers scan the article.', 'npcink-workflow-toolbox' )
-			);
-		}
-
-		$format_consistency = $this->editor_article_checkup_format_consistency( $paragraphs );
-		$format_items       = is_array( $format_consistency['items'] ?? null ) ? $format_consistency['items'] : array();
-		foreach ( $format_items as $format_item ) {
-			$items[] = $format_item;
-		}
-
-		$semantic_consistency = $this->editor_article_checkup_semantic_consistency( $text );
-		$semantic_items       = is_array( $semantic_consistency['items'] ?? null ) ? $semantic_consistency['items'] : array();
-		foreach ( $semantic_items as $semantic_item ) {
-			$items[] = $semantic_item;
 		}
 
 		$issue_count = count( $items );
-		if ( empty( $items ) ) {
-			$items[] = $this->editor_article_checkup_issue(
-				'no_blocking_local_issue',
-				'clarity',
-				'info',
-				__( 'Full article', 'npcink-workflow-toolbox' ),
-				'',
-				__( 'No high-confidence local article issues were found.', 'npcink-workflow-toolbox' ),
-				__( 'This is a local heuristic check only. Run focused title, summary, taxonomy, internal-link, image, or publish preflight actions when needed.', 'npcink-workflow-toolbox' )
-			);
-		}
 
 		$shown_items = array_slice( $items, 0, 12 );
 		foreach ( $shown_items as &$item ) {
@@ -2426,8 +2308,25 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'write_posture'          => 'suggestion_only',
 			'final_write_path'       => 'operator_review_only',
 			'direct_wordpress_write' => false,
-			'format_consistency'     => $format_consistency,
-			'semantic_consistency'   => $semantic_consistency,
+			'format_consistency'     => array(
+				'artifact_type'          => 'format_consistency.v1',
+				'source'                 => 'current_full_draft_local_heuristic',
+				'status'                 => 'not_checked',
+				'write_posture'          => 'suggestion_only',
+				'direct_wordpress_write' => false,
+				'no_rewrite'             => true,
+				'items'                  => array(),
+			),
+			'semantic_consistency'   => array(
+				'artifact_type'          => 'semantic_consistency.v1',
+				'source'                 => 'current_full_draft_local_heuristic',
+				'status'                 => 'not_checked',
+				'write_posture'          => 'suggestion_only_no_replacement_text',
+				'action_policy'          => 'operator_review_only_no_insert',
+				'direct_wordpress_write' => false,
+				'no_rewrite'             => true,
+				'items'                  => array(),
+			),
 			'items'                  => $shown_items,
 			'coverage'               => array(
 				'scope'                      => 'bounded_local_heuristics',
@@ -2437,17 +2336,17 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				'paragraphs_in_context'      => $paragraph_count,
 				'paragraphs_checked'         => count( $paragraphs ),
 				'sentences_in_context'       => $sentence_count,
-				'semantic_sentences_checked' => min( 80, $sentence_count ),
+				'semantic_sentences_checked' => 0,
 				'issues_found'               => $issue_count,
 				'issues_shown'               => min( 12, $issue_count ),
-				'partial'                    => $truncated || $paragraph_count > 24 || $sentence_count > 80 || $issue_count > 12,
-				'not_checked'                => array( 'comprehensive_grammar', 'general_cross_paragraph_logic', 'body_risk_classification', 'factual_verification' ),
+				'partial'                    => $truncated || $paragraph_count > 24 || $issue_count > 12,
+				'not_checked'                => array( 'style_structure_and_format', 'comprehensive_grammar', 'general_cross_paragraph_logic', 'body_risk_classification', 'factual_verification' ),
 			),
 			'summary'                => array(
 				'paragraph_count'            => count( $paragraphs ),
 				'issue_count'                => $issue_count,
-				'format_consistency_count'   => count( $format_items ),
-				'semantic_consistency_count' => count( $semantic_items ),
+				'format_consistency_count'   => 0,
+				'semantic_consistency_count' => 0,
 				'cloud_calls'                => false,
 				'no_rewrite'                 => true,
 			),
@@ -2471,122 +2370,6 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		return $paragraphs;
 	}
 
-	private function editor_article_checkup_structure_glue_issues( string $paragraph, int $paragraph_number, string $location ): array {
-		$signals = array();
-
-		if ( Rest_Editor_Paragraph_Check::editor_text_has_heading_label_glue( $paragraph ) ) {
-			$signals[] = __( '标题式标签直接黏在正文前', 'npcink-workflow-toolbox' );
-		}
-		if ( Rest_Editor_Paragraph_Check::editor_text_has_phrase_cluster_glue( $paragraph ) ) {
-			$signals[] = __( '短语组之间缺少分隔', 'npcink-workflow-toolbox' );
-		}
-		if ( Rest_Editor_Paragraph_Check::editor_text_has_alnum_cjk_glue( $paragraph ) ) {
-			$signals[] = __( '字母、数字或方案标签与中文黏连', 'npcink-workflow-toolbox' );
-		}
-
-		if ( empty( $signals ) ) {
-			return array();
-		}
-
-		return array(
-			$this->editor_article_checkup_issue(
-				'structural_glue_' . $paragraph_number,
-				'format',
-				'warning',
-				$location,
-				$paragraph,
-				__( '标题标签、短语组或方案标签可能与正文黏连。', 'npcink-workflow-toolbox' ),
-				sprintf(
-					/* translators: %s: comma-separated structural glue signals. */
-					__( '请检查这些分隔问题：%s。发布前可改为小标题、标点、项目符号或表格行。', 'npcink-workflow-toolbox' ),
-					implode( ', ', $signals )
-				)
-			),
-		);
-	}
-
-	private function editor_article_checkup_format_consistency( array $paragraphs ): array {
-		$items = array();
-
-		foreach ( $paragraphs as $index => $paragraph ) {
-			if ( ! is_string( $paragraph ) || '' === trim( $paragraph ) ) {
-				continue;
-			}
-			$inline_marker_count = preg_match_all( '/(?:^|[。；;：:\\s])(?:\\d+[.．、]|[（(]?\\d+[）)]|[A-Za-z][.．、])(?=\\s*[^\\s])/u', $paragraph );
-			if ( (int) $inline_marker_count < 2 ) {
-				continue;
-			}
-			$location = sprintf(
-				/* translators: %d: paragraph number. */
-				__( 'Paragraph %d', 'npcink-workflow-toolbox' ),
-				$index + 1
-			);
-			$items[] = $this->editor_article_checkup_issue(
-				'format_inline_list_' . ( $index + 1 ),
-				'format',
-				'info',
-				$location,
-				$paragraph,
-				__( 'The paragraph looks like an inline numbered or option list.', 'npcink-workflow-toolbox' ),
-				__( 'Review whether these points should become bullets, table rows, or separate paragraphs. Keep this as layout guidance only; do not auto-rewrite the article.', 'npcink-workflow-toolbox' )
-			);
-			if ( count( $items ) >= 3 ) {
-				break;
-			}
-		}
-
-		return array(
-			'artifact_type'          => 'format_consistency.v1',
-			'source'                 => 'current_full_draft_local_heuristic',
-			'status'                 => 'ready',
-			'write_posture'          => 'suggestion_only',
-			'direct_wordpress_write' => false,
-			'no_rewrite'             => true,
-			'items'                  => $items,
-		);
-	}
-
-	private function editor_article_checkup_semantic_consistency( string $text ): array {
-		$sentences = $this->editor_article_checkup_sentences( $text );
-		$items     = array();
-
-		foreach ( $this->editor_article_checkup_semantic_aeo_answer_order_issues( $sentences ) as $item ) {
-			$items[] = $item;
-			if ( count( $items ) >= 4 ) {
-				break;
-			}
-		}
-
-		if ( count( $items ) < 4 ) {
-			foreach ( $this->editor_article_checkup_semantic_term_tensions( $sentences ) as $item ) {
-				$items[] = $item;
-				if ( count( $items ) >= 4 ) {
-					break;
-				}
-			}
-		}
-
-		if ( count( $items ) < 4 ) {
-			foreach ( $this->editor_article_checkup_semantic_boundary_tensions( $sentences ) as $item ) {
-				$items[] = $item;
-				if ( count( $items ) >= 4 ) {
-					break;
-				}
-			}
-		}
-
-		return array(
-			'artifact_type'          => 'semantic_consistency.v1',
-			'status'                 => empty( $items ) ? 'clear' : 'review',
-			'source'                 => 'current_full_draft_local_heuristic',
-			'write_posture'          => 'suggestion_only_no_replacement_text',
-			'action_policy'          => 'operator_review_only_no_insert',
-			'direct_wordpress_write' => false,
-			'no_rewrite'             => true,
-			'items'                  => array_slice( $items, 0, 4 ),
-		);
-	}
-
 	private function editor_article_checkup_sentences( string $text, int $limit = 80 ): array {
 		$normalized = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $text ) ) ?: '' );
 		if ( '' === $normalized ) {
@@ -2607,117 +2390,6 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		}
 
 		return $sentences;
-	}
-
-	private function editor_article_checkup_semantic_aeo_answer_order_issues( array $sentences ): array {
-		$items = array();
-		foreach ( $sentences as $index => $sentence ) {
-			$next_sentence = isset( $sentences[ $index + 1 ] ) ? (string) $sentences[ $index + 1 ] : '';
-			$window        = trim( $sentence . ' ' . $next_sentence );
-			if ( 1 !== preg_match( '/(AEO|回答型体验|回答型|直接答案)/iu', $window ) ) {
-				continue;
-			}
-			if ( 1 !== preg_match( '/(不能|不应|不要|避免)先给(出)?直接答案/u', $window ) ) {
-				continue;
-			}
-			$items[] = $this->editor_article_checkup_issue(
-				'semantic_aeo_answer_order',
-				'semantic_consistency',
-				'warning',
-				__( 'Full article', 'npcink-workflow-toolbox' ),
-				$window,
-				__( 'The AEO section may reverse answer-first guidance.', 'npcink-workflow-toolbox' ),
-				__( 'Confirm whether the cannot-answer-first wording is intentional. For answer-oriented content, manually verify the direct answer, conditions, steps, and limits before publishing.', 'npcink-workflow-toolbox' )
-			);
-			return $items;
-		}
-
-		return $items;
-	}
-
-	private function editor_article_checkup_semantic_term_tensions( array $sentences ): array {
-		$terms = array( 'SEO', 'AEO', 'GEO', 'AI', 'Toolbox', 'Core', 'Cloud', 'Adapter', 'WordPress', 'OpenClaw' );
-		$items = array();
-
-		foreach ( $terms as $term ) {
-			$negative = '';
-			$positive = '';
-			foreach ( $sentences as $sentence ) {
-				if ( false === stripos( $sentence, $term ) ) {
-					continue;
-				}
-				if ( '' === $negative && $this->editor_article_checkup_has_negative_semantic_marker( $sentence ) ) {
-					$negative = $sentence;
-				}
-				if ( '' === $positive && $this->editor_article_checkup_has_positive_semantic_marker( $sentence ) ) {
-					$positive = $sentence;
-				}
-				if ( '' !== $negative && '' !== $positive && $negative !== $positive ) {
-					$items[] = $this->editor_article_checkup_issue(
-						'semantic_term_tension_' . strtolower( $term ),
-						'semantic_consistency',
-						'warning',
-						__( 'Full article', 'npcink-workflow-toolbox' ),
-						$negative . ' ' . $positive,
-						sprintf(
-							/* translators: %s: term. */
-							__( 'The draft uses both limiting and enabling language around %s.', 'npcink-workflow-toolbox' ),
-							$term
-						),
-						__( 'Confirm whether the contrast is intentional, stage-specific, or a real contradiction before publishing. Keep any final wording change manual.', 'npcink-workflow-toolbox' )
-					);
-					break;
-				}
-			}
-		}
-
-		return $items;
-	}
-
-	private function editor_article_checkup_semantic_boundary_tensions( array $sentences ): array {
-		$items = array();
-		foreach ( $sentences as $index => $sentence ) {
-			if ( ! $this->editor_article_checkup_has_free_generation_marker( $sentence ) ) {
-				continue;
-			}
-			foreach ( $sentences as $other_index => $other_sentence ) {
-				if ( $index === $other_index || ! $this->editor_article_checkup_has_review_boundary_marker( $other_sentence ) ) {
-					continue;
-				}
-				$items[] = $this->editor_article_checkup_issue(
-					'semantic_generation_boundary_' . ( $index + 1 ),
-					'semantic_consistency',
-					'warning',
-					__( 'Full article', 'npcink-workflow-toolbox' ),
-					$other_sentence . ' ' . $sentence,
-					__( 'The draft mixes review-boundary wording with free-generation or replacement wording.', 'npcink-workflow-toolbox' ),
-					__( 'Check whether the free-generation phrase is a counterexample or the actual recommendation. Do not turn this into an automatic rewrite.', 'npcink-workflow-toolbox' )
-				);
-				return $items;
-			}
-		}
-
-		return $items;
-	}
-
-	private function editor_article_checkup_has_negative_semantic_marker( string $sentence ): bool {
-		return 1 === preg_match( '/(不是|不能|不要|不应|不得|避免|禁止|不等于|不要让|不替换|不生成|不写入)/u', $sentence );
-	}
-
-	private function editor_article_checkup_has_positive_semantic_marker( string $sentence ): bool {
-		return 1 === preg_match( '/(应该|需要|可以|用于|负责|依赖|直接|自动|一键|生成|替换|写入|发布)/u', $sentence );
-	}
-
-	private function editor_article_checkup_has_free_generation_marker( string $sentence ): bool {
-		return 1 === preg_match( '/(自由发挥|生成全文|替换正文|一键优化|自动改写|自动发布|直接写入)/u', $sentence );
-	}
-
-	private function editor_article_checkup_has_review_boundary_marker( string $sentence ): bool {
-		return 1 === preg_match( '/(人工|审阅|审核|建议|只读|不生成|不替换|不写入|约束|治理|Core|proposal)/iu', $sentence );
-	}
-
-	private function editor_article_checkup_has_heading_signal( string $text ): bool {
-		return 1 === preg_match( '/(^|\n)\s*(#{2,6}\s+|[一二三四五六七八九十]+[、.．]|\\d+[.．、]|[（(][一二三四五六七八九十\\d]+[）)])|<h[1-6][^>]*>/iu', $text );
 	}
 
 	private function editor_article_checkup_issue( string $id, string $type, string $severity, string $location, string $evidence, string $issue, string $edit_direction ): array {

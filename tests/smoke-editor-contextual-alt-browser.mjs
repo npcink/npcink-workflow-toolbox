@@ -229,9 +229,9 @@ try {
 	await page.waitForSelector('.npcink-toolbox-editor-support__flow', { timeout: 30000 });
 	const standaloneAltFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Article image ALT|文章图片 ALT/ });
 	assert(await standaloneAltFlow.count() === 0, 'Editor does not expose a separate Article Image ALT workflow.');
-	const discoverabilityFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Publish preflight|发布预检/ });
-	assert(await discoverabilityFlow.count() === 1, 'Editor uses the existing SEO-aware Publish preflight workflow as the ALT entry point.');
-	await discoverabilityFlow.locator('button').click({ timeout: 30000 });
+	const discoverabilityFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Article check|文章检查/ });
+	assert(await discoverabilityFlow.count() === 1, 'Editor uses Article check as the contextual ALT entry point.');
+	await discoverabilityFlow.getByRole('button', { name: /^(?:Check article|检查).*?(?:Article check|文章检查)/ }).click({ timeout: 30000 });
 	await page.waitForSelector('.npcink-toolbox-editor-support__discoverability-media', { timeout: 45000 });
 	await page.locator('.npcink-toolbox-editor-support__discoverability-media button').filter({ hasText: /Preview contextual ALT|预览上下文 ALT/ }).click({ timeout: 30000 });
 

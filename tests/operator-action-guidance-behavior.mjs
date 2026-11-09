@@ -116,3 +116,48 @@ for (const provider of ['auto', 'site_media']) {
  await assert.rejects(expiring,error=>error.code==='npcink_toolbox_image_source_timeout');
 }
 console.log('Image deadlines: semantic media query/evidence budget, external fast timeout, expiry and cancellation passed.');
+
+// Exercise the real compact article-check report, including degradation and
+// precise evidence disclosure. These tests do not call a model or write a post.
+const extract = name => {
+ const begin = source.indexOf(`\tfunction ${name}(`);
+ assert.ok(begin >= 0);
+ return source.slice(begin, source.indexOf('\n\tfunction ', begin + 10));
+};
+const sprintf = (template, ...values) => template.replace(/%(?:(\d+)\$)?[ds]/g, (_match, position) => String(position ? values[Number(position)-1] : values.shift()));
+const walk = tree => Array.isArray(tree) ? tree.flatMap(walk) : !tree || typeof tree !== 'object' ? [] : [tree, ...tree.children.flatMap(walk)];
+const visibleText = tree => Array.isArray(tree) ? tree.map(visibleText).join(' ') : tree && typeof tree === 'object' ? tree.type === 'details' ? visibleText(tree.children[0]) : tree.children.map(visibleText).join(' ') : String(tree ?? '');
+const scopeReport = new Function('createElement','__','sprintf',extract('renderArticleCheckScope')+'\nreturn renderArticleCheckScope;')(createElement,text=>text,sprintf);
+const localSection = {coverage:{paragraphs_checked:24,paragraphs_in_context:30,issues_shown:12,issues_found:20,partial:true,context_truncated:true}};
+for (const state of ['completed','partial','failed','refused','unavailable','not_checked']) {
+ const sections = {local_article_checkup:localSection,article_language_review:{status:state === 'completed' ? 'ready' : state,checks:Object.fromEntries(['language','logic','content_risk'].map(key=>[key,{status:state,reason_code:state === 'failed' ? 'timeout' : 'ok'}])),coverage:{blocks_checked:80,omitted:2},invalid_finding_count:1,result_limit_reached:true}};
+ const tree = scopeReport(sections,{articleReview:{stale:true}});
+ assert.match(visibleText(tree),/24 \/ 30/);
+ assert.match(visibleText(tree),/部分完成/);
+ assert.match(visibleText(tree),/没有提示不代表文章正确、安全或可以发布/);
+ assert.match(visibleText(tree),/草稿已变化/);
+ assert.ok(!visibleText(tree).includes('已隐藏'), 'Long counts are disclosed on demand.');
+ const expected = {completed:'语句：完成',partial:'语句：部分完成',failed:'语句：失败（超时）',refused:'语句：未完成（拒绝）',unavailable:'语句：暂不可用',not_checked:'语句：未检查'}[state];
+ assert.ok(visibleText(tree).includes(expected), `Top scope discloses ${state}.`);
+ assert.equal(walk(tree).filter(node=>node.type === 'button').length,0);
+}
+assert.match(visibleText(scopeReport({},{})),/本地重复标点：未检查/);
+let located = 0;
+const languageReport = new Function('createElement','__','Button','locateArticleReviewIssue',extract('renderArticleLanguageReviewItems')+'\nreturn renderArticleLanguageReviewItems;')(createElement,text=>text,'button',()=>located++);
+const evidenceQuote = '原文  空格\n换行 🧪';
+const finding = {id:'f1',check:'logic',issue:'Two claims conflict.',edit_direction:'Verify the stated condition.',evidence_refs:[{quote:evidenceQuote,unique:true,client_id:'b1'},{quote:'另一段的原文。',unique:false}]};
+for (const stale of [false,true]) {
+ const tree = languageReport({items:[finding]},{articleReview:{stale,isCurrent:()=>!stale}});
+ assert.match(visibleText(tree),/Two claims conflict/);
+ assert.match(visibleText(tree),/Verify the stated condition/);
+ assert.ok(!visibleText(tree).includes(evidenceQuote), 'Long evidence starts collapsed.');
+ assert.equal(walk(tree).find(node=>node.type === 'blockquote').children[0],evidenceQuote,'Evidence whitespace and Unicode remain exact.');
+ assert.equal(walk(tree).filter(node=>node.type === 'blockquote').length,2,'Both logic evidence quotes remain available.');
+ const action = walk(tree).find(node=>node.type === 'button');
+ assert.equal(action.props.disabled,stale);
+ action.props.onClick();
+}
+assert.equal(located,1,'Only current and unique evidence can locate; no content write action exists.');
+const allFlows = new Function('__',source.match(/const flows = (\[[\s\S]*?\n\t\]);/)[0]+'\nreturn flows;')(text=>text);
+assert.deepEqual(allFlows.filter(flow=>flow.defaultVisible !== false).map(flow=>flow.intent),['format_content','publish_preflight','internal_links','image_candidates']);
+console.log('Article check: four defaults, honest completion/degradation, concise issues, exact collapsed paired evidence and stale navigation passed.');

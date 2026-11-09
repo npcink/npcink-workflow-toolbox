@@ -12,8 +12,8 @@ defined( 'ABSPATH' ) || exit;
 final class Ability_Surface_Metadata {
 	public static function definitions(): array {
 		return array(
-			'source_adaptation_review' => self::definition( __( 'Draft from source materials', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'cloud_reader_site_knowledge_and_hosted_ai_via_addon', 'native_editor_or_article_plan_core_handoff', 'npcink_owned_default' ),
-			'publish_preflight'        => self::definition( __( 'Publish Preflight', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolbox_local_optional_cloud', 'seo_meta_core_handoff_preview', 'npcink_owned_default' ),
+			'source_adaptation_review' => self::definition( __( 'Draft from source materials', 'npcink-workflow-toolbox' ), 'editor_hidden_compatibility', false, 'cloud_reader_site_knowledge_and_hosted_ai_via_addon', 'native_editor_or_article_plan_core_handoff', 'npcink_supporting_surface' ),
+			'publish_preflight'        => self::definition( __( 'Article check', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolbox_local_optional_cloud', 'manual_editor_review', 'npcink_owned_default' ),
 			'category_suggestions'     => self::definition( __( 'Category suggestions', 'npcink-workflow-toolbox' ), 'editor_hidden_compatibility', false, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_supporting_surface' ),
 			'tag_suggestions'          => self::definition( __( 'Tag suggestions', 'npcink-workflow-toolbox' ), 'editor_hidden_compatibility', false, 'toolkit_local_taxonomy_suggestion', 'content_metadata_apply_plan', 'npcink_supporting_surface' ),
 			'internal_link_candidates' => self::definition( __( 'Internal Link Candidates', 'npcink-workflow-toolbox' ), 'editor_default_button', true, 'toolkit_with_optional_site_knowledge', 'manual_editor_review', 'npcink_owned_default' ),
@@ -56,7 +56,7 @@ final class Ability_Surface_Metadata {
 				'label'       => __( 'Default entries', 'npcink-workflow-toolbox' ),
 				'status'      => 'ok',
 				'status_text' => __( 'Npcink workflows', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Editor defaults are source drafting, preflight, links, and images. ALT review is in preflight; category and tag shortcuts are hidden.', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Editor defaults are formatting, article check, site citations, and images. ALT review is in article check; source drafting and category/tag shortcuts are hidden.', 'npcink-workflow-toolbox' ),
 			),
 			array(
 				'id'          => 'route_only_compatibility',
