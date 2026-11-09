@@ -289,7 +289,7 @@
 		{
 			intent: 'source_adaptation_review',
 			label: __('Draft from source materials', 'npcink-workflow-toolbox'),
-			description: __('Provide a reference URL or brief, confirm the writing direction, then generate a review-only draft. Nothing is saved or published automatically.', 'npcink-workflow-toolbox'),
+			description: __('Prepare a draft from a URL or brief.', 'npcink-workflow-toolbox'),
 			group: 'research_adaptation',
 			sourceLabel: __('Optional public URL plus typed editorial brief', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Source evidence when present, Site Knowledge overlap, reviewed plan, and fact risks', 'npcink-workflow-toolbox'),
@@ -302,7 +302,8 @@
 		{
 			intent: 'publish_preflight',
 			label: __('Publish preflight', 'npcink-workflow-toolbox'),
-			description: __('图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。', 'npcink-workflow-toolbox'),
+			description: __('Check missing items and risks. Plain article text is sent to Cloud for language review.', 'npcink-workflow-toolbox'),
+			details: __('图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft, editor fields, Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Preflight checks, duplicate-risk refs, SEO handoff preview', 'npcink-workflow-toolbox'),
@@ -314,6 +315,7 @@
 		},
 		{
 			intent: 'category_suggestions',
+			defaultVisible: false,
 			label: __('Category suggestions', 'npcink-workflow-toolbox'),
 			description: __('Find matching existing categories without running the full metadata workflow.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
@@ -327,6 +329,7 @@
 		},
 		{
 			intent: 'tag_suggestions',
+			defaultVisible: false,
 			label: __('Tag suggestions', 'npcink-workflow-toolbox'),
 			description: __('Find matching existing tags without creating new vocabulary.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
@@ -341,7 +344,7 @@
 		{
 			intent: 'internal_links',
 			label: __('Site citation suggestions', 'npcink-workflow-toolbox'),
-			description: __('Find links for the draft text or choose articles for a related reading list.', 'npcink-workflow-toolbox'),
+			description: __('Choose body links or a related reading list.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft plus related Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Existing-post refs, anchor hints, relevance notes', 'npcink-workflow-toolbox'),
@@ -375,7 +378,7 @@
 		{
 			intent: 'image_candidates',
 			label: __('Article images', 'npcink-workflow-toolbox'),
-			description: __('Find images in this site\'s Media Library, search external sources, or generate a candidate for this article.', 'npcink-workflow-toolbox'),
+			description: __('Search site media, external sources, or generated candidates.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft visual brief and Cloud image-source candidates', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Provider/source refs, attribution, quality and risk tags', 'npcink-workflow-toolbox'),
@@ -5776,11 +5779,6 @@
 			excerpt: 'summary_terms_optimization',
 			summary: 'summary_terms_optimization',
 			prose_quality: 'polish_notes',
-			categories: 'category_suggestions',
-			category_suggestions: 'category_suggestions',
-			tags: 'tag_suggestions',
-			tag_suggestions: 'tag_suggestions',
-			terms: 'category_suggestions',
 			featured_image: 'image_candidates',
 			featured_media: 'image_candidates',
 			image_candidates: 'image_candidates',
@@ -5791,8 +5789,6 @@
 
 	function preflightActionLabel(intent, fallback) {
 		const labels = {
-			category_suggestions: __('Open category suggestions', 'npcink-workflow-toolbox'),
-			tag_suggestions: __('Open tag suggestions', 'npcink-workflow-toolbox'),
 			image_candidates: __('Open image candidates', 'npcink-workflow-toolbox'),
 			internal_links: __('Open internal link candidates', 'npcink-workflow-toolbox'),
 			polish_notes: __('Review selected paragraph', 'npcink-workflow-toolbox'),
@@ -10546,11 +10542,6 @@
 							openProgressiveRecommendation,
 							() => runProgressivePrefetch(progressiveRecommendationKey(postContext), true)
 						),
-						createElement(
-							'div',
-							{ className: 'npcink-toolbox-editor-support__intro-row' },
-							createElement('p', { className: 'npcink-toolbox-editor-support__intro' }, __('Run fixed support flows around the current draft. Article text stays with the editor.', 'npcink-workflow-toolbox'))
-						),
 						flowGroups.filter((group) => defaultFlows.some((flow) => flow.group === group.id)).map((group) => createElement(
 							'section',
 							{ className: 'npcink-toolbox-editor-support__flow-group', key: group.id },
@@ -10565,13 +10556,12 @@
 												: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox')));
 										return createElement(
 										'div',
-										{ className: 'npcink-toolbox-editor-support__flow', key: flow.intent },
+										{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : ''), key: flow.intent },
 										createElement(
 											'div',
 													{ className: 'npcink-toolbox-editor-support__flow-main' },
 													createElement('strong', null, flow.label),
-													createElement('span', null, flow.description),
-													flow.intent === 'source_adaptation_review' ? createElement(
+													flow.intent === 'source_adaptation_review' && (sourceExtractionComplete || sourceAdaptationComplete || sourceDraftComplete) ? createElement(
 														'small',
 														{ className: 'npcink-toolbox-editor-support__flow-status' },
 														__('Current status: ', 'npcink-workflow-toolbox') + sourceWorkflowStatusLabel
@@ -10593,7 +10583,12 @@
 											type: 'button', variant: 'secondary', disabled: Boolean(running),
 											onClick: () => runFlow('related_content'),
 										}, __('Related reading', 'npcink-workflow-toolbox')) : null
-										)
+										),
+										createElement('p', { className: 'npcink-toolbox-editor-support__flow-description' }, flow.description),
+										flow.details ? createElement('details', { className: 'npcink-toolbox-editor-support__flow-help' },
+											createElement('summary', null, __('Check scope and data use', 'npcink-workflow-toolbox')),
+											createElement('p', null, flow.details)
+										) : null
 									);
 								}
 							)

@@ -12,6 +12,23 @@ retired; this amendment does not restore any other legacy surface.
 
 Date proposed: 2026-10-07. Accepted: 2026-10-07.
 
+## 2026-11-09 Sidebar Visibility Amendment
+
+The operator requested removal of the default `category_suggestions` and
+`tag_suggestions` sidebar shortcuts because the WordPress AI plugin already
+covers those actions. They are now hidden compatibility entries in both the
+menu and read-only ability surface metadata. Preflight rows no longer link back
+to these duplicate tools. The retained handlers, REST
+allowlist, permissions and metadata handoff contract are unchanged; this is
+not another intent retirement or a change to the native taxonomy panels.
+The historical inventory below records the earlier delivery decision.
+
+The menu also removes its general introduction, shortens action summaries and
+uses the full row width for help. Detailed preflight scope is collapsed under
+"Check scope and data use"; the visible summary still states that plain article
+text is sent to Cloud. Draft workflow status appears only after progress, while
+source review, empty-editor adoption, freshness and write boundaries remain.
+
 ## Problem
 
 `/editor/content-support` currently accepts a 22-intent allowlist plus the

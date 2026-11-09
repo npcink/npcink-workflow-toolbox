@@ -234,6 +234,9 @@ described above.
 
 = Unreleased =
 
+* Hide duplicate category/tag sidebar shortcuts and simplify editor help and
+  narrow-panel layout. Keep the preflight Cloud notice visible and detailed
+  scope expandable; existing taxonomy contracts remain available.
 * Formatting preserves words, numbers, punctuation, links and multimedia;
   only bounded layout and CJK/Latin-or-digit spacing may change.
 * Publish preflight shows bounded coverage, manual punctuation hints,

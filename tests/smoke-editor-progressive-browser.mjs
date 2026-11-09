@@ -404,7 +404,7 @@ try {
 			}
 		});
 		await waitForProgressiveRequest(requests, 1);
-		await page.waitForSelector('text=/Run fixed support flows|围绕当前草稿运行固定支持流程/', { timeout: 30000 });
+		await page.waitForSelector('.npcink-toolbox-editor-support__menu-view', { timeout: 30000 });
 		const defaultProgressiveCardCount = await page.locator('text=/Fast recommendations|快速推荐|Local suggestions are ready|本地建议已就绪/').count();
 		assert(defaultProgressiveCardCount === 0, 'Successful local progressive recommendations stay hidden by default.');
 		const defaultLocalSuggestionsButtonCount = await page.locator('button').filter({ hasText: /Local suggestions|本地建议/ }).count();
