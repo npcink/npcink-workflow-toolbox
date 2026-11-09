@@ -27,6 +27,9 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 
 	public function run_hosted_ai_content_support( array $input ) {
 		$intent = sanitize_key( (string) ( $input['intent'] ?? 'discoverability' ) );
+		if ( Settings::cloud_feature_paused( 'source_drafting' ) && in_array( $intent, array( 'source_adaptation_review', 'article_draft_from_writing_pack' ), true ) ) {
+			return Settings::cloud_feature_pause_error( 'source_drafting' );
+		}
 		if ( ! in_array( $intent, array( 'title_summary', 'article_outline', 'polish_notes', 'summary_suggestions', 'summary_terms_optimization', 'audio_summary_script', 'source_adaptation_review', 'article_draft_from_writing_pack' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_hosted_ai_intent',

@@ -27,32 +27,20 @@ while IFS= read -r excluded_path; do
 	excluded_paths+=("$excluded_path")
 done < <(sed -e 's/\r$//' "$DISTIGNORE_FILE" | awk 'NF && $1 !~ /^#/')
 
-if [[ "WORKTREE" == "$PACKAGE_REF" ]]; then
-	mkdir -p "$package_dir"
-	rsync_args=("-a")
-	for excluded_path in "${excluded_paths[@]}"; do
-		rsync_args+=("--exclude=$excluded_path")
-	done
-	rsync_args+=("$ROOT_DIR/" "$package_dir/")
-	rsync "${rsync_args[@]}"
-else
+source_dir="$ROOT_DIR"
+if [[ "WORKTREE" != "$PACKAGE_REF" ]]; then
+	source_dir="$tmpdir/source"
+	mkdir -p "$source_dir"
 	(
 		cd "$ROOT_DIR"
-		git archive --format=tar --prefix="$PLUGIN_SLUG/" "$PACKAGE_REF" | tar -x -C "$tmpdir"
+		git archive --format=tar "$PACKAGE_REF" | tar -x -C "$source_dir"
 	)
-	shopt -s nullglob dotglob
-	for excluded_path in "${excluded_paths[@]}"; do
-		if [[ "$excluded_path" == *[\*\?\[]* ]]; then
-			matches=("$package_dir"/$excluded_path)
-			if [[ "${#matches[@]}" -gt 0 ]]; then
-				rm -rf -- "${matches[@]}"
-			fi
-		else
-			rm -rf -- "$package_dir/$excluded_path"
-		fi
-	done
-	shopt -u nullglob dotglob
 fi
+
+# Use identical recursive exclusions for a working checkout and a Git ref.
+# Root-only removal after git archive would leave nested tests in modules/.
+mkdir -p "$package_dir"
+rsync -a --exclude-from="$DISTIGNORE_FILE" "$source_dir/" "$package_dir/"
 
 shopt -s nullglob dotglob
 for excluded_path in "${excluded_paths[@]}"; do
@@ -69,6 +57,8 @@ for excluded_path in "${excluded_paths[@]}"; do
 	exit 1
 done
 shopt -u nullglob dotglob
+
+python3 "$ROOT_DIR/scripts/check-release-package.py" "$package_dir"
 
 wp_args=(plugin check "$package_dir" --mode=update --format=strict-json)
 if [[ -n "${WP_PATH:-}" ]]; then

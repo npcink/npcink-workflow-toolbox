@@ -16,6 +16,7 @@ final class Settings {
 	/** Reversible release policy, independent of saved user preferences. */
 	private static array $paused_cloud_features = array(
 		'cloud_inspection' => true,
+		'source_drafting'  => true,
 		'audio_generation' => true,
 		'advanced_media'   => true,
 	);

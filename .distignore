@@ -19,3 +19,14 @@ wporg-assets
 phpstan*
 phpstan.neon
 phpcs.xml
+output
+artifacts
+.local*
+.cache
+coverage
+__pycache__
+*.log
+*.pyc
+*.zip
+*.tar
+*.tar.gz

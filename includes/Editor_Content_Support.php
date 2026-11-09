@@ -99,10 +99,28 @@ final class Editor_Content_Support {
 			NPCINK_TOOLBOX_DIR . 'languages'
 		);
 
+		$writing_pack_dependencies = array();
+		if ( ! Settings::cloud_feature_paused( 'source_drafting' ) ) {
+			$writing_pack_path = $this->asset_path( 'assets/editor-content-support/writing-pack.js' );
+			wp_enqueue_script(
+				'npcink-toolbox-editor-content-support-writing-pack',
+				NPCINK_TOOLBOX_URL . $writing_pack_path,
+				array(),
+				$this->asset_version( $writing_pack_path ),
+				true
+			);
+			wp_set_script_translations(
+				'npcink-toolbox-editor-content-support-writing-pack',
+				'npcink-workflow-toolbox',
+				NPCINK_TOOLBOX_DIR . 'languages'
+			);
+			$writing_pack_dependencies[] = 'npcink-toolbox-editor-content-support-writing-pack';
+		}
+
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support',
 			NPCINK_TOOLBOX_URL . $script_path,
-			array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-related-reading', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
+			array_merge( array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-related-reading', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ), $writing_pack_dependencies ),
 			$this->asset_version( $script_path ),
 			true
 		);
@@ -123,6 +141,7 @@ final class Editor_Content_Support {
 				'adminUrl'                   => esc_url_raw( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=tools' ) ),
 				'cloudAddonSiteKnowledgeUrl' => esc_url_raw( admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
 				'coreAdminUrl'               => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
+				'sourceDraftingAvailable'    => ! Settings::cloud_feature_paused( 'source_drafting' ),
 				'canSubmitMetadataHandoff'   => current_user_can( Rest_Controller::default_capability_for_scope( 'cap.toolbox.workflow_suggest' ) ),
 				'showRuntimeDiagnostics'     => $this->show_runtime_diagnostics(),
 				'locale'                     => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),

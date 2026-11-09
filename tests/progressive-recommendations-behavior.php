@@ -885,6 +885,14 @@ npcink_toolbox_progressive_assert(
 	'Article writing pack blocks navigation or metadata-only source evidence before draft generation.'
 );
 
+// Exercise retained implementation only after explicitly unpausing the test policy.
+$drafting_policy = new ReflectionProperty( Npcink_Toolbox\Settings::class, 'paused_cloud_features' );
+$drafting_policy->setAccessible( true );
+$drafting_policy_snapshot = $drafting_policy->getValue();
+$drafting_test_policy = $drafting_policy_snapshot;
+unset( $drafting_test_policy['source_drafting'] );
+$drafting_policy->setValue( null, $drafting_test_policy );
+
 $npcink_toolbox_progressive_source_reader_mode = 'blocked';
 $source_reader_calls_before_failure = $npcink_toolbox_progressive_source_reader_calls;
 $blocked_source_response = $controller->editor_content_support(
@@ -1238,3 +1246,5 @@ npcink_toolbox_progressive_assert(
 	&& 'article_writing_pack.v1' === ( $legacy_adapt_data['sections']['article_writing_pack']['artifact_type'] ?? '' ),
 	'Legacy adapt stage preserves its outer artifact while adding the canonical article writing pack.'
 );
+
+$drafting_policy->setValue( null, $drafting_policy_snapshot );

@@ -41,4 +41,13 @@ if PLUGIN_CHECK_TEST_LOG="$CALL_LOG" \
 	exit 1
 fi
 
+# The committed-ref path must use the same recursive exclusions as WORKTREE.
+PLUGIN_CHECK_TEST_LOG="$CALL_LOG" \
+PLUGIN_CHECK_TEST_OUTPUT='[]' \
+PACKAGE_REF=HEAD \
+WP_CLI="$FAKE_WP" \
+bash "$ROOT_DIR/scripts/check-plugin-package.sh" >/dev/null
+
 echo "Packaged Plugin Check isolation: ok"
+
+python3 "$ROOT_DIR/tests/release-package-behavior.py"

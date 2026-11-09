@@ -94,6 +94,24 @@ Use the release zip generated from the intended release commit:
 composer package:release
 ```
 
+The build requires Python 3 in addition to rsync, zip and Node tooling.
+`.distignore` excludes `output/`, `artifacts/`, `.local*`, caches, coverage,
+logs and nested archives. `scripts/check-release-package.py` validates the
+copied distribution **and the final ZIP**, allowing only the plugin's required
+root files, JS/CSS assets, PHP includes, translation files and the existing
+local-automation runtime module. Unknown paths, symlinks, unsafe/duplicate ZIP
+members and corrupt archives fail the build. New runtime file types or roots
+require an explicit inventory change and regression test. The same check runs
+before installed-package Plugin Check. `tests/release-package-behavior.py`
+exercises dirty build inputs and rejected ZIP members through actual rsync.
+
+Freezing development alone does not remove code from a package. Source drafting
+is explicitly server-paused; its separate `writing-pack.js` source/minified
+sibling and JED remain packaged for recovery but are not enqueued while paused.
+This reduces ordinary editor asset loading while preserving compatibility and
+security maintenance. Remaining shared state helpers still load. None of this
+publishes the package to WordPress.org.
+
 Packaging also runs `scripts/minify-assets.sh` on the packaged copy, so
 the zip ships `.min.js`/`.min.css` siblings for the admin and editor
 bundles next to the readable sources (the release zip measured ~1.04MB of
