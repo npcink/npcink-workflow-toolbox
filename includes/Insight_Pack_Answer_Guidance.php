@@ -105,7 +105,7 @@ final class Insight_Pack_Answer_Guidance {
 			return '';
 		}
 		if ( $published_total > $sample_size ) {
-			return sprintf( '只抽查了 %1$d 篇（全站已发布 %2$d 篇），结论仅供参考。', $sample_size, $published_total );
+			return sprintf( '只抽查了 %1$d 篇（本次范围内已发布 %2$d 篇），结论仅供参考。', $sample_size, $published_total );
 		}
 		if ( $sample_size < 10 ) {
 			return sprintf( '只看到 %d 篇已发布内容，样本较少，结论仅供参考。', $sample_size );
@@ -132,7 +132,7 @@ final class Insight_Pack_Answer_Guidance {
 		);
 		$label   = $batches[ $strata_count ] ?? (string) $strata_count;
 
-		return sprintf( '按发布时间分%1$s批共抽查 %2$d 篇（全站已发布 %3$d 篇），结论仅供参考。', $label, $sampled, $published_total );
+		return sprintf( '按发布时间分%1$s批共抽查 %2$d 篇（本次范围内已发布 %3$d 篇），结论仅供参考。', $label, $sampled, $published_total );
 	}
 
 	/**

@@ -92,7 +92,7 @@ final class Environment_Performance_Insight_Builder {
 	public static function plugin_list_limit(): int {
 		$limit = self::PLUGIN_LIST_LIMIT_DEFAULT;
 		if ( function_exists( 'apply_filters' ) ) {
-			$limit = (int) apply_filters( self::PLUGIN_LIST_LIMIT_FILTER, $limit );
+			$limit = (int) apply_filters( 'npcink_toolbox_environment_performance_plugin_list_limit', $limit );
 		}
 
 		return max( self::PLUGIN_LIST_LIMIT_MIN, min( self::PLUGIN_LIST_LIMIT_MAX, $limit ) );

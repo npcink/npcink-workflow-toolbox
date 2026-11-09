@@ -86,6 +86,7 @@ if ( ! class_exists( 'WP_Post' ) ) {
 	class WP_Post {
 		public int $ID                   = 0;
 		public string $post_type         = 'post';
+		public string $post_status       = 'publish';
 		public string $post_title        = '';
 		public string $post_content      = '';
 		public string $post_excerpt      = '';
@@ -174,8 +175,20 @@ if ( ! function_exists( 'wp_parse_url' ) ) {
 		return null === $key ? null : ( $parts[ $key ] ?? null );
 	}
 }
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( $tag, $value ) {
+		return $GLOBALS['content_structure_filters'][ $tag ] ?? $value;
+	}
+}
 if ( ! function_exists( 'get_posts' ) ) {
 	function get_posts( array $args = array() ): array {
+		$GLOBALS['content_structure_query_calls'][] = $args;
+		if ( 'ids' === ( $args['fields'] ?? '' ) ) {
+			return $GLOBALS['content_structure_query_ids'] ?? array( 11 );
+		}
+		if ( isset( $GLOBALS['content_structure_query_rows'] ) ) {
+			return $GLOBALS['content_structure_query_rows'];
+		}
 		$post                    = new WP_Post();
 		$post->ID                = 11;
 		$post->post_type         = 'post';
@@ -322,7 +335,7 @@ content_structure_rest_assert( false !== strpos( $sys_prompt, '结论：1–2 �
 content_structure_rest_assert( false !== strpos( $sys_prompt, '不含流量' ) && false !== strpos( $sys_prompt, '高流量页面' ) && false !== strpos( $sys_prompt, '回答里直接不谈这些' ), 'Ask prompt forbids citing metrics absent from the pack (traffic).' );
 content_structure_rest_assert( false !== strpos( $sys_prompt, '不要在回答里解释或复述这些规则' ) && false === strpos( $sys_prompt, '需要时直说' ) && false === strpos( $sys_prompt, '摘要里没有流量数据' ), 'Ask prompt tells the model not to restate rules or missing data in the answer.' );
 content_structure_rest_assert( false !== strpos( $sys_prompt, '只给建议' ), 'Ask prompt keeps suggestion-only posture.' );
-content_structure_rest_assert( '只抽查了 24 篇（全站已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
+content_structure_rest_assert( '只抽查了 24 篇（本次范围内已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
 content_structure_rest_assert( '' === $guidance_cls::sample_note( 24, 24 ), 'Full-coverage sample adds no caveat.' );
 
 // Stratified sampling (publish-date thirds, systematic picks).
@@ -355,7 +368,7 @@ content_structure_rest_assert( 0.45 === $sampling['weighted_rates']['missing_met
 content_structure_rest_assert( false !== strpos( (string) $sampling['rate_basis'], 'weighted' ) && 'publish_date_thirds_systematic' === $sampling['method'], 'Rate basis is labeled.' );
 $sampling_json = (string) json_encode( $sampling );
 content_structure_rest_assert( false === strpos( $sampling_json, 'post_content' ) && false === strpos( $sampling_json, '"ids"' ), 'Sampling metadata carries no bodies or raw ID lists.' );
-content_structure_rest_assert( '按发布时间分三批共抽查 60 篇（全站已发布 2000 篇），结论仅供参考。' === $guidance_cls::stratified_sample_note( 3, 60, 2000 ), 'Stratified caveat is plain Chinese without field names.' );
+content_structure_rest_assert( '按发布时间分三批共抽查 60 篇（本次范围内已发布 2000 篇），结论仅供参考。' === $guidance_cls::stratified_sample_note( 3, 60, 2000 ), 'Stratified caveat is plain Chinese without field names.' );
 content_structure_rest_assert( '' === $guidance_cls::stratified_sample_note( 3, 20, 20 ), 'Full coverage adds no caveat.' );
 content_structure_rest_assert( is_array( $pack['sampling'] ?? null ) && isset( $pack['sampling']['strata'] ), 'Pack exposes sampling metadata.' );
 content_structure_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
@@ -367,5 +380,43 @@ content_structure_rest_assert( "只抽查。\n「x」" === $guidance_cls::strip_
 content_structure_rest_assert( '“甲”和“乙”' === $guidance_cls::strip_first_line_quotes( '“甲”和“乙”' ) && '「a」「b」' === $guidance_cls::strip_first_line_quotes( '「a」「b」' ), 'Inner quoted spans are kept.' );
 content_structure_rest_assert( '' === $guidance_cls::strip_first_line_quotes( '' ) && '「」' === $guidance_cls::strip_first_line_quotes( '「」' ), 'Empty input and empty pair are left alone.' );
 content_structure_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
+
+// A result filter may inject non-public, unrelated or duplicate objects.
+$query_fixture = static function ( int $id, string $status, string $type ): WP_Post {
+	$post = new WP_Post();
+	$post->ID = $id;
+	$post->post_status = $status;
+	$post->post_type = $type;
+	return $post;
+};
+$GLOBALS['content_structure_query_ids'] = array( 11, 12, 13, 14 );
+$GLOBALS['content_structure_query_rows'] = array(
+	$query_fixture( 11, 'publish', 'post' ),
+	$query_fixture( 11, 'publish', 'post' ),
+	$query_fixture( 12, 'private', 'post' ),
+	$query_fixture( 13, 'draft', 'page' ),
+	$query_fixture( 14, 'publish', 'attachment' ),
+	$query_fixture( 15, 'publish', 'page' ),
+	(object) array( 'ID' => 16 ),
+);
+$GLOBALS['content_structure_query_calls'] = array();
+$query_builder = new $builder_cls();
+$query_ids = new ReflectionMethod( $builder_cls, 'collect_public_ids_by_date' );
+$query_sample = new ReflectionMethod( $builder_cls, 'collect_public_sample' );
+$query_rows = $query_sample->invoke( $query_builder, $builder_cls::plan_strata( $query_ids->invoke( $query_builder ), 60 ) );
+content_structure_rest_assert( array( 11 ) === array_column( $query_rows, 'object_id' ), 'Filtered samples retain only unique planned published post/page objects.' );
+foreach ( $GLOBALS['content_structure_query_calls'] as $query_args ) {
+	content_structure_rest_assert( false === $query_args['suppress_filters'] && 'publish' === $query_args['post_status'] && array( 'post', 'page' ) === $query_args['post_type'], 'Both population and sample queries respect host filters within the public post/page scope.' );
+}
+content_structure_rest_assert( 2 === count( $GLOBALS['content_structure_query_calls'] ) && 'ids' === $GLOBALS['content_structure_query_calls'][0]['fields'] && 4 === $GLOBALS['content_structure_query_calls'][1]['posts_per_page'], 'Population stays IDs-only and sample fetch stays bounded to the planned count.' );
+$GLOBALS['content_structure_query_ids'] = array();
+$GLOBALS['content_structure_query_calls'] = array();
+content_structure_rest_assert( array() === $query_sample->invoke( $query_builder, $builder_cls::plan_strata( $query_ids->invoke( $query_builder ), 60 ) ) && 1 === count( $GLOBALS['content_structure_query_calls'] ), 'An empty filtered population never falls back to an unrestricted sample query.' );
+unset( $GLOBALS['content_structure_query_ids'], $GLOBALS['content_structure_query_rows'] );
+$GLOBALS['content_structure_filters'][ $builder_cls::SAMPLE_LIMIT_FILTER ] = 9999;
+content_structure_rest_assert( 120 === $builder_cls::sample_limit(), 'The existing public filter name still applies and is upper-clamped.' );
+$GLOBALS['content_structure_filters'][ $builder_cls::SAMPLE_LIMIT_FILTER ] = -9;
+content_structure_rest_assert( 6 === $builder_cls::sample_limit(), 'The existing public filter remains lower-clamped.' );
+unset( $GLOBALS['content_structure_filters'] );
 
 echo "All content-structure insight pack REST behavior checks passed.\n";

@@ -41,9 +41,9 @@ function npcink_toolbox_uninstall_current_site(): void {
 	);
 	$editor_cache_options = array();
 	foreach ( $transient_prefixes as $transient_prefix ) {
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must enumerate dynamic, expiring transient keys before removing them through WordPress APIs.
 		$editor_cache_options = array_merge(
 			$editor_cache_options,
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall must enumerate dynamic, expiring transient keys before removing them through WordPress APIs.
 			$wpdb->get_col(
 				$wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $transient_prefix )
 			)

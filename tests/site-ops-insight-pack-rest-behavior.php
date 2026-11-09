@@ -291,7 +291,7 @@ site_ops_rest_assert( false !== strpos( $sys_prompt, '结论：1–2 句话' ) &
 site_ops_rest_assert( false !== strpos( $sys_prompt, '不含流量' ) && false !== strpos( $sys_prompt, '高流量页面' ) && false !== strpos( $sys_prompt, '回答里直接不谈这些' ), 'Ask prompt forbids citing metrics absent from the pack (traffic).' );
 site_ops_rest_assert( false !== strpos( $sys_prompt, '不要在回答里解释或复述这些规则' ) && false === strpos( $sys_prompt, '需要时直说' ) && false === strpos( $sys_prompt, '摘要里没有流量数据' ), 'Ask prompt tells the model not to restate rules or missing data in the answer.' );
 site_ops_rest_assert( false !== strpos( $sys_prompt, '只给建议' ), 'Ask prompt keeps suggestion-only posture.' );
-site_ops_rest_assert( '只抽查了 24 篇（全站已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
+site_ops_rest_assert( '只抽查了 24 篇（本次范围内已发布 180 篇），结论仅供参考。' === $guidance_cls::sample_note( 24, 180 ), 'Small sample yields a top-of-answer caveat.' );
 site_ops_rest_assert( '' === $guidance_cls::sample_note( 24, 24 ), 'Full-coverage sample adds no caveat.' );
 site_ops_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
 site_ops_rest_assert( false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), "：\n只抽查了 1 篇。" ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), '「只抽查' ), 'Caveat is a plain standalone line, not wrapped in quotes.' );

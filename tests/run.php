@@ -3356,6 +3356,15 @@ foreach ( array( 'ranking_version', 'candidate_rank', 'score_bucket', 'retrieval
 $article_check_render = substr( $editor_js, strpos( $editor_js, 'if (hasPreflightReview) {' ), 900 );
 toolbox_assert( false !== strpos( $article_check_render, 'renderArticleCheckScope' ) && false === strpos( $article_check_render, 'renderPreflightSummaryPanel' ) && strpos( $article_check_render, 'renderArticleCheckScope' ) < strpos( $article_check_render, 'renderArticleCheckupItems' ) && false !== strpos( $article_check_render, 'renderDiscoverabilityMediaSection' ), 'Default Article check leads with scope, keeps contextual ALT and concrete findings, and omits legacy metadata readiness.' );
 
+// Plugin Check policy: filtered population and fetch must agree without loosening public scope.
+foreach ( array( 'Content_Structure', 'Page_Quality' ) as $pack_query_prefix ) {
+	$pack_query_source = (string) file_get_contents( $root . '/includes/' . $pack_query_prefix . '_Insight_Builder.php' );
+	toolbox_assert( 2 === preg_match_all( "/'suppress_filters'\\s*=> false/", $pack_query_source ) && false === strpos( $pack_query_source, "'suppress_filters'       => true" ), $pack_query_prefix . ' respects host filters in both sampling queries.' );
+	toolbox_assert( false !== strpos( $pack_query_source, "'publish' !== \$post->post_status" ) && false !== strpos( $pack_query_source, 'isset( $stratum_of[ $post_id ] )' ) && false !== strpos( $pack_query_source, 'isset( $sample[ $post_id ] )' ) && false !== strpos( $pack_query_source, "in_array( \$post->post_type, array( 'post', 'page' ), true )" ), $pack_query_prefix . ' revalidates public type, planned membership and uniqueness after result filters.' );
+}
+$pack_answer_guidance = (string) file_get_contents( $root . '/includes/Insight_Pack_Answer_Guidance.php' );
+toolbox_assert( false !== strpos( $pack_answer_guidance, '本次范围内已发布' ) && false === strpos( $pack_answer_guidance, '全站已发布' ), 'Sampling caveats describe the actual filtered scope without claiming an unfiltered census.' );
+
 if ( '' !== $toolbox_test_options['filter'] && 0 === $toolbox_test_counts['passed'] ) {
 	fwrite( STDERR, 'No static contract checks matched filter: ' . $toolbox_test_options['filter'] . PHP_EOL );
 	exit( 1 );
