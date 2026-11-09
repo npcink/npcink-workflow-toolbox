@@ -43,3 +43,13 @@ waiting on: how do translated part files get their zh_CN catalog?
 - Part load order stays governed by the explicit `PART_ORDER` list in
   `tests/editor-content-support-sources.mjs` and the enqueue dependency
   chain in `includes/Editor_Content_Support.php`.
+
+## Conditionally loaded recovery parts
+
+The retained `writing-pack.js` factory receives dependencies from the main
+editor script; it captures no WordPress globals or requests at file load time.
+Its own script handle and JED registration are conditional on the server-side
+`source_drafting` availability policy. The main script tolerates its absence.
+`PART_ORDER` includes it for isolated compatibility tests; this is not a promise
+that every test part is enqueued on ordinary editor pages. The main catalog
+retains its existing superset, and the new part catalog covers moved literals.

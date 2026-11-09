@@ -23,6 +23,17 @@ Existing media snapshots, completed batches, backups, restoration, retention
 cleanup and public content remain intact. Toolkit and Core keep their current
 contracts and all final-write authority; this plugin adds no second registry.
 
+## Toolbox-local source drafting pause — 2026-11-09
+
+`source_drafting` blocks `source_adaptation_review` at editor REST entry and
+both source adaptation and `article_draft_from_writing_pack` at the hosted
+provider seam. All source stages return the existing 409 pause error before
+reader, Site Knowledge or model calls. The UI module/JED are not enqueued.
+IDs, permissions, implementation and history remain; generic reader abilities
+are unaffected. This local policy does not add a Cloud/Addon runtime key or
+change the cross-repo pause inventories. Tests may explicitly unpause only
+inside isolated recovery fixtures; there is no user setting or runtime bypass.
+
 ## Retained scope and development freeze
 
 Continue ordinary title/summary/translation, ALT and image assistance, safe
@@ -58,7 +69,7 @@ sibling scopes for the same faces.
 | --- | --- |
 | Addon | [`docs/reversible-feature-pauses-v1.md`](https://github.com/npcink/npcink-cloud-addon/blob/master/docs/reversible-feature-pauses-v1.md) — Tables A–C and matrix row map;对照 landed in [PR #309](https://github.com/npcink/npcink-cloud-addon/pull/309) (use that PR until merge). Local sibling: `../../npcink-cloud-addon/docs/reversible-feature-pauses-v1.md`. **Naming:** Addon has no `$paused_specialist_tasks`; the ten SEO/AEO/GEO ids live inside `is_task_paused()`. |
 | Cloud | [`docs/reversible-feature-pauses-v1.md`](https://github.com/npcink/npcink-ai-cloud/blob/master/docs/reversible-feature-pauses-v1.md) — ordered pause batches and evidence. Local sibling: `../../npcink-ai-cloud/docs/reversible-feature-pauses-v1.md`. |
-| Toolbox (this file) | Specialist surface: `Settings::DISCOVERABILITY_PAUSED` (whole-surface boolean, no per-task array). Runtime keys in `$paused_cloud_features`: `cloud_inspection`, `audio_generation`, `advanced_media`. Reject code: `npcink_toolbox_feature_paused` (409). |
+| Toolbox (this file) | Specialist surface: `Settings::DISCOVERABILITY_PAUSED` (whole-surface boolean, no per-task array). Runtime keys in `$paused_cloud_features`: `cloud_inspection`, `source_drafting`, `audio_generation`, `advanced_media`. Reject code: `npcink_toolbox_feature_paused` (409). |
 
 ### Pause smoke matrix v1 (row owners)
 

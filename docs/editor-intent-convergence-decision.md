@@ -12,11 +12,37 @@ retired; this amendment does not restore any other legacy surface.
 
 Date proposed: 2026-10-07. Accepted: 2026-10-07.
 
+## 2026-11-09 Frozen-feature release containment
+
+Source-material drafting is now **server-paused**, in addition to being hidden
+and development-frozen. The existing `source_adaptation_review` intent keeps its
+ID and permission gate but returns `npcink_toolbox_feature_paused` (HTTP 409,
+`feature=source_drafting`, `retryable=false`) before source reading, Site Knowledge
+or hosted model work. Both hosted source-research and
+`article_draft_from_writing_pack` calls enforce the same policy, including direct
+provider calls. No fallback to another paid path is attempted.
+
+Implementation, translations, historical data and existing governance handoffs
+remain for recovery. The writing-pack UI/conversion module and its translation
+catalog stay in the package but are not enqueued while paused. A few shared
+state/default helpers remain in the main editor bundle; this is a bounded load
+reduction, not a claim of zero dormant overhead. Generic source-reader abilities
+remain available to other consumers. No saved setting can bypass this pause.
+Restore only through an explicitly approved source change and fresh verification.
+This is a Toolbox-local pause, not a claim that Cloud/Addon reject these tasks.
+
+Release packaging excludes screenshots, local reports, caches, logs and archives.
+Both the distribution copy and final ZIP must pass the runtime inventory guard;
+see [release packaging](wordpress-org-submission.md#release-package). Frozen source
+code is retained; development evidence is excluded. No production deployment or
+WordPress.org publication is performed by these changes.
+
 ## 2026-11-09 Article check convergence
 
 The operator approved four default sidebar entries: formatting, **Article check**,
 site citation suggestions and article images. Source-material drafting is hidden
-and frozen; its callable contracts, data and compatibility code remain. Restore
+and frozen; the retained callable IDs now return the pause response documented above.
+Its data and compatibility code remain. Restore
 its entry only after a specific operator decision tied to a concrete use case.
 
 Article check keeps the `publish_preflight` intent and permissions. Its default

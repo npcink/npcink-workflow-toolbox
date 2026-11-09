@@ -1,5 +1,12 @@
 # Product Positioning
 
+Current availability (2026-11-09): source-material drafting is hidden and
+server-paused under `source_drafting`, including direct hosted drafting calls.
+Retained writing-pack descriptions below document recovery contracts, not active
+availability. Four default editor tools remain: formatting, Article check,
+site citations and article images. See the
+[release-containment decision](development-freeze-2026-11-09.md#2026-11-09-frozen-feature-release-containment).
+
 Status: active product contract; development scope reviewed 2026-11-09.
 
 Npcink Workflow Toolbox is the WordPress operator-facing AI workflow surface:

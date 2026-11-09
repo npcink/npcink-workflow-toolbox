@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 
-import { readEditorContentSupportBundle } from './editor-content-support-sources.mjs';
+import { readEditorContentSupportBundle, readEditorContentSupportSources, PART_ORDER } from './editor-content-support-sources.mjs';
 
 const source = readEditorContentSupportBundle();
 const expose = `
 	window.__NpcinkArticleDraftTest = {
 		defaultFlows,
+		sourceDraftingAvailable,
+		writingPackHelpers,
 		articleDraftPreviewBlocks,
 		articleDraftPreviewPlanInput,
 		editorBlockHasMeaningfulContent,
@@ -36,7 +38,7 @@ const wp = {
 	editor: { PluginSidebar: noop },
 	element: {
 		Fragment: 'div',
-		createElement: noop,
+		createElement: (type, props, ...children) => ({ type, props, children }),
 		useEffect: noop,
 		useRef: (value) => ({ current: value }),
 		useState: (value) => [typeof value === 'function' ? value() : value, noop],
@@ -45,12 +47,13 @@ const wp = {
 	i18n: { __: (value) => value, sprintf: (value) => value },
 	plugins: { registerPlugin: noop },
 };
+function boot(config = {}, withWritingPack = true) {
 const context = vm.createContext({
 	console,
 	setTimeout,
 	clearTimeout,
 	window: {
-		NpcinkToolboxEditorSupport: {},
+		NpcinkToolboxEditorSupport: config,
 		addEventListener: noop,
 		dispatchEvent: noop,
 		location: { href: '' },
@@ -59,12 +62,34 @@ const context = vm.createContext({
 		wp,
 	},
 });
-vm.runInContext(instrumented, context, { filename: 'editor-content-support.js' });
+const code = withWritingPack ? instrumented : readEditorContentSupportSources().filter((_, index) => PART_ORDER[index] !== 'writing-pack.js').join('\n').replace(/\}\)\(window\.wp \|\| \{\}\);\s*$/, expose);
+vm.runInContext(code, context, { filename: 'editor-content-support.js' });
+return context;
+}
+const context = boot();
 
 const helpers = context.window.__NpcinkArticleDraftTest;
 assert.equal(helpers.defaultFlows.some(flow => ['article_narration', 'article_audio_summary'].includes(flow.intent)), false, 'Paused audio generation entries are absent.');
 assert.equal(helpers.defaultFlows.some(flow => flow.intent === 'format_content'), true, 'Ordinary editor formatting remains available.');
 assert.ok(helpers, 'Editor draft helpers must be exposed to the smoke test.');
+
+for (const value of [undefined, false, '0', '', true, '1']) {
+	const withoutPart = boot({ sourceDraftingAvailable: value }, false).window.__NpcinkArticleDraftTest;
+	assert.equal(withoutPart.sourceDraftingAvailable, value === true || value === '1', 'Availability fails closed for missing/false localized flags.');
+	assert.equal(Object.keys(withoutPart.writingPackHelpers).length, 0, 'Normal editor boots without the dormant module.');
+	assert.equal(withoutPart.defaultFlows.length, 4, 'Default editor entries remain unchanged.');
+}
+// Exercise each dormant modal stage through the actual factory dependency wiring.
+for (const step of [1, 2, 3]) {
+	const modal = helpers.writingPackHelpers.renderSourceWorkflowModal({
+		sourceWorkflowModalOpen: true, sourceWorkflowStep: step,
+		sourceAdaptationComplete: step >= 2, sourceDraftComplete: step === 3,
+		writingPackInputMode: 'manual_brief', writingPackBrief: {}, resultControls: {},
+		result: { sections: { article_draft_preview: { sections: [{ heading: 'Heading', body: 'Body' }] } } },
+	});
+	assert.ok(modal, `Dormant stage ${step} renders with explicit dependencies.`);
+}
+assert.equal(helpers.writingPackHelpers.renderSourceWorkflowModal({ sourceWorkflowModalOpen: false }), null);
 
 const converted = helpers.articleDraftPreviewBlocks({
 	sections: [

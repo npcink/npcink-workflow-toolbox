@@ -40,6 +40,9 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
 	public function editor_content_support( WP_REST_Request $request ) {
 		$intent = sanitize_key( (string) ( $request->get_param( 'intent' ) ?: '' ) );
+		if ( 'source_adaptation_review' === $intent && Settings::cloud_feature_paused( 'source_drafting' ) ) {
+			return Settings::cloud_feature_pause_error( 'source_drafting' );
+		}
 		if ( Settings::cloud_feature_paused( 'audio_generation' ) && in_array( $intent, array( 'article_narration', 'article_audio_summary' ), true ) ) {
 			return Settings::cloud_feature_pause_error( 'audio_generation' );
 		}

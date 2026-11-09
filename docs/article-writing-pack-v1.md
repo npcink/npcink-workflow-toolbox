@@ -1,5 +1,11 @@
 # Article Writing Pack V1
 
+Active pause (2026-11-09): source drafting is server-paused with HTTP 409
+`npcink_toolbox_feature_paused` before source reading or hosted generation.
+The implementation and isolated recovery tests below are retained compatibility,
+not an enabled runtime feature. See the
+[approved containment scope](development-freeze-2026-11-09.md#2026-11-09-frozen-feature-release-containment).
+
 Status: active contract for URL, manual, mixed, review, and draft-preview stages.
 
 ## Purpose

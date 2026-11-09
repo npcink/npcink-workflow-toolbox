@@ -1,6 +1,13 @@
 # External Source Adaptation Review
 
-Status: active writing-pack review and draft-preview flow.
+Active pause (2026-11-09): the source-drafting workflow is server-paused.
+Existing source-stage IDs return HTTP 409 `npcink_toolbox_feature_paused` before
+source/model work. Trial instructions and recovery implementations below are
+historical until an explicit operator decision restores the flow; do not run a
+paid trial merely to clear this expected pause. See the
+[containment scope](development-freeze-2026-11-09.md#2026-11-09-frozen-feature-release-containment).
+
+Status: retained writing-pack contracts; runtime paused.
 
 ## AI Change Envelope
 

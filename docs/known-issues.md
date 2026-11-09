@@ -20,6 +20,20 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
+- **Installed Plugin Check package policy errors (Toolbox content-structure/page-quality pack queries, 2026-11-09).**
+  The release-containment slice reproduces two
+  `WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters`
+  errors at `Content_Structure_Insight_Builder.php:167` and
+  `Page_Quality_Insight_Builder.php:168`, with five existing warnings. The
+  working distribution and `origin/master` at `54f95edc` return identical
+  findings. Source guards, full deterministic tests and runtime inventory pass,
+  but WordPress.org package acceptance is not established. Next bounded action
+  before publication: audit why these two sampling queries suppress filters,
+  preserve their scoping/no-store guarantees, then repair or explicitly justify
+  the policy and rerun installed Plugin Check. Do not silently flip the flags
+  in an unrelated editor/packaging change. Source:
+  [containment verification](development-freeze-2026-11-09.md#containment-verification--2026-11-09).
+
 - **Local/Cloud media identity mismatch (Addon / Cloud projection, WordPress attachment truth, 2026-11-09).**
   The [timeout follow-up](site-media-timeout-followup-2026-11-09.md) traced a
   successful Cloud search and repaired the browser deadline mismatch (see

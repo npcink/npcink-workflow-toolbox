@@ -7,9 +7,19 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Frozen-feature release containment — 2026-11-09:** source drafting now returns
+HTTP 409 before source/model work, including direct hosted-provider calls.
+Its retained UI module and JED are packaged for recovery but not enqueued while
+paused. Release builds validate both copied files and the final ZIP against a
+runtime inventory, excluding local screenshots/reports/logs/caches/archives.
+See the [approved scope](development-freeze-2026-11-09.md#2026-11-09-frozen-feature-release-containment).
+Installed Plugin Check still fails on two pre-existing sampling-query policy
+errors, reproduced identically on `origin/master`; see [Known Issues](known-issues.md).
+This is source/package verification, not a new WordPress.org release.
+
 **Article check convergence — 2026-11-09:** the operator approved four default
 editor entries: formatting, Article check, site citation suggestions and images.
-Source drafting is hidden/frozen with compatibility retained. The existing
+Source drafting is hidden/frozen and server-paused with IDs and recovery code retained. The existing
 `publish_preflight` report shows local/Cloud scope first, contextual ALT and
 source-backed issues; generic style, length, structure and metadata tasks are
 paused. See the [current decision](editor-intent-convergence-decision.md#2026-11-09-article-check-convergence).

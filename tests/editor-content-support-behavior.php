@@ -710,6 +710,18 @@ npcink_toolbox_editor_flow_assert( 1 === count( $precise['items'] ) && 'punctuat
 $late_punctuation = $review_method->invoke( $review_service, array( 'content_full_text' => str_repeat( '保留正常原文', 30 ) . '，，需要核对。' ) );
 npcink_toolbox_editor_flow_assert( false !== strpos( $late_punctuation['items'][0]['evidence'], '，，' ), 'Long-paragraph evidence quotes the actual punctuation instead of an unrelated leading excerpt.' );
 
+// The release pause rejects every retained drafting stage before context or transport.
+$drafting_call_snapshot = array( $npcink_toolbox_progressive_cloud_calls, $npcink_toolbox_progressive_source_reader_calls, $npcink_toolbox_progressive_writing_pack_inputs, $npcink_toolbox_progressive_draft_inputs, $npcink_toolbox_progressive_site_knowledge_inputs );
+foreach ( array( 'extract', 'research_plan', 'adapt', 'draft' ) as $stage ) {
+	$paused_drafting = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'source_adaptation_review', 'source_stage' => $stage, 'input_mode' => 'manual_brief' ) );
+	npcink_toolbox_editor_flow_assert( isset( $paused_drafting['error'] ) && 409 === npcink_toolbox_editor_flow_error_status( $paused_drafting['error'] ) && 'npcink_toolbox_feature_paused' === $paused_drafting['error']->get_error_code() && 'source_drafting' === $paused_drafting['error']->get_error_data()['feature'] && false === $paused_drafting['error']->get_error_data()['retryable'], "Drafting stage {$stage} is paused before parsing malformed or missing source context." );
+}
+foreach ( array( 'source_adaptation_review', 'article_draft_from_writing_pack' ) as $drafting_intent ) {
+	$paused_provider = $client->run_hosted_ai_content_support( array( 'intent' => $drafting_intent ) );
+	npcink_toolbox_editor_flow_assert( is_wp_error( $paused_provider ) && 'npcink_toolbox_feature_paused' === $paused_provider->get_error_code(), "Direct hosted provider intent {$drafting_intent} cannot bypass the release pause." );
+}
+npcink_toolbox_editor_flow_assert( $drafting_call_snapshot === array( $npcink_toolbox_progressive_cloud_calls, $npcink_toolbox_progressive_source_reader_calls, $npcink_toolbox_progressive_writing_pack_inputs, $npcink_toolbox_progressive_draft_inputs, $npcink_toolbox_progressive_site_knowledge_inputs ), 'Paused source drafting makes zero Reader, Site Knowledge, writing pack or model calls.' );
+
 // A2. Audio intents are paused at the REST editor path before generation or transport.
 foreach ( array( 'article_narration', 'article_audio_summary' ) as $audio_intent ) {
 	$paused_audio = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => $audio_intent ) + $npcink_toolbox_editor_flow_draft );

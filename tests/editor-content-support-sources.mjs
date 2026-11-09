@@ -13,6 +13,7 @@ export const PART_ORDER = [
 	'internal-links.js',
 	'related-reading.js',
 	'audio-preferences.js',
+	'writing-pack.js',
 ];
 
 export function readEditorContentSupportSources() {
