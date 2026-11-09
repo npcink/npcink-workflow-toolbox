@@ -126,6 +126,7 @@ Start from the active documents below before changing code.
 - [Editor Progressive Recommendations Trial](editor-progressive-recommendations-trial.md)
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
+- [Installed editor real-role acceptance (2026-11-09)](editor-real-role-acceptance-2026-11-09.md) — real role authorization, native taxonomy panels, ALT save/readback, image request cleanup repair and separate live retrieval timeout.
 - [Article review report v1](article-review-report-v1.md) — bounded coverage, evidence navigation and author-only correction.
 - [Article language integration acceptance (2026-10-30)](article-language-integration-acceptance-2026-10-30.md) and [body-free receipt](article-language-integration-evidence-2026-10-30.json) — exact-text, offline bridge/browser acceptance; Cloud GitHub source gate remains unfulfilled.
 - [Chinese language review delivery (2026-10-31)](article-language-delivery-acceptance-2026-10-31.md) and [body-free delivery evidence](article-language-delivery-evidence-2026-10-31.json) — merged source, exact-SHA CI, real signed/model checks and separate M4 acceptance state.

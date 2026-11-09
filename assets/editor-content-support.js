@@ -8849,6 +8849,7 @@
 					setImageResultForSearchMode(targetSearchMode, imageResultForSearchMode(targetSearchMode) || null, true);
 			setImagePreviewLightbox(null);
 			setImageSelectionError('');
+				const requestSignal = beginContentRequest();
 				try {
 					const query = imageFastSearchQuery(postContext, operatorInstruction, activePicker.context, activePicker);
 					const refreshVariant = forceRefresh ? imageRefreshVariant() : '';
@@ -8862,7 +8863,6 @@
 						refresh_variant: refreshVariant,
 						visual_context: buildImageVisualContext(postContext, activeImageMode, operatorInstruction, imagePickerContextOverride(activePicker), activePicker.imageUse, refreshVariant),
 					};
-					const requestSignal = beginContentRequest();
 					let result = await postImageCandidatesFastFirst(requestPayload, requestSignal);
 					const fallbackQueries = targetSearchMode === 'source' && !extractImageCandidates(result).length
 						? imageAutoFallbackQueries(result, query, activePicker).slice(0, IMAGE_SOURCE_AUTO_FALLBACK_MAX_ATTEMPTS)
@@ -8992,6 +8992,7 @@
 					setImageResultForSearchMode(targetSearchMode, imageResultForSearchMode(targetSearchMode) || null, true);
 			setImagePreviewLightbox(null);
 			setImageSelectionError('');
+				const requestSignal = beginContentRequest();
 				try {
 					const refreshVariant = forceRefresh ? imageRefreshVariant() : '';
 					const requestPayload = {
@@ -9003,7 +9004,6 @@
 						refresh_variant: refreshVariant,
 						visual_context: buildImageVisualContext(postContext, activePicker.mode, query, imagePickerContextOverride(activePicker), activePicker.imageUse, refreshVariant),
 					};
-					const requestSignal = beginContentRequest();
 					const result = await postImageCandidatesFastFirst(requestPayload, requestSignal);
 					if (imageSourceRequestSeqRef.current !== requestSeq) {
 						return;

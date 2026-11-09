@@ -7,6 +7,16 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Real editor roles — 2026-11-09:** installed WordPress author, editor and
+administrator accounts now pass real REST permission checks, native taxonomy
+panel selection, current-article ALT Apply, normal draft save and reload.
+Core records and attachment-global ALT remain unchanged. Image request cleanup
+had a reproduced `requestSignal` scope error in both manual and automatic
+handlers; the focused repair covers success, error, cancel and stale exits.
+Candidate provider results are fixed on the server after authorization;
+an initial live site-media query timed out and remains separate upstream debt.
+See [acceptance and limits](editor-real-role-acceptance-2026-11-09.md).
+
 **Operator action guidance maintenance — 2026-11-09:** metadata category/tag
 results now provide manual WordPress selection guidance for users without the
 default administrator workflow capability, while retaining the existing Core
