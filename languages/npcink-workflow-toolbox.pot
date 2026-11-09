@@ -10145,3 +10145,24 @@ msgstr ""
 
 msgid "Review existing WordPress tags that match this draft."
 msgstr ""
+
+msgid "Prepare a draft from a URL or brief."
+msgstr ""
+
+msgid "Check missing items and risks. Plain article text is sent to Cloud for language review."
+msgstr ""
+
+msgid "Choose body links or a related reading list."
+msgstr ""
+
+msgid "Search site media, external sources, or generated candidates."
+msgstr ""
+
+msgid "Check scope and data use"
+msgstr ""
+
+msgid "Adjust spacing and layout only."
+msgstr ""
+
+msgid "Editor defaults are source drafting, preflight, links, and images. ALT review is in preflight; category and tag shortcuts are hidden."
+msgstr ""

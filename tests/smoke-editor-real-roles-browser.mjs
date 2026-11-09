@@ -146,20 +146,14 @@ add_action('set_transient', static function ($key) use ($role_smoke_guard) {
 		await openSidebar();
 		assert.equal(await page.evaluate(() => window.NpcinkToolboxEditorSupport.canSubmitMetadataHandoff), role === 'administrator' ? '1' : '');
 		const roleResult = { role };
+		// Taxonomy shortcuts are hidden; exercise retained transport authorization
+		// directly and keep native WordPress taxonomy save/readback below.
 		for (const [label, intent, field] of [[/Category suggestions|分类建议/, 'category_suggestions', 'category_candidates'], [/Tag suggestions|标签建议/, 'tag_suggestions', 'tag_candidates']]) {
-			const payload = await runFlow(label, intent);
-			const candidates = payload.sections.summary_terms_optimization[field];
+			assert.equal(await page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: label }).count(), 0);
+			const response = await rest('editor/content-support', { intent, post_id: post, title: `${site.category.name} ${site.tag.name}`, content: `${site.category.name} ${site.tag.name}` });
+			assert.equal(response.status, 200, `${role}: retained ${intent} REST authorization succeeds.`);
+			const candidates = response.body.sections.summary_terms_optimization[field];
 			assert.ok(candidates.length > 0, `${role}: existing ${field} returned.`);
-			const handoff = page.locator('.npcink-toolbox-editor-support__metadata-handoff');
-			if (role === 'administrator') {
-				await handoff.waitFor();
-				await handoff.locator('summary').click();
-				await handoff.getByRole('checkbox').first().check();
-				assert.ok(await handoff.getByRole('button', { name: /Create Core review proposal|创建 Core 审核提案/ }).isEnabled());
-			} else {
-				await page.getByText(/Review these suggestions in the WordPress Categories|请对照建议，在 WordPress/).waitFor();
-				assert.equal(await handoff.count(), 0);
-			}
 			roleResult[intent] = true;
 		}
 		const plan = await rest('flows/content-metadata-apply-plan', { post_id: post, category_ids: [site.category.term_id], tag_ids: [site.tag.term_id] });

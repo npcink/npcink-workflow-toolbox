@@ -9,6 +9,11 @@
         "lang": "zh_CN",
         "plural-forms": "nplurals=1; plural=0;"
       },
+      "Prepare a draft from a URL or brief.": ["根据网址或简要需求准备初稿。"],
+      "Check missing items and risks. Plain article text is sent to Cloud for language review.": ["检查缺失项与风险；语言检查会将正文纯文本发送至 Cloud。"],
+      "Choose body links or a related reading list.": ["选择正文内链或文末相关阅读。"],
+      "Search site media, external sources, or generated candidates.": ["查找站内图片、外部图库或生成候选。"],
+      "Check scope and data use": ["检查范围与数据使用"],
       "Review existing WordPress categories that match this draft.": ["审阅与当前草稿匹配的现有 WordPress 分类。"],
       "Review existing WordPress tags that match this draft.": ["审阅与当前草稿匹配的现有 WordPress 标签。"],
       "Use the current article context to search the site Media Library or external sources, or generate an image candidate. Review a candidate before choosing how to use it.": ["根据当前文章内容搜索本站媒体库、外部来源，或生成候选图片。先审阅候选，再选择用途。"],

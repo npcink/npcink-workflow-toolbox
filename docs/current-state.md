@@ -7,6 +7,17 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Editor sidebar simplification — 2026-11-09:** at the operator's request,
+category/tag menu and preflight shortcuts are hidden because the WordPress AI
+plugin covers them; their REST/runtime compatibility and permissions remain
+intact. The menu drops
+its general introduction and idle drafting status, uses concise full-width
+help, and folds detailed preflight scope while keeping its Cloud text-transfer
+notice visible. See the [visibility amendment](editor-intent-convergence-decision.md#2026-11-09-sidebar-visibility-amendment).
+Installed Chinese/English checks pass at 248px content width with keyboard
+disclosure and no overflow. Real-role fixture acceptance retains native taxonomy
+and ALT save/readback; it does not evaluate hosted model quality or production.
+
 **Site-media deadline follow-up — 2026-11-09:** a successful Cloud query took
 15.056 seconds (17.019 seconds for the complete provider call), proving the
 shared 8-second browser deadline was too short for the existing two 20-second

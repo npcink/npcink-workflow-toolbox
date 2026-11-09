@@ -190,15 +190,6 @@
 	overflow-wrap: anywhere;
 }
 
-.npcink-toolbox-editor-support__intro-row {
-	display: block;
-	margin: 0 0 12px;
-}
-
-.npcink-toolbox-editor-support__intro-row .npcink-toolbox-editor-support__intro {
-	margin: 0;
-}
-
 .npcink-toolbox-editor-support__progressive {
 	display: grid;
 	gap: 8px;
@@ -237,6 +228,7 @@
 .npcink-toolbox-editor-support__flow-group {
 	display: grid;
 	gap: 0;
+	min-width: 0;
 }
 
 .npcink-toolbox-editor-support__flow-group h4 {
@@ -252,9 +244,38 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
 	gap: 8px;
-	align-items: start;
+	align-items: center;
 	padding: 10px 0;
 	border-top: 1px solid #f0f0f0;
+}
+
+.npcink-toolbox-editor-support__flow-description,
+.npcink-toolbox-editor-support__flow-help {
+	grid-column: 1 / -1;
+	min-width: 0;
+	margin: 0;
+	color: var(--wpds-color-foreground-content-neutral-weak, #646970);
+	font-size: 12px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.npcink-toolbox-editor-support__flow-help summary {
+	width: fit-content;
+	max-width: 100%;
+	cursor: pointer;
+}
+
+.npcink-toolbox-editor-support__flow-help p {
+	margin: 8px 0 0;
+}
+
+.npcink-toolbox-editor-format > p {
+	margin-bottom: 8px;
+}
+
+.npcink-toolbox-editor-support__flow--links .npcink-toolbox-editor-support__flow-actions {
+	grid-column: 1 / -1;
 }
 
 .npcink-toolbox-editor-support__flow-main {
@@ -3301,6 +3322,15 @@
 
 .npcink-toolbox-editor-support__flow-actions {
 	display: flex;
-	flex-direction: column;
+	flex-wrap: wrap;
 	gap: 8px;
+	min-width: 0;
+}
+
+.npcink-toolbox-editor-support__flow-actions .components-button {
+	max-width: 100%;
+	height: auto;
+	min-height: 32px;
+	padding: 6px 8px;
+	white-space: normal;
 }

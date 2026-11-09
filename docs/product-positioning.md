@@ -226,9 +226,11 @@ same Toolkit plan and Adapter execution profile.
 
 High-frequency article support belongs in the WordPress post editor as a
 Toolbox-owned panel, not only on the standalone Toolbox admin page. The editor
-panel defaults to fixed flows for writing-pack preparation, publish preflight,
-existing-category and existing-tag suggestions, internal-link candidates,
-related reading, current-article contextual ALT review, and image candidates.
+panel defaults to formatting, writing-pack preparation, publish preflight,
+internal-link candidates, related reading, and image candidates. Current-article
+contextual ALT review is reached through preflight. Category/tag shortcuts are
+hidden at the operator's request on 2026-11-09 because the WordPress AI plugin
+already supplies those entrypoints; retained Toolbox contracts remain callable.
 New article narration and audio-summary requests are paused. The standalone
 generic editor title, summary, outline, discoverability, article-checkup, and
 combined taxonomy intents are retired under the

@@ -244,7 +244,7 @@
 		}
 
 		return h('div', { className: 'npcink-toolbox-editor-format' },
-			h('p', null, t('Formatting only adjusts spacing and layout. Words, punctuation, links, and media are preserved; corrections are for you to make.')),
+			h('p', { className: 'npcink-toolbox-editor-support__flow-description' }, t('Adjust spacing and layout only.')),
 			h('div', { className: 'npcink-toolbox-editor-support__flow' },
 				h(Button, { variant: 'secondary', icon: 'editor-alignleft', 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
 				undo ? h(Button, { icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),

@@ -1,5 +1,10 @@
 # Npcink Workflow Toolbox
 
+The editor sidebar hides duplicate category/tag shortcuts supplied by the
+WordPress AI plugin. Its compact menu keeps descriptions across the full width
+and detailed preflight scope optional, with Cloud text-transfer guidance visible.
+Existing taxonomy runtime contracts remain callable.
+
 SEO/AEO/GEO specialist entrypoints and new specialist calls are temporarily
 paused. Ordinary titles, summaries, categories, tags, internal links, ALT,
 media tools and source preparation remain available. Existing specialist

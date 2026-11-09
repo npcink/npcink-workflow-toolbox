@@ -10651,3 +10651,24 @@ msgstr "审阅与当前草稿匹配的现有 WordPress 分类。"
 
 msgid "Review existing WordPress tags that match this draft."
 msgstr "审阅与当前草稿匹配的现有 WordPress 标签。"
+
+msgid "Prepare a draft from a URL or brief."
+msgstr "根据网址或简要需求准备初稿。"
+
+msgid "Check missing items and risks. Plain article text is sent to Cloud for language review."
+msgstr "检查缺失项与风险；语言检查会将正文纯文本发送至 Cloud。"
+
+msgid "Choose body links or a related reading list."
+msgstr "选择正文内链或文末相关阅读。"
+
+msgid "Search site media, external sources, or generated candidates."
+msgstr "查找站内图片、外部图库或生成候选。"
+
+msgid "Check scope and data use"
+msgstr "检查范围与数据使用"
+
+msgid "Adjust spacing and layout only."
+msgstr "仅整理间距和版式。"
+
+msgid "Editor defaults are source drafting, preflight, links, and images. ALT review is in preflight; category and tag shortcuts are hidden."
+msgstr "编辑器默认提供资料起草、发布预检、内链与配图。ALT 审阅位于发布预检中；分类和标签快捷入口已隐藏。"
