@@ -1,6 +1,6 @@
 # Product Positioning
 
-Status: active product contract; availability reviewed 2026-11-02.
+Status: active product contract; development scope reviewed 2026-11-09.
 
 Npcink Workflow Toolbox is the WordPress operator-facing AI workflow surface:
 it gives site owners and editors fixed buttons for Cloud-managed web search,
@@ -9,8 +9,12 @@ and repeatable AI-assisted content-support workflows.
 
 ## Current Focus And Availability
 
-The current delivery priority is useful related-article candidates for manual
-selection in the WordPress editor. Follow the
+The current priority is the everyday usability of the existing article editor
+loop under the operator-approved
+[development freeze](development-freeze-2026-11-09.md). Maintain supported
+behavior and fix concrete failures; feature expansion, new packs/providers and
+repeated model/ranking campaigns are frozen. Keep the existing related-article
+and internal-link baseline available for manual choice. Follow the
 [recommendation standard](related-article-and-internal-link-recommendation-standard-v1.md)
 and its AI-led evaluation loop. Candidate relevance and safe link insertion
 are separate acceptance questions. The operator uses the product, provides

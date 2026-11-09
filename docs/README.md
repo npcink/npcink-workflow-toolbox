@@ -16,6 +16,7 @@ Start from the active documents below before changing code.
 ## Core Contracts
 
 - [Current State](current-state.md)
+- [Development Freeze And Maintenance Scope — 2026-11-09](development-freeze-2026-11-09.md) — accepted feature dispositions, editor-loop maintenance, no-repeat rules and bounded restart conditions; existing runtime pauses and data remain.
 - [Known Issues](known-issues.md)
 - [Article / OSS referenced-chat closeout (2026-11-01)](article-oss-session-closeout-2026-11-01.md) — historical issue dispositions, 19 merged PRs, four OSS commits, verified topic cleanup and explicit retained resources/owners.
 - [推荐与模型研究会话关闭审计 — 2026-10-29](session-research-closeout-2026-10-29.md) — 48 merged PRs, ignored-evidence preservation, conditional research and remaining owners; runtime acceptance remains separate.
