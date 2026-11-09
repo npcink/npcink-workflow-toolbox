@@ -692,13 +692,23 @@ for ( $i = 0; $i < 30; ++$i ) {
 	$paragraphs[] = "第{$i}段，，保留原文。第二句。第三句。第四句。";
 }
 $bounded = $review_method->invoke( $review_service, array( 'title' => '文章', 'excerpt' => '摘要', 'content_full_text' => implode( "\n\n", $paragraphs ) ) );
-npcink_toolbox_editor_flow_assert( 24 === $bounded['coverage']['paragraphs_checked'] && 30 === $bounded['coverage']['paragraphs_in_context'] && 80 === $bounded['coverage']['semantic_sentences_checked'] && 120 === $bounded['coverage']['sentences_in_context'], 'Report distinguishes 24 of 30 paragraphs and 80 of 120 sentences.' );
+npcink_toolbox_editor_flow_assert( 24 === $bounded['coverage']['paragraphs_checked'] && 30 === $bounded['coverage']['paragraphs_in_context'] && 0 === $bounded['coverage']['semantic_sentences_checked'] && 120 === $bounded['coverage']['sentences_in_context'], 'Report distinguishes 24 of 30 punctuation-checked paragraphs and explicitly pauses local semantic checking.' );
 npcink_toolbox_editor_flow_assert( true === $bounded['coverage']['partial'] && 12 === $bounded['coverage']['issues_shown'] && $bounded['coverage']['issues_found'] > 12 && in_array( 'body_risk_classification', $bounded['coverage']['not_checked'], true ), 'Report discloses issue truncation and unimplemented content-risk checking.' );
 $long_input = array( 'title' => 'Article', 'excerpt' => 'Summary', 'content' => str_repeat( 'unchanged ', 4000 ) );
 $limited = $review_method->invoke( $review_service, $review_context->invoke( $review_service, new WP_REST_Request( $long_input ) ) );
 npcink_toolbox_editor_flow_assert( true === $limited['coverage']['context_truncated'] && $limited['coverage']['input_text_characters'] > $limited['coverage']['context_text_characters'], 'Report reveals the 30,000-character context limit before claiming coverage.' );
 $clear = $review_method->invoke( $review_service, array( 'title' => 'Article', 'excerpt' => 'Summary', 'content_full_text' => 'A short note.' ) );
 npcink_toolbox_editor_flow_assert( 0 === $clear['coverage']['issues_found'] && 0 === $clear['coverage']['issues_shown'] && 0 === $clear['summary']['issue_count'], 'A no-findings notice is not counted as a finding or a comprehensive pass.' );
+
+// Generic editorial preferences and missing metadata must not drown out precise issues.
+$generic_text = str_repeat( '性能提升 20%，完全适合本次测试。', 30 );
+$generic = $review_method->invoke( $review_service, array( 'content_full_text' => $generic_text ) );
+npcink_toolbox_editor_flow_assert( array() === $generic['items'] && 'not_checked' === $generic['format_consistency']['status'] && 'not_checked' === $generic['semantic_consistency']['status'], 'Digits, tone, length, missing title/excerpt and format preferences create no local warnings.' );
+$precise = $review_method->invoke( $review_service, array( 'content_full_text' => $generic_text . "\n\n最后一段，，需要核对。" ) );
+npcink_toolbox_editor_flow_assert( 1 === count( $precise['items'] ) && 'punctuation' === $precise['items'][0]['type'], 'A concrete punctuation issue survives after broad editorial content.' );
+
+$late_punctuation = $review_method->invoke( $review_service, array( 'content_full_text' => str_repeat( '保留正常原文', 30 ) . '，，需要核对。' ) );
+npcink_toolbox_editor_flow_assert( false !== strpos( $late_punctuation['items'][0]['evidence'], '，，' ), 'Long-paragraph evidence quotes the actual punctuation instead of an unrelated leading excerpt.' );
 
 // A2. Audio intents are paused at the REST editor path before generation or transport.
 foreach ( array( 'article_narration', 'article_audio_summary' ) as $audio_intent ) {

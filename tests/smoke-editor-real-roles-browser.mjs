@@ -50,7 +50,7 @@ async function runFlow(label, intent) {
 	await toolList();
 	const [response] = await Promise.all([
 		page.waitForResponse((response) => new URL(response.url()).pathname.endsWith('/editor/content-support') && response.request().method() === 'POST' && response.request().postDataJSON()?.intent === intent, { timeout: 180000 }),
-		page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: label }).getByRole('button').click(),
+		page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: label }).locator('.npcink-toolbox-editor-support__flow-actions').getByRole('button').first().click(),
 	]);
 	assert.equal(response.status(), 200, `${intent}: real REST authorization succeeds.`);
 	console.log(`PASS: real ${intent} response.`);
@@ -191,7 +191,7 @@ add_action('set_transient', static function ($key) use ($role_smoke_guard) {
 		console.log(`PASS: ${role}: real image route with server provider fixture.`);
 		await page.locator('.npcink-toolbox-editor-support__image-modal .components-modal__header button').click();
 		await inspector.waitFor({ state: 'hidden' });
-		const preflight = await runFlow(/Publish preflight|发布预检/, 'publish_preflight');
+		const preflight = await runFlow(/Article check|文章检查/, 'publish_preflight');
 		roleResult.article_review_status = preflight.sections.article_language_review?.status;
 		await page.locator('.npcink-toolbox-editor-support__discoverability-media button').filter({ hasText: /Preview contextual ALT|预览上下文 ALT/ }).click();
 		const alt = page.locator('[data-toolbox-contextual-alt-input]');

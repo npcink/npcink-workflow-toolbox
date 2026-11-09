@@ -10681,3 +10681,72 @@ msgstr "展开"
 
 msgid "Collapse"
 msgstr "收起"
+
+msgid "Article check"
+msgstr "文章检查"
+
+msgid "Check"
+msgstr "检查"
+
+msgid "Check specific text issues and image ALT. Bounded article text is sent to Cloud for read-only review."
+msgstr "检查具体文字问题和图片 ALT；运行时将有界文章文本发送至 Cloud 只读审阅。"
+
+msgid "No repeated punctuation hints in the checked text."
+msgstr "本次已检查文本没有重复标点提示。"
+
+msgid "Editor defaults are formatting, article check, site citations, and images. ALT review is in article check; source drafting and category/tag shortcuts are hidden."
+msgstr "编辑器默认提供正文整理、文章检查、站内引用建议和文章配图。ALT 审阅位于文章检查中；根据资料起草及分类、标签快捷入口已隐藏。"
+
+msgid "未完成（拒绝）"
+msgstr "未完成（拒绝）"
+
+msgid "（超时）"
+msgstr "（超时）"
+
+msgid "（完成）"
+msgstr "（完成）"
+
+msgid "本地仅检查文章开头，后文超出范围。"
+msgstr "本地仅检查文章开头，后文超出范围。"
+
+msgid "检查详情"
+msgstr "检查详情"
+
+msgid "本地重复标点：%1$d / %2$d 段%3$s。"
+msgstr "本地重复标点：%1$d / %2$d 段%3$s。"
+
+msgid "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"
+msgstr "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"
+
+msgid "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
+msgstr "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
+
+msgid "完成"
+msgstr "完成"
+
+msgid "失败"
+msgstr "失败"
+
+msgid "语境"
+msgstr "语境"
+
+msgid "本地重复标点：未检查。"
+msgstr "本地重复标点：未检查。"
+
+msgid "本次没有可展示的 Cloud 提示，请结合顶部检查状态判断覆盖范围。"
+msgstr "本次没有可展示的 Cloud 提示，请结合顶部检查状态判断覆盖范围。"
+
+msgid "本次检查范围"
+msgstr "本次检查范围"
+
+msgid "Cloud 仅覆盖部分内容或结果不完整。"
+msgstr "Cloud 仅覆盖部分内容或结果不完整。"
+
+msgid "本地显示 %1$d / %2$d 条提示。"
+msgstr "本地显示 %1$d / %2$d 条提示。"
+
+msgid "（部分完成）"
+msgstr "（部分完成）"
+
+msgid "Check article"
+msgstr "检查"

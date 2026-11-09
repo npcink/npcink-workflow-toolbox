@@ -7,6 +7,13 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Article check convergence — 2026-11-09:** the operator approved four default
+editor entries: formatting, Article check, site citation suggestions and images.
+Source drafting is hidden/frozen with compatibility retained. The existing
+`publish_preflight` report shows local/Cloud scope first, contextual ALT and
+source-backed issues; generic style, length, structure and metadata tasks are
+paused. See the [current decision](editor-intent-convergence-decision.md#2026-11-09-article-check-convergence).
+
 **Editor sidebar simplification — 2026-11-09:** at the operator's request,
 the menu uses flat titled action rows without group subtitles. Each tool keeps
 its basic introduction visible, limited to two lines; overflowing text has an
@@ -184,9 +191,8 @@ ordinary generation and Site Knowledge remain available. See
   Comment Moderation and Flagged Media (0.3.0), Taxonomy/Tag and
   Internal-Link (0.4.0). All share one pattern: bounded sampling (<=50),
   Cloud suggestion, review-only admin panel, fail-closed, pii no-store.
-- Default surfaces: editor **Npcink Content Support** sidebar (writing
-  pack, preflight, category/tag, internal links, contextual ALT, image
-  candidates) on `post`/`page` editors only (extend via the
+- Default surfaces: editor **Npcink Content Support** sidebar (formatting, Article check with contextual ALT,
+  site citations and image candidates) on `post`/`page` editors only (extend via the
   `npcink_toolbox_editor_supported_post_types` filter). Admin has three top
   tabs: **Start**, **Site & Ask**, and **Image Handling** (ALT review first;
   optimization paused). Site Profile, Smart Ask and the folded Site Check

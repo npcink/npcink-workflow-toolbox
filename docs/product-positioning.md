@@ -226,24 +226,27 @@ same Toolkit plan and Adapter execution profile.
 
 High-frequency article support belongs in the WordPress post editor as a
 Toolbox-owned panel, not only on the standalone Toolbox admin page. The editor
-panel defaults to formatting, writing-pack preparation, publish preflight,
-internal-link candidates, related reading, and image candidates. Current-article
-contextual ALT review is reached through preflight. Category/tag shortcuts are
+panel defaults to formatting, Article check, site citation suggestions (body
+links and related reading), and image candidates. Current-article contextual ALT
+review is reached through Article check. Source drafting is hidden and frozen
+under the 2026-11-09 operator convergence decision; callable contracts remain.
+Category/tag shortcuts are
 hidden at the operator's request on 2026-11-09 because the WordPress AI plugin
 already supplies those entrypoints; retained Toolbox contracts remain callable.
 New article narration and audio-summary requests are paused. The standalone
 generic editor title, summary, outline, discoverability, article-checkup, and
 combined taxonomy intents are retired under the
 [editor intent decision](editor-intent-convergence-decision.md); local
-article-checkup signals remain inside publish preflight. Ordinary title,
+concrete punctuation signals remain inside Article check (`publish_preflight`).
+Ordinary title,
 summary, and selected-text rewrite entrypoints belong to the WordPress AI
 plugin; see the [existing-content acceptance](existing-content-loop-acceptance-2026-10-30.md).
 Suggestions keep the native-editor or governed-handoff boundary appropriate
 to their target. Related existing-post review
-belongs inside publish preflight duplicate-risk checks and the unified site
-citation flow rather than a separate editor intent. Site citation candidates
-are manual review aids, publish preflight is a unified advisory
-review panel, SEO metadata is only a single-post Core handoff preview, and new
+belongs in the unified site citation flow rather than a separate editor intent.
+Site citation candidates are manual review aids. Article check reports concrete
+source-backed text issues; the broad legacy preflight checklist is hidden.
+Retained SEO metadata contracts provide only a single-post Core handoff preview; new
 vocabulary remains Core policy-gated strong review.
 
 The editor may also expose one URL-reference article-writing-pack flow that

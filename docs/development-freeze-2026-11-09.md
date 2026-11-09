@@ -3,6 +3,24 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## 2026-11-09 Article check convergence
+
+The operator approved four default sidebar entries: formatting, **Article check**,
+site citation suggestions and article images. Source-material drafting is hidden
+and frozen; its callable contracts, data and compatibility code remain. Restore
+its entry only after a specific operator decision tied to a concrete use case.
+
+Article check keeps the `publish_preflight` intent and permissions. Its default
+report leads with local/Cloud completion and partial/unavailable scope, then
+current-article ALT review and source-backed findings. Long evidence is collapsed;
+location only selects a verified current block. No result means neither approval
+nor safety. The legacy metadata/readiness checklist is not rendered by this path;
+missing excerpt is not a mandatory task. Generic tone, numerical-claim, length,
+structure and formatting advice is paused. Local active checks cover repeated
+Chinese punctuation only; Cloud retains its verified language/logic/context
+contract. Unused private broad-rule implementations are removed; their public
+section fields remain with `not_checked` and empty items. No automatic correction, save, publish, new mode, model or ranking change.
+
 ## Decision And Purpose
 
 Concentrate Toolbox work on the everyday usability of the existing article
@@ -29,7 +47,7 @@ no feature removal, data migration, deployment or release.
 | Current-article missing ALT, image candidates and existing-media selection | Maintain existing use; freeze expansion | Fix safety, permissions, compatibility and blocking defects; preserve attribution and editor/governed adoption boundaries. |
 | Related articles, internal links and Related reading | Keep usable; freeze ranking/model baseline and expansion | Apply the existing recommendation no-repeat rule and restart conditions; verify candidate quality separately from insertion safety. |
 | Category/tag suggestions, site profile and Site Knowledge consumption | Maintenance only | Preserve current contracts and dependency health; no new vocabulary automation, local indexing or retrieval management. |
-| Source-material writing packs and draft preview | Keep usable; freeze expansion | Maintain bounded review and empty-body editor adoption; no new writing platform, bulk drafting or CMS integration. |
+| Source-material writing packs and draft preview | Hide default entry; freeze development | Preserve callable compatibility and existing data; restoration requires a concrete use case and explicit operator decision. |
 | Smart Ask | Keep usable; freeze expansion | Retain four existing insight packs and the separate Public site content option; no new packs, automatic selection, multi-pack orchestration or multi-turn chat product. |
 | Local Site Check and Scheduled Review preview | Keep usable; freeze expansion | Maintain bounded read-only checks; no new dashboards, scoring dimensions, crawlers or automation. |
 | External research, image sources and Zhihu hot-topic widget | Maintenance only | Preserve existing consumers and transports; no new providers, topic channels or topic-planning system. |

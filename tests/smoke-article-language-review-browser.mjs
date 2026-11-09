@@ -130,15 +130,20 @@ try {
 		return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(report) });
 	});
 	const review = page.locator('.npcink-toolbox-editor-support__article-language-review');
+	const scope = page.locator('.npcink-toolbox-editor-support__article-check-scope');
 	const locate = () => review.getByRole('button', { name: /Locate in draft|定位到正文/ }).first();
 	const start = async () => {
 		// Return from the result screen through the existing menu.
-		if (!(await page.getByRole('button', { name: /(?:Run|运行|开始|执行).*?(?:Publish preflight|发布预检)/ }).count())) {
-			await page.getByRole('button', { name: /Back to tools|返回工具/ }).click();
+		if (!(await page.getByRole('button', { name: /(?:Check|检查|Run|运行|开始|执行).*?(?:Article check|文章检查)/ }).count())) {
+			await page.getByRole('button', { name: /Tool list|工具列表|Back to tools|返回工具/ }).click();
 		}
-		await page.getByRole('button', { name: /(?:Run|运行|开始|执行).*?(?:Publish preflight|发布预检)/ }).click();
+		const response = page.waitForResponse(value => value.url().includes('/editor/content-support') && value.request().postDataJSON()?.intent === 'publish_preflight');
+		await page.getByRole('button', { name: /(?:Check|检查|Run|运行|开始|执行).*?(?:Article check|文章检查)/ }).click();
+		await response;
+		await review.waitFor();
+		for (const detail of await review.locator('details').all()) await detail.locator('summary').click();
 	};
-	assert.match(await page.locator('.npcink-toolbox-editor-support').innerText(), /运行时会将.*发送至 Cloud/);
+	assert.match(await page.locator('.npcink-toolbox-editor-support').innerText(), /发送至 Cloud|sent to Cloud/);
 	await start();
 	await review.waitFor();
 	await locate().waitFor();
@@ -149,7 +154,7 @@ try {
 	assert.equal(await review.locator('blockquote').evaluate((node) => getComputedStyle(node).whiteSpace), 'pre-wrap');
 	assert.equal(await review.getByRole('button').count(), 1);
 	assert.equal(await review.getByRole('textbox').count(), 0);
-	assert.match(await review.innerText(), /逻辑：本次范围分析完成/);
+	assert.match(await scope.innerText(), /逻辑：完成/);
 	await locate().click();
 	assert.equal(await page.evaluate(() => wp.data.select('core/block-editor').getSelectedBlock()?.name), 'core/paragraph');
 	assert.equal(await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent()), original);
@@ -159,7 +164,7 @@ try {
 		wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, { content: block.attributes.content + '编辑' });
 		wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, { content: block.attributes.content });
 	});
-	await review.getByText('草稿已变化，当前报告只能阅读，不能定位。', { exact: true }).waitFor();
+	await scope.getByText('草稿已变化，当前报告只能阅读，不能定位。', { exact: true }).waitFor();
 	assert.ok(await locate().isDisabled());
 	assert.equal(await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent()), original);
 	console.log('PASS: exact text, exclusions, read-only navigation, and edit/undo cannot revive old report.');
@@ -176,9 +181,11 @@ try {
 	// Freeze a response, edit while it is running, then release the old result.
 	pending = new Promise((resolve) => { release = resolve; });
 	const requestArrived = new Promise((resolve) => { arrived = resolve; });
-	await start(); await requestArrived;
+	const inFlightReview = start();
+	await requestArrived;
 	await page.evaluate(() => wp.data.dispatch('core/editor').editPost({ title: '作者继续编辑的合成标题' }));
 	release(); pending = Promise.resolve(); arrived = null;
+	await inFlightReview;
 	await locate().waitFor();
 	assert.ok(await locate().isDisabled());
 	console.log('PASS: in-flight draft edit leaves the returned report stale.');
@@ -199,16 +206,17 @@ try {
 	console.log('PASS: both cross-paragraph locations are read-only and expire together.');
 	mode = 'partial';
 	await start(); await locate().waitFor();
-	assert.match(await review.innerText(), /已隐藏 1 条/);
-	assert.match(await review.innerText(), /数量上限/);
-	assert.match(await review.innerText(), /部分内容|不完整/);
+	await scope.locator('summary').click();
+	assert.match(await scope.innerText(), /已隐藏 1 条/);
+	assert.match(await scope.innerText(), /数量上限/);
+	assert.match(await scope.innerText(), /部分内容|不完整/);
 	mode = 'refused';
 	await start(); await locate().waitFor();
-	assert.match(await review.innerText(), /成人内容语境风险：未能分析（拒绝）/);
+	assert.match(await scope.innerText(), /语境：未完成（拒绝）/);
 	mode = 'unavailable';
 	const beforeUnavailable = await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
 	await start();
-	await review.getByText('Cloud 中文语句提示暂不可用；本地发布前检查仍可继续。', { exact: true }).waitFor();
+	await scope.getByText('Cloud 中文语句提示暂不可用；本地发布前检查仍可继续。', { exact: true }).waitFor();
 	assert.equal(await review.getByRole('button').count(), 0);
 	assert.equal(await review.getByRole('textbox').count(), 0);
 	assert.equal(await page.evaluate(() => wp.data.select('core/editor').getEditedPostContent()), beforeUnavailable);

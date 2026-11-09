@@ -288,6 +288,7 @@
 		},
 		{
 			intent: 'source_adaptation_review',
+			defaultVisible: false,
 			label: __('Draft from source materials', 'npcink-workflow-toolbox'),
 			description: __('Prepare a draft from a URL or brief.', 'npcink-workflow-toolbox'),
 			group: 'research_adaptation',
@@ -301,9 +302,9 @@
 		},
 		{
 			intent: 'publish_preflight',
-			label: __('Publish preflight', 'npcink-workflow-toolbox'),
-			description: __('Check missing items and risks. Plain article text is sent to Cloud for language review.', 'npcink-workflow-toolbox'),
-			details: __('图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。', 'npcink-workflow-toolbox'),
+			label: __('Article check', 'npcink-workflow-toolbox'),
+			description: __('Check specific text issues and image ALT. Bounded article text is sent to Cloud for read-only review.', 'npcink-workflow-toolbox'),
+			details: __('只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft, editor fields, Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Preflight checks, duplicate-risk refs, SEO handoff preview', 'npcink-workflow-toolbox'),
@@ -2142,7 +2143,7 @@
 			format: __('Format', 'npcink-workflow-toolbox'),
 			semantic_consistency: __('Semantic consistency', 'npcink-workflow-toolbox'),
 			other: __('Other', 'npcink-workflow-toolbox'),
-			publish_preflight: __('Publish preflight', 'npcink-workflow-toolbox'),
+			publish_preflight: __('Article check', 'npcink-workflow-toolbox'),
 			polish_notes: __('Paragraph review', 'npcink-workflow-toolbox'),
 			discoverability: __('Discoverability suggestions', 'npcink-workflow-toolbox'),
 				image_alt_suggestions: __('Image ALT Review', 'npcink-workflow-toolbox'),
@@ -4691,11 +4692,10 @@
 			const evidence = readableItemText(item.evidence || '', '');
 			const location = readableItemText(item.location || '', '');
 			const rawType = String(item.type || 'other').trim().toLowerCase().replace(/[\s-]+/g, '_') || 'other';
-			const severity = item.severity ? formatMetaLabel(item.severity) : '';
-			const type = rawType !== 'other' ? formatMetaLabel(rawType) : '';
 			return {
 				name: [location, issue].filter(Boolean).join(' · ') || __('Review item', 'npcink-workflow-toolbox'),
-				detail: [direction, evidence ? __('Evidence: ', 'npcink-workflow-toolbox') + evidence : '', [type, severity].filter(Boolean).join(' / ')].filter(Boolean).join(' · '),
+				detail: direction,
+				evidence,
 				action_policy: item.action_policy || 'operator_review_only_no_insert',
 				evidence_refs: item.evidence_refs || [],
 				id: item.id || String(index),
@@ -4736,19 +4736,12 @@
 
 	function renderArticleCheckupItems(section, controls) {
 		const items = articleCheckupItems(section);
-		const coverage = section.coverage || {};
 		if (!items.length) {
-			return renderItems(items, __('No high-confidence local article checkup issues were found.', 'npcink-workflow-toolbox'));
+			return renderItems(items, __('No repeated punctuation hints in the checked text.', 'npcink-workflow-toolbox'));
 		}
 		return createElement(
 			'div',
 			{ className: 'npcink-toolbox-editor-support__article-checkup-groups' },
-			createElement('p', null, __('Local hints only. Comprehensive grammar, cross-paragraph logic, content risk, and facts have not been verified. You make all text and punctuation corrections.', 'npcink-workflow-toolbox')),
-			coverage.scope ? createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, sprintf(
-				__('Checked %1$d of %2$d context paragraphs and %3$d of %4$d context sentences; showing %5$d of %6$d findings.', 'npcink-workflow-toolbox'),
-				coverage.paragraphs_checked, coverage.paragraphs_in_context, coverage.semantic_sentences_checked, coverage.sentences_in_context, coverage.issues_shown, coverage.issues_found
-			)) : null,
-			coverage.context_truncated ? createElement('p', null, __('Only the beginning of this article was checked; the remaining text was outside the review limit.', 'npcink-workflow-toolbox')) : null,
 			articleCheckupGroups(items).map((group) => createElement(
 				'section',
 				{ key: group.key, className: 'npcink-toolbox-editor-support__article-checkup-group' },
@@ -4756,6 +4749,7 @@
 				createElement('ul', null, group.items.map((item) => createElement('li', { key: item.id },
 					createElement('strong', null, item.name),
 					createElement('p', null, item.detail),
+					item.evidence ? createElement('details', null, createElement('summary', null, __('Evidence', 'npcink-workflow-toolbox')), createElement('blockquote', null, item.evidence)) : null,
 					item.source_location?.status === 'matched' ? createElement(Button, {
 						variant: 'link', disabled: Boolean(controls?.articleReview?.stale),
 						onClick: () => { if (!controls?.articleReview?.stale) locateArticleReviewIssue(item.source_location); },
@@ -4821,40 +4815,50 @@
 		return Boolean(before && after && ['postId', 'title', 'excerpt', 'content', 'blocks'].every((key) => before[key] === after[key]));
 	}
 
+	function renderArticleCheckScope(sections, controls) {
+		const local = sections.local_article_checkup;
+		const cloud = sections.article_language_review;
+		const coverage = local?.coverage || {};
+		const cloudCoverage = cloud?.coverage || {};
+		const states = { completed: __('完成', 'npcink-workflow-toolbox'), partial: __('部分完成', 'npcink-workflow-toolbox'), refused: __('未完成（拒绝）', 'npcink-workflow-toolbox'), failed: __('失败', 'npcink-workflow-toolbox'), unavailable: __('暂不可用', 'npcink-workflow-toolbox'), not_checked: __('未检查', 'npcink-workflow-toolbox') };
+		const status = (check) => (states[check?.status] || states.unavailable) + (check?.reason_code === 'timeout' ? __('（超时）', 'npcink-workflow-toolbox') : '');
+		return createElement('section', { className: 'npcink-toolbox-editor-support__article-check-scope' },
+			createElement('strong', null, __('本次检查范围', 'npcink-workflow-toolbox')),
+			createElement('p', null, local ? sprintf(__('本地重复标点：%1$d / %2$d 段%3$s。', 'npcink-workflow-toolbox'), coverage.paragraphs_checked || 0, coverage.paragraphs_in_context || 0, coverage.partial ? __('（部分完成）', 'npcink-workflow-toolbox') : __('（完成）', 'npcink-workflow-toolbox')) : __('本地重复标点：未检查。', 'npcink-workflow-toolbox')),
+			createElement('p', null, 'Cloud · ' + ['language', 'logic', 'content_risk'].map((key, index) => [__('语句', 'npcink-workflow-toolbox'), __('逻辑', 'npcink-workflow-toolbox'), __('语境', 'npcink-workflow-toolbox')][index] + '：' + status(cloud?.checks?.[key])).join('；')),
+			cloud?.status === 'unavailable' ? createElement('p', null, cloud.message || __('Cloud 文章审阅暂不可用。', 'npcink-workflow-toolbox')) : null,
+			cloud?.status === 'partial' || cloudCoverage.partial ? createElement('p', null, __('Cloud 仅覆盖部分内容或结果不完整。', 'npcink-workflow-toolbox')) : null,
+			coverage.context_truncated ? createElement('p', null, __('本地仅检查文章开头，后文超出范围。', 'npcink-workflow-toolbox')) : null,
+			controls?.articleReview?.stale ? createElement('p', null, __('草稿已变化，当前报告只能阅读，不能定位。', 'npcink-workflow-toolbox')) : null,
+			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。', 'npcink-workflow-toolbox')),
+			createElement('details', null,
+				createElement('summary', null, __('检查详情', 'npcink-workflow-toolbox')),
+				createElement('p', null, sprintf(__('已提交 %1$d 个文本块；排除 %2$d 个块，省略 %3$d 个文本块，截短 %4$d 个文本块。', 'npcink-workflow-toolbox'), cloudCoverage.blocks_checked || 0, cloudCoverage.excluded || 0, cloudCoverage.omitted || 0, cloudCoverage.truncated || 0)),
+				cloud?.invalid_finding_count ? createElement('p', null, sprintf(__('已隐藏 %d 条无法完整核对的提示。', 'npcink-workflow-toolbox'), cloud.invalid_finding_count)) : null,
+				cloud?.result_limit_reached ? createElement('p', null, __('已达到本次提示数量上限。', 'npcink-workflow-toolbox')) : null,
+				createElement('p', null, sprintf(__('本地显示 %1$d / %2$d 条提示。', 'npcink-workflow-toolbox'), coverage.issues_shown || 0, coverage.issues_found || 0))
+			)
+		);
+	}
+
 	function renderArticleLanguageReviewItems(section, controls) {
 		const items = Array.isArray(section?.items) ? section.items : [];
-		const checks = section?.checks || {};
 		const stale = Boolean(controls?.articleReview?.stale);
-		const coverage = section?.coverage || {};
 		const checkLabels = { language: __('语句', 'npcink-workflow-toolbox'), logic: __('逻辑', 'npcink-workflow-toolbox'), content_risk: __('成人内容语境风险', 'npcink-workflow-toolbox') };
-		const statusLabels = { completed: __('本次范围分析完成', 'npcink-workflow-toolbox'), partial: __('部分完成', 'npcink-workflow-toolbox'), refused: __('未能分析（拒绝）', 'npcink-workflow-toolbox'), failed: __('分析失败', 'npcink-workflow-toolbox'), unavailable: __('暂不可用', 'npcink-workflow-toolbox'), not_checked: __('未检查', 'npcink-workflow-toolbox') };
 		const contextLabels = { medical: '医学', educational: '教育', news: '新闻', literary: '文学', commercial: '商业', unknown: '语境待确认' };
-		const blocks = [
-			createElement('p', null, __('Cloud 文章审阅（只读）：语句、逻辑与成人内容语境风险均由作者自行判断、人工修改。报告不会自动更正、插入、保存或发布正文。', 'npcink-workflow-toolbox')),
-			createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('只分析本次提交的文本，不核验外部事实，不判断是否允许发布。没有提示不代表文章正确或安全。草稿变化后请重新检查。', 'npcink-workflow-toolbox')),
-		];
-		blocks.push(createElement('p', null, ['language', 'logic', 'content_risk'].map((key) => checkLabels[key] + '：' + (statusLabels[checks[key]?.status] || statusLabels.unavailable) + (checks[key]?.reason_code === 'timeout' ? '（超时）' : '')).join('；')));
-		if (section.status === 'unavailable') {
-			return createElement('div', { className: 'npcink-toolbox-editor-support__article-language-review' }, blocks.concat(createElement('p', null, section.message || __('Cloud 文章审阅暂不可用。', 'npcink-workflow-toolbox'))));
-		}
-		blocks.push(createElement('p', null, sprintf(__('已提交 %1$d 个文本块；排除 %2$d 个块，省略 %3$d 个文本块，截短 %4$d 个文本块。', 'npcink-workflow-toolbox'), coverage.blocks_checked || 0, coverage.excluded || 0, coverage.omitted || 0, coverage.truncated || 0)));
-		if (section.status === 'partial' || coverage.partial) blocks.push(createElement('p', null, __('本次仅覆盖部分内容或返回结果不完整，不能据此判断全文没有问题。', 'npcink-workflow-toolbox')));
-		if (section.invalid_finding_count) blocks.push(createElement('p', null, sprintf(__('已隐藏 %d 条无法完整核对的提示。', 'npcink-workflow-toolbox'), section.invalid_finding_count)));
-		if (section.result_limit_reached) blocks.push(createElement('p', null, __('已达到本次提示数量上限。', 'npcink-workflow-toolbox')));
-		if (stale) blocks.push(createElement('p', null, __('草稿已变化，当前报告只能阅读，不能定位。', 'npcink-workflow-toolbox')));
-		if (!items.length) blocks.push(createElement('p', null, __('本次没有可展示的提示；请结合各类检查状态判断覆盖情况。', 'npcink-workflow-toolbox')));
+		const blocks = [];
+		if (!items.length) blocks.push(createElement('p', null, __('本次没有可展示的 Cloud 提示，请结合顶部检查状态判断覆盖范围。', 'npcink-workflow-toolbox')));
+
 		items.forEach((item) => {
 			blocks.push(createElement('article', { key: item.id, className: 'npcink-toolbox-editor-support__article-language-review-item' },
 				createElement('p', null, (checkLabels[item.check] || checkLabels.language) + (item.context ? ' · ' + (contextLabels[item.context] || contextLabels.unknown) : '')),
-				...(item.evidence_refs || []).map((ref, index) => createElement('div', { key: index },
-					createElement('blockquote', { style: { whiteSpace: 'pre-wrap' } }, ref.quote),
-					ref.unique && ref.client_id ? createElement(Button, {
-						variant: 'link', disabled: stale,
-						onClick: () => { if (!stale && controls.articleReview.isCurrent()) locateArticleReviewIssue({ status: 'matched', client_id: ref.client_id, excerpt: ref.quote }, true); },
-					}, __('Locate in draft', 'npcink-workflow-toolbox')) : null
-				)),
-				createElement('p', null, item.issue),
-				createElement('p', null, item.edit_direction)
+				createElement('strong', null, item.issue),
+				createElement('p', null, item.edit_direction),
+				...(item.evidence_refs || []).filter((ref) => ref.unique && ref.client_id).map((ref, index) => createElement(Button, {
+					key: index, variant: 'link', disabled: stale,
+					onClick: () => { if (!stale && controls.articleReview.isCurrent()) locateArticleReviewIssue({ status: 'matched', client_id: ref.client_id, excerpt: ref.quote }, true); },
+				}, __('Locate in draft', 'npcink-workflow-toolbox'))),
+				createElement('details', null, createElement('summary', null, __('Evidence', 'npcink-workflow-toolbox')), ...(item.evidence_refs || []).map((ref, index) => createElement('blockquote', { key: index, style: { whiteSpace: 'pre-wrap' } }, ref.quote)))
 			));
 		});
 		return createElement('div', { className: 'npcink-toolbox-editor-support__article-language-review' }, blocks);
@@ -5330,7 +5334,7 @@
 				createElement('span', null, sprintf(__('%d missing ALT', 'npcink-workflow-toolbox'), mediaSummary.missingAlt)),
 				createElement('span', null, sprintf(__('%d weak ALT', 'npcink-workflow-toolbox'), mediaSummary.weakAlt))
 			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No images are currently used by this draft.', 'npcink-workflow-toolbox')),
-				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Generate ALT drafts from nearby article context. Review and confirm to apply to this draft\'s image blocks, then save or update in WordPress. Media Library ALT is unchanged.', 'npcink-workflow-toolbox')),
+				createElement(window.NpcinkToolboxContentFormat.Description, { text: __('Generate ALT drafts from nearby article context. Review and confirm to apply to this draft\'s image blocks, then save or update in WordPress. Media Library ALT is unchanged.', 'npcink-workflow-toolbox') }),
 			createElement(
 				Button,
 				{
@@ -5958,6 +5962,7 @@
 			);
 		}
 
+		// Frozen legacy checklist helpers; the default report renders Article check scope instead.
 		function renderPreflightSummaryPanel(payload, controls) {
 			const sections = payload && payload.sections ? payload.sections : {};
 			const counts = preflightReviewCounts(sections.pre_publish_review);
@@ -7272,15 +7277,10 @@
 				}
 
 				if (hasPreflightReview) {
-					if (metadataHandoffControls?.articleReview?.stale) blocks.push(createElement(Notice, { key: 'article-review-stale', status: 'warning', isDismissible: false }, __('The draft changed after this check. These findings are out of date; run publish preflight again.', 'npcink-workflow-toolbox')));
-					blocks.push(renderPreflightSummaryPanel(payload, metadataHandoffControls));
+					blocks.push(renderArticleCheckScope(sections, metadataHandoffControls));
 					blocks.push(renderDiscoverabilityMediaSection(metadataHandoffControls, sections.image_alt_suggestions));
-					if (sections.local_article_checkup) {
-						blocks.push(renderArticleCheckupItems(sections.local_article_checkup, metadataHandoffControls));
-					}
-					if (sections.article_language_review) {
-						blocks.push(renderArticleLanguageReviewItems(sections.article_language_review, metadataHandoffControls));
-					}
+					if (sections.local_article_checkup) blocks.push(renderArticleCheckupItems(sections.local_article_checkup, metadataHandoffControls));
+					if (sections.article_language_review) blocks.push(renderArticleLanguageReviewItems(sections.article_language_review, metadataHandoffControls));
 				}
 
 			if (sections.checks && !hasPreflightReview) {
@@ -9575,7 +9575,7 @@
 				return createElement(
 					Modal,
 					{
-						title: __('Publish preflight', 'npcink-workflow-toolbox'),
+						title: __('Article check', 'npcink-workflow-toolbox'),
 						onRequestClose: () => setPreflightModalOpen(false),
 						className: 'npcink-toolbox-editor-support__preflight-modal',
 					},
@@ -10533,7 +10533,7 @@
 								? __('Open', 'npcink-workflow-toolbox')
 								: (flow.intent === 'source_adaptation_review'
 									? ((sourceExtractionReady || sourceAdaptationComplete || sourceDraftComplete) ? __('Continue', 'npcink-workflow-toolbox') : __('Start', 'npcink-workflow-toolbox'))
-									: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox')));
+									: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : (flow.intent === 'publish_preflight' ? __('Check article', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox'))));
 							return createElement(
 								'div',
 								{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : ''), key: flow.intent },

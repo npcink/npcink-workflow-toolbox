@@ -6,6 +6,24 @@ handles timeout receipt margin). See the [current acceptance](article-review-con
 and [strict extension contract](article-review-context-v1.md). Older language-only
 acceptances remain historical compatibility evidence, not production proof.
 
+## 2026-11-09 Article check convergence
+
+The operator approved four default sidebar entries: formatting, **Article check**,
+site citation suggestions and article images. Source-material drafting is hidden
+and frozen; its callable contracts, data and compatibility code remain. Restore
+its entry only after a specific operator decision tied to a concrete use case.
+
+Article check keeps the `publish_preflight` intent and permissions. Its default
+report leads with local/Cloud completion and partial/unavailable scope, then
+current-article ALT review and source-backed findings. Long evidence is collapsed;
+location only selects a verified current block. No result means neither approval
+nor safety. The legacy metadata/readiness checklist is not rendered by this path;
+missing excerpt is not a mandatory task. Generic tone, numerical-claim, length,
+structure and formatting advice is paused. Local active checks cover repeated
+Chinese punctuation only; Cloud retains its verified language/logic/context
+contract. Unused private broad-rule implementations are removed; their public
+section fields remain with `not_checked` and empty items. No automatic correction, save, publish, new mode, model or ranking change.
+
 ## Surface and preservation
 
 Reuse `POST /npcink-toolbox/v1/editor/content-support` with `publish_preflight`
@@ -29,7 +47,8 @@ stay language-only with other categories not_checked. Logic requires verified
 scope and paired evidence; content_risk is limited to adult sexual context hints.
 Cloud or evidence failure leaves local checks usable and discloses category state.
 
-The UI labels this area “Cloud 文章审阅（只读）”. It has no Apply/Replace
+The UI labels the flow “Article check / 文章检查”; the top scope identifies local
+and Cloud checks. Text findings have no Apply/Replace
 control. A dedicated editor subscription increments a monotonic change generation;
 location stays disabled after an edit, including edit/Undo with identical final
 text, changed block ids, a different post, and edits while the request is in flight.
@@ -73,9 +92,9 @@ legacy normalized item renderer. Repeated quotes remain readable without locatio
 | context_text_characters | Sanitized text available to local checks |
 | context_truncated | Whether the 30,000-character context limit was exceeded |
 | paragraphs_in_context / paragraphs_checked | Available paragraph segments / first at most 24 checked |
-| sentences_in_context / semantic_sentences_checked | Available sentence segments / first at most 80 checked by local semantic rules |
+| sentences_in_context / semantic_sentences_checked | Available sentence segments / 0; local semantic heuristics are paused |
 | issues_found / issues_shown | Findings before / after the 12-item display cap |
-| partial | A context, paragraph, sentence or display limit was reached |
+| partial | A context, paragraph or display limit was reached |
 | not_checked | Comprehensive grammar, general cross-paragraph logic, body-risk classification and factual verification |
 
 Paragraphs/sentences are local text segments, not a claim of Gutenberg block
@@ -132,3 +151,30 @@ fields and guards; no article or schema migration is required.
 statuses, strict logic scope and context-sensitive adult-content hints to the
 same preflight section. Language-only input and all manual-edit boundaries remain.
 [Runtime/model/browser acceptance](article-review-context-acceptance-2026-11-01.md) is recorded separately from source implementation.
+
+## Convergence verification — 2026-11-09
+
+The existing real article 2701 previously filled the twelve-item report with
+broad local editorial warnings. The narrowed local report returns zero for that
+same body; positive repeated-punctuation controls still locate their exact source,
+including punctuation late in a long paragraph. This demonstrates noise removal
+for one reproduced article, not general language-review accuracy.
+
+`test:operator-action-guidance` executes the actual report renderer for complete,
+partial, refused, failed, unavailable and unchecked categories, collapsed exact
+paired evidence, stale navigation and the four default flows. The existing offline
+Toolbox/Addon/Cloud bridge and installed `smoke-article-language-review-browser.mjs`
+pass exact whitespace/UTF-16, cross-paragraph locations, edit/Undo, replaced block
+identity, in-flight edits and degraded states without live model requests.
+
+A separate installed 1440px/900px convergence check covers twelve states using
+request-scoped upstream blocking and controlled Cloud reports; screenshots and
+body-free receipts are retained locally under
+`output/playwright/article-check-convergence-20261109/` (ignored, not release
+artifacts). The original database article is unchanged; its disposable copy,
+temporary session and request observer are removed. The existing contextual ALT
+browser smoke also passes preview, missing-only Apply and native draft save,
+with attachment-global ALT unchanged and its disposable article deleted. That
+smoke uses the existing real REST route; it is separate from controlled Cloud
+report evidence. No new quality campaign, model/ranking change, M4 sync,
+production deployment or WordPress.org release is implied.

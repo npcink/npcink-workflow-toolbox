@@ -12,6 +12,24 @@ retired; this amendment does not restore any other legacy surface.
 
 Date proposed: 2026-10-07. Accepted: 2026-10-07.
 
+## 2026-11-09 Article check convergence
+
+The operator approved four default sidebar entries: formatting, **Article check**,
+site citation suggestions and article images. Source-material drafting is hidden
+and frozen; its callable contracts, data and compatibility code remain. Restore
+its entry only after a specific operator decision tied to a concrete use case.
+
+Article check keeps the `publish_preflight` intent and permissions. Its default
+report leads with local/Cloud completion and partial/unavailable scope, then
+current-article ALT review and source-backed findings. Long evidence is collapsed;
+location only selects a verified current block. No result means neither approval
+nor safety. The legacy metadata/readiness checklist is not rendered by this path;
+missing excerpt is not a mandatory task. Generic tone, numerical-claim, length,
+structure and formatting advice is paused. Local active checks cover repeated
+Chinese punctuation only; Cloud retains its verified language/logic/context
+contract. Unused private broad-rule implementations are removed; their public
+section fields remain with `not_checked` and empty items. No automatic correction, save, publish, new mode, model or ranking change.
+
 ## 2026-11-09 Sidebar Visibility Amendment
 
 The operator requested removal of the default `category_suggestions` and

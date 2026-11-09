@@ -10175,3 +10175,69 @@ msgstr ""
 
 msgid "Collapse"
 msgstr ""
+
+msgid "Article check"
+msgstr ""
+
+msgid "Check specific text issues and image ALT. Bounded article text is sent to Cloud for read-only review."
+msgstr ""
+
+msgid "No repeated punctuation hints in the checked text."
+msgstr ""
+
+msgid "Editor defaults are formatting, article check, site citations, and images. ALT review is in article check; source drafting and category/tag shortcuts are hidden."
+msgstr ""
+
+msgid "未完成（拒绝）"
+msgstr ""
+
+msgid "（超时）"
+msgstr ""
+
+msgid "（完成）"
+msgstr ""
+
+msgid "本地仅检查文章开头，后文超出范围。"
+msgstr ""
+
+msgid "检查详情"
+msgstr ""
+
+msgid "本地重复标点：%1$d / %2$d 段%3$s。"
+msgstr ""
+
+msgid "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"
+msgstr ""
+
+msgid "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
+msgstr ""
+
+msgid "完成"
+msgstr ""
+
+msgid "失败"
+msgstr ""
+
+msgid "语境"
+msgstr ""
+
+msgid "本地重复标点：未检查。"
+msgstr ""
+
+msgid "本次没有可展示的 Cloud 提示，请结合顶部检查状态判断覆盖范围。"
+msgstr ""
+
+msgid "本次检查范围"
+msgstr ""
+
+msgid "Cloud 仅覆盖部分内容或结果不完整。"
+msgstr ""
+
+msgid "本地显示 %1$d / %2$d 条提示。"
+msgstr ""
+
+msgid "（部分完成）"
+msgstr ""
+
+msgid "Check article"
+msgstr ""
