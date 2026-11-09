@@ -95,3 +95,47 @@ The correction is:
 When WordPress.org sends a review email, decode the current top-level message,
 extract every cited file and line, fix the whole pattern class, and add a local
 guard when the pattern is statically checkable.
+
+## Plugin Check query-policy repair — 2026-11-09
+
+The baseline `859bf9b0` reproduces two errors and five warnings in an isolated
+WORKTREE distribution. The focused source repair is
+[`db02bd1b`](https://github.com/npcink/npcink-workflow-toolbox/commit/db02bd1b216152ed233dc71fe0abb23e1da1f561).
+
+| Finding | Diagnosis and disposition |
+| --- | --- |
+| Two `SuppressFilters_suppress_filters` errors | The content-structure/page-quality population queries explicitly set `suppress_filters=true`; their sample fetches also inherited the `get_posts()` default of true. Both queries now explicitly use false, preserving published post/page constraints, ID-only population enumeration, chronological strata and bounded sample fetches while respecting host filters. |
+| Three `DynamicHooknameFound` warnings | The checker cannot resolve the public hook-name constants. The calls now use the same prefixed literal names; constants remain public for compatibility. Existing sample/plugin-list hooks and their clamp limits are tested. |
+| Uninstall `DirectQuery` / `NoCaching` warnings | Dynamic transient-name enumeration needs a prefix-bounded prepared SELECT, followed by `delete_option()` so WordPress manages deletion/cache cleanup. The existing narrowly justified annotation was attached to `array_merge`, not `get_col`; it is moved to the actual call. SQL, prefixes, cleanup APIs and ownership remain unchanged. No global sniff exclusions are added. |
+
+Host filters may narrow a population, for example to a language or visible
+subset. `sampling.total_published` describes that eligible queried population;
+`post_counts` remains the separate site-wide aggregate. Sample notes therefore
+say **本次范围内已发布**, not **全站已发布**. No new field, scope selector,
+provider, pack or REST permission is introduced. Custom filters can change the
+selected population; the plugin does not bypass them to claim a full-site census.
+
+Because result filters can replace rows, both samplers recheck published status,
+post/page type and planned-ID membership before reading output fields; duplicates
+are discarded. Empty populations skip the sample query rather than falling back
+to recent posts. No new body/title storage, Cloud calls or WordPress writes.
+
+Verification in this slice:
+
+- `composer test:all`: passes, including 4,577 static contracts and the focused
+  sampling/hook compatibility/uninstall/privacy behavior checks.
+- Composer validation, `composer check:wporg`, PHPCS and PHPStan: pass.
+- Installed `composer plugin-check:release`: passes with no reported errors or
+  warnings, versus the recorded baseline's two errors/five warnings. This uses
+  the isolated distribution builder and the running Local WordPress site.
+- Installed read-only verification exercises both builders with real
+  `posts_where` / `posts_results` filters: two eligible posts yield two samples;
+  injected private/draft/unplanned/other-type/duplicate rows leave one allowed
+  sample; an empty population yields no samples and no fallback query. Six
+  cases pass, zero upstream HTTP, zero observed database mutations and unchanged
+  existing post records. Filter callbacks are process-scoped and removed in
+  `finally`; no fixtures, sessions or persistent observer are created.
+
+This clears the recorded Plugin Check findings only. Final ZIP installation,
+upgrade/final candidate acceptance, versioning, WordPress.org publication and
+production deployment remain separate work; none is claimed here.

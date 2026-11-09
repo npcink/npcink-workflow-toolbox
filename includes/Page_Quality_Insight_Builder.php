@@ -137,14 +137,14 @@ final class Page_Quality_Insight_Builder {
 	public static function sample_limit(): int {
 		$limit = self::SAMPLE_LIMIT_DEFAULT;
 		if ( function_exists( 'apply_filters' ) ) {
-			$limit = (int) apply_filters( self::SAMPLE_LIMIT_FILTER, $limit );
+			$limit = (int) apply_filters( 'npcink_toolbox_page_quality_sample_limit', $limit );
 		}
 
 		return max( self::SAMPLE_LIMIT_MIN, min( self::SAMPLE_LIMIT_MAX, $limit ) );
 	}
 
 	/**
-	 * All published post/page IDs, oldest publish date first (ids only, no bodies).
+	 * Eligible published post/page IDs, oldest first; host query filters apply.
 	 *
 	 * @return array<int,int>
 	 */
@@ -165,7 +165,7 @@ final class Page_Quality_Insight_Builder {
 				'no_found_rows'          => true,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
-				'suppress_filters'       => true,
+				'suppress_filters'       => false,
 			)
 		);
 		$ids  = array();
@@ -253,12 +253,13 @@ final class Page_Quality_Insight_Builder {
 
 		$posts = get_posts(
 			array(
-				'post_type'      => array( 'post', 'page' ),
-				'post_status'    => 'publish',
-				'post__in'       => $order,
-				'orderby'        => 'post__in',
-				'posts_per_page' => count( $order ),
-				'no_found_rows'  => true,
+				'post_type'        => array( 'post', 'page' ),
+				'post_status'      => 'publish',
+				'post__in'         => $order,
+				'orderby'          => 'post__in',
+				'posts_per_page'   => count( $order ),
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
 			)
 		);
 
@@ -267,13 +268,18 @@ final class Page_Quality_Insight_Builder {
 			if ( ! $post instanceof \WP_Post ) {
 				continue;
 			}
-			$post_id  = (int) $post->ID;
-			$content  = (string) $post->post_content;
-			$headings = $this->heading_counts( $content );
-			$sample[] = array(
+			$post_id = (int) $post->ID;
+			// Query filters may replace results; keep only unique planned public objects.
+			if ( ! isset( $stratum_of[ $post_id ] ) || isset( $sample[ $post_id ] ) || 'publish' !== $post->post_status || ! in_array( $post->post_type, array( 'post', 'page' ), true ) ) {
+				continue;
+			}
+
+			$content            = (string) $post->post_content;
+			$headings           = $this->heading_counts( $content );
+			$sample[ $post_id ] = array(
 				'object_type'              => (string) $post->post_type,
 				'object_id'                => $post_id,
-				'stratum'                  => $stratum_of[ $post_id ] ?? 'newest',
+				'stratum'                  => $stratum_of[ $post_id ],
 				'title'                    => wp_strip_all_tags( (string) $post->post_title ),
 				'published_at'             => $this->gmt_iso( (string) $post->post_date_gmt ),
 				'modified_at'              => $this->gmt_iso( (string) $post->post_modified_gmt ),
@@ -291,7 +297,7 @@ final class Page_Quality_Insight_Builder {
 			);
 		}
 
-		return $sample;
+		return array_values( $sample );
 	}
 
 	/**

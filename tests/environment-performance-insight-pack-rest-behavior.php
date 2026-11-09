@@ -211,7 +211,7 @@ if ( ! function_exists( 'wp_upload_dir' ) ) {
 }
 if ( ! function_exists( 'apply_filters' ) ) {
 	function apply_filters( $tag, $value ) {
-		return $value;
+		return $GLOBALS['environment_performance_filters'][ $tag ] ?? $value;
 	}
 }
 if ( ! class_exists( 'Npcink_Toolbox\\Settings', false ) ) {
@@ -310,5 +310,12 @@ $ok_env = "从这份清单看，调试显示可能开着。\n\n1. 关掉对着�
 environment_performance_rest_assert( false === $guidance_cls::answer_has_forbidden_speed_claims( $ok_env ), 'Plain inventory advice is not treated as a fake speed score.' );
 environment_performance_rest_assert( false !== strpos( $sys_prompt, '可能拖慢/可能有帮助' ), 'Env Ask prompt requires conditional language for debug/cache signals.' );
 environment_performance_rest_assert( empty( $pack['safety']['speed_score_returned'] ) && empty( $pack['safety']['lighthouse_run'] ), 'Safety forbids speed_score_returned and lighthouse_run.' );
+
+
+$GLOBALS['environment_performance_filters'][ Npcink_Toolbox\Environment_Performance_Insight_Builder::PLUGIN_LIST_LIMIT_FILTER ] = 9999;
+environment_performance_rest_assert( 80 === Npcink_Toolbox\Environment_Performance_Insight_Builder::plugin_list_limit(), 'The existing plugin-list hook name remains upper-clamped.' );
+$GLOBALS['environment_performance_filters'][ Npcink_Toolbox\Environment_Performance_Insight_Builder::PLUGIN_LIST_LIMIT_FILTER ] = -9;
+environment_performance_rest_assert( 10 === Npcink_Toolbox\Environment_Performance_Insight_Builder::plugin_list_limit(), 'The existing plugin-list hook name remains lower-clamped.' );
+unset( $GLOBALS['environment_performance_filters'] );
 
 echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;
