@@ -20,16 +20,16 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
-- **Installed site-media query timeout (Toolbox transport / Addon / Cloud, 2026-11-09).**
-  During [real-role acceptance](editor-real-role-acceptance-2026-11-09.md), one
-  real local-site media query hit the existing 8-second browser deadline with
-  no candidate response or Cloud `run_id` returned to the browser. Root cause
-  is unconfirmed; role authorization is separately verified with provider
-  fixtures after the real server permission gate. Do not label live image
-  retrieval accepted or infer a capability defect from this timeout. The next
-  bounded investigation, when admitted for concrete maintained-use feedback,
-  should correlate the Addon/Cloud request by its Cloud `run_id` when available;
-  do not broaden local-model capacity work, indexing or recommendation evaluation.
+- **Local/Cloud media identity mismatch (Addon / Cloud projection, WordPress attachment truth, 2026-11-09).**
+  The [timeout follow-up](site-media-timeout-followup-2026-11-09.md) traced a
+  successful Cloud search and repaired the browser deadline mismatch (see
+  Recently Closed). Both bounded real queries returned nine media identities
+  absent from the local site; existing local checks rejected them. Historical
+  cause is unconfirmed. Real candidate adoption/save remains unaccepted despite
+  HTTP 200 retrieval. Do not recreate missing attachments, remap identities or
+  infer an authorization defect. Further repair requires an operator decision
+  on the correct site snapshot and Addon/Cloud-owned projection repair scope;
+  no indexing, model work or repeated query campaign is scheduled.
 
 - **Editor-loop maintenance and frozen recommendation follow-up (Toolbox, 2026-11-09).**
   Follow the [maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
@@ -362,6 +362,15 @@ and repeated research stay frozen under the decision's restart rules.
   media-derivative render helpers); inspect actual call sites before removal.
 
 ## Recently Closed
+
+- **Premature site-media browser timeout (Toolbox editor, 2026-11-09).**
+  [Follow-up trace and repair](site-media-timeout-followup-2026-11-09.md): Cloud
+  search `run_11438123e32c4a5487db60ca4182c117` succeeded in 15.056 seconds,
+  beyond the old 8-second browser deadline. Site-media now budgets 45 seconds
+  for the two existing 20-second server reads plus margin; external image
+  sources retain 8 seconds. The pre-repair behavior regression fails, the
+  repair passes, and a real browser query returns HTTP 200. The independent
+  absent-media-identity problem stays open above; full adoption is not claimed.
 
 - **Historical-image recovery and local vision capacity work — disposed 2026-11-02.**
   The operator accepts all 69 images without originals/registered variants as
