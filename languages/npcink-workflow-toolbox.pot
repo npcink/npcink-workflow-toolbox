@@ -10169,3 +10169,9 @@ msgstr ""
 
 msgid "Body formatting"
 msgstr ""
+
+msgid "Expand"
+msgstr ""
+
+msgid "Collapse"
+msgstr ""

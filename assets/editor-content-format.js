@@ -176,6 +176,28 @@
 		wp.data.dispatch('core/block-editor').updateBlockAttributes(updates.map((item) => item.clientId), attributes, true);
 	}
 
+	function Description({ text, details = '' }) {
+		const [expanded, setExpanded] = useState(false);
+		const [overflow, setOverflow] = useState(false);
+		const preview = useRef(null);
+		const fullText = details ? text + ' ' + details : text;
+		useEffect(() => {
+			const node = preview.current;
+			if (!node || expanded) return;
+			const measure = () => setOverflow(node.scrollHeight > node.clientHeight + 1);
+			measure();
+			const observer = new ResizeObserver(measure);
+			observer.observe(node);
+			return () => observer.disconnect();
+		}, [fullText, expanded]);
+		return h('div', { className: 'npcink-toolbox-editor-support__flow-description' + (expanded ? ' is-expanded' : '') },
+			h('p', { ref: preview, className: 'npcink-toolbox-editor-support__description-text' }, fullText),
+			(overflow || expanded) ? h('button', {
+				type: 'button', className: 'npcink-toolbox-editor-support__description-toggle',
+				'aria-expanded': expanded, 'aria-label': expanded ? t('Collapse') : t('Expand'), onClick: () => setExpanded(!expanded),
+			}, expanded ? t('Collapse') : t('Expand')) : null);
+	}
+
 	function Control({ disabled = false }) {
 		const [busy, setBusy] = useState(false);
 		const [notice, setNotice] = useState(null);
@@ -248,8 +270,9 @@
 			h('div', { className: 'npcink-toolbox-editor-support__flow-actions' },
 				h(Button, { variant: 'secondary', title: t('Adjust spacing and layout only.'), 'aria-description': t('Adjust spacing and layout only.'), 'aria-label': busy ? t('Formatting text') : t('Format text'), disabled: disabled || busy, isBusy: busy, onClick: format }, busy ? t('Formatting text') : t('Format text')),
 				undo ? h(Button, { variant: 'tertiary', icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),
+			h(Description, { text: t('Adjust spacing and layout only.') }),
 			notice ? h(Notice, { className: 'npcink-toolbox-editor-support__flow-feedback', status: notice.status, isDismissible: true, onRemove: () => setNotice(null) }, notice.text) : null);
 	}
 
-	window.NpcinkToolboxContentFormat = { Control, prepare, onlyInsertedSpaces };
+	window.NpcinkToolboxContentFormat = { Control, Description, prepare, onlyInsertedSpaces };
 })(window.wp);
