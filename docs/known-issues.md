@@ -20,6 +20,17 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
+- **Installed site-media query timeout (Toolbox transport / Addon / Cloud, 2026-11-09).**
+  During [real-role acceptance](editor-real-role-acceptance-2026-11-09.md), one
+  real local-site media query hit the existing 8-second browser deadline with
+  no candidate response or Cloud `run_id` returned to the browser. Root cause
+  is unconfirmed; role authorization is separately verified with provider
+  fixtures after the real server permission gate. Do not label live image
+  retrieval accepted or infer a capability defect from this timeout. The next
+  bounded investigation, when admitted for concrete maintained-use feedback,
+  should correlate the Addon/Cloud request by its Cloud `run_id` when available;
+  do not broaden local-model capacity work, indexing or recommendation evaluation.
+
 - **Editor-loop maintenance and frozen recommendation follow-up (Toolbox, 2026-11-09).**
   Follow the [maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
   Next action: preserve ordinary use and reproduce a concrete editor failure
