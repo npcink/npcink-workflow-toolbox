@@ -24,13 +24,12 @@ not another intent retirement or a change to the native taxonomy panels.
 The historical inventory below records the earlier delivery decision.
 
 The menu removes its general introduction and redundant group subtitles. Tool
-names and actions form a flat list; brief descriptions are available as hover
-and accessible action help instead of persistent paragraphs. Preflight's
-"Check scope and data use" disclosure is closed by default and retains the
-detailed scope and notice that plain article text is sent to Cloud.
-It can be opened with the keyboard before running the check. Draft workflow
-status appears only after progress. Formatting uses the same titled action row
-as the other tools, with compact Format/Undo controls on the right and full-width
+names and actions form a flat list. Basic descriptions remain visible up to two
+lines; text that overflows has an Expand button at the end of the second line,
+with Collapse available after expansion. Overflow is remeasured on resize.
+Preflight includes its detailed scope and Cloud text-transfer notice in that
+same expandable description, available before Run without another help row.
+Formatting uses compact Format/Undo controls on the right and full-width
 feedback below. These are presentation changes; source review, empty-editor
 adoption, freshness, formatting/undo logic and write boundaries remain.
 

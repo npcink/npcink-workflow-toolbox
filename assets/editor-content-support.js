@@ -10560,10 +10560,7 @@
 										onClick: () => runFlow('related_content'),
 									}, __('Related reading', 'npcink-workflow-toolbox')) : null
 								),
-								flow.details ? createElement('details', { className: 'npcink-toolbox-editor-support__flow-help' },
-									createElement('summary', null, __('Check scope and data use', 'npcink-workflow-toolbox')),
-									createElement('p', null, flow.details)
-								) : null
+								createElement(window.NpcinkToolboxContentFormat.Description, { text: flow.description, details: flow.details })
 							);
 						})
 					)

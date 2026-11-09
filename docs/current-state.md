@@ -8,19 +8,18 @@ a canonical contract doc disagree, the contract doc wins.
 Last reviewed: 2026-11-09.
 
 **Editor sidebar simplification — 2026-11-09:** at the operator's request,
-the menu now uses flat titled action rows without group subtitles or persistent
-introduction paragraphs. Brief help is available on hover and as accessible
-action descriptions; preflight's closed keyboard disclosure retains scope and
-Cloud data-use copy. Formatting uses compact Format/Undo controls on the right
-and full-width feedback below. Category/tag menu and preflight shortcuts remain
-hidden because the WordPress AI plugin covers them; their REST/runtime
-compatibility and permissions remain intact. See the
+the menu uses flat titled action rows without group subtitles. Each tool keeps
+its basic introduction visible, limited to two lines; overflowing text has an
+Expand control at the end of the second line and Collapse after expansion.
+Preflight includes scope and Cloud data-use copy in the same expandable text.
+Formatting keeps compact Format/Undo controls on the right and full-width
+feedback below. Category/tag shortcuts remain hidden with compatibility and
+permissions intact. See the
 [visibility amendment](editor-intent-convergence-decision.md#2026-11-09-sidebar-visibility-amendment).
-Installed Chinese/English checks pass at 248px content width, including keyboard
-disclosure, hover/accessible descriptions and formatting/undo states, with no
-overflow. The initial tool list is about 319px tall. Real-role fixture acceptance
-retains native taxonomy and ALT save/readback; layout checks do not evaluate
-hosted model quality or production.
+Installed zh_CN/en_US checks at 248px verify two-line previews, trailing toggle
+placement, keyboard expansion/collapse, resize remeasurement and formatting/undo
+with no overflow. The initial lists are about 441px/459px high. This layout
+evidence is separate from hosted model quality and production acceptance.
 
 **Site-media deadline follow-up — 2026-11-09:** a successful Cloud query took
 15.056 seconds (17.019 seconds for the complete provider call), proving the

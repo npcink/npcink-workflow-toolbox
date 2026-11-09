@@ -10675,3 +10675,9 @@ msgstr "编辑器默认提供资料起草、发布预检、内链与配图。ALT
 
 msgid "Body formatting"
 msgstr "正文整理"
+
+msgid "Expand"
+msgstr "展开"
+
+msgid "Collapse"
+msgstr "收起"

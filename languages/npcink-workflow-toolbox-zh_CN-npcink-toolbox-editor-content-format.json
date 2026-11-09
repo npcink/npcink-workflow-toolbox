@@ -10,6 +10,8 @@
         "plural-forms": "nplurals=1; plural=0;"
       },
       "Adjust spacing and layout only.": ["仅整理间距和版式。"],
+      "Expand": ["展开"],
+      "Collapse": ["收起"],
       "Body formatting": ["正文整理"],
       "Format text": ["整理"],
       "Formattable text needs no changes; the remaining content was skipped. The original text is unchanged.": ["可处理的文字无需调整，其余内容已跳过，原文未改动。"],
