@@ -296,6 +296,35 @@
 	margin: 0;
 }
 
+.npcink-toolbox-editor-format__feedback {
+	font-size: 12px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.npcink-toolbox-editor-format__feedback p {
+	margin: 0;
+}
+
+.npcink-toolbox-editor-format__feedback details {
+	margin-top: 4px;
+}
+
+.npcink-toolbox-editor-format__feedback summary {
+	width: fit-content;
+	cursor: pointer;
+	color: var(--wp-admin-theme-color, #2271b1);
+}
+
+.npcink-toolbox-editor-format__feedback details[open] summary {
+	margin-bottom: 4px;
+}
+
+.npcink-toolbox-editor-format__feedback ul {
+	margin: 4px 0;
+	padding-inline-start: 20px;
+}
+
 .npcink-toolbox-editor-support__flow--links .npcink-toolbox-editor-support__flow-actions {
 	grid-column: 1 / -1;
 }

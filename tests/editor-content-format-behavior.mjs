@@ -7,10 +7,14 @@ const sourceBlocks = [{ clientId: 'keep-id', name: 'core/paragraph', attributes:
 const source = serialize(sourceBlocks);
 const candidate = source.replace('中文AI', '中文 AI');
 const wp = { element: {}, components: {}, blocks: { serialize, parse: JSON.parse } };
-const context = vm.createContext({ window: { wp } });
+// DOM stub is used only for the feedback's BR count, not candidate validation.
+class FeedbackDOMParser {
+	parseFromString(html) { return { body: { querySelectorAll: () => html.match(/<br\s*\/?\s*>/g) || [] } }; }
+}
+const context = vm.createContext({ window: { wp }, DOMParser: FeedbackDOMParser });
 const script = fs.readFileSync(new URL('../assets/editor-content-format.js', import.meta.url), 'utf8');
 vm.runInContext(script, context);
-const { prepare, onlyInsertedSpaces } = context.window.NpcinkToolboxContentFormat;
+const { prepare, onlyInsertedSpaces, formatFeedback } = context.window.NpcinkToolboxContentFormat;
 const result = { contract_version: 'content_format_candidate.v1', format: 'html', status: 'CHANGED', visible_characters_preserved: true, direct_wordpress_write: false, persisted: false, candidate };
 const updates = prepare(sourceBlocks, source, result);
 assert.equal(updates.length, 1);
@@ -40,6 +44,24 @@ for (const name of ['core/gallery', 'core/image', 'vendor/custom']) {
 }
 assert.throws(() => prepare(code, serialize(code), { ...result, candidate: serialize(code).replace('中文AI', '中文 AI') }));
 for (const forbidden of ['savePost(', 'saveEntityRecord(', 'resetBlocks(', '/wp/v2/posts', 'localStorage', 'sessionStorage']) assert.equal(script.includes(forbidden), false, forbidden);
+
+const spaced = formatFeedback(sourceBlocks, { ...result, inserted_spaces: 1, structural_changes: 0 }, true);
+assert.equal(spaced.text, 'Formatted · spacing: 1 · layout: 0');
+assert.equal(spaced.compact, true);
+assert.equal(spaced.skipped, false);
+assert.deepEqual(Array.from(spaced.metrics), ['Spacing insertions: 1']);
+const p = (content) => ({ name: 'core/paragraph', attributes: { content }, innerBlocks: [] });
+const list = { name: 'core/list', attributes: {}, innerBlocks: ['来源：甲', '价格：229 元', '授权：单站点'].map((content) => ({ ...p(content), name: 'core/list-item' })) };
+const structured = formatFeedback([p('介绍<br>正文')], { ...result, status: 'PARTIAL', inserted_spaces: 0, structural_changes: 2,
+	candidate: serialize([p('介绍'), p('正文'), list]) }, true);
+assert.equal(structured.skipped, true, 'Partial formatting is never disguised as complete.');
+assert.equal(structured.text, 'Formatted · spacing: 0 · layout: 2');
+assert.deepEqual(Array.from(structured.metrics), ['Spacing insertions: 0', 'Paragraphs: 1 → 2', 'List items: 0 → 3', 'Line breaks: 1 → 0'], 'Net block counts are labeled before/after, not operation counts.');
+const skipped = formatFeedback(sourceBlocks, { ...result, status: 'REVIEW', candidate: source }, false);
+assert.equal(skipped.text, 'No changes; some content was skipped.');
+assert.equal(skipped.skipped, true);
+assert.equal(skipped.metrics.length, 0);
+assert.equal(formatFeedback(sourceBlocks, { ...result, status: 'UNCHANGED', candidate: source }, false).text, 'The article body needs no changes.');
 
 // Exercise the actual click handler: sub-500ms edits/undo and post switches
 // must discard a delayed response without any block mutation.
