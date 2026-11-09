@@ -123,6 +123,7 @@ final class Editor_Content_Support {
 				'adminUrl'                   => esc_url_raw( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=tools' ) ),
 				'cloudAddonSiteKnowledgeUrl' => esc_url_raw( admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
 				'coreAdminUrl'               => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
+				'canSubmitMetadataHandoff'   => current_user_can( Rest_Controller::default_capability_for_scope( 'cap.toolbox.workflow_suggest' ) ),
 				'showRuntimeDiagnostics'     => $this->show_runtime_diagnostics(),
 				'locale'                     => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),
 			)

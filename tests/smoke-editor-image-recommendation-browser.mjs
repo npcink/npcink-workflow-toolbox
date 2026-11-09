@@ -340,7 +340,7 @@ try {
 	});
 
 	await page.waitForSelector('.npcink-toolbox-editor-support__flow', { timeout: 30000 });
-	const imageFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /AI recommended featured image|AI 推荐特色图/ });
+	const imageFlow = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Article images|文章配图/ });
 	assert(await imageFlow.count() === 1, 'The editor exposes one featured-image recommendation entry.');
 	await imageFlow.locator('button').click();
 
@@ -380,6 +380,9 @@ try {
 	await page.waitForFunction(() => document.querySelectorAll('.npcink-toolbox-editor-support__image-card').length === 1, null, { timeout: 10000 });
 	const manualLibraryRequest = libraryRequests[libraryRequests.length - 1] || {};
 	assert(manualLibraryRequest.provider === 'site_media' && manualLibraryRequest.query === libraryQuery, 'Site-media mode sends the reviewed natural-language local-library search request.');
+	// Changing source may discard the old selection. Review the new candidate explicitly.
+	await page.locator('.npcink-toolbox-editor-support__image-card').first().click();
+	await page.getByText(/Why this image matches|为什么匹配这张图片/).waitFor();
 	assert(await page.getByText(/Why this image matches|为什么匹配这张图片/).count() === 1, 'The selected site-media candidate shows its semantic match reason.');
 		assert(await page.getByText(/Suggested ALT text|建议的 ALT 文本/).count() === 1, 'The selected site-media candidate shows the reused ALT suggestion.');
 		assert(await page.locator('.npcink-toolbox-editor-support__image-evidence-item p').filter({ hasText: '自然光下摆放笔记本电脑和绿植的木质书桌' }).count() === 1, 'The visible ALT suggestion comes from the candidate evidence.');

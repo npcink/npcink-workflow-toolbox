@@ -7,6 +7,25 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Operator action guidance maintenance — 2026-11-09:** metadata category/tag
+results now provide manual WordPress selection guidance for users without the
+default administrator workflow capability, while retaining the existing Core
+proposal form for administrators. The article-image entry and contextual ALT
+instructions describe their existing scope. Admin Start no longer advertises
+paused optimization; Smart Ask explains its data ranges and has a stop-wait
+control plus a 90-second browser deadline. Normalized failures retain their
+Cloud run id in support details. REST permissions, host filters, Cloud budgets,
+pack choices and runtime pauses are unchanged. See the
+[ADR-018 maintenance amendment](decisions/ADR-018-editor-scoped-permissions.md#gate-admin-flow-sidebar-actions-per-role-in-javascript)
+and [admin IA maintenance](admin-ia-site-and-ask-v1.md#开放待办).
+Deterministic role/cancellation/timeout/retry tests and installed
+`magick-ai.local` browser checks use controlled responses; the author browser
+view uses an injected capability flag, with real role denials covered by the
+isolated PHP permission suite. Image-modal smoke also passes after explicitly
+selecting the new candidate when changing sources (the original smoke failed
+identically against `origin/master`). These are development checks, not live
+Cloud, natural-use, production or WordPress.org release acceptance.
+
 **Active development freeze — 2026-11-09:** the operator accepted the
 [freeze and maintenance scope](development-freeze-2026-11-09.md). Concentrate
 on concrete failures in the existing article editor loop; freeze new feature,

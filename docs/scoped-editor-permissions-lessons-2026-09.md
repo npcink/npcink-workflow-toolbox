@@ -70,10 +70,12 @@ the REST permission cannot drift apart.
   landed first with per-intent rulings and rejected alternatives, then code.
   Mid-rollout amendments (the `image_source` scope) went back into the ADR
   and docs in the same commit as the code that depended on them.
-- Document UX seams instead of hiding them. Admin-gated handoff buttons stay
-  visible to editor-role users and fail with permission errors; ADR-018
-  records the seam and defers per-role JavaScript gating. Hiding buttons
-  client-side would mask the server boundary rather than document it.
+- Document UX seams explicitly. The initial rollout kept admin-gated handoff
+  buttons visible and deferred per-role guidance. The 2026-11-09 operator
+  decision closes the category/tag metadata seam with manual-selection
+  guidance and an administrator-only proposal form. Its capability flag is
+  conservative presentation guidance; server permissions and host filters
+  remain authoritative. Other adoption/handoff seams remain outside this slice.
 - Mixed worktrees: a maintainer commit (provider-client assertion-source
   aggregation) landed on the session branch mid-session. Editing-tool
   file-state anomalies were the detection signal; verify with `git log` on

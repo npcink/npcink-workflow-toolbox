@@ -2,6 +2,8 @@
 	'use strict';
 
 	const config = window.NpcinkToolboxEditorSupport || {};
+	// wp_localize_script serializes top-level scalar capabilities as strings.
+	const canSubmitMetadataHandoff = config.canSubmitMetadataHandoff === true || config.canSubmitMetadataHandoff === '1';
 	const { normalizeText, plainTextFromHtml, truncateText } = (typeof window !== 'undefined' && window.NpcinkToolboxTextHelpers) || {};
 	const {
 		canonicalInternalLinkUrl,
@@ -205,9 +207,9 @@
 			autoSearch: false,
 			allowGeneration: true,
 			allowImagePlan: true,
-			title: __('AI recommended featured image', 'npcink-workflow-toolbox'),
-			intro: __('Uses the current article title, excerpt, and body context to recommend source images or request a host-generated featured image candidate. Paragraph selection is ignored for this entry.', 'npcink-workflow-toolbox'),
-			emptyTitle: __('Select a featured image candidate', 'npcink-workflow-toolbox'),
+			title: __('Article images', 'npcink-workflow-toolbox'),
+			intro: __('Use the current article context to search the site Media Library or external sources, or generate an image candidate. Review a candidate before choosing how to use it.', 'npcink-workflow-toolbox'),
+			emptyTitle: __('Choose an article image candidate', 'npcink-workflow-toolbox'),
 			sourceModeLabel: __('External image library', 'npcink-workflow-toolbox'),
 			libraryModeLabel: __('Site media library', 'npcink-workflow-toolbox'),
 			generateModeLabel: __('AI generation', 'npcink-workflow-toolbox'),
@@ -297,7 +299,7 @@
 		{
 			intent: 'publish_preflight',
 			label: __('Publish preflight', 'npcink-workflow-toolbox'),
-			description: __('检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。', 'npcink-workflow-toolbox'),
+			description: __('图片 ALT 审阅位于检查结果中。检查缺失项与重复风险；运行时会将有界标题、摘要和正文纯文本发送至 Cloud 获取只读语句、逻辑与成人内容语境风险提示。代码、多媒体及不支持的块不参与；原文由作者人工修改。', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft, editor fields, Site Knowledge evidence', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Preflight checks, duplicate-risk refs, SEO handoff preview', 'npcink-workflow-toolbox'),
@@ -369,8 +371,8 @@
 		},
 		{
 			intent: 'image_candidates',
-			label: __('AI recommended featured image', 'npcink-workflow-toolbox'),
-			description: __('Recommend or generate a featured image from the current article context.', 'npcink-workflow-toolbox'),
+			label: __('Article images', 'npcink-workflow-toolbox'),
+			description: __('Find images in this site\'s Media Library, search external sources, or generate a candidate for this article.', 'npcink-workflow-toolbox'),
 			group: 'review_handoff',
 			sourceLabel: __('Current draft visual brief and Cloud image-source candidates', 'npcink-workflow-toolbox'),
 			evidenceLabel: __('Provider/source refs, attribution, quality and risk tags', 'npcink-workflow-toolbox'),
@@ -2337,7 +2339,7 @@
 		// Plain sentences shared with Cloud_Error_Plain_Messages (PHP) and the
 		// Npcink Cloud Addon; provider/routing jargon never reaches the editor.
 		const plainServiceUnavailable = __('Npcink Cloud is temporarily unavailable. Try again in a few minutes.', 'npcink-workflow-toolbox');
-		const plainFailed = __('The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.', 'npcink-workflow-toolbox');
+		const plainFailed = __('The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.', 'npcink-workflow-toolbox');
 		const providerMessages = {
 			'provider.invalid_request': __('The image service rejected the current settings. Try one candidate at medium quality, or revise the visual description.', 'npcink-workflow-toolbox'),
 			'provider.rate_limited': __('Too many AI requests right now. Wait a minute, then try again.', 'npcink-workflow-toolbox'),
@@ -5337,7 +5339,7 @@
 				createElement('span', null, sprintf(__('%d missing ALT', 'npcink-workflow-toolbox'), mediaSummary.missingAlt)),
 				createElement('span', null, sprintf(__('%d weak ALT', 'npcink-workflow-toolbox'), mediaSummary.weakAlt))
 			) : createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('No images are currently used by this draft.', 'npcink-workflow-toolbox')),
-				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Generate one review-only ALT draft per image occurrence from nearby article context. Toolbox will not write post blocks or media metadata.', 'npcink-workflow-toolbox')),
+				createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Generate ALT drafts from nearby article context. Review and confirm to apply to this draft\'s image blocks, then save or update in WordPress. Media Library ALT is unchanged.', 'npcink-workflow-toolbox')),
 			createElement(
 				Button,
 				{
@@ -6854,6 +6856,9 @@
 		if (!section || !controls) {
 			return null;
 		}
+		if (controls.canSubmit !== true) {
+			return createElement('p', { className: 'npcink-toolbox-editor-support__muted' }, __('Review these suggestions in the WordPress Categories or Tags panel and select existing terms there. Creating a Core review proposal requires administrator permission.', 'npcink-workflow-toolbox'));
+		}
 		const selection = controls.selection || {};
 		const excerpt = metadataRecommendedExcerpt(section);
 		const tags = metadataDeltaTermItems(section, 'tags');
@@ -7063,7 +7068,7 @@
 				categoryItems,
 				__('No matching existing categories found.', 'npcink-workflow-toolbox'),
 				{
-					description: __('Existing WordPress categories appear here and can be selected for a Core review proposal.', 'npcink-workflow-toolbox'),
+					description: __('Review existing WordPress categories that match this draft.', 'npcink-workflow-toolbox'),
 				}
 			));
 			if (metadataHandoffControls && metadataHandoffControls.showHandoff && metadataHandoffHasChoices(section)) {
@@ -7077,7 +7082,7 @@
 				tagItems,
 				__('No matching existing tags found.', 'npcink-workflow-toolbox'),
 				{
-					description: __('Existing WordPress tags appear here and can be selected for a Core review proposal.', 'npcink-workflow-toolbox'),
+					description: __('Review existing WordPress tags that match this draft.', 'npcink-workflow-toolbox'),
 				}
 			));
 			if (metadataHandoffControls && metadataHandoffControls.showHandoff && metadataHandoffHasChoices(section)) {
@@ -7105,7 +7110,7 @@
 				__('No matching existing categories found.', 'npcink-workflow-toolbox'),
 				{
 					hideHeading: activeIntent === 'category_suggestions',
-					description: __('Existing WordPress categories appear here and can be selected for a Core review proposal.', 'npcink-workflow-toolbox'),
+					description: __('Review existing WordPress categories that match this draft.', 'npcink-workflow-toolbox'),
 				}
 			));
 		}
@@ -7116,7 +7121,7 @@
 				__('No matching existing tags found.', 'npcink-workflow-toolbox'),
 				{
 					hideHeading: activeIntent === 'tag_suggestions',
-					description: __('Existing WordPress tags appear here and can be selected for a Core review proposal.', 'npcink-workflow-toolbox'),
+					description: __('Review existing WordPress tags that match this draft.', 'npcink-workflow-toolbox'),
 				}
 			));
 		}
@@ -9813,6 +9818,9 @@
 			}
 
 		async function submitMetadataHandoff() {
+			if (!canSubmitMetadataHandoff) {
+				return;
+			}
 			const section = result && result.sections && result.sections.summary_terms_optimization ? result.sections.summary_terms_optimization : null;
 			const planInput = buildMetadataApplyPlanInput(section, metadataHandoffSelection, postContext || {});
 			if (!planInput.post_id || (!planInput.excerpt && !planInput.category_ids.length && !planInput.tag_ids.length)) {
@@ -10273,6 +10281,7 @@
 			},
 			intent: activeFlowIntent || (result && result.intent) || '',
 			showHandoff: ['summary_terms_optimization', 'category_suggestions', 'tag_suggestions'].indexOf(activeFlowIntent) >= 0,
+			canSubmit: canSubmitMetadataHandoff,
 			selection: metadataHandoffSelection,
 			setSelection: setMetadataHandoffSelection,
 			toggleTerm: toggleMetadataTermSelection,

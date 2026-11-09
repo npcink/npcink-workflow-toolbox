@@ -59,17 +59,17 @@ $assert   = static function ( bool $ok, string $label ) use ( &$failures ): void
 	}
 };
 
-// Strings must match Npcink Cloud Addon (master 76274ef) source msgids exactly.
+// Classification stays aligned with Addon; the fallback points to Toolbox support details.
 $addon_strings = array(
 	M::KEY_CREDITS_EXHAUSTED   => 'Your AI credits have run out. Top up on Npcink Cloud, then try again.',
 	M::KEY_NOT_CONNECTED       => 'This site is no longer connected to Npcink Cloud. Reconnect it on the Npcink AI > Cloud Addon page, then try again.',
 	M::KEY_SITE_INACTIVE       => 'This site is turned off in Npcink Cloud. Turn it on in Npcink Cloud, then try again.',
 	M::KEY_RATE_LIMITED        => 'Too many AI requests right now. Wait a minute, then try again.',
 	M::KEY_SERVICE_UNAVAILABLE => 'Npcink Cloud is temporarily unavailable. Try again in a few minutes.',
-	M::KEY_FAILED              => 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.',
+	M::KEY_FAILED              => 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.',
 );
 foreach ( $addon_strings as $key => $text ) {
-	$assert( M::message( $key ) === $text, "message($key) matches Addon wording" );
+	$assert( M::message( $key ) === $text, "message($key) uses the expected user-facing wording" );
 }
 
 $cases = array(
@@ -123,7 +123,7 @@ $editor_js = (string) file_get_contents( dirname( __DIR__ ) . '/assets/editor-co
 $assert( false !== strpos( $editor_js, 'error.data.plain_message' ), 'editor prefers the server plain_message' );
 
 $po = (string) file_get_contents( dirname( __DIR__ ) . '/languages/npcink-workflow-toolbox-zh_CN.po' );
-foreach ( array( 'AI 积分已用完。请去 Npcink Cloud 充值后再试。', '此站点已与 Npcink Cloud 断开。请在“Npcink AI > 云端扩展”页面重新连接后再试。', 'AI 请求没有成功。请稍后再试，若一直失败请到「检查」页复制信息联系客服。' ) as $zh ) {
+foreach ( array( 'AI 积分已用完。请去 Npcink Cloud 充值后再试。', '此站点已与 Npcink Cloud 断开。请在“Npcink AI > 云端扩展”页面重新连接后再试。', 'AI 请求没有成功。请稍后再试；若一直失败，请提供「给客服的信息」中显示的运行编号（如有）。' ) as $zh ) {
 	$assert( false !== strpos( $po, $zh ), "zh_CN translation present: $zh" );
 }
 

@@ -805,6 +805,7 @@
 	gap: 10px;
 }
 
+.npcink-toolbox [data-toolbox-smart-ask-stop][hidden],
 .npcink-toolbox__ops-panel[hidden] {
 	display: none;
 }

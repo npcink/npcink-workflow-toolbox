@@ -4,7 +4,8 @@
  *
  * Wording and classification mirror Npcink Cloud Addon
  * (Npcink_Cloud_Addon_WordPress_AI_Connector::user_facing_runtime_failure,
- * addon master 76274ef) so both plugins say the same thing. Toolbox keeps its
+ * addon master 76274ef). The generic fallback points to Toolbox support
+ * details rather than the Addon-only Checks tab. Toolbox keeps its
  * own copy because the Addon helper also records Addon-owned diagnostics and
  * Toolbox must keep working when the Addon is absent. Raw error codes stay in
  * the response data (`diagnostic_code`) for copy/support use only.
@@ -60,7 +61,7 @@ final class Cloud_Error_Plain_Messages {
 			case self::KEY_SERVICE_UNAVAILABLE:
 				return __( 'Npcink Cloud is temporarily unavailable. Try again in a few minutes.', 'npcink-workflow-toolbox' );
 		}
-		return __( 'The AI request did not succeed. Try again later; if it keeps failing, copy the information on the Checks tab and contact support.', 'npcink-workflow-toolbox' );
+		return __( 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.', 'npcink-workflow-toolbox' );
 	}
 
 	/**
