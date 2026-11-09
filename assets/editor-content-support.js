@@ -69,6 +69,9 @@
 	const PROGRESSIVE_RECOMMENDATION_TIMEOUT_MS = 2500;
 	const PROGRESSIVE_RECOMMENDATION_DEBOUNCE_MS = 1600;
 	const IMAGE_SOURCE_FAST_TIMEOUT_MS = 8000;
+	// Site media runs a 20-second semantic query and an optional 20-second
+	// evidence read. Keep a small transport margin outside those server budgets.
+	const SITE_MEDIA_SEARCH_TIMEOUT_MS = 45000;
 	// Generous ceiling for hosted draft generation, image generation, and media
 	// briefs: long enough for legitimate processing, low enough that a hung
 	// Cloud call can never pin the sidebar spinner forever.
@@ -785,7 +788,7 @@
 		return postJsonWithTimeout(
 			'image-candidates',
 			payload,
-			IMAGE_SOURCE_FAST_TIMEOUT_MS,
+			payload.provider === 'site_media' ? SITE_MEDIA_SEARCH_TIMEOUT_MS : IMAGE_SOURCE_FAST_TIMEOUT_MS,
 			__('Cloud image search is taking too long. Try a shorter query or refresh again.', 'npcink-workflow-toolbox'),
 			'npcink_toolbox_image_source_timeout',
 			externalSignal

@@ -7,6 +7,15 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-09.
 
+**Site-media deadline follow-up — 2026-11-09:** a successful Cloud query took
+15.056 seconds (17.019 seconds for the complete provider call), proving the
+shared 8-second browser deadline was too short for the existing two 20-second
+Site Knowledge budgets. Site-media alone now gets 45 seconds including margin;
+external sources retain 8 seconds. Live browser retrieval returns HTTP 200,
+but returned media identities are absent locally, so full candidate adoption
+remains unaccepted. No model/index/site-binding change was made. See the
+[trace, repair and stop condition](site-media-timeout-followup-2026-11-09.md).
+
 **Real editor roles — 2026-11-09:** installed WordPress author, editor and
 administrator accounts now pass real REST permission checks, native taxonomy
 panel selection, current-article ALT Apply, normal draft save and reload.

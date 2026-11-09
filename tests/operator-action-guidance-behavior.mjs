@@ -79,3 +79,40 @@ for (const name of ['runAutoImageRecommendations', 'runImageSearch']) {
  }
 }
 console.log('Image search lifecycle: automatic/manual success, failure, cancellation, supersession and stale responses release their request.');
+
+// The external fast-source deadline used to abort valid 15-second semantic
+// media retrieval. Exercise the real timeout helper with a deterministic clock.
+const timeoutStart = source.indexOf('\tasync function postJsonWithTimeout(');
+const timeoutEnd = source.indexOf('\n\tfunction ', source.indexOf('\tasync function postImageCandidatesFastFirst('));
+assert.ok(timeoutStart >= 0 && timeoutEnd > timeoutStart);
+for (const provider of ['auto', 'site_media']) {
+ const timers = [];
+ let request;
+ const clock = {AbortController, setTimeout:(callback,delay)=>{ timers.push({callback,delay}); return timers.length; }, clearTimeout:()=>{}};
+ const fetchResponse = (_url, options) => new Promise((resolve,reject)=>{
+  request={options,resolve,reject};
+  options.signal.addEventListener('abort',()=>reject({name:'AbortError'}));
+ });
+ const constants = source.match(/const (?:IMAGE_SOURCE_FAST_TIMEOUT_MS|SITE_MEDIA_SEARCH_TIMEOUT_MS) = \d+;/g).join('\n');
+ const helper = new Function('window','fetch','config','__','joinRestUrl','parseJsonResponse', constants+'\n'+source.slice(timeoutStart,timeoutEnd)+'\nreturn postImageCandidatesFastFirst;')(clock,fetchResponse,{restUrl:'/test/',nonce:'test'},text=>text,(base,path)=>base+path,async value=>value);
+ const controller = new AbortController();
+ const waiting = helper({provider},controller.signal);
+ assert.equal(timers.length,1);
+ assert.equal(timers[0].delay,provider === 'site_media'?45000:8000);
+ if(provider === 'site_media') {
+  assert.ok(timers[0].delay>16000,'A valid 16-second Cloud search must remain reachable.');
+  request.resolve({images:[{id:'existing-media'}]});
+  assert.equal((await waiting).images.length,1);
+ } else {
+  timers[0].callback();
+  await assert.rejects(waiting,error=>error.code==='npcink_toolbox_image_source_timeout');
+ }
+ const canceled = new AbortController();
+ const canceling = helper({provider},canceled.signal);
+ canceled.abort();
+ await assert.rejects(canceling,error=>error.code==='npcink_toolbox_request_cancelled');
+ const expiring = helper({provider},new AbortController().signal);
+ timers.at(-1).callback();
+ await assert.rejects(expiring,error=>error.code==='npcink_toolbox_image_source_timeout');
+}
+console.log('Image deadlines: semantic media query/evidence budget, external fast timeout, expiry and cancellation passed.');
