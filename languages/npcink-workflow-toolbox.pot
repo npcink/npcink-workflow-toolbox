@@ -10306,7 +10306,7 @@ msgstr ""
 msgid "Find articles and images worth reviewing, then open the relevant editor or tool."
 msgstr ""
 
-msgid "Ask in your own words. Relevant site summaries or delivered public articles are used when available; unclear questions may need clarification."
+msgid "Describe the problem. Relevant site information is prepared automatically; only details the site cannot provide may need clarification."
 msgstr ""
 
 msgid "What would you like help with?"
@@ -10354,7 +10354,7 @@ msgstr ""
 msgid "The question could not be understood reliably. Rephrase it and try again."
 msgstr ""
 
-msgid "Understanding your question and preparing an answer…"
+msgid "Understanding your question and preparing relevant site context as needed…"
 msgstr ""
 
 msgid "Based on a bounded site summary, not a full-site audit."

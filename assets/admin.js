@@ -7914,7 +7914,7 @@
 				}
 
 				setBusy(true);
-				setStatus(t('Understanding your question and preparing an answer…'), 'is-pending');
+				setStatus(t('Understanding your question and preparing relevant site context as needed…'), 'is-pending');
 				resultEl.hidden = true;
 				setMarkdownContent(answerEl, '');
 				resetSources();

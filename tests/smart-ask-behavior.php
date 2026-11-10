@@ -105,6 +105,8 @@ namespace {
 		$payload=$GLOBALS['calls'][0][0];
 		check( $payload['storage_mode']==='no_store' && $payload['data_classification']==='pii' && $payload['retry_max']===0 && $payload['timeout_seconds']===15 && $payload['policy']['allow_fallback']===false, 'Decision is no-store, bounded, single-shot and no fallback.' );
 		check( json_decode($payload['input']['messages'][1]['content'],true)===$request->input && !isset($payload['input']['source']), 'Decision receives question and entry hint only, never site data.' );
+		$instruction = $payload['input']['messages'][0]['content'];
+		check( str_contains($instruction, 'Route concrete site slowness') && str_contains($instruction, 'Do not ask users to copy') && str_contains($instruction, 'Never request passwords'), 'Automatic context policy routes supported troubleshooting and never asks operators to prepare available facts or secrets.' );
 	}
 	foreach ( array('clarify','guidance') as $action ) {
 		reset_case($action,'','A short clarification or general answer.');

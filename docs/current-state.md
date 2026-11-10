@@ -32,11 +32,15 @@ clarification/general guidance, with evidence scope visible in the answer.
 Inspection preview is reachable through support/legacy URLs. The old internal-link
 admin card remains hidden/frozen; existing editor links and related reading remain.
 See [scope and validation limits](admin-operator-focus-2026-11-10.md).
-Deterministic gates and bilingual installed layouts pass. Live question selection
-and the original content-structure answer both fail with
-`cloud_routing_no_candidates` before a Cloud run exists; live success and semantic
-selection quality remain unaccepted. Model/provider configuration is unchanged;
-see Known Issues before retrying.
+Deterministic gates and bilingual PC layouts pass. Cloud #1397 fixes the existing
+`text.ai` editorial-model candidate selection; the accepted M4 revision
+`45e3a24a0d5630b1998420a08b2173744d59308a` includes that fix. Two bounded live
+question-only checks now return successful content-structure/environment answers.
+The follow-up makes existing background preparation explicit and keeps answers
+focused on the actual question; users do not copy versions, plugin lists or
+configuration. This is limited developer wiring evidence, not general answer
+quality, web-SAPI configuration accuracy or production API acceptance. See
+[maintenance acceptance](maintenance-acceptance-2026-11-10.md).
 
 **Site Profile summary, batch 2 — 2026-11-10:** saved brief fields are shown
 as an escaped two-line summary with an Edit site profile disclosure. Empty
