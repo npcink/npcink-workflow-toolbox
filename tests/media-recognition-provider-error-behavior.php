@@ -199,6 +199,7 @@ namespace {
 	file_put_contents( $changed_file, file_get_contents( $first_file ) . 'changed-file-bytes' );
 	$GLOBALS['npcink_toolbox_media_files'][42] = $first_file;
 	$GLOBALS['npcink_toolbox_media_upload_calls'] = 0;
+	$GLOBALS['npcink_toolbox_media_projection'] = array();
 	$GLOBALS['npcink_toolbox_media_vision_result'] = array(
 		'contract_version' => 'image_context_evidence.v1',
 		'run_id' => 'run_visual_projection',
@@ -239,8 +240,9 @@ namespace {
 	$changed = $client->resolve_media_image_context_evidence( $request, true, 'test-upload' );
 	npcink_toolbox_media_recognition_error_assert(
 		0 === $changed['reused_count'] && 1 === $changed['recognized_count']
+		&& true === $changed['projection_queued'] && 2 === count( $GLOBALS['npcink_toolbox_media_projection'] )
 		&& $vision_calls + 1 === $GLOBALS['npcink_toolbox_media_provider_calls']
-		&& 'sha256:' . hash_file( 'sha256', $changed_file ) === $GLOBALS['npcink_toolbox_media_projection'][1]['media_items'][0]['media_fingerprint'],
+		&& 'sha256:' . hash_file( 'sha256', $changed_file ) === ( $GLOBALS['npcink_toolbox_media_projection'][1]['media_items'][0]['media_fingerprint'] ?? '' ),
 		'Changed file bytes reject stale Cloud evidence and project the newly recognized fingerprint.'
 	);
 	unset( $GLOBALS['npcink_toolbox_media_vision_result'] );
