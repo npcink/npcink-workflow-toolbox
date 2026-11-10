@@ -69,7 +69,8 @@ comparison: 26 local attachments, 71 Cloud media documents, 2 matching IDs,
 69 Cloud-only IDs and 24 local-only IDs; all 26 local files are readable.
 This proves stale projection data, not the exact historical deletion/restore event.
 
-Addon source `includes/class-cloud-site-knowledge-change-bridge.php` has:
+At the initial diagnosis, Addon source
+`includes/class-cloud-site-knowledge-change-bridge.php` had:
 
 1. `register()` attachment add/edit/meta hooks, but no attachment-delete hook.
 2. `handle_removed_post()` delegates only for public posts/pages;
@@ -88,10 +89,62 @@ read errors, disabled delivery and unreachable sites must never imply deletion;
 preserve non-media and other sites, and handle uncertain/in-flight deliveries.
 No new operator selector or manual routine cleanup is warranted.
 
-No media records were deleted in this session. The earlier exact development
-cleanup question is still awaiting an explicit answer. Root-cause repair,
-cleanup, successful current-media adoption/save and production evidence remain
-separate unfinished states in Known Issues.
+### Media source repair and historical writer limit
+
+Source repair merged: Cloud #1400 (`9f7fe0916499f109c87f4f5e5739dffc0049d6c2`)
+and Addon #347 (`a55ca329bad2ffdd5c7157dec3fcd5feb16d955a`). Their exact tested
+source trees match their squash merges. All final-head CI checks passed.
+The Addon release ZIP has 55 files and SHA-256
+`af75b36799c3e02d2d933da78e31521a7a9fd7b6b3cbb9cdb166b238dff184e5`;
+package verification, strict Plugin Check, PHPStan, full behavior tests and
+Playground compatibility passed. A disposable real WordPress attachment deletion
+also confirmed durable typed withdrawal after deletion, retained parent and zero
+HTTP inside the hook. This is separate from Local MySQL and M4 evidence.
+
+The operator explicitly authorized M4 synchronization and this exact 69-source
+cleanup. Another Portal session occupied M4; synchronization waited until that
+session ended, as requested. Governed promotion of Cloud #1400 now reports
+`acceptance_state=accepted`, clean `master`, revision `9f7fe0916499`.
+
+The installed hourly callback then automatically queued 69 missing-media
+identities before the manual acceptance driver reached its queue stage. D0 run
+`run_0b7366424200492682e2a3f0237066d3` succeeded, with zero provider calls.
+Read-only before/after SQL and fresh signed typed presence confirm:
+
+| Scope | Before | After | Evidence |
+| --- | --- | --- | --- |
+| Media documents / chunks | 71 / 71 | 2 / 2 | Exactly the 69 absent manifest IDs removed |
+| Current indexed media | 2 | 2 | Complete document/chunk row hashes unchanged |
+| Non-media documents | 2,060 | 2,060 | Complete row hash unchanged |
+| Non-media chunks | 2,305 | 2,305 | Complete row hash unchanged |
+| Local attachments | 26 | 26 | Local SQL inventory; no WordPress content writes |
+
+The active M4 vector backend was independently read as `postgres_json`; its
+vectors reside in the verified chunk rows. This does not establish external
+Zilliz deletion or production behavior. The 24 local-only images were not
+bulk indexed or recognized.
+
+**Lifecycle confirmation remains pending.** The existing operation retains
+55 old producer identities. Seventeen were positively witnessed, then
+`run_ad5e8b35be5b4fd098edd855348cf06b` failed witness validation: it was
+administratively marked `runtime.operator_stale_running_failed` on 2026-10-28,
+not positively observed exiting the executor. Its result is purged. Two other
+historical producers failed with `site_knowledge.image_embedding_source_unavailable`;
+the failed-run allowlist was not broadened during acceptance. Do not clear these
+records, manufacture a terminal witness, or declare compensation complete.
+`media_cleanup_error=cloud_site_knowledge_writer_unknown` stays visible, while
+scan-read error is empty. Legacy uncertainty and the unrelated previously
+blocked article-exclusion intent were preserved.
+
+The manual driver first rejected the unrelated blocked intent, then required a
+pre-cleanup 71-ID manifest after the automatic callback had already deleted the
+69 IDs. Both preflight rejections occurred before manual mutations; they are
+not product failures or evidence of a complete first-pass acceptance run.
+Bounded production-path callbacks then advanced known-writer checks and stopped
+when progress ceased. The remaining action is evidence-based disposition of
+historical writer uncertainty; it is separate from the verified data cleanup.
+No new model evaluation, manual run-state override or production deployment was
+performed. Editor adoption and final customer value acceptance remain separate.
 
 ## Evidence location
 
@@ -101,3 +154,8 @@ It contains the two live receipts, PC render receipt/screenshots, ZIP receipts,
 package hash, sanitized drift counts/manifest hash and gate logs. No credentials
 or raw host configuration are committed. Earlier failures remain in their
 original dated records.
+
+The media repair bundle is alongside it under `media-withdrawal-20261110/`:
+final source/package/CI receipts, M4 accepted state, signed presence, before/after
+counts and hashes, the automatic D0 run, local/Playground evidence and the
+unresolved writer diagnosis. Raw configuration and credentials are excluded.

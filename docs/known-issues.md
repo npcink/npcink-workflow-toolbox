@@ -40,25 +40,31 @@ and repeated research stay frozen under the decision's restart rules.
   assertions conditional on actual scan counts while retaining coverage.
   Do not change live site content or scanning rules to manufacture a result.
 
-- **Local/Cloud media withdrawal gap (Addon delivery / Cloud index, WordPress is source truth, 2026-11-10).**
-  A read-only comparison of the same development site finds 26 current attachments
-  and 71 Cloud media documents: two match, 69 Cloud identities no longer exist
-  locally, and 24 current attachments are not in that Cloud index. This proves
-  projection drift, not its historical trigger. Source inspection confirms the
-  Addon registers attachment add/edit but no attachment-delete callback; its
-  generic removed-post callback excludes attachments, and hourly reconciliation
-  only visits existing rows. Incremental Cloud refresh intentionally preserves
-  omissions, so neither path withdraws those absent media sources. A one-off
-  cleanup does not close this delivery/reconciliation defect.
-  The operator reaffirmed that the current site is the sole media source. The
-  previously requested exact 69-source development cleanup remains pending an
-  explicit response; no records have been deleted. Repair must include typed
-  attachment deletion and missed-notification reconciliation with validated
-  source evidence; partial pages, read failures, disabled consent and unavailable
-  sites must never be interpreted as deletion. Retain Cloud site/type scoping,
-  local candidate rejection, other content and valid media. No ID remapping,
-  recreation, model campaign or production change. See
-  [diagnosis and acceptance boundaries](maintenance-acceptance-2026-11-10.md#media-source-drift).
+- **Media withdrawal source fix and remaining historical writer confirmation (Addon / Cloud, development, 2026-11-10).**
+  Cloud [#1400](https://github.com/npcink/npcink-ai-cloud/pull/1400) and Addon
+  [#347](https://github.com/npcink/npcink-cloud-addon/pull/347) merged with all
+  final-head checks passing. Cloud clean master `9f7fe091` is M4 accepted.
+  WordPress now queues typed attachment withdrawal after successful deletion;
+  the existing hourly callback checks one bounded Cloud identity page against
+  exact local SQL attachment existence. Partial pages, read failures and disabled
+  consent fail closed; no routine operator cleanup selector was added.
+  After explicit operator authorization, the installed hourly callback discovered
+  and removed exactly the 69 confirmed absent media sources. Fresh signed
+  presence and SQL confirm two valid media remain; all 2,060 non-media records,
+  2,305 non-media chunks and both current media have unchanged row hashes.
+  Local attachments remain 26; no model call or production change was made.
+  **Remaining:** the withdrawal intent is still pending, not fully confirmed.
+  Of 55 known old producers, witness checking stops at a 2026-10-28 run marked
+  `runtime.operator_stale_running_failed`. That administrative failure is not
+  executor-completion evidence and must not be silently accepted or cleared.
+  Its result was purged; 17 earlier writers were positively confirmed when
+  acceptance stopped. Existing unknown-history and an unrelated blocked
+  article-exclusion intent remain intact. Keep the exact missing-media manifest,
+  visible cleanup error and typed suppression; a bounded historical-writer
+  disposition needs separate evidence. Do not relabel data removal as completed
+  compensation or permanent exclusion. Twenty-four current unindexed attachments,
+  editor adoption and production API/release acceptance stay outside this fix.
+  See [repair and evidence](maintenance-acceptance-2026-11-10.md#media-source-repair-and-historical-writer-limit).
 
 - **Editor-loop maintenance and frozen recommendation follow-up (Toolbox, 2026-11-09).**
   Follow the [maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
