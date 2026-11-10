@@ -10789,3 +10789,19 @@ msgstr "媒体优化已暂停，已有水印模板仍可展开编辑。"
 #: includes/Admin_Page.php
 msgid "Check that public content can be read. This preview does not enable automatic inspections."
 msgstr "检查能否读取本站公开内容，此预览不会开启自动巡检。"
+
+#: includes/Admin_Page.php
+msgid "Give AI your site positioning, audience, and preferred voice."
+msgstr "帮助 AI 理解本站的定位、受众和表达习惯。"
+
+#: includes/Admin_Page.php
+msgid "Saved profile"
+msgstr "已保存画像"
+
+#: includes/Admin_Page.php
+msgid "Start with the four basic fields below."
+msgstr "从下面四项基本信息开始填写。"
+
+#: includes/Admin_Page.php
+msgid "Edit site profile"
+msgstr "编辑站点画像"
