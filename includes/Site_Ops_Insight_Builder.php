@@ -32,8 +32,6 @@ final class Site_Ops_Insight_Builder {
 		$this->add_comment_finding( $comments, $findings );
 		$this->add_media_finding( $media, $posts, $findings );
 		$this->add_taxonomy_finding( $taxonomies, $findings );
-		$this->add_context_finding( $context, $findings );
-		$this->add_site_knowledge_finding( $context, $findings );
 
 		usort(
 			$findings,
@@ -388,52 +386,6 @@ final class Site_Ops_Insight_Builder {
 			__( 'Sparse vocabulary can fragment content discovery and weaken recommendation quality.', 'npcink-workflow-toolbox' ),
 			__( 'Review taxonomy consolidation separately; do not create, merge, or assign terms from this panel.', 'npcink-workflow-toolbox' ),
 			'manual_review_only',
-			array()
-		);
-	}
-
-	/**
-	 * @param array<string,mixed>            $context Context.
-	 * @param array<int,array<string,mixed>> $findings Findings.
-	 */
-	private function add_context_finding( array $context, array &$findings ): void {
-		if ( ! empty( $context['content_context_ready'] ) ) {
-			return;
-		}
-
-		$findings[] = $this->finding(
-			'site_context_incomplete',
-			__( 'Site Context needs a stronger brief', 'npcink-workflow-toolbox' ),
-			'site_context',
-			72,
-			'medium',
-			__( 'The compact site positioning, audience, voice, or keyword context is incomplete.', 'npcink-workflow-toolbox' ),
-			__( 'Site context helps keep content suggestions consistent.', 'npcink-workflow-toolbox' ),
-			__( 'Fill the Site Context brief before relying on repeated AI recommendations.', 'npcink-workflow-toolbox' ),
-			'manual_review_only',
-			array()
-		);
-	}
-
-	/**
-	 * @param array<string,mixed>            $context Context.
-	 * @param array<int,array<string,mixed>> $findings Findings.
-	 */
-	private function add_site_knowledge_finding( array $context, array &$findings ): void {
-		if ( ! empty( $context['cloud_ready'] ) ) {
-			return;
-		}
-
-		$findings[] = $this->finding(
-			'site_knowledge_cloud_unavailable',
-			__( 'Cloud Site Knowledge is not available', 'npcink-workflow-toolbox' ),
-			'site_knowledge',
-			68,
-			'medium',
-			__( 'The local site check can run, but semantic Site Knowledge and Cloud detail are unavailable.', 'npcink-workflow-toolbox' ),
-			__( 'Without Cloud, recommendations stay local and cannot use semantic related-content evidence.', 'npcink-workflow-toolbox' ),
-			__( 'Connect or verify Cloud Addon before expecting deeper semantic analysis.', 'npcink-workflow-toolbox' ),
-			'blocked_until_cloud_ready',
 			array()
 		);
 	}

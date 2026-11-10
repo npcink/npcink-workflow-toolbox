@@ -1,5 +1,15 @@
 # Development Freeze And Maintenance Scope — 2026-11-09
 
+## 2026-11-10 Operator admin entry amendment
+
+The operator approved [admin convergence](admin-operator-focus-2026-11-10.md).
+This first slice moves optional content preferences and inspection preview into
+support and removes setup gaps from content findings. Keep existing data, writes,
+pauses and five Ask choices. A second approved slice will replace the selector
+with a bounded question-only decision and at most one existing read-only answer;
+it does not permit new packs, agents, model/provider configuration or queues.
+
+
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 

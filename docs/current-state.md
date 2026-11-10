@@ -1,5 +1,12 @@
 # Current State
 
+**Operator admin entry convergence — 2026-11-10:** optional profile/boundary/technical
+preferences and inspection preview move to support. Setup gaps no longer create
+content findings; repeated check explanations fold away. The old internal-link
+card stays hidden. Five Ask choices remain for this first slice; the approved
+single-question implementation follows separately. See
+[scope and limits](admin-operator-focus-2026-11-10.md).
+
 Status: the session orientation page. Read this plus `AGENTS.md` at session
 start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
