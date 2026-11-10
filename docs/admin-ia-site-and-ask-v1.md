@@ -1,13 +1,13 @@
 # Toolbox Admin IA — 开始 / 站点与提问 / 图片审核与设置（v1）
 
-## 2026-11-10 后台入口与检查收敛
-
-按[本轮限定范围](admin-operator-focus-2026-11-10.md)，画像/内容边界/技术 JSON
-和巡检预览移至支持路径；取消画像必填引导，站点检查不再把可选配置缺口当成内容
-问题。保留配置、旧 URL、权限、暂停和五项提问选择器。自然语言问答在下一独立批次交付。
-
-
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。智能提问 **行为**（pack 下拉 + REST）本阶段不变。
+
+## 当前覆盖决议 — 2026-11-10
+
+用户已同意[面向运营人员的收敛](admin-operator-focus-2026-11-10.md)。以下旧版中
+画像优先、五项提问下拉、巡检预览常驻的约定为历史基线。默认界面现在先提问、后
+内容问题检查；画像/边界/JSON 与巡检预览移到支持路径。提问通过一次有界判断选择
+一个既有资料来源或先澄清，旧 REST、权限、配置与运行暂停不变。
 
 ## 产品意图（降门槛）
 

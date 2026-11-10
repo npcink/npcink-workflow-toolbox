@@ -15,12 +15,11 @@ class Node {
  querySelector(s) { return this.nodes[s]; }
 }
 const root = new Node();
-const parts = ['submit','stop','question','status','result','answer','run-id','meta','pack','sources','completeness'];
+const parts = ['submit','stop','question','status','result','answer','run-id','meta','basis','sources','completeness'];
 root.nodes = Object.fromEntries(parts.map(p => [`[data-toolbox-smart-ask-${p}]`, new Node()]));
 const node = p => root.nodes[`[data-toolbox-smart-ask-${p}]`];
 node('sources').nodes = { ol: new Node('ol') };
-const option = new Node(); option.attrs['data-endpoint'] = 'site-knowledge/answers';
-node('pack').options = [option]; node('pack').selectedIndex = 0;
+root.attrs['data-source-hint'] = 'site_ops';
 node('question').value = 'What is in the source?';
 node('submit').textContent = 'Ask';
 const document = { querySelectorAll: () => [root], createElement: tag => new Node(tag), createTextNode: text => ({textContent:text}) };
@@ -30,8 +29,8 @@ let transportCalls = 0;
 let lastSignal;
 const timers = new Map();
 let timerId = 0;
-const postJson = async (_base, _path, _payload, signal) => {
- transportCalls += 1; lastSignal = signal;
+const postJson = async (_base, path, payload, signal) => {
+ transportCalls += 1; lastSignal = signal; assert.equal(path, 'smart-ask'); assert.equal(payload.source_hint, 'site_ops');
  if (pending) return new Promise((_resolve, reject) => signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), {once:true}));
  if (reply instanceof Error) throw reply; return reply;
 };
@@ -67,7 +66,7 @@ await node('submit').handlers.click();
 assert.equal(node('run-id').textContent, 'run_diagnostic', 'Normalized Toolbox errors retain the Cloud correlation ID in support details.');
 assert.equal(node('result').hidden, false);
 reply = fixture('https://site.test/source'); await node('submit').handlers.click();
-node('pack').handlers.change();
+node('question').handlers.input();
 assert.equal(node('result').hidden, true); assert.equal(node('sources').hidden, true);
 assert.equal(timers.size, 0, 'Success and failure clear the request deadline.');
 
@@ -85,7 +84,7 @@ assert.match(node('status').textContent, /Stopped waiting.*Cloud may still be pr
 assert.equal(node('stop').hidden, true);
 assert.equal(node('submit').disabled, false);
 assert.equal(node('question').disabled, false);
-assert.equal(node('pack').disabled, false);
+assert.equal(root.nodes['[data-toolbox-smart-ask-pack]'], undefined, 'No data-package selector is required.');
 assert.equal(node('result').hidden, true, 'Stopping never exposes the previous answer.');
 assert.equal(timers.size, 0);
 
@@ -98,14 +97,24 @@ assert.match(node('status').textContent, /took too long.*Cloud may still be proc
 assert.equal(node('submit').disabled, false);
 assert.equal(timers.size, 0);
 pending = false;
-option.attrs['data-endpoint'] = 'site-ops/insight-pack-qa';
-reply = {ok:true, answer:'Fresh summary', run_id:'run_fresh'};
+
+reply = {ok:true, answer:'Fresh summary', run_id:'run_fresh', answer_basis:'site_summary'};
 await node('submit').handlers.click();
 assert.equal(lastSignal.aborted, false, 'A user retry gets a fresh request signal.');
 assert.equal(node('answer').textContent, 'Fresh summary');
 assert.equal(node('run-id').textContent, 'run_fresh');
+assert.match(node('basis').textContent, /bounded site summary/);
 assert.equal(node('sources').hidden, true);
 assert.equal(timers.size, 0);
+
+for (const [basis, label] of [['clarification',/requested detail/], ['general_guidance',/has not been checked/]]) {
+ reply = {ok:true, answer:'A short response', run_id:'run_short', answer_basis:basis};
+ await node('submit').handlers.click();
+ assert.match(node('basis').textContent, label);
+ assert.equal(node('basis').hidden, false);
+ assert.equal(node('sources').hidden, true);
+ assert.equal(node('answer').textContent, 'A short response');
+}
 
 const transportStart = source.indexOf('\tasync function postJson(');
 const transportEnd = source.indexOf('\n\tasync function ', transportStart + 10);

@@ -34,12 +34,14 @@ do not expect local prefix traces to grep Cloud logs directly.
 **脱密 pack → Cloud 验证（其它 AI 必读）：** 边界
 `docs/deidentified-assistant-boundary-v1.md`。
 - **巡检摘要：** `docs/insight-pack-cloud-qa-cli.md`；`scripts/insight-pack-cloud-qa.sh`；
-  后台 **智能提问** → 选择「本次站点检查」（`POST …/site-ops/insight-pack-qa`）。
+  CLI 直调 `POST …/site-ops/insight-pack-qa`；后台智能提问直接描述站点检查问题。
 - **内容结构摘要（第二包）：** `docs/content-structure-pack-cloud-qa-cli.md`；
-  `scripts/content-structure-pack-cloud-qa.sh`；后台 **智能提问** → 选择「内容结构」
+  `scripts/content-structure-pack-cloud-qa.sh`；后台智能提问直接描述内容结构问题
   （`POST …/content-structure/insight-pack-qa`；不要去「图片处理」）。
 源码已包含巡检、内容结构、页面质量、环境清单四包，以及独立的「本站公开内容」问答。
-冻结新增包与编排；保留现有入口，不为本次冻结重新验收或恢复功能。
+冻结新增包与编排；原五类接口保留。2026-11-10 用户同意取消后台资料选择器，
+只允许一次问题判断与至多一个既有回答路径，见
+`docs/admin-operator-focus-2026-11-10.md`；不恢复其他冻结功能。
 勿走已暂停的 `cloud_inspection`；排障优先带 Cloud `run_id`。
 
 ## Product Boundary

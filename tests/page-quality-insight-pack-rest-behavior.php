@@ -320,9 +320,8 @@ page_quality_rest_assert( false !== strpos( $controller_source, "'/page-quality/
 $admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
 $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
 page_quality_rest_assert( false === strpos( $admin_source, 'data-toolbox-page-quality-qa' ), 'Page quality does not host a separate Ask card outside Smart Ask.' );
-page_quality_rest_assert( false !== strpos( $admin_source, "'page_quality'" ) && false !== strpos( $admin_source, 'Page quality' ), 'Smart Ask lists a plain Page quality option (no contract id jargon in the label).' );
-page_quality_rest_assert( false !== strpos( $admin_source, "'endpoint'         => 'page-quality/insight-pack-qa'" ) && false !== strpos( $admin_source, "'contract'         => 'page_quality_insight_pack.v1'" ), 'Smart Ask registry includes the page-quality pack.' );
-page_quality_rest_assert( false !== strpos( $js_source, 'initSmartAsk' ) && false !== strpos( $js_source, "getAttribute('data-endpoint')" ), 'admin.js sends Smart Ask to the selected pack endpoint.' );
+page_quality_rest_assert( false !== strpos( $controller_source, '$this->page_quality_insight_pack_qa( $delegate )' ) && false === strpos( $admin_source, 'data-toolbox-smart-ask-pack' ), 'Unified Ask retains the existing page_quality_insight_pack_qa path without an operator-facing package selector.' );
+page_quality_rest_assert( false !== strpos( $js_source, 'initSmartAsk' ) && false !== strpos( $js_source, "const endpoint = 'smart-ask'" ), 'admin.js submits a free-form question to the bounded single-entry endpoint.' );
 page_quality_rest_assert( false !== strpos( $js_source, 'is-ask-busy' ) && false !== strpos( $bridge_source, 'busy_slot' ), 'Ask UI / bridge share busy-slot handling.' );
 
 $boundary = (string) file_get_contents( dirname( __DIR__ ) . '/docs/deidentified-assistant-boundary-v1.md' );

@@ -1,17 +1,21 @@
 # Development Freeze And Maintenance Scope — 2026-11-09
 
-## 2026-11-10 Operator admin entry amendment
-
-The operator approved [admin convergence](admin-operator-focus-2026-11-10.md).
-This first slice moves optional content preferences and inspection preview into
-support and removes setup gaps from content findings. Keep existing data, writes,
-pauses and five Ask choices. A second approved slice will replace the selector
-with a bounded question-only decision and at most one existing read-only answer;
-it does not permit new packs, agents, model/provider configuration or queues.
-
-
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
+
+## 2026-11-10 Operator-first admin amendment
+
+The operator approved [the bounded admin convergence](admin-operator-focus-2026-11-10.md):
+move profile/boundary/technical preferences and inspection preview out of the
+ordinary workflow; stop treating optional profile completion or Cloud connection
+as content findings. Replace the five-source selector with one free-form question,
+one bounded no-store evidence decision and at most one existing read-only answer.
+Clarify ambiguous requests; distinguish general guidance from site evidence.
+This explicitly supersedes the earlier selector-preservation default, but does
+not add packs, agents, queues, write authority or reopen other frozen work.
+Internal-link/related-reading review retains product value; the hidden legacy
+admin card stays hidden and expansion remains frozen. Existing editor consumers,
+settings, contracts and recovery remain.
 
 ## 2026-11-10 Site Profile summary, batch 2
 

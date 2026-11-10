@@ -317,9 +317,9 @@ content_structure_rest_assert( false !== strpos( $controller_source, "'/content-
 
 $admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
 $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
-content_structure_rest_assert( false === strpos( $admin_source, 'data-toolbox-content-structure-qa' ) && false === strpos( $admin_source, 'render_smart_ask_link' ) && false !== strpos( $admin_source, 'data-toolbox-smart-ask-pack' ), 'Site Profile omits duplicate Ask UI while the shared Smart Ask selector remains available.' );
-content_structure_rest_assert( false !== strpos( $admin_source, "'endpoint'         => 'content-structure/insight-pack-qa'" ) && false !== strpos( $admin_source, "'contract'         => 'content_structure_insight_pack.v1'" ), 'Smart Ask registry includes the content-structure pack.' );
-content_structure_rest_assert( false !== strpos( $js_source, 'initSmartAsk' ) && false !== strpos( $js_source, "getAttribute('data-endpoint')" ), 'admin.js sends Smart Ask to the selected pack endpoint.' );
+content_structure_rest_assert( false === strpos( $admin_source, 'data-toolbox-content-structure-qa' ) && false === strpos( $admin_source, 'render_smart_ask_link' ) && false === strpos( $admin_source, 'data-toolbox-smart-ask-pack' ) && false !== strpos( $admin_source, 'data-toolbox-smart-ask-question' ), 'Site Profile omits duplicate Ask UI while the shared natural-language question remains available.' );
+content_structure_rest_assert( false !== strpos( $controller_source, '$this->content_structure_insight_pack_qa( $delegate )' ) && false === strpos( $admin_source, 'data-toolbox-smart-ask-pack' ), 'Unified Ask retains the existing content_structure_insight_pack_qa path without an operator-facing package selector.' );
+content_structure_rest_assert( false !== strpos( $js_source, 'initSmartAsk' ) && false !== strpos( $js_source, "const endpoint = 'smart-ask'" ), 'admin.js submits a free-form question to the bounded single-entry endpoint.' );
 content_structure_rest_assert( false !== strpos( $js_source, 'is-ask-busy' ) && false !== strpos( $bridge_source, 'busy_slot' ), 'Ask UI / bridge share busy-slot handling.' );
 
 $boundary = (string) file_get_contents( dirname( __DIR__ ) . '/docs/deidentified-assistant-boundary-v1.md' );

@@ -65,6 +65,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller_Support.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Web_Search_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Insight_Pack_Answer_Guidance.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Site_Ops_Insight_Bridges.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Smart_Ask.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Content_Structure_Insight_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Page_Quality_Insight_Bridges.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Environment_Performance_Insight_Bridges.php';

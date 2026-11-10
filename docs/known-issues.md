@@ -20,6 +20,18 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
+- **Smart Ask live wiring lacks an eligible Cloud model (Cloud routing, 2026-11-10).**
+  The new question-only decision returns HTTP 400 with
+  `cloud_routing_no_candidates` before a run is created; the unchanged
+  content-structure QA path reproduces the same Cloud error (bridge HTTP 502).
+  Admin UI, controlled five-source dispatch, privacy and deterministic gates
+  pass; real selection quality and successful live answers remain unaccepted.
+  Keep `pii/no_store` and existing model/provider configuration intact. After
+  the Cloud owner restores an eligible candidate for the existing `text.ai`
+  profile, run one bounded wiring check; do not schedule repeated evaluation
+  or expand the frozen product. Source:
+  [operator admin convergence](admin-operator-focus-2026-11-10.md#本轮验收记录).
+
 - **Installed Site Check browser smoke assumes a particular finding (Toolbox test, 2026-11-10).**
   `tests/smoke-site-ops-insights-browser.mjs:272` unconditionally expects an
   internal-link-health finding from the mutable local site's bounded sample.

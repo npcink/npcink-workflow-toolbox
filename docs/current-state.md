@@ -1,18 +1,26 @@
 # Current State
 
-**Operator admin entry convergence — 2026-11-10:** optional profile/boundary/technical
-preferences and inspection preview move to support. Setup gaps no longer create
-content findings; repeated check explanations fold away. The old internal-link
-card stays hidden. Five Ask choices remain for this first slice; the approved
-single-question implementation follows separately. See
-[scope and limits](admin-operator-focus-2026-11-10.md).
-
 Status: the session orientation page. Read this plus `AGENTS.md` at session
 start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-10.
+
+**Operator-first admin convergence — 2026-11-10:** the latest accepted direction
+moves profile, content-boundary and technical editing to support; removes optional
+profile/Cloud readiness from content findings; and uses a single natural-language
+question instead of five operator-selected data sources. A bounded no-store
+question-only decision selects at most one existing answer path or requests a
+clarification/general guidance, with evidence scope visible in the answer.
+Inspection preview is reachable through support/legacy URLs. The old internal-link
+admin card remains hidden/frozen; existing editor links and related reading remain.
+See [scope and validation limits](admin-operator-focus-2026-11-10.md).
+Deterministic gates and bilingual installed layouts pass. Live question selection
+and the original content-structure answer both fail with
+`cloud_routing_no_candidates` before a Cloud run exists; live success and semantic
+selection quality remain unaccepted. Model/provider configuration is unchanged;
+see Known Issues before retrying.
 
 **Site Profile summary, batch 2 — 2026-11-10:** saved brief fields are shown
 as an escaped two-line summary with an Edit site profile disclosure. Empty

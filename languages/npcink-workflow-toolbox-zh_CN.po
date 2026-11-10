@@ -10815,6 +10815,12 @@ msgstr "描述需要帮助的问题，或查找值得回顾的内容。建议不
 msgid "Find articles and images worth reviewing, then open the relevant editor or tool."
 msgstr "查找值得回顾的文章和图片，再打开对应编辑器或工具处理。"
 
+msgid "Ask in your own words. Relevant site summaries or delivered public articles are used when available; unclear questions may need clarification."
+msgstr "直接描述你的问题。系统会按需参考站点摘要或已收录的公开文章；问题不明确时会先澄清。"
+
+msgid "What would you like help with?"
+msgstr "你需要什么帮助？"
+
 msgid "Stopping the wait does not cancel Cloud processing."
 msgstr "停止等待不会取消 Cloud 已开始的处理。"
 
@@ -10847,3 +10853,30 @@ msgstr "抽样公开内容中的分类和标签。"
 
 msgid "AI answers and suggestions need a connection. Local site checks and metadata review remain available."
 msgstr "AI 回答和建议需要连接 Cloud；本地站点检查和信息审阅仍可使用。"
+
+msgid "Enter a question in the question field."
+msgstr "请在问题框中输入问题。"
+
+msgid "Enter a shorter question and try again."
+msgstr "请缩短问题后重试。"
+
+msgid "The question could not be understood reliably. Rephrase it and try again."
+msgstr "暂时无法准确理解这个问题，请换一种说法后重试。"
+
+msgid "Understanding your question and preparing an answer…"
+msgstr "正在理解问题并准备回答…"
+
+msgid "Based on a bounded site summary, not a full-site audit."
+msgstr "回答依据有限范围的站点摘要，未做全站审查。"
+
+msgid "Based on retrieved public articles; check the references below."
+msgstr "回答依据检索到的公开文章，请核对下方引用。"
+
+msgid "General guidance only. This site has not been checked for this answer."
+msgstr "以下为一般建议，本次回答尚未检查本站。"
+
+msgid "Add the requested detail to your question above, then ask again."
+msgstr "请在上方问题中补充所需信息，再次提问。"
+
+msgid "Please add a little more detail."
+msgstr "请补充一点具体信息。"
