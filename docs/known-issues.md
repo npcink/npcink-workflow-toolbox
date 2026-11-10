@@ -20,6 +20,18 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
+- **Installed Site Check browser smoke assumes a particular finding (Toolbox test, 2026-11-10).**
+  `tests/smoke-site-ops-insights-browser.mjs:272` unconditionally expects an
+  internal-link-health finding from the mutable local site's bounded sample.
+  The admin maintenance browser run reaches this unrelated failure after
+  passing the repaired snapshot-state assertion. An `origin/master`
+  Admin_Page probe, omitting only the already known old snapshot assertion,
+  fails at the same finding assertion. Source: [focused admin verification](admin-ia-site-and-ask-v1.md#本地验证与限制).
+  Next bounded action, only when this smoke is needed: give it a disposable
+  deterministic content fixture and cleanup, or make finding-specific
+  assertions conditional on actual scan counts while retaining coverage.
+  Do not change live site content or scanning rules to manufacture a result.
+
 - **Local/Cloud media identity mismatch (Addon / Cloud projection, WordPress attachment truth, 2026-11-09).**
   The [timeout follow-up](site-media-timeout-followup-2026-11-09.md) traced a
   successful Cloud search and repaired the browser deadline mismatch (see
@@ -362,6 +374,18 @@ and repeated research stay frozen under the decision's restart rules.
   media-derivative render helpers); inspect actual call sites before removal.
 
 ## Recently Closed
+
+- **Admin labels and overlapping watermark save controls (Toolbox admin, 2026-11-10).**
+  The operator-approved [maintenance slice](admin-ia-site-and-ask-v1.md#后台设置维护--2026-11-10)
+  names image/settings and content-boundary entries accurately, states the
+  fixed backup policy, separates cleanup saving and keeps watermark controls
+  in normal flow only for unsaved edits. Logo edits mark dirty; Undo removes
+  the stale empty-state message. Snapshot success/error labels retain the
+  existing Ask/Rescan actions. Frozen entry flags, data and permissions remain.
+  Local zh_CN/en_US browser checks cover desktop/narrow layouts and intercepted
+  Settings API submits; no saved settings, media or Cloud writes were made.
+  Production, actual settings persistence and human visual acceptance are not
+  certified by these browser checks.
 
 - **Installed Plugin Check package policy findings (Toolbox, 2026-11-09).**
   Source repair [`db02bd1b`](https://github.com/npcink/npcink-workflow-toolbox/commit/db02bd1b216152ed233dc71fe0abb23e1da1f561)

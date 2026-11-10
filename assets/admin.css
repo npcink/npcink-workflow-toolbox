@@ -2076,6 +2076,7 @@
 
 .npcink-toolbox__retention-actions {
 	display: flex;
+	grid-column: 1 / -1;
 	justify-content: flex-end;
 	padding-bottom: 1px;
 }
@@ -3751,22 +3752,12 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__watermark-save-bar {
-	position: sticky;
-	z-index: 4;
-	bottom: 0;
 	display: flex;
-	gap: 18px;
 	align-items: center;
-	justify-content: space-between;
-	margin: 24px -24px -24px;
-	padding: 12px 24px;
+	justify-content: flex-end;
+	margin-top: 12px;
+	padding-top: 12px;
 	border-top: 1px solid #c3c4c7;
-	background: var(--npcink-ui-surface);
-	box-shadow: 0 -4px 12px rgba(0, 0, 0, .05);
-}
-
-.npcink-toolbox__watermark-save-bar > span {
-	color: var(--npcink-ui-text);
 }
 
 .npcink-toolbox__watermark-save-bar > div {
@@ -3776,9 +3767,6 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__watermark-undo {
-	position: sticky;
-	z-index: 5;
-	bottom: 66px;
 	display: flex;
 	gap: 12px;
 	align-items: center;
@@ -3789,6 +3777,7 @@ pre.npcink-toolbox__result {
 	background: var(--npcink-ui-warning-bg);
 }
 
+.npcink-toolbox__watermark-save-bar[hidden],
 .npcink-toolbox__watermark-undo[hidden],
 .npcink-toolbox__field-warning[hidden] {
 	display: none;
@@ -4374,13 +4363,10 @@ pre.npcink-toolbox__result {
 	.npcink-toolbox__watermark-save-bar {
 		align-items: stretch;
 		flex-direction: column;
-		margin-right: -16px;
-		margin-left: -16px;
-		padding-right: 16px;
-		padding-left: 16px;
 	}
 
 	.npcink-toolbox__watermark-save-bar > div {
+		flex-wrap: wrap;
 		justify-content: space-between;
 	}
 }

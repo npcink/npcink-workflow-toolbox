@@ -8161,6 +8161,10 @@
 
 	function markWatermarkLibraryDirty(library) {
 		library.setAttribute('data-dirty', '1');
+		const saveBar = library.querySelector('.npcink-toolbox__watermark-save-bar');
+		if (saveBar) {
+			saveBar.hidden = false;
+		}
 		const status = library.querySelector('[data-toolbox-watermark-save-status]');
 		const discard = library.querySelector('[data-toolbox-watermark-discard]');
 		if (status) {
@@ -8406,6 +8410,10 @@
 
 	function initWatermarkTemplateLibrary() {
 		document.querySelectorAll('[data-toolbox-watermark-library]').forEach((library) => {
+			const saveBar = library.querySelector('.npcink-toolbox__watermark-save-bar');
+			if (saveBar) {
+				saveBar.hidden = true;
+			}
 			reindexWatermarkTemplateEditors(library);
 			syncWatermarkLibraryDefaultOptions(library);
 			activeWatermarkTemplateEditors(library).forEach((editor) => syncWatermarkTemplateEditor(library, editor, false));
@@ -8516,6 +8524,10 @@
 						editor.open = true;
 						reindexWatermarkTemplateEditors(library);
 						syncWatermarkTemplateEditor(library, editor, true);
+						const empty = library.querySelector('[data-toolbox-watermark-template-empty]');
+						if (empty) {
+							empty.hidden = true;
+						}
 						const defaultSelect = library.querySelector('[data-toolbox-watermark-library-default]');
 						if (defaultSelect instanceof HTMLSelectElement && library.__npcinkDeletedDefaultTemplate) {
 							defaultSelect.value = library.__npcinkDeletedDefaultTemplate;
@@ -8555,6 +8567,7 @@
 								name.textContent = String(attachment.filename || ('#' + attachment.id));
 							}
 							syncWatermarkTemplateEditor(library, editor, true);
+							markWatermarkLibraryDirty(library);
 						}
 					});
 					frame.open();

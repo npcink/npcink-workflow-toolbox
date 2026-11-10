@@ -10750,3 +10750,30 @@ msgstr "（部分完成）"
 
 msgid "Check article"
 msgstr "检查"
+
+msgid "Image Review & Settings"
+msgstr "图片审核与设置"
+
+msgid "Watermark & Backups"
+msgstr "水印与备份"
+
+msgid "Current snapshot is ready"
+msgstr "当前快照已生成"
+
+msgid "Scan unavailable"
+msgstr "扫描暂不可用"
+
+msgid "Content boundaries"
+msgstr "内容边界"
+
+msgid "Optional guidance for topics and claims."
+msgstr "可选的主题与表述边界指引。"
+
+msgid "Backups kept for 30 days (fixed policy)."
+msgstr "备份保留 30 天（固定策略）。"
+
+msgid "Save cleanup mode"
+msgstr "保存清理方式"
+
+msgid "Review ALT drafts here; media optimization is paused."
+msgstr "在此审阅 ALT 草稿；媒体优化当前暂停。"

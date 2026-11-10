@@ -5,7 +5,17 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-09.
+Last reviewed: 2026-11-10.
+
+**Admin settings maintenance — 2026-11-10:** the image tab now says
+Image Review & Settings; its settings entry says Watermark & Backups. The
+fixed 30-day backup policy is separated from the writable cleanup mode.
+Watermark save/undo controls no longer float over content; JavaScript shows
+save actions for unsaved edits only, including Logo selection. Paused specialist
+preferences are labeled Content boundaries. Site Check distinguishes a ready
+snapshot from a failed scan while preserving Ask/Rescan actions. Existing
+pauses, data, permissions and Smart Ask choices remain. See
+[the focused scope](admin-ia-site-and-ask-v1.md#后台设置维护--2026-11-10).
 
 **Plugin Check query-policy repair — 2026-11-09:** the two sampling-query errors
 and five hook/uninstall warnings are resolved in the current source. Population
@@ -213,7 +223,7 @@ ordinary generation and Site Knowledge remain available. See
 - Default surfaces: editor **Npcink Content Support** sidebar (formatting, Article check with contextual ALT,
   site citations and image candidates) on `post`/`page` editors only (extend via the
   `npcink_toolbox_editor_supported_post_types` filter). Admin has three top
-  tabs: **Start**, **Site & Ask**, and **Image Handling** (ALT review first;
+  tabs: **Start**, **Site & Ask**, and **Image Review & Settings** (ALT review first;
   optimization paused). Site Profile, Smart Ask and the folded Site Check
   live under Site & Ask; legacy Site Check URLs remain compatible. This is
   the source layout, not a new WordPress.org release receipt. Release packages

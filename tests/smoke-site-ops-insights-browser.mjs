@@ -231,7 +231,8 @@ try {
 		assert(await page.locator('[data-toolbox-site-ops-insights] > .npcink-toolbox__section-heading').count() === 0, 'Generated report does not keep the large report action header in the default view.');
 		assert(await page.locator('[data-toolbox-site-ops-insights] .npcink-toolbox__ops-report-toolbar').count() === 0, 'Generated report does not keep a report-internal rescan toolbar.');
 		const statusActionText = await page.locator('.npcink-toolbox__ops-status-row .npcink-toolbox__ops-status-actions').innerText();
-		assert(/Current snapshot is ready|当前快照已生成/.test(statusActionText) && /Rescan|重新扫描/.test(statusActionText), 'Generated report keeps scan actions in the status row.');
+		const statusText = await page.locator('.npcink-toolbox__ops-status-main').innerText();
+		assert(/Current snapshot is ready|当前快照已生成/.test(statusText) && /Ask about this check|去提问/.test(statusActionText) && /Rescan|重新扫描/.test(statusActionText), 'Generated report keeps snapshot status and scan actions in the status row.');
 
 		const overviewText = await page.locator('[data-toolbox-ops-panel="overview"]').innerText();
 		const overviewRawText = await page.locator('[data-toolbox-ops-panel="overview"]').textContent();

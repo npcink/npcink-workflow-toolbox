@@ -10241,3 +10241,30 @@ msgstr ""
 
 msgid "Check article"
 msgstr ""
+
+msgid "Image Review & Settings"
+msgstr ""
+
+msgid "Watermark & Backups"
+msgstr ""
+
+msgid "Current snapshot is ready"
+msgstr ""
+
+msgid "Scan unavailable"
+msgstr ""
+
+msgid "Content boundaries"
+msgstr ""
+
+msgid "Optional guidance for topics and claims."
+msgstr ""
+
+msgid "Backups kept for 30 days (fixed policy)."
+msgstr ""
+
+msgid "Save cleanup mode"
+msgstr ""
+
+msgid "Review ALT drafts here; media optimization is paused."
+msgstr ""
