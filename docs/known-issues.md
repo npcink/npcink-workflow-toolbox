@@ -20,20 +20,6 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
-- **Backend ALT live timeout and visual projection reuse remain unaccepted (Addon/Cloud, 2026-11-10).**
-  Real pixel-based ALT succeeded twice on one installed sunset image and left
-  attachment ALT unchanged; the first ordinary 30-second call timed out.
-  Later success at 9.681/8.625 seconds does not establish the timeout root cause.
-  The ordinary repeat recognized again: a cache-only read shows the existing
-  2026-10-30 `metadata_only` projection, correctly rejected as visual evidence.
-  One replay of the saved recognition into the existing projection path was
-  acknowledged, but the subsequent read still lacked visual evidence. Valid
-  fingerprint reuse and changed-file invalidation pass controlled provider tests;
-  fresh live projection persistence/reuse is not accepted. Keep this as bounded
-  Addon/Cloud follow-up on ordinary-use evidence; do not create a Toolbox cache,
-  rebuild indexes, change models, or schedule repeated live evaluation. Source:
-  [backend ALT validation](admin-ia-site-and-ask-v1.md#后台-alt-看图生成--2026-11-10).
-
 - **Smart Ask live wiring lacks an eligible Cloud model (Cloud routing, 2026-11-10).**
   The new question-only decision returns HTTP 400 with
   `cloud_routing_no_candidates` before a run is created; the unchanged
@@ -400,6 +386,24 @@ and repeated research stay frozen under the decision's restart rules.
   media-derivative render helpers); inspect actual call sites before removal.
 
 ## Recently Closed
+
+- **Backend ALT projection reuse / HTTP margin repaired locally (Toolbox/Addon, 2026-11-10, current maintenance commit).**
+  The earlier ordinary 30-second call timed out; later success did not prove its
+  root cause. Separate sync failures were confirmed as
+  `site_knowledge.image_embedding_source_unavailable`: Toolbox omitted the uploaded
+  artifact, leaving Cloud to fetch a development-only WordPress URL. The resolver
+  now forwards that artifact and run/model provenance. Installed saved-result
+  replay sync `run_9894acd7792e45bca3da7f8579d8af5f` succeeded; a cache-only read
+  returned one reused image and zero recognitions, with attachment ALT unchanged.
+  Tests cover changed-file invalidation and no projection after recognition errors.
+  Addon HTTP wait is 40 seconds for the unchanged 30-second model budget,
+  without retry/fallback; timeout run identity is retained. The operator confirmed
+  local-model limitations and plans third-party APIs in production. This closes
+  these bounded code defects locally, not production API quality/latency acceptance
+  or the unproven cause of that first transient timeout. No repeated local-model
+  evaluation, index rebuild, M4 sync or production deployment was performed.
+  Source: [maintenance evidence](media-alt-caption-review-set.md#visual-projection--transport-maintenance--2026-11-10).
+
 
 - **Admin labels and overlapping watermark save controls (Toolbox admin, 2026-11-10).**
   The operator-approved [maintenance slice](admin-ia-site-and-ask-v1.md#后台设置维护--2026-11-10)

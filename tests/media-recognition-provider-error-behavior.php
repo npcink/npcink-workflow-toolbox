@@ -1,6 +1,6 @@
 <?php
 /**
- * Focused behavior checks for media-recognition Cloud error propagation.
+ * Focused behavior checks for media-recognition Cloud errors and visual projection reuse.
  *
  * @package Npcink_Toolbox
  */
@@ -59,13 +59,32 @@ namespace {
 
 	function npcink_cloud_addon_request_image_context_evidence( array $request, string $trace_id, string $idempotency_key ) {
 		++$GLOBALS['npcink_toolbox_media_provider_calls'];
-		return new WP_Error( 'cloud_media_recognition_temporarily_unavailable' );
+		$GLOBALS['npcink_toolbox_media_last_request'] = $request;
+		return $GLOBALS['npcink_toolbox_media_vision_result'] ?? new WP_Error( 'cloud_media_recognition_temporarily_unavailable' );
 	}
 
 	if ( ! function_exists( 'apply_filters' ) ) {
 		function apply_filters( string $tag, $value, ...$args ) {
+			if ( 'npcink_toolbox_site_knowledge_cloud_request' === $tag ) {
+				if ( 'npcink-cloud/site-knowledge-status' === ( $args[1] ?? '' ) ) {
+					return array( 'status' => 'ok', 'data' => array( 'result' => array( 'status' => 'ready', 'media_evidence_items' => $GLOBALS['npcink_toolbox_media_cache'] ?? array() ) ) );
+				}
+				$GLOBALS['npcink_toolbox_media_projection'][] = $args[0]['input'];
+				return array( 'status' => 'ok', 'data' => array( 'result' => array( 'status' => 'ready' ) ) );
+			}
 			return $value;
 		}
+	}
+
+	define( 'MB_IN_BYTES', 1024 * 1024 );
+	function get_attached_file( int $id ) { return $GLOBALS['npcink_toolbox_media_files'][ $id ] ?? ''; }
+	function wp_upload_dir(): array { return array( 'basedir' => sys_get_temp_dir() ); }
+	function trailingslashit( string $path ): string { return rtrim( $path, '/' ) . '/'; }
+	function wp_get_image_mime( string $path ): string { return 'image/png'; }
+	function esc_url_raw( string $url, array $protocols = array() ): string { return $url; }
+	function npcink_cloud_addon_upload_toolbox_site_media_visual_source( array $source, string $trace, string $key ): array {
+		++$GLOBALS['npcink_toolbox_media_upload_calls'];
+		return array( 'artifact_id' => 'art_0123456789abcdef0123456789abcdef' );
 	}
 
 	function npcink_toolbox_media_recognition_error_assert( bool $condition, string $message ): void {
@@ -79,6 +98,7 @@ namespace {
 
 namespace Npcink_Toolbox {
 	final class Settings {
+		public function raw_responses_enabled(): bool { return false; }
 	}
 }
 
@@ -168,4 +188,68 @@ namespace {
 		'' === $reuse_method->invoke( $client, 42, $current_fingerprint, $evidence_fingerprint, array() ),
 		'Visual evidence requiring reidentification is never reused after a replacement.'
 	);
+	// Exercise the real local upload -> vision -> Cloud projection seam.
+	$first_file = tempnam( sys_get_temp_dir(), 'npcink-visual-' );
+	$changed_file = tempnam( sys_get_temp_dir(), 'npcink-visual-' );
+	register_shutdown_function( static function () use ( $first_file, $changed_file ): void {
+		unlink( $first_file );
+		unlink( $changed_file );
+	} );
+	file_put_contents( $first_file, base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jf1sAAAAASUVORK5CYII=' ) );
+	file_put_contents( $changed_file, file_get_contents( $first_file ) . 'changed-file-bytes' );
+	$GLOBALS['npcink_toolbox_media_files'][42] = $first_file;
+	$GLOBALS['npcink_toolbox_media_upload_calls'] = 0;
+	$GLOBALS['npcink_toolbox_media_vision_result'] = array(
+		'contract_version' => 'image_context_evidence.v1',
+		'run_id' => 'run_visual_projection',
+		'model_id' => 'vision-model',
+		'write_posture' => 'suggestion_only',
+		'direct_wordpress_write' => false,
+		'items' => array( array( 'attachment_id' => 42, 'status' => 'ready', 'visual_summary' => 'A red sunset over the sea.', 'source' => 'hosted_vision_model' ) ),
+	);
+	$request['items'][0]['url'] = 'https://site.local/uploads/sunset.png';
+	$first = $client->resolve_media_image_context_evidence( $request, true, 'test-upload' );
+	$projection = $GLOBALS['npcink_toolbox_media_projection'][0]['media_items'][0] ?? array();
+	$vision_request = $GLOBALS['npcink_toolbox_media_last_request']['items'][0] ?? array();
+	npcink_toolbox_media_recognition_error_assert(
+		1 === $first['recognized_count'] && true === $first['projection_queued']
+		&& 'art_0123456789abcdef0123456789abcdef' === ( $projection['source_artifact_id'] ?? '' )
+		&& $projection['source_artifact_id'] === ( $vision_request['source_artifact_id'] ?? '' )
+		&& $request['items'][0]['url'] === ( $projection['url'] ?? '' ) && ! isset( $vision_request['url'] )
+		&& 'sha256:' . hash_file( 'sha256', $first_file ) === ( $projection['media_fingerprint'] ?? '' )
+		&& 'run_visual_projection' === ( $projection['vision_run_id'] ?? '' )
+		&& 'vision-model' === ( $projection['vision_model_id'] ?? '' ),
+		'Local visual projection retains the uploaded artifact, original URL, current fingerprint and Cloud provenance.'
+	);
+	$GLOBALS['npcink_toolbox_media_cache'] = array( array(
+		'attachment_id' => 42,
+		'media_fingerprint' => $projection['media_fingerprint'],
+		'visual_evidence' => array( 'status' => 'ready', 'visual_summary' => $projection['visual_summary'] ),
+	) );
+	$vision_calls = $GLOBALS['npcink_toolbox_media_provider_calls'];
+	$second = $client->resolve_media_image_context_evidence( $request, true, 'test-upload' );
+	npcink_toolbox_media_recognition_error_assert(
+		1 === $second['reused_count'] && 0 === $second['recognized_count']
+		&& $vision_calls === $GLOBALS['npcink_toolbox_media_provider_calls']
+		&& 1 === $GLOBALS['npcink_toolbox_media_upload_calls']
+		&& 1 === count( $GLOBALS['npcink_toolbox_media_projection'] ),
+		'Cloud ready evidence for the same file avoids another upload, recognition or projection.'
+	);
+	$GLOBALS['npcink_toolbox_media_files'][42] = $changed_file;
+	$changed = $client->resolve_media_image_context_evidence( $request, true, 'test-upload' );
+	npcink_toolbox_media_recognition_error_assert(
+		0 === $changed['reused_count'] && 1 === $changed['recognized_count']
+		&& $vision_calls + 1 === $GLOBALS['npcink_toolbox_media_provider_calls']
+		&& 'sha256:' . hash_file( 'sha256', $changed_file ) === $GLOBALS['npcink_toolbox_media_projection'][1]['media_items'][0]['media_fingerprint'],
+		'Changed file bytes reject stale Cloud evidence and project the newly recognized fingerprint.'
+	);
+	unset( $GLOBALS['npcink_toolbox_media_vision_result'] );
+	$projection_count = count( $GLOBALS['npcink_toolbox_media_projection'] );
+	$failed = $client->resolve_media_image_context_evidence( $request, true, 'test-upload' );
+	npcink_toolbox_media_recognition_error_assert(
+		0 === $failed['recognized_count'] && false === $failed['projection_queued']
+		&& $projection_count === count( $GLOBALS['npcink_toolbox_media_projection'] ),
+		'Failed recognition does not create a visual projection or a reusable success.'
+	);
+
 }
