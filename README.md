@@ -309,6 +309,7 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/web-search/diagnostics`
 - `GET /wp-json/npcink-toolbox/v1/site-knowledge/status`
 - `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack` (local `site_ops_insight_pack.v1` only; `manage_options`; no Cloud analysis, no WordPress writes)
+- `POST /wp-json/npcink-toolbox/v1/smart-ask` (single operator question; question-only no-store source decision, then at most one existing read-only answer or clarification/general guidance; `manage_options`; no writes; see [contract](docs/admin-operator-focus-2026-11-10.md))
 - `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa` (MVP Ask UI: local pack + hosted_ai_content_support.v1; `manage_options`; suggestion-only, no WordPress writes)
 - `GET /wp-json/npcink-toolbox/v1/content-structure/insight-pack` (local `content_structure_insight_pack.v1` only; `manage_options`; no post bodies, no Cloud call, no WordPress writes)
 - `POST /wp-json/npcink-toolbox/v1/content-structure/insight-pack-qa` (Site Profile Ask: local pack 2 + hosted_ai_content_support.v1; `manage_options`; suggestion-only, no WordPress writes)
@@ -961,6 +962,6 @@ The current gate runs PHP syntax linting and static contract checks.
 
 ### Answers from public site content
 
-Smart Ask → Public site content uses the registered, administrator-only
+Smart Ask may select public site content through the registered, administrator-only
 `npcink-toolbox/answer-site-content` ability through Cloud Addon. Answers include
 verified source references; see [contract and acceptance](docs/site-content-answer-v1.md).

@@ -600,51 +600,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
-	/**
-	 * Smart Ask pack registry: add one entry to support another de-identified pack.
-	 *
-	 * @return array<string,array<string,string>>
-	 */
-	private function smart_ask_packs(): array {
-		return array(
-			'site_ops'                => array(
-				'label'            => __( 'Current site check', 'npcink-workflow-toolbox' ),
-				'contract'         => 'site_ops_insight_pack.v1',
-				'endpoint'         => 'site-ops/insight-pack-qa',
-				'default_question' => __( '根据这份巡检摘要，站点优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
-			),
-			'content_structure'       => array(
-				'label'            => __( 'Content structure', 'npcink-workflow-toolbox' ),
-				'contract'         => 'content_structure_insight_pack.v1',
-				'endpoint'         => 'content-structure/insight-pack-qa',
-				'default_question' => __( '根据这份内容结构摘要，SEO / 内容健康上优先该处理哪 1–3 件事？', 'npcink-workflow-toolbox' ),
-			),
-			'page_quality'            => array(
-				'label'            => __( 'Page quality', 'npcink-workflow-toolbox' ),
-				'contract'         => 'page_quality_insight_pack.v1',
-				'endpoint'         => 'page-quality/insight-pack-qa',
-				'default_question' => __( '根据这份页面质量摘要，优先该补哪 1–3 件基础问题？用大白话回答。', 'npcink-workflow-toolbox' ),
-			),
-			'environment_performance' => array(
-				'label'            => __( '环境与性能', 'npcink-workflow-toolbox' ),
-				'contract'         => 'environment_performance_insight_pack.v1',
-				'endpoint'         => 'environment-performance/insight-pack-qa',
-				'default_question' => __( '根据这份环境与性能相关摘要，站长先检查哪 1–3 件事更合适？用大白话，不要假装做过测速。', 'npcink-workflow-toolbox' ),
-			),
-			'site_content'            => array(
-				'label'            => __( 'Public site content', 'npcink-workflow-toolbox' ),
-				'contract'         => 'grounded_answer_evidence.v1',
-				'endpoint'         => 'site-knowledge/answers',
-				'default_question' => '',
-			),
-		);
-	}
-
-	private function requested_smart_ask_pack(): string {
-		$packs     = $this->smart_ask_packs();
-		$requested = sanitize_key( $this->query_text_param( 'ask_pack' ) );
-
-		return isset( $packs[ $requested ] ) ? $requested : (string) array_key_first( $packs );
+	private function requested_smart_ask_hint(): string {
+		$hint = $this->query_text_param( 'ask_pack' );
+		return in_array( $hint, Smart_Ask::SOURCES, true ) ? $hint : '';
 	}
 
 	private function smart_ask_url( string $pack, string $seed_question = '' ): string {
@@ -714,38 +672,29 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	private function render_smart_ask_panel(): void {
-		$packs    = $this->smart_ask_packs();
-		$selected = $this->requested_smart_ask_pack();
-		$seed     = $this->requested_smart_ask_seed();
-		$question = '' !== $seed ? $seed : (string) $packs[ $selected ]['default_question'];
+		$hint = $this->requested_smart_ask_hint();
+		$seed = $this->requested_smart_ask_seed();
 		?>
 		<div class="npcink-toolbox__panel-header">
 			<h2><?php esc_html_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?></h2>
 			<p class="description" data-toolbox-smart-ask-notice><?php esc_html_e( 'Answers are for reference only and will not change your site.', 'npcink-workflow-toolbox' ); ?></p>
-			<?php if ( '' !== $seed && 'site_ops' === $selected ) : ?>
+			<?php if ( '' !== $seed && 'site_ops' === $hint ) : ?>
 				<p class="description" data-toolbox-smart-ask-from-check><?php esc_html_e( 'Question drafted from your current Site Check summary. Edit it, then ask.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php endif; ?>
 		</div>
-		<section class="npcink-toolbox__card" data-toolbox-smart-ask aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>">
-			<p>
-				<label for="npcink-toolbox-smart-ask-pack"><strong><?php esc_html_e( 'Ask about', 'npcink-workflow-toolbox' ); ?></strong></label>
-				<select id="npcink-toolbox-smart-ask-pack" data-toolbox-smart-ask-pack>
-					<?php foreach ( $packs as $pack_id => $pack ) : ?>
-						<option value="<?php echo esc_attr( $pack_id ); ?>" data-endpoint="<?php echo esc_attr( $pack['endpoint'] ); ?>" data-contract="<?php echo esc_attr( $pack['contract'] ); ?>" data-default-question="<?php echo esc_attr( $pack['default_question'] ); ?>"<?php selected( $selected, $pack_id ); ?>><?php echo esc_html( $pack['label'] ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p class="description"><?php esc_html_e( 'The four summaries use deidentified site data without article bodies. Public site content searches only delivered public articles. Environment and performance lists configuration; it does not run a speed test.', 'npcink-workflow-toolbox' ); ?></p>
+		<section class="npcink-toolbox__card" data-toolbox-smart-ask data-source-hint="<?php echo esc_attr( $hint ); ?>" aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>">
+			<p class="description"><?php esc_html_e( 'Ask in your own words. Relevant site summaries or delivered public articles are used when available; unclear questions may need clarification.', 'npcink-workflow-toolbox' ); ?></p>
 			<label for="npcink-toolbox-smart-ask-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
-			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" data-toolbox-smart-ask-question><?php echo esc_textarea( $question ); ?></textarea>
+			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" placeholder="<?php esc_attr_e( 'What would you like help with?', 'npcink-workflow-toolbox' ); ?>" data-toolbox-smart-ask-question><?php echo esc_textarea( $seed ); ?></textarea>
 			<p class="npcink-toolbox__ops-status-actions" style="margin-top:10px;">
 				<button type="button" class="button button-primary" data-toolbox-smart-ask-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="button" data-toolbox-smart-ask-stop hidden><?php esc_html_e( 'Stop waiting', 'npcink-workflow-toolbox' ); ?></button>
-				<span class="description"><?php esc_html_e( 'Administrator permission required. Usually ready within about 45 seconds. Stopping the wait does not cancel Cloud processing.', 'npcink-workflow-toolbox' ); ?></span>
+				<span class="description"><?php esc_html_e( 'Stopping the wait does not cancel Cloud processing.', 'npcink-workflow-toolbox' ); ?></span>
 			</p>
 			<div class="npcink-toolbox__result-notice" data-toolbox-smart-ask-status aria-live="polite" hidden></div>
 			<div data-toolbox-smart-ask-result hidden>
 				<div class="npcink-toolbox__markdown" data-toolbox-smart-ask-answer></div>
+				<p class="description" data-toolbox-smart-ask-basis hidden></p>
 				<p data-toolbox-smart-ask-completeness hidden></p>
 				<section data-toolbox-smart-ask-sources hidden><h3><?php esc_html_e( 'Source references', 'npcink-workflow-toolbox' ); ?></h3><ol></ol></section>
 				<details class="npcink-toolbox__support-meta"><summary><?php esc_html_e( 'Details for support', 'npcink-workflow-toolbox' ); ?></summary>

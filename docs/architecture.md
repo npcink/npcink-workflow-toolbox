@@ -434,6 +434,12 @@ grant narrower access without treating every Toolbox action as one permission.
 
 ## REST Surface
 
+- `POST /wp-json/npcink-toolbox/v1/smart-ask` uses a bounded question-only
+  no-store decision, then at most one existing read-only answer path. Ambiguous
+  questions request clarification; general guidance is labeled without site
+  evidence. Existing permissions, pack and public-citation validation remain.
+  See [the approved admin scope](admin-operator-focus-2026-11-10.md).
+
 Current routes require the scope-mapped default capability (`manage_options`,
 except `/editor/content-support`, `/image-candidates`, `/ai/image-generation`,
 and `/agent-feedback`, which accept

@@ -7763,32 +7763,17 @@
 			const answerEl = root.querySelector('[data-toolbox-smart-ask-answer]');
 			const runIdEl = root.querySelector('[data-toolbox-smart-ask-run-id]');
 			const metaEl = root.querySelector('[data-toolbox-smart-ask-meta]');
-			const packSelect = root.querySelector('[data-toolbox-smart-ask-pack]');
+			const basisEl = root.querySelector('[data-toolbox-smart-ask-basis]');
 			const sourcesEl = root.querySelector('[data-toolbox-smart-ask-sources]');
 			const completenessEl = root.querySelector('[data-toolbox-smart-ask-completeness]');
-			if (!packSelect || !button || !questionField || !statusEl || !resultEl || !answerEl || !runIdEl) {
+			if (!button || !questionField || !statusEl || !resultEl || !answerEl || !runIdEl) {
 				return;
 			}
-
-			// Pack registry lives in the <select> options (endpoint + default question).
-			const selectedPack = () => packSelect.options[packSelect.selectedIndex] || null;
-			let lastDefault = String((selectedPack() && selectedPack().getAttribute('data-default-question')) || '');
-			packSelect.addEventListener('change', () => {
-				const option = selectedPack();
-				const nextDefault = String((option && option.getAttribute('data-default-question')) || '');
-				const current = String(questionField.value || '').trim();
-				if (!current || current === lastDefault.trim()) {
-					questionField.value = nextDefault;
-				}
-				lastDefault = nextDefault;
-				resetSources();
-				resultEl.hidden = true;
-				setStatus('', '');
-			});
 
 			const resetSources = () => {
 				if (sourcesEl) { sourcesEl.hidden = true; sourcesEl.querySelector('ol').replaceChildren(); }
 				if (completenessEl) { completenessEl.hidden = true; completenessEl.textContent = ''; }
+				if (basisEl) { basisEl.hidden = true; basisEl.textContent = ''; }
 			};
 			const renderSources = (body) => {
 				resetSources();
@@ -7843,7 +7828,6 @@
 				button.disabled = busy;
 				button.setAttribute('aria-busy', busy ? 'true' : 'false');
 				questionField.disabled = busy;
-				packSelect.disabled = busy;
 				button.textContent = busy ? t('In progress…') : idleLabel;
 				if (stopButton) {
 					stopButton.hidden = !busy;
@@ -7894,6 +7878,13 @@
 				return String(message);
 			};
 
+			questionField.addEventListener('input', () => {
+				if (inFlight) return;
+				resetSources();
+				resultEl.hidden = true;
+				setStatus('', '');
+			});
+
 			button.addEventListener('click', async () => {
 				if (inFlight) {
 					setStatus(t('A question is already in progress. Please wait.'), 'is-pending');
@@ -7906,19 +7897,14 @@
 					resultEl.hidden = true;
 					return;
 				}
-				const option = selectedPack();
-				const endpoint = String((option && option.getAttribute('data-endpoint')) || '');
-				if (!endpoint) {
-					setStatus(t('Choose what to ask about first.'), 'is-warning');
-					return;
-				}
+				const endpoint = 'smart-ask';
 				if (!config.restUrl) {
 					setStatus(t('REST URL is missing.'), 'is-error');
 					return;
 				}
 
 				setBusy(true);
-				setStatus(endpoint === 'site-knowledge/answers' ? t('Searching public site content and preparing an answer…') : t('In progress: building the pack and asking Cloud…'), 'is-pending');
+				setStatus(t('Understanding your question and preparing an answer…'), 'is-pending');
 				resultEl.hidden = true;
 				setMarkdownContent(answerEl, '');
 				resetSources();
@@ -7934,7 +7920,7 @@
 					request.controller.abort();
 				}, 90000);
 				try {
-					const body = await postJson(config.restUrl, endpoint, { question }, request.controller.signal);
+					const body = await postJson(config.restUrl, endpoint, { question, source_hint: root.getAttribute('data-source-hint') || '' }, request.controller.signal);
 					if (request.controller.signal.aborted) throw new Error('aborted');
 					const runId = String((body && body.run_id) || '');
 					const answer = String((body && body.answer) || '');
@@ -7942,16 +7928,26 @@
 					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
 					runIdEl.textContent = runId || '—';
 					// run_id / pack_run_id live in the folded support details only.
-					const grounded = endpoint === 'site-knowledge/answers';
+					const grounded = Boolean(body && body.grounded_evidence);
 					answerEl.style.whiteSpace = grounded ? 'pre-wrap' : '';
 					if (grounded) { answerEl.textContent = answer; renderSources(body); }
 					else { setMarkdownContent(answerEl, answer || t('(empty answer)')); }
+					if (basisEl) {
+						const labels = {
+							site_summary: t('Based on a bounded site summary, not a full-site audit.'),
+							public_content: t('Based on retrieved public articles; check the references below.'),
+							general_guidance: t('General guidance only. This site has not been checked for this answer.'),
+							clarification: t('Add the requested detail to your question above, then ask again.'),
+						};
+						basisEl.textContent = labels[body && body.answer_basis] || '';
+						basisEl.hidden = !basisEl.textContent;
+					}
 					if (metaEl) {
-						metaEl.textContent = [packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · '); // inside support <details>
+						metaEl.textContent = [body.decision_run_id ? ('decision_run_id ' + String(body.decision_run_id)) : '', packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · '); // inside support <details>
 					}
 					resultEl.hidden = false;
 					if (body && (body.ok || body.grounded_evidence) && answer) {
-						setStatus(t('Suggestion ready (no WordPress write).'), 'is-ok');
+						setStatus(body.answer_basis === 'clarification' ? t('Please add a little more detail.') : t('Suggestion ready (no WordPress write).'), body.answer_basis === 'clarification' ? 'is-pending' : 'is-ok');
 					} else {
 						setStatus(t('The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.'), 'is-warning');
 					}

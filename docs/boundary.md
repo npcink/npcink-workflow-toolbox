@@ -224,6 +224,10 @@ cannot submit adoption, metadata-apply, or other `/flows/*` handoffs in the
 first scoped version; those actions stay administrator-facing.
 
 - `/status`
+- `/smart-ask` — administrator-only question-to-evidence selection; one no-store
+  question decision and at most one existing read-only answer path. No new
+  evidence pack, agent runtime or write authority. See
+  [the approved admin scope](admin-operator-focus-2026-11-10.md).
 - `/image-candidates`
 - `/web-search/test`
 - `/web-search/diagnostics`

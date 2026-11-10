@@ -280,7 +280,7 @@ environment_performance_rest_assert( false !== strpos( $controller_source, "'/en
 $admin_source = (string) file_get_contents( dirname( __DIR__ ) . '/includes/Admin_Page.php' );
 $js_source    = (string) file_get_contents( dirname( __DIR__ ) . '/assets/admin.js' );
 environment_performance_rest_assert( false === strpos( $admin_source, 'data-toolbox-environment-performance-qa' ), 'No separate Ask card outside Smart Ask.' );
-environment_performance_rest_assert( false !== strpos( $admin_source, '环境与性能' ) && false !== strpos( $admin_source, 'environment-performance/insight-pack-qa' ), 'Smart Ask lists plain 环境与性能 option.' );
+environment_performance_rest_assert( false !== strpos( $controller_source, '$this->environment_performance_insight_pack_qa( $delegate )' ) && false === strpos( $admin_source, 'data-toolbox-smart-ask-pack' ), 'Unified Ask retains environment inventory without requiring a technical category choice.' );
 environment_performance_rest_assert( false !== strpos( $js_source, 'initSmartAsk' ), 'admin.js Smart Ask shell present.' );
 
 $boundary = (string) file_get_contents( dirname( __DIR__ ) . '/docs/deidentified-assistant-boundary-v1.md' );

@@ -79,6 +79,8 @@ runtime, the plugin still shows local settings, context forms, and review-only
 local planning surfaces, but Cloud-managed searches and AI runtime actions fail
 closed.
 
+The current development source simplifies admin use to a free-form Smart Ask question and content checks. Relevant existing evidence is selected internally; ambiguous requests ask for detail. General guidance is identified separately from site evidence. Optional saved content preferences and inspection previews remain in support details. This is not a new stable-release receipt.
+
 == Installation ==
 
 1. Upload the `npcink-workflow-toolbox` folder to `/wp-content/plugins/`, or install it

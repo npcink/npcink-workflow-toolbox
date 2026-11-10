@@ -105,6 +105,22 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->post( '/web-search/diagnostics', 'web_search_diagnostics' );
 		$this->post( '/site-knowledge/search', 'site_knowledge_search' );
 		$this->post( '/site-knowledge/answers', 'site_content_answer' );
+		$this->post(
+			'/smart-ask',
+			'smart_ask',
+			array(
+				'question'    => array(
+					'type'      => 'string',
+					'required'  => true,
+					'minLength' => 1,
+					'maxLength' => 2000,
+				),
+				'source_hint' => array(
+					'type' => 'string',
+					'enum' => array_merge( array( '' ), Smart_Ask::SOURCES ),
+				),
+			)
+		);
 		$this->post( '/site-knowledge/sync', 'site_knowledge_sync' );
 		$this->post( '/site-media/index-batch', 'site_media_index_batch' );
 		$this->post( '/agent-feedback', 'agent_feedback' );
@@ -290,6 +306,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/site-ops/insight-pack-qa'                => 'cap.toolbox.admin',
 			'/site-knowledge/status'                   => 'cap.toolbox.knowledge.read',
 			'/site-knowledge/answers'                  => 'cap.toolbox.admin',
+			'/smart-ask'                               => 'cap.toolbox.admin',
 			'/site-knowledge/search'                   => 'cap.toolbox.knowledge.search',
 			'/site-knowledge/sync'                     => 'cap.toolbox.knowledge.sync',
 			'/site-media/index-batch'                  => 'cap.toolbox.knowledge.sync',
@@ -370,6 +387,54 @@ final class Rest_Controller extends Rest_Controller_Support {
 			return $result;
 		}
 		$response = rest_ensure_response( $result );
+		$response->header( 'Cache-Control', 'no-store' );
+		return $response;
+	}
+
+	/** One decision and at most one existing read-only answer; no retries or writes. */
+	public function smart_ask( WP_REST_Request $request ) {
+		$decision = Smart_Ask::resolve( $request->get_json_params() );
+		if ( is_wp_error( $decision ) ) {
+			return $decision;
+		}
+		if ( 'route' !== $decision['action'] ) {
+			$result = array(
+				'ok'           => true,
+				'answer'       => $decision['message'],
+				'answer_basis' => 'clarify' === $decision['action'] ? 'clarification' : 'general_guidance',
+				'run_id'       => $decision['run_id'],
+			);
+		} else {
+			$delegate = new WP_REST_Request( 'POST' );
+			$delegate->set_header( 'Content-Type', 'application/json' );
+			$delegate->set_body( (string) wp_json_encode( array( 'question' => $decision['question'] ) ) );
+			switch ( $decision['source'] ) {
+				case 'site_ops':
+					$response = $this->site_ops_insight_pack_qa( $delegate );
+					break;
+				case 'content_structure':
+					$response = $this->content_structure_insight_pack_qa( $delegate );
+					break;
+				case 'page_quality':
+					$response = $this->page_quality_insight_pack_qa( $delegate );
+					break;
+				case 'environment_performance':
+					$response = $this->environment_performance_insight_pack_qa( $delegate );
+					break;
+				default: // resolve() validates the closed source allow-list first.
+					$response = $this->site_content_answer( $delegate );
+			}
+			if ( is_wp_error( $response ) ) {
+				return Smart_Ask::failure( $response, $decision['run_id'] );
+			}
+			$result                    = $response->get_data();
+			$result['answer_basis']    = isset( $result['grounded_evidence'] ) ? 'public_content' : 'site_summary';
+			$result['decision_run_id'] = $decision['run_id'];
+		}
+		$result['write_posture']          = 'suggestion_only';
+		$result['direct_wordpress_write'] = false;
+		$result['proposal_created']       = false;
+		$response                         = rest_ensure_response( $result );
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;
 	}

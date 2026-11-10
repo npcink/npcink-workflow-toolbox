@@ -10306,6 +10306,12 @@ msgstr ""
 msgid "Find articles and images worth reviewing, then open the relevant editor or tool."
 msgstr ""
 
+msgid "Ask in your own words. Relevant site summaries or delivered public articles are used when available; unclear questions may need clarification."
+msgstr ""
+
+msgid "What would you like help with?"
+msgstr ""
+
 msgid "Stopping the wait does not cancel Cloud processing."
 msgstr ""
 
@@ -10337,4 +10343,31 @@ msgid "Categories and tags in the sampled public content."
 msgstr ""
 
 msgid "AI answers and suggestions need a connection. Local site checks and metadata review remain available."
+msgstr ""
+
+msgid "Enter a question in the question field."
+msgstr ""
+
+msgid "Enter a shorter question and try again."
+msgstr ""
+
+msgid "The question could not be understood reliably. Rephrase it and try again."
+msgstr ""
+
+msgid "Understanding your question and preparing an answer…"
+msgstr ""
+
+msgid "Based on a bounded site summary, not a full-site audit."
+msgstr ""
+
+msgid "Based on retrieved public articles; check the references below."
+msgstr ""
+
+msgid "General guidance only. This site has not been checked for this answer."
+msgstr ""
+
+msgid "Add the requested detail to your question above, then ask again."
+msgstr ""
+
+msgid "Please add a little more detail."
 msgstr ""
