@@ -7,6 +7,14 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-10.
 
+**Site Profile summary, batch 2 — 2026-11-10:** saved brief fields are shown
+as an escaped two-line summary with an Edit site profile disclosure. Empty
+briefs and settings errors keep the native form open, including without JS.
+Draft/clear actions mark unsaved changes; folding preserves the in-memory form
+and the summary continues to describe saved values. Content boundaries and
+technical details retain their existing collapsed defaults. See
+[the focused scope](admin-ia-site-and-ask-v1.md#站点画像摘要第二批--2026-11-10).
+
 **Admin entry contraction, batch 1 — 2026-11-10:** the operator approved
 removing the industry-specific profile template button and duplicate profile-to-Ask
 shortcut. Current-site form drafting and contextual Site Check → Ask remain.

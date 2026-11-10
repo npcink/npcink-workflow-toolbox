@@ -10280,3 +10280,19 @@ msgstr ""
 #: includes/Admin_Page.php
 msgid "Check that public content can be read. This preview does not enable automatic inspections."
 msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Give AI your site positioning, audience, and preferred voice."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Saved profile"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Start with the four basic fields below."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Edit site profile"
+msgstr ""

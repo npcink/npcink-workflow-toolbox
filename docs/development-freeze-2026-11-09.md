@@ -3,6 +3,17 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## 2026-11-10 Site Profile summary, batch 2
+
+The operator requested the second presentation batch: show saved Site Profile
+brief values as a compact summary, with explicit editing through a native
+disclosure. Empty briefs and settings errors leave the form open. Preserve
+existing field names, Settings API save/sanitize behavior, permissions and
+unsaved edits; keep content boundaries and technical details folded. The
+Start page, five Ask choices, runtime pauses, stored preferences and product
+ownership remain. This does not expand features or restore paused entries.
+See [admin IA](admin-ia-site-and-ask-v1.md#站点画像摘要第二批--2026-11-10).
+
 ## 2026-11-10 Admin entry contraction, batch 1
 
 The operator explicitly approved a bounded admin presentation change:

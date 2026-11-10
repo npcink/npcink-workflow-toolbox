@@ -1534,6 +1534,25 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	private function render_content_context_form( array $context ): void {
+		$brief_summary = array();
+		foreach ( array(
+			'site_positioning' => __( 'Site positioning', 'npcink-workflow-toolbox' ),
+			'target_audience'  => __( 'Target audience', 'npcink-workflow-toolbox' ),
+			'brand_voice'      => __( 'Brand voice', 'npcink-workflow-toolbox' ),
+			'primary_keywords' => __( 'Primary keywords', 'npcink-workflow-toolbox' ),
+		) as $field => $label ) {
+			$value = $context[ $field ] ?? '';
+			$value = is_array( $value ) ? implode( ', ', array_filter( $value, 'is_scalar' ) ) : ( is_scalar( $value ) ? (string) $value : '' );
+			if ( '' !== trim( $value ) ) {
+				$brief_summary[] = $label . ': ' . $value;
+			}
+		}
+		$editor_open = array() === $brief_summary;
+		foreach ( get_settings_errors() as $error ) {
+			if ( 'error' === ( $error['type'] ?? '' ) ) {
+				$editor_open = true;
+			}
+		}
 		$proposal_fields = array(
 			'seo_title'             => __( 'SEO title', 'npcink-workflow-toolbox' ),
 			'seo_description'       => __( 'SEO description', 'npcink-workflow-toolbox' ),
@@ -1548,9 +1567,21 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<div class="npcink-toolbox__panel-header">
 			<h2><?php esc_html_e( 'Site Profile', 'npcink-workflow-toolbox' ); ?></h2>
-			<p><?php esc_html_e( 'Fill the short site brief used by AI suggestions. Most sites can keep the optional preferences unchanged.', 'npcink-workflow-toolbox' ); ?></p>
+			<p><?php esc_html_e( 'Give AI your site positioning, audience, and preferred voice.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 
+		<details class="npcink-toolbox__profile-editor" data-toolbox-profile-editor<?php echo $editor_open ? ' open' : ''; ?>>
+			<summary>
+				<span class="npcink-toolbox__profile-summary" data-toolbox-profile-summary>
+					<?php if ( $brief_summary ) : ?>
+						<strong><?php esc_html_e( 'Saved profile', 'npcink-workflow-toolbox' ); ?>:</strong>
+						<?php echo esc_html( implode( ' · ', $brief_summary ) ); ?>
+					<?php else : ?>
+						<?php esc_html_e( 'Start with the four basic fields below.', 'npcink-workflow-toolbox' ); ?>
+					<?php endif; ?>
+				</span>
+				<span class="npcink-toolbox__profile-edit-label"><?php esc_html_e( 'Edit site profile', 'npcink-workflow-toolbox' ); ?></span>
+			</summary>
 		<form class="npcink-toolbox__settings-form" method="post" action="options.php" data-toolbox-context-form>
 			<?php settings_fields( 'npcink_toolbox_content_context' ); ?>
 
@@ -1795,6 +1826,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<p class="description"><?php esc_html_e( 'This profile guides suggestions only. WordPress changes still require review approval.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php submit_button( __( 'Save site profile', 'npcink-workflow-toolbox' ) ); ?>
 		</form>
+		</details>
 
 		<?php
 	}

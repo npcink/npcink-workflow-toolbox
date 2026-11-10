@@ -8044,6 +8044,7 @@
 
 			setContextField(form, key, draft[key]);
 		});
+		form.setAttribute('data-dirty', '1');
 
 		form.querySelectorAll('.npcink-toolbox__disclosure').forEach((details) => {
 			if (details instanceof HTMLDetailsElement) {
@@ -8069,6 +8070,7 @@
 		form.querySelectorAll('input[type="checkbox"]').forEach((field) => {
 			field.checked = false;
 		});
+		form.setAttribute('data-dirty', '1');
 	}
 
 	function initContextDrafts() {
