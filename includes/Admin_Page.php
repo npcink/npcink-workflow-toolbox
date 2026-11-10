@@ -683,7 +683,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<?php endif; ?>
 		</div>
 		<section class="npcink-toolbox__card" data-toolbox-smart-ask data-source-hint="<?php echo esc_attr( $hint ); ?>" aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>">
-			<p class="description"><?php esc_html_e( 'Ask in your own words. Relevant site summaries or delivered public articles are used when available; unclear questions may need clarification.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Describe the problem. Relevant site information is prepared automatically; only details the site cannot provide may need clarification.', 'npcink-workflow-toolbox' ); ?></p>
 			<label for="npcink-toolbox-smart-ask-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
 			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" placeholder="<?php esc_attr_e( 'What would you like help with?', 'npcink-workflow-toolbox' ); ?>" data-toolbox-smart-ask-question><?php echo esc_textarea( $seed ); ?></textarea>
 			<p class="npcink-toolbox__ops-status-actions" style="margin-top:10px;">

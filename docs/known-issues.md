@@ -20,17 +20,13 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
-- **Smart Ask live wiring lacks an eligible Cloud model (Cloud routing, 2026-11-10).**
-  The new question-only decision returns HTTP 400 with
-  `cloud_routing_no_candidates` before a run is created; the unchanged
-  content-structure QA path reproduces the same Cloud error (bridge HTTP 502).
-  Admin UI, controlled five-source dispatch, privacy and deterministic gates
-  pass; real selection quality and successful live answers remain unaccepted.
-  Keep `pii/no_store` and existing model/provider configuration intact. After
-  the Cloud owner restores an eligible candidate for the existing `text.ai`
-  profile, run one bounded wiring check; do not schedule repeated evaluation
-  or expand the frozen product. Source:
-  [operator admin convergence](admin-operator-focus-2026-11-10.md#本轮验收记录).
+- **Smart Ask representative usefulness / production API acceptance (Toolbox / Cloud, 2026-11-10).**
+  The old routing blocker is closed below. Two bounded developer checks establish
+  existing content/environment wiring, not arbitrary-question source selection
+  or representative answer quality. The operator will use a third-party API in
+  production; local model tuning and repeated evaluation are not scheduled.
+  Record ordinary feedback and separately accept the configured production API.
+  [Current evidence](maintenance-acceptance-2026-11-10.md).
 
 - **Installed Site Check browser smoke assumes a particular finding (Toolbox test, 2026-11-10).**
   `tests/smoke-site-ops-insights-browser.mjs:272` unconditionally expects an
@@ -44,16 +40,25 @@ and repeated research stay frozen under the decision's restart rules.
   assertions conditional on actual scan counts while retaining coverage.
   Do not change live site content or scanning rules to manufacture a result.
 
-- **Local/Cloud media identity mismatch (Addon / Cloud projection, WordPress attachment truth, 2026-11-09).**
-  The [timeout follow-up](site-media-timeout-followup-2026-11-09.md) traced a
-  successful Cloud search and repaired the browser deadline mismatch (see
-  Recently Closed). Both bounded real queries returned nine media identities
-  absent from the local site; existing local checks rejected them. Historical
-  cause is unconfirmed. Real candidate adoption/save remains unaccepted despite
-  HTTP 200 retrieval. Do not recreate missing attachments, remap identities or
-  infer an authorization defect. Further repair requires an operator decision
-  on the correct site snapshot and Addon/Cloud-owned projection repair scope;
-  no indexing, model work or repeated query campaign is scheduled.
+- **Local/Cloud media withdrawal gap (Addon delivery / Cloud index, WordPress is source truth, 2026-11-10).**
+  A read-only comparison of the same development site finds 26 current attachments
+  and 71 Cloud media documents: two match, 69 Cloud identities no longer exist
+  locally, and 24 current attachments are not in that Cloud index. This proves
+  projection drift, not its historical trigger. Source inspection confirms the
+  Addon registers attachment add/edit but no attachment-delete callback; its
+  generic removed-post callback excludes attachments, and hourly reconciliation
+  only visits existing rows. Incremental Cloud refresh intentionally preserves
+  omissions, so neither path withdraws those absent media sources. A one-off
+  cleanup does not close this delivery/reconciliation defect.
+  The operator reaffirmed that the current site is the sole media source. The
+  previously requested exact 69-source development cleanup remains pending an
+  explicit response; no records have been deleted. Repair must include typed
+  attachment deletion and missed-notification reconciliation with validated
+  source evidence; partial pages, read failures, disabled consent and unavailable
+  sites must never be interpreted as deletion. Retain Cloud site/type scoping,
+  local candidate rejection, other content and valid media. No ID remapping,
+  recreation, model campaign or production change. See
+  [diagnosis and acceptance boundaries](maintenance-acceptance-2026-11-10.md#media-source-drift).
 
 - **Editor-loop maintenance and frozen recommendation follow-up (Toolbox, 2026-11-09).**
   Follow the [maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
@@ -386,6 +391,15 @@ and repeated research stay frozen under the decision's restart rules.
   media-derivative render helpers); inspect actual call sites before removal.
 
 ## Recently Closed
+
+- **Smart Ask `text.ai` routing blocker (2026-11-10).** Cloud #1397 is merged
+  and present in accepted M4 revision `45e3a24a0d5630b1998420a08b2173744d59308a`.
+  One content-structure question and one environment question returned HTTP 200
+  with successful decision and answer runs; original failure evidence remains
+  in the operator convergence record. No privacy downgrade, local answer
+  fallback, retry loop or model configuration change. This closes wiring only;
+  representative usefulness and production API acceptance remain above.
+  [Run receipts](maintenance-acceptance-2026-11-10.md#smart-ask).
 
 - **Backend ALT projection reuse / HTTP margin repaired locally (Toolbox/Addon, 2026-11-10, current maintenance commit).**
   The earlier ordinary 30-second call timed out; later success did not prove its

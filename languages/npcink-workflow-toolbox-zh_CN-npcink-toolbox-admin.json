@@ -1090,7 +1090,7 @@
       "Answers are for reference only and will not change your site.": ["答复仅供参考，不会改动网站"],
       "Ask about": ["提问对象"],
       "Choose what to ask about first.": ["请先选择提问对象。"],
-      "Understanding your question and preparing an answer…": ["正在理解问题并准备回答…"],
+      "Understanding your question and preparing relevant site context as needed…": ["正在理解问题，并按需准备本站背景…"],
       "Based on a bounded site summary, not a full-site audit.": ["回答依据有限范围的站点摘要，未做全站审查。"],
       "Based on retrieved public articles; check the references below.": ["回答依据检索到的公开文章，请核对下方引用。"],
       "General guidance only. This site has not been checked for this answer.": ["以下为一般建议，本次回答尚未检查本站。"],
