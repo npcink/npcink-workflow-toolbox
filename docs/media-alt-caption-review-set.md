@@ -31,6 +31,33 @@ Toolbox applies this stricter backend presentation rule to their review artifact
 
 Verification is tracked in [the admin amendment](admin-ia-site-and-ask-v1.md#后台-alt-看图生成--2026-11-10).
 
+## Visual projection / transport maintenance — 2026-11-10
+
+The interactive resolver retains the same uploaded `source_artifact_id` for both
+recognition and the existing Site Knowledge refresh. The projection keeps the
+original attachment URL, current file fingerprint, and Cloud run/model provenance;
+Cloud need not fetch a development-only WordPress URL to embed the source image.
+An accepted sync request means queued, not persisted: reuse requires a subsequent
+Cloud `ready` visual record matching the current fingerprint/verified lineage.
+No local visual cache, extra model retry, queue, setting or WordPress write is added.
+
+Installed development verification replayed the saved sunset recognition (no new
+vision call), uploaded the same image and completed sync
+`run_9894acd7792e45bca3da7f8579d8af5f`. A subsequent cache-only resolver read returned
+`reused_count=1`, `recognized_count=0`, with no remaining recognition-required ids.
+Attachment ALT remained unchanged. Controlled behavior also verifies a changed
+file rejects old evidence and a recognition error queues no success projection.
+Local evidence: `projection-repaired.json` and `cache-only-repaired.json` in the
+2026-11-10 backend ALT acceptance artifact directory.
+
+The Addon leaves ten seconds of HTTP transport margin beyond the unchanged
+30-second vision execution budget; retry remains zero and fallback disabled.
+A Cloud timeout preserves its original run id. The operator confirmed that local
+model latency/capability variation is a development limitation, with third-party
+APIs planned for production. Do not continue local-model tuning or repeated
+quality evaluation for this repair. Production API quality/latency acceptance is
+separate and has not been performed; changing providers is not timeout proof.
+
 ## Purpose
 
 The media ALT/caption review set turns the existing **AI Site Helpers -> Media

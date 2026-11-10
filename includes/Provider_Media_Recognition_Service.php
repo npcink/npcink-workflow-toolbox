@@ -173,7 +173,8 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 				$upload_scope
 			);
 			if ( is_array( $artifact ) && ! empty( $artifact['artifact_id'] ) ) {
-				$item['source_artifact_id'] = sanitize_text_field( (string) $artifact['artifact_id'] );
+				$item['source_artifact_id']                             = sanitize_text_field( (string) $artifact['artifact_id'] );
+				$prepared_items[ $attachment_id ]['source_artifact_id'] = $item['source_artifact_id'];
 				unset( $item['url'], $item['thumbnail_url'] );
 			} elseif ( isset( $local_sources[ $attachment_id ] ) ) {
 				continue;
@@ -203,6 +204,8 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 				if ( 0 >= $attachment_id || ! isset( $prepared_items[ $attachment_id ] ) ) {
 					continue;
 				}
+				$fresh_item['run_id']                 = sanitize_text_field( (string) ( ( $fresh_item['run_id'] ?? '' ) ?: $fresh_run_id ) );
+				$fresh_item['model_id']               = sanitize_text_field( (string) ( ( $fresh_item['model_id'] ?? '' ) ?: ( $fresh['model_id'] ?? '' ) ) );
 				$fresh_item['media_fingerprint']      = $fingerprints[ $attachment_id ];
 				$fresh_item['evidence_reuse']         = 'new_visual_recognition';
 				$fresh_item['write_posture']          = 'suggestion_only';
@@ -333,6 +336,7 @@ final class Provider_Media_Recognition_Service extends Provider_Client_Support {
 			}
 			$media_items[] = array(
 				'attachment_id'           => $attachment_id,
+				'source_artifact_id'      => sanitize_text_field( (string) ( $item['source_artifact_id'] ?? '' ) ),
 				'mime_type'               => sanitize_text_field( (string) ( $item['mime_type'] ?? '' ) ),
 				'title'                   => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
 				'url'                     => $url,

@@ -15,6 +15,14 @@ success and recognition failures are visible. Shared Toolkit contracts, editor
 contextual ALT, permissions and missing-only governed proposals remain. See
 [scope and evidence](admin-ia-site-and-ask-v1.md#后台-alt-看图生成--2026-11-10).
 
+**ALT maintenance follow-up — 2026-11-10:** local image artifacts now reach
+visual projection refreshes with Cloud provenance. Installed saved-result replay
+completed in Cloud; the next cache-only read reused one image without recognition.
+Addon HTTP wait has ten seconds of transport margin over the unchanged model
+budget, with no automatic retry. Local-model variation is accepted as a development
+limitation; production will use third-party APIs and remains separately unverified.
+See [maintenance evidence](media-alt-caption-review-set.md#visual-projection--transport-maintenance--2026-11-10).
+
 **Operator-first admin convergence — 2026-11-10:** the latest accepted direction
 moves profile, content-boundary and technical editing to support; removes optional
 profile/Cloud readiness from content findings; and uses a single natural-language
