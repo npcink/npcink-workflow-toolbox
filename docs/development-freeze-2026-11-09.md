@@ -3,6 +3,19 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## 2026-11-10 Backend ALT visual-evidence amendment
+
+The operator explicitly requires actual image recognition for backend ALT drafts.
+The existing bounded `/ai/site-helpers` ALT intent reuses current fingerprint-matched
+Cloud visual evidence or requests recognition for at most the selected review limit
+(1–10 images). Metadata-rich images are not exempt. Metadata may identify and
+contextualize an image but cannot supply an ALT candidate. Recognition failure or
+incomplete results keep the affected row unavailable; no metadata-only success.
+Retain editable drafts, human visual confirmation and missing-only Core proposals.
+This does not reopen media optimization, change the editor contextual-ALT policy,
+add providers/models/queues, or authorize production deployment. See
+[the backend contract](media-alt-caption-review-set.md#backend-visual-evidence-requirement--2026-11-10).
+
 ## 2026-11-10 Operator-first admin amendment
 
 The operator approved [the bounded admin convergence](admin-operator-focus-2026-11-10.md):

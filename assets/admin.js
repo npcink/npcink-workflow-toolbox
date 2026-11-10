@@ -2715,6 +2715,8 @@
 			missing_caption: 'Missing caption',
 			title_filename_like: 'Title looks like a filename',
 			candidate_quality_insufficient: 'Suggestion quality was too weak',
+			visual_evidence_unavailable: 'Image recognition did not produce a usable ALT. Check the image and try again.',
+			visual_evidence_pending: 'Image recognition is still processing. Try again later.',
 			caption_review_only: 'Caption review only',
 			context_confirmation_required: 'Location or proper-name context needs confirmation',
 			needs_context_confirmation: 'Confirm location or proper-name context',
@@ -2737,6 +2739,14 @@
 		payload = asObject(payload);
 		const section = createSection('Scan results');
 		const eligibility = asObject(reviewSet.eligibility_summary);
+		const visualReview = asObject(reviewSet.visual_review);
+		if (Number(visualReview.pending_count || 0) > 0) {
+			section.appendChild(el('div', 'npcink-toolbox__result-notice', 'Image recognition is still processing. No ALT draft is available for those images yet. Try again later.'));
+		}
+		if (Number(visualReview.unavailable_count || 0) > 0) {
+			section.appendChild(el('div', 'npcink-toolbox__result-notice is-warning', 'Some images could not be recognized. No ALT was generated for them from metadata. Check Cloud and the image files, then try again.'));
+		}
+
 		const allSelectedItems = asArray(reviewSet.selected_items);
 		const captionOnlyItems = allSelectedItems.filter((item) => String(item.candidate_review_status || '') === 'caption_review_only');
 		const selectedItems = allSelectedItems.filter((item) => {

@@ -258,6 +258,9 @@ function apply_filters( string $hook, $value, ...$args ) {
 		$site_knowledge_runtime = is_array( $args[0] ?? null ) ? $args[0] : array();
 		$npcink_toolbox_progressive_site_knowledge_inputs[] = is_array( $site_knowledge_runtime['input'] ?? null ) ? $site_knowledge_runtime['input'] : array();
 		if ( 'npcink-cloud/site-knowledge-status' === (string) ( $args[1] ?? '' ) ) {
+			if ( isset( $GLOBALS['npcink_toolbox_alt_cached_evidence'] ) ) {
+				return array( 'status' => 'ok', 'data' => array( 'result' => array( 'status' => 'ready', 'media_evidence_items' => $GLOBALS['npcink_toolbox_alt_cached_evidence'] ) ) );
+			}
 			if ( isset( $GLOBALS['npcink_toolbox_status_coverage_fixture'] ) ) {
 				return array( 'status' => 'ok', 'data' => array( 'result' => array( 'status' => 'ready', 'coverage' => $GLOBALS['npcink_toolbox_status_coverage_fixture'] ) ) );
 			}
@@ -916,3 +919,124 @@ $GLOBALS['npcink_toolbox_pause_options'][Npcink_Toolbox\Plugin::OPTION_NAME] = a
 $paused_saved_settings = $pause_settings->sanitize( array( 'nightly_inspection_enabled' => true ) );
 npcink_toolbox_progressive_assert( true === $paused_saved_settings['nightly_inspection_pro_enabled'] && 'excerpt' === $paused_saved_settings['nightly_inspection_cloud_payload_mode'] && 14 === $paused_saved_settings['nightly_inspection_cloud_retention_days'], 'An ordinary local settings save preserves paused Cloud preferences exactly.' );
 npcink_toolbox_progressive_assert( false === $pause_settings->get_nightly_inspection_settings()['pro_enabled'], 'Retained enabled preference cannot restore effective Cloud inspection availability.' );
+
+
+// Backend ALT must recognize metadata-rich images too, without a text-only fallback.
+function npcink_cloud_addon_request_image_context_evidence( array $request, string $trace_id, string $idempotency_key ) {
+	$GLOBALS['npcink_toolbox_alt_visual_requests'][] = $request;
+	if ( 'error' === ( $GLOBALS['npcink_toolbox_alt_visual_mode'] ?? 'ready' ) ) {
+		return new WP_Error( 'vision_unavailable', 'Vision is unavailable.' );
+	}
+	if ( 'processing' === ( $GLOBALS['npcink_toolbox_alt_visual_mode'] ?? '' ) ) {
+		return array(
+			'contract_version'       => 'image_context_evidence.v1',
+			'write_posture'          => 'suggestion_only',
+			'direct_wordpress_write' => false,
+			'status'                 => 'processing',
+			'run_id'                 => 'vision-processing-run',
+			'items'                  => array(),
+		);
+	}
+	$items = array();
+	foreach ( $request['items'] as $item ) {
+		if ( 'partial' === ( $GLOBALS['npcink_toolbox_alt_visual_mode'] ?? '' ) && 42 !== $item['attachment_id'] ) {
+			continue;
+		}
+		$items[] = array(
+			'attachment_id'  => $item['attachment_id'],
+			'visual_summary' => 'A red bicycle leans against a brick wall beside a tree.',
+			'confidence'     => 0.9,
+		);
+	}
+	return array(
+		'contract_version'       => 'image_context_evidence.v1',
+		'write_posture'          => 'suggestion_only',
+		'direct_wordpress_write' => false,
+		'run_id'                 => 'vision-test-run',
+		'status'                 => 'partial' === ( $GLOBALS['npcink_toolbox_alt_visual_mode'] ?? '' ) ? 'partial' : 'ready',
+		'items'                  => $items,
+	);
+}
+
+$GLOBALS['npcink_toolbox_site_knowledge_status_mode'] = 'ready';
+$GLOBALS['npcink_toolbox_alt_visual_requests']        = array();
+$alt_item     = array(
+	'attachment_id'     => 42,
+	'alt'               => '',
+	'title'             => 'An attractive mountain landscape with a lake',
+	'description'       => 'Snow-covered mountains reflected in the calm water.',
+	'caption'           => '',
+	'filename'          => 'mountain-lake.jpg',
+	'url'               => 'https://example.test/mountain-lake.jpg',
+	'mime_type'         => 'image/jpeg',
+	'media_fingerprint' => 'sha256:' . str_repeat( 'a', 64 ),
+);
+$alt_input    = array(
+	'intent'         => 'media_alt_suggestions',
+	'media_snapshot' => array( 'items' => array( $alt_item ) ),
+);
+$alt_response = $client->run_hosted_ai_site_helper( $alt_input );
+$alt_review   = $alt_response['media_alt_caption_review_set'];
+$alt_row      = $alt_review['selected_items'][0] ?? array();
+npcink_toolbox_provider_services_assert( 1 === count( $GLOBALS['npcink_toolbox_alt_visual_requests'] ) && 42 === $GLOBALS['npcink_toolbox_alt_visual_requests'][0]['items'][0]['attachment_id'], 'Metadata-rich missing ALT still requests actual image recognition.' );
+npcink_toolbox_provider_services_assert( 'ready' === $alt_response['status'] && ! empty( $alt_row['alt_candidates'] ), 'Successful visual evidence produces reviewable ALT.' );
+npcink_toolbox_provider_services_assert( false === stripos( wp_json_encode( $alt_row['alt_candidates'] ), 'mountain' ) && false !== stripos( wp_json_encode( $alt_row['alt_candidates'] ), 'bicycle' ), 'Conflicting metadata does not become an alternative ALT candidate.' );
+npcink_toolbox_provider_services_assert( false === $alt_response['direct_wordpress_write'] && false === $alt_review['proposal_created'] && false === $alt_review['execution_created'], 'Visual ALT remains a suggestion and creates no proposal, execution, or media write.' );
+
+$caption_first = $alt_input;
+$caption_first['review_set_limit'] = 1;
+$caption_first['media_snapshot']['items'] = array( array_merge( $alt_item, array( 'attachment_id' => 41, 'alt' => 'A complete existing description of the mountain lake.' ) ), $alt_item );
+$alt_after_caption = $client->run_hosted_ai_site_helper( $caption_first );
+npcink_toolbox_provider_services_assert( 42 === ( $alt_after_caption['media_alt_caption_review_set']['selected_items'][0]['attachment_id'] ?? 0 ), 'An earlier caption-only image cannot consume the requested ALT review slot.' );
+
+$GLOBALS['npcink_toolbox_alt_visual_mode'] = 'error';
+$alt_input['image_context_evidence']       = array(
+	'contract_version'       => 'image_context_evidence.v1',
+	'write_posture'          => 'suggestion_only',
+	'direct_wordpress_write' => false,
+	'items'                  => array(
+		array(
+			'attachment_id'  => 42,
+			'visual_summary' => 'Client-supplied claim about the image.',
+		),
+	),
+);
+$alt_failed                                = $client->run_hosted_ai_site_helper( $alt_input );
+npcink_toolbox_provider_services_assert( 'unavailable' === $alt_failed['status'] && array() === $alt_failed['media_alt_caption_review_set']['selected_items'] && 1 === $alt_failed['media_alt_caption_review_set']['visual_review']['unavailable_count'], 'Vision errors fail closed instead of using metadata or caller-supplied visual claims.' );
+
+$GLOBALS['npcink_toolbox_alt_visual_mode'] = 'processing';
+$alt_processing = $client->run_hosted_ai_site_helper( $alt_input );
+npcink_toolbox_provider_services_assert( 'processing' === $alt_processing['status'] && 1 === $alt_processing['media_alt_caption_review_set']['visual_review']['pending_count'] && 0 === $alt_processing['media_alt_caption_review_set']['visual_review']['unavailable_count'] && 'vision-processing-run' === $alt_processing['run_id'] && array() === $alt_processing['media_alt_caption_review_set']['selected_items'], 'Processing recognition preserves its run id without claiming failure or generating a metadata draft.' );
+
+$GLOBALS['npcink_toolbox_alt_visual_mode'] = 'partial';
+$alt_input['media_snapshot']['items'][]    = array_merge( $alt_item, array( 'attachment_id' => 43 ) );
+$alt_partial                               = $client->run_hosted_ai_site_helper( $alt_input );
+npcink_toolbox_provider_services_assert( 'partial' === $alt_partial['status'] && 1 === count( $alt_partial['media_alt_caption_review_set']['selected_items'] ) && 1 === $alt_partial['media_alt_caption_review_set']['visual_review']['unavailable_count'], 'Partial recognition retains successful ALT and reports the failed image without a metadata draft.' );
+
+$GLOBALS['npcink_toolbox_alt_cached_evidence'] = array(
+	array(
+		'attachment_id'     => 42,
+		'media_fingerprint' => $alt_item['media_fingerprint'],
+		'visual_evidence'   => array(
+			'status'         => 'ready',
+			'visual_summary' => 'A red bicycle leans against a brick wall beside a tree.',
+		),
+	),
+);
+$alt_input['media_snapshot']['items']          = array( $alt_item );
+$calls_before_cache                            = count( $GLOBALS['npcink_toolbox_alt_visual_requests'] );
+$alt_cached                                    = $client->run_hosted_ai_site_helper( $alt_input );
+npcink_toolbox_provider_services_assert( 'ready' === $alt_cached['status'] && 1 === $alt_cached['media_alt_caption_review_set']['visual_review']['reused_count'] && $calls_before_cache === count( $GLOBALS['npcink_toolbox_alt_visual_requests'] ), 'Current fingerprint-matched pixel evidence is reused without a fresh model request.' );
+$alt_input['media_snapshot']['items'][0]['media_fingerprint'] = 'sha256:' . str_repeat( 'b', 64 );
+$client->run_hosted_ai_site_helper( $alt_input );
+npcink_toolbox_provider_services_assert( $calls_before_cache + 1 === count( $GLOBALS['npcink_toolbox_alt_visual_requests'] ), 'Changed image fingerprint requests fresh recognition instead of reusing stale evidence.' );
+unset( $GLOBALS['npcink_toolbox_alt_cached_evidence'] );
+$alt_input['media_snapshot']['items'] = array_fill( 0, 15, $alt_item );
+foreach ( $alt_input['media_snapshot']['items'] as $index => &$item ) {
+	$item['attachment_id'] = 100 + $index;
+}
+unset( $item );
+$alt_input['review_set_limit'] = 5;
+$client->run_hosted_ai_site_helper( $alt_input );
+$last_request = end( $GLOBALS['npcink_toolbox_alt_visual_requests'] );
+npcink_toolbox_provider_services_assert( 5 === count( $last_request['items'] ), 'Visual recognition respects the requested review limit instead of recognizing the whole scan.' );

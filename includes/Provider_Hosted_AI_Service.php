@@ -473,28 +473,17 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		if ( 0 >= $media_sample_limit ) {
 			$media_sample_limit = 10;
 		}
-		$media_sample_limit     = max( 1, min( 30, $media_sample_limit ) );
-		$media_snapshot         = 'media_alt_suggestions' === $intent
+		$media_sample_limit = max( 1, min( 30, $media_sample_limit ) );
+		$media_snapshot     = 'media_alt_suggestions' === $intent
 			? $this->hosted_ai_media_alt_snapshot_from_input( $input, $media_sample_limit )
 			: array();
-		$image_context_evidence = is_array( $input['image_context_evidence'] ?? null )
-			? $this->sanitize_payload( $input['image_context_evidence'] )
-			: array();
-		$review_set_limit       = absint( $input['review_set_limit'] ?? ( $input['max_items'] ?? 5 ) );
-		if ( 0 >= $review_set_limit ) {
-			$review_set_limit = 5;
+		$review_set_limit   = max( 1, min( 10, absint( $input['review_set_limit'] ?? ( $input['max_items'] ?? 5 ) ) ?: 5 ) );
+		if ( 'media_alt_suggestions' === $intent ) {
+			$review = $this->client->build_visual_media_alt_caption_review_set( $media_snapshot, $review_set_limit );
+			return $this->client->local_media_alt_caption_review_response( array(), $review, 'visual_evidence_required' );
 		}
-		$review_set_limit             = max( 1, min( 10, $review_set_limit ) );
-		$media_alt_caption_review_set = 'media_alt_suggestions' === $intent
-			? $this->client->build_media_alt_caption_review_set( $media_snapshot, $review_set_limit, $image_context_evidence )
-			: array();
-		if ( 'media_alt_suggestions' === $intent && empty( $image_context_evidence ) ) {
-			$image_context_evidence = $this->client->maybe_request_media_alt_caption_image_context_evidence( $media_alt_caption_review_set );
-			if ( ! empty( $image_context_evidence ) ) {
-				$media_alt_caption_review_set = $this->client->build_media_alt_caption_review_set( $media_snapshot, $review_set_limit, $image_context_evidence );
-			}
-		}
-		$comment_sample_limit = absint( $input['comment_sample_size'] ?? ( $input['sample_size'] ?? 50 ) );
+		$media_alt_caption_review_set = array();
+		$comment_sample_limit         = absint( $input['comment_sample_size'] ?? ( $input['sample_size'] ?? 50 ) );
 		if ( 0 >= $comment_sample_limit ) {
 			$comment_sample_limit = 50;
 		}
@@ -541,18 +530,16 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			: array();
 
 		$source              = array(
-			'focus'                  => wp_trim_words( $focus, 80, '' ),
-			'site_snapshot'          => 'content_snapshot_suggestions' === $intent ? $this->client->collect_hosted_ai_site_snapshot() : array(),
-			'media_snapshot'         => 'media_alt_suggestions' === $intent ? $media_snapshot : array(),
-			'image_context_evidence' => 'media_alt_suggestions' === $intent ? $image_context_evidence : array(),
-			'comment_sample'         => 'comment_moderation_suggestions' === $intent ? $comment_sample : array(),
-			'flagged_media_sample'   => 'flagged_media_suggestions' === $intent ? $flagged_media_sample : array(),
-			'taxonomy_tag_sample'    => $taxonomy_tag_sample,
-			'internal_link_sample'   => $internal_link_sample,
-			'source_policy'          => sanitize_key( (string) ( $input['source_policy'] ?? ( 'media_alt_suggestions' === $intent ? ( $media_snapshot['snapshot_policy'] ?? 'current_article_media_metadata_only' ) : ( 'comment_moderation_suggestions' === $intent ? 'pending_hold_approved_would_be_public_fields_only' : ( 'flagged_media_suggestions' === $intent ? 'recent_media_metadata_only_no_pixels' : 'bounded_public_content_opportunity_sample_only' ) ) ) ) ),
+			'focus'                => wp_trim_words( $focus, 80, '' ),
+			'site_snapshot'        => 'content_snapshot_suggestions' === $intent ? $this->client->collect_hosted_ai_site_snapshot() : array(),
+			'comment_sample'       => 'comment_moderation_suggestions' === $intent ? $comment_sample : array(),
+			'flagged_media_sample' => 'flagged_media_suggestions' === $intent ? $flagged_media_sample : array(),
+			'taxonomy_tag_sample'  => $taxonomy_tag_sample,
+			'internal_link_sample' => $internal_link_sample,
+			'source_policy'        => sanitize_key( (string) ( $input['source_policy'] ?? ( 'comment_moderation_suggestions' === $intent ? 'pending_hold_approved_would_be_public_fields_only' : ( 'flagged_media_suggestions' === $intent ? 'recent_media_metadata_only_no_pixels' : 'bounded_public_content_opportunity_sample_only' ) ) ) ),
 		);
 		$prompt              = $this->hosted_ai_site_helper_prompt( $intent, $source, $context );
-		$data_classification = in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ? 'pii' : 'public_site_content';
+		$data_classification = in_array( $intent, array( 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ? 'pii' : 'public_site_content';
 		$runtime_payload     = array(
 			'ability_name'        => 'npcink-toolbox/ai-site-helper',
 			'contract_version'    => 'hosted_ai_site_helper.v1',
@@ -595,16 +582,13 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			);
 		}
 		$classification_input = $input;
-		if ( in_array( $intent, array( 'media_alt_suggestions', 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ) {
+		if ( in_array( $intent, array( 'comment_moderation_suggestions', 'flagged_media_suggestions' ), true ) ) {
 			$classification_input['runtime_data_classification'] = 'pii';
 		}
 		$runtime_payload = $this->runtime_payload_with_data_classification( $runtime_payload, $data_classification, $classification_input );
 
 		$handled = apply_filters( 'npcink_toolbox_hosted_ai_site_helper_cloud_request', null, $runtime_payload, $input );
 		if ( is_wp_error( $handled ) ) {
-			if ( 'media_alt_suggestions' === $intent ) {
-				return $this->client->local_media_alt_caption_review_response( $runtime_payload, $media_alt_caption_review_set, $handled->get_error_code() );
-			}
 			if ( 'comment_moderation_suggestions' === $intent ) {
 				return $this->client->local_comment_moderation_review_response( $runtime_payload, $comment_moderation_review_set, $handled->get_error_code() );
 			}
@@ -615,9 +599,6 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 		}
 		if ( is_array( $handled ) ) {
 			return $this->normalize_hosted_ai_site_helper_response( $handled, $runtime_payload, $intent, $media_alt_caption_review_set, $comment_sample, $flagged_media_sample, $taxonomy_tag_review_set, $internal_link_review_set );
-		}
-		if ( 'media_alt_suggestions' === $intent ) {
-			return $this->client->local_media_alt_caption_review_response( $runtime_payload, $media_alt_caption_review_set );
 		}
 		if ( 'comment_moderation_suggestions' === $intent ) {
 			return $this->client->local_comment_moderation_review_response( $runtime_payload, $comment_moderation_review_set, 'cloud_required' );

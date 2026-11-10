@@ -1095,7 +1095,11 @@
       "Based on retrieved public articles; check the references below.": ["回答依据检索到的公开文章，请核对下方引用。"],
       "General guidance only. This site has not been checked for this answer.": ["以下为一般建议，本次回答尚未检查本站。"],
       "Add the requested detail to your question above, then ask again.": ["请在上方问题中补充所需信息，再次提问。"],
-      "Please add a little more detail.": ["请补充一点具体信息。"]
+      "Please add a little more detail.": ["请补充一点具体信息。"],
+      "Image recognition did not produce a usable ALT. Check the image and try again.": ["识图未能生成可用的 ALT，请检查图片后重试。"],
+      "Some images could not be recognized. No ALT was generated for them from metadata. Check Cloud and the image files, then try again.": ["部分图片识别失败，未使用元数据代替生成 ALT。请检查 Cloud 和图片文件后重试。"],
+      "Image recognition is still processing. Try again later.": ["图片仍在识别中，请稍后重试。"],
+      "Image recognition is still processing. No ALT draft is available for those images yet. Try again later.": ["图片仍在识别中，暂未生成这些图片的 ALT 草稿，请稍后重试。"]
     }
   }
 }
