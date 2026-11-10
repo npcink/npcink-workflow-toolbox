@@ -7,6 +7,15 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-10.
 
+**Admin entry contraction, batch 1 — 2026-11-10:** the operator approved
+removing the industry-specific profile template button and duplicate profile-to-Ask
+shortcut. Current-site form drafting and contextual Site Check → Ask remain.
+Scheduled Review is visibly labeled as a preview, with automatic inspections
+remaining off. Watermark templates are collapsed using native details; backup
+cleanup stays outside, with existing saved data and recovery paths retained.
+Three top tabs, five Ask choices, permissions and runtime pauses remain.
+See [the focused scope](admin-ia-site-and-ask-v1.md#后台入口收缩第一批--2026-11-10).
+
 **Admin settings maintenance — 2026-11-10:** the image tab now says
 Image Review & Settings; its settings entry says Watermark & Backups. The
 fixed 30-day backup policy is separated from the writable cleanup mode.

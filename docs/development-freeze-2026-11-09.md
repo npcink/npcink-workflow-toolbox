@@ -3,6 +3,22 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## 2026-11-10 Admin entry contraction, batch 1
+
+The operator explicitly approved a bounded admin presentation change:
+remove the industry-specific Site Profile template button and duplicate Ask
+shortcut; label Scheduled Review as a preview inside Site Check; collapse
+watermark template management while keeping backup cleanup outside the fold.
+The current-site profile draft action, contextual Check → Ask action, three
+top tabs and all five Smart Ask choices remain. Retain stored settings,
+template recovery implementation, backups, restore paths, permissions and
+runtime pauses. This does not enable automatic inspections or media optimization.
+
+This amendment changes only the named presentation defaults. It does not
+authorize feature expansion or another evaluation campaign. The second batch
+of profile summary/edit changes remains a separate slice.
+See [admin IA](admin-ia-site-and-ask-v1.md#后台入口收缩第一批--2026-11-10).
+
 ## 2026-11-09 Frozen-feature release containment
 
 Source-material drafting is now **server-paused**, in addition to being hidden

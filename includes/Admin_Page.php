@@ -711,15 +711,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		);
 	}
 
-	private function render_smart_ask_link( string $pack ): void {
-		?>
-		<p class="npcink-toolbox__smart-ask-link" data-toolbox-smart-ask-link="<?php echo esc_attr( $pack ); ?>">
-			<a class="button" href="<?php echo esc_url( $this->smart_ask_url( $pack ) ); ?>"><?php esc_html_e( 'Go to Smart Ask', 'npcink-workflow-toolbox' ); ?></a>
-			<span class="description"><?php esc_html_e( 'Ask a question about this data in plain language.', 'npcink-workflow-toolbox' ); ?></span>
-		</p>
-		<?php
-	}
-
 	private function render_smart_ask_panel(): void {
 		$packs    = $this->smart_ask_packs();
 		$selected = $this->requested_smart_ask_pack();
@@ -1040,7 +1031,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<div class="npcink-toolbox__ops-workspace" data-toolbox-site-check-tabs>
 			<nav class="npcink-toolbox__ops-tabs" aria-label="<?php esc_attr_e( 'Site Check sections', 'npcink-workflow-toolbox' ); ?>">
 				<button type="button" class="npcink-toolbox__ops-tab<?php echo 'current-check' === $active_site_check_tab ? ' is-active' : ''; ?>" data-toolbox-site-check-target="current-check" aria-selected="<?php echo 'current-check' === $active_site_check_tab ? 'true' : 'false'; ?>"><?php esc_html_e( 'Current check', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-toolbox__ops-tab<?php echo 'scheduled-review' === $active_site_check_tab ? ' is-active' : ''; ?>" data-toolbox-site-check-target="scheduled-review" aria-selected="<?php echo 'scheduled-review' === $active_site_check_tab ? 'true' : 'false'; ?>"><?php esc_html_e( 'Scheduled review', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="npcink-toolbox__ops-tab<?php echo 'scheduled-review' === $active_site_check_tab ? ' is-active' : ''; ?>" data-toolbox-site-check-target="scheduled-review" aria-selected="<?php echo 'scheduled-review' === $active_site_check_tab ? 'true' : 'false'; ?>"><?php esc_html_e( 'Scheduled review preview', 'npcink-workflow-toolbox' ); ?></button>
 			</nav>
 
 			<section class="npcink-toolbox__ops-panel" data-toolbox-site-check-panel="current-check"<?php echo 'current-check' === $active_site_check_tab ? '' : ' hidden'; ?>>
@@ -1501,7 +1492,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<?php if ( ! $embedded ) : ?>
 			<div class="npcink-toolbox__panel-header">
-				<h2><?php esc_html_e( 'Scheduled review', 'npcink-workflow-toolbox' ); ?></h2>
+				<h2><?php esc_html_e( 'Scheduled review preview', 'npcink-workflow-toolbox' ); ?></h2>
 				<p><?php esc_html_e( 'For an occasional look only. For everyday upkeep, start with Current check.', 'npcink-workflow-toolbox' ); ?></p>
 			</div>
 		<?php endif; ?>
@@ -1514,8 +1505,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<section class="npcink-toolbox__card">
 				<div class="npcink-toolbox__section-heading">
 					<div>
-						<h3><?php esc_html_e( 'Scheduled review status', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Preview whether the check can read your public content.', 'npcink-workflow-toolbox' ) : __( 'Use this only to check that your content can be read. Nightly check history is in Npcink Cloud.', 'npcink-workflow-toolbox' ) ); ?></p>
+						<h3><?php esc_html_e( 'Scheduled review preview', 'npcink-workflow-toolbox' ); ?></h3>
+						<p><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Check that public content can be read. This preview does not enable automatic inspections.', 'npcink-workflow-toolbox' ) : __( 'Use this only to check that your content can be read. Nightly check history is in Npcink Cloud.', 'npcink-workflow-toolbox' ) ); ?></p>
 					</div>
 					<div class="npcink-toolbox__inline-actions">
 						<a class="button button-primary" href="<?php echo esc_url( $this->nightly_inspection_preview_url() ); ?>"><?php esc_html_e( 'Preview scheduled review', 'npcink-workflow-toolbox' ); ?></a>
@@ -1560,13 +1551,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<p><?php esc_html_e( 'Fill the short site brief used by AI suggestions. Most sites can keep the optional preferences unchanged.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 
-		<?php $this->render_smart_ask_link( 'content_structure' ); ?>
-
 		<form class="npcink-toolbox__settings-form" method="post" action="options.php" data-toolbox-context-form>
 			<?php settings_fields( 'npcink_toolbox_content_context' ); ?>
 
 			<div class="npcink-toolbox__draft-actions" aria-label="<?php esc_attr_e( 'Content context draft actions', 'npcink-workflow-toolbox' ); ?>">
-				<button type="button" class="button" data-toolbox-context-draft="aiBlog"><?php esc_html_e( 'Use AI tech blog template', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="button" data-toolbox-context-draft="site"><?php esc_html_e( 'Draft from current site content', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="button" data-toolbox-context-clear><?php esc_html_e( 'Clear form', 'npcink-workflow-toolbox' ); ?></button>
 				<span><?php esc_html_e( 'Drafts only prefill this form. They do not change posts, media, SEO meta, or provider settings.', 'npcink-workflow-toolbox' ); ?></span>
@@ -2074,12 +2062,20 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<div class="npcink-toolbox__image-settings" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" <?php echo $active ? '' : 'hidden'; ?>>
 			<div class="npcink-toolbox__panel-header">
 				<h2><?php esc_html_e( 'Watermark & Backups', 'npcink-workflow-toolbox' ); ?></h2>
-				<p><?php esc_html_e( 'Manage low-frequency image defaults here. Review and execution tools remain in their own tabs.', 'npcink-workflow-toolbox' ); ?></p>
+				<p><?php esc_html_e( 'Manage backup cleanup. Expand watermark settings when needed.', 'npcink-workflow-toolbox' ); ?></p>
 			</div>
 		<?php
 		$this->render_media_backup_retention_settings();
-		$this->render_watermark_template_library( '', true );
 		?>
+			<details class="npcink-toolbox__start-advanced" data-toolbox-watermark-settings>
+				<summary>
+					<span><?php esc_html_e( 'Watermark Templates', 'npcink-workflow-toolbox' ); ?></span>
+					<?php if ( Settings::cloud_feature_paused( 'advanced_media' ) ) : ?>
+						<small><?php esc_html_e( 'Media optimization is paused. Saved templates remain available to edit.', 'npcink-workflow-toolbox' ); ?></small>
+					<?php endif; ?>
+				</summary>
+				<?php $this->render_watermark_template_library( '', true ); ?>
+			</details>
 		</div>
 		<?php
 	}

@@ -100,7 +100,7 @@ foreach (
 		'These settings only affect the preview on this site.',
 		'Check on this site (optional)',
 		'See nightly check history',
-		'Scheduled review status',
+		'Scheduled review preview',
 		'Use this only to check that your content can be read. Nightly check history is in Npcink Cloud.',
 	) as $required_admin_text
 ) {

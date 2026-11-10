@@ -5961,7 +5961,7 @@ msgid "Could not build the local scheduled review preview."
 msgstr "无法生成本地定期巡检预览。"
 
 msgid "Scheduled review preview"
-msgstr "定期巡检预览"
+msgstr "巡检预览"
 
 msgid "Scheduled review preview summary"
 msgstr "定期巡检预览摘要"
@@ -10777,3 +10777,15 @@ msgstr "保存清理方式"
 
 msgid "Review ALT drafts here; media optimization is paused."
 msgstr "在此审阅 ALT 草稿；媒体优化当前暂停。"
+
+#: includes/Admin_Page.php
+msgid "Manage backup cleanup. Expand watermark settings when needed."
+msgstr "管理备份清理，需要时展开水印设置。"
+
+#: includes/Admin_Page.php
+msgid "Media optimization is paused. Saved templates remain available to edit."
+msgstr "媒体优化已暂停，已有水印模板仍可展开编辑。"
+
+#: includes/Admin_Page.php
+msgid "Check that public content can be read. This preview does not enable automatic inspections."
+msgstr "检查能否读取本站公开内容，此预览不会开启自动巡检。"

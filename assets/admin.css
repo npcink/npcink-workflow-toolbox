@@ -500,6 +500,20 @@
 	line-height: 1.35;
 }
 
+.npcink-toolbox__start-advanced[data-toolbox-watermark-settings] > summary {
+	display: list-item;
+	list-style: disclosure-closed inside;
+}
+
+.npcink-toolbox__start-advanced[data-toolbox-watermark-settings][open] > summary {
+	list-style-type: disclosure-open;
+}
+
+.npcink-toolbox__start-advanced[data-toolbox-watermark-settings] > summary small {
+	display: block;
+	margin-top: 4px;
+}
+
 .npcink-toolbox__start-advanced .npcink-toolbox__start-actions {
 	padding: 0 14px 14px;
 }
@@ -4210,6 +4224,10 @@ pre.npcink-toolbox__result {
 @media (max-width: 782px) {
 	.npcink-toolbox__tabs {
 		overflow-x: auto;
+	}
+
+	[data-toolbox-morning-brief] .npcink-toolbox__section-heading {
+		flex-direction: column;
 	}
 
 	.npcink-toolbox__readiness-strip,

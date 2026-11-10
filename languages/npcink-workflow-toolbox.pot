@@ -10268,3 +10268,15 @@ msgstr ""
 
 msgid "Review ALT drafts here; media optimization is paused."
 msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Manage backup cleanup. Expand watermark settings when needed."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Media optimization is paused. Saved templates remain available to edit."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Check that public content can be read. This preview does not enable automatic inspections."
+msgstr ""
