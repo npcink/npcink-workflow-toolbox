@@ -194,3 +194,8 @@ site_ops_smoke_assert( false !== $encoded, 'Site Ops insight pack is JSON encoda
 foreach ( array( '"comment_content"', '"comment_author_email"', '"comment_author_IP"', '"comment_agent"', 'wp_insert_post', 'wp_update_post', 'update_post_meta', 'wp_schedule_event', 'as_enqueue_async_action' ) as $forbidden ) {
 	site_ops_smoke_assert( false === strpos( (string) $encoded, $forbidden ), 'Site Ops insight pack omits forbidden field or write token: ' . $forbidden );
 }
+
+$configured_pack = $builder->build( $snapshot, array( 'content_context_ready' => true, 'cloud_ready' => true, 'internal_link_graph_health' => array( 'available' => false ) ) );
+$unconfigured_pack = $builder->build( $snapshot, array( 'content_context_ready' => false, 'cloud_ready' => false, 'internal_link_graph_health' => array( 'available' => false ) ) );
+site_ops_smoke_assert( $configured_pack['top_findings'] === $unconfigured_pack['top_findings'], 'Optional preferences and Cloud connection do not create or reorder content findings.' );
+site_ops_smoke_assert( ! in_array( 'site_context_incomplete', array_column( $pack['top_findings'], 'id' ), true ) && ! in_array( 'site_knowledge_cloud_unavailable', array_column( $pack['top_findings'], 'id' ), true ), 'Product setup gaps are not website content problems.' );

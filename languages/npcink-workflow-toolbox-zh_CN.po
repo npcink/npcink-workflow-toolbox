@@ -10805,3 +10805,45 @@ msgstr "从下面四项基本信息开始填写。"
 #: includes/Admin_Page.php
 msgid "Edit site profile"
 msgstr "编辑站点画像"
+
+msgid "Smart Ask and Site Check"
+msgstr "智能提问与站点检查"
+
+msgid "Describe what you need help with, or find content worth reviewing. Suggestions do not change your site."
+msgstr "描述需要帮助的问题，或查找值得回顾的内容。建议不会修改站点。"
+
+msgid "Find articles and images worth reviewing, then open the relevant editor or tool."
+msgstr "查找值得回顾的文章和图片，再打开对应编辑器或工具处理。"
+
+msgid "Stopping the wait does not cancel Cloud processing."
+msgstr "停止等待不会取消 Cloud 已开始的处理。"
+
+msgid "Saved content preferences"
+msgstr "已保存的内容偏好"
+
+msgid "WordPress Site Health"
+msgstr "WordPress 站点健康"
+
+msgid "Connect AI when needed, then try a small task. You do not need to fill a site profile."
+msgstr "按需连接 AI，再尝试一个小任务，无需先填写站点画像。"
+
+msgid "Review a bounded sample of public content and image metadata. A finding is a review suggestion, not proof that an article is wrong."
+msgstr "抽样检查公开内容和图片信息。发现的问题仅供回顾，不代表文章有错。"
+
+msgid "2. Open the relevant article or tool"
+msgstr "2. 打开对应文章或工具"
+
+msgid "Review the affected examples, then use the article editor or image review tool. Ask for an explanation when needed."
+msgstr "查看涉及的示例，再到文章编辑器或图片审阅工具处理；需要时可提问了解原因。"
+
+msgid "Review summary"
+msgstr "回顾摘要"
+
+msgid "Handling details"
+msgstr "处理说明"
+
+msgid "Categories and tags in the sampled public content."
+msgstr "抽样公开内容中的分类和标签。"
+
+msgid "AI answers and suggestions need a connection. Local site checks and metadata review remain available."
+msgstr "AI 回答和建议需要连接 Cloud；本地站点检查和信息审阅仍可使用。"

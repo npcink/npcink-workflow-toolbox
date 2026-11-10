@@ -10296,3 +10296,45 @@ msgstr ""
 #: includes/Admin_Page.php
 msgid "Edit site profile"
 msgstr ""
+
+msgid "Smart Ask and Site Check"
+msgstr ""
+
+msgid "Describe what you need help with, or find content worth reviewing. Suggestions do not change your site."
+msgstr ""
+
+msgid "Find articles and images worth reviewing, then open the relevant editor or tool."
+msgstr ""
+
+msgid "Stopping the wait does not cancel Cloud processing."
+msgstr ""
+
+msgid "Saved content preferences"
+msgstr ""
+
+msgid "WordPress Site Health"
+msgstr ""
+
+msgid "Connect AI when needed, then try a small task. You do not need to fill a site profile."
+msgstr ""
+
+msgid "Review a bounded sample of public content and image metadata. A finding is a review suggestion, not proof that an article is wrong."
+msgstr ""
+
+msgid "2. Open the relevant article or tool"
+msgstr ""
+
+msgid "Review the affected examples, then use the article editor or image review tool. Ask for an explanation when needed."
+msgstr ""
+
+msgid "Review summary"
+msgstr ""
+
+msgid "Handling details"
+msgstr ""
+
+msgid "Categories and tags in the sampled public content."
+msgstr ""
+
+msgid "AI answers and suggestions need a connection. Local site checks and metadata review remain available."
+msgstr ""

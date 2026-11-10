@@ -191,6 +191,7 @@ Start from the active documents below before changing code.
 - [页面质量摘要 → Cloud CLI 验证（第三包）](page-quality-pack-cloud-qa-cli.md) — REST + `scripts/page-quality-pack-cloud-qa.sh`；智能提问「页面质量」。
 - [环境与性能清单（第四包）](environment-performance-insight-pack-v1.md) — `environment_performance_insight_pack.v1`：配置/清单 only；非测速。
 - [环境与性能清单 → Cloud CLI 验证（第四包）](environment-performance-pack-cloud-qa-cli.md) — REST + `scripts/environment-performance-pack-cloud-qa.sh`；智能提问「环境与性能」。
+- [后台面向运营人员的收敛](admin-operator-focus-2026-11-10.md) — 可选偏好与巡检预览移到支持入口，站点检查聚焦内容事项。
 - [Toolbox Admin IA（开始 / 站点与提问 / 图片处理）](admin-ia-site-and-ask-v1.md) — 顶栏 3；站点检查折入站点与提问；智能提问行为不变；`operations-insights` 映射兼容。
 - [Admin IA 开放待办（2026-10-23）](admin-ia-open-todos-2026-10-23.md) — L3 折叠、单框选包、生产 Cloud 部署决策、year-0020、英文 toast 移交、orphan runs、mid-sync 502。
 - [Insight Pack 开发约定笔记 v1](insight-pack-dev-notes-v1.md) — `#289`–`#309` 操作约定：后端切片、suggestion_only、白话 Guidance、magick-ai.local+M4、证据目录、不擅自改生产；单框/自动选包未做。

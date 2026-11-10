@@ -82,3 +82,12 @@ does not expose a batch Apply.
 - no local queue, cron, or background link scanning;
 - no replacement for the editor sidebar's current-article internal-link
   candidates.
+
+## Operator disposition — 2026-11-10
+
+The operator retains this product need, including reviewing useful related reading
+alongside body links. The existing admin implementation only reviews sparse
+internal links; it does not audit all adopted reading lists or third-party dynamic
+recommendations. Keep its default-hidden card and expansion freeze. Reuse the
+existing editor link/related-reading consumers when a separately scoped restoration
+is approved; this decision does not restore the card or add bulk insertion.
