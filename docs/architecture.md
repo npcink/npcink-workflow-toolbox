@@ -675,13 +675,15 @@ future `npcink-abilities-toolkit/update-media-details` target contracts.
 `future_contract_preview` is a non-request preview wrapper; candidate quality
 fields and preview wrapper metadata are excluded from ability input schemas and
 must not be forwarded to Adapter/Core/Abilities execution routes.
-Optional `image_context_evidence.v1` remains a bounded Cloud Addon or
-host-provided helper boundary. Toolbox may prepare the request artifact and
-consume returned review evidence, but it does not run local vision inference,
-store provider credentials, create a queue, persist runtime ownership, or treat
-returned visual evidence as final truth. If that helper is productized beyond
-the current optional call, it must be represented in Cloud bridge and
-route-boundary documentation before release.
+Backend ALT now requires `image_context_evidence.v1` through the existing Cloud
+Addon recognition helper, including metadata-rich images. The current-file resolver
+reuses valid visual evidence and recognizes only misses within the review limit;
+metadata-only candidates are removed before preview. Failed/partial recognition is
+visible and cannot fall back to local metadata drafts or hosted text suggestions.
+Toolkit still owns the shared review-set ability; Toolbox owns this stricter
+backend presentation. The editor's contextual-ALT policy is unchanged. Toolbox
+runs no local vision model, stores no provider credentials and creates no queue
+or WordPress write. See [the current backend contract](media-alt-caption-review-set.md#backend-visual-evidence-requirement--2026-11-10).
 The standalone discoverability result is a post-publish optimization task
 panel: SEO title, SEO description, slug, and excerpt are shown as actionable
 review tasks. SEO title and description use the governed SEO handoff, then ask

@@ -1773,7 +1773,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				'id'          => 'media-alt-caption-review',
 				'endpoint'    => 'ai/site-helpers',
 				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Build a local review preview for missing or weak ALT text. Cloud visual evidence is optional.', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Generate missing or weak ALT drafts by looking at the images. Review each draft before submitting it.', 'npcink-workflow-toolbox' ),
 				'intent'      => 'media_alt_suggestions',
 				'button'      => __( 'Build ALT review preview', 'npcink-workflow-toolbox' ),
 				'custom'      => 'media_alt_caption_review',
@@ -2417,12 +2417,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<h2><?php echo esc_html( $title ); ?></h2>
 			<p><?php echo esc_html( $description ); ?></p>
 			<?php if ( ! $cloud_ready ) : ?>
-				<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Local metadata review is available. Connect Cloud Addon only when optional visual evidence is needed.', 'npcink-workflow-toolbox' ); ?></div>
+				<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Connect Cloud Addon to recognize these images. Metadata alone cannot generate ALT drafts.', 'npcink-workflow-toolbox' ); ?></div>
 			<?php endif; ?>
 			<input type="hidden" name="intent" value="media_alt_suggestions" />
 				<div class="npcink-toolbox__example is-ai">
-					<strong><?php esc_html_e( 'Local review preview', 'npcink-workflow-toolbox' ); ?></strong>
-					<span><?php esc_html_e( 'Toolbox prepares editable ALT drafts from available metadata and optional visual evidence. Confirmed missing ALT rows can be submitted to Core review; Toolbox does not approve, execute, or change media.', 'npcink-workflow-toolbox' ); ?></span>
+					<strong><?php esc_html_e( 'Look at images to draft ALT', 'npcink-workflow-toolbox' ); ?></strong>
+					<span><?php esc_html_e( 'Images are sent to Cloud for recognition; valid results for unchanged images can be reused. Review and edit the ALT before submitting it for approval.', 'npcink-workflow-toolbox' ); ?></span>
 				</div>
 			<div class="npcink-toolbox__result-actions npcink-toolbox__alt-source-actions">
 				<a class="button" href="<?php echo esc_url( admin_url( 'upload.php' ) ); ?>"><?php esc_html_e( 'Select images in Media Library', 'npcink-workflow-toolbox' ); ?></a>

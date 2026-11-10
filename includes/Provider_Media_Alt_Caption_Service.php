@@ -25,16 +25,18 @@ final class Provider_Media_Alt_Caption_Service extends Provider_Client_Support {
 
 	public function local_media_alt_caption_review_response( array $runtime_payload, array $review_set, string $cloud_status = 'optional_not_requested' ): array {
 		$quality_contract = $this->client->hosted_ai_site_helper_quality_contract( 'media_alt_suggestions' );
+		$visual_review    = is_array( $review_set['visual_review'] ?? null ) ? $review_set['visual_review'] : array();
 
 		return $this->with_output_contract(
 			array(
-				'provider'                     => 'local_metadata_review',
-				'cloud_runtime'                => 'optional',
+				'provider'                     => $visual_review ? 'cloud_visual_review' : 'local_metadata_review',
+				'cloud_runtime'                => $visual_review ? 'required_visual_evidence' : 'optional',
 				'cloud_enrichment_status'      => sanitize_key( $cloud_status ),
 				'cloud_ability'                => sanitize_text_field( (string) ( $runtime_payload['ability_name'] ?? 'npcink-toolbox/ai-site-helper' ) ),
 				'contract_version'             => sanitize_text_field( (string) ( $runtime_payload['contract_version'] ?? 'hosted_ai_site_helper.v1' ) ),
 				'intent'                       => 'media_alt_suggestions',
-				'status'                       => 'ready_local',
+				'status'                       => $visual_review ? (string) $visual_review['status'] : 'ready_local',
+				'run_id'                       => (string) ( $visual_review['run_id'] ?? '' ),
 				'output_text'                  => '',
 				'result'                       => array(),
 				'quality_contract'             => $this->sanitize_payload( $quality_contract ),
@@ -43,16 +45,120 @@ final class Provider_Media_Alt_Caption_Service extends Provider_Client_Support {
 				'reject_if'                    => $this->sanitize_string_list( $quality_contract['reject_if'] ?? array() ),
 				'media_alt_caption_review_set' => $this->sanitize_payload( $review_set ),
 				'write_posture'                => 'suggestion_only',
-				'final_write_path'             => 'future_core_contract_required',
+				'final_write_path'             => $visual_review ? 'core_proposal_required' : 'future_core_contract_required',
 				'direct_wordpress_write'       => false,
 				'handoff'                      => array(
-					'core_submission'        => 'not_available_from_preview',
+					'core_submission'        => $visual_review ? 'requires_human_visual_confirmation' : 'not_available_from_preview',
 					'direct_wordpress_write' => false,
 				),
 			),
 			'hosted_ai_site_helper',
 			'hosted_ai_site_helper'
 		);
+	}
+	/**
+	 * Backend ALT drafts require pixel evidence, including metadata-rich images.
+	 * The shared Toolkit artifact remains the review contract; this projection
+	 * removes metadata-only candidates before they reach the operator.
+	 */
+	public function build_visual_media_alt_caption_review_set( array $media_snapshot, int $max_items ): array {
+		$max_items = max( 1, min( 10, $max_items ) );
+		$sources   = array();
+		$requested = array();
+		foreach ( (array) ( $media_snapshot['items'] ?? array() ) as $item ) {
+			if ( ! is_array( $item ) || empty( $item['attachment_id'] ) ) {
+				continue;
+			}
+			foreach ( array_keys( $item ) as $field ) {
+				if ( 0 === strpos( (string) $field, 'image_context_' ) ) {
+					unset( $item[ $field ] );
+				}
+			}
+			$id             = absint( $item['attachment_id'] );
+			$sources[ $id ] = $item;
+			$status         = $this->media_alt_caption_item_status( $item );
+			if ( 'present' !== $status['current_alt_status'] && count( $requested ) < $max_items ) {
+				$requested[ $id ] = array_merge( $item, $status, array( 'blocked_reason' => 'candidate_quality_insufficient' ) );
+			}
+		}
+
+		$request  = $this->media_alt_caption_image_context_evidence_request( array_values( $requested ), $max_items );
+		$evidence = empty( $request ) ? array() : $this->client->resolve_media_image_context_evidence( $request, true );
+		$evidence = is_array( $evidence ) ? $evidence : array();
+		$indexed  = $this->media_alt_caption_index_image_context_evidence( $evidence );
+		$pending  = in_array( $evidence['status'] ?? '', array( 'accepted', 'queued', 'running', 'processing' ), true );
+		// Caption-only rows must not consume the bounded ALT selection slots.
+		$media_snapshot['items'] = array_merge( array_values( array_intersect_key( $sources, $requested ) ), array_values( array_diff_key( $sources, $requested ) ) );
+		$review                  = $this->build_media_alt_caption_review_set( $media_snapshot, $max_items, $evidence );
+		$selected                = array();
+		$blocked                 = (array) ( $review['blocked_items'] ?? array() );
+		foreach ( (array) ( $review['selected_items'] ?? array() ) as $row ) {
+			$id     = absint( $row['attachment_id'] ?? 0 );
+			$source = $sources[ $id ] ?? array();
+			$visual = isset( $requested[ $id ] ) ? ( $indexed[ $id ] ?? array() ) : array();
+			if ( ! in_array( $visual['status'] ?? 'ready', array( 'ready', 'completed' ), true ) ) {
+				$visual = array();
+			}
+			$status  = $this->media_alt_caption_item_status( $source );
+			$quality = $this->media_alt_caption_candidate_quality(
+				$this->media_alt_caption_apply_image_context_evidence( $source, $visual ),
+				$status,
+				true
+			);
+			if ( ! empty( $visual ) && ! empty( $quality['alt_candidates'] ) ) {
+				$selected[] = array_merge( $row, $quality, array( 'image_context_evidence' => $this->media_alt_caption_public_image_context_evidence( $visual ) ) );
+				continue;
+			}
+			$blocked[] = array_merge(
+				array_intersect_key( $row, array_flip( array( 'attachment_id', 'title', 'filename', 'thumbnail_url', 'url', 'current_alt_status', 'current_caption_status', 'review_reasons' ) ) ),
+				array(
+					'status'               => 'blocked',
+					'blocked_reason'       => isset( $requested[ $id ] ) ? 'visual_evidence_unavailable' : ( 'present' === $status['current_alt_status'] ? 'metadata_complete_for_p0' : 'selection_limit_reached' ),
+					'operator_next_action' => 'retry_visual_recognition_or_skip',
+				)
+			);
+		}
+		$unavailable   = 0;
+		$pending_count = 0;
+		foreach ( $blocked as &$row ) {
+			$id = absint( $row['attachment_id'] ?? 0 );
+			if ( isset( $requested[ $id ] ) && in_array( $row['blocked_reason'] ?? '', array( 'candidate_quality_insufficient', 'visual_evidence_unavailable' ), true ) ) {
+				$row                         = array_intersect_key( $row, array_flip( array( 'attachment_id', 'title', 'filename', 'thumbnail_url', 'url', 'current_alt_status', 'current_caption_status', 'review_reasons' ) ) );
+				$row['status']               = 'blocked';
+				$row['blocked_reason']       = $pending ? 'visual_evidence_pending' : 'visual_evidence_unavailable';
+				$row['operator_next_action'] = $pending ? 'wait_then_retry' : 'retry_visual_recognition_or_skip';
+				if ( $pending ) {
+					++$pending_count;
+				} else {
+					++$unavailable;
+				}
+			}
+		}
+		unset( $row );
+
+		$review['selected_items']                 = $selected;
+		$review['blocked_items']                  = $blocked;
+		$review['source_policy']                  = 'bounded_media_visual_evidence_required';
+		$review['eligibility_summary']            = array_merge(
+			(array) ( $review['eligibility_summary'] ?? array() ),
+			$this->media_alt_caption_review_quality_summary( $selected, $blocked ),
+			array(
+				'selected_count'                => count( $selected ),
+				'blocked_count'                 => count( $blocked ),
+				'visual_evidence_request_count' => $unavailable + $pending_count,
+			)
+		);
+		$review['image_context_evidence_request'] = array();
+		$review['visual_review']                  = array(
+			'status'            => empty( $requested ) ? 'not_needed' : ( $pending_count ? 'processing' : ( $unavailable ? ( $selected ? 'partial' : 'unavailable' ) : 'ready' ) ),
+			'requested_count'   => count( $requested ),
+			'reused_count'      => absint( $evidence['reused_count'] ?? 0 ),
+			'recognized_count'  => absint( $evidence['recognized_count'] ?? 0 ),
+			'unavailable_count' => $unavailable,
+			'pending_count'     => $pending_count,
+			'run_id'            => sanitize_text_field( (string) ( $evidence['run_id'] ?? '' ) ),
+		);
+		return $review;
 	}
 
 
@@ -377,6 +483,7 @@ final class Provider_Media_Alt_Caption_Service extends Provider_Client_Support {
 			}
 			$items[] = array(
 				'attachment_id'            => $attachment_id,
+				'media_fingerprint'        => $this->runtime_safe_media_fingerprint( (string) ( $item['media_fingerprint'] ?? '' ) ),
 				'title'                    => sanitize_text_field( (string) ( $item['title'] ?? '' ) ),
 				'filename'                 => sanitize_file_name( (string) ( $item['filename'] ?? '' ) ),
 				'thumbnail_url'            => esc_url_raw( (string) ( $item['thumbnail_url'] ?? '' ) ),
@@ -447,7 +554,7 @@ final class Provider_Media_Alt_Caption_Service extends Provider_Client_Support {
 	}
 
 
-	private function media_alt_caption_candidate_quality( array $item, array $item_status ): array {
+	private function media_alt_caption_candidate_quality( array $item, array $item_status, bool $visual_only = false ): array {
 		$flags                      = array();
 		$notes                      = array();
 		$basis                      = array();
@@ -458,7 +565,8 @@ final class Provider_Media_Alt_Caption_Service extends Provider_Client_Support {
 		$needs_context_confirmation = false;
 
 		if ( 'present' !== (string) ( $item_status['current_alt_status'] ?? '' ) ) {
-			foreach ( array( 'image_context_visual_summary', 'image_context_scene', 'image_context_objects_summary', 'description', 'caption', 'title', 'filename' ) as $field ) {
+			$alt_fields = $visual_only ? array( 'image_context_visual_summary', 'image_context_scene', 'image_context_objects_summary' ) : array( 'image_context_visual_summary', 'image_context_scene', 'image_context_objects_summary', 'description', 'caption', 'title', 'filename' );
+			foreach ( $alt_fields as $field ) {
 				$value     = 'filename' === $field
 					? $this->media_alt_caption_filename_descriptor( (string) ( $item['filename'] ?? '' ) )
 					: (string) ( $item[ $field ] ?? '' );
@@ -484,7 +592,8 @@ final class Provider_Media_Alt_Caption_Service extends Provider_Client_Support {
 		}
 
 		if ( 'missing' === (string) ( $item_status['current_caption_status'] ?? '' ) ) {
-			foreach ( array( 'image_context_visual_summary', 'image_context_scene', 'description', 'alt', 'title' ) as $field ) {
+			$caption_fields = $visual_only ? array( 'image_context_visual_summary', 'image_context_scene' ) : array( 'image_context_visual_summary', 'image_context_scene', 'description', 'alt', 'title' );
+			foreach ( $caption_fields as $field ) {
 				$candidate = $this->media_alt_caption_clean_candidate( (string) ( $item[ $field ] ?? '' ) );
 				if ( '' === $candidate ) {
 					continue;

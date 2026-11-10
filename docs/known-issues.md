@@ -20,6 +20,20 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
+- **Backend ALT live timeout and visual projection reuse remain unaccepted (Addon/Cloud, 2026-11-10).**
+  Real pixel-based ALT succeeded twice on one installed sunset image and left
+  attachment ALT unchanged; the first ordinary 30-second call timed out.
+  Later success at 9.681/8.625 seconds does not establish the timeout root cause.
+  The ordinary repeat recognized again: a cache-only read shows the existing
+  2026-10-30 `metadata_only` projection, correctly rejected as visual evidence.
+  One replay of the saved recognition into the existing projection path was
+  acknowledged, but the subsequent read still lacked visual evidence. Valid
+  fingerprint reuse and changed-file invalidation pass controlled provider tests;
+  fresh live projection persistence/reuse is not accepted. Keep this as bounded
+  Addon/Cloud follow-up on ordinary-use evidence; do not create a Toolbox cache,
+  rebuild indexes, change models, or schedule repeated live evaluation. Source:
+  [backend ALT validation](admin-ia-site-and-ask-v1.md#后台-alt-看图生成--2026-11-10).
+
 - **Smart Ask live wiring lacks an eligible Cloud model (Cloud routing, 2026-11-10).**
   The new question-only decision returns HTTP 400 with
   `cloud_routing_no_candidates` before a run is created; the unchanged

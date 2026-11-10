@@ -4,7 +4,8 @@
  *
  * This opens a real local WordPress admin page, builds a bounded review set
  * from explicit real attachment ids, and checks operator-facing handoff state.
- * It does not click the Core handoff button, create proposals, or write media.
+ * Controlled browser responses exercise proposal receipts and visual failure
+ * states; no real Core proposal, model request or media write is made.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -281,6 +282,7 @@ const expectedCaptionOnlyMin = intEnv('MEDIA_ALT_CAPTION_BROWSER_EXPECT_CAPTION_
 const expectedContextRowsMin = intEnv('MEDIA_ALT_CAPTION_BROWSER_EXPECT_CONTEXT_ROWS_MIN', 4);
 const expectedReadyRowsMin = intEnv('MEDIA_ALT_CAPTION_BROWSER_EXPECT_READY_ROWS_MIN', 0);
 verifyAttachmentIds(attachmentIds);
+const thumbnails = JSON.parse(wpCli(['eval', `echo wp_json_encode(array_map(static function ($id) { return wp_get_attachment_image_url($id, 'thumbnail'); }, array(${attachmentIds.join(',')})));`]));
 
 const browserOptions = {
 	headless: process.env.HEADLESS !== '0',
@@ -304,26 +306,32 @@ let loginHelper = null;
 let runtimeFilter = null;
 let page = null;
 const requests = [];
+let visualScenario = 'legacy';
+const pageErrors = [];
+const visualCases = [];
 try {
 	runtimeFilter = createRuntimeFilter();
 	const context = await browser.newContext({ ignoreHTTPSErrors: true });
 	page = await context.newPage();
+	page.on('pageerror', (error) => pageErrors.push(error.message));
 	await page.route('**/wp-json/npcink-toolbox/v1/ai/site-helpers', async (route) => {
-		const selectedItems = attachmentIds.map((attachmentId, index) => ({
+		const visual = visualScenario !== 'legacy';
+		const availableIds = !visual ? attachmentIds : visualScenario === 'ready' ? attachmentIds.slice(0, 2) : visualScenario === 'partial' ? attachmentIds.slice(0, 1) : [];
+		const selectedItems = availableIds.map((attachmentId, index) => ({
 			attachment_id: attachmentId,
 			title: `Browser smoke image ${index + 1}`,
-			thumbnail_url: '',
+			thumbnail_url: thumbnails[attachmentIds.indexOf(attachmentId)] || '',
 			current_alt: '',
 			current_alt_status: 'missing',
 			review_reasons: ['missing_alt'],
-			alt_candidates: index === attachmentIds.length - 1 ? [] : [`Reviewed browser smoke image ${index + 1}`],
-			candidate_review_status: index === attachmentIds.length - 1 ? 'caption_review_only' : 'needs_context_confirmation',
+			alt_candidates: !visual && index === attachmentIds.length - 1 ? [] : [`Reviewed browser smoke image ${index + 1}`],
+			candidate_review_status: visual ? 'ready_for_review' : index === attachmentIds.length - 1 ? 'caption_review_only' : 'needs_context_confirmation',
 			candidate_confidence: 'medium',
 			candidate_quality_score: 80,
 			candidate_quality_tier: 'review',
 			automation_recommendation: 'human_review',
-			candidate_fact_types: ['metadata_fact'],
-			needs_context_confirmation: index !== attachmentIds.length - 1,
+			candidate_fact_types: [visual ? 'visual_fact' : 'metadata_fact'],
+			needs_context_confirmation: !visual && index !== attachmentIds.length - 1,
 			needs_human_visual_check: true,
 			source_item_id: `media-alt-caption:${attachmentId}`,
 			evidence_refs: [`browser-smoke:${attachmentId}`],
@@ -334,19 +342,20 @@ try {
 			body: JSON.stringify({
 				artifact_type: 'hosted_ai_site_helper',
 				intent: 'media_alt_suggestions',
-				status: 'ready',
+				status: visual ? visualScenario : 'ready',
 				model_id: 'browser_smoke_fixture',
 				media_alt_caption_review_set: {
 					contract_version: 'media_alt_caption_review_set.v1',
 					selected_items: selectedItems,
-					blocked_items: [],
+					blocked_items: visual && visualScenario !== 'ready' ? [{ attachment_id: attachmentIds[1], blocked_reason: visualScenario === 'processing' ? 'visual_evidence_pending' : 'visual_evidence_unavailable' }] : [],
+					...(visual ? { visual_review: { status: visualScenario, unavailable_count: ['partial', 'unavailable'].includes(visualScenario) ? 1 : 0, pending_count: visualScenario === 'processing' ? 1 : 0 } } : {}),
 					eligibility_summary: {
 						scanned_count: attachmentIds.length,
-						local_preview_candidate_count: Math.max(0, attachmentIds.length - 1),
-						context_confirmation_count: Math.max(0, attachmentIds.length - 1),
-						caption_review_only_count: attachmentIds.length ? 1 : 0,
-						visual_evidence_request_count: Math.max(0, attachmentIds.length - 1),
-						blocked_count: 0,
+						local_preview_candidate_count: visual ? selectedItems.length : Math.max(0, attachmentIds.length - 1),
+						context_confirmation_count: visual ? 0 : Math.max(0, attachmentIds.length - 1),
+						caption_review_only_count: visual ? 0 : attachmentIds.length ? 1 : 0,
+						visual_evidence_request_count: visual ? (visualScenario === 'ready' ? 0 : 1) : Math.max(0, attachmentIds.length - 1),
+						blocked_count: visual && visualScenario !== 'ready' ? 1 : 0,
 					},
 					image_context_evidence_request: { items: [] },
 				},
@@ -537,6 +546,38 @@ try {
 		mkdirSync(resolve(screenshotPath, '..'), { recursive: true });
 		await captureViewportScreenshot(page, screenshotPath);
 		pass(`Media ALT/Caption browser smoke screenshot: ${screenshotPath}`);
+		for (const width of [1440, 900]) {
+			await page.setViewportSize({ width, height: 1000 });
+			for (const scenario of ['ready', 'partial', 'unavailable', 'processing']) {
+				visualScenario = scenario;
+				await submit.click();
+				await page.waitForFunction((expected) => {
+					const root = document.querySelector('[data-toolbox-media-alt-caption-review] .npcink-toolbox__result');
+					const text = root?.innerText || '';
+					const rows = root?.querySelectorAll('.npcink-toolbox__alt-review-row').length || 0;
+					if (expected === 'ready') return rows === 2;
+					if (expected === 'partial') return rows === 1 && /could not be recognized|部分图片识别失败/.test(text);
+					if (expected === 'unavailable') return rows === 0 && /could not be recognized|部分图片识别失败/.test(text);
+					return rows === 0 && /still processing|仍在识别中/.test(text);
+				}, scenario);
+				const state = await form.locator('.npcink-toolbox__result').evaluate((root) => ({
+					rows: root.querySelectorAll('.npcink-toolbox__alt-review-row').length,
+					failureVisible: Array.from(root.querySelectorAll('.npcink-toolbox__result-notice')).some((el) => !el.closest('details') && /could not be recognized|部分图片识别失败/.test(el.textContent)),
+					pendingVisible: Array.from(root.querySelectorAll('.npcink-toolbox__result-notice')).some((el) => !el.closest('details') && /still processing|仍在识别中/.test(el.textContent)),
+					handoffEnabled: root.querySelector('[data-toolbox-media-alt-caption-handoff]')?.disabled === false,
+					overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+				}));
+				assert(!state.handoffEnabled && !state.overflow, `${width}px ${scenario}: no unreviewed submission or horizontal overflow.`);
+				assert(state.failureVisible === ['partial', 'unavailable'].includes(scenario) && state.pendingVisible === (scenario === 'processing'), `${width}px ${scenario}: incomplete and failed recognition have distinct visible notices.`);
+				await form.locator('.npcink-toolbox__result').scrollIntoViewIfNeeded();
+				const caseScreenshot = screenshotPath.replace(/\.png$/, `-${width}-${scenario}.png`);
+				await captureViewportScreenshot(page, caseScreenshot);
+				visualCases.push({ width, scenario, ...state, screenshot: caseScreenshot });
+			}
+		}
+		assert(pageErrors.length === 0, 'Visual recognition browser cases have no page JavaScript errors.');
+		assert(forbiddenExecutionRequests(requests).length === 0, 'Visual failure checks introduce no execution, polling or media writes.');
+		writeFileSync(screenshotPath.replace(/\.png$/, '.json'), JSON.stringify({ fixtureOnly: true, visualCases, pageErrors }, null, 2));
 	} catch (error) {
 		await captureDiagnostics(page, requests, error);
 		throw error;

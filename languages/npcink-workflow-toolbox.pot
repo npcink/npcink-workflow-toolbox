@@ -1678,7 +1678,7 @@ msgid "Image ALT Review"
 msgstr ""
 
 #: includes/Admin_Page.php:1564
-msgid "Build a local review preview for missing or weak ALT text. Cloud visual evidence is optional."
+msgid "Generate missing or weak ALT drafts by looking at the images. Review each draft before submitting it."
 msgstr ""
 
 #: includes/Admin_Page.php:1566
@@ -2064,15 +2064,15 @@ msgid "This review is read-only: Toolbox never deletes, trashes, detaches, or re
 msgstr ""
 
 #: includes/Admin_Page.php:2197
-msgid "Local metadata review is available. Connect Cloud Addon only when optional visual evidence is needed."
+msgid "Connect Cloud Addon to recognize these images. Metadata alone cannot generate ALT drafts."
 msgstr ""
 
 #: includes/Admin_Page.php:2201
-msgid "Local review preview"
+msgid "Look at images to draft ALT"
 msgstr ""
 
 #: includes/Admin_Page.php:2202
-msgid "Toolbox prepares editable ALT drafts from available metadata and optional visual evidence. Confirmed missing ALT rows can be submitted to Core review; Toolbox does not approve, execute, or change media."
+msgid "Images are sent to Cloud for recognition; valid results for unchanged images can be reused. Review and edit the ALT before submitting it for approval."
 msgstr ""
 
 #: includes/Admin_Page.php:2205
@@ -10370,4 +10370,16 @@ msgid "Add the requested detail to your question above, then ask again."
 msgstr ""
 
 msgid "Please add a little more detail."
+msgstr ""
+
+msgid "Image recognition did not produce a usable ALT. Check the image and try again."
+msgstr ""
+
+msgid "Some images could not be recognized. No ALT was generated for them from metadata. Check Cloud and the image files, then try again."
+msgstr ""
+
+msgid "Image recognition is still processing. Try again later."
+msgstr ""
+
+msgid "Image recognition is still processing. No ALT draft is available for those images yet. Try again later."
 msgstr ""

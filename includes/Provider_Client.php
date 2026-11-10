@@ -508,6 +508,14 @@ final class Provider_Client extends Provider_Client_Support {
 		return $this->media_alt->build_media_alt_caption_review_set( $media_snapshot, $max_items, $image_context_evidence );
 	}
 
+
+	/**
+	 * Builds the backend review using current Cloud visual evidence only.
+	 */
+	public function build_visual_media_alt_caption_review_set( array $media_snapshot, int $max_items ): array {
+		return $this->media_alt->build_visual_media_alt_caption_review_set( $media_snapshot, $max_items );
+	}
+
 	/**
 	 * Delegates to the media ALT/caption service.
 	 */

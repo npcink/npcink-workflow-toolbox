@@ -6949,8 +6949,8 @@ msgstr "批量 ALT 审核"
 msgid "Review ALT Suggestions"
 msgstr "审核 ALT 建议"
 
-msgid "Build a local review preview for missing or weak ALT text. Cloud visual evidence is optional."
-msgstr "为缺失或薄弱的 ALT 文本生成本地审核预览。Cloud 视觉证据为可选项。"
+msgid "Generate missing or weak ALT drafts by looking at the images. Review each draft before submitting it."
+msgstr "识别图片内容，为缺失或薄弱的 ALT 生成草稿。逐张检查后再提交审核。"
 
 msgid "Build ALT review preview"
 msgstr "生成 ALT 审核预览"
@@ -6961,14 +6961,14 @@ msgstr "批量图片 ALT 审核"
 msgid "Inspect and edit ALT drafts locally. This stage does not submit or update media."
 msgstr "在本地检查并编辑 ALT 草稿。此阶段不会提交或更新媒体。"
 
-msgid "Local metadata review is available. Connect Cloud Addon only when optional visual evidence is needed."
-msgstr "本地元数据审核可直接使用。仅在需要可选视觉证据时连接 Cloud Addon。"
+msgid "Connect Cloud Addon to recognize these images. Metadata alone cannot generate ALT drafts."
+msgstr "请连接 Cloud Addon 以识别图片。仅凭元数据不会生成 ALT 草稿。"
 
-msgid "Local review preview"
-msgstr "本地审核预览"
+msgid "Look at images to draft ALT"
+msgstr "看图生成 ALT"
 
-msgid "Toolbox prepares editable ALT drafts from available metadata and optional visual evidence. Confirmed missing ALT rows can be submitted to Core review; Toolbox does not approve, execute, or change media."
-msgstr "Toolbox 根据现有元数据和可选视觉证据生成可编辑的 ALT 草稿。确认后的缺失 ALT 行可提交至 Core 审核；Toolbox 不会批准、执行或更改媒体。"
+msgid "Images are sent to Cloud for recognition; valid results for unchanged images can be reused. Review and edit the ALT before submitting it for approval."
+msgstr "图片将发送至 Cloud 识别；图片未变时可复用有效识图结果。检查并编辑 ALT 后，再提交审核。"
 
 msgid "Select images in Media Library"
 msgstr "在媒体库中选择图片"
@@ -10880,3 +10880,15 @@ msgstr "请在上方问题中补充所需信息，再次提问。"
 
 msgid "Please add a little more detail."
 msgstr "请补充一点具体信息。"
+
+msgid "Image recognition did not produce a usable ALT. Check the image and try again."
+msgstr "识图未能生成可用的 ALT，请检查图片后重试。"
+
+msgid "Some images could not be recognized. No ALT was generated for them from metadata. Check Cloud and the image files, then try again."
+msgstr "部分图片识别失败，未使用元数据代替生成 ALT。请检查 Cloud 和图片文件后重试。"
+
+msgid "Image recognition is still processing. Try again later."
+msgstr "图片仍在识别中，请稍后重试。"
+
+msgid "Image recognition is still processing. No ALT draft is available for those images yet. Try again later."
+msgstr "图片仍在识别中，暂未生成这些图片的 ALT 草稿，请稍后重试。"

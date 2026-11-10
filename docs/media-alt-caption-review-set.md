@@ -2,6 +2,35 @@
 
 Status: reviewed candidate set plus governed missing-ALT proposal handoff.
 
+## Backend visual-evidence requirement — 2026-11-10
+
+This operator-approved amendment supersedes the metadata-first backend defaults
+below. `/ai/site-helpers` with `media_alt_suggestions` now requires real visual
+evidence for every ALT draft, including images with rich titles/descriptions.
+The shared Toolkit builder and editor contextual-ALT contracts remain compatible;
+Toolbox applies this stricter backend presentation rule to their review artifact.
+
+- Reuse only evidence accepted by the existing current-file fingerprint/lineage
+  resolver. Otherwise call the existing Cloud Addon image-recognition helper,
+  bounded to the review limit (default 5, maximum 10), rather than the scan size.
+- Generate candidate text only from returned visual summary/scene/subjects.
+  Metadata identifies and contextualizes the source; it cannot become an
+  alternative candidate. Caller-supplied evidence cannot bypass recognition.
+- Preserve `media_alt_caption_review_set.v1`, suggestion-only posture, editable
+  drafts, visual confirmation and missing-only Core proposal handoff. No media
+  writes, proposal approval/execution, new route, model or scheduler.
+- The backend `source_policy` is `bounded_media_visual_evidence_required`.
+  `visual_review` reports `ready`, `partial`, `processing`, `unavailable` or `not_needed`, plus
+  requested/reused/recognized/unavailable/pending counts and an available Cloud `run_id`.
+- An unavailable image has no ALT/caption candidate. Partial results retain
+  successful rows and show the recognition failure above the result list.
+  Processing results retain the run id and show a wait/retry notice, without
+  claiming failure, adding polling, or exposing a metadata draft.
+  Metadata-only success and the optional hosted text-helper fallback no longer
+  serve this intent. The shared metadata builder remains for other consumers.
+
+Verification is tracked in [the admin amendment](admin-ia-site-and-ask-v1.md#后台-alt-看图生成--2026-11-10).
+
 ## Purpose
 
 The media ALT/caption review set turns the existing **AI Site Helpers -> Media

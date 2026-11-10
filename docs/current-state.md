@@ -7,6 +7,14 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-10.
 
+**Backend ALT visual requirement — 2026-11-10:** at the operator's request,
+backend ALT drafts require Cloud pixel evidence even when metadata is rich.
+The existing resolver reuses valid current-file evidence or recognizes only the
+bounded review selection. Failed images keep no metadata-only draft; partial
+success and recognition failures are visible. Shared Toolkit contracts, editor
+contextual ALT, permissions and missing-only governed proposals remain. See
+[scope and evidence](admin-ia-site-and-ask-v1.md#后台-alt-看图生成--2026-11-10).
+
 **Operator-first admin convergence — 2026-11-10:** the latest accepted direction
 moves profile, content-boundary and technical editing to support; removes optional
 profile/Cloud readiness from content findings; and uses a single natural-language
