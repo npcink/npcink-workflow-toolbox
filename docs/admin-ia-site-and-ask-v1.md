@@ -1,4 +1,4 @@
-# Toolbox Admin IA — 开始 / 站点与提问 / 图片处理（v1）
+# Toolbox Admin IA — 开始 / 站点与提问 / 图片审核与设置（v1）
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。智能提问 **行为**（pack 下拉 + REST）本阶段不变。
 
@@ -16,11 +16,11 @@
 │     ├── 智能提问（pack 选择器保留）
 │     └── 站点检查（折叠区；当前检查 / 定期巡检 L2）
 │           └── 更多扫描视图（L3，默认折叠；展开后显示结果维度 tab）
-└── 图片处理           toolbox_tab=tools
+└── 图片审核与设置           toolbox_tab=tools
       └── 工具组 / 工具（L2，不动）
 ```
 
-顶栏 **3** 个：开始 | 站点与提问 | 图片处理。不引入 Addon 式「连接 / 额度 / Checks」控制面入口。
+顶栏 **3** 个：开始 | 站点与提问 | 图片审核与设置。不引入 Addon 式「连接 / 额度 / Checks」控制面入口。
 
 ## 命名
 
@@ -28,7 +28,7 @@
 | --- | --- | --- |
 | 开始 | Start | `start` |
 | 站点与提问 | Site & Ask | `site-and-ask` |
-| 图片处理 | Image Handling | `tools` |
+| 图片审核与设置 | Image Review & Settings | `tools` |
 | 站点画像 | Site Profile | 面板内分区 |
 | 智能提问 | Smart Ask | 面板内分区 |
 | 站点检查 | Site Check | 面板内折叠区（不再是顶栏）；兼容查询 `toolbox_tab=operations-insights` → 落到 `site-and-ask` |
@@ -57,7 +57,7 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 | 标记媒体回顾 | `flagged_media_review` | 隐藏 |
 | 评论审核 / 分类标签 / 内链 三卡片 | `site_check_ops_review_cards` | 隐藏 |
 
-站点档案 SEO / AEO / GEO / Boundaries 深偏好继续收在站点简介下方的 `<details class="npcink-toolbox__context-advanced">`，主摘要文案为 **Advanced / 高级**（智能提问 packs 不变）。
+站点档案 SEO / AEO / GEO / Boundaries 深偏好继续收在站点简介下方的 `<details class="npcink-toolbox__context-advanced">`，专项暂停期间主摘要为 **Content boundaries / 内容边界**，仅显示现有主题和表述指引；恢复专项时仍使用 Advanced（智能提问 packs 不变）。
 
 ## 开始页清理与下一步卡片（2026-10-22）
 
@@ -93,3 +93,37 @@ UI-only；实现与文案保留，通过 `Settings::admin_ui_entry_hidden()` 不
 Checks 标签页。后台 ALT 预览与编辑器当前文章 ALT 应用的边界分别说明。
 
 会话遗留与旁路清单见 [admin-ia-open-todos-2026-10-23.md](admin-ia-open-todos-2026-10-23.md)（L3 折叠已关闭；其余为单框选包、生产 Cloud 部署决策、year-0020、英文 toast 移交、orphan runs、mid-sync 502）。
+
+## 后台设置维护 — 2026-11-10
+
+本次只修复后台巡检发现的展示问题。顶栏「图片审核与设置」和内部「水印与备份」
+明确现有范围，URL、选项名、权限和冻结开关保持不变。媒体详情不再指引已暂停的优化。
+
+站点检查状态区区分「可扫描」「扫描暂不可用」「当前快照已生成」；成功后仍以
+「去提问」为主动作，「重新扫描」为次动作。保留四包和公开内容问答，不调整选择逻辑。
+
+备份 30 天呈现为固定策略，只有清理方式可改，按钮明确为「保存清理方式」。
+水印的已保存状态改成静态文本；JS 初始化后仅在发生修改时显示保存/放弃操作，
+保存区和删除撤销区使用正常文档流，不覆盖模板或预览。无 JS 时仍保留表单保存按钮。
+选择 Logo 同样标记未保存，防止新的保存区隐藏规则遗漏此操作；撤销删除后同步隐藏过时的空列表提示。
+
+不调整 Site & Ask 的模块顺序，不恢复隐藏能力，不删除已有配置、备份、历史或恢复路径。
+
+### 本地验证与限制
+
+`magick-ai.local` 通过源码符号链接运行。中英文分别在 1440×900 和 390×844
+验证命名、固定保留策略、干净/已修改状态、仅预览、默认模板变更、放弃、新建、
+Logo 选择、删除/撤销和原 Settings API 表单提交字段；没有横向溢出、JS 错误或
+失败请求。`options.php` 提交在浏览器中拦截，没有持久修改设置；Logo 选择使用受控
+媒体选择结果，没有上传。现有五个提问选项、专项隐藏和旧优化 URL 回落均保留。
+临时登录/语言辅助文件清理。截图与结构化回执在 ignored `output/playwright/admin-maintenance-20261110/`，
+不是发布产物；人类视觉验收和生产发布仍单独进行。
+
+已有 Site Check browser smoke 通过本次状态/按钮断言后，在第 272 行要求本地
+一定产生内链健康问题而失败。使用 `origin/master` 的 Admin_Page 源码，跳过其
+已知旧状态断言后复现同一后续失败；不伪造站点内容来让它通过。相关记录见
+[Known Issues](known-issues.md)。完整确定性门禁与本次专项浏览器验证分开报告。
+
+确定性验证：`composer test:all`（4580 项静态契约及行为/JS/包门禁）、
+`composer validate --no-check-publish`、`composer check:wporg`、PHPStan 和配置内
+运行时 PHPCS 均通过。补充无 JavaScript 浏览器检查确认表单保存按钮仍然可用。
