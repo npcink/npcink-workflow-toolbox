@@ -146,6 +146,50 @@ historical writer uncertainty; it is separate from the verified data cleanup.
 No new model evaluation, manual run-state override or production deployment was
 performed. Editor adoption and final customer value acceptance remain separate.
 
+## Media withdrawal compensation completion (2026-11-11)
+
+This follow-up supersedes the pending-withdrawal state above. Addon
+[#348](https://github.com/npcink/npcink-cloud-addon/pull/348) merged as
+`dc0200128ea76545abccdb1c8056281b6d3c60bb`; all final-head CI checks passed.
+The Local site's existing symlink loads that merged tree. Cloud required no
+new deployment: M4 was accepted at `84d4bc55f1b4feb3cfeb5ec1cf1bcc990090400a`,
+which includes #1400.
+
+The original intent `215b6215-d227-4529-b64e-2212b969a17b` completed at
+poll 28. The exact 69-ID absence manifest was rechecked against Local SQL
+before each validation callback, and the driver refused any other runtime
+mutation. Compensation `run_f76007cad4a44365b58082f0ce4971ab` succeeded at
+2026-11-11 01:19:56 UTC with zero Provider calls. Fresh signed presence at
+01:20:32 UTC confirms all 69 absent and both current media retained; cleanup
+and scan errors are empty. No media suppression remains from this intent.
+
+Before/after SQL snapshots match in full: two media documents/chunks,
+2,060 non-media documents, 2,305 non-media chunks and all retained-row hashes.
+Local attachments remain 26 with the same inventory hash. The unrelated
+article-exclusion intent remains blocked at poll 121, unchanged.
+
+Of 55 old producers, 52 have verified terminal receipts; three failed runs
+retain **unverified exits**, separately from terminal witnesses. The
+`legacy_unknown` flag remains true. Read-only checks found no queued/running
+originals or linked descendants; M4 API/worker generations postdate the
+October run. These observations do not manufacture executor-exit proof.
+Current cleanup is complete; permanent exclusion is not claimed. A late write
+is subject to the existing hourly eventual repair. Mismatched receipts,
+transport failures and running writers still block advancement; explicit
+exclusion semantics were not relaxed.
+
+Local deterministic/PHPStan/WordPress.org/gettext gates, Playground and packaged
+Plugin Check passed. Regression fixtures cover late writes before confirmation,
+later hourly repair, mismatched site identity and persistent writes hitting
+the outer poll cap. Local DeepSeek review was triaged against the actual caller
+and immutable state; CI and installed acceptance are separate evidence.
+Production, customer value and the 24 current unindexed attachments remain
+unverified/out of scope.
+
+Evidence bundle: `media-withdrawal-20261111/`, alongside the earlier bundle
+listed below. It includes the merged PR rollup, source/package/review receipts,
+signed presence, compensation, SQL hashes and final operation state.
+
 ## Evidence location
 
 Local bundle:
