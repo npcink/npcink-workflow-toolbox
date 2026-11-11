@@ -40,31 +40,24 @@ and repeated research stay frozen under the decision's restart rules.
   assertions conditional on actual scan counts while retaining coverage.
   Do not change live site content or scanning rules to manufacture a result.
 
-- **Media withdrawal source fix and remaining historical writer confirmation (Addon / Cloud, development, 2026-11-10).**
-  Cloud [#1400](https://github.com/npcink/npcink-ai-cloud/pull/1400) and Addon
-  [#347](https://github.com/npcink/npcink-cloud-addon/pull/347) merged with all
-  final-head checks passing. Cloud clean master `9f7fe091` is M4 accepted.
-  WordPress now queues typed attachment withdrawal after successful deletion;
-  the existing hourly callback checks one bounded Cloud identity page against
-  exact local SQL attachment existence. Partial pages, read failures and disabled
-  consent fail closed; no routine operator cleanup selector was added.
-  After explicit operator authorization, the installed hourly callback discovered
-  and removed exactly the 69 confirmed absent media sources. Fresh signed
-  presence and SQL confirm two valid media remain; all 2,060 non-media records,
-  2,305 non-media chunks and both current media have unchanged row hashes.
-  Local attachments remain 26; no model call or production change was made.
-  **Remaining:** the withdrawal intent is still pending, not fully confirmed.
-  Of 55 known old producers, witness checking stops at a 2026-10-28 run marked
-  `runtime.operator_stale_running_failed`. That administrative failure is not
-  executor-completion evidence and must not be silently accepted or cleared.
-  Its result was purged; 17 earlier writers were positively confirmed when
-  acceptance stopped. Existing unknown-history and an unrelated blocked
-  article-exclusion intent remain intact. Keep the exact missing-media manifest,
-  visible cleanup error and typed suppression; a bounded historical-writer
-  disposition needs separate evidence. Do not relabel data removal as completed
-  compensation or permanent exclusion. Twenty-four current unindexed attachments,
-  editor adoption and production API/release acceptance stay outside this fix.
-  See [repair and evidence](maintenance-acceptance-2026-11-10.md#media-source-repair-and-historical-writer-limit).
+- **Media withdrawal compensation completed (Addon / Cloud, development, 2026-11-11).**
+  Cloud [#1400](https://github.com/npcink/npcink-ai-cloud/pull/1400), Addon
+  [#347](https://github.com/npcink/npcink-cloud-addon/pull/347) and
+  [#348](https://github.com/npcink/npcink-cloud-addon/pull/348) are merged.
+  The installed Addon now completes automatic missing-media repair while
+  retaining matching failed writers separately from verified executor exits.
+  The original 69-item intent is completed; its compensation run succeeded
+  with zero Provider calls and the cleanup error is empty. Fresh signed presence
+  and SQL confirm only two current media remain. All retained-media and
+  non-media row hashes and the 26 local attachments are unchanged.
+  **Remaining limitation:** 52 old writers have verified completion; three
+  failed runs retain unverified exits and legacy history stays unknown.
+  This confirms current cleanup, not permanent exclusion or proof that every
+  historical executor ended. A later write is repaired by the existing hourly
+  scan. The unrelated blocked article exclusion remains intact. Twenty-four
+  current unindexed attachments, editor adoption and production acceptance
+  remain outside this repair.
+  See [completion evidence](maintenance-acceptance-2026-11-10.md#media-withdrawal-compensation-completion-2026-11-11).
 
 - **Editor-loop maintenance and frozen recommendation follow-up (Toolbox, 2026-11-09).**
   Follow the [maintenance sequence](roadmap.md#current-delivery-order--2026-11-09).
