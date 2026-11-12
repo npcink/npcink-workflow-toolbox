@@ -15,7 +15,7 @@ class Node {
  querySelector(s) { return this.nodes[s]; }
 }
 const root = new Node();
-const parts = ['submit','stop','question','status','result','answer','run-id','meta','basis','sources','completeness'];
+const parts = ['submit','stop','stop-note','question','status','result','answer','run-id','meta','basis','sources','completeness'];
 root.nodes = Object.fromEntries(parts.map(p => [`[data-toolbox-smart-ask-${p}]`, new Node()]));
 const node = p => root.nodes[`[data-toolbox-smart-ask-${p}]`];
 node('sources').nodes = { ol: new Node('ol') };
@@ -61,6 +61,7 @@ await node('submit').handlers.click();
 assert.equal(node('sources').hidden, true); assert.equal(node('sources').nodes.ol.children.length, 0);
 assert.equal(node('answer').textContent, ''); assert.equal(node('run-id').textContent, 'run_failed');
 assert.equal(node('submit').disabled, false);
+assert.equal(node('stop-note').hidden, true, 'Stop guidance is absent after a failed request.');
 reply = new Error('Normalized Cloud failure'); reply.data = {diagnostic:{run_id:'run_diagnostic'},status:502};
 await node('submit').handlers.click();
 assert.equal(node('run-id').textContent, 'run_diagnostic', 'Normalized Toolbox errors retain the Cloud correlation ID in support details.');
@@ -73,6 +74,7 @@ assert.equal(timers.size, 0, 'Success and failure clear the request deadline.');
 pending = true;
 const waiting = node('submit').handlers.click();
 assert.equal(node('stop').hidden, false);
+assert.equal(node('stop-note').hidden, false, 'Stop guidance appears only while waiting.');
 assert.equal(node('question').disabled, true);
 const callsBeforeDuplicate = transportCalls;
 await node('submit').handlers.click();
@@ -82,6 +84,7 @@ await waiting;
 assert.equal(lastSignal.aborted, true);
 assert.match(node('status').textContent, /Stopped waiting.*Cloud may still be processing/);
 assert.equal(node('stop').hidden, true);
+assert.equal(node('stop-note').hidden, true, 'Stop guidance leaves with the stop control.');
 assert.equal(node('submit').disabled, false);
 assert.equal(node('question').disabled, false);
 assert.equal(root.nodes['[data-toolbox-smart-ask-pack]'], undefined, 'No data-package selector is required.');
@@ -97,6 +100,7 @@ assert.match(node('status').textContent, /took too long.*Cloud may still be proc
 assert.equal(node('submit').disabled, false);
 assert.equal(timers.size, 0);
 pending = false;
+assert.equal(node('stop-note').hidden, true, 'Timeout also clears stop guidance.');
 
 reply = {ok:true, answer:'Fresh summary', run_id:'run_fresh', answer_basis:'site_summary'};
 await node('submit').handlers.click();
