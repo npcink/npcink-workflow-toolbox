@@ -970,5 +970,6 @@ Smart Ask may select public site content through the registered, administrator-o
 `npcink-toolbox/answer-site-content` ability through Cloud Addon. Answers include
 verified source references; see [contract and acceptance](docs/site-content-answer-v1.md).
 
-Single-image save-as-new uses read-only `/processed-image-preview` and the existing
-Adapter/Core proposal path; see [the contract](docs/processed-image-save-as-new-v1.md).
+Single-image processing defaults to save-as-new, with an unchecked replace-original
+option. Both use read-only `/processed-image-preview` and the existing Adapter/Core
+proposal path; Toolkit owns every write and replacement backup; see [the contract](docs/processed-image-save-as-new-v1.md).

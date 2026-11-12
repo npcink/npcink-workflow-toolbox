@@ -10603,3 +10603,33 @@ msgstr ""
 #: assets/admin.js
 msgid "This result is not smaller than the original. Saving it will not reduce the image file size."
 msgstr ""
+
+msgid "Preview the result, then request approval to save a new image or replace the selected image."
+msgstr ""
+
+msgid "Replace the original with the processed image"
+msgstr ""
+
+msgid "Save as a new Media Library image; keep the original and article references unchanged."
+msgstr ""
+
+msgid "New images and replacement backups take storage space. Unsaved Cloud previews expire automatically."
+msgstr ""
+
+msgid "Request replacement"
+msgstr ""
+
+msgid "After approval, replace this Media Library image and back up the original. Other uses of this image are affected. Recognized article image URLs are repaired; external URLs and theme settings need separate review."
+msgstr ""
+
+msgid "Submitting the image replacement request..."
+msgstr ""
+
+msgid "Replace image with reviewed result"
+msgstr ""
+
+msgid "Replace the selected attachment, back up the original and repair recognized article image URLs. Review all affected uses before approval."
+msgstr ""
+
+msgid "Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires."
+msgstr ""

@@ -7,11 +7,20 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+**Optional reviewed replacement — 2026-11-12:** the operator authorized an unchecked
+“Replace the original with the processed image” checkbox on both single-image tasks.
+Default remains save as new. The checked option reuses the reviewed Cloud result
+and existing Adapter/Core/Toolkit adoption, preserves the attachment ID and backs
+up the original. Source fingerprint drift fails closed. Other uses are affected;
+recognized article URLs are repaired, external/theme references need review.
+Backups still occupy storage. This does not restore legacy replacement routes or
+batch execution. See [the contract](processed-image-save-as-new-v1.md).
+
 **Single-image save as new — 2026-11-12:** the operator authorized the bounded
 [core flow](processed-image-save-as-new-v1.md): Cloud preview, compare, explicit
 Adapter/Core save request, Toolkit new attachment. Source bytes/metadata and article
 references stay unchanged. This supersedes the paused single-image presentation
-below; legacy batch/replacement paths remain paused. Verification is recorded in
+below; legacy Toolbox batch/replacement routes remain paused. Verification is recorded in
 the contract and must distinguish deterministic, installed and live Cloud evidence.
 
 **Image task hierarchy — 2026-11-12:** Image Processing now separates compression

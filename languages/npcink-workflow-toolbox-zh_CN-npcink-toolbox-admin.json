@@ -1116,14 +1116,24 @@
       "The preview is unavailable or no longer matches this image. Generate it again.": ["预览不可用或已与当前图片不符，请重新生成。"],
       "The processed preview could not be displayed.": ["无法显示处理后的预览图。"],
       "Saving adds this file plus WordPress thumbnails; the original stays.": ["保存后会新增此文件及 WordPress 缩略图，原图继续保留。"],
-      "Compare both images. Request saving only if the result is suitable.": ["请对比两张图片，满意后再申请保存新图。"],
+      "Compare both images. Request saving only if the result is suitable.": ["请对比两张图片，满意后再申请保存。"],
       "This preview expired. Generate a new preview before saving.": ["预览已过期，请重新生成后再保存。"],
       "Submitting the new media save request...": ["正在提交新图保存申请……"],
       "Save processed image as new media": ["将处理结果另存为媒体库新图"],
       "Create a new attachment from the reviewed result. Preserve the original and all article references.": ["将已审阅的结果保存为新附件，保留原图及所有文章引用。"],
       "The save request did not return a review reference.": ["保存申请未返回审批编号。"],
       "Save request submitted. The new image has not been added to the Media Library yet. Continue in Core review before the preview expires.": ["保存申请已提交，新图尚未进入媒体库。请在预览过期前前往审批页面完成后续操作。"],
-      "This result is not smaller than the original. Saving it will not reduce the image file size.": ["本次结果并不比原图小，保存它不能减小图片文件体积。"]
+      "This result is not smaller than the original. Saving it will not reduce the image file size.": ["本次结果并不比原图小，保存它不能减小图片文件体积。"],
+      "Preview the result, then request approval to save a new image or replace the selected image.": ["预览处理结果，再申请另存为新图片或替换所选图片。"],
+      "Replace the original with the processed image": ["用处理后的图片替换原图"],
+      "Save as a new Media Library image; keep the original and article references unchanged.": ["另存为媒体库中的新图片，原图和文章引用保持不变。"],
+      "New images and replacement backups take storage space. Unsaved Cloud previews expire automatically.": ["新图片和替换备份都会占用存储空间。未保存的云端预览到期自动清理。"],
+      "Request replacement": ["申请替换原图"],
+      "After approval, replace this Media Library image and back up the original. Other uses of this image are affected. Recognized article image URLs are repaired; external URLs and theme settings need separate review.": ["审批后替换同一媒体库图片，并保留原图备份。其他引用该图片的位置也会受影响。已识别的文章图片地址会同步修复；外部地址和主题设置需另行检查。"],
+      "Submitting the image replacement request...": ["正在提交原图替换申请……"],
+      "Replace image with reviewed result": ["用已审阅的结果替换图片"],
+      "Replace the selected attachment, back up the original and repair recognized article image URLs. Review all affected uses before approval.": ["替换所选媒体附件、备份原图并修复已识别的文章图片地址。请在审批前核对所有受影响的使用位置。"],
+      "Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires.": ["替换申请已提交，审批前原图保持不变。请在预览到期前进入 Core 审核。"]
     }
   }
 }

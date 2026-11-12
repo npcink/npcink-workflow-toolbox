@@ -3,7 +3,18 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
-## Single-image save-as-new amendment — 2026-11-12 (latest)
+## Optional single-image replacement amendment — 2026-11-12 (latest)
+
+The operator subsequently authorized a default-unchecked replacement checkbox in
+both single-image tasks. It reuses the same reviewed preview and submits the
+existing `adopt-cloud-media-derivative` ability through Adapter/Core; Toolkit owns
+replacement, original backup, recognized article URL repairs and recovery. Source
+fingerprint binding rejects stale review. No direct Toolbox execution, legacy
+route restoration, batch, source deletion, new Cloud runtime or storage manager.
+The default remains save as new; visible copy explains other affected uses and
+backup storage. See [the contract](processed-image-save-as-new-v1.md).
+
+## Single-image save-as-new amendment — 2026-11-12
 
 The operator explicitly resumed one image core flow: select an existing image,
 compress/convert or watermark in Cloud, compare, then submit an explicit save-as-new
