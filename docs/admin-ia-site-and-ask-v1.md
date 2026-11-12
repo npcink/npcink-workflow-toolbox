@@ -1,8 +1,41 @@
-# Toolbox Admin IA — 开始 / 站点与提问 / 图片设置（v1）
+# Toolbox Admin IA — 开始 / 站点与提问 / 图片处理（v1）
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。当前展示规则以下方最新覆盖决议为准。
 
-## Backend ALT UI retirement — 2026-11-12 (latest)
+## Image task hierarchy — 2026-11-12 (latest)
+
+The operator approved Image Processing with two peer tasks: Image compression
+and Add watermark. Format conversion belongs only to compression. Selection is
+an action step, not a navigation level. Backup cleanup is shared, collapsed
+settings, not a peer task. The legacy `media-batch-optimize` id now opens the
+compression view; `image-settings` opens watermark templates. Default, retired
+ALT and unknown URLs open compression. Neither URL re-enables the advanced-media
+runtime: compression shows a pause state before rendering execution controls or
+reading recovery state; applying watermarks stays paused, while existing default
+template selection, local preview and template editing remain available. Template
+management is collapsed; the default selection and small preview stay visible.
+Native task links also work without JavaScript. Existing Settings API saves,
+permissions, backup records/policies, REST/ability contracts, editor ALT and all
+runtime pauses remain. This does not add a standalone watermark writer or restore
+retired single-image replacement. Future runtime restoration and new output-format
+controls require a separate reviewed change; no inactive controls imply they work.
+Earlier same-day navigation descriptions below are historical.
+
+### 本次界面维护验证
+
+- `composer test:all`（4,615 条静态契约及既有行为/边界门禁）、Composer 元数据、
+  WordPress.org 源码规则、PHPCS、PHPStan 通过；未改写入权限和运行暂停策略。
+- 安装态 `magick-ai.local` 验证两项平级入口、模板选择/本地预览、折叠管理和
+  共用备份设置、切换保留未保存模板选择、旧地址回退、无 JS 导航与折叠。
+  1440/390px 的压缩、水印及展开模板界面均无横向溢出；最终检查无 JS 错误，
+  未发出图片处理、ALT 或提案请求，未保存测试设置或修改媒体。
+- 首轮一次出现 WordPress 媒体页 `ClipboardJS is not defined`；诊断复跑及最终
+  浏览器检查未复现。Toolbox 源码不引用该全局，未据此更改 WordPress 核心或屏蔽错误。
+- 发布构建及最终 ZIP 的 runtime-only inventory 通过（118 个文件），中文 MO
+  通过 `msgfmt --check` 并在安装态显示。截图不是图片压缩或加水印的执行验收，
+  不证明生产部署或恢复已暂停功能。
+
+## Backend ALT UI retirement — 2026-11-12
 
 The operator approved removing backend ALT as a product surface, superseding
 this day's earlier contextual Media Library entry decision. Remove the ALT
@@ -106,16 +139,18 @@ WordPress.org 源码规则、PHPCS、PHPStan 通过。发布构建和最终 ZIP 
 ```text
 流程工具箱（Npcink AI → 流程工具箱）
 ├── 开始              toolbox_tab=start
-│     ├── 去提问 / 图片设置
+│     ├── 去提问 / 图片处理
 │     └── 支持详情（默认折叠）：画像偏好 / 站点检查 / 巡检预览 / Site Health
 ├── 站点与提问         toolbox_tab=site-and-ask
 │     ├── 智能提问（单个自然语言问题，按需准备既有资料）
 │     └── 显式支持或兼容地址才显示：画像偏好 / 手动检查 / 巡检预览
-└── 图片设置           toolbox_tab=tools
-      └── 水印模板与原图备份清理（旧 ALT 地址回到此处）
+└── 图片处理           toolbox_tab=tools
+      ├── 图片压缩（格式转换属于此任务；运行暂停）
+      ├── 添加水印（应用暂停；模板选择、预览与编辑可用）
+      └── 共用备份设置（默认折叠）
 ```
 
-顶栏 **3** 个：开始 | 站点与提问 | 图片设置。不引入 Addon 式「连接 / 额度 / Checks」控制面入口。
+顶栏 **3** 个：开始 | 站点与提问 | 图片处理。不引入 Addon 式「连接 / 额度 / Checks」控制面入口。
 
 ## 命名
 

@@ -10458,3 +10458,75 @@ msgstr ""
 #: includes/Admin_Page.php
 msgid "Try your first question"
 msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Image Processing"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Image processing"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Open Image Processing"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Ask about your site or work with images. AI suggestions require human review."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Compress images or add a watermark. Backup settings are shared."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Image compression"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Add watermark"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Choose a watermark template and preview its appearance."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Choose a template and preview it."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Reduce image file size. Format conversion belongs to compression."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Backup settings"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Keep until manually cleaned up"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Backups become eligible for cleanup after 30 days. Manual mode keeps them until you explicitly clean them up. Automatic mode applies only to new backups; existing records and current images are unchanged."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Image compression and format conversion are paused. No images will be processed."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Choose a default template and preview it. Editing templates does not change images."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Applying watermarks is paused. You can still preview and save templates."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Manage templates"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Local preview only. Saved images are unchanged."
+msgstr ""

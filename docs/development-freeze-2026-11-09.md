@@ -3,7 +3,26 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
-## Backend ALT UI retirement — 2026-11-12 (latest)
+## Image task hierarchy — 2026-11-12 (latest)
+
+The operator approved Image Processing with two peer tasks: Image compression
+and Add watermark. Format conversion belongs only to compression. Selection is
+an action step, not a navigation level. Backup cleanup is shared, collapsed
+settings, not a peer task. The legacy `media-batch-optimize` id now opens the
+compression view; `image-settings` opens watermark templates. Default, retired
+ALT and unknown URLs open compression. Neither URL re-enables the advanced-media
+runtime: compression shows a pause state before rendering execution controls or
+reading recovery state; applying watermarks stays paused, while existing default
+template selection, local preview and template editing remain available. Template
+management is collapsed; the default selection and small preview stay visible.
+Native task links also work without JavaScript. Existing Settings API saves,
+permissions, backup records/policies, REST/ability contracts, editor ALT and all
+runtime pauses remain. This does not add a standalone watermark writer or restore
+retired single-image replacement. Future runtime restoration and new output-format
+controls require a separate reviewed change; no inactive controls imply they work.
+Earlier same-day navigation descriptions below are historical.
+
+## Backend ALT UI retirement — 2026-11-12
 
 The operator approved removing backend ALT as a product surface, superseding
 this day's earlier contextual Media Library entry decision. Remove the ALT

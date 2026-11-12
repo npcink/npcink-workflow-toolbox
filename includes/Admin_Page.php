@@ -496,7 +496,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
-			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Ask about your site or manage image settings. AI suggestions require human review.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Ask about your site or work with images. AI suggestions require human review.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php
 			if ( ! $cloud_ready ) {
 				$this->render_cloud_runtime_notice();
@@ -509,7 +509,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<nav class="npcink-ai-tabs npcink-toolbox__tabs" data-toolbox-tabs aria-label="<?php esc_attr_e( 'Toolbox sections', 'npcink-workflow-toolbox' ); ?>">
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'site-and-ask' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="site-and-ask" aria-selected="<?php echo 'site-and-ask' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'site-and-ask' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Settings', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Processing', 'npcink-workflow-toolbox' ); ?></button>
 			</nav>
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="start" aria-label="<?php esc_attr_e( 'Toolbox start', 'npcink-workflow-toolbox' ); ?>"<?php echo 'start' === $active_tab ? '' : ' hidden'; ?>>
@@ -532,7 +532,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php endif; ?>
 			</section>
 
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="tools" aria-label="<?php esc_attr_e( 'Image Settings', 'npcink-workflow-toolbox' ); ?>"<?php echo 'tools' === $active_tab ? '' : ' hidden'; ?>>
+			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="tools" aria-label="<?php esc_attr_e( 'Image Processing', 'npcink-workflow-toolbox' ); ?>"<?php echo 'tools' === $active_tab ? '' : ' hidden'; ?>>
 				<?php $this->render_tool_cards( $cloud_ready, 'image' ); ?>
 			</section>
 
@@ -686,9 +686,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			'media-batch-optimize' => true,
 			'image-settings'       => true,
 		);
-		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
-			unset( $allowed['media-batch-optimize'] ); }
-		return isset( $allowed[ $requested ] ) ? $requested : 'image-settings';
+		return isset( $allowed[ $requested ] ) ? $requested : 'media-batch-optimize';
 	}
 
 	private function render_start_panel( array $content_context, bool $cloud_ready ): void {
@@ -718,9 +716,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			),
 			array(
 				'id'     => 'images',
-				'title'  => __( 'Image settings', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Manage watermark templates and original-image backups.', 'npcink-workflow-toolbox' ),
-				'action' => __( 'Open Image Settings', 'npcink-workflow-toolbox' ),
+				'title'  => __( 'Image processing', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Compress images or add a watermark. Backup settings are shared.', 'npcink-workflow-toolbox' ),
+				'action' => __( 'Open Image Processing', 'npcink-workflow-toolbox' ),
 				'tab'    => 'tools',
 			),
 		);
@@ -1688,11 +1686,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$tools          = array(
 			array(
 				'surface'     => 'image',
-				'group'       => __( 'Media', 'npcink-workflow-toolbox' ),
+				'group'       => __( 'Image compression', 'npcink-workflow-toolbox' ),
 				'group_id'    => 'media',
 				'id'          => 'media-batch-optimize',
 				'endpoint'    => 'media-derivative-handoff',
-				'title'       => __( 'Media Library Optimization', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Image compression', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Choose a range, check the expected results, then confirm once to optimize. Backups remain available for restore.', 'npcink-workflow-toolbox' ),
 				'custom'      => 'media_derivative_batch',
 			),
@@ -1710,12 +1708,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			),
 			array(
 				'surface'     => 'image',
-				'group'       => __( 'Watermark & Backups', 'npcink-workflow-toolbox' ),
+				'group'       => __( 'Add watermark', 'npcink-workflow-toolbox' ),
 				'group_id'    => 'image-settings',
 				'id'          => 'image-settings',
 				'endpoint'    => '',
-				'title'       => __( 'Watermark & Backups', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Manage watermark templates and original-image backup retention.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Add watermark', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Choose a watermark template and preview its appearance.', 'npcink-workflow-toolbox' ),
 				'custom'      => 'image_settings',
 			),
 		);
@@ -1724,8 +1722,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			array_filter(
 				$tools,
 				static function ( array $tool ) use ( $surface ): bool {
-					if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'media-batch-optimize' === (string) $tool['id'] ) {
-						return false; }
 					if ( Settings::admin_ui_entry_hidden( 'flagged_media_review' ) && 'flagged-media-review' === (string) $tool['id'] ) {
 						return false;
 					}
@@ -1753,16 +1749,16 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 		$tool_groups  = array(
 			'media'                => array(
-				'title'       => __( 'Media Library Optimization', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Choose a range, check the expected results, then confirm once to optimize. Restore from history when needed.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Image compression', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Reduce image file size. Format conversion belongs to compression.', 'npcink-workflow-toolbox' ),
 			),
 			'image-flagged-review' => array(
 				'title'       => __( 'Flagged Media', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Review Cloud content-safety flags for recent images. Read-only.', 'npcink-workflow-toolbox' ),
 			),
 			'image-settings'       => array(
-				'title'       => __( 'Watermark & Backups', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Watermark templates and backup retention.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Add watermark', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Choose a template and preview it.', 'npcink-workflow-toolbox' ),
 			),
 		);
 		$group_counts = array();
@@ -1775,10 +1771,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		}
 
 		$surface_header = array(
-			'title'             => __( 'Image Settings', 'npcink-workflow-toolbox' ),
-			'description'       => __( 'Manage watermark templates and original-image backups.', 'npcink-workflow-toolbox' ),
-			'scope_title'       => __( 'Image settings', 'npcink-workflow-toolbox' ),
-			'scope_description' => __( 'Manage watermark templates and original-image backups.', 'npcink-workflow-toolbox' ),
+			'title'             => __( 'Image Processing', 'npcink-workflow-toolbox' ),
+			'description'       => __( 'Compress images or add a watermark. Backup settings are shared.', 'npcink-workflow-toolbox' ),
+			'scope_title'       => __( 'Image processing', 'npcink-workflow-toolbox' ),
+			'scope_description' => __( 'Compress images or add a watermark. Backup settings are shared.', 'npcink-workflow-toolbox' ),
 		);
 		?>
 		<div class="npcink-toolbox__panel-header npcink-toolbox__panel-header--compact" aria-label="<?php echo esc_attr( (string) $surface_header['title'] ); ?>">
@@ -1806,10 +1802,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						$group_classes[] = 'is-secondary';
 					}
 					?>
-					<button type="button" class="<?php echo esc_attr( implode( ' ', $group_classes ) ); ?>" data-toolbox-tool-group-target="<?php echo esc_attr( $group_id ); ?>" aria-selected="<?php echo $active_group_id === $group_id ? 'true' : 'false'; ?>">
+					<a href="<?php echo esc_url( $this->image_batch_tool_url( (string) $tool['id'] ) ); ?>" class="<?php echo esc_attr( implode( ' ', $group_classes ) ); ?>" data-toolbox-tool-group-target="<?php echo esc_attr( $group_id ); ?>" aria-selected="<?php echo $active_group_id === $group_id ? 'true' : 'false'; ?>">
 						<span><?php echo esc_html( (string) $group_meta['title'] ); ?></span>
 						<small><?php echo esc_html( (string) $group_meta['description'] ); ?></small>
-					</button>
+					</a>
 				<?php endforeach; ?>
 			</div>
 
@@ -1909,30 +1905,21 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				}
 				?>
 			</div>
+			<?php $this->render_image_backup_settings(); ?>
 		</div>
 		<?php
 	}
 
 	private function render_image_settings_panel( string $tool_id, bool $active = false ): void {
+		$this->render_watermark_template_library( $tool_id, $active );
+	}
+
+	private function render_image_backup_settings(): void {
 		?>
-		<div class="npcink-toolbox__image-settings" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" <?php echo $active ? '' : 'hidden'; ?>>
-			<div class="npcink-toolbox__panel-header">
-				<h2><?php esc_html_e( 'Watermark & Backups', 'npcink-workflow-toolbox' ); ?></h2>
-				<p><?php esc_html_e( 'Manage backup cleanup. Expand watermark settings when needed.', 'npcink-workflow-toolbox' ); ?></p>
-			</div>
-		<?php
-		$this->render_media_backup_retention_settings();
-		?>
-			<details class="npcink-toolbox__start-advanced" data-toolbox-watermark-settings>
-				<summary>
-					<span><?php esc_html_e( 'Watermark Templates', 'npcink-workflow-toolbox' ); ?></span>
-					<?php if ( Settings::cloud_feature_paused( 'advanced_media' ) ) : ?>
-						<small><?php esc_html_e( 'Media optimization is paused. Saved templates remain available to edit.', 'npcink-workflow-toolbox' ); ?></small>
-					<?php endif; ?>
-				</summary>
-				<?php $this->render_watermark_template_library( '', true ); ?>
-			</details>
-		</div>
+		<details class="npcink-toolbox__image-backup-settings" data-toolbox-image-backup-settings>
+			<summary><?php esc_html_e( 'Backup settings', 'npcink-workflow-toolbox' ); ?></summary>
+			<?php $this->render_media_backup_retention_settings(); ?>
+		</details>
 		<?php
 	}
 
@@ -1944,16 +1931,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php settings_fields( 'npcink_toolbox_media_optimization' ); ?>
 				<div class="npcink-toolbox__section-heading">
 					<div>
-						<h3><?php esc_html_e( 'Original image backup retention', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php esc_html_e( 'Backups are retained for 30 days. Choose whether cleanup requires your confirmation or runs automatically for backups created after this setting is enabled. The current Media Library image is never removed.', 'npcink-workflow-toolbox' ); ?></p>
+						<h3><?php esc_html_e( 'Expired backup cleanup', 'npcink-workflow-toolbox' ); ?></h3>
+						<p><?php esc_html_e( 'Backups become eligible for cleanup after 30 days. Manual mode keeps them until you explicitly clean them up. Automatic mode applies only to new backups; existing records and current images are unchanged.', 'npcink-workflow-toolbox' ); ?></p>
 					</div>
 				</div>
 				<div class="npcink-toolbox__retention-control">
-				<p class="description"><?php esc_html_e( 'Backups kept for 30 days (fixed policy).', 'npcink-workflow-toolbox' ); ?></p>
 				<label>
 					<span><?php esc_html_e( 'Expired backup cleanup', 'npcink-workflow-toolbox' ); ?></span>
 					<select name="<?php echo esc_attr( Plugin::MEDIA_OPTION_NAME ); ?>[backup_cleanup_mode]">
-						<option value="manual" <?php selected( 'manual', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Ask me before cleanup', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="manual" <?php selected( 'manual', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Keep until manually cleaned up', 'npcink-workflow-toolbox' ); ?></option>
 						<option value="automatic" <?php selected( 'automatic', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Clean up automatically', 'npcink-workflow-toolbox' ); ?></option>
 					</select>
 				</label>
@@ -2048,12 +2034,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<?php settings_fields( 'npcink_toolbox_watermark_templates' ); ?>
 			<div class="npcink-toolbox__watermark-library-heading">
 				<div>
-					<h2><?php esc_html_e( 'Watermark Templates', 'npcink-workflow-toolbox' ); ?></h2>
-					<p><?php esc_html_e( 'Keep reusable watermarks here. Image tools only choose a template and preview the result.', 'npcink-workflow-toolbox' ); ?></p>
+					<h2><?php esc_html_e( 'Add watermark', 'npcink-workflow-toolbox' ); ?></h2>
+					<p><?php esc_html_e( 'Choose a default template and preview it. Editing templates does not change images.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
-				<button type="button" class="button" data-toolbox-add-watermark-template <?php disabled( count( $custom_templates ) >= 20 ); ?>><?php esc_html_e( 'Add template', 'npcink-workflow-toolbox' ); ?></button>
 			</div>
 
+			<?php if ( Settings::cloud_feature_paused( 'advanced_media' ) ) : ?>
+				<p class="description" data-toolbox-watermark-paused><?php esc_html_e( 'Applying watermarks is paused. You can still preview and save templates.', 'npcink-workflow-toolbox' ); ?></p>
+			<?php endif; ?>
 			<div class="npcink-toolbox__watermark-library-summary">
 				<label>
 					<span><?php esc_html_e( 'Default template', 'npcink-workflow-toolbox' ); ?></span>
@@ -2071,7 +2059,20 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</div>
 
 			<div class="npcink-toolbox__watermark-library-workspace">
-				<div class="npcink-toolbox__watermark-library-list">
+				<aside class="npcink-toolbox__watermark-library-preview">
+					<div class="npcink-toolbox__watermark-preview-heading">
+						<div><h3><?php esc_html_e( 'Effect preview', 'npcink-workflow-toolbox' ); ?></h3><p><?php esc_html_e( 'Local preview only. Saved images are unchanged.', 'npcink-workflow-toolbox' ); ?></p></div>
+						<button type="button" class="button button-small" data-toolbox-watermark-preview-image><?php esc_html_e( 'Choose preview image', 'npcink-workflow-toolbox' ); ?></button>
+					</div>
+					<div class="npcink-toolbox__watermark-preview-frame" data-toolbox-watermark-library-preview>
+						<img alt="" data-toolbox-watermark-preview-image-element hidden />
+						<span class="npcink-toolbox__watermark-effect" data-toolbox-watermark-library-effect></span>
+					</div>
+					<p class="description" data-toolbox-watermark-preview-name><?php esc_html_e( 'Select or edit a template to preview it.', 'npcink-workflow-toolbox' ); ?></p>
+				</aside>
+				<details class="npcink-toolbox__watermark-library-list" data-toolbox-watermark-settings>
+					<summary><?php esc_html_e( 'Manage templates', 'npcink-workflow-toolbox' ); ?></summary>
+					<button type="button" class="button" data-toolbox-add-watermark-template <?php disabled( count( $custom_templates ) >= 20 ); ?>><?php esc_html_e( 'Add template', 'npcink-workflow-toolbox' ); ?></button>
 					<section>
 						<h3><?php esc_html_e( 'Built-in presets', 'npcink-workflow-toolbox' ); ?></h3>
 						<p class="description"><?php esc_html_e( 'Built-in presets cannot be edited. Copy one to create your own version.', 'npcink-workflow-toolbox' ); ?></p>
@@ -2095,19 +2096,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						</div>
 						<p class="npcink-toolbox__watermark-library-empty" data-toolbox-watermark-template-empty <?php echo $custom_templates ? 'hidden' : ''; ?>><?php esc_html_e( 'No custom templates yet. Copy a preset or add a blank template.', 'npcink-workflow-toolbox' ); ?></p>
 					</section>
-				</div>
+				</details>
 
-				<aside class="npcink-toolbox__watermark-library-preview">
-					<div class="npcink-toolbox__watermark-preview-heading">
-						<div><h3><?php esc_html_e( 'Effect preview', 'npcink-workflow-toolbox' ); ?></h3><p><?php esc_html_e( 'Guidance only. The exact Cloud result still requires visual confirmation.', 'npcink-workflow-toolbox' ); ?></p></div>
-						<button type="button" class="button button-small" data-toolbox-watermark-preview-image><?php esc_html_e( 'Choose preview image', 'npcink-workflow-toolbox' ); ?></button>
-					</div>
-					<div class="npcink-toolbox__watermark-preview-frame" data-toolbox-watermark-library-preview>
-						<img alt="" data-toolbox-watermark-preview-image-element hidden />
-						<span class="npcink-toolbox__watermark-effect" data-toolbox-watermark-library-effect></span>
-					</div>
-					<p class="description" data-toolbox-watermark-preview-name><?php esc_html_e( 'Select or edit a template to preview it.', 'npcink-workflow-toolbox' ); ?></p>
-				</aside>
 			</div>
 
 			<template data-toolbox-watermark-template-prototype><?php $this->render_watermark_template_editor( array(), 0 ); ?></template>
@@ -2684,6 +2674,17 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	private function render_media_derivative_batch_tool( string $endpoint, string $title, string $description, string $tool_id, bool $active = false, bool $cloud_ready = true ): void {
+		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
+			?>
+			<section class="npcink-toolbox__card" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-image-compression-paused <?php echo $active ? '' : 'hidden'; ?>>
+				<h2><?php esc_html_e( 'Image compression', 'npcink-workflow-toolbox' ); ?></h2>
+				<p><?php esc_html_e( 'Reduce image file size. Format conversion belongs to compression.', 'npcink-workflow-toolbox' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Image compression and format conversion are paused. No images will be processed.', 'npcink-workflow-toolbox' ); ?></p>
+			</section>
+			<?php
+			return;
+		}
+
 		$toolbox_policy = $this->get_media_derivative_toolbox_policy();
 		if ( $active ) {
 			$this->render_media_recognition_recovery();

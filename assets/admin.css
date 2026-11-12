@@ -1936,6 +1936,7 @@
 	font: inherit;
 	line-height: 1.3;
 	text-align: center;
+	text-decoration: none;
 }
 
 .npcink-toolbox__tool-group-tab:hover,
@@ -3720,10 +3721,7 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__watermark-library-workspace {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
-	gap: 24px;
-	align-items: start;
+	display: block;
 }
 
 .npcink-toolbox__card--compact[data-toolbox-media-backup-retention] {
@@ -3736,8 +3734,9 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__watermark-library-list {
-	display: grid;
-	gap: 24px;
+	display: block;
+	padding-top: 12px;
+	border-top: 1px solid var(--npcink-ui-border);
 }
 
 .npcink-toolbox__watermark-library-list section + section {
@@ -3836,8 +3835,9 @@ pre.npcink-toolbox__result {
 }
 
 .npcink-toolbox__watermark-library-preview {
-	position: sticky;
-	top: 46px;
+	position: static;
+	max-width: 420px;
+	margin-bottom: 16px;
 }
 
 .npcink-toolbox__watermark-preview-heading {
@@ -3848,7 +3848,7 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__watermark-preview-frame {
 	position: relative;
 	overflow: hidden;
-	min-height: 280px;
+	min-height: 180px;
 	border: 1px solid #c3c4c7;
 	border-radius: var(--npcink-ui-radius-card);
 	background:
@@ -3859,7 +3859,7 @@ pre.npcink-toolbox__result {
 .npcink-toolbox__watermark-preview-frame > img {
 	display: block;
 	width: 100%;
-	height: 280px;
+	height: 180px;
 	object-fit: cover;
 }
 
@@ -4621,4 +4621,32 @@ pre.npcink-toolbox__result {
 
 .npcink-toolbox__ops-dimension-fold > .npcink-toolbox__ops-tabs {
 	margin: var(--npcink-ui-space-3) 0 var(--npcink-ui-space-4);
+}
+
+/* Image tasks share compact secondary settings instead of a settings workbench. */
+.npcink-toolbox__image-backup-settings {
+	grid-column: 1 / -1;
+	padding-top: 12px;
+	border-top: 1px solid var(--npcink-ui-border);
+}
+
+.npcink-toolbox__image-backup-settings summary,
+.npcink-toolbox__watermark-library-list summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.npcink-toolbox__image-backup-settings .npcink-toolbox__retention-control {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+}
+
+.npcink-toolbox__image-backup-settings .npcink-toolbox__retention-actions {
+	padding: 0;
+}
+
+.npcink-toolbox__watermark-library-list[open] > summary {
+	margin-bottom: 12px;
 }
