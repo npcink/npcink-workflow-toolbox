@@ -1363,3 +1363,24 @@ branch, confirm its merged PR and head, preserve squash-merged source/evidence
 and check that no open PR or release handoff needs it. Retain candidate and
 rollback materials outside disposable worktrees. Never clean another task's
 resources based on age, name or clean status alone.
+
+## Operator Maintenance Closeout
+
+Feature-convergence and integration closeouts must separate implemented fixes,
+intentional pauses, conditional release/quality acceptance and unresolved incidents.
+A historical TODO does not authorize expansion. Keep operator introductions short,
+retain essential failure facts and recovery paths, and avoid duplicate technical
+controls; question-only assistance prepares existing background automatically,
+without creating a new collector, runtime or write owner.
+
+Record code/CI, actual loaded source, package/install, Local/M4/test-site/production,
+fault injection and human evidence separately. HTTP 200 and temporary index absence
+are not completion proof. Preserve original-data hashes and restore test content,
+settings and temporary triggers before reporting acceptance.
+
+Keep reusable lessons in active module docs, link dated receipts from Current State,
+and preserve raw evidence outside disposable worktrees. Before closing a chat,
+verify every task PR, final checks, exact branch identity and worktree occupancy;
+clean only its merged resources. Record other chats' ownership and remaining
+conditions without claiming a handoff or deleting their work. See the
+[2026-11-12 case and remaining boundaries](feature-convergence-session-closeout-2026-11-12.md).

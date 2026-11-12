@@ -203,3 +203,12 @@ The media repair bundle is alongside it under `media-withdrawal-20261110/`:
 final source/package/CI receipts, M4 accepted state, signed presence, before/after
 counts and hashes, the automatic D0 run, local/Playground evidence and the
 unresolved writer diagnosis. Raw configuration and credentials are excluded.
+
+## Later acceptance — 2026-11-12
+
+The later [session closeout](feature-convergence-session-closeout-2026-11-12.md) and
+[Addon retrospective](https://github.com/npcink/npcink-cloud-addon/blob/master/docs/media-source-sync-retrospective-2026-11-12.md)
+record subsequent media update hooks, real test-site Cron delivery/deletion/missed
+notification acceptance, consent-off withdrawal and failure recovery (#351–#355).
+They supersede corresponding old pending follow-ups, not historical unknown exits,
+third-party model quality, customer rollout or the unresolved host incident.

@@ -5,7 +5,13 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-10.
+Last reviewed: 2026-11-12.
+
+**Session closeout — 2026-11-12:** the [convergence and recovery record](feature-convergence-session-closeout-2026-11-12.md)
+indexes the 34 merged task PRs, later real media/Cron acceptance and unresolved
+production incident/quality/release boundaries. Earlier failed or pending receipts
+remain historical; the latest media checks do not certify all customer releases.
+
 
 **Backend ALT visual requirement — 2026-11-10:** at the operator's request,
 backend ALT drafts require Cloud pixel evidence even when metadata is rich.
