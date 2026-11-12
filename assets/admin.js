@@ -511,6 +511,9 @@
 		});
 		delete form.__npcinkToolboxInFlight;
 		form.removeAttribute('data-toolbox-in-flight');
+		if (form.matches('[data-toolbox-media-alt-caption-review]')) {
+			updateMediaAltCaptionScope(form);
+		}
 	}
 
 	function errorContainsCode(value, code, seen) {
@@ -5275,6 +5278,11 @@
 		if (!endpoint || !config.restUrl) {
 			return;
 		}
+		if (form.matches('[data-toolbox-media-alt-caption-review]')) {
+			updateMediaAltCaptionScope(form);
+			const submit = form.querySelector('button[type="submit"]');
+			if (!(submit instanceof HTMLButtonElement) || submit.disabled) return;
+		}
 		if (!beginToolboxInFlight(form, 'tool')) {
 			return;
 		}
@@ -7636,6 +7644,11 @@
 				postInput.value = '';
 			}
 		}
+		const sample = form.querySelector('.npcink-toolbox__alt-sample-options');
+		const submit = form.querySelector('button[type="submit"]');
+		if (submit instanceof HTMLButtonElement) {
+			submit.disabled = Boolean(form.__npcinkToolboxInFlight) || (selectedIds.length === 0 && !(sample instanceof HTMLDetailsElement && sample.open));
+		}
 	}
 
 	function prefillSelectedAttachmentIds(form) {
@@ -7644,12 +7657,18 @@
 			return;
 		}
 		const ids = selectedAttachmentIdsFromUrl();
-		if (ids.length && !field.value.trim()) {
+		if (ids.length && !field.value.trim() && !form.matches('[data-toolbox-media-alt-caption-review]')) {
 			field.value = ids.join(', ');
 		}
 		const summary = form.querySelector('[data-toolbox-selected-attachment-summary]');
 		const currentIds = parseAttachmentIds(field.value);
 		if (summary) {
+			if (summary.hasAttribute('data-selected-template')) {
+				summary.textContent = currentIds.length
+					? summary.getAttribute('data-selected-template').replace('%d', String(currentIds.length))
+					: summary.getAttribute('data-empty-summary');
+				return;
+			}
 			summary.textContent = currentIds.length
 				? t('Using selected media-library images: ') + currentIds.join(', ')
 				: t('You can start from the media library bulk action, or leave this empty to use the bounded sample below.');
@@ -7660,6 +7679,11 @@
 		document.querySelectorAll('[data-toolbox-media-alt-caption-review]').forEach((form) => {
 			prefillSelectedAttachmentIds(form);
 			updateMediaAltCaptionScope(form);
+			const sample = form.querySelector('.npcink-toolbox__alt-sample-options');
+			if (sample) {
+				sample.addEventListener('toggle', () => updateMediaAltCaptionScope(form));
+			}
+			form.addEventListener('input', () => updateMediaAltCaptionScope(form));
 			form.addEventListener('change', (event) => {
 				if (event.target instanceof Element && event.target.matches('[data-toolbox-media-alt-scope]')) {
 					updateMediaAltCaptionScope(form);

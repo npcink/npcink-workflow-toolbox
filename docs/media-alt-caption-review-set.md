@@ -2,6 +2,27 @@
 
 Status: reviewed candidate set plus governed missing-ALT proposal handoff.
 
+## Contextual entry amendment — 2026-11-12
+
+This user-approved presentation amendment supersedes the standalone workbench
+default below. Image tools now lead to Media Library selection; only the existing
+explicit ALT tool URL renders the workbench. Media Library row, attachment and
+bulk actions keep their selected-image links. A folded support link retains the
+empty-selection recovery URL. The page is labeled Complete ALT for selected
+images, with a count instead of raw IDs in the main flow. IDs and sample controls
+are folded support inputs; empty selection cannot silently sample. Opening the
+retained sample options explicitly enables that fallback. This is presentation
+state, not write authorization or a changed REST contract.
+Clearing manual IDs affects the current page; reload restores the URL selection.
+Without JavaScript, selection information and links remain visible; draft generation
+and sampling require JavaScript, as stated by the page's noscript notice.
+
+Use editor contextual ALT for article images. Decorative images may correctly
+keep empty ALT; filling attachment metadata does not promise to update every
+saved article occurrence. Existing visual-evidence policy, missing-only governed
+plans, human review and all current runtime pauses remain unchanged. No new model,
+background cleanup, metadata writer or approval shortcut is introduced.
+
 ## Backend visual-evidence requirement — 2026-11-10
 
 This operator-approved amendment supersedes the metadata-first backend defaults

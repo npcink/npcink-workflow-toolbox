@@ -226,7 +226,7 @@
     },
     {
       "button_id": "batch_alt_review",
-      "label": "Image ALT Review",
+      "label": "Complete ALT for selected images",
       "surface": "admin_image_handling",
       "source_contracts": [
         "npcink-abilities-toolkit/build-media-alt-caption-review-set",
@@ -237,8 +237,9 @@
       "handoff_owner": "npcink-ai-client-adapter_to_core",
       "adapter_parity_status": "ability_parity_ready",
       "source_file": "includes/Admin_Page.php",
-      "source_marker": "Image ALT Review",
-      "direct_wordpress_write": false
+      "source_marker": "Complete ALT for selected images",
+      "direct_wordpress_write": false,
+      "default_visible": false
     },
     {
       "button_id": "flagged_media_review",

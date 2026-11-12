@@ -20,8 +20,7 @@ function pass(message) {
 }
 
 function fail(message) {
-	console.error(`FAIL: ${message}`);
-	process.exit(1);
+	throw new Error(`FAIL: ${message}`);
 }
 
 function assert(condition, message) {
@@ -273,6 +272,84 @@ async function captureViewportScreenshot(page, screenshotPath) {
 	await client.detach().catch(() => {});
 }
 
+async function verifyContextualEntry(page, context, baseUrl) {
+	const toolboxUrl = `${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools`;
+	const artifactDir = resolve('output/playwright/media-alt-contextual-entry');
+	mkdirSync(artifactDir, { recursive: true });
+	await page.goto(toolboxUrl, { waitUntil: 'domcontentloaded' });
+	assert(await page.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Default image page does not render the ALT workbench.');
+	const entry = page.locator('[data-toolbox-tool-panel="media-library"]');
+	const supportLink = entry.locator('a[href*="toolbox_tool=media-alt-caption-review"]');
+	assert(await entry.isVisible() && !await supportLink.isVisible(), 'Default entry leads to the Media Library; the ALT support link is folded.');
+	for (const width of [1440, 390]) {
+		await page.setViewportSize({ width, height: 1000 });
+		assert(await entry.evaluate(element => element.scrollWidth <= element.clientWidth), `Default image entry fits ${width}px.`);
+		await page.screenshot({ path: `${artifactDir}/default-${width}.png`, fullPage: true });
+	}
+	await entry.locator('summary').click();
+	await supportLink.click();
+	let form = page.locator('[data-toolbox-media-alt-caption-review]');
+	await form.waitFor({ state: 'visible' });
+	assert(await form.isVisible() && await form.locator('button[type="submit"]').isDisabled(), 'Explicit support page waits for image selection.');
+	assert(!await form.locator('input[name="attachment_ids"]').isVisible() && !await form.locator('select[name="sample_size"]').isVisible(), 'Attachment IDs and sample controls are folded by default.');
+	await form.locator('[data-toolbox-alt-support] > summary').click();
+	await form.locator('.npcink-toolbox__alt-sample-options > summary').click();
+	await page.waitForFunction(() => !document.querySelector('[data-toolbox-media-alt-caption-review] button[type="submit"]').disabled);
+	assert(await form.locator('button[type="submit"]').isEnabled(), 'Explicitly opening sampling enables the retained bounded sample.');
+	await form.locator('.npcink-toolbox__alt-sample-options > summary').click();
+	await page.waitForFunction(() => document.querySelector('[data-toolbox-media-alt-caption-review] button[type="submit"]').disabled);
+	assert(await form.locator('button[type="submit"]').isDisabled(), 'Closing sampling with no selection disables generation again.');
+	await page.setViewportSize({ width: 1440, height: 1000 });
+	await form.locator('a[href*="upload.php"]').click();
+	const checkboxes = page.locator('#the-list tr:has(.npcink_toolbox_alt) input[name="media[]"]');
+	await checkboxes.first().waitFor({ state: 'attached' });
+	const count = Math.min(2, await checkboxes.count());
+	assert(count > 0, 'Media Library lists images with contextual ALT actions.');
+	const selected = [];
+	for (let index = 0; index < count; index += 1) {
+		selected.push(await checkboxes.nth(index).inputValue());
+		await checkboxes.nth(index).check();
+	}
+	await page.locator('#bulk-action-selector-top').selectOption('npcink_toolbox_batch_alt');
+	await Promise.all([page.waitForURL(/toolbox_tool=media-alt-caption-review/), page.locator('#doaction').click()]);
+	form = page.locator('[data-toolbox-media-alt-caption-review]');
+	assert(new URL(page.url()).searchParams.get('attachment_ids') === selected.join(','), 'Native Media Library bulk action carries exactly the selected images.');
+	assert(await form.locator('button[type="submit"]').isEnabled() && !await form.locator('input[name="attachment_ids"]').isVisible(), 'Selected-image page is ready with technical inputs still folded.');
+	assert((await form.locator('[data-toolbox-selected-attachment-summary]').innerText()).includes(String(count)), 'Selection summary shows an image count.');
+	const selectedUrl = page.url();
+	await page.reload({ waitUntil: 'domcontentloaded' });
+	assert(await form.locator('input[name="attachment_ids"]').inputValue() === selected.join(', '), 'Reload preserves the selected images.');
+	for (const width of [1440, 390]) {
+		await page.setViewportSize({ width, height: 1000 });
+		assert(await form.evaluate(element => element.scrollWidth <= element.clientWidth), `Selected-image page fits ${width}px.`);
+		await page.screenshot({ path: `${artifactDir}/selected-${width}.png`, fullPage: true });
+	}
+	visualScenario = 'ready';
+	await form.locator('button[type="submit"]').click();
+	await form.locator('[data-toolbox-media-alt-caption-item]').first().waitFor({ state: 'visible' });
+	assert(await form.evaluate(element => element.scrollWidth <= element.clientWidth), 'Mobile selected-image generation works with support details folded and without overflow.');
+	await page.screenshot({ path: `${artifactDir}/preview-390.png`, fullPage: true });
+	visualScenario = 'legacy';
+	await form.locator('[data-toolbox-alt-support] > summary').click();
+	await form.locator('input[name="attachment_ids"]').fill('');
+	assert(await form.locator('button[type="submit"]').isDisabled(), 'Clearing the support selection does not refill IDs from the URL or start a sample.');
+	const noJs = await browser.newContext({ ignoreHTTPSErrors: true, javaScriptEnabled: false, storageState: await context.storageState() });
+	try {
+		const noJsPage = await noJs.newPage();
+		await noJsPage.goto(toolboxUrl, { waitUntil: 'domcontentloaded' });
+		assert(await noJsPage.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Default ALT workbench is absent without JavaScript.');
+		await noJsPage.goto(selectedUrl, { waitUntil: 'domcontentloaded' });
+		assert(await noJsPage.locator('input[name="attachment_ids"]').inputValue() === selected.join(', '), 'Server-rendered selected IDs survive without JavaScript.');
+		assert(await noJsPage.locator('[data-toolbox-media-alt-caption-review] noscript').isVisible(), 'No-JS view explains that generation and sampling require JavaScript.');
+	} finally {
+		await noJs.close();
+	}
+	await page.goto(`${toolboxUrl}&toolbox_tool=image-settings`, { waitUntil: 'domcontentloaded' });
+	assert(await page.locator('[data-toolbox-tool-panel="image-settings"]').isVisible(), 'Existing watermark and backup settings URL remains usable.');
+	await page.goto(`${toolboxUrl}&toolbox_tool=unknown`, { waitUntil: 'domcontentloaded' });
+	assert(await page.locator('[data-toolbox-tool-panel="media-library"]').isVisible() && await page.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Unknown tools fall back to the Media Library entry.');
+}
+
 const { chromium } = await loadPlaywright();
 const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const attachmentIds = parseAttachmentIds();
@@ -411,12 +488,16 @@ try {
 	try {
 		loginHelper = createLoginHelper(baseUrl);
 		await page.goto(loginHelper.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+		await verifyContextualEntry(page, context, baseUrl);
+		await page.setViewportSize({ width: 1440, height: 1000 });
 		await openAltCaptionPanel(page, baseUrl);
 		await page.waitForSelector('[data-toolbox-media-alt-caption-review]:not([hidden])', { timeout: 30000 });
 		const form = page.locator('[data-toolbox-media-alt-caption-review]');
 		const submit = form.locator('button[type="submit"]');
-		assert(await submit.isEnabled(), 'Media ALT/Caption review-set button is enabled for the local admin smoke.');
+		assert(await submit.isDisabled(), 'Empty ALT support page does not silently sample images.');
+		await form.locator('[data-toolbox-alt-support] > summary').click();
 		await form.locator('[data-toolbox-selected-attachment-ids]').fill(attachmentIds.join(', '));
+		assert(await submit.isEnabled(), 'Selecting explicit images enables ALT drafts.');
 		await form.locator('.npcink-toolbox__alt-sample-options').evaluate((details) => {
 			if (details instanceof HTMLDetailsElement) {
 				details.open = true;
@@ -425,6 +506,7 @@ try {
 		await form.locator('select[name="sample_size"]').selectOption('10');
 		await form.locator('select[name="review_set_limit"]').selectOption('5');
 		await form.locator('select[name="media_filter"]').selectOption('all_recent');
+		assert(await form.evaluate(element => element.checkValidity()), 'ALT support inputs satisfy native form validation.');
 		await submit.click();
 		await page.waitForSelector('[data-toolbox-media-alt-caption-item]', { timeout: 45000 });
 		await page.waitForFunction(
@@ -579,6 +661,7 @@ try {
 		assert(forbiddenExecutionRequests(requests).length === 0, 'Visual failure checks introduce no execution, polling or media writes.');
 		writeFileSync(screenshotPath.replace(/\.png$/, '.json'), JSON.stringify({ fixtureOnly: true, visualCases, pageErrors }, null, 2));
 	} catch (error) {
+		console.error(`Page JavaScript errors: ${JSON.stringify(pageErrors)}`);
 		await captureDiagnostics(page, requests, error);
 		throw error;
 	}

@@ -3,6 +3,17 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## 2026-11-12 Contextual ALT entry amendment
+
+The operator approved contracting backend ALT to a Media Library contextual
+action. Default image tools show selection guidance, not the review workbench.
+Existing selected-image/legacy tool URLs and a folded support link open it on
+demand. Attachment IDs and bounded sampling move to support details; an empty
+selection does not start sampling unless those sample options are explicitly
+opened. Keep Cloud visual evidence, editable drafts, human confirmation,
+missing-only Core handoff and editor contextual ALT. No approval/execution
+shortcut, media write, new runtime, model or frozen-feature restoration.
+
 ## 2026-11-12 Site Check support-only amendment
 
 The operator approved removing manual Site Check from the default working area

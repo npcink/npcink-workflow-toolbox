@@ -10392,3 +10392,53 @@ msgstr ""
 
 msgid "Ask a question about your site. Relevant background is prepared automatically."
 msgstr ""
+
+msgid "Select images in the Media Library to complete ALT, or manage watermarks and backups."
+msgstr ""
+
+msgid "Media Library"
+msgstr ""
+
+msgid "Complete ALT for selected images"
+msgstr ""
+
+msgid "Draft missing ALT for the images you selected. Review each draft before submitting it for approval."
+msgstr ""
+
+msgid "Generate ALT drafts"
+msgstr ""
+
+msgid "Choose images where you manage them."
+msgstr ""
+
+msgid "Review missing ALT drafts for your selection."
+msgstr ""
+
+msgid "Work with images in the Media Library"
+msgstr ""
+
+msgid "Select the images that need ALT, then choose the Npcink bulk action to draft missing descriptions."
+msgstr ""
+
+msgid "For images in an article, use the article editor so the description fits its context. Decorative images may need empty ALT."
+msgstr ""
+
+msgid "Open ALT support page"
+msgstr ""
+
+#. translators: %d: number of selected media-library images.
+#, php-format
+msgid "Selected images: %d"
+msgstr ""
+
+msgid "Select images in the Media Library first. Sampling and attachment IDs are available in Support details."
+msgstr ""
+
+msgid "Draft generation does not change images. Only missing ALT can be submitted for approval."
+msgstr ""
+
+msgid "Attachment IDs"
+msgstr ""
+
+msgid "Enable JavaScript to generate ALT drafts and use the sample options."
+msgstr ""
