@@ -69,6 +69,8 @@ Start from the active documents below before changing code.
 
 ## Development And Release
 
+- [功能收敛与媒体同步会话收尾 — 2026-11-12](feature-convergence-session-closeout-2026-11-12.md) — 已合并交付、冻结取舍、最新自动恢复实测、资源回收方法与未关闭事项。
+
 - [Development Workflow](development-workflow.md)
 - [Five-Session Closeout Audit — 2026-10-26](session-closeout-audit-2026-10-26.md) — merged PRs, retired OCR experiments, branch/worktree scope, development lessons and remaining owners.
 - [Local OCR Final Feasibility Closeout — 2026-10-15](archive/2026-10/local-ocr-final-feasibility-closeout-2026-10-15.md) — preserved stopped experiment; not an accepted publication migration.
