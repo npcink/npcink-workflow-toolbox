@@ -7767,6 +7767,7 @@
 		document.querySelectorAll('[data-toolbox-smart-ask]').forEach((root) => {
 			const button = root.querySelector('[data-toolbox-smart-ask-submit]');
 			const stopButton = root.querySelector('[data-toolbox-smart-ask-stop]');
+			const stopNote = root.querySelector('[data-toolbox-smart-ask-stop-note]');
 			const questionField = root.querySelector('[data-toolbox-smart-ask-question]');
 			const statusEl = root.querySelector('[data-toolbox-smart-ask-status]');
 			const resultEl = root.querySelector('[data-toolbox-smart-ask-result]');
@@ -7841,6 +7842,9 @@
 				button.textContent = busy ? t('In progress…') : idleLabel;
 				if (stopButton) {
 					stopButton.hidden = !busy;
+				}
+				if (stopNote) {
+					stopNote.hidden = !busy;
 				}
 			};
 			if (stopButton) {

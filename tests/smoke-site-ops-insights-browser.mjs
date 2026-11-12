@@ -177,6 +177,70 @@ async function captureViewportScreenshot(page, screenshotPath) {
 	await client.detach().catch(() => {});
 }
 
+async function verifySmartAskLayout(page) {
+	const ask = page.locator('[data-toolbox-smart-ask]');
+	const stopNote = ask.locator('[data-toolbox-smart-ask-stop-note]');
+	assert(await page.locator('[data-toolbox-tab-panel="site-and-ask"] h2').count() === 1, 'Default Ask has one heading.');
+	assert(!await stopNote.isVisible(), 'Idle Ask omits stop guidance.');
+	const routePattern = /\/smart-ask(?:\?|$)/;
+	let calls = 0;
+	for (const mode of ['success', 'failure', 'stop']) {
+		let releaseResponse;
+		let requestReady;
+		let arrivalTimeout;
+		const response = new Promise(resolve => { releaseResponse = resolve; });
+		const intercepted = new Promise(resolve => { requestReady = resolve; });
+		const handler = async route => {
+			calls += 1;
+			requestReady();
+			// Every request in this case shares its fixture; cleanup releases all waiters.
+			await route.fulfill({ contentType: 'application/json', ...await response }).catch(() => {});
+		};
+		await page.route(routePattern, handler);
+		try {
+			await ask.locator('textarea').fill('浏览器排版验证：请给出一条站点维护建议。');
+			await ask.locator('[data-toolbox-smart-ask-submit]').click();
+			await Promise.race([intercepted, new Promise((_, reject) => {
+				arrivalTimeout = setTimeout(() => reject(new Error('Ask request was not intercepted.')), 10000);
+			})]);
+			clearTimeout(arrivalTimeout);
+			await stopNote.waitFor({ state: 'visible' });
+			assert(await ask.locator('textarea').isDisabled(), `${mode}: waiting disables the question and shows stop guidance.`);
+			if (mode === 'success') {
+				for (const width of [1440, 390]) {
+					await page.setViewportSize({ width, height: 1000 });
+					assert(await ask.evaluate(element => element.scrollWidth <= element.clientWidth), `Waiting Ask fits ${width}px.`);
+					const screenshot = resolve(`output/playwright/smart-ask-layout/waiting-${width}.png`);
+					mkdirSync(dirname(screenshot), { recursive: true });
+					await page.screenshot({ path: screenshot, fullPage: true });
+				}
+			}
+			if (mode === 'stop') {
+				await ask.locator('[data-toolbox-smart-ask-stop]').click();
+			}
+			releaseResponse(mode === 'failure'
+				? { status: 503, body: JSON.stringify({ message: 'Controlled unavailable response', data: { run_id: 'layout_failure' } }) }
+				: { status: 200, body: JSON.stringify({ ok: true, answer: '### 维护建议\n\n先检查文章中的失效链接，再按需要更新相关内容。', run_id: 'layout_success', answer_basis: 'site_summary' }) });
+			await stopNote.waitFor({ state: 'hidden' });
+			assert(await ask.locator('textarea').isEnabled(), `${mode}: completion restores input and hides stop guidance.`);
+			if (mode !== 'stop') {
+				assert(await ask.locator('[data-toolbox-smart-ask-result]').isVisible(), `${mode}: answer or support result remains reachable.`);
+				assert(!await ask.locator('details').evaluate(element => element.open), `${mode}: support details stay folded.`);
+				for (const width of [1440, 390]) {
+					await page.setViewportSize({ width, height: 1000 });
+					assert(await ask.evaluate(element => element.scrollWidth <= element.clientWidth), `${mode}: Ask fits ${width}px.`);
+					await page.screenshot({ path: resolve(`output/playwright/smart-ask-layout/${mode}-${width}.png`), fullPage: true });
+				}
+			}
+		} finally {
+			clearTimeout(arrivalTimeout);
+			releaseResponse({ status: 503, body: '{}' });
+			await page.unroute(routePattern, handler);
+		}
+	}
+	assert(calls === 3, 'Three controlled Ask requests were intercepted without live Cloud calls.');
+}
+
 const { chromium } = await loadPlaywright();
 const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const screenshotPath = resolve(env('SITE_OPS_BROWSER_SCREENSHOT', 'build/smoke/site-ops-insights.png'));
@@ -231,15 +295,20 @@ try {
 		for (const width of [1440, 390]) {
 			await page.setViewportSize({ width, height: 1000 });
 			assert(await page.locator('.npcink-toolbox').evaluate(element => element.scrollWidth <= element.clientWidth), `Default Ask fits the ${width}px viewport.`);
-			const defaultScreenshot = resolve(`output/playwright/site-check-support-only/ask-${width}.png`);
+			const questionBox = await page.locator('[data-toolbox-smart-ask-question]').boundingBox();
+			const submitBox = await page.locator('[data-toolbox-smart-ask-submit]').boundingBox();
+			assert(Math.abs(questionBox.x - submitBox.x) < 1, `Question and primary action align at ${width}px.`);
+			const defaultScreenshot = resolve(`output/playwright/smart-ask-layout/ask-${width}.png`);
 			mkdirSync(dirname(defaultScreenshot), { recursive: true });
 			await page.screenshot({ path: defaultScreenshot, fullPage: true });
 		}
+		await verifySmartAskLayout(page);
 		const noJsContext = await browser.newContext({ ignoreHTTPSErrors: true, javaScriptEnabled: false, storageState: await context.storageState() });
 		try {
 			const noJsPage = await noJsContext.newPage();
 			await noJsPage.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask`, { waitUntil: 'domcontentloaded' });
 			assert(await noJsPage.locator('[data-toolbox-site-check-fold]').count() === 0, 'Default report is absent without JavaScript too.');
+			assert(!await noJsPage.locator('[data-toolbox-smart-ask-stop-note]').isVisible(), 'No-JS Ask keeps waiting-only guidance hidden.');
 			await noJsPage.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&toolbox_support=site-check`, { waitUntil: 'domcontentloaded' });
 			assert(await noJsPage.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support report remains usable without JavaScript.');
 		} finally {
