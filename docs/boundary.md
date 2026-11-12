@@ -498,6 +498,12 @@ comment workflow governance.
 
 ## Site Check Boundary
 
+**Visibility amendment — 2026-11-12:** manual Site Check is support-only.
+The default Start cards and Site & Ask working area do not promote or render
+it. Folded Start support details and explicit compatibility URLs may open the
+existing report. Smart Ask may consume its existing pack without a manual scan.
+This changes no read/write authority, permissions or runtime pause.
+
 The **Site Check** panel is the operator-facing decision router for the fixed
 Toolbox button surface. It builds one administrator-requested local
 `site_ops_insight_pack.v1` preview. The underlying contract keeps the Site Ops
@@ -770,8 +776,8 @@ Toolbox product surfaces stay task-owned:
 - **Content Library Usage** owns read-only Site Knowledge status/result
   consumption and review handoff context. Cloud Addon owns connector state,
   refresh, indexing, and delivery detail.
-- **Site Check** owns the everyday site-maintenance entry: manual read-only site
-  checks, explicit Cloud detail requests, and the operator-facing path to
+- **Site Check** owns the support-only manual read-only site report, retained
+  Cloud detail contracts under their runtime pause, and the path to
   low-frequency scheduled review.
 - **Scheduled Review** owns the Nightly/Morning Brief implementation details:
   scheduled-review preview and optional local fallback settings. Cloud Addon
@@ -796,8 +802,8 @@ Scheduled Review must not live inside Cloud Checks and must not be presented as
 an ordinary connection diagnostic or as a second site-check product.
 
 The default Scheduled Review view should show one primary action: preview the
-scheduled review. Site Check remains the ordinary manual site-check report and
-the primary operator-facing site-maintenance entry.
+scheduled review. Site Check remains a support-only manual report; ordinary
+work starts in the editor, Smart Ask or image review.
 Local fallback settings should stay folded behind an advanced disclosure inside
 Toolbox because they control only the WordPress-side WP-Cron dry-run fallback.
 They should not migrate to Cloud Addon, where operators manage Cloud runtime

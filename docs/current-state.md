@@ -7,6 +7,12 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+**Site Check support-only — 2026-11-12:** the operator approved removing the
+manual check block and Start check card from the default working area. Start
+support details retain the report link; explicit support, legacy check and preview
+URLs remain usable. Smart Ask keeps the underlying read-only pack. Permissions,
+settings, rules and runtime pauses remain. See [the current admin contract](admin-ia-site-and-ask-v1.md).
+
 **Session closeout — 2026-11-12:** the [convergence and recovery record](feature-convergence-session-closeout-2026-11-12.md)
 indexes the 34 merged task PRs, later real media/Cron acceptance and unresolved
 production incident/quality/release boundaries. Earlier failed or pending receipts
@@ -282,8 +288,8 @@ ordinary generation and Site Knowledge remain available. See
   site citations and image candidates) on `post`/`page` editors only (extend via the
   `npcink_toolbox_editor_supported_post_types` filter). Admin has three top
   tabs: **Start**, **Site & Ask**, and **Image Review & Settings** (ALT review first;
-  optimization paused). Site Profile, Smart Ask and the folded Site Check
-  live under Site & Ask; legacy Site Check URLs remain compatible. This is
+  optimization paused). Site & Ask defaults to Smart Ask; Site Profile and manual
+  Site Check render only through support/explicit legacy URLs. This is
   the source layout, not a new WordPress.org release receipt. Release packages
   ship `.min` asset siblings (`composer package:release` runs
   `scripts/minify-assets.sh`); checkouts without them enqueue the

@@ -102,7 +102,7 @@ The first version provides:
   review lives in **Site Check**; media
   ALT/caption helper contracts stay available for editor-sidebar use and future
   batch review sets, but the standalone admin tool is not exposed;
-- a **temporarily hidden Site Check compatibility panel** that retains the fixed-button toolbox's
+- a **support-only Site Check report** that retains the fixed-button toolbox's
   read-only decision router. It builds a local
   `site_ops_insight_pack.v1` from bounded public content, approved comment
   signals, media metadata, taxonomy summaries, Site Context readiness, and
@@ -115,7 +115,7 @@ The first version provides:
   that request to Cloud runtime for a suggestion-only
   `site_ops_cloud_analysis_result.v1`, without local queues, local run tables,
   Core proposal creation, or WordPress writes;
-- a **Site Check** tab with two internal sections: **Current Check** for the
+- a support/compatibility **Site Check** view with two internal sections: **Current Check** for the
   ordinary manual site report, and **Scheduled Review** for low-frequency
   scheduled-review preview, optional local fallback settings, and a link to
   Cloud-owned run recovery. The former Advanced and Morning Brief entries
@@ -125,7 +125,10 @@ The first version provides:
   renders a dry-run Nightly Site Inspection preview without cron, Cloud calls,
   Core proposals, persistence, or WordPress writes. **Site Check** remains a
   manual site-check report for future reassessment, but not a default operator
-  entry;
+  entry. Start has Ask and Images cards; folded **Support details** provides
+  **Open Site Check**. The report renders only for that support link or explicit
+  legacy check/preview URLs. Smart Ask uses the existing pack without requiring
+  a manual scan. Cloud detail remains paused; retained contracts do not enable it;
 - no local Cloud Checks or Troubleshooting Checks panel. Cloud connection,
   hosted runtime, search, image-source, quota, entitlement, and service health
   diagnostics belong in `npcink-cloud-addon` or Cloud service-plane surfaces;
@@ -469,7 +472,7 @@ Cloud Addon Runtime Runs can read recent/status/result detail and request
 Cloud-owned retry for known Nightly Inspection runs. Toolbox may retain
 compatibility REST bridges for existing callers, but runtime entitlement,
 quota, batch limit, retention, recent/status/result, and retry detail belong in
-Cloud Addon Runtime Runs. The visible Site Check tab links to Cloud Addon for
+Cloud Addon Runtime Runs. The support-only Site Check view links to Cloud Addon for
 run recovery instead of presenting a second run-recovery workspace. Any local
 display of `pro_cloud_runtime` detail is not billing truth.
 Action Scheduler is reserved as a future local fallback/substrate candidate only

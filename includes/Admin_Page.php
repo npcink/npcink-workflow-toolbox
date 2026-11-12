@@ -554,7 +554,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<div class="wrap npcink-toolbox">
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
-			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Ask about your site, run local checks, and review image ALT drafts. AI suggestions require human review.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Ask about your site and review image ALT drafts. AI suggestions require human review.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php
 			if ( ! $cloud_ready ) {
 				$this->render_cloud_runtime_notice();
@@ -574,15 +574,16 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<?php $this->render_start_panel( $content_context, $cloud_ready ); ?>
 			</section>
 
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Smart Ask and Site Check', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
+			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
 				<div class="npcink-toolbox__panel-header">
 					<h2><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></h2>
-					<p><?php esc_html_e( 'Describe what you need help with, or find content worth reviewing. Suggestions do not change your site.', 'npcink-workflow-toolbox' ); ?></p>
+					<p><?php esc_html_e( 'Describe what you need help with. Suggestions do not change your site.', 'npcink-workflow-toolbox' ); ?></p>
 				</div>
 				<?php if ( 'content-preferences' === $this->query_text_param( 'toolbox_support' ) ) : ?>
 					<?php $this->render_content_context_form( $content_context ); ?>
 				<?php endif; ?>
 				<?php $this->render_smart_ask_panel(); ?>
+				<?php if ( $this->site_check_requested() ) : ?>
 				<section class="npcink-toolbox__site-check-fold" id="npcink-toolbox-site-check" data-toolbox-site-check-fold aria-label="<?php esc_attr_e( 'Site check', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__panel-header">
 						<h2><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></h2>
@@ -590,6 +591,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					</div>
 					<?php $this->render_operations_insights_panel( $site_ops_preview, $content_context, $cloud_ready, $settings, $nightly_preview, $active_site_check_tab ); ?>
 				</section>
+				<?php endif; ?>
 			</section>
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="tools" aria-label="<?php esc_attr_e( 'Image Review & Settings', 'npcink-workflow-toolbox' ); ?>"<?php echo 'tools' === $active_tab ? '' : ' hidden'; ?>>
@@ -721,6 +723,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		return isset( $allowed[ $requested ] ) ? $requested : 'start';
 	}
 
+	/** Manual report is support-only; existing explicit check URLs remain usable. */
+	private function site_check_requested(): bool {
+		return 'site-check' === $this->query_text_param( 'toolbox_support' )
+			|| 'operations-insights' === $this->query_text_param( 'toolbox_tab' )
+			|| in_array( $this->query_text_param( 'site_check_tab' ), array( 'current-check', 'scheduled-review' ), true )
+			|| '1' === $this->query_text_param( 'site_ops_insights_preview' )
+			|| '1' === $this->query_text_param( 'nightly_inspection_preview' );
+	}
+
 	private function requested_site_check_tab(): string {
 		$requested       = sanitize_key( $this->query_text_param( 'site_check_tab' ) );
 		$nightly_preview = $this->query_text_param( 'nightly_inspection_preview' );
@@ -759,27 +770,16 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	/**
-	 * Renders the three primary Start routes (Ask / Check-under-Site-&-Ask / Images).
+	 * Renders the two primary Start routes (Ask / Images).
 	 */
 	private function render_start_next_step_cards(): void {
 		$cards = array(
 			array(
 				'id'     => 'ask',
 				'title'  => __( 'Go ask', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Fill the site profile and ask questions about this site.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Ask a question about your site. Relevant background is prepared automatically.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Site & Ask', 'npcink-workflow-toolbox' ),
 				'tab'    => 'site-and-ask',
-			),
-			array(
-				'id'     => 'check',
-				'title'  => __( 'Go check', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Run a local site check or open scheduled review under Site & Ask.', 'npcink-workflow-toolbox' ),
-				'action' => __( 'Open Site Check', 'npcink-workflow-toolbox' ),
-				'tab'    => 'site-and-ask',
-				'args'   => array(
-					'site_check_tab' => 'current-check',
-				),
-				'hash'   => 'npcink-toolbox-site-check',
 			),
 			array(
 				'id'     => 'images',
@@ -798,13 +798,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 						'page'        => self::MENU_SLUG,
 						'toolbox_tab' => (string) $card['tab'],
 					);
-					if ( ! empty( $card['args'] ) && is_array( $card['args'] ) ) {
-						$query = array_merge( $query, $card['args'] );
-					}
-					$url = add_query_arg( $query, admin_url( 'admin.php' ) );
-					if ( ! empty( $card['hash'] ) ) {
-						$url .= '#' . rawurlencode( (string) $card['hash'] );
-					}
+					$url   = add_query_arg( $query, admin_url( 'admin.php' ) );
 					?>
 					<article class="npcink-toolbox__card npcink-toolbox__start-route-card" data-toolbox-start-route="<?php echo esc_attr( (string) $card['id'] ); ?>">
 						<h3><?php echo esc_html( (string) $card['title'] ); ?></h3>
@@ -845,7 +839,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<div class="npcink-toolbox__start-support-notes" data-toolbox-start-support-notes>
 					<p><?php esc_html_e( 'Toolbox only suggests. WordPress content still changes only after you review and confirm.', 'npcink-workflow-toolbox' ); ?></p>
 					<p><?php esc_html_e( 'For connector or runtime checks, open Npcink Cloud Addon when it is installed. Start does not list internal workflow rows here.', 'npcink-workflow-toolbox' ); ?></p>
-					<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&toolbox_support=content-preferences' ) ); ?>"><?php esc_html_e( 'Saved content preferences', 'npcink-workflow-toolbox' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&site_check_tab=scheduled-review' ) ); ?>"><?php esc_html_e( 'Scheduled review preview', 'npcink-workflow-toolbox' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'site-health.php' ) ); ?>"><?php esc_html_e( 'WordPress Site Health', 'npcink-workflow-toolbox' ); ?></a></p>
+					<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&toolbox_support=content-preferences' ) ); ?>"><?php esc_html_e( 'Saved content preferences', 'npcink-workflow-toolbox' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&toolbox_support=site-check#npcink-toolbox-site-check' ) ); ?>"><?php esc_html_e( 'Open Site Check', 'npcink-workflow-toolbox' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&site_check_tab=scheduled-review' ) ); ?>"><?php esc_html_e( 'Scheduled review preview', 'npcink-workflow-toolbox' ); ?></a> · <a href="<?php echo esc_url( admin_url( 'site-health.php' ) ); ?>"><?php esc_html_e( 'WordPress Site Health', 'npcink-workflow-toolbox' ); ?></a></p>
 				</div>
 			</details>
 		</section>
@@ -963,7 +957,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<section class="npcink-toolbox__ops-status-row" aria-label="<?php esc_attr_e( 'Site Check readiness', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__ops-status-main">
 						<span><strong><?php esc_html_e( 'Local scan', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $scan_status ); ?></span>
-						<span><strong><?php esc_html_e( 'Cloud', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $cloud_ready ? __( 'Available when needed', 'npcink-workflow-toolbox' ) : __( 'Optional', 'npcink-workflow-toolbox' ) ); ?></span>
+						<span><strong><?php esc_html_e( 'Cloud', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Cloud analysis is temporarily paused. This brief uses local rules only.', 'npcink-workflow-toolbox' ) : ( $cloud_ready ? __( 'Available when needed', 'npcink-workflow-toolbox' ) : __( 'Optional', 'npcink-workflow-toolbox' ) ) ); ?></span>
 						<span><strong><?php esc_html_e( 'Site changes', 'npcink-workflow-toolbox' ); ?></strong><?php esc_html_e( 'Suggestions only', 'npcink-workflow-toolbox' ); ?></span>
 					</div>
 					<div class="npcink-toolbox__ops-status-actions">

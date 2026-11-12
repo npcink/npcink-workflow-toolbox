@@ -1,13 +1,34 @@
 # Toolbox Admin IA — 开始 / 站点与提问 / 图片审核与设置（v1）
 
-状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。智能提问 **行为**（pack 下拉 + REST）本阶段不变。
+状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。当前展示规则以下方最新覆盖决议为准。
 
-## 当前覆盖决议 — 2026-11-10
+## 当前覆盖决议 — 2026-11-12
 
-用户已同意[面向运营人员的收敛](admin-operator-focus-2026-11-10.md)。以下旧版中
-画像优先、五项提问下拉、巡检预览常驻的约定为历史基线。默认界面现在先提问、后
-内容问题检查；画像/边界/JSON 与巡检预览移到支持路径。提问通过一次有界判断选择
-一个既有资料来源或先澄清，旧 REST、权限、配置与运行暂停不变。
+用户同意手动站点检查退出默认操作区。开始页仅保留「去提问 / 去改图」两张卡；
+「站点与提问」默认只显示自然语言提问。开始页折叠的「支持详情」提供
+`toolbox_tab=site-and-ask&toolbox_support=site-check#npcink-toolbox-site-check`，
+按需打开只读报告。普通页面不渲染检查区，而非用 CSS 隐藏。
+
+旧 `toolbox_tab=operations-insights`、显式 `site_check_tab=current-check` /
+`scheduled-review` 与带 nonce 的扫描/预览链接继续可达；无显式请求不运行扫描。
+报告内「去提问 / 重扫」保持，刷新与页签导航保留显式检查位置。
+`full_site_insights` 的可见性投影改为 `default_visible=false`；能力 ID 和 REST 不变。
+底层采集器和摘要问答继续供智能提问按问题使用。Cloud 分析、自动巡检及其他冻结
+功能不恢复；报告状态明确显示 Cloud 分析暂停。
+
+此前 11 月 10 日决议继续约束单入口提问、画像/边界/JSON 支持路径和巡检预览。
+以下旧版产品意图和历史记录不再授权默认站点检查或资料选择器。
+
+### 本次验证 — 2026-11-12
+
+- `composer test:all`（4,613 条静态契约及既有行为/边界门禁）、Composer 元数据、
+  WordPress.org 源码规则、PHPCS、PHPStan 通过。
+- 安装态 `magick-ai.local`：开始页两张卡、默认提问无检查区、折叠支持入口、
+  支持地址刷新、旧顶栏/当前检查/巡检地址、巡检切回当前检查后刷新、检查后带问题
+  返回提问均通过；无 JS 默认和支持地址通过。1440/390px 提问及结果维度截图无横向
+  溢出。只运行本地只读检查，未点击 Cloud 或写入/交接动作；不证明模型回答质量。
+- 发布构建和最终 ZIP 的 runtime-only inventory 通过（118 个运行文件），中文 MO
+  通过 `msgfmt --check` 并在安装态显示。未发布 WordPress.org 稳定版或部署生产。
 
 ## 产品意图（降门槛）
 
@@ -18,12 +39,12 @@
 ```text
 流程工具箱（Npcink AI → 流程工具箱）
 ├── 开始              toolbox_tab=start
+│     ├── 去提问 / 去改图
+│     └── 支持详情（默认折叠）：画像偏好 / 站点检查 / 巡检预览 / Site Health
 ├── 站点与提问         toolbox_tab=site-and-ask
-│     ├── 站点画像（简报表单）
-│     ├── 智能提问（pack 选择器保留）
-│     └── 站点检查（折叠区；当前检查 / 定期巡检 L2）
-│           └── 更多扫描视图（L3，默认折叠；展开后显示结果维度 tab）
-└── 图片审核与设置           toolbox_tab=tools
+│     ├── 智能提问（单个自然语言问题，按需准备既有资料）
+│     └── 显式支持或兼容地址才显示：画像偏好 / 手动检查 / 巡检预览
+└── 图片审核与设置      toolbox_tab=tools
       └── 工具组 / 工具（L2，不动）
 ```
 
@@ -38,7 +59,7 @@
 | 图片审核与设置 | Image Review & Settings | `tools` |
 | 站点画像 | Site Profile | 面板内分区 |
 | 智能提问 | Smart Ask | 面板内分区 |
-| 站点检查 | Site Check | 面板内折叠区（不再是顶栏）；兼容查询 `toolbox_tab=operations-insights` → 落到 `site-and-ask` |
+| 站点检查 | Site Check | 支持视图（默认不渲染）；兼容查询 `toolbox_tab=operations-insights` → 落到 `site-and-ask` |
 
 与 Cloud Addon「检查」区分：Toolbox 始终称 **站点检查**（运营只读检查），不是连接器 readiness。
 
@@ -46,13 +67,13 @@
 
 规范 `toolbox_tab`：`start` | `site-and-ask` | `tools`。
 缺省或未知回落 `start`。`toolbox_tab=operations-insights` 仍接受，映射为 `site-and-ask`（含预览与 `site_check_tab`）。
-`site_check_tab`、`toolbox_tool`、智能提问 pack 选择逻辑不变。开始「去检查」深链：`site-and-ask` + `#npcink-toolbox-site-check`。
+`toolbox_tool` 不变；智能提问通过既有单入口按问题选择资料。旧开始页「去检查」使用的 `site_check_tab=current-check` 深链继续兼容，默认卡片已移除。
 
 ## 非目标（本笔记）
 
-- 单框自动选包 / 隐藏 pack 下拉。
+- 新增资料包或多包编排。
 - 改 REST 合同或 suggestion_only 边界。
-- 删除站点检查能力（仅去掉顶栏 Tab，收入站点与提问）。
+- 删除站点检查能力、改检查规则或恢复暂停功能。
 
 ## 默认隐藏 / 折叠（2026-10-22 产品决议）
 
