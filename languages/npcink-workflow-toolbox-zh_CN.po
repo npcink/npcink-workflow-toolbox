@@ -10892,3 +10892,12 @@ msgstr "图片仍在识别中，请稍后重试。"
 
 msgid "Image recognition is still processing. No ALT draft is available for those images yet. Try again later."
 msgstr "图片仍在识别中，暂未生成这些图片的 ALT 草稿，请稍后重试。"
+
+msgid "Ask about your site and review image ALT drafts. AI suggestions require human review."
+msgstr "向本站提问，或审阅图片 ALT 草稿。AI 建议仍需人工确认。"
+
+msgid "Describe what you need help with. Suggestions do not change your site."
+msgstr "描述你需要帮助的问题。建议不会改动站点。"
+
+msgid "Ask a question about your site. Relevant background is prepared automatically."
+msgstr "直接描述本站的问题，系统会自动准备相关背景。"

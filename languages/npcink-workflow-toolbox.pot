@@ -10383,3 +10383,12 @@ msgstr ""
 
 msgid "Image recognition is still processing. No ALT draft is available for those images yet. Try again later."
 msgstr ""
+
+msgid "Ask about your site and review image ALT drafts. AI suggestions require human review."
+msgstr ""
+
+msgid "Describe what you need help with. Suggestions do not change your site."
+msgstr ""
+
+msgid "Ask a question about your site. Relevant background is prepared automatically."
+msgstr ""

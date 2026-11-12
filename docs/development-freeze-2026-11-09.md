@@ -3,6 +3,17 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## 2026-11-12 Site Check support-only amendment
+
+The operator approved removing manual Site Check from the default working area
+and the Start task cards. Folded Start support details retain a manual-report
+link; explicit support and legacy check/preview URLs remain usable. Smart Ask
+continues to consume the existing pack without requiring an operator scan.
+Keep the underlying collectors, routes, permissions, settings, report actions
+and runtime pauses. This changes presentation only, with no new checks, packs,
+model requests, automatic inspections, writes or feature restoration. See
+[the current admin visibility contract](admin-ia-site-and-ask-v1.md).
+
 ## 2026-11-10 Backend ALT visual-evidence amendment
 
 The operator explicitly requires actual image recognition for backend ALT drafts.
@@ -157,7 +168,7 @@ no feature removal, data migration, deployment or release.
 | Category/tag suggestions, site profile and Site Knowledge consumption | Maintenance only | Preserve current contracts and dependency health; no new vocabulary automation, local indexing or retrieval management. |
 | Source-material writing packs and draft preview | Hide entry; server-pause generation; freeze development | Preserve IDs, implementation and existing data; restoration requires a concrete use case and explicit operator decision. |
 | Smart Ask | Keep usable; freeze expansion | Retain four existing insight packs and the separate Public site content option; no new packs, automatic selection, multi-pack orchestration or multi-turn chat product. |
-| Local Site Check and Scheduled Review preview | Keep usable; freeze expansion | Maintain bounded read-only checks; no new dashboards, scoring dimensions, crawlers or automation. |
+| Local Site Check and Scheduled Review preview | Support-only; keep usable; freeze expansion | Maintain bounded read-only checks; no new dashboards, scoring dimensions, crawlers or automation. |
 | External research, image sources and Zhihu hot-topic widget | Maintenance only | Preserve existing consumers and transports; no new providers, topic channels or topic-planning system. |
 | Media-library ALT and legacy comment/taxonomy/internal-link/flagged-media review sets | Freeze expansion; preserve current visibility | Maintain contracts and safe handoff; do not restore default-hidden cards or add bulk execution. |
 | SEO/AEO/GEO specialist surfaces; Cloud inspection/site analysis; new audio; media optimization | Continue runtime pauses | Preserve history, existing audio playback, backups and recovery; restoration follows the pause contracts and a specific operator decision. |

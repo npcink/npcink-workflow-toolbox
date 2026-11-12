@@ -216,6 +216,44 @@ try {
 	try {
 		loginHelper = createLoginHelper(baseUrl);
 		await page.goto(loginHelper.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+		await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox`, { waitUntil: 'domcontentloaded' });
+		assert(await page.locator('[data-toolbox-start-route]').count() === 2 && await page.locator('[data-toolbox-start-route="check"]').count() === 0, 'Start offers Ask and Images without a check task card.');
+		assert(await page.locator('[data-toolbox-site-check-fold]').count() === 0, 'Default Start does not render the manual report.');
+		const supportLink = page.locator('.npcink-toolbox__start-support a[href*="toolbox_support=site-check"]');
+		assert(await supportLink.count() === 1 && !await supportLink.isVisible(), 'Manual Site Check is available only inside folded support details.');
+		await page.locator('.npcink-toolbox__start-support summary').click();
+		await supportLink.click();
+		assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support link opens the manual report.');
+		await page.reload({ waitUntil: 'domcontentloaded' });
+		assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support report remains reachable after reload.');
+		await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask`, { waitUntil: 'domcontentloaded' });
+		assert(await page.locator('[data-toolbox-smart-ask]').isVisible() && await page.locator('[data-toolbox-site-check-fold]').count() === 0, 'Ordinary Site & Ask renders the question shell without Site Check.');
+		for (const width of [1440, 390]) {
+			await page.setViewportSize({ width, height: 1000 });
+			assert(await page.locator('.npcink-toolbox').evaluate(element => element.scrollWidth <= element.clientWidth), `Default Ask fits the ${width}px viewport.`);
+			const defaultScreenshot = resolve(`output/playwright/site-check-support-only/ask-${width}.png`);
+			mkdirSync(dirname(defaultScreenshot), { recursive: true });
+			await page.screenshot({ path: defaultScreenshot, fullPage: true });
+		}
+		const noJsContext = await browser.newContext({ ignoreHTTPSErrors: true, javaScriptEnabled: false, storageState: await context.storageState() });
+		try {
+			const noJsPage = await noJsContext.newPage();
+			await noJsPage.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask`, { waitUntil: 'domcontentloaded' });
+			assert(await noJsPage.locator('[data-toolbox-site-check-fold]').count() === 0, 'Default report is absent without JavaScript too.');
+			await noJsPage.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&toolbox_support=site-check`, { waitUntil: 'domcontentloaded' });
+			assert(await noJsPage.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support report remains usable without JavaScript.');
+		} finally {
+			await noJsContext.close();
+		}
+		for (const query of ['site_check_tab=current-check', 'site_check_tab=scheduled-review']) {
+			await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&${query}`, { waitUntil: 'domcontentloaded' });
+			assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), `Explicit compatibility query remains available: ${query}.`);
+		}
+		await page.locator('[data-toolbox-site-check-target="current-check"]').click();
+		assert(new URL(page.url()).searchParams.get('site_check_tab') === 'current-check', 'Scheduled-to-current navigation preserves an explicit check URL.');
+		await page.reload({ waitUntil: 'domcontentloaded' });
+		assert(await page.locator('[data-toolbox-site-check-panel="current-check"]').isVisible(), 'Current check remains available after tab navigation and reload.');
+		await page.setViewportSize({ width: 1440, height: 1000 });
 		await openToolboxPage(page, baseUrl);
 		await page.waitForSelector('[data-toolbox-site-ops-insights]', { state: 'attached', timeout: 30000 });
 		assert(await page.locator('[data-toolbox-tab-target="operations-insights"]').count() === 0, 'Site Check is no longer a top-level tab.');
@@ -234,6 +272,11 @@ try {
 		const statusText = await page.locator('.npcink-toolbox__ops-status-main').innerText();
 		assert(/Current snapshot is ready|当前快照已生成/.test(statusText) && /Ask about this check|去提问/.test(statusActionText) && /Rescan|重新扫描/.test(statusActionText), 'Generated report keeps snapshot status and scan actions in the status row.');
 
+		const summaryDetails = page.locator('.npcink-toolbox__ops-scan-details').nth(0);
+		const handlingDetails = page.locator('.npcink-toolbox__ops-scan-details').nth(1);
+		assert(!await summaryDetails.evaluate(element => element.open) && !await handlingDetails.evaluate(element => element.open), 'Review summary and handling details remain folded by default.');
+		await summaryDetails.locator('summary').first().click();
+		await handlingDetails.locator('summary').first().click();
 		const overviewText = await page.locator('[data-toolbox-ops-panel="overview"]').innerText();
 		const overviewRawText = await page.locator('[data-toolbox-ops-panel="overview"]').textContent();
 		assert(/Site action brief|站点待办摘要/.test(overviewText), 'Overview starts with a site action brief.');
@@ -263,10 +306,11 @@ try {
 		assert(/Nothing is changed automatically|不会自动更改|不会自动修改/.test(overviewText), 'Overview makes the no-auto-change boundary readable.');
 		assert(/Needs review workflow|Manual check only|需要审核流程|人工检查/.test(overviewText), 'Overview shows operator-friendly handling labels.');
 		assert(await page.locator('[data-toolbox-ops-panel="advanced"]').isHidden(), 'Advanced JSON panel is hidden by default.');
-		await page.locator('.npcink-toolbox__ops-scan-details summary').click();
-		const scanDetailText = await page.locator('.npcink-toolbox__ops-scan-details').innerText();
+		await page.locator('.npcink-toolbox__ops-scan-details').nth(2).locator('summary').first().click();
+		const scanDetailText = await page.locator('.npcink-toolbox__ops-scan-details').nth(2).innerText();
 		assert(/Local analysis summary|本地分析摘要|Coverage snapshot|覆盖快照/.test(scanDetailText), 'Scan-detail disclosure contains local coverage detail and charts.');
 		assert(/\d+ posts checked; \d+ internal-link issues|已检查\s*\d+\s*篇文章.*\d+\s*个内链问题/.test(scanDetailText), 'Scan-detail disclosure shows bounded internal-link health counts without raw JSON.');
+		await page.locator('.npcink-toolbox__ops-dimension-fold > summary').click();
 		await openOpsTab(page, 'content');
 		const contentText = await page.locator('[data-toolbox-ops-panel="content"]').innerText();
 		assert(/Internal-link health needs review|内链健康状况需要审核/.test(contentText), 'Content analysis renders the internal-link health finding for operator review.');
@@ -313,6 +357,10 @@ try {
 		mkdirSync(dirname(screenshotPath), { recursive: true });
 		await captureViewportScreenshot(page, screenshotPath);
 		assert(existsSync(screenshotPath), `Screenshot captured at ${screenshotPath}.`);
+		await page.locator('[data-toolbox-check-to-ask]').click();
+		await page.waitForLoadState('domcontentloaded');
+		assert(await page.locator('[data-toolbox-smart-ask-question]').inputValue() !== '' && await page.locator('[data-toolbox-site-check-fold]').count() === 0, 'Check-to-Ask preserves the seeded question and returns to the ordinary Ask surface.');
+
 	} catch (error) {
 		await captureDiagnostics(page, requests, error);
 		throw error;

@@ -29,7 +29,8 @@ ordinary feedback, and makes final decisions; developer evidence is not human
 adoption evidence.
 
 The admin surface has **Start**, **Site & Ask**, and **Image Handling** tabs;
-Site Profile, Smart Ask, and the folded local Site Check live under Site & Ask.
+Site & Ask defaults to Smart Ask. Site Profile and manual Site Check are
+support-only views; Start support details and legacy URLs keep them accessible.
 See the [current IA](admin-ia-site-and-ask-v1.md).
 SEO/AEO/GEO specialist entrypoints, Cloud inspection/site analysis, new audio
 generation, and media optimization remain paused under the
@@ -155,7 +156,7 @@ and `npcink_toolbox_ability_permission`.
 9. Retain the paused `media_optimization_v1` fixed workflow and its backup
    recovery contracts without creating a duplicate runner or enabling new
    optimization work.
-10. Offer bounded local Site Check review in the folded Site & Ask section.
+10. Retain bounded local Site Check review through support and legacy URLs.
    Keep its ranked decision list and check-to-Ask link without expanding
    Toolbox runtime or write ownership. Legacy Site Check URLs remain compatible.
 11. Preserve Core and Abilities boundaries for final WordPress writes.

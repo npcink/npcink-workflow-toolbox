@@ -7435,7 +7435,7 @@
 			return null;
 		}
 		const target = activeTarget(workspace, '[data-toolbox-site-check-target]', 'data-toolbox-site-check-target');
-		return target && target !== 'current-check' ? target : null;
+		return target || 'current-check';
 	}
 
 	function activateSiteCheckTab(target, updateUrl) {
@@ -7459,7 +7459,7 @@
 				tool: null,
 				toolbox_tab: 'site-and-ask',
 				toolbox_tool: null,
-				site_check_tab: target === 'current-check' ? null : target,
+				site_check_tab: target,
 			});
 		}
 		return true;
