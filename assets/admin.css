@@ -2066,6 +2066,20 @@
 	max-width: var(--npcink-ui-column-wide);
 }
 
+.npcink-toolbox__card--alt-review [hidden] {
+	display: none;
+}
+
+.npcink-toolbox .npcink-toolbox__media-entry h2,
+.npcink-toolbox .npcink-toolbox__card--alt-review h2 {
+	font-size: var(--npcink-ui-font-card-title);
+}
+
+.npcink-toolbox__media-entry > .npcink-toolbox__support-meta,
+.npcink-toolbox__card--alt-review > .npcink-toolbox__support-meta {
+	margin-top: var(--npcink-ui-space-4);
+}
+
 .npcink-toolbox__card h2 {
 	margin: 0 0 4px;
 	font-size: 20px;

@@ -10901,3 +10901,53 @@ msgstr "描述你需要帮助的问题。建议不会改动站点。"
 
 msgid "Ask a question about your site. Relevant background is prepared automatically."
 msgstr "直接描述本站的问题，系统会自动准备相关背景。"
+
+msgid "Select images in the Media Library to complete ALT, or manage watermarks and backups."
+msgstr "从媒体库选择图片补全 ALT，或管理水印与备份。"
+
+msgid "Media Library"
+msgstr "媒体库"
+
+msgid "Complete ALT for selected images"
+msgstr "补全所选图片的 ALT"
+
+msgid "Draft missing ALT for the images you selected. Review each draft before submitting it for approval."
+msgstr "为所选图片生成缺失的 ALT 草稿，逐张检查后再提交审批。"
+
+msgid "Generate ALT drafts"
+msgstr "生成 ALT 草稿"
+
+msgid "Choose images where you manage them."
+msgstr "从媒体库选择要处理的图片。"
+
+msgid "Review missing ALT drafts for your selection."
+msgstr "检查所选图片缺失的 ALT 草稿。"
+
+msgid "Work with images in the Media Library"
+msgstr "从媒体库处理图片"
+
+msgid "Select the images that need ALT, then choose the Npcink bulk action to draft missing descriptions."
+msgstr "在媒体库勾选需要补全 ALT 的图片，再选择 Npcink 批量操作生成草稿。"
+
+msgid "For images in an article, use the article editor so the description fits its context. Decorative images may need empty ALT."
+msgstr "文章中的图片请在文章编辑器内处理，让描述符合上下文。装饰性图片可以保留空 ALT。"
+
+msgid "Open ALT support page"
+msgstr "打开 ALT 补全支持页"
+
+#. translators: %d: number of selected media-library images.
+#, php-format
+msgid "Selected images: %d"
+msgstr "已选择 %d 张图片"
+
+msgid "Select images in the Media Library first. Sampling and attachment IDs are available in Support details."
+msgstr "请先从媒体库选择图片。抽样检查与附件 ID 在支持详情中。"
+
+msgid "Draft generation does not change images. Only missing ALT can be submitted for approval."
+msgstr "生成草稿不会更改图片，仅缺失的 ALT 可提交审批。"
+
+msgid "Attachment IDs"
+msgstr "附件 ID"
+
+msgid "Enable JavaScript to generate ALT drafts and use the sample options."
+msgstr "请启用 JavaScript，以生成 ALT 草稿或使用抽样选项。"

@@ -61,12 +61,6 @@ parameters:
 			path: includes/Admin_Page.php
 
 		-
-			message: '#^Offset ''surface'' on array\{surface\: ''image'', group\: mixed, group_id\: ''image\-flagged\-review'', id\: ''flagged\-media\-review'', endpoint\: ''ai/site\-helpers'', title\: mixed, description\: mixed, intent\: ''flagged_media…'', \.\.\.\}\|array\{surface\: ''image'', group\: mixed, group_id\: ''image\-settings'', id\: ''image\-settings'', endpoint\: '''', title\: mixed, description\: mixed, custom\: ''image_settings''\}\|array\{surface\: ''image'', group\: mixed, group_id\: ''image\-text\-review'', id\: ''media\-alt\-caption…'', endpoint\: ''ai/site\-helpers'', title\: mixed, description\: mixed, intent\: ''media_alt…'', \.\.\.\}\|array\{surface\: ''image'', group\: mixed, group_id\: ''media'', id\: ''media\-batch\-optimize'', endpoint\: ''media\-derivative…'', title\: mixed, description\: mixed, custom\: ''media_derivative…''\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
 			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2

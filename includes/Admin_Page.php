@@ -741,13 +741,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$requested = sanitize_key( $this->query_text_param( 'toolbox_tool' ) );
 
 		$allowed = array(
+			'media-library'            => true,
 			'media-batch-optimize'     => true,
 			'media-alt-caption-review' => true,
 			'image-settings'           => true,
 		);
 		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
 			unset( $allowed['media-batch-optimize'] ); }
-		return isset( $allowed[ $requested ] ) ? $requested : ( Settings::cloud_feature_paused( 'advanced_media' ) ? 'media-alt-caption-review' : 'media-batch-optimize' );
+		return isset( $allowed[ $requested ] ) ? $requested : 'media-library';
 	}
 
 	private function render_start_panel( array $content_context, bool $cloud_ready ): void {
@@ -778,7 +779,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			array(
 				'id'     => 'images',
 				'title'  => __( 'Go edit images', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Preview image ALT drafts and review image settings. Media optimization is paused.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Select images in the Media Library to complete ALT, or manage watermarks and backups.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Image Handling', 'npcink-workflow-toolbox' ),
 				'tab'    => 'tools',
 			),
@@ -1743,7 +1744,17 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	private function render_tool_cards( bool $cloud_ready, string $surface = 'image' ): void {
-		$tools = array(
+		$requested_tool = $this->requested_toolbox_tool();
+		$tools          = array(
+			array(
+				'surface'     => 'image',
+				'group'       => __( 'Media Library', 'npcink-workflow-toolbox' ),
+				'group_id'    => 'media-library',
+				'id'          => 'media-library',
+				'title'       => __( 'Media Library', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Select images in the Media Library to complete ALT, or manage watermarks and backups.', 'npcink-workflow-toolbox' ),
+				'custom'      => 'media_library_entry',
+			),
 			array(
 				'surface'     => 'image',
 				'group'       => __( 'Media', 'npcink-workflow-toolbox' ),
@@ -1756,14 +1767,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			),
 			array(
 				'surface'     => 'image',
-				'group'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
+				'group'       => __( 'Complete ALT for selected images', 'npcink-workflow-toolbox' ),
 				'group_id'    => 'image-text-review',
 				'id'          => 'media-alt-caption-review',
 				'endpoint'    => 'ai/site-helpers',
-				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Generate missing or weak ALT drafts by looking at the images. Review each draft before submitting it.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Complete ALT for selected images', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Draft missing ALT for the images you selected. Review each draft before submitting it for approval.', 'npcink-workflow-toolbox' ),
 				'intent'      => 'media_alt_suggestions',
-				'button'      => __( 'Build ALT review preview', 'npcink-workflow-toolbox' ),
+				'button'      => __( 'Generate ALT drafts', 'npcink-workflow-toolbox' ),
 				'custom'      => 'media_alt_caption_review',
 			),
 			array(
@@ -1793,20 +1804,22 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$tools          = array_values(
 			array_filter(
 				$tools,
-				static function ( array $tool ) use ( $surface ): bool {
+				static function ( array $tool ) use ( $surface, $requested_tool ): bool {
+					if ( 'media-alt-caption-review' === (string) $tool['id'] && 'media-alt-caption-review' !== $requested_tool ) {
+						return false;
+					}
 					if ( Settings::cloud_feature_paused( 'advanced_media' ) && 'media-batch-optimize' === (string) $tool['id'] ) {
 						return false; }
 					if ( Settings::admin_ui_entry_hidden( 'flagged_media_review' ) && 'flagged-media-review' === (string) $tool['id'] ) {
 						return false;
 					}
-					if ( $surface !== (string) ( $tool['surface'] ?? 'image' ) ) {
+					if ( $surface !== (string) $tool['surface'] ) {
 						return false;
 					}
 					return true;
 				}
 			)
 		);
-		$requested_tool = $this->requested_toolbox_tool();
 		$active_tool_id = (string) ( $tools[0]['id'] ?? '' );
 		foreach ( $tools as $tool ) {
 			if ( $requested_tool === (string) ( $tool['id'] ?? '' ) ) {
@@ -1823,13 +1836,17 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		}
 
 		$tool_groups  = array(
+			'media-library'        => array(
+				'title'       => __( 'Media Library', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Choose images where you manage them.', 'npcink-workflow-toolbox' ),
+			),
 			'media'                => array(
 				'title'       => __( 'Media Library Optimization', 'npcink-workflow-toolbox' ),
 				'description' => __( 'Choose a range, check the expected results, then confirm once to optimize. Restore from history when needed.', 'npcink-workflow-toolbox' ),
 			),
 			'image-text-review'    => array(
-				'title'       => __( 'Image ALT Review', 'npcink-workflow-toolbox' ),
-				'description' => __( 'Inspect and edit ALT drafts locally. This stage does not submit or update media. To apply ALT to the current article, use Image ALT Review in the editor Publish preflight results.', 'npcink-workflow-toolbox' ),
+				'title'       => __( 'Complete ALT for selected images', 'npcink-workflow-toolbox' ),
+				'description' => __( 'Review missing ALT drafts for your selection.', 'npcink-workflow-toolbox' ),
 			),
 			'image-flagged-review' => array(
 				'title'       => __( 'Flagged Media', 'npcink-workflow-toolbox' ),
@@ -1926,6 +1943,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<div class="npcink-toolbox__tool-panels">
 				<?php
 				foreach ( $tools as $index => $tool ) {
+					if ( 'media_library_entry' === (string) ( $tool['custom'] ?? '' ) ) {
+						$this->render_media_library_entry( $active_tool_id === (string) $tool['id'] );
+						continue;
+					}
 					if ( 'content_support_flow' === (string) ( $tool['custom'] ?? '' ) ) {
 						$this->render_content_support_flow_tool(
 							(string) $tool['endpoint'],
@@ -1997,6 +2018,21 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				?>
 			</div>
 		</div>
+		<?php
+	}
+
+	private function render_media_library_entry( bool $active ): void {
+		?>
+		<section class="npcink-toolbox__card npcink-toolbox__media-entry" data-toolbox-tool-panel="media-library" <?php echo $active ? '' : 'hidden'; ?>>
+			<h2><?php esc_html_e( 'Work with images in the Media Library', 'npcink-workflow-toolbox' ); ?></h2>
+			<p><?php esc_html_e( 'Select the images that need ALT, then choose the Npcink bulk action to draft missing descriptions.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="description"><?php esc_html_e( 'For images in an article, use the article editor so the description fits its context. Decorative images may need empty ALT.', 'npcink-workflow-toolbox' ); ?></p>
+			<a class="button button-primary" href="<?php echo esc_url( admin_url( 'upload.php?mode=list' ) ); ?>"><?php esc_html_e( 'Select images in Media Library', 'npcink-workflow-toolbox' ); ?></a>
+			<details class="npcink-toolbox__support-meta">
+				<summary><?php esc_html_e( 'Support details', 'npcink-workflow-toolbox' ); ?></summary>
+				<p><a href="<?php echo esc_url( $this->image_batch_tool_url( 'media-alt-caption-review' ) ); ?>"><?php esc_html_e( 'Open ALT support page', 'npcink-workflow-toolbox' ); ?></a></p>
+			</details>
+		</section>
 		<?php
 	}
 
@@ -2400,6 +2436,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	private function render_media_alt_caption_review_tool( string $endpoint, string $title, string $description, string $tool_id, string $button, bool $active = false, bool $cloud_ready = true ): void {
+		$selected_ids = array_slice( array_values( array_unique( array_filter( array_map( 'absint', explode( ',', $this->query_text_param( 'attachment_ids' ) ) ) ) ) ), 0, 50 );
+		/* translators: %d: number of selected media-library images. */
+		$selected_summary = __( 'Selected images: %d', 'npcink-workflow-toolbox' );
 		?>
 		<form class="npcink-toolbox__card npcink-toolbox__card--alt-review" data-toolbox-endpoint="<?php echo esc_attr( $endpoint ); ?>" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-media-alt-caption-review <?php echo $active ? '' : 'hidden'; ?>>
 			<h2><?php echo esc_html( $title ); ?></h2>
@@ -2408,19 +2447,20 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'Connect Cloud Addon to recognize these images. Metadata alone cannot generate ALT drafts.', 'npcink-workflow-toolbox' ); ?></div>
 			<?php endif; ?>
 			<input type="hidden" name="intent" value="media_alt_suggestions" />
-				<div class="npcink-toolbox__example is-ai">
-					<strong><?php esc_html_e( 'Look at images to draft ALT', 'npcink-workflow-toolbox' ); ?></strong>
-					<span><?php esc_html_e( 'Images are sent to Cloud for recognition; valid results for unchanged images can be reused. Review and edit the ALT before submitting it for approval.', 'npcink-workflow-toolbox' ); ?></span>
-				</div>
+			<p class="description"><?php esc_html_e( 'Images are sent to Cloud for recognition; valid results for unchanged images can be reused. Review and edit the ALT before submitting it for approval.', 'npcink-workflow-toolbox' ); ?></p>
 			<div class="npcink-toolbox__result-actions npcink-toolbox__alt-source-actions">
-				<a class="button" href="<?php echo esc_url( admin_url( 'upload.php' ) ); ?>"><?php esc_html_e( 'Select images in Media Library', 'npcink-workflow-toolbox' ); ?></a>
-				<span class="description"><?php esc_html_e( 'Use the Npcink bulk action there, or enter attachment IDs below.', 'npcink-workflow-toolbox' ); ?></span>
+				<a class="button" href="<?php echo esc_url( admin_url( 'upload.php?mode=list' ) ); ?>"><?php esc_html_e( 'Select images in Media Library', 'npcink-workflow-toolbox' ); ?></a>
+				<span class="description" data-toolbox-selected-attachment-summary data-selected-template="<?php echo esc_attr( $selected_summary ); ?>" data-empty-summary="<?php esc_attr_e( 'Select images in the Media Library first. Sampling and attachment IDs are available in Support details.', 'npcink-workflow-toolbox' ); ?>"><?php echo $selected_ids ? esc_html( sprintf( $selected_summary, count( $selected_ids ) ) ) : esc_html__( 'Select images in the Media Library first. Sampling and attachment IDs are available in Support details.', 'npcink-workflow-toolbox' ); ?></span>
 			</div>
+			<p class="description"><?php esc_html_e( 'Draft generation does not change images. Only missing ALT can be submitted for approval.', 'npcink-workflow-toolbox' ); ?></p>
+			<noscript><p><?php esc_html_e( 'Enable JavaScript to generate ALT drafts and use the sample options.', 'npcink-workflow-toolbox' ); ?></p></noscript>
+			<button type="submit" class="button button-primary" <?php disabled( empty( $selected_ids ) ); ?>><?php echo esc_html( $button ); ?></button>
+			<details class="npcink-toolbox__support-meta" data-toolbox-alt-support>
+				<summary><?php esc_html_e( 'Support details', 'npcink-workflow-toolbox' ); ?></summary>
 			<label>
-				<span><?php esc_html_e( 'Images to review', 'npcink-workflow-toolbox' ); ?></span>
-				<input type="text" name="attachment_ids" data-toolbox-selected-attachment-ids placeholder="<?php esc_attr_e( 'Optional: 12, 34, 56', 'npcink-workflow-toolbox' ); ?>" />
+				<span><?php esc_html_e( 'Attachment IDs', 'npcink-workflow-toolbox' ); ?></span>
+				<input type="text" name="attachment_ids" data-toolbox-selected-attachment-ids value="<?php echo esc_attr( implode( ', ', $selected_ids ) ); ?>" placeholder="<?php esc_attr_e( 'Optional: 12, 34, 56', 'npcink-workflow-toolbox' ); ?>" />
 			</label>
-			<p class="description" data-toolbox-selected-attachment-summary><?php esc_html_e( 'No images selected yet. You can use the bounded sample options below.', 'npcink-workflow-toolbox' ); ?></p>
 			<details class="npcink-toolbox__result-details npcink-toolbox__alt-sample-options">
 				<summary><?php esc_html_e( 'Or scan a bounded sample', 'npcink-workflow-toolbox' ); ?></summary>
 				<div class="npcink-toolbox__split">
@@ -2469,7 +2509,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				</div>
 			</details>
 			<div class="npcink-toolbox__result-notice is-pending"><?php esc_html_e( 'The scan is read-only. After reviewing an image, only a missing ALT row can be submitted to Core; Toolbox never approves, executes, or updates media.', 'npcink-workflow-toolbox' ); ?></div>
-			<button type="submit" class="button button-primary"><?php echo esc_html( $button ); ?></button>
+			</details>
 			<div class="npcink-toolbox__result is-empty" aria-live="polite" hidden></div>
 		</form>
 		<?php

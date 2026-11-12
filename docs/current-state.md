@@ -7,6 +7,14 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+**Contextual backend ALT — 2026-11-12:** default image tools now lead to Media
+Library selection. The ALT workbench renders only for its explicit existing tool
+URL (media bulk/row actions or folded support link). Selected images appear as
+a count; attachment IDs and sampling stay in support details. Empty selections
+cannot silently sample; opening the existing sample options explicitly enables
+that fallback. Editor contextual ALT, visual evidence and missing-only governed
+handoff remain. See [the admin contract](admin-ia-site-and-ask-v1.md).
+
 **Site Check support-only — 2026-11-12:** the operator approved removing the
 manual check block and Start check card from the default working area. Start
 support details retain the report link; explicit support, legacy check and preview
