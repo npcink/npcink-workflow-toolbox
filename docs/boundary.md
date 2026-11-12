@@ -782,7 +782,10 @@ Toolbox product surfaces stay task-owned:
 - **Scheduled Review** owns the Nightly/Morning Brief implementation details:
   scheduled-review preview and optional local fallback settings. Cloud Addon
   owns Nightly Inspection run status, result reads, and recovery.
-- **Image Handling** owns selected-media review and governed handoff flows.
+- **Image Settings** owns watermark templates and backup cleanup. Backend ALT UI
+  and Media Library shortcuts are retired (2026-11-12); article ALT belongs in
+  the current article editor. Existing media review and governed handoff APIs
+  remain compatibility contracts, with their permissions and write boundaries.
 
 Cloud web search, image-source, and site-knowledge runtime routes may remain as
 bounded call sites for those product workflows, but their standalone diagnostic

@@ -2,6 +2,18 @@
 
 Status: reviewed candidate set plus governed missing-ALT proposal handoff.
 
+## Backend ALT UI retirement — 2026-11-12 (latest)
+
+The operator approved removing backend ALT as a product surface, superseding
+this day's earlier contextual Media Library entry decision. Remove the ALT
+workbench even for explicit/support URLs, plus Media Library bulk, row and
+attachment-detail shortcuts. Image Settings retains watermark templates and
+backup cleanup; default, retired and unknown tool URLs resolve to those settings.
+Keep article-context ALT review/adoption and normal WordPress editor saving.
+Existing REST/ability IDs, visual-evidence policy and governed handoff contracts
+remain for compatibility; no new write lane, permission change, runtime/model
+work or frozen-feature restoration. Earlier entry descriptions below are historical.
+
 ## Contextual entry amendment — 2026-11-12
 
 This user-approved presentation amendment supersedes the standalone workbench

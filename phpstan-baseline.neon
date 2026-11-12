@@ -61,12 +61,6 @@ parameters:
 			path: includes/Admin_Page.php
 
 		-
-			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Admin_Page.php
-
-		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1

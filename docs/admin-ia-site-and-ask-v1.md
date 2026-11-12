@@ -1,6 +1,32 @@
-# Toolbox Admin IA — 开始 / 站点与提问 / 图片审核与设置（v1）
+# Toolbox Admin IA — 开始 / 站点与提问 / 图片设置（v1）
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。当前展示规则以下方最新覆盖决议为准。
+
+## Backend ALT UI retirement — 2026-11-12 (latest)
+
+The operator approved removing backend ALT as a product surface, superseding
+this day's earlier contextual Media Library entry decision. Remove the ALT
+workbench even for explicit/support URLs, plus Media Library bulk, row and
+attachment-detail shortcuts. Image Settings retains watermark templates and
+backup cleanup; default, retired and unknown tool URLs resolve to those settings.
+Keep article-context ALT review/adoption and normal WordPress editor saving.
+Existing REST/ability IDs, visual-evidence policy and governed handoff contracts
+remain for compatibility; no new write lane, permission change, runtime/model
+work or frozen-feature restoration. Earlier entry descriptions below are historical.
+
+### 本次验证
+
+- `composer test:all`（4,614 条静态契约及既有行为/边界门禁）、Composer 元数据、
+  WordPress.org 源码规则、PHPCS、PHPStan 均通过。
+- 安装态 `magick-ai.local`：默认、旧 ALT 空选/所选图片地址、旧媒体库入口、
+  未知地址及暂停优化地址均回到水印与备份；媒体库批量、行操作、附件详情均无
+  Toolbox ALT 入口；无 JS 回退通过。1440/390px 无横向溢出、无 JS 错误，
+  未发出 ALT 生成/规划或 Core 提案请求。
+- 原有文章上下文 ALT 回归通过：13 个图片出现位置、分页保留手改值和装饰图、
+  采用后普通 WordPress 草稿保存、匿名质量反馈关联、媒体库全局 ALT 不变。
+  临时文章及登录文件均清理。此证据不证明模型质量、审批执行或生产部署。
+- 发布构建和最终 ZIP 的 runtime-only inventory 通过（118 个运行文件），
+  中文 MO 通过 `msgfmt --check` 并在安装态显示；未发布稳定版或部署生产。
 
 ## 当前覆盖决议 — 2026-11-12
 
@@ -80,17 +106,16 @@ WordPress.org 源码规则、PHPCS、PHPStan 通过。发布构建和最终 ZIP 
 ```text
 流程工具箱（Npcink AI → 流程工具箱）
 ├── 开始              toolbox_tab=start
-│     ├── 去提问 / 去改图
+│     ├── 去提问 / 图片设置
 │     └── 支持详情（默认折叠）：画像偏好 / 站点检查 / 巡检预览 / Site Health
 ├── 站点与提问         toolbox_tab=site-and-ask
 │     ├── 智能提问（单个自然语言问题，按需准备既有资料）
 │     └── 显式支持或兼容地址才显示：画像偏好 / 手动检查 / 巡检预览
-└── 图片审核与设置      toolbox_tab=tools
-      ├── 媒体库选图 / 水印与备份
-      └── 显式选图或支持地址：补全所选图片的 ALT
+└── 图片设置           toolbox_tab=tools
+      └── 水印模板与原图备份清理（旧 ALT 地址回到此处）
 ```
 
-顶栏 **3** 个：开始 | 站点与提问 | 图片审核与设置。不引入 Addon 式「连接 / 额度 / Checks」控制面入口。
+顶栏 **3** 个：开始 | 站点与提问 | 图片设置。不引入 Addon 式「连接 / 额度 / Checks」控制面入口。
 
 ## 命名
 

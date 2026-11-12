@@ -56,7 +56,7 @@ sort( $expected_ids );
 npcink_fixed_button_check( $expected_ids === $actual_ids, 'The table covers exactly the fifteen fixed-button contracts' );
 npcink_fixed_button_check(
 	array( 'article_narration', 'article_audio_summary', 'batch_alt_review' ) === array_values( array_map( static fn( array $button ): string => (string) $button['button_id'], array_filter( $buttons, static fn( array $button ): bool => false === ( $button['default_visible'] ?? true ) ) ) ),
-	'The audio compatibility flows and contextual ALT workbench are hidden from the default menu'
+	'Audio and ALT compatibility contracts remain absent from the default menu'
 );
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => 'workflow_projection_proven' === ( $button['adapter_parity_status'] ?? '' ) ) ), 'Only the currently proven media workflow claims full projection parity' );
 npcink_fixed_button_check( 1 === count( array_filter( $buttons, static fn( array $button ): bool => true === ( $button['direct_wordpress_write'] ?? false ) ) ), 'Only Media Library Optimization declares the bounded direct-write exception' );
@@ -102,7 +102,7 @@ foreach ( $admin_tool_blocks as $admin_tool_block ) {
 }
 $admin_table_count = count( array_filter( $buttons, static fn( array $button ): bool => 'admin_image_handling' === ( $button['surface'] ?? '' ) ) );
 npcink_fixed_button_check( $admin_table_count === count( array_unique( $admin_execution_ids ) ), 'Every executable Image Handling tool has one fixed-button contract row' );
-npcink_fixed_button_check( array( 'media-library', 'image-settings' ) === $admin_local_settings_ids, 'Image Handling navigation links and local settings stay outside fixed-button runtime contracts' );
+npcink_fixed_button_check( array( 'image-settings' ) === $admin_local_settings_ids, 'Image Handling navigation links and local settings stay outside fixed-button runtime contracts' );
 
 $adr = file_get_contents( $root . '/docs/decisions/ADR-008-freeze-fixed-button-and-generic-client-boundary.md' );
 foreach ( array( 'No further broad ownership migration', 'External clients do not inherit this exception', 'consumer-conformance test', 'must not add a channel' ) as $marker ) {
