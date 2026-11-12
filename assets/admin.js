@@ -7615,6 +7615,10 @@
 
 				const groupButton = event.target.closest('[data-toolbox-tool-group-target]');
 				if (groupButton && workspace.contains(groupButton)) {
+					if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+						return;
+					}
+					event.preventDefault();
 					activateToolGroup(groupButton.getAttribute('data-toolbox-tool-group-target'), true, workspace);
 					return;
 				}

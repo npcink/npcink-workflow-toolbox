@@ -83,7 +83,7 @@ function findPlaywrightChromiumExecutable(chromium) {
 
 const { chromium } = await loadPlaywright();
 const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
-const artifactDir = env('SMOKE_ARTIFACT_DIR', 'output/playwright/backend-alt-retirement');
+const artifactDir = env('SMOKE_ARTIFACT_DIR', 'output/playwright/image-task-hierarchy');
 mkdirSync(artifactDir, { recursive: true });
 const executablePath = process.env.BROWSER_EXECUTABLE || findPlaywrightChromiumExecutable(chromium);
 const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
@@ -94,10 +94,10 @@ let page;
 try {
  const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1440, height: 1000 } });
  page = await context.newPage();
- page.on('pageerror', error => errors.push(error.message));
+ page.on('pageerror', error => errors.push(`${page.url()}: ${error.stack || error.message}`));
  await page.route('**/wp-json/**', async route => {
   const url = route.request().url();
-  if (/npcink-toolbox.*(?:ai\/site-helpers|media-alt|proposals)|npcink-ai.*proposals/.test(url)) {
+  if (/npcink-toolbox.*(?:ai\/site-helpers|media-alt|media-derivative|media-optimization|proposals)|npcink-ai.*proposals/.test(url)) {
    unexpected.push(url); await route.abort(); return;
   }
   await route.continue();
@@ -105,21 +105,49 @@ try {
  await page.goto(login.url, { waitUntil: 'networkidle' });
  const toolsUrl = `${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools`;
  async function checkSettings(label) {
-  assert(await page.locator('[data-toolbox-tool-panel="image-settings"]:visible').count() === 1, `${label}: image settings are active.`);
+  const activeId = label === 'image-settings' ? 'image-settings' : 'media-batch-optimize';
+  assert(await page.locator(`[data-toolbox-tool-panel="${activeId}"]:visible`).count() === 1, `${label}: expected image task is active.`);
   assert(await page.locator('[data-toolbox-media-backup-retention]').count() === 1, `${label}: backup settings remain.`);
   assert(await page.locator('[data-toolbox-watermark-library]').count() === 1, `${label}: watermark settings remain.`);
   assert(await page.locator('[data-toolbox-media-alt-caption-review], [data-toolbox-tool-panel="media-library"], a[href*="toolbox_tool=media-alt-caption-review"]').count() === 0, `${label}: no backend ALT workbench or shortcut exists.`);
  }
  await checkSettings('Default URL');
+ assert(await page.locator('[data-toolbox-tool-group-target]').count() === 2, 'Image compression and Add watermark are the two peer tasks.');
+ assert(await page.locator('[data-toolbox-image-compression-paused]:visible').count() === 1 && await page.locator('[data-toolbox-media-derivative]').count() === 0, 'Paused compression renders no execution form or recovery controls.');
+ assert(await page.locator('[data-toolbox-image-backup-settings]').evaluate(node => !node.open), 'Shared backup settings start collapsed.');
+ await page.locator('[data-toolbox-tool-group-target="image-settings"]').click();
+ assert(await page.locator('[data-toolbox-watermark-library]:visible').count() === 1 && await page.locator('[data-toolbox-watermark-paused]:visible').count() === 1, 'Watermark task shows template settings and its runtime pause.');
+ const select = page.locator('[data-toolbox-watermark-library-default]');
+ const original = await select.inputValue();
+ const alternative = await select.locator('option:not([disabled])').evaluateAll((options, current) => options.map(option => option.value).find(value => value !== current), original);
+ assert(!!alternative, 'A second template is available for preview.');
+ await select.selectOption(alternative);
+ assert(await page.locator('[data-toolbox-watermark-library-preview]:visible').count() === 1, 'Template selection retains the small local preview.');
+ await page.locator('[data-toolbox-tool-group-target="media"]').click();
+ assert(await page.locator('[data-toolbox-image-backup-settings]').count() === 1, 'Switching tasks retains one shared backup settings block.');
+ await page.locator('[data-toolbox-tool-group-target="image-settings"]').click();
+ assert(await select.inputValue() === alternative, 'Task switching preserves unsaved template selection.');
+ await select.selectOption(original);
+ assert(await page.locator('[data-toolbox-watermark-settings]').evaluate(node => !node.open), 'Template management starts collapsed.');
+ await page.locator('[data-toolbox-watermark-settings] > summary').click();
+ assert(await page.locator('[data-toolbox-add-watermark-template]').isVisible(), 'Template management expands to existing editing controls.');
+ await page.locator('[data-toolbox-watermark-settings] > summary').click();
  for (const query of ['media-alt-caption-review', 'media-alt-caption-review&attachment_ids=282285,282284', 'media-library', 'unknown', 'image-settings', 'media-batch-optimize']) {
   await page.goto(`${toolsUrl}&toolbox_tool=${query}`, { waitUntil: 'networkidle' });
   await checkSettings(query);
  }
  for (const width of [1440, 390]) {
   await page.setViewportSize({ width, height: 1000 });
-  await page.goto(toolsUrl, { waitUntil: 'networkidle' });
-  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px settings have no horizontal overflow.`);
-  await page.screenshot({ path: `${artifactDir}/settings-${width}.png`, fullPage: true });
+  for (const task of ['media-batch-optimize', 'image-settings']) {
+   await page.goto(`${toolsUrl}&toolbox_tool=${task}`, { waitUntil: 'networkidle' });
+   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px ${task} has no horizontal overflow.`);
+   await page.screenshot({ path: `${artifactDir}/${task}-${width}.png`, fullPage: true });
+  }
+  await page.locator('[data-toolbox-watermark-settings] > summary').click();
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px template editor has no horizontal overflow.`);
+  await page.screenshot({ path: `${artifactDir}/templates-${width}.png`, fullPage: true });
+  await page.locator('[data-toolbox-image-backup-settings] > summary').click();
+  assert(await page.locator('[data-toolbox-media-backup-retention]').isVisible(), 'Shared backup controls open on demand.');
  }
  await page.setViewportSize({ width: 1440, height: 1000 });
  await page.goto(`${baseUrl}/wp-admin/upload.php?mode=list`, { waitUntil: 'networkidle' });
@@ -131,7 +159,11 @@ try {
  const noJs = await browser.newContext({ ignoreHTTPSErrors: true, javaScriptEnabled: false, storageState: await context.storageState() });
  const plainPage = await noJs.newPage();
  await plainPage.goto(`${toolsUrl}&toolbox_tool=media-alt-caption-review&attachment_ids=282285`, { waitUntil: 'load' });
- assert(await plainPage.locator('[data-toolbox-tool-panel="image-settings"]:visible').count() === 1 && await plainPage.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Without JavaScript the retired URL renders settings only.');
+ assert(await plainPage.locator('[data-toolbox-tool-panel="media-batch-optimize"]:visible').count() === 1 && await plainPage.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Without JavaScript the retired URL renders the paused compression task.');
+ await plainPage.locator('[data-toolbox-tool-group-target="image-settings"]').click();
+ assert(await plainPage.locator('[data-toolbox-watermark-library]:visible').count() === 1, 'Native task links open watermarks without JavaScript.');
+ await plainPage.locator('[data-toolbox-image-backup-settings] > summary').click();
+ assert(await plainPage.locator('[data-toolbox-media-backup-retention]').isVisible(), 'Native backup disclosure works without JavaScript.');
  await noJs.close();
  assert(unexpected.length === 0, 'Retired entries send no AI, ALT planning or proposal requests.');
  assert(errors.length === 0, `No browser JavaScript errors: ${errors.join('; ')}`);

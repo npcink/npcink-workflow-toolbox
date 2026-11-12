@@ -10967,3 +10967,71 @@ msgstr "向本站提问，或管理图片设置。AI 建议仍需人工确认。
 #: includes/Admin_Page.php
 msgid "Try your first question"
 msgstr "尝试首次提问"
+
+#: includes/Admin_Page.php
+msgid "Image Processing"
+msgstr "图片处理"
+
+#: includes/Admin_Page.php
+msgid "Image processing"
+msgstr "图片处理"
+
+#: includes/Admin_Page.php
+msgid "Open Image Processing"
+msgstr "打开图片处理"
+
+#: includes/Admin_Page.php
+msgid "Ask about your site or work with images. AI suggestions require human review."
+msgstr "向本站提问，或处理图片。AI 建议仍需人工确认。"
+
+#: includes/Admin_Page.php
+msgid "Compress images or add a watermark. Backup settings are shared."
+msgstr "压缩图片或添加水印，备份设置共用。"
+
+#: includes/Admin_Page.php
+msgid "Image compression"
+msgstr "图片压缩"
+
+#: includes/Admin_Page.php
+msgid "Choose a watermark template and preview its appearance."
+msgstr "选择水印模板并预览效果。"
+
+#: includes/Admin_Page.php
+msgid "Choose a template and preview it."
+msgstr "选择模板并预览。"
+
+#: includes/Admin_Page.php
+msgid "Reduce image file size. Format conversion belongs to compression."
+msgstr "减小图片体积，也可在压缩时转换格式。"
+
+#: includes/Admin_Page.php
+msgid "Backup settings"
+msgstr "备份设置"
+
+#: includes/Admin_Page.php
+msgid "Keep until manually cleaned up"
+msgstr "保留，直到手动清理"
+
+#: includes/Admin_Page.php
+msgid "Backups become eligible for cleanup after 30 days. Manual mode keeps them until you explicitly clean them up. Automatic mode applies only to new backups; existing records and current images are unchanged."
+msgstr "备份满 30 天后可清理。手动模式会继续保留，直到您主动清理。自动模式仅适用于此后新建的备份，不改变已有记录和当前图片。"
+
+#: includes/Admin_Page.php
+msgid "Image compression and format conversion are paused. No images will be processed."
+msgstr "图片压缩与格式转换暂未开放，不会处理图片。"
+
+#: includes/Admin_Page.php
+msgid "Choose a default template and preview it. Editing templates does not change images."
+msgstr "选择默认模板并预览，编辑模板不会修改图片。"
+
+#: includes/Admin_Page.php
+msgid "Applying watermarks is paused. You can still preview and save templates."
+msgstr "实际添加水印暂未开放，仍可预览和保存模板。"
+
+#: includes/Admin_Page.php
+msgid "Manage templates"
+msgstr "管理模板"
+
+#: includes/Admin_Page.php
+msgid "Local preview only. Saved images are unchanged."
+msgstr "仅供本地预览，不会修改已保存的图片。"
