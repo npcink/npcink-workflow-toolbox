@@ -10442,3 +10442,19 @@ msgstr ""
 
 msgid "Enable JavaScript to generate ALT drafts and use the sample options."
 msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Manage watermark templates and original-image backups."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Open Image Settings"
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Ask about your site or manage image settings. AI suggestions require human review."
+msgstr ""
+
+#: includes/Admin_Page.php
+msgid "Try your first question"
+msgstr ""

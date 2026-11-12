@@ -10951,3 +10951,19 @@ msgstr "附件 ID"
 
 msgid "Enable JavaScript to generate ALT drafts and use the sample options."
 msgstr "请启用 JavaScript，以生成 ALT 草稿或使用抽样选项。"
+
+#: includes/Admin_Page.php
+msgid "Manage watermark templates and original-image backups."
+msgstr "管理水印模板和原图备份。"
+
+#: includes/Admin_Page.php
+msgid "Open Image Settings"
+msgstr "打开图片设置"
+
+#: includes/Admin_Page.php
+msgid "Ask about your site or manage image settings. AI suggestions require human review."
+msgstr "向本站提问，或管理图片设置。AI 建议仍需人工确认。"
+
+#: includes/Admin_Page.php
+msgid "Try your first question"
+msgstr "尝试首次提问"

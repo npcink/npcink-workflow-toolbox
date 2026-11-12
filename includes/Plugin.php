@@ -65,8 +65,6 @@ final class Plugin {
 		add_action( 'admin_menu', array( $this->admin_page, 'register_menu' ), 45 );
 		add_action( 'admin_enqueue_scripts', array( $this->admin_page, 'enqueue' ) );
 		add_action( 'admin_post_npcink_toolbox_download_scheduled_review_dry_run', array( $this->admin_page, 'download_scheduled_review_dry_run' ) );
-		add_filter( 'attachment_fields_to_edit', array( $this->admin_page, 'add_media_library_attachment_actions' ), 10, 2 );
-		add_filter( 'media_row_actions', array( $this->admin_page, 'filter_media_library_row_actions' ), 10, 3 );
 		add_filter( 'bulk_actions-upload', array( $this->admin_page, 'filter_media_library_bulk_actions' ) );
 		add_filter( 'handle_bulk_actions-upload', array( $this->admin_page, 'handle_media_library_bulk_action' ), 10, 3 );
 		$this->editor_content_support->register_hooks();
