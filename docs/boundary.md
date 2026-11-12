@@ -14,8 +14,12 @@ and restore routes. Those writes use Adapter, Core, and Toolkit.
 The [single-image save-as-new core flow](processed-image-save-as-new-v1.md) adds
 only a narrow preview route and a reviewed-artifact submission to Adapter/Core.
 `npcink-abilities-toolkit/import-cloud-media-derivative` owns creation of a new
-attachment; Toolbox has no import executor or approval bypass. Legacy replacement
-and batch pauses are unchanged. A proposal receipt is not a saved attachment.
+attachment by default. An unchecked replacement option submits the existing
+`npcink-abilities-toolkit/adopt-cloud-media-derivative` instead, with a reviewed
+source fingerprint. Toolkit retains replacement, backup, reference repair and
+restore ownership; Toolbox has no executor or approval bypass. Legacy Toolbox
+replacement routes and batch remain paused. A proposal receipt is not a saved
+attachment or completed replacement.
 
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 

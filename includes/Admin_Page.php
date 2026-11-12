@@ -1916,7 +1916,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		?>
 		<form class="npcink-toolbox__card npcink-toolbox__processed-image" data-toolbox-processed-image="<?php echo esc_attr( $task ); ?>" <?php echo '' !== $tool_id ? 'data-toolbox-tool-panel="' . esc_attr( $tool_id ) . '"' : ''; ?> <?php echo $active ? '' : 'hidden'; ?>>
 			<h2><?php echo esc_html( $watermark ? __( 'Add watermark', 'npcink-workflow-toolbox' ) : __( 'Image compression', 'npcink-workflow-toolbox' ) ); ?></h2>
-			<p><?php esc_html_e( 'Keep the original. Preview a processed copy, then request approval to save it as new media.', 'npcink-workflow-toolbox' ); ?></p>
+			<p><?php esc_html_e( 'Preview the result, then request approval to save a new image or replace the selected image.', 'npcink-workflow-toolbox' ); ?></p>
 			<fieldset>
 				<div class="npcink-toolbox__processed-options">
 					<button type="button" class="button" data-processed-choose><?php esc_html_e( 'Choose image', 'npcink-workflow-toolbox' ); ?></button>
@@ -1934,6 +1934,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<details><summary><?php esc_html_e( 'More settings', 'npcink-workflow-toolbox' ); ?></summary>
 					<label><?php esc_html_e( 'Quality', 'npcink-workflow-toolbox' ); ?> <input type="number" name="quality" min="1" max="100" value="<?php echo $watermark ? '95' : '82'; ?>" /></label>
 				</details>
+				<p><label><input type="checkbox" name="replace_original" data-processed-replace /> <?php esc_html_e( 'Replace the original with the processed image', 'npcink-workflow-toolbox' ); ?></label></p>
+				<p class="description" data-processed-destination><?php esc_html_e( 'Save as a new Media Library image; keep the original and article references unchanged.', 'npcink-workflow-toolbox' ); ?></p>
 				<p><button type="submit" class="button button-primary" data-processed-preview disabled><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button></p>
 			</fieldset>
 			<div data-processed-status role="status" aria-live="polite"></div>
@@ -1943,7 +1945,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</div>
 			<p data-processed-storage hidden></p>
 			<button type="button" class="button button-primary" data-processed-save hidden disabled><?php esc_html_e( 'Request save as new media', 'npcink-workflow-toolbox' ); ?></button>
-			<p class="description"><?php esc_html_e( 'Saving adds a new file and WordPress thumbnails. It does not free server storage or replace images in articles. Unsaved previews expire automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="description"><?php esc_html_e( 'New images and replacement backups take storage space. Unsaved Cloud previews expire automatically.', 'npcink-workflow-toolbox' ); ?></p>
 			<noscript><?php esc_html_e( 'Enable JavaScript to select an image and review the result.', 'npcink-workflow-toolbox' ); ?></noscript>
 		</form>
 		<?php

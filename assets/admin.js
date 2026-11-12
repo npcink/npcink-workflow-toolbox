@@ -3568,6 +3568,15 @@
 			const status = form.querySelector('[data-processed-status]');
 			const comparison = form.querySelector('[data-processed-comparison]');
 			const storage = form.querySelector('[data-processed-storage]');
+			const replace = form.querySelector('[data-processed-replace]');
+			const destination = form.querySelector('[data-processed-destination]');
+			const updateDestination = () => {
+				save.textContent = replace.checked ? t('Request replacement') : t('Request save as new media');
+				destination.textContent = replace.checked
+					? t('After approval, replace this Media Library image and back up the original. Other uses of this image are affected. Recognized article image URLs are repaired; external URLs and theme settings need separate review.')
+					: t('Save as a new Media Library image; keep the original and article references unchanged.');
+			};
+			updateDestination();
 			let selected = null;
 			let reviewed = null;
 			let pending = null;
@@ -3596,8 +3605,12 @@
 				});
 				frame.open();
 			});
-			form.addEventListener('input', reset);
-			form.addEventListener('change', reset);
+			const optionsChanged = (event) => {
+				if (event.target === replace) { updateDestination(); return; }
+				reset();
+			};
+			form.addEventListener('input', optionsChanged);
+			form.addEventListener('change', optionsChanged);
 			form.addEventListener('submit', async (event) => {
 				event.preventDefault();
 				if (busy || !selected || !form.reportValidity()) { return; }
@@ -3630,7 +3643,7 @@
 						throw new Error(t('The processed preview could not be displayed.'));
 					}
 					reviewed = { source_attachment_id: Number(selected.id), expected_source_media_fingerprint: pending.source_media_fingerprint, derivative_artifact: artifact, dry_run: true, commit: false, idempotency_key: 'media-import-' + artifact.artifact_id };
-					storage.textContent = t('Original') + ': ' + formatMediaBytes(artifact.transform_facts.source_filesize_bytes) + ' → ' + t('Processed copy') + ': ' + formatMediaBytes(artifact.filesize_bytes) + '. ' + t('Saving adds this file plus WordPress thumbnails; the original stays.');
+					storage.textContent = t('Original') + ': ' + formatMediaBytes(artifact.transform_facts.source_filesize_bytes) + ' → ' + t('Processed copy') + ': ' + formatMediaBytes(artifact.filesize_bytes);
 					if (task === 'compression' && artifact.filesize_bytes >= artifact.transform_facts.source_filesize_bytes) {
 						storage.textContent += ' ' + t('This result is not smaller than the original. Saving it will not reduce the image file size.');
 					}
@@ -3655,22 +3668,30 @@
 			save.addEventListener('click', async () => {
 				if (busy || !reviewed) { return; }
 				if (Date.parse(reviewed.derivative_artifact.expires_at) <= Date.now()) { reset(); status.textContent = t('This preview expired. Generate a new preview before saving.'); return; }
+				const replacing = replace.checked;
+				const input = replacing ? {
+					attachment_id: reviewed.source_attachment_id,
+					expected_current_media_fingerprint: reviewed.expected_source_media_fingerprint,
+					derivative_artifact: reviewed.derivative_artifact,
+					dry_run: true, commit: false,
+					idempotency_key: 'media-replace-' + reviewed.derivative_artifact.artifact_id,
+				} : reviewed;
 				busy = true;
 				fieldset.disabled = true;
 				save.disabled = true;
-				status.textContent = t('Submitting the new media save request...');
+				status.textContent = replacing ? t('Submitting the image replacement request...') : t('Submitting the new media save request...');
 				try {
 					const bridge = await postJson(config.adapterRestUrl, 'proposals', {
-						ability_id: 'npcink-abilities-toolkit/import-cloud-media-derivative',
-						title: t('Save processed image as new media'),
-						summary: t('Create a new attachment from the reviewed result. Preserve the original and all article references.'),
-						input: reviewed,
+						ability_id: replacing ? 'npcink-abilities-toolkit/adopt-cloud-media-derivative' : 'npcink-abilities-toolkit/import-cloud-media-derivative',
+						title: replacing ? t('Replace image with reviewed result') : t('Save processed image as new media'),
+						summary: replacing ? t('Replace the selected attachment, back up the original and repair recognized article image URLs. Review all affected uses before approval.') : t('Create a new attachment from the reviewed result. Preserve the original and all article references.'),
+						input,
 					});
 					const proposal = proposalFromPlanResponse(bridge);
 					const id = proposalIdFromResponse(proposal);
 					if (!id) { throw new Error(t('The save request did not return a review reference.')); }
 					clearTimeout(expiryTimer);
-					status.textContent = t('Save request submitted. The new image has not been added to the Media Library yet. Continue in Core review before the preview expires.');
+					status.textContent = replacing ? t('Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires.') : t('Save request submitted. The new image has not been added to the Media Library yet. Continue in Core review before the preview expires.');
 					status.appendChild(document.createTextNode(' '));
 					status.appendChild(createLink(config.coreAdminUrl + '&proposal_id=' + encodeURIComponent(id), 'Open in Core review'));
 					reviewed = null;

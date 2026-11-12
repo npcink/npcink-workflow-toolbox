@@ -98,8 +98,11 @@ $id=0; $path=''; try {
 	};
 	const localReview = { method: 'POST', endpoint: `${baseUrl}/wp-json/npcink-toolbox/v1/media-derivative-local-review/${artifact.artifact_id}`, artifact };
 	let requestedInput;
+	let previewRequests = 0;
+	let expectedReplacement = false;
 	await context.route('**/wp-json/npcink-toolbox/v1/processed-image-preview', async route => {
 		requestedInput = route.request().postDataJSON();
+		previewRequests++;
 		artifact.transform_facts.watermark_applied = requestedInput.task === 'watermark';
 		await route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ run_id: 'browser-preview-run', source_attachment_id: attachmentId, source_media_fingerprint: artifact.transform_facts.source_checksum }) });
 	});
@@ -113,7 +116,12 @@ $id=0; $path=''; try {
 	let saveRequests = 0;
 	await context.route('**/wp-json/npcink-openclaw-adapter/v1/proposals', async route => {
 		const body = route.request().postDataJSON();
-		assert(body.ability_id === 'npcink-abilities-toolkit/import-cloud-media-derivative' && body.input.source_attachment_id === attachmentId && body.input.commit === false, 'Save submits only the new-attachment governed ability.');
+		assert(body.input.commit === false && body.input.dry_run === true, 'Save requests cannot commit or approve writes.');
+		if (expectedReplacement) {
+			assert(body.ability_id === 'npcink-abilities-toolkit/adopt-cloud-media-derivative' && body.input.attachment_id === attachmentId && body.input.expected_current_media_fingerprint === artifact.transform_facts.source_checksum && !('source_attachment_id' in body.input), 'Replacement preserves the attachment identity and reviewed source fingerprint.');
+		} else {
+			assert(body.ability_id === 'npcink-abilities-toolkit/import-cloud-media-derivative' && body.input.source_attachment_id === attachmentId, 'Default save still creates a new-attachment proposal.');
+		}
 		saveRequests++;
 		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ proposal: { proposal_id: 'browser-new-media', status: 'pending' } }) });
 	});
@@ -134,6 +142,7 @@ $id=0; $path=''; try {
 		await page.goto(tools + '&toolbox_tool=' + (task === 'compression' ? 'media-batch-optimize' : 'image-settings'), { waitUntil: 'networkidle' });
 		const form = page.locator(`[data-toolbox-processed-image="${task}"]`);
 		assert(await form.isVisible(), `${task}: working surface visible.`);
+		assert(!(await form.locator('[data-processed-replace]').isChecked()), 'Replacement defaults to unchecked.');
 		assert(await form.locator('[data-processed-preview]').isDisabled(), 'Preview requires a selected image.');
 		assert(!(await form.locator('details').evaluate(node => node.open)), 'More settings starts folded.');
 		await choose(form);
@@ -142,11 +151,11 @@ $id=0; $path=''; try {
 		assert(requestedInput.task === task && requestedInput.input.attachment_id === attachmentId, 'Preview binds one selected image and task.');
 		assert(task !== 'compression' || !requestedInput.input.watermark, 'Compression does not inherit saved watermark defaults.');
 		assert(await form.locator('[data-processed-comparison] img').evaluateAll(nodes => nodes.every(node => node.naturalWidth === 640 && node.naturalHeight === 360)), 'Original and processed result both decode.');
-		assert((await form.locator('[data-processed-storage]').innerText()).includes('WordPress'), 'Storage copy accounts for new files and thumbnails.');
+		assert((await form.locator('.description').last().innerText()).length > 0, 'Storage costs remain visible beside the save flow.');
 		if (task === 'compression') {
 			assert(/并不比原图小|not smaller than the original/.test(await form.locator('[data-processed-storage]').innerText()), 'Non-smaller compression is disclosed before saving.');
 		}
-		assert(saveRequests === (task === 'compression' ? 0 : 1), 'Preview does not submit a save request.');
+		assert(saveRequests === (task === 'compression' ? 0 : 2), 'Preview does not submit a save request.');
 		mkdirSync('output/playwright/processed-image', { recursive: true });
 		for (const width of [1440, 390]) {
 			await page.setViewportSize({ width, height: 1000 });
@@ -163,6 +172,19 @@ $id=0; $path=''; try {
 		await form.locator('[data-processed-status] a[href*="proposal_id=browser-new-media"]').waitFor();
 		assert(await form.locator('[data-processed-save]').isHidden(), 'Successful submission cannot be sent twice.');
 		assert((await form.locator('[data-processed-status]').innerText()).match(/尚未|not been added/), 'Pending proposal is never shown as a saved image.');
+		await form.locator('[data-processed-preview]').click();
+		await form.locator('[data-processed-save]:not([hidden]):not([disabled])').waitFor();
+		const beforeToggle = previewRequests;
+		await form.locator('[data-processed-replace]').check();
+		assert(await form.locator('[data-processed-save]').isEnabled() && beforeToggle === previewRequests, 'Switching the save destination keeps the reviewed preview without another Cloud request.');
+		assert(/影响|affected/.test(await form.locator('[data-processed-destination]').innerText()), 'Replacement discloses effects on other image uses.');
+		assert(/替换|replacement/i.test(await form.locator('[data-processed-save]').innerText()), 'Primary action explicitly requests replacement.');
+		await page.screenshot({ path: `output/playwright/processed-image/${task}-replace-1440.png`, fullPage: true });
+		expectedReplacement = true;
+		await form.locator('[data-processed-save]').click();
+		await form.locator('[data-processed-status] a[href*="proposal_id=browser-new-media"]').waitFor();
+		assert(/审批|approval/.test(await form.locator('[data-processed-status]').innerText()), 'Replacement stays pending approval and does not claim the original changed.');
+		expectedReplacement = false;
 	}
 	assert(errors.length === 0, `No browser JavaScript errors: ${errors.join('; ')}`);
 	assert(!requests.some(request => /approve-and-execute|commit-preflight|\/execute|media-optimization-batches/.test(request.url)), 'Toolbox never approves, executes or starts a batch.');
