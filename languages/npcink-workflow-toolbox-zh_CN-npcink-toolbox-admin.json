@@ -1099,7 +1099,31 @@
       "Image recognition did not produce a usable ALT. Check the image and try again.": ["识图未能生成可用的 ALT，请检查图片后重试。"],
       "Some images could not be recognized. No ALT was generated for them from metadata. Check Cloud and the image files, then try again.": ["部分图片识别失败，未使用元数据代替生成 ALT。请检查 Cloud 和图片文件后重试。"],
       "Image recognition is still processing. Try again later.": ["图片仍在识别中，请稍后重试。"],
-      "Image recognition is still processing. No ALT draft is available for those images yet. Try again later.": ["图片仍在识别中，暂未生成这些图片的 ALT 草稿，请稍后重试。"]
+      "Image recognition is still processing. No ALT draft is available for those images yet. Try again later.": ["图片仍在识别中，暂未生成这些图片的 ALT 草稿，请稍后重试。"],
+      "Keep the original. Preview a processed copy, then request approval to save it as new media.": ["保留原图。先预览处理结果，再申请另存为媒体库新图。"],
+      "Choose image": ["选择图片"],
+      "Keep format": ["保持原格式"],
+      "More settings": ["更多设置"],
+      "Processed copy": ["处理后的新图"],
+      "Request save as new media": ["申请另存为新图"],
+      "Saving adds a new file and WordPress thumbnails. It does not free server storage or replace images in articles. Unsaved previews expire automatically.": ["保存会新增图片文件及 WordPress 缩略图，不会释放服务器空间或替换文章中的图片。未保存的预览会自动过期清理。"],
+      "Enable JavaScript to select an image and review the result.": ["请启用 JavaScript，以选择图片并查看处理结果。"],
+      "Manage watermark templates": ["管理水印模板"],
+      "Select one image and a supported processing task.": ["请选择一张图片及支持的处理方式。"],
+      "Compression and watermark are separate tasks.": ["图片压缩和添加水印是两个独立的操作。"],
+      "You cannot use this image for processing.": ["您无权使用这张图片进行处理。"],
+      "Generating preview. The original is unchanged.": ["正在生成预览，原图保持不变。"],
+      "The preview is unavailable or no longer matches this image. Generate it again.": ["预览不可用或已与当前图片不符，请重新生成。"],
+      "The processed preview could not be displayed.": ["无法显示处理后的预览图。"],
+      "Saving adds this file plus WordPress thumbnails; the original stays.": ["保存后会新增此文件及 WordPress 缩略图，原图继续保留。"],
+      "Compare both images. Request saving only if the result is suitable.": ["请对比两张图片，满意后再申请保存新图。"],
+      "This preview expired. Generate a new preview before saving.": ["预览已过期，请重新生成后再保存。"],
+      "Submitting the new media save request...": ["正在提交新图保存申请……"],
+      "Save processed image as new media": ["将处理结果另存为媒体库新图"],
+      "Create a new attachment from the reviewed result. Preserve the original and all article references.": ["将已审阅的结果保存为新附件，保留原图及所有文章引用。"],
+      "The save request did not return a review reference.": ["保存申请未返回审批编号。"],
+      "Save request submitted. The new image has not been added to the Media Library yet. Continue in Core review before the preview expires.": ["保存申请已提交，新图尚未进入媒体库。请在预览过期前前往审批页面完成后续操作。"],
+      "This result is not smaller than the original. Saving it will not reduce the image file size.": ["本次结果并不比原图小，保存它不能减小图片文件体积。"]
     }
   }
 }

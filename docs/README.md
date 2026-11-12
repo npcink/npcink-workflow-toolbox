@@ -283,3 +283,5 @@ afterwards an archived record is edited only to fix link targets.
 
 - [Article logic/context-risk acceptance (2026-11-01)](article-review-context-acceptance-2026-11-01.md) — merged sources, frozen 24-call outcomes including one timeout, installed editor, no-store audit and closeout; [body-free evidence](article-review-context-evidence-2026-11-01.json).
 - [News-control follow-up evidence (2026-11-01)](article-news-control-recheck-evidence-2026-11-01.json) — one explicit successful recheck after the transport fix; preserves the original 23/24 initial completion count.
+
+- [Processed image save as new v1](processed-image-save-as-new-v1.md) — single-image preview, governed new attachment and storage policy.

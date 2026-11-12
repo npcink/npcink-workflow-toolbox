@@ -149,6 +149,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 		$this->post( '/flows/media-brief', 'media_brief' );
 		$this->post( '/editor/content-support', 'editor_content_support' );
 		$this->post( '/media-derivative-handoff', 'media_derivative_handoff' );
+		$this->post( '/processed-image-preview', 'create_processed_image_preview' );
 		$this->post( '/media-derivative-preview', 'create_media_derivative_preview' );
 		$this->get( '/media-derivative-preview/(?P<run_id>[A-Za-z0-9._:-]+)', 'get_media_derivative_preview' );
 		$this->get( '/media-derivative-preview/(?P<run_id>[A-Za-z0-9._:-]+)/result', 'get_media_derivative_preview_result' );
@@ -330,6 +331,7 @@ final class Rest_Controller extends Rest_Controller_Support {
 			'/flows/media-brief'                       => 'cap.toolbox.workflow_suggest',
 			'/editor/content-support'                  => 'cap.toolbox.editor_suggest',
 			'/media-derivative-handoff'                => 'cap.toolbox.workflow_suggest',
+			'/processed-image-preview'                 => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-preview'                => 'cap.toolbox.workflow_suggest',
 			'/media-derivative-optimization-payload'   => 'cap.toolbox.workflow_suggest',
 			'/nightly-inspection/cloud-runtime-entitlement' => 'cap.toolbox.nightly_inspection',
@@ -646,6 +648,10 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	public function media_derivative_handoff( WP_REST_Request $request ) {
 		return $this->media_derivative_previews->media_derivative_handoff( $request );
+	}
+
+	public function create_processed_image_preview( WP_REST_Request $request ) {
+		return $this->media_derivative_previews->create_processed_image_preview( $request );
 	}
 
 	public function create_media_derivative_preview( WP_REST_Request $request ) {

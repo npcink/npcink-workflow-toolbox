@@ -11,6 +11,12 @@ ADR-015 permits one narrow present-admin write lane for `auto_safe.v1` Media Lib
 ADR-017 retires the Toolbox single-image import, replacement, backup-listing,
 and restore routes. Those writes use Adapter, Core, and Toolkit.
 
+The [single-image save-as-new core flow](processed-image-save-as-new-v1.md) adds
+only a narrow preview route and a reviewed-artifact submission to Adapter/Core.
+`npcink-abilities-toolkit/import-cloud-media-derivative` owns creation of a new
+attachment; Toolbox has no import executor or approval bypass. Legacy replacement
+and batch pauses are unchanged. A proposal receipt is not a saved attachment.
+
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 
 ADR-006 is the active authority for choosing between native editor commit and
@@ -270,6 +276,7 @@ first scoped version; those actions stay administrator-facing.
 - `/media-optimization-batches/{batch_id}/confirm`
 - `/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
 - `/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
+- `/processed-image-preview` (single-image read-only core flow)
 - `/media-derivative-preview`
 - `/media-derivative-preview/{run_id}`
 - `/media-derivative-preview/{run_id}/result`

@@ -458,6 +458,16 @@
       "boundary_note": "Delegates one explicitly selected batch restore to the existing Toolkit restore ability and isolates item failure."
     },
     {
+      "route": "/processed-image-preview",
+      "documented_route": "/processed-image-preview",
+      "methods": ["POST"],
+      "scope": "cap.toolbox.workflow_suggest",
+      "owner": "toolbox_fixed_workflow_surface",
+      "write_posture": "preview_only",
+      "direct_wordpress_write": false,
+      "boundary_note": "Explicitly resumed single-image compression or watermark preview; manual preserve-dimensions only. Signed Cloud Addon transport, no WordPress media writes or proposals."
+    },
+    {
       "route": "/media-derivative-preview",
       "documented_route": "/media-derivative-preview",
       "methods": [
