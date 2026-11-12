@@ -3,6 +3,19 @@
 Status: accepted by the operator on 2026-11-09 (Asia/Shanghai); active until a
 specific later operator decision changes the scope. No automatic expiry.
 
+## Single-image save-as-new amendment — 2026-11-12 (latest)
+
+The operator explicitly resumed one image core flow: select an existing image,
+compress/convert or watermark in Cloud, compare, then submit an explicit save-as-new
+request through Adapter/Core. Toolkit creates a distinct Media Library attachment;
+source files, source metadata and existing article references stay unchanged.
+The new `/processed-image-preview` route is a narrow read-only exception to the
+advanced-media pause. Legacy preview/replacement/batch execution stays paused.
+Compression and watermark are peer tasks; only compression offers output format.
+No batch, source deletion, automatic storage management, approval bypass, provider,
+model or new runtime is authorized. Previews expire in Cloud; saved copies add disk
+usage including WordPress sizes. See [the contract](processed-image-save-as-new-v1.md).
+
 ## Image task hierarchy — 2026-11-12 (latest)
 
 The operator approved Image Processing with two peer tasks: Image compression

@@ -488,6 +488,7 @@ and `/agent-feedback`, which accept
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/confirm`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
+- `POST /wp-json/npcink-toolbox/v1/processed-image-preview`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-preview`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}/result`
@@ -1044,3 +1045,6 @@ registered Ability. Cloud Addon projects that registration; Cloud retrieves
 `site_knowledge_evidence` and validates exact quotes. Toolbox validates the
 reply envelope and renders answer/source text without model-controlled links.
 See [contract](site-content-answer-v1.md); this adds no runtime ownership.
+
+Single-image save-as-new uses read-only `/processed-image-preview` and the existing
+Adapter/Core proposal path; see [the contract](processed-image-save-as-new-v1.md).

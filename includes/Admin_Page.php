@@ -1910,8 +1910,54 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
+	/** Single-image core workflow; settings and old batch runtime stay separate. */
+	private function render_processed_image_tool( string $task, string $tool_id = '', bool $active = true ): void {
+		$watermark = 'watermark' === $task;
+		?>
+		<form class="npcink-toolbox__card npcink-toolbox__processed-image" data-toolbox-processed-image="<?php echo esc_attr( $task ); ?>" <?php echo '' !== $tool_id ? 'data-toolbox-tool-panel="' . esc_attr( $tool_id ) . '"' : ''; ?> <?php echo $active ? '' : 'hidden'; ?>>
+			<h2><?php echo esc_html( $watermark ? __( 'Add watermark', 'npcink-workflow-toolbox' ) : __( 'Image compression', 'npcink-workflow-toolbox' ) ); ?></h2>
+			<p><?php esc_html_e( 'Keep the original. Preview a processed copy, then request approval to save it as new media.', 'npcink-workflow-toolbox' ); ?></p>
+			<fieldset>
+				<div class="npcink-toolbox__processed-options">
+					<button type="button" class="button" data-processed-choose><?php esc_html_e( 'Choose image', 'npcink-workflow-toolbox' ); ?></button>
+					<span data-processed-selection><?php esc_html_e( 'No image selected', 'npcink-workflow-toolbox' ); ?></span>
+					<?php if ( $watermark ) : ?>
+						<label><?php esc_html_e( 'Watermark template', 'npcink-workflow-toolbox' ); ?>
+							<select name="template"><?php $this->render_watermark_template_options( $this->settings->media_watermark_templates(), (string) $this->settings->get_watermark_template_settings()['default_template'], absint( $this->settings->get_media_optimization_settings()['watermark_attachment_id'] ?? 0 ), false ); ?></select>
+						</label>
+					<?php else : ?>
+						<label><?php esc_html_e( 'Output format', 'npcink-workflow-toolbox' ); ?>
+							<select name="format"><option value="webp">WebP</option><option value="avif">AVIF</option><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="original"><?php esc_html_e( 'Keep format', 'npcink-workflow-toolbox' ); ?></option></select>
+						</label>
+					<?php endif; ?>
+				</div>
+				<details><summary><?php esc_html_e( 'More settings', 'npcink-workflow-toolbox' ); ?></summary>
+					<label><?php esc_html_e( 'Quality', 'npcink-workflow-toolbox' ); ?> <input type="number" name="quality" min="1" max="100" value="<?php echo $watermark ? '95' : '82'; ?>" /></label>
+				</details>
+				<p><button type="submit" class="button button-primary" data-processed-preview disabled><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button></p>
+			</fieldset>
+			<div data-processed-status role="status" aria-live="polite"></div>
+			<div class="npcink-toolbox__processed-comparison" data-processed-comparison hidden>
+				<figure><figcaption><?php esc_html_e( 'Original', 'npcink-workflow-toolbox' ); ?></figcaption><img data-processed-original alt="" /></figure>
+				<figure><figcaption><?php esc_html_e( 'Processed copy', 'npcink-workflow-toolbox' ); ?></figcaption><img data-processed-result alt="" /></figure>
+			</div>
+			<p data-processed-storage hidden></p>
+			<button type="button" class="button button-primary" data-processed-save hidden disabled><?php esc_html_e( 'Request save as new media', 'npcink-workflow-toolbox' ); ?></button>
+			<p class="description"><?php esc_html_e( 'Saving adds a new file and WordPress thumbnails. It does not free server storage or replace images in articles. Unsaved previews expire automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			<noscript><?php esc_html_e( 'Enable JavaScript to select an image and review the result.', 'npcink-workflow-toolbox' ); ?></noscript>
+		</form>
+		<?php
+	}
+
 	private function render_image_settings_panel( string $tool_id, bool $active = false ): void {
-		$this->render_watermark_template_library( $tool_id, $active );
+		?>
+		<section data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" <?php echo $active ? '' : 'hidden'; ?>>
+			<?php $this->render_processed_image_tool( 'watermark' ); ?>
+			<details class="npcink-toolbox__processed-templates"><summary><?php esc_html_e( 'Manage watermark templates', 'npcink-workflow-toolbox' ); ?></summary>
+				<?php $this->render_watermark_template_library( '', true ); ?>
+			</details>
+		</section>
+		<?php
 	}
 
 	private function render_image_backup_settings(): void {
@@ -2040,7 +2086,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</div>
 
 			<?php if ( Settings::cloud_feature_paused( 'advanced_media' ) ) : ?>
-				<p class="description" data-toolbox-watermark-paused><?php esc_html_e( 'Applying watermarks is paused. You can still preview and save templates.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php endif; ?>
 			<div class="npcink-toolbox__watermark-library-summary">
 				<label>
@@ -2675,13 +2720,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 	private function render_media_derivative_batch_tool( string $endpoint, string $title, string $description, string $tool_id, bool $active = false, bool $cloud_ready = true ): void {
 		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
-			?>
-			<section class="npcink-toolbox__card" data-toolbox-tool-panel="<?php echo esc_attr( $tool_id ); ?>" data-toolbox-image-compression-paused <?php echo $active ? '' : 'hidden'; ?>>
-				<h2><?php esc_html_e( 'Image compression', 'npcink-workflow-toolbox' ); ?></h2>
-				<p><?php esc_html_e( 'Reduce image file size. Format conversion belongs to compression.', 'npcink-workflow-toolbox' ); ?></p>
-				<p class="description"><?php esc_html_e( 'Image compression and format conversion are paused. No images will be processed.', 'npcink-workflow-toolbox' ); ?></p>
-			</section>
-			<?php
+			$this->render_processed_image_tool( 'compression', $tool_id, $active );
 			return;
 		}
 

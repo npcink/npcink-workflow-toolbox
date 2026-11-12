@@ -46,6 +46,10 @@ final class Rest_Media_Derivative_Previews {
 		if ( Settings::cloud_feature_paused( 'advanced_media' ) ) {
 			return Settings::cloud_feature_pause_error( 'advanced_media' );
 		}
+		return $this->dispatch_media_derivative_preview( $request );
+	}
+
+	private function dispatch_media_derivative_preview( WP_REST_Request $request, string $processing_purpose = '' ) {
 		$preview_input = $this->media_derivative_preview_input( $request );
 		if ( is_wp_error( $preview_input ) ) {
 			return $preview_input;
@@ -77,13 +81,15 @@ final class Rest_Media_Derivative_Previews {
 			}
 		}
 
-		$trace_id = sanitize_text_field( (string) ( $request->get_param( 'trace_id' ) ?: wp_generate_uuid4() ) );
-		$dispatch = npcink_cloud_addon_dispatch_media_derivative_cloud_request(
+		$source_fingerprint = 'sha256:' . hash_file( 'sha256', $source_artifact['path'] );
+		$trace_id           = sanitize_text_field( (string) ( $request->get_param( 'trace_id' ) ?: wp_generate_uuid4() ) );
+		$dispatch           = npcink_cloud_addon_dispatch_media_derivative_cloud_request(
 			$ability_response,
 			$source_artifact,
 			$trace_id,
 			sanitize_text_field( (string) $request->get_param( 'idempotency_key' ) ),
-			$watermark_artifact
+			$watermark_artifact,
+			$processing_purpose
 		);
 		if ( is_wp_error( $dispatch ) ) {
 			return $dispatch;
@@ -94,17 +100,43 @@ final class Rest_Media_Derivative_Previews {
 
 		return new WP_REST_Response(
 			array(
-				'contract_version'       => 'toolbox_media_derivative_preview.v2',
-				'status'                 => 'submitted',
-				'run_id'                 => sanitize_text_field( (string) $run_id ),
-				'cloud_run'              => $cloud_run,
-				'ability_response'       => $ability_response,
-				'write_posture'          => 'preview_only',
-				'direct_wordpress_write' => false,
-				'core_proposal_created'  => false,
+				'contract_version'         => 'toolbox_media_derivative_preview.v2',
+				'status'                   => 'submitted',
+				'run_id'                   => sanitize_text_field( (string) $run_id ),
+				'cloud_run'                => $cloud_run,
+				'ability_response'         => $ability_response,
+				'source_attachment_id'     => absint( $ability_input['attachment_id'] ?? 0 ),
+				'source_media_fingerprint' => $source_fingerprint,
+				'write_posture'            => 'preview_only',
+				'direct_wordpress_write'   => false,
+				'core_proposal_created'    => false,
 			),
 			202
 		);
+	}
+
+	/** Narrow single-image preview; legacy replacement/batch routes stay paused. */
+	public function create_processed_image_preview( WP_REST_Request $request ) {
+		$input = $request->get_param( 'input' );
+		$task  = $request->get_param( 'task' );
+		if ( ! is_array( $input ) || ! in_array( $task, array( 'compression', 'watermark' ), true ) || array_diff( array_keys( $input ), array( 'attachment_id', 'preferred_format', 'quality', 'watermark', 'watermark_attachment_id' ) ) ) {
+			return new WP_Error( 'npcink_toolbox_processed_image_input_invalid', __( 'Select one image and a supported processing task.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
+		}
+		if ( ( 'compression' === $task && ( isset( $input['watermark'] ) || isset( $input['watermark_attachment_id'] ) ) ) || ( 'watermark' === $task && empty( $input['watermark'] ) ) ) {
+			return new WP_Error( 'npcink_toolbox_processed_image_task_invalid', __( 'Compression and watermark are separate tasks.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
+		}
+		if ( ! is_int( $input['attachment_id'] ?? null ) || $input['attachment_id'] < 1 || ( isset( $input['quality'] ) && ( ! is_int( $input['quality'] ) || $input['quality'] < 1 || $input['quality'] > 100 ) ) || ( isset( $input['preferred_format'] ) && ! in_array( $input['preferred_format'], array( 'webp', 'avif', 'jpeg', 'png', 'original' ), true ) ) || ( isset( $input['watermark'] ) && ! is_array( $input['watermark'] ) ) || ( isset( $input['watermark_attachment_id'] ) && ( ! is_int( $input['watermark_attachment_id'] ) || $input['watermark_attachment_id'] < 1 ) ) ) {
+			return new WP_Error( 'npcink_toolbox_processed_image_input_invalid', __( 'Select one image and a supported processing task.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
+		}
+		$input['optimization_mode'] = 'manual';
+		$input['resize_mode']       = 'preserve';
+		if ( 'watermark' === $task ) {
+			$input['preferred_format'] = 'original';
+		}
+		$preview = new WP_REST_Request( 'POST' );
+		$preview->set_param( 'input', $input );
+		$preview->set_param( 'idempotency_key', sanitize_text_field( (string) $request->get_param( 'idempotency_key' ) ) );
+		return $this->dispatch_media_derivative_preview( $preview, 'save_as_new.v1' );
 	}
 
 	public function get_media_derivative_preview( WP_REST_Request $request ) {
@@ -444,7 +476,10 @@ final class Rest_Media_Derivative_Previews {
 	}
 
 	private function media_derivative_attachment_descriptor( int $attachment_id ) {
-		$path = $attachment_id > 0 ? get_attached_file( $attachment_id ) : '';
+		if ( $attachment_id <= 0 || ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return new WP_Error( 'npcink_toolbox_media_derivative_permission_denied', __( 'You cannot use this image for processing.', 'npcink-workflow-toolbox' ), array( 'status' => 403 ) );
+		}
+		$path = get_attached_file( $attachment_id );
 		if ( ! is_string( $path ) || '' === $path || ! is_readable( $path ) ) {
 			return new WP_Error(
 				'npcink_toolbox_media_derivative_file_unreadable',

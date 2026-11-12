@@ -7,9 +7,16 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+**Single-image save as new — 2026-11-12:** the operator authorized the bounded
+[core flow](processed-image-save-as-new-v1.md): Cloud preview, compare, explicit
+Adapter/Core save request, Toolkit new attachment. Source bytes/metadata and article
+references stay unchanged. This supersedes the paused single-image presentation
+below; legacy batch/replacement paths remain paused. Verification is recorded in
+the contract and must distinguish deterministic, installed and live Cloud evidence.
+
 **Image task hierarchy — 2026-11-12:** Image Processing now separates compression
-(including format conversion) from watermark templates. Processing remains paused;
-only the existing template settings/preview are active. Shared backup cleanup and
+(including format conversion) from watermark templates. The later single-image
+flow above activates only reviewed save-as-new processing. Shared backup cleanup and
 template management are collapsed. Old tool IDs remain, and retired ALT URLs fall
 back to the paused compression task. See [the current admin contract](admin-ia-site-and-ask-v1.md).
 
@@ -301,8 +308,8 @@ ordinary generation and Site Knowledge remain available. See
 - Default surfaces: editor **Npcink Content Support** sidebar (formatting, Article check with contextual ALT,
   site citations and image candidates) on `post`/`page` editors only (extend via the
   `npcink_toolbox_editor_supported_post_types` filter). Admin has three top
-  tabs: **Start**, **Site & Ask**, and **Image Review & Settings** (ALT review first;
-  optimization paused). Site & Ask defaults to Smart Ask; Site Profile and manual
+  tabs: **Start**, **Site & Ask**, and **Image Processing** (compression/format
+  conversion and watermark; batch/replacement paused). Site & Ask defaults to Smart Ask; Site Profile and manual
   Site Check render only through support/explicit legacy URLs. This is
   the source layout, not a new WordPress.org release receipt. Release packages
   ship `.min` asset siblings (`composer package:release` runs

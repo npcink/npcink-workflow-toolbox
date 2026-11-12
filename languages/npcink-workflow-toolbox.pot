@@ -10530,3 +10530,76 @@ msgstr ""
 #: includes/Admin_Page.php
 msgid "Local preview only. Saved images are unchanged."
 msgstr ""
+
+msgid "Keep the original. Preview a processed copy, then request approval to save it as new media."
+msgstr ""
+
+msgid "Choose image"
+msgstr ""
+
+msgid "Keep format"
+msgstr ""
+
+msgid "More settings"
+msgstr ""
+
+msgid "Processed copy"
+msgstr ""
+
+msgid "Request save as new media"
+msgstr ""
+
+msgid "Saving adds a new file and WordPress thumbnails. It does not free server storage or replace images in articles. Unsaved previews expire automatically."
+msgstr ""
+
+msgid "Enable JavaScript to select an image and review the result."
+msgstr ""
+
+msgid "Manage watermark templates"
+msgstr ""
+
+msgid "Select one image and a supported processing task."
+msgstr ""
+
+msgid "Compression and watermark are separate tasks."
+msgstr ""
+
+msgid "You cannot use this image for processing."
+msgstr ""
+
+msgid "Generating preview. The original is unchanged."
+msgstr ""
+
+msgid "The preview is unavailable or no longer matches this image. Generate it again."
+msgstr ""
+
+msgid "The processed preview could not be displayed."
+msgstr ""
+
+msgid "Saving adds this file plus WordPress thumbnails; the original stays."
+msgstr ""
+
+msgid "Compare both images. Request saving only if the result is suitable."
+msgstr ""
+
+msgid "This preview expired. Generate a new preview before saving."
+msgstr ""
+
+msgid "Submitting the new media save request..."
+msgstr ""
+
+msgid "Save processed image as new media"
+msgstr ""
+
+msgid "Create a new attachment from the reviewed result. Preserve the original and all article references."
+msgstr ""
+
+msgid "The save request did not return a review reference."
+msgstr ""
+
+msgid "Save request submitted. The new image has not been added to the Media Library yet. Continue in Core review before the preview expires."
+msgstr ""
+
+#: assets/admin.js
+msgid "This result is not smaller than the original. Saving it will not reduce the image file size."
+msgstr ""

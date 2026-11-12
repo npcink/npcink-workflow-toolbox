@@ -357,6 +357,7 @@ registered.
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/confirm`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/complete`
 - `POST /wp-json/npcink-toolbox/v1/media-optimization-batches/{batch_id}/items/{attachment_id}/restore`
+- `POST /wp-json/npcink-toolbox/v1/processed-image-preview`
 - `POST /wp-json/npcink-toolbox/v1/media-derivative-preview`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}`
 - `GET /wp-json/npcink-toolbox/v1/media-derivative-preview/{run_id}/result`
@@ -968,3 +969,6 @@ The current gate runs PHP syntax linting and static contract checks.
 Smart Ask may select public site content through the registered, administrator-only
 `npcink-toolbox/answer-site-content` ability through Cloud Addon. Answers include
 verified source references; see [contract and acceptance](docs/site-content-answer-v1.md).
+
+Single-image save-as-new uses read-only `/processed-image-preview` and the existing
+Adapter/Core proposal path; see [the contract](docs/processed-image-save-as-new-v1.md).

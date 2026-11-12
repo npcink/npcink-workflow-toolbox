@@ -3559,6 +3559,133 @@
 		return String(cloudRun.status || (cloudRun.data && cloudRun.data.status) || '');
 	}
 
+	function initProcessedImageTools() {
+		document.querySelectorAll('[data-toolbox-processed-image]').forEach((form) => {
+			const task = form.dataset.toolboxProcessedImage;
+			const fieldset = form.querySelector('fieldset');
+			const preview = form.querySelector('[data-processed-preview]');
+			const save = form.querySelector('[data-processed-save]');
+			const status = form.querySelector('[data-processed-status]');
+			const comparison = form.querySelector('[data-processed-comparison]');
+			const storage = form.querySelector('[data-processed-storage]');
+			let selected = null;
+			let reviewed = null;
+			let pending = null;
+			let busy = false;
+			let expiryTimer;
+			const reset = () => {
+				clearTimeout(expiryTimer);
+				revokeMediaDerivativePreviewUrls(form);
+				reviewed = null;
+				pending = null;
+				save.hidden = true;
+				save.disabled = true;
+				comparison.hidden = true;
+				storage.hidden = true;
+				status.textContent = '';
+				preview.disabled = !selected;
+				preview.classList.add('button-primary');
+			};
+			form.querySelector('[data-processed-choose]').addEventListener('click', () => {
+				if (busy || !window.wp || !wp.media) { return; }
+				const frame = wp.media({ title: t('Choose image'), library: { type: 'image' }, multiple: false });
+				frame.on('select', () => {
+					selected = frame.state().get('selection').first().toJSON();
+					reset();
+					form.querySelector('[data-processed-selection]').textContent = selected.filename || selected.title || String(selected.id);
+				});
+				frame.open();
+			});
+			form.addEventListener('input', reset);
+			form.addEventListener('change', reset);
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				if (busy || !selected || !form.reportValidity()) { return; }
+				busy = true;
+				fieldset.disabled = true;
+				save.hidden = true;
+				reviewed = null;
+				status.textContent = t('Generating preview. The original is unchanged.');
+				try {
+					if (!pending) {
+						const input = { attachment_id: selected.id, quality: Number(form.elements.quality.value) };
+						if (task === 'watermark') {
+							const option = form.elements.template.selectedOptions[0];
+							Object.assign(input, JSON.parse(option.getAttribute('data-watermark-definition') || '{}'));
+						} else {
+							input.preferred_format = form.elements.format.value;
+						}
+						pending = await postJson(config.restUrl, 'processed-image-preview', { task, input });
+					}
+					const result = await waitForMediaDerivativeResult(pending.run_id);
+					const localReview = localReviewFromResult(result);
+					const transport = mediaDerivativeLocalReviewTransport(localReview);
+					const artifact = transport && transport.artifact;
+					if (!artifact || pending.source_attachment_id !== Number(selected.id) || artifact.transform_facts.source_checksum !== pending.source_media_fingerprint || artifact.transform_facts.watermark_applied !== (task === 'watermark') || artifact.transform_facts.crop_applied || artifact.transform_facts.resize_applied || Date.parse(artifact.expires_at) <= Date.now()) {
+						throw new Error(t('The preview is unavailable or no longer matches this image. Generate it again.'));
+					}
+					form.querySelector('[data-processed-original]').src = selected.url;
+					comparison.hidden = false;
+					if (!await loadMediaDerivativePreviewImage(form.querySelector('[data-processed-result]'), transport)) {
+						throw new Error(t('The processed preview could not be displayed.'));
+					}
+					reviewed = { source_attachment_id: Number(selected.id), expected_source_media_fingerprint: pending.source_media_fingerprint, derivative_artifact: artifact, dry_run: true, commit: false, idempotency_key: 'media-import-' + artifact.artifact_id };
+					storage.textContent = t('Original') + ': ' + formatMediaBytes(artifact.transform_facts.source_filesize_bytes) + ' → ' + t('Processed copy') + ': ' + formatMediaBytes(artifact.filesize_bytes) + '. ' + t('Saving adds this file plus WordPress thumbnails; the original stays.');
+					if (task === 'compression' && artifact.filesize_bytes >= artifact.transform_facts.source_filesize_bytes) {
+						storage.textContent += ' ' + t('This result is not smaller than the original. Saving it will not reduce the image file size.');
+					}
+					storage.hidden = false;
+					save.hidden = false;
+					save.disabled = false;
+					preview.classList.remove('button-primary');
+					status.textContent = t('Compare both images. Request saving only if the result is suitable.');
+					if (artifact.processing_warnings.length) {
+						status.textContent += ' ' + artifact.processing_warnings.join(' · ');
+					}
+					expiryTimer = setTimeout(() => { reviewed = null; pending = null; save.disabled = true; status.textContent = t('This preview expired. Generate a new preview before saving.'); }, Math.max(0, Date.parse(artifact.expires_at) - Date.now()));
+				} catch (error) {
+					status.textContent = formatErrorMessage(error) + (pending && pending.run_id ? ' · ' + pending.run_id : '');
+					// A timeout may resume this existing run; a terminal failure needs a fresh preview.
+					if (!isMediaDerivativePollTimeout(error)) { pending = null; }
+				} finally {
+					busy = false;
+					fieldset.disabled = false;
+				}
+			});
+			save.addEventListener('click', async () => {
+				if (busy || !reviewed) { return; }
+				if (Date.parse(reviewed.derivative_artifact.expires_at) <= Date.now()) { reset(); status.textContent = t('This preview expired. Generate a new preview before saving.'); return; }
+				busy = true;
+				fieldset.disabled = true;
+				save.disabled = true;
+				status.textContent = t('Submitting the new media save request...');
+				try {
+					const bridge = await postJson(config.adapterRestUrl, 'proposals', {
+						ability_id: 'npcink-abilities-toolkit/import-cloud-media-derivative',
+						title: t('Save processed image as new media'),
+						summary: t('Create a new attachment from the reviewed result. Preserve the original and all article references.'),
+						input: reviewed,
+					});
+					const proposal = proposalFromPlanResponse(bridge);
+					const id = proposalIdFromResponse(proposal);
+					if (!id) { throw new Error(t('The save request did not return a review reference.')); }
+					clearTimeout(expiryTimer);
+					status.textContent = t('Save request submitted. The new image has not been added to the Media Library yet. Continue in Core review before the preview expires.');
+					status.appendChild(document.createTextNode(' '));
+					status.appendChild(createLink(config.coreAdminUrl + '&proposal_id=' + encodeURIComponent(id), 'Open in Core review'));
+					reviewed = null;
+					save.hidden = true;
+				} catch (error) {
+					status.textContent = formatErrorMessage(error);
+					save.disabled = !reviewed;
+				} finally {
+					busy = false;
+					fieldset.disabled = false;
+				}
+			});
+		});
+	}
+
 	function mediaDerivativeInput(form) {
 		syncWatermarkTemplateSelection(form);
 		const raw = serialize(form);
@@ -9185,6 +9312,7 @@
 	initNightlyCloudBatch();
 	initWatermarkTemplateLibrary();
 	initMediaDerivativeControls();
+	initProcessedImageTools();
 	initMediaAltCaptionControls();
 	initUrlState();
 	initOnboardingTour();

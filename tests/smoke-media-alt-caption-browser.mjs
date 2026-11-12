@@ -113,10 +113,11 @@ try {
  }
  await checkSettings('Default URL');
  assert(await page.locator('[data-toolbox-tool-group-target]').count() === 2, 'Image compression and Add watermark are the two peer tasks.');
- assert(await page.locator('[data-toolbox-image-compression-paused]:visible').count() === 1 && await page.locator('[data-toolbox-media-derivative]').count() === 0, 'Paused compression renders no execution form or recovery controls.');
+ assert(await page.locator('[data-toolbox-processed-image="compression"]:visible').count() === 1 && await page.locator('[data-toolbox-media-derivative]').count() === 0, 'Single-image compression renders without legacy batch or recovery controls.');
  assert(await page.locator('[data-toolbox-image-backup-settings]').evaluate(node => !node.open), 'Shared backup settings start collapsed.');
  await page.locator('[data-toolbox-tool-group-target="image-settings"]').click();
- assert(await page.locator('[data-toolbox-watermark-library]:visible').count() === 1 && await page.locator('[data-toolbox-watermark-paused]:visible').count() === 1, 'Watermark task shows template settings and its runtime pause.');
+ assert(await page.locator('[data-toolbox-processed-image="watermark"]:visible').count() === 1, 'Watermark task shows the single-image workflow.');
+ await page.locator('.npcink-toolbox__processed-templates > summary').click();
  const select = page.locator('[data-toolbox-watermark-library-default]');
  const original = await select.inputValue();
  const alternative = await select.locator('option:not([disabled])').evaluateAll((options, current) => options.map(option => option.value).find(value => value !== current), original);
@@ -143,6 +144,7 @@ try {
    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px ${task} has no horizontal overflow.`);
    await page.screenshot({ path: `${artifactDir}/${task}-${width}.png`, fullPage: true });
   }
+  await page.locator('.npcink-toolbox__processed-templates > summary').click();
   await page.locator('[data-toolbox-watermark-settings] > summary').click();
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px template editor has no horizontal overflow.`);
   await page.screenshot({ path: `${artifactDir}/templates-${width}.png`, fullPage: true });
@@ -161,7 +163,7 @@ try {
  await plainPage.goto(`${toolsUrl}&toolbox_tool=media-alt-caption-review&attachment_ids=282285`, { waitUntil: 'load' });
  assert(await plainPage.locator('[data-toolbox-tool-panel="media-batch-optimize"]:visible').count() === 1 && await plainPage.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Without JavaScript the retired URL renders the paused compression task.');
  await plainPage.locator('[data-toolbox-tool-group-target="image-settings"]').click();
- assert(await plainPage.locator('[data-toolbox-watermark-library]:visible').count() === 1, 'Native task links open watermarks without JavaScript.');
+ assert(await plainPage.locator('[data-toolbox-processed-image="watermark"]:visible').count() === 1, 'Native task links open watermarks without JavaScript.');
  await plainPage.locator('[data-toolbox-image-backup-settings] > summary').click();
  assert(await plainPage.locator('[data-toolbox-media-backup-retention]').isVisible(), 'Native backup disclosure works without JavaScript.');
  await noJs.close();
