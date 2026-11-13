@@ -7,6 +7,18 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+## Seven-day single-image recovery amendment — 2026-11-13
+
+Operator-approved checked replacements now retain the original and old sizes
+in place for seven days without a duplicate original. Toolkit owns the frozen
+file group and existing maintenance cleanup; historical backups keep their
+existing policies. Selected-image recovery status and a restore-proposal button
+reuse Adapter reads and Core-governed writes. Failed checks retain old files
+and show why; no immediate or guaranteed storage saving is claimed. Existing
+approval, paused batch/legacy routes and Cloud boundaries remain unchanged.
+See [lifecycle contract](processed-image-save-as-new-v1.md) and
+[PC visual receipt](temporary-image-backup-visual-receipt-2026-11-13.md).
+
 **Optional reviewed replacement — 2026-11-12:** the operator authorized an unchecked
 “Replace the original with the processed image” checkbox on both single-image tasks.
 Default remains save as new. The checked option reuses the reviewed Cloud result

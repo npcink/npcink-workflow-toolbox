@@ -1934,6 +1934,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<details><summary><?php esc_html_e( 'More settings', 'npcink-workflow-toolbox' ); ?></summary>
 					<label><?php esc_html_e( 'Quality', 'npcink-workflow-toolbox' ); ?> <input type="number" name="quality" min="1" max="100" value="<?php echo $watermark ? '95' : '82'; ?>" /></label>
 				</details>
+				<div data-processed-backup hidden>
+					<p data-processed-backup-status role="status" aria-live="polite"></p>
+					<button type="button" class="button" data-processed-restore hidden><?php esc_html_e( 'Request restore of original image', 'npcink-workflow-toolbox' ); ?></button>
+					<button type="button" class="button" data-processed-backup-retry hidden><?php esc_html_e( 'Retry recovery status', 'npcink-workflow-toolbox' ); ?></button>
+				</div>
 				<p><label><input type="checkbox" name="replace_original" data-processed-replace /> <?php esc_html_e( 'Replace the original with the processed image', 'npcink-workflow-toolbox' ); ?></label></p>
 				<p class="description" data-processed-destination><?php esc_html_e( 'Save as a new Media Library image; keep the original and article references unchanged.', 'npcink-workflow-toolbox' ); ?></p>
 				<p><button type="submit" class="button button-primary" data-processed-preview disabled><?php esc_html_e( 'Generate preview', 'npcink-workflow-toolbox' ); ?></button></p>
@@ -1945,7 +1950,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			</div>
 			<p data-processed-storage hidden></p>
 			<button type="button" class="button button-primary" data-processed-save hidden disabled><?php esc_html_e( 'Request save as new media', 'npcink-workflow-toolbox' ); ?></button>
-			<p class="description"><?php esc_html_e( 'New images and replacement backups take storage space. Unsaved Cloud previews expire automatically.', 'npcink-workflow-toolbox' ); ?></p>
+			<p class="description"><?php esc_html_e( 'New copies add storage. Replacement originals remain recoverable for 7 days; files that pass safety checks are cleaned up afterwards. Unsaved Cloud previews expire automatically.', 'npcink-workflow-toolbox' ); ?></p>
 			<noscript><?php esc_html_e( 'Enable JavaScript to select an image and review the result.', 'npcink-workflow-toolbox' ); ?></noscript>
 		</form>
 		<?php
@@ -1980,7 +1985,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<div class="npcink-toolbox__section-heading">
 					<div>
 						<h3><?php esc_html_e( 'Expired backup cleanup', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php esc_html_e( 'Backups become eligible for cleanup after 30 days. Manual mode keeps them until you explicitly clean them up. Automatic mode applies only to new backups; existing records and current images are unchanged.', 'npcink-workflow-toolbox' ); ?></p>
+						<p><?php esc_html_e( 'These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe.', 'npcink-workflow-toolbox' ); ?></p>
 					</div>
 				</div>
 				<div class="npcink-toolbox__retention-control">

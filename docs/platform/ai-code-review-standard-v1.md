@@ -2,6 +2,20 @@
 
 Status: active.
 
+## Authorized review model amendment — 2026-11-13
+
+The operator explicitly authorized the newly configured `gpt-6.1-sol` model for
+local AI review. This exact model is allowed alongside existing Qwen/DeepSeek
+model ids in request generation and receipt verification. Other GPT models are
+not implicitly approved. The machine configuration remains outside Git; no
+credential, endpoint or product runtime change is part of this amendment.
+Exact base/head/diff binding, complete findings, triage, failure receipts,
+request limits and required deterministic CI checks remain mandatory. Historical
+Qwen/DeepSeek-only wording below is superseded for this one authorized model;
+legacy script and receipt contract names remain unchanged. Requests identify the
+client as `Npcink-Local-Review/1.0` for endpoint compatibility; no credential
+or machine-specific information is included in that header.
+
 ## Active policy — 2026-11-03 operator decision
 
 The operator retired GitHub/cloud AI review because its failures and waiting
@@ -45,7 +59,9 @@ opaque base85 payloads and reverse binary patches are not model review text.
 Receipts list these paths under `binary_content_not_reviewed`. Record separate
 visual or format verification for those assets in the PR; a zero-finding model
 receipt does not certify binary contents. The 220,000-character text budget
-continues to reject oversized text changes without truncation.
+continues to reject oversized text changes without truncation. Newly added text
+files already appear in full in the diff and do not receive a duplicate
+supplementary snapshot; existing small changed files still receive that context.
 
 When a provider response cannot satisfy the review contract, the command exits
 non-zero and writes a sidecar at `<output>.failure.json` (or a numeric suffix if

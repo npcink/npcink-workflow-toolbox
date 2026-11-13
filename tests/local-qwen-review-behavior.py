@@ -60,6 +60,43 @@ class LocalReviewTests(unittest.TestCase):
                 sent = json.loads(request.call_args.args[0].data)
                 self.assertEqual(sent['model'], 'deepseek-v4.1-flash-1017')
                 request.assert_called_once()
+                self.assertEqual(request.call_args.args[0].get_header('User-agent'), 'Npcink-Local-Review/1.0')
+                receipt = json.loads(output.read_text())
+                self.assertEqual(receipt['model'], sent['model'])
+                reviewer.verify(receipt, '', FROZEN['head_sha'])
+            self.assertFalse(Path(str(output)+'.failure.json').exists())
+            self.assertNotIn('not-a-real-token', output.read_text())
+
+    def test_authorized_gpt_review_keeps_identity_completeness_and_triage_checks(self):
+        receipt = copy.deepcopy(self.receipt)
+        receipt['model'] = 'gpt-6.1-sol'
+        self.verify(receipt)
+        for key, value in [('base_sha', 'd'*40), ('head_sha', 'd'*40),
+                           ('diff_sha256', 'e'*64), ('success', False)]:
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self.verify(dict(receipt, **{key: value}))
+        with self.assertRaises(ValueError):
+            self.verify(receipt, body='## AI Review Triage\n')
+        receipt['review']['findings'] = None
+        with self.assertRaises(ValueError):
+            self.verify(receipt)
+
+    def test_configured_authorized_gpt_request_generates_verifiable_receipt(self):
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content':
+            json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); config = root/'config.json'; output = root/'review.json'
+            config.write_text(json.dumps(dict(provider='qwen-shared', custom_providers={
+                'qwen-shared': dict(model='gpt-6.1-sol',
+                                    url='https://example.invalid/v1', auth_token='not-a-real-token')})))
+            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, b'diff')), patch.object(
+                    reviewer, 'git', return_value=b''), patch.object(reviewer.urllib.request,
+                    'urlopen', return_value=io.BytesIO(response)) as request:
+                reviewer.run('base', 'head', output, config)
+                sent = json.loads(request.call_args.args[0].data)
+                self.assertEqual(sent['model'], 'gpt-6.1-sol')
+                request.assert_called_once()
+                self.assertEqual(request.call_args.args[0].get_header('User-agent'), 'Npcink-Local-Review/1.0')
                 receipt = json.loads(output.read_text())
                 self.assertEqual(receipt['model'], sent['model'])
                 reviewer.verify(receipt, '', FROZEN['head_sha'])
@@ -67,7 +104,7 @@ class LocalReviewTests(unittest.TestCase):
             self.assertNotIn('not-a-real-token', output.read_text())
 
     def test_unsupported_model_rejected_before_provider_call(self):
-        for model in ['other-model', '', None, 123, 'deepseek\nother', ' deepseek-v4']:
+        for model in ['other-model', '', None, 123, 'deepseek\nother', ' deepseek-v4', 'gpt-other', 'gpt-6.1-sol-other', ' gpt-6.1-sol', 'gpt-6.1-sol\nother']:
             with self.subTest(model=model), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory); config = root/'config.json'; output = root/'review.json'
                 config.write_text(json.dumps(dict(model=model, url='https://example.invalid/v1',
@@ -277,6 +314,30 @@ class LocalReviewTests(unittest.TestCase):
                 deleted_context, deleted_binaries = reviewer.review_context(deleted)
                 self.assertEqual(deleted_binaries, ['asset.png'])
                 self.assertIn('deleted file mode', deleted_context)
+
+    def test_new_file_diff_is_complete_without_a_duplicate_snapshot(self):
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content':
+            json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+        context = 'diff new.php\n+<?php unique_added_line();\nexisting diff\n'
+        def source_git(*args):
+            if args[0] == 'diff': return b'new.php\0existing.php\0'
+            self.assertEqual(args, ('show', FROZEN['head_sha'] + ':existing.php'))
+            return b'<?php existing_context();'
+        def exists(command, **kwargs):
+            return SimpleNamespace(returncode=1 if command[-1] == FROZEN['base_sha'] + ':new.php' else 0)
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory)/'config.json'; output = Path(directory)/'review.json'
+            config.write_text(json.dumps(dict(model='gpt-6.1-sol', url='https://example.invalid/v1', auth_token='test-token')))
+            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, b'complete binary diff')), patch.object(
+                    reviewer, 'review_context', return_value=(context, [])), patch.object(
+                    reviewer, 'git', side_effect=source_git), patch.object(reviewer.subprocess, 'run', side_effect=exists), patch.object(
+                    reviewer.urllib.request, 'urlopen', return_value=io.BytesIO(response)) as request:
+                reviewer.run('base', 'head', output, config)
+                sent = json.loads(request.call_args.args[0].data)['messages'][1]['content']
+                self.assertTrue(sent.startswith(context))
+                self.assertEqual(sent.count('unique_added_line'), 1)
+                self.assertIn('FILE existing.php\n<?php existing_context();', sent)
+                self.assertEqual(json.loads(output.read_text())['diff_sha256'], FROZEN['diff_sha256'])
 
     def test_text_budget_still_blocks_without_provider_call(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(

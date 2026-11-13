@@ -6,8 +6,9 @@ Choose one existing WordPress image; compress/convert or watermark in Cloud;
 compare original and verified result; explicitly request saving a new Media Library
 image (default), or select the optional replacement of the same attachment. Format conversion belongs to compression. Quality is under More settings;
 watermark templates are a separate peer task. The replacement checkbox is unchecked
-by default. Source deletion, automatic adoption, batch operations and a storage
-manager are out of scope.
+by default. Automatic adoption, batch operations, broad orphan scans and a storage
+manager are out of scope. The 2026-11-13 amendment below authorizes only recorded
+seven-day replacement-file cleanup.
 
 ## Ownership and contracts
 
@@ -63,15 +64,43 @@ returns recovery_required with the new attachment id.
 Saving adds the result and WordPress sizes to site storage. A smaller delivered
 image does not mean less server storage while the source remains. No unconfirmed
 preview is inserted into the Media Library. Cloud owns preview expiry/cleanup;
-there is no new local temporary-file registry. Original cleanup needs a separate
-future decision with reference/backup evidence; it is not automatic here.
+there is no new Cloud or local job registry.
 
-Replacement also retains the original backup and existing source files; it does
-not promise immediate disk savings. Existing governed `restore-media-backup`
-remains the recovery path. Recognized sized article URLs are consolidated to the
-main image; restoring returns them to the original main URL, not their prior
-per-occurrence thumbnail URLs. This is image recovery, not byte-exact post undo.
-No new restore UI or backup writer is added.
+### Seven-day replacement recovery — 2026-11-13
+
+The checked replacement explicitly adds `backup_lifecycle=temporary_7_days.v1`
+to the existing adoption proposal. Toolkit records the original and metadata-owned
+sizes as one frozen group in existing replacement history, retains them in place
+for seven days and creates no duplicate original. Historical callers/backups keep
+their existing directory, 30-day and manual/automatic policies.
+
+Selecting an image reads the existing `list-media-backups` ability through Adapter.
+Only managed groups show a deadline, restore request, cleanup bytes or exceptions.
+Restore submits the existing `restore-media-backup` proposal; Core approval/preflight
+remain mandatory. Restoring reuses original bytes and saved sizes/metadata, cancels
+that group's cleanup, and gives the superseded processed version its own seven-day
+window. It is not a batch restore or a new approval store.
+
+Existing WordPress daily maintenance checks only frozen file paths after expiry.
+It verifies uploads containment, regular non-symlink/non-hardlink files, identity,
+size/checksum, current attachment metadata, other attachment/recovery uses and
+local content/meta/options references. Queries that fail or exceed the bounded
+candidate limit, changed files and deletion failures preserve files and visible
+reasons. Cooperative adoption/restore/cleanup share a nonblocking uploads lock.
+History persistence uses the previous value to avoid overwriting concurrent edits.
+External sites, CDN copies and arbitrary plugin storage are not observable; review
+external dependencies before replacing. This is conservative reference detection,
+not proof of universal unreferenced status.
+
+Old URLs continue to work during the grace period. WP-Cron may run late; expiry
+ends restore eligibility, but does not promise immediate deletion. UI reports actual
+deleted file sizes, not an estimate of physical filesystem savings; retained
+exceptions mean no guaranteed total saving. No deletion outside recorded groups,
+new queue, broad storage manager or Cloud runtime change is added.
+
+Recognized sized article URLs are consolidated to the main image; restoring
+returns them to the original main URL, not prior per-occurrence thumbnail URLs.
+This is image recovery, not byte-exact post undo.
 
 ## Verification
 
@@ -136,3 +165,23 @@ Local unmerged source and installed-site evidence for the checkbox follow-up:
   remains `f17354f234d2852baa41a8b27e07bf73e081c5f7`; new plugin merge/CI and
   production remain separate states. No production deployment or WordPress.org
   release is performed by these tests.
+
+## Temporary lifecycle verification — 2026-11-13
+
+Installed disposable replacement/restore verifies unchanged attachment ID, no
+extra original copy, exact original bytes and thumbnail metadata after restore.
+Cloud `run_a14f21d5b93e4eae9da7f62ed89d0fe8`; replacement Core
+`1ca78a0c-7607-4275-a4aa-ed8268677c9c`; restore Core
+`e7858b24-f070-4cd5-8aed-2e5c5cd549d1`. Source drift still returns 409;
+preview/proposal stages do not mutate media.
+
+The installed maintenance fixture scopes the real public cleanup query to its
+own attachment and restores the cursor. It covers active windows, read-only
+preview, another recovery, shared attachments, theme references, changed bytes,
+delete failures, filter redirection, retry, exact deleted bytes and idempotence.
+Current files and historical manual backups survive; successful cleanup leaves
+no frozen original/thumbnail files. Disposable fixtures are removed.
+
+See [PC visual receipt](temporary-image-backup-visual-receipt-2026-11-13.md).
+Local/plugin CI/merged/production are separate states; these tests perform no
+production deployment or WordPress.org release.
