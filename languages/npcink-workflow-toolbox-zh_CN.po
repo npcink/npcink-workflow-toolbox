@@ -11138,3 +11138,91 @@ msgstr "替换所选媒体附件、备份原图并修复已识别的文章图片
 
 msgid "Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires."
 msgstr "替换申请已提交，审批前原图保持不变。请在预览到期前进入 Core 审核。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "After approval, replace this image and retain the original files for 7 days, then clean up files with no detected site references. Other uses are affected. External references cannot be checked; review them before replacement."
+msgstr "审批通过后替换此图片，原图及旧缩略图保留 7 天，到期清理未检测到站内引用的文件。其他使用位置也会受影响；无法检查站外引用，请先核对。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Reading original image recovery status..."
+msgstr "正在读取原图恢复状态…"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Original image recovery status is unavailable."
+msgstr "暂时无法读取原图恢复状态。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "The original image has been restored."
+msgstr "原图已恢复。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Old image files cleaned up. Space released:"
+msgstr "旧图片文件已清理，实际释放："
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Original image recoverable until:"
+msgstr "原图可恢复至："
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Previous processed version retained until:"
+msgstr "上一个处理版本保留至："
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "The recovery period ended. Cleanup runs during WordPress maintenance."
+msgstr "恢复期限已结束，等待 WordPress 维护任务检查清理。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file changed or is missing; it was kept for review."
+msgstr "旧文件发生变化或无法读取，已暂停清理，请核查。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file is used by another media item; it was kept."
+msgstr "旧文件被其他媒体使用，已保留。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file is needed by another recovery; it was kept."
+msgstr "其他恢复记录仍需使用旧文件，已保留。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file still has a site reference; it was kept."
+msgstr "旧文件仍有站内引用，已保留。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "File references could not be verified; cleanup was stopped."
+msgstr "无法核实文件引用，已暂停清理。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Image state changed during cleanup; cleanup was stopped."
+msgstr "清理时图片状态发生变化，已暂停清理。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file could not be deleted; maintenance will retry."
+msgstr "旧文件删除失败，维护任务将重试。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Some old files were kept for review."
+msgstr "部分旧文件已保留，请核查。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Old files still retained:"
+msgstr "仍保留的旧文件："
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Restore request submitted. The image is unchanged until approval."
+msgstr "恢复申请已提交，审批通过前图片不会改变。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Request restore of original image"
+msgstr "申请恢复原图"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Retry recovery status"
+msgstr "重新读取恢复状态"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "New copies add storage. Replacement originals remain recoverable for 7 days; files that pass safety checks are cleaned up afterwards. Unsaved Cloud previews expire automatically."
+msgstr "另存图片会增加存储。替换后的原图保留 7 天，到期后清理通过安全检查的文件。未保存的云端预览会自动过期。"
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe."
+msgstr "这些设置仅适用于历史备份：保留 30 天后，按原有手动或自动策略清理。新单图替换的原文件保留 7 天，到期且安全时自动清理。"

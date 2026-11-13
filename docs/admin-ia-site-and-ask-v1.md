@@ -2,6 +2,18 @@
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。当前展示规则以下方最新覆盖决议为准。
 
+## Seven-day single-image recovery amendment — 2026-11-13
+
+Operator-approved checked replacements now retain the original and old sizes
+in place for seven days without a duplicate original. Toolkit owns the frozen
+file group and existing maintenance cleanup; historical backups keep their
+existing policies. Selected-image recovery status and a restore-proposal button
+reuse Adapter reads and Core-governed writes. Failed checks retain old files
+and show why; no immediate or guaranteed storage saving is claimed. Existing
+approval, paused batch/legacy routes and Cloud boundaries remain unchanged.
+See [lifecycle contract](processed-image-save-as-new-v1.md) and
+[PC visual receipt](temporary-image-backup-visual-receipt-2026-11-13.md).
+
 ## Image task hierarchy — 2026-11-12 (latest)
 
 The operator approved Image Processing with two peer tasks: Image compression

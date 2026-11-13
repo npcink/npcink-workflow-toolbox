@@ -100,6 +100,21 @@ $id=0; $path=''; try {
 	let requestedInput;
 	let previewRequests = 0;
 	let expectedReplacement = false;
+	let expectedRestore = false;
+	let backupMode = 'none';
+	let backupReads = 0;
+	const deadline = new Date(Date.now() + 7 * 86400000).toISOString();
+	await context.route('**/wp-json/npcink-openclaw-adapter/v1/run-read-ability', async route => {
+		const body = route.request().postDataJSON();
+		assert(body.ability_id === 'npcink-abilities-toolkit/list-media-backups' && body.input.attachment_id === attachmentId, 'Recovery read is scoped to the selected image.');
+		backupReads++;
+		if (backupMode === 'error') return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'fixture unavailable' }) });
+		const receipt = { policy: 'temporary_7_days.v1', state: 'retained', expires_at_gmt: deadline, restorable: true, removed_bytes: 0, retained_bytes: 512, blocked_reasons: [] };
+		if (backupMode === 'cleaned') Object.assign(receipt, { state: 'cleaned', restorable: false, removed_bytes: 2048, retained_bytes: 0 });
+		if (backupMode === 'blocked') Object.assign(receipt, { state: 'blocked', restorable: false, expires_at_gmt: '2020-01-01T00:00:00Z', blocked_reasons: ['local_reference', 'delete_failed'] });
+		const row = { backup_id: 'browser-original', operation: backupMode === 'restored' ? 'restore_media_backup' : 'adopt_cloud_media_derivative', file_exists: true, temporary_backup: receipt };
+		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { backups: backupMode === 'none' ? [] : [row] } }) });
+	});
 	await context.route('**/wp-json/npcink-toolbox/v1/processed-image-preview', async route => {
 		requestedInput = route.request().postDataJSON();
 		previewRequests++;
@@ -117,7 +132,10 @@ $id=0; $path=''; try {
 	await context.route('**/wp-json/npcink-openclaw-adapter/v1/proposals', async route => {
 		const body = route.request().postDataJSON();
 		assert(body.input.commit === false && body.input.dry_run === true, 'Save requests cannot commit or approve writes.');
-		if (expectedReplacement) {
+		if (expectedRestore) {
+			assert(body.ability_id === 'npcink-abilities-toolkit/restore-media-backup' && body.input.attachment_id === attachmentId && body.input.backup_id === 'browser-original', 'Restore submits only the existing governed ability with the selected backup.');
+		} else if (expectedReplacement) {
+			assert(body.input.backup_lifecycle === 'temporary_7_days.v1', 'Checked replacement explicitly opts into the seven-day lifecycle.');
 			assert(body.ability_id === 'npcink-abilities-toolkit/adopt-cloud-media-derivative' && body.input.attachment_id === attachmentId && body.input.expected_current_media_fingerprint === artifact.transform_facts.source_checksum && !('source_attachment_id' in body.input), 'Replacement preserves the attachment identity and reviewed source fingerprint.');
 		} else {
 			assert(body.ability_id === 'npcink-abilities-toolkit/import-cloud-media-derivative' && body.input.source_attachment_id === attachmentId, 'Default save still creates a new-attachment proposal.');
@@ -157,7 +175,7 @@ $id=0; $path=''; try {
 		}
 		assert(saveRequests === (task === 'compression' ? 0 : 2), 'Preview does not submit a save request.');
 		mkdirSync('output/playwright/processed-image', { recursive: true });
-		for (const width of [1440, 390]) {
+		for (const width of [1440, 1100]) {
 			await page.setViewportSize({ width, height: 1000 });
 			assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${task} ${width}px has no horizontal overflow.`);
 			await page.screenshot({ path: `output/playwright/processed-image/${task}-${width}.png`, fullPage: true });
@@ -186,6 +204,44 @@ $id=0; $path=''; try {
 		assert(/审批|approval/.test(await form.locator('[data-processed-status]').innerText()), 'Replacement stays pending approval and does not claim the original changed.');
 		expectedReplacement = false;
 	}
+	// Each state uses the same installed surface; only the read receipt is deterministic.
+	for (const mode of ['retained', 'restored', 'cleaned', 'blocked', 'error']) {
+		backupMode = mode;
+		await page.goto(tools + '&toolbox_tool=media-batch-optimize', { waitUntil: 'networkidle' });
+		const form = page.locator('[data-toolbox-processed-image="compression"]');
+		await choose(form);
+		const status = form.locator('[data-processed-backup-status]');
+		if (mode === 'retained') {
+			await form.locator('[data-processed-restore]:not([hidden])').waitFor();
+			assert(/可恢复至|recoverable until/.test(await status.innerText()), 'Recovery deadline is visible beside the selected image.');
+			for (const width of [1440, 1100]) {
+				await page.setViewportSize({ width, height: 1000 });
+				assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `Recovery state ${width}px has no horizontal overflow.`);
+				await page.screenshot({ path: `output/playwright/processed-image/recovery-${width}.png`, fullPage: true });
+			}
+			expectedRestore = true;
+			await form.locator('[data-processed-restore]').click();
+			await status.locator('a[href*="proposal_id=browser-new-media"]').waitFor();
+			assert(/审批|approval/.test(await status.innerText()), 'Restore receipt says pending approval, without claiming recovery.');
+			assert(await form.locator('[data-processed-restore]').isHidden(), 'Pending restore cannot be submitted twice.');
+			expectedRestore = false;
+		} else if (mode === 'error') {
+			await form.locator('[data-processed-backup-retry]:not([hidden])').waitFor();
+			backupMode = 'retained';
+			await form.locator('[data-processed-backup-retry]').click();
+			await form.locator('[data-processed-restore]:not([hidden])').waitFor();
+			assert(/可恢复至|recoverable until/.test(await status.innerText()), 'Retry retains the selected image and recovers the deadline.');
+		} else {
+			const expected = mode === 'cleaned' ? /实际释放|Space released/ : mode === 'blocked' ? /站内引用|site reference/ : /原图已恢复|has been restored/;
+			await status.filter({ hasText: expected }).waitFor();
+			assert(await form.locator('[data-processed-restore]').isHidden(), 'Completed or blocked states do not offer an invalid original restore.');
+			if (mode === 'cleaned') assert(/2(?:\.00)?\s*KB/i.test(await status.innerText()), 'Cleaned receipt reports actual removed bytes.');
+			if (mode === 'blocked') assert(/仍保留|still retained/.test(await status.innerText()), 'Blocked state keeps retained size and reason visible.');
+			if (mode === 'restored') assert(/上一个处理版本|Previous processed version/.test(await status.innerText()) && !/原图可恢复至|Original image recoverable until/.test(await status.innerText()), 'Restored state names the previous processed version correctly.');
+			await page.screenshot({ path: `output/playwright/processed-image/recovery-${mode}.png`, fullPage: true });
+		}
+	}
+	assert(backupReads >= 8, 'Recovery status is refreshed for selection and retry.');
 	assert(errors.length === 0, `No browser JavaScript errors: ${errors.join('; ')}`);
 	assert(!requests.some(request => /approve-and-execute|commit-preflight|\/execute|media-optimization-batches/.test(request.url)), 'Toolbox never approves, executes or starts a batch.');
 	assert(readFileSync(wpCli(['eval', `echo get_attached_file(${attachmentId});`])).equals(sourceBytes), 'Preview and save request preserve original file bytes.');

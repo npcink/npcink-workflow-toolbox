@@ -19,7 +19,10 @@ attachment by default. An unchecked replacement option submits the existing
 source fingerprint. Toolkit retains replacement, backup, reference repair and
 restore ownership; Toolbox has no executor or approval bypass. Legacy Toolbox
 replacement routes and batch remain paused. A proposal receipt is not a saved
-attachment or completed replacement.
+attachment or completed replacement. New checked replacements opt into Toolkit-owned
+seven-day recorded-file retention/cleanup. Recovery status is an Adapter ability
+read; restore is only a Core proposal. Historical policies remain unchanged;
+Toolbox adds no maintenance task, filesystem deletion or approval truth.
 
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 

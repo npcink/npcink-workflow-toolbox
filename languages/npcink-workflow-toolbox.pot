@@ -10633,3 +10633,95 @@ msgstr ""
 
 msgid "Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires."
 msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "After approval, replace this image and retain the original files for 7 days, then clean up files with no detected site references. Other uses are affected. External references cannot be checked; review them before replacement."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Reading original image recovery status..."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Original image recovery status is unavailable."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "The original image has been restored."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Old image files cleaned up. Space released:"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Original image recoverable until:"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Previous processed version retained until:"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "The recovery period ended. Cleanup runs during WordPress maintenance."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file changed or is missing; it was kept for review."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file is used by another media item; it was kept."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file is needed by another recovery; it was kept."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file still has a site reference; it was kept."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "File references could not be verified; cleanup was stopped."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Image state changed during cleanup; cleanup was stopped."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "An old file could not be deleted; maintenance will retry."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Some old files were kept for review."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Old files still retained:"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Restore original image"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Restore request submitted. The image is unchanged until approval."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Request restore of original image"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "Retry recovery status"
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "New copies add storage. Replacement originals remain recoverable for 7 days; files that pass safety checks are cleaned up afterwards. Unsaved Cloud previews expire automatically."
+msgstr ""
+
+#: includes/Admin_Page.php assets/admin.js
+msgid "These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe."
+msgstr ""

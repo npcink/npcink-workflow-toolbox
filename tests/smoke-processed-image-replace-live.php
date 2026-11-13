@@ -48,6 +48,7 @@ try {
 	if ( is_wp_error( $source_id ) ) { $error = $source_id; $source_id = 0; throw new RuntimeException( $error->get_error_message() ); }
 	wp_update_attachment_metadata( $source_id, wp_generate_attachment_metadata( $source_id, $path ) );
 	$source_sha = hash_file( 'sha256', $path );
+	$original_metadata = wp_get_attachment_metadata( $source_id );
 	$source_url = wp_get_attachment_url( $source_id );
 	$thumbnail = wp_get_attachment_image_url( $source_id, 'thumbnail' );
 	$original_content = '<!-- wp:image {"id":' . $source_id . '} --><figure class="wp-block-image"><img src="' . esc_url( $source_url ) . '" class="wp-image-' . $source_id . '"/></figure><!-- /wp:image --><p><img src="' . esc_url( $thumbnail ) . '"/></p>';
@@ -68,7 +69,7 @@ try {
 	$check( $finished, 'Live compression preview completed' );
 	$result = $call( 'GET', '/npcink-toolbox/v1/media-derivative-preview/' . $run_id . '/result' );
 	$artifact = $result['local_review']['artifact'];
-	$input = array( 'attachment_id' => $source_id, 'expected_current_media_fingerprint' => 'sha256:' . $source_sha, 'derivative_artifact' => $artifact, 'dry_run' => true, 'commit' => false, 'idempotency_key' => 'live-replace-' . $artifact['artifact_id'] );
+	$input = array( 'attachment_id' => $source_id, 'expected_current_media_fingerprint' => 'sha256:' . $source_sha, 'backup_lifecycle' => 'temporary_7_days.v1', 'derivative_artifact' => $artifact, 'dry_run' => true, 'commit' => false, 'idempotency_key' => 'live-replace-' . $artifact['artifact_id'] );
 	$check( $artifact['transform_facts']['source_checksum'] === $input['expected_current_media_fingerprint'], 'Reviewed artifact is bound to source bytes' );
 	$wrong = $input;
 	$wrong['expected_current_media_fingerprint'] = 'sha256:' . str_repeat( '0', 64 );
@@ -85,7 +86,8 @@ try {
 	$history = get_post_meta( $source_id, '_npcink_ai_media_file_replacement_history', true );
 	$record = end( $history );
 	$backup_path = $uploads['basedir'] . '/' . $record['backup']['relative_file'];
-	$check( is_file( $backup_path ) && hash_file( 'sha256', $backup_path ) === $source_sha, 'Recorded backup preserves original bytes' );
+	$check( $backup_path === $path && is_file( $backup_path ) && hash_file( 'sha256', $backup_path ) === $source_sha && count( $record['temporary_backup']['files'] ) > 1, 'One temporary group retains original and sizes without a duplicate original copy' );
+	$check( abs( strtotime( $record['temporary_backup']['expires_at_gmt'] ) - time() - 7 * DAY_IN_SECONDS ) < 60, 'New replacement freezes a seven-day recovery window' );
 	$restore_id = $propose( 'restore-media-backup', array( 'attachment_id' => $source_id, 'backup_id' => $record['replacement_id'], 'dry_run' => true, 'commit' => false ) );
 	$restored = $call( 'POST', '/npcink-openclaw-adapter/v1/proposals/' . $restore_id . '/approve-and-execute' );
 	$check( ! empty( $restored['success'] ) && get_attached_file( $source_id ) === $path && wp_get_attachment_url( $source_id ) === $source_url && hash_file( 'sha256', $path ) === $source_sha && get_post_mime_type( $source_id ) === 'image/png', 'Approved backup restore recovers original bytes, URL and MIME on the same attachment' );
@@ -93,6 +95,7 @@ try {
 	// retain per-occurrence size history. Verify recovery, not a byte-exact post undo.
 	$restored_content = str_replace( $thumbnail, $source_url, $original_content );
 	$check( get_post_field( 'post_content', $post_id ) === $restored_content && $ids() === $before_ids, 'Restore repairs recognized article URLs to the original main image without new attachments' );
+	$check( wp_get_attachment_metadata( $source_id ) === $original_metadata, 'Temporary backup restore recovers exact original metadata without regenerating old thumbnails' );
 	echo wp_json_encode( array( 'run_id' => $run_id, 'replacement_proposal_id' => $proposal_id, 'restore_proposal_id' => $restore_id, 'attachment_id' => $source_id, 'post_id' => $post_id ) ) . "\n";
 } finally {
 	if ( $post_id > 0 ) { wp_delete_post( $post_id, true ); }

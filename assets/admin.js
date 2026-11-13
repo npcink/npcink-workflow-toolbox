@@ -3573,7 +3573,7 @@
 			const updateDestination = () => {
 				save.textContent = replace.checked ? t('Request replacement') : t('Request save as new media');
 				destination.textContent = replace.checked
-					? t('After approval, replace this Media Library image and back up the original. Other uses of this image are affected. Recognized article image URLs are repaired; external URLs and theme settings need separate review.')
+					? t('After approval, replace this image and retain the original files for 7 days, then clean up files with no detected site references. Other uses are affected. External references cannot be checked; review them before replacement.')
 					: t('Save as a new Media Library image; keep the original and article references unchanged.');
 			};
 			updateDestination();
@@ -3582,6 +3582,79 @@
 			let pending = null;
 			let busy = false;
 			let expiryTimer;
+			const backupNode = form.querySelector('[data-processed-backup]');
+			const backupStatus = form.querySelector('[data-processed-backup-status]');
+			const restore = form.querySelector('[data-processed-restore]');
+			const retryBackup = form.querySelector('[data-processed-backup-retry]');
+			let restoreInput = null;
+			let backupRequest = 0;
+			const refreshBackup = async () => {
+				if (!selected) return;
+				const attachmentId = Number(selected.id);
+				const request = ++backupRequest;
+				restoreInput = null;
+				restore.hidden = true;
+				retryBackup.hidden = true;
+				backupNode.hidden = false;
+				backupStatus.textContent = t('Reading original image recovery status...');
+				try {
+					const response = await postJson(config.adapterRestUrl, 'run-read-ability', { ability_id: 'npcink-abilities-toolkit/list-media-backups', input: { attachment_id: attachmentId } });
+					if (request !== backupRequest) return;
+					const data = planDataFromEnvelope(response);
+					if (!data || !Array.isArray(data.backups)) throw new Error(t('Original image recovery status is unavailable.'));
+					const rows = data.backups.filter(row => row.temporary_backup && row.temporary_backup.policy === 'temporary_7_days.v1');
+					if (!rows.length) { backupNode.hidden = true; return; }
+					const latest = rows[rows.length - 1];
+					const receipt = latest.temporary_backup;
+					const deadline = new Date(receipt.expires_at_gmt).toLocaleString();
+					const messages = [];
+					if (latest.operation === 'restore_media_backup') messages.push(t('The original image has been restored.'));
+					if (receipt.state === 'cleaned') messages.push(t('Old image files cleaned up. Space released:') + ' ' + formatMediaBytes(receipt.removed_bytes));
+					else if (Date.parse(receipt.expires_at_gmt) > Date.now()) messages.push((latest.operation === 'restore_media_backup' ? t('Previous processed version retained until:') : t('Original image recoverable until:')) + ' ' + deadline);
+					else messages.push(t('The recovery period ended. Cleanup runs during WordPress maintenance.'));
+					const reasons = new Set(rows.flatMap(row => row.temporary_backup.blocked_reasons || []));
+					const reasonText = {
+						file_changed: t('An old file changed or is missing; it was kept for review.'),
+						another_attachment: t('An old file is used by another media item; it was kept.'),
+						another_recovery: t('An old file is needed by another recovery; it was kept.'),
+						local_reference: t('An old file still has a site reference; it was kept.'),
+						reference_check_unavailable: t('File references could not be verified; cleanup was stopped.'),
+						state_changed: t('Image state changed during cleanup; cleanup was stopped.'),
+						delete_failed: t('An old file could not be deleted; maintenance will retry.'),
+					};
+					for (const reason of reasons) messages.push(reasonText[reason] || t('Some old files were kept for review.'));
+					const retained = rows.filter(row => row.temporary_backup.state === 'blocked').reduce((sum, row) => sum + Number(row.temporary_backup.retained_bytes || 0), 0);
+					if (retained) messages.push(t('Old files still retained:') + ' ' + formatMediaBytes(retained));
+					backupStatus.textContent = messages.join(' ');
+					if (receipt.restorable && latest.file_exists && latest.operation !== 'restore_media_backup') {
+						restoreInput = { attachment_id: attachmentId, backup_id: latest.backup_id, dry_run: true, commit: false };
+						restore.hidden = false;
+					}
+				} catch (error) {
+					if (request !== backupRequest) return;
+					backupStatus.textContent = t('Original image recovery status is unavailable.');
+					retryBackup.hidden = false;
+				}
+			};
+			retryBackup.addEventListener('click', refreshBackup);
+			restore.addEventListener('click', async () => {
+				if (busy || !restoreInput) return;
+				const input = Object.assign({}, restoreInput);
+				busy = true;
+				fieldset.disabled = true;
+				try {
+					const bridge = await postJson(config.adapterRestUrl, 'proposals', { ability_id: 'npcink-abilities-toolkit/restore-media-backup', input, title: t('Restore original image') });
+					const id = proposalIdFromResponse(proposalFromPlanResponse(bridge));
+					if (!id) throw new Error(t('The save request did not return a review reference.'));
+					backupStatus.textContent = t('Restore request submitted. The image is unchanged until approval.');
+					backupStatus.appendChild(document.createTextNode(' '));
+					backupStatus.appendChild(createLink(config.coreAdminUrl + '&proposal_id=' + encodeURIComponent(id), 'Open in Core review'));
+					restore.hidden = true;
+					restoreInput = null;
+				} catch (error) { backupStatus.textContent = formatErrorMessage(error); }
+				finally { busy = false; fieldset.disabled = false; }
+			});
+
 			const reset = () => {
 				clearTimeout(expiryTimer);
 				revokeMediaDerivativePreviewUrls(form);
@@ -3602,6 +3675,7 @@
 					selected = frame.state().get('selection').first().toJSON();
 					reset();
 					form.querySelector('[data-processed-selection]').textContent = selected.filename || selected.title || String(selected.id);
+					refreshBackup();
 				});
 				frame.open();
 			});
@@ -3672,6 +3746,7 @@
 				const input = replacing ? {
 					attachment_id: reviewed.source_attachment_id,
 					expected_current_media_fingerprint: reviewed.expected_source_media_fingerprint,
+					backup_lifecycle: 'temporary_7_days.v1',
 					derivative_artifact: reviewed.derivative_artifact,
 					dry_run: true, commit: false,
 					idempotency_key: 'media-replace-' + reviewed.derivative_artifact.artifact_id,
