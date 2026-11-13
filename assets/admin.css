@@ -2147,20 +2147,6 @@
 	max-width: var(--npcink-ui-column);
 }
 
-.npcink-toolbox__retention-control {
-	display: grid;
-	grid-template-columns: minmax(260px, 1fr) auto;
-	align-items: end;
-	gap: 16px;
-}
-
-.npcink-toolbox__retention-actions {
-	display: flex;
-	grid-column: 1 / -1;
-	justify-content: flex-end;
-	padding-bottom: 1px;
-}
-
 .npcink-toolbox__cloud-check-workspace {
 	display: grid;
 	gap: 12px;
@@ -3724,15 +3710,6 @@ pre.npcink-toolbox__result {
 	display: block;
 }
 
-.npcink-toolbox__card--compact[data-toolbox-media-backup-retention] {
-	margin-bottom: 24px;
-	padding-bottom: 20px;
-}
-
-.npcink-toolbox__card--compact[data-toolbox-media-backup-retention] + .npcink-toolbox__watermark-library {
-	margin-top: 0;
-}
-
 .npcink-toolbox__watermark-library-list {
 	display: block;
 	padding-top: 12px;
@@ -3987,14 +3964,6 @@ pre.npcink-toolbox__result {
 @media (max-width: 680px) {
 	.npcink-toolbox__restore-actions {
 		grid-template-columns: 1fr;
-	}
-
-	.npcink-toolbox__retention-control {
-		grid-template-columns: 1fr;
-	}
-
-	.npcink-toolbox__retention-actions {
-		justify-content: flex-start;
 	}
 
 	.npcink-toolbox__single-media-comparison,
@@ -4623,28 +4592,9 @@ pre.npcink-toolbox__result {
 	margin: var(--npcink-ui-space-3) 0 var(--npcink-ui-space-4);
 }
 
-/* Image tasks share compact secondary settings instead of a settings workbench. */
-.npcink-toolbox__image-backup-settings {
-	grid-column: 1 / -1;
-	padding-top: 12px;
-	border-top: 1px solid var(--npcink-ui-border);
-}
-
-.npcink-toolbox__image-backup-settings summary,
 .npcink-toolbox__watermark-library-list summary {
 	cursor: pointer;
 	font-weight: 600;
-}
-
-.npcink-toolbox__image-backup-settings .npcink-toolbox__retention-control {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: 12px;
-}
-
-.npcink-toolbox__image-backup-settings .npcink-toolbox__retention-actions {
-	padding: 0;
 }
 
 .npcink-toolbox__watermark-library-list[open] > summary {

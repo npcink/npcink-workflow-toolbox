@@ -717,7 +717,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			array(
 				'id'     => 'images',
 				'title'  => __( 'Image processing', 'npcink-workflow-toolbox' ),
-				'help'   => __( 'Compress images or add a watermark. Backup settings are shared.', 'npcink-workflow-toolbox' ),
+				'help'   => __( 'Compress images or add a watermark.', 'npcink-workflow-toolbox' ),
 				'action' => __( 'Open Image Processing', 'npcink-workflow-toolbox' ),
 				'tab'    => 'tools',
 			),
@@ -1772,9 +1772,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 		$surface_header = array(
 			'title'             => __( 'Image Processing', 'npcink-workflow-toolbox' ),
-			'description'       => __( 'Compress images or add a watermark. Backup settings are shared.', 'npcink-workflow-toolbox' ),
+			'description'       => __( 'Compress images or add a watermark.', 'npcink-workflow-toolbox' ),
 			'scope_title'       => __( 'Image processing', 'npcink-workflow-toolbox' ),
-			'scope_description' => __( 'Compress images or add a watermark. Backup settings are shared.', 'npcink-workflow-toolbox' ),
+			'scope_description' => __( 'Compress images or add a watermark.', 'npcink-workflow-toolbox' ),
 		);
 		?>
 		<div class="npcink-toolbox__panel-header npcink-toolbox__panel-header--compact" aria-label="<?php echo esc_attr( (string) $surface_header['title'] ); ?>">
@@ -1905,7 +1905,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				}
 				?>
 			</div>
-			<?php $this->render_image_backup_settings(); ?>
 		</div>
 		<?php
 	}
@@ -1963,44 +1962,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<details class="npcink-toolbox__processed-templates"><summary><?php esc_html_e( 'Manage watermark templates', 'npcink-workflow-toolbox' ); ?></summary>
 				<?php $this->render_watermark_template_library( '', true ); ?>
 			</details>
-		</section>
-		<?php
-	}
-
-	private function render_image_backup_settings(): void {
-		?>
-		<details class="npcink-toolbox__image-backup-settings" data-toolbox-image-backup-settings>
-			<summary><?php esc_html_e( 'Backup settings', 'npcink-workflow-toolbox' ); ?></summary>
-			<?php $this->render_media_backup_retention_settings(); ?>
-		</details>
-		<?php
-	}
-
-	private function render_media_backup_retention_settings(): void {
-		$settings = $this->settings->get_media_optimization_settings();
-		?>
-		<section class="npcink-toolbox__card npcink-toolbox__card--compact" data-toolbox-media-backup-retention>
-			<form method="post" action="options.php" class="npcink-toolbox__settings-form">
-				<?php settings_fields( 'npcink_toolbox_media_optimization' ); ?>
-				<div class="npcink-toolbox__section-heading">
-					<div>
-						<h3><?php esc_html_e( 'Expired backup cleanup', 'npcink-workflow-toolbox' ); ?></h3>
-						<p><?php esc_html_e( 'These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe.', 'npcink-workflow-toolbox' ); ?></p>
-					</div>
-				</div>
-				<div class="npcink-toolbox__retention-control">
-				<label>
-					<span><?php esc_html_e( 'Expired backup cleanup', 'npcink-workflow-toolbox' ); ?></span>
-					<select name="<?php echo esc_attr( Plugin::MEDIA_OPTION_NAME ); ?>[backup_cleanup_mode]">
-						<option value="manual" <?php selected( 'manual', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Keep until manually cleaned up', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="automatic" <?php selected( 'automatic', (string) ( $settings['backup_cleanup_mode'] ?? 'manual' ) ); ?>><?php esc_html_e( 'Clean up automatically', 'npcink-workflow-toolbox' ); ?></option>
-					</select>
-				</label>
-				<div class="npcink-toolbox__retention-actions">
-					<?php submit_button( __( 'Save cleanup mode', 'npcink-workflow-toolbox' ), 'secondary', 'submit', false ); ?>
-				</div>
-				</div>
-			</form>
 		</section>
 		<?php
 	}

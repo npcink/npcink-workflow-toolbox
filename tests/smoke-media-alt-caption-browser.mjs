@@ -107,14 +107,14 @@ try {
  async function checkSettings(label) {
   const activeId = label === 'image-settings' ? 'image-settings' : 'media-batch-optimize';
   assert(await page.locator(`[data-toolbox-tool-panel="${activeId}"]:visible`).count() === 1, `${label}: expected image task is active.`);
-  assert(await page.locator('[data-toolbox-media-backup-retention]').count() === 1, `${label}: backup settings remain.`);
+  assert(await page.locator('[data-toolbox-media-backup-retention]').count() === 0, `${label}: legacy backup settings are absent.`);
   assert(await page.locator('[data-toolbox-watermark-library]').count() === 1, `${label}: watermark settings remain.`);
   assert(await page.locator('[data-toolbox-media-alt-caption-review], [data-toolbox-tool-panel="media-library"], a[href*="toolbox_tool=media-alt-caption-review"]').count() === 0, `${label}: no backend ALT workbench or shortcut exists.`);
  }
  await checkSettings('Default URL');
  assert(await page.locator('[data-toolbox-tool-group-target]').count() === 2, 'Image compression and Add watermark are the two peer tasks.');
  assert(await page.locator('[data-toolbox-processed-image="compression"]:visible').count() === 1 && await page.locator('[data-toolbox-media-derivative]').count() === 0, 'Single-image compression renders without legacy batch or recovery controls.');
- assert(await page.locator('[data-toolbox-image-backup-settings]').evaluate(node => !node.open), 'Shared backup settings start collapsed.');
+ assert(await page.locator('[data-toolbox-image-backup-settings]').count() === 0, 'Legacy backup settings have no disclosure or empty container.');
  await page.locator('[data-toolbox-tool-group-target="image-settings"]').click();
  assert(await page.locator('[data-toolbox-processed-image="watermark"]:visible').count() === 1, 'Watermark task shows the single-image workflow.');
  await page.locator('.npcink-toolbox__processed-templates > summary').click();
@@ -125,7 +125,7 @@ try {
  await select.selectOption(alternative);
  assert(await page.locator('[data-toolbox-watermark-library-preview]:visible').count() === 1, 'Template selection retains the small local preview.');
  await page.locator('[data-toolbox-tool-group-target="media"]').click();
- assert(await page.locator('[data-toolbox-image-backup-settings]').count() === 1, 'Switching tasks retains one shared backup settings block.');
+ assert(await page.locator('[data-toolbox-image-backup-settings]').count() === 0, 'Switching tasks does not restore legacy backup settings.');
  await page.locator('[data-toolbox-tool-group-target="image-settings"]').click();
  assert(await select.inputValue() === alternative, 'Task switching preserves unsaved template selection.');
  await select.selectOption(original);
@@ -137,7 +137,7 @@ try {
   await page.goto(`${toolsUrl}&toolbox_tool=${query}`, { waitUntil: 'networkidle' });
   await checkSettings(query);
  }
- for (const width of [1440, 390]) {
+ for (const width of [1440, 1100]) {
   await page.setViewportSize({ width, height: 1000 });
   for (const task of ['media-batch-optimize', 'image-settings']) {
    await page.goto(`${toolsUrl}&toolbox_tool=${task}`, { waitUntil: 'networkidle' });
@@ -148,8 +148,7 @@ try {
   await page.locator('[data-toolbox-watermark-settings] > summary').click();
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px template editor has no horizontal overflow.`);
   await page.screenshot({ path: `${artifactDir}/templates-${width}.png`, fullPage: true });
-  await page.locator('[data-toolbox-image-backup-settings] > summary').click();
-  assert(await page.locator('[data-toolbox-media-backup-retention]').isVisible(), 'Shared backup controls open on demand.');
+  assert(await page.locator('[data-toolbox-image-backup-settings], [name*="backup_cleanup_mode"]').count() === 0, 'Legacy backup controls are absent at this PC width.');
  }
  await page.setViewportSize({ width: 1440, height: 1000 });
  await page.goto(`${baseUrl}/wp-admin/upload.php?mode=list`, { waitUntil: 'networkidle' });
@@ -161,11 +160,10 @@ try {
  const noJs = await browser.newContext({ ignoreHTTPSErrors: true, javaScriptEnabled: false, storageState: await context.storageState() });
  const plainPage = await noJs.newPage();
  await plainPage.goto(`${toolsUrl}&toolbox_tool=media-alt-caption-review&attachment_ids=282285`, { waitUntil: 'load' });
- assert(await plainPage.locator('[data-toolbox-tool-panel="media-batch-optimize"]:visible').count() === 1 && await plainPage.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Without JavaScript the retired URL renders the paused compression task.');
+ assert(await plainPage.locator('[data-toolbox-tool-panel="media-batch-optimize"]:visible').count() === 1 && await plainPage.locator('[data-toolbox-media-alt-caption-review]').count() === 0, 'Without JavaScript the retired URL renders the compression task.');
  await plainPage.locator('[data-toolbox-tool-group-target="image-settings"]').click();
  assert(await plainPage.locator('[data-toolbox-processed-image="watermark"]:visible').count() === 1, 'Native task links open watermarks without JavaScript.');
- await plainPage.locator('[data-toolbox-image-backup-settings] > summary').click();
- assert(await plainPage.locator('[data-toolbox-media-backup-retention]').isVisible(), 'Native backup disclosure works without JavaScript.');
+ assert(await plainPage.locator('[data-toolbox-image-backup-settings], [data-toolbox-media-backup-retention]').count() === 0, 'Legacy backup settings are absent without JavaScript.');
  await noJs.close();
  assert(unexpected.length === 0, 'Retired entries send no AI, ALT planning or proposal requests.');
  assert(errors.length === 0, `No browser JavaScript errors: ${errors.join('; ')}`);

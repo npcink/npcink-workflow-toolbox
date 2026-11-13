@@ -7,6 +7,17 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+## Legacy backup settings removed — 2026-11-13
+
+Operator-approved: remove the entire Image Processing backup-settings disclosure,
+cleanup selector and save action, including empty containers and shared-backup
+help text. This supersedes earlier instructions to retain that settings surface.
+No replacement settings page is added. Existing stored options, per-record legacy
+policies, the policy filter, Toolkit recovery and maintenance remain unchanged.
+Seven-day replacement recovery/deadline, cleanup blockers and actual deleted bytes
+remain beside the selected image. Watermark template management remains on demand.
+See [PC verification and disposition ledger](legacy-backup-settings-removal-2026-11-13.md).
+
 ## Seven-day single-image recovery amendment — 2026-11-13
 
 Operator-approved checked replacements now retain the original and old sizes

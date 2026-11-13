@@ -2,6 +2,17 @@
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。当前展示规则以下方最新覆盖决议为准。
 
+## Legacy backup settings removed — 2026-11-13
+
+Operator-approved: remove the entire Image Processing backup-settings disclosure,
+cleanup selector and save action, including empty containers and shared-backup
+help text. This supersedes earlier instructions to retain that settings surface.
+No replacement settings page is added. Existing stored options, per-record legacy
+policies, the policy filter, Toolkit recovery and maintenance remain unchanged.
+Seven-day replacement recovery/deadline, cleanup blockers and actual deleted bytes
+remain beside the selected image. Watermark template management remains on demand.
+See [PC verification and disposition ledger](legacy-backup-settings-removal-2026-11-13.md).
+
 ## Seven-day single-image recovery amendment — 2026-11-13
 
 Operator-approved checked replacements now retain the original and old sizes

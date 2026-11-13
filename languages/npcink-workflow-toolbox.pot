@@ -10476,7 +10476,7 @@ msgid "Ask about your site or work with images. AI suggestions require human rev
 msgstr ""
 
 #: includes/Admin_Page.php
-msgid "Compress images or add a watermark. Backup settings are shared."
+msgid "Compress images or add a watermark."
 msgstr ""
 
 #: includes/Admin_Page.php
