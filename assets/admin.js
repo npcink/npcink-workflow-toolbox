@@ -3609,7 +3609,7 @@
 					const deadline = new Date(receipt.expires_at_gmt).toLocaleString();
 					const messages = [];
 					if (latest.operation === 'restore_media_backup') messages.push(t('The original image has been restored.'));
-					if (receipt.state === 'cleaned') messages.push(t('Old image files cleaned up. Space released:') + ' ' + formatMediaBytes(receipt.removed_bytes));
+					if (receipt.state === 'cleaned') messages.push(t('Old image files cleaned up. Space released:') + ' ' + (formatMediaBytes(receipt.removed_bytes) || '0 B'));
 					else if (Date.parse(receipt.expires_at_gmt) > Date.now()) messages.push((latest.operation === 'restore_media_backup' ? t('Previous processed version retained until:') : t('Original image recoverable until:')) + ' ' + deadline);
 					else messages.push(t('The recovery period ended. Cleanup runs during WordPress maintenance.'));
 					const reasons = new Set(rows.flatMap(row => row.temporary_backup.blocked_reasons || []));

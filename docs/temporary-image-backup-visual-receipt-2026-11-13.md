@@ -22,14 +22,14 @@ Information hierarchy before editing:
 
 Source state (SHA-256; final UI blobs):
 
-- `assets/admin.js`: `80a5a2dfd923934ad1a98069d39dd4495d823611aae0ce37e9f92d9f36763035`
+- `assets/admin.js`: `43da61918628835173ede2f0187f034c7dfa05e40a86ea821bf7b5235359cd55`
 - `includes/Admin_Page.php`: `ea194d8e867056897c3188b56abe3fa4a556e5f95597816a7d0d1eaa89fb6647`
 - `languages/npcink-workflow-toolbox-zh_CN-npcink-toolbox-admin.json`: `1c8565532b9705d29be3fe6030f9d0bcf7047f124e0888f5927fae0aecb938c3`
-- `tests/smoke-processed-image-browser.mjs`: `2ce75bb3e90af4a11bfc543320972375a992ba453fc2be04854d7d8a71e0290e`
+- `tests/smoke-processed-image-browser.mjs`: `a497e974915f914f0d9c9cf48016ab75492fee51f9f4485cf8b3dc83f5b8d63f`
 
 Deterministic browser: tests/smoke-processed-image-browser.mjs passes. States:
 no managed backup, active deadline, restored with previous-version deadline,
-cleaned with 2.00 KB actual bytes, expired blocked with reference/delete failure
+cleaned with 2.00 KB actual bytes, cleaned with explicit 0 B, expired blocked with reference/delete failure
 and retained bytes, unavailable read and successful retry, restore-proposal
 pending, both task previews/default import/checked adoption. Checked adoption
 passes temporary_7_days.v1; restore sends dry-run/commit=false only. No approval,

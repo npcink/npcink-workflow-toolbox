@@ -110,8 +110,9 @@ $id=0; $path=''; try {
 		backupReads++;
 		if (backupMode === 'error') return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'fixture unavailable' }) });
 		const receipt = { policy: 'temporary_7_days.v1', state: 'retained', expires_at_gmt: deadline, restorable: true, removed_bytes: 0, retained_bytes: 512, blocked_reasons: [] };
-		if (backupMode === 'cleaned') Object.assign(receipt, { state: 'cleaned', restorable: false, removed_bytes: 2048, retained_bytes: 0 });
+		if (backupMode === 'cleaned' || backupMode === 'cleaned-zero') Object.assign(receipt, { state: 'cleaned', restorable: false, removed_bytes: 2048, retained_bytes: 0 });
 		if (backupMode === 'blocked') Object.assign(receipt, { state: 'blocked', restorable: false, expires_at_gmt: '2020-01-01T00:00:00Z', blocked_reasons: ['local_reference', 'delete_failed'] });
+		if (backupMode === 'cleaned-zero') receipt.removed_bytes = 0;
 		const row = { backup_id: 'browser-original', operation: backupMode === 'restored' ? 'restore_media_backup' : 'adopt_cloud_media_derivative', file_exists: true, temporary_backup: receipt };
 		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { backups: backupMode === 'none' ? [] : [row] } }) });
 	});
@@ -205,7 +206,7 @@ $id=0; $path=''; try {
 		expectedReplacement = false;
 	}
 	// Each state uses the same installed surface; only the read receipt is deterministic.
-	for (const mode of ['retained', 'restored', 'cleaned', 'blocked', 'error']) {
+	for (const mode of ['retained', 'restored', 'cleaned', 'cleaned-zero', 'blocked', 'error']) {
 		backupMode = mode;
 		await page.goto(tools + '&toolbox_tool=media-batch-optimize', { waitUntil: 'networkidle' });
 		const form = page.locator('[data-toolbox-processed-image="compression"]');
@@ -232,10 +233,11 @@ $id=0; $path=''; try {
 			await form.locator('[data-processed-restore]:not([hidden])').waitFor();
 			assert(/可恢复至|recoverable until/.test(await status.innerText()), 'Retry retains the selected image and recovers the deadline.');
 		} else {
-			const expected = mode === 'cleaned' ? /实际释放|Space released/ : mode === 'blocked' ? /站内引用|site reference/ : /原图已恢复|has been restored/;
+			const expected = mode.startsWith('cleaned') ? /实际释放|Space released/ : mode === 'blocked' ? /站内引用|site reference/ : /原图已恢复|has been restored/;
 			await status.filter({ hasText: expected }).waitFor();
 			assert(await form.locator('[data-processed-restore]').isHidden(), 'Completed or blocked states do not offer an invalid original restore.');
 			if (mode === 'cleaned') assert(/2(?:\.00)?\s*KB/i.test(await status.innerText()), 'Cleaned receipt reports actual removed bytes.');
+			if (mode === 'cleaned-zero') assert(/0 B/.test(await status.innerText()), 'Zero deleted bytes are shown explicitly without invented savings.');
 			if (mode === 'blocked') assert(/仍保留|still retained/.test(await status.innerText()), 'Blocked state keeps retained size and reason visible.');
 			if (mode === 'restored') assert(/上一个处理版本|Previous processed version/.test(await status.innerText()) && !/原图可恢复至|Original image recoverable until/.test(await status.innerText()), 'Restored state names the previous processed version correctly.');
 			await page.screenshot({ path: `output/playwright/processed-image/recovery-${mode}.png`, fullPage: true });
