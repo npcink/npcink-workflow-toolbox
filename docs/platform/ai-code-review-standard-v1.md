@@ -12,7 +12,9 @@ credential, endpoint or product runtime change is part of this amendment.
 Exact base/head/diff binding, complete findings, triage, failure receipts,
 request limits and required deterministic CI checks remain mandatory. Historical
 Qwen/DeepSeek-only wording below is superseded for this one authorized model;
-legacy script and receipt contract names remain unchanged.
+legacy script and receipt contract names remain unchanged. Requests identify the
+client as `Npcink-Local-Review/1.0` for endpoint compatibility; no credential
+or machine-specific information is included in that header.
 
 ## Active policy — 2026-11-03 operator decision
 
