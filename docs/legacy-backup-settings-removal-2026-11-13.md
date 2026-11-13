@@ -25,7 +25,9 @@ Deleted: the legacy backup form and repeated shared-backup help text.
 Environment: installed magick-ai.local, Chrome headless, zh_CN. Two peer task
 routes use /wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=tools with
 toolbox_tool=media-batch-optimize or image-settings. Page model: one selected-image
-workbench. PC viewports: 1440×1000 and 1100×1000; mobile/tablet are excluded.
+workbench. PC acceptance viewports: 1440×1000 and 1100×1000. The pre-existing 390px
+smoke is retained as a regression floor; this change does not add mobile/tablet
+optimization or acceptance.
 
 Before source: master b5eb8c9. Same-state before/after captures are under ignored
 output/playwright/legacy-backup-removal/: before- and after-compression-{1440,1100}.png,
@@ -42,11 +44,12 @@ Route/no-JS browser: pass on the final run. Default, retired ALT, media-library,
 unknown and both image-task URLs contain no legacy backup controls. Task switching
 preserves unsaved template selection; template management still opens. Native links
 and template/backup absence work without JavaScript. Log:
-/tmp/remove-legacy-backup-routes-browser-recheck.log. The first run completed those
+/tmp/remove-legacy-backup-routes-browser-retained-widths.log. The first run completed those
 checks but failed on the existing WordPress upload.php ClipboardJS undefined error
 (previously recorded in the IA document); its failure log remains at
 /tmp/remove-legacy-backup-routes-browser.log. It was not suppressed or counted as a
-pass; the unchanged-code rerun completed without page errors.
+pass; the unchanged-code rerun completed without page errors. The final run also retains
+the original 390px smoke alongside the two PC widths.
 
 | Visual rule | Result / evidence |
 | --- | --- |
@@ -82,4 +85,4 @@ The MO is compiled from the reviewed PO, not edited as an opaque binary.
 - `includes/Admin_Page.php`: `d42915cda89ee7004de8d422b1b42dc46e3025c92b74e49a6a4a58d02f8d71b0`
 - `assets/admin.css`: `bf9f896e20ba7ddeb13dceea97d57cb1b44a51b8232b355b5516128982116fa9`
 - `languages/npcink-workflow-toolbox-zh_CN.mo`: `d5ce997ef6809cd10a8e6d22ada366f1630752bc828127e83afb69a7b84838b7`
-- `tests/smoke-media-alt-caption-browser.mjs`: `2bb076d6625b983b2439fbb827d543e73920bce40c5bc40a7c72f1516472189e`
+- `tests/smoke-media-alt-caption-browser.mjs`: `d3dce883be711a46b99242fb825f29ead85517c5d2269a11d047e561f81454cc`

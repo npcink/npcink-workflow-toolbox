@@ -137,7 +137,7 @@ try {
   await page.goto(`${toolsUrl}&toolbox_tool=${query}`, { waitUntil: 'networkidle' });
   await checkSettings(query);
  }
- for (const width of [1440, 1100]) {
+ for (const width of [1440, 1100, 390]) {
   await page.setViewportSize({ width, height: 1000 });
   for (const task of ['media-batch-optimize', 'image-settings']) {
    await page.goto(`${toolsUrl}&toolbox_tool=${task}`, { waitUntil: 'networkidle' });
