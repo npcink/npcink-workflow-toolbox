@@ -315,6 +315,30 @@ class LocalReviewTests(unittest.TestCase):
                 self.assertEqual(deleted_binaries, ['asset.png'])
                 self.assertIn('deleted file mode', deleted_context)
 
+    def test_new_file_diff_is_complete_without_a_duplicate_snapshot(self):
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content':
+            json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+        context = 'diff new.php\n+<?php unique_added_line();\nexisting diff\n'
+        def source_git(*args):
+            if args[0] == 'diff': return b'new.php\0existing.php\0'
+            self.assertEqual(args, ('show', FROZEN['head_sha'] + ':existing.php'))
+            return b'<?php existing_context();'
+        def exists(command, **kwargs):
+            return SimpleNamespace(returncode=1 if command[-1] == FROZEN['base_sha'] + ':new.php' else 0)
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory)/'config.json'; output = Path(directory)/'review.json'
+            config.write_text(json.dumps(dict(model='gpt-6.1-sol', url='https://example.invalid/v1', auth_token='test-token')))
+            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, b'complete binary diff')), patch.object(
+                    reviewer, 'review_context', return_value=(context, [])), patch.object(
+                    reviewer, 'git', side_effect=source_git), patch.object(reviewer.subprocess, 'run', side_effect=exists), patch.object(
+                    reviewer.urllib.request, 'urlopen', return_value=io.BytesIO(response)) as request:
+                reviewer.run('base', 'head', output, config)
+                sent = json.loads(request.call_args.args[0].data)['messages'][1]['content']
+                self.assertTrue(sent.startswith(context))
+                self.assertEqual(sent.count('unique_added_line'), 1)
+                self.assertIn('FILE existing.php\n<?php existing_context();', sent)
+                self.assertEqual(json.loads(output.read_text())['diff_sha256'], FROZEN['diff_sha256'])
+
     def test_text_budget_still_blocks_without_provider_call(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(
                 reviewer, 'snapshot', return_value=(FROZEN, b'diff')), patch.object(

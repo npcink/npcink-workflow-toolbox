@@ -59,7 +59,9 @@ opaque base85 payloads and reverse binary patches are not model review text.
 Receipts list these paths under `binary_content_not_reviewed`. Record separate
 visual or format verification for those assets in the PR; a zero-finding model
 receipt does not certify binary contents. The 220,000-character text budget
-continues to reject oversized text changes without truncation.
+continues to reject oversized text changes without truncation. Newly added text
+files already appear in full in the diff and do not receive a duplicate
+supplementary snapshot; existing small changed files still receive that context.
 
 When a provider response cannot satisfy the review contract, the command exits
 non-zero and writes a sidecar at `<output>.failure.json` (or a numeric suffix if

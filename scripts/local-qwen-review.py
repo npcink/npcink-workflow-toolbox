@@ -190,6 +190,10 @@ def run(base, head, output, config):
                 raise ValueError('secret-like changed path is not review input')
             exists = subprocess.run(['git', 'cat-file', '-e', frozen['head_sha'] + ':' + name], capture_output=True).returncode == 0
             if exists and Path(name).suffix in {'.py', '.sh', '.php', '.js'}:
+                base_exists = subprocess.run(['git', 'cat-file', '-e', frozen['base_sha'] + ':' + name], capture_output=True).returncode == 0
+                if not base_exists:
+                    # A newly added text file already appears in full in the diff.
+                    continue
                 content = git('show', frozen['head_sha'] + ':' + name).decode('utf-8', errors='strict')
                 context += ('\n\nFILE ' + name + '\n' + content
                             if len(content) <= 30000
