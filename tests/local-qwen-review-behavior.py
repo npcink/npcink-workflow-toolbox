@@ -66,8 +66,43 @@ class LocalReviewTests(unittest.TestCase):
             self.assertFalse(Path(str(output)+'.failure.json').exists())
             self.assertNotIn('not-a-real-token', output.read_text())
 
+    def test_authorized_gpt_review_keeps_identity_completeness_and_triage_checks(self):
+        receipt = copy.deepcopy(self.receipt)
+        receipt['model'] = 'gpt-6.1-sol'
+        self.verify(receipt)
+        for key, value in [('base_sha', 'd'*40), ('head_sha', 'd'*40),
+                           ('diff_sha256', 'e'*64), ('success', False)]:
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                self.verify(dict(receipt, **{key: value}))
+        with self.assertRaises(ValueError):
+            self.verify(receipt, body='## AI Review Triage\n')
+        receipt['review']['findings'] = None
+        with self.assertRaises(ValueError):
+            self.verify(receipt)
+
+    def test_configured_authorized_gpt_request_generates_verifiable_receipt(self):
+        response = json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content':
+            json.dumps({'summary': 'Reviewed', 'findings': []})}}]}).encode()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); config = root/'config.json'; output = root/'review.json'
+            config.write_text(json.dumps(dict(provider='qwen-shared', custom_providers={
+                'qwen-shared': dict(model='gpt-6.1-sol',
+                                    url='https://example.invalid/v1', auth_token='not-a-real-token')})))
+            with patch.object(reviewer, 'snapshot', return_value=(FROZEN, b'diff')), patch.object(
+                    reviewer, 'git', return_value=b''), patch.object(reviewer.urllib.request,
+                    'urlopen', return_value=io.BytesIO(response)) as request:
+                reviewer.run('base', 'head', output, config)
+                sent = json.loads(request.call_args.args[0].data)
+                self.assertEqual(sent['model'], 'gpt-6.1-sol')
+                request.assert_called_once()
+                receipt = json.loads(output.read_text())
+                self.assertEqual(receipt['model'], sent['model'])
+                reviewer.verify(receipt, '', FROZEN['head_sha'])
+            self.assertFalse(Path(str(output)+'.failure.json').exists())
+            self.assertNotIn('not-a-real-token', output.read_text())
+
     def test_unsupported_model_rejected_before_provider_call(self):
-        for model in ['other-model', '', None, 123, 'deepseek\nother', ' deepseek-v4']:
+        for model in ['other-model', '', None, 123, 'deepseek\nother', ' deepseek-v4', 'gpt-other', 'gpt-6.1-sol-other', ' gpt-6.1-sol', 'gpt-6.1-sol\nother']:
             with self.subTest(model=model), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory); config = root/'config.json'; output = root/'review.json'
                 config.write_text(json.dumps(dict(model=model, url='https://example.invalid/v1',

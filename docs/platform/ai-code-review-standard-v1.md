@@ -2,6 +2,18 @@
 
 Status: active.
 
+## Authorized review model amendment — 2026-11-13
+
+The operator explicitly authorized the newly configured `gpt-6.1-sol` model for
+local AI review. This exact model is allowed alongside existing Qwen/DeepSeek
+model ids in request generation and receipt verification. Other GPT models are
+not implicitly approved. The machine configuration remains outside Git; no
+credential, endpoint or product runtime change is part of this amendment.
+Exact base/head/diff binding, complete findings, triage, failure receipts,
+request limits and required deterministic CI checks remain mandatory. Historical
+Qwen/DeepSeek-only wording below is superseded for this one authorized model;
+legacy script and receipt contract names remain unchanged.
+
 ## Active policy — 2026-11-03 operator decision
 
 The operator retired GitHub/cloud AI review because its failures and waiting

@@ -146,7 +146,10 @@ def write_failure_receipt(output, frozen, model, code, path, message, response_b
 
 
 def supported_model(model):
-    return isinstance(model, str) and re.fullmatch(r'(?:qwen|deepseek)[a-z0-9._-]*', model, re.I) is not None
+    return isinstance(model, str) and (
+        re.fullmatch(r'(?:qwen|deepseek)[a-z0-9._-]*', model, re.I) is not None
+        or model == 'gpt-6.1-sol'
+    )
 
 
 def verify(receipt, body, expected_head):
@@ -199,7 +202,7 @@ def run(base, head, output, config):
         endpoint = provider.get('url', settings.get('url', '')).rstrip('/')
         token = provider.get('api_key') or provider.get('auth_token') or settings.get('api_key') or settings.get('auth_token')
         if not supported_model(model) or not endpoint or not token:
-            raise ValueError('configured Qwen or DeepSeek provider required')
+            raise ValueError('configured operator-approved review model required')
         if not endpoint.endswith('/chat/completions'):
             endpoint += '/chat/completions'
         request = {'model': model, 'temperature': 0, 'max_tokens': 7000,

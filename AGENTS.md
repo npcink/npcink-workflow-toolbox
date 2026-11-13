@@ -165,8 +165,8 @@ Default gate:
 composer test:all
 ```
 
-Local AI review uses the configured Qwen or DeepSeek model under the
-2026-11-03 operator decision. The legacy script path remains compatible.
+Local AI review uses the configured operator-approved model: Qwen, DeepSeek,
+or exact `gpt-6.1-sol` authorized on 2026-11-13. The legacy script path remains compatible.
 Do not wait for or rerun cloud AI review. Use
 `python3 scripts/local-qwen-review.py --base origin/master --head HEAD --output <new-local-receipt.json>`
 and publish with `--local-review <receipt.json>`. Bind the exact committed diff,
