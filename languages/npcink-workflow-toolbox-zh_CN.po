@@ -10985,8 +10985,8 @@ msgid "Ask about your site or work with images. AI suggestions require human rev
 msgstr "向本站提问，或处理图片。AI 建议仍需人工确认。"
 
 #: includes/Admin_Page.php
-msgid "Compress images or add a watermark. Backup settings are shared."
-msgstr "压缩图片或添加水印，备份设置共用。"
+msgid "Compress images or add a watermark."
+msgstr "压缩图片或添加水印。"
 
 #: includes/Admin_Page.php
 msgid "Image compression"

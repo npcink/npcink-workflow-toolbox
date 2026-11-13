@@ -1,5 +1,10 @@
 # ADR-012: Expose a Bounded Media Backup Retention Setting
 
+2026-11-13 amendment: the operator retired the cleanup settings UI from Image
+Processing. Stored legacy policy and backup/restore/maintenance behavior remain.
+See [current decision and evidence](../legacy-backup-settings-removal-2026-11-13.md).
+
+
 ## Status
 
 Accepted

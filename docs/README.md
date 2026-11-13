@@ -5,6 +5,7 @@ Start from the active documents below before changing code.
 
 ## Current Reviews And Proposals
 
+- [Legacy backup settings removal — 2026-11-13](legacy-backup-settings-removal-2026-11-13.md) — product decision, disposition ledger and PC evidence.
 - [Reversible Feature Pauses](reversible-feature-pauses-v1.md) — withdrawn Cloud inspection, audio and media optimization entrypoints; preserved data and restoration evidence; cross-repo对照 + smoke matrix row owners (links Addon / Cloud inventories).
 
 - [SEO 专项功能暂停实施记录](seo-specialist-pause-implementation-2026-10-18.md) — three-repository implementation, retained data, restoration and verification states.
