@@ -5,6 +5,7 @@ Start from the active documents below before changing code.
 
 ## Current Reviews And Proposals
 
+- [图片处理与后台收敛：会话收尾 — 2026-11-16](processed-image-session-closeout-2026-11-16.md) — 17 个应用 PR 的合并、任务分支清理、受保护工作区、剩余验收与开发经验。
 - [Legacy backup settings removal — 2026-11-13](legacy-backup-settings-removal-2026-11-13.md) — product decision, disposition ledger and PC evidence.
 - [Reversible Feature Pauses](reversible-feature-pauses-v1.md) — withdrawn Cloud inspection, audio and media optimization entrypoints; preserved data and restoration evidence; cross-repo对照 + smoke matrix row owners (links Addon / Cloud inventories).
 

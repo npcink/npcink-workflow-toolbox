@@ -7,6 +7,12 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-12.
 
+**Image/admin session closeout — 2026-11-16:** the
+[closeout and lessons](processed-image-session-closeout-2026-11-16.md) index the
+17 merged application PRs, exact-head branch cleanup, protected primary worktree,
+preserved unrelated Toolkit edits and remaining release/value/acceptance limits.
+This closes the development session, not production or natural-use acceptance.
+
 ## Legacy backup settings removed — 2026-11-13
 
 Operator-approved: remove the entire Image Processing backup-settings disclosure,
