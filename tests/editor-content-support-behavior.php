@@ -694,9 +694,9 @@ for ( $i = 0; $i < 30; ++$i ) {
 $bounded = $review_method->invoke( $review_service, array( 'title' => '文章', 'excerpt' => '摘要', 'content_full_text' => implode( "\n\n", $paragraphs ) ) );
 npcink_toolbox_editor_flow_assert( 24 === $bounded['coverage']['paragraphs_checked'] && 30 === $bounded['coverage']['paragraphs_in_context'] && 0 === $bounded['coverage']['semantic_sentences_checked'] && 120 === $bounded['coverage']['sentences_in_context'], 'Report distinguishes 24 of 30 punctuation-checked paragraphs and explicitly pauses local semantic checking.' );
 npcink_toolbox_editor_flow_assert( true === $bounded['coverage']['partial'] && 12 === $bounded['coverage']['issues_shown'] && $bounded['coverage']['issues_found'] > 12 && in_array( 'body_risk_classification', $bounded['coverage']['not_checked'], true ), 'Report discloses issue truncation and unimplemented content-risk checking.' );
-$long_input = array( 'title' => 'Article', 'excerpt' => 'Summary', 'content' => str_repeat( 'unchanged ', 4000 ) );
+$long_input = array( 'title' => 'Article', 'excerpt' => 'Summary', 'content' => str_repeat( 'unchanged ', 6000 ) );
 $limited = $review_method->invoke( $review_service, $review_context->invoke( $review_service, new WP_REST_Request( $long_input ) ) );
-npcink_toolbox_editor_flow_assert( true === $limited['coverage']['context_truncated'] && $limited['coverage']['input_text_characters'] > $limited['coverage']['context_text_characters'], 'Report reveals the 30,000-character context limit before claiming coverage.' );
+npcink_toolbox_editor_flow_assert( true === $limited['coverage']['context_truncated'] && $limited['coverage']['input_text_characters'] > $limited['coverage']['context_text_characters'], 'Report reveals the 50,000-character context limit before claiming coverage.' );
 $clear = $review_method->invoke( $review_service, array( 'title' => 'Article', 'excerpt' => 'Summary', 'content_full_text' => 'A short note.' ) );
 npcink_toolbox_editor_flow_assert( 0 === $clear['coverage']['issues_found'] && 0 === $clear['coverage']['issues_shown'] && 0 === $clear['summary']['issue_count'], 'A no-findings notice is not counted as a finding or a comprehensive pass.' );
 
@@ -1032,3 +1032,12 @@ $GLOBALS['npcink_toolbox_simulated_capabilities'] = array();
 npcink_toolbox_editor_flow_assert( false === $permission_probe( '/editor/content-support' ) && false === $permission_probe( '/agent-feedback' ), 'Users without the scoped capability are denied even the relaxed editor routes.' );
 
 echo "Editor content support behavior checks passed.\n";
+
+foreach ( array( '中', '😀', 'a' ) as $char ) {
+	$input = array( 'content' => str_repeat( $char, 50000 ), 'selected_text' => str_repeat( $char, 12000 ) );
+	$context = $review_context->invoke( $review_service, new WP_REST_Request( $input ) );
+	npcink_toolbox_editor_flow_assert( $context['content_full_text'] === $input['content'] && $context['selected_text_full'] === $input['selected_text'] && ! $context['selection_truncated'] && ! $context['article_review_truncated'], 'Full article and selection preserve exact Unicode boundary content.' );
+	$input['selected_text'] .= $char;
+	$response = npcink_toolbox_editor_flow_call( $controller, array( 'intent' => 'polish_notes' ) + $input );
+	npcink_toolbox_editor_flow_assert( isset( $response['error'] ) && 'npcink_toolbox_editor_selection_too_long' === $response['error']->get_error_code(), 'Oversize selections fail explicitly before model execution.' );
+}

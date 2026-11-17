@@ -10725,3 +10725,12 @@ msgstr ""
 #: includes/Admin_Page.php assets/admin.js
 msgid "These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe."
 msgstr ""
+
+msgid "Select up to 12000 characters for paragraph review. The original text is unchanged."
+msgstr ""
+
+msgid "Use up to %d characters for this action. The original text is unchanged."
+msgstr ""
+
+msgid "Use up to 50000 characters for article formatting. The original text is unchanged."
+msgstr ""

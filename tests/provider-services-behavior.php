@@ -288,6 +288,7 @@ function apply_filters( string $hook, $value, ...$args ) {
 		);
 	}
 	if ( 'npcink_toolbox_hosted_ai_cloud_request' === $hook ) {
+		$GLOBALS['budget_hosted_payload'] = $args[0];
 		global $npcink_toolbox_progressive_draft_inputs, $npcink_toolbox_progressive_writing_pack_inputs;
 		$runtime_input = is_array( $args[1] ?? null ) ? $args[1] : array();
 		if ( 'article_draft_from_writing_pack' === (string) ( $runtime_input['intent'] ?? '' ) ) {
@@ -346,8 +347,8 @@ function wp_trim_words( $text, int $num_words = 55, ?string $more = null ): stri
 	return implode( ' ', array_slice( $words, 0, $num_words ) ) . ( null === $more ? '' : $more );
 }
 
-function wp_json_encode( $value ): string {
-	return (string) json_encode( $value );
+function wp_json_encode( $value, int $flags = 0, int $depth = 512 ): string {
+	return (string) json_encode( $value, $flags, $depth );
 }
 
 function is_wp_error( $value ): bool {
@@ -1040,3 +1041,21 @@ $alt_input['review_set_limit'] = 5;
 $client->run_hosted_ai_site_helper( $alt_input );
 $last_request = end( $GLOBALS['npcink_toolbox_alt_visual_requests'] );
 npcink_toolbox_provider_services_assert( 5 === count( $last_request['items'] ), 'Visual recognition respects the requested review limit instead of recognizing the whole scan.' );
+
+$helper = new ReflectionMethod( Npcink_Toolbox\Provider_Client_Support::class, 'bounded_text' );
+$helper->setAccessible( true );
+foreach ( array( '中', '😀', 'a' ) as $char ) {
+	$sample = str_repeat( $char, 800 );
+	npcink_toolbox_provider_services_assert( $sample === $helper->invoke( $hosted_ai, $sample, 1200 ), 'Under-budget multilingual text is not byte-clipped.' );
+	npcink_toolbox_provider_services_assert( str_repeat( $char, 1200 ) === $helper->invoke( $hosted_ai, str_repeat( $char, 1201 ), 1200 ), 'Oversize helper text clips at a valid Unicode boundary.' );
+	foreach ( array( 'polish_notes' => 12000, 'summary_suggestions' => 50000 ) as $intent => $limit ) {
+		$content = str_repeat( $char, $limit );
+		$GLOBALS['budget_hosted_payload'] = null;
+		$hosted_ai->run_hosted_ai_content_support( array( 'intent' => $intent, 'content' => $content, 'summary_generation_mode' => 'full_context' ) );
+		$prompt = $GLOBALS['budget_hosted_payload']['input']['messages'][1]['content'] ?? '';
+		npcink_toolbox_provider_services_assert( ( json_decode( $prompt, true )['source']['content'] ?? null ) === $content, 'Boundary article/selection reaches the final hosted prompt without excerpt clipping.' );
+		$GLOBALS['budget_hosted_payload'] = null;
+		$r = $hosted_ai->run_hosted_ai_content_support( array( 'intent' => $intent, 'content' => $content . $char, 'summary_generation_mode' => 'full_context' ) );
+		npcink_toolbox_provider_services_assert( is_wp_error( $r ) && null === $GLOBALS['budget_hosted_payload'], 'Over-limit full context is rejected before hosted transport.' );
+	}
+}

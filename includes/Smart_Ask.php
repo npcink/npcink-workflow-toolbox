@@ -31,8 +31,8 @@ final class Smart_Ask {
 		$question = trim( sanitize_textarea_field( $input['question'] ) );
 		$hint     = $input['source_hint'] ?? '';
 		// Match the strictest existing summary bridge bound; do not silently truncate.
-		if ( '' === $question || strlen( $question ) > 2000 || ! is_string( $hint ) || ( '' !== $hint && ! in_array( $hint, self::SOURCES, true ) ) ) {
-			return new WP_Error( 'npcink_toolbox_ask_question', __( 'Enter a shorter question and try again.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
+		if ( '' === $question || strlen( $question ) > 8000 || false === preg_match_all( '/./us', $question ) || preg_match_all( '/./us', $question ) > 2000 || ! is_string( $hint ) || ( '' !== $hint && ! in_array( $hint, self::SOURCES, true ) ) ) {
+			return new WP_Error( 'npcink_toolbox_ask_question', __( 'Enter a question of up to 2000 characters.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
 		}
 		$client = class_exists( '\Npcink_Cloud_Runtime_Client_Factory' ) ? \Npcink_Cloud_Runtime_Client_Factory::configured() : null;
 		if ( ! $client ) {

@@ -70,10 +70,10 @@ final class Rest_Environment_Performance_Insight_Bridges {
 				array( 'status' => 400 )
 			);
 		}
-		if ( strlen( $question ) > 2000 ) {
+		if ( strlen( $question ) > 8000 || false === preg_match_all( '/./us', $question ) || preg_match_all( '/./us', $question ) > 2000 ) {
 			return new WP_Error(
 				'npcink_toolbox_environment_performance_qa_question_too_long',
-				__( 'Keep the question under 2000 characters.', 'npcink-workflow-toolbox' ),
+				__( 'Enter a question of up to 2000 characters.', 'npcink-workflow-toolbox' ),
 				array( 'status' => 400 )
 			);
 		}

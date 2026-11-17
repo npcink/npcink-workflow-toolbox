@@ -11226,3 +11226,12 @@ msgstr "另存图片会增加存储。替换后的原图保留 7 天，到期后
 #: includes/Admin_Page.php assets/admin.js
 msgid "These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe."
 msgstr "这些设置仅适用于历史备份：保留 30 天后，按原有手动或自动策略清理。新单图替换的原文件保留 7 天，到期且安全时自动清理。"
+
+msgid "Select up to 12000 characters for paragraph review. The original text is unchanged."
+msgstr "段落检查最多支持 12,000 个字符。请缩小选区后重试，原文未被修改。"
+
+msgid "Use up to %d characters for this action. The original text is unchanged."
+msgstr "此操作最多支持 %d 个字符。请精简内容后重试，原文未被修改。"
+
+msgid "Use up to 50000 characters for article formatting. The original text is unchanged."
+msgstr "文章排版最多支持 50,000 个字符（含格式标记）。请缩短内容后重试，原文未被修改。"

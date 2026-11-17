@@ -110,7 +110,7 @@ final class Rest_Editor_Audio_Text {
 			return mb_strlen( $value, 'UTF-8' ) > $max_chars ? mb_substr( $value, 0, $max_chars, 'UTF-8' ) : $value;
 		}
 
-		return strlen( $value ) > $max_chars ? substr( $value, 0, $max_chars ) : $value;
+		return implode( '', array_slice( preg_split( '//u', $value, -1, PREG_SPLIT_NO_EMPTY ) ?: array(), 0, $max_chars ) );
 	}
 
 	public static function trim( string $value, int $max_chars ): string {

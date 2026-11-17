@@ -18,7 +18,7 @@ final class Editor_Content_Format {
 		$content = $params['content'] ?? null;
 		$post_id = $params['post_id'] ?? null;
 		if ( array( 'content', 'intent', 'post_id' ) !== $keys || ! is_string( $content )
-			|| '' === trim( $content ) || strlen( $content ) > 100000 || 1 !== preg_match( '//u', $content )
+			|| '' === trim( $content ) || strlen( $content ) > 262144 || preg_match_all( '/./us', $content ) > 50000 || 1 !== preg_match( '//u', $content )
 			|| ! is_int( $post_id ) || $post_id < 1 ) {
 			return self::error( 'input', __( 'The article body is empty, too long, or the request format is invalid. The original text is unchanged.', 'npcink-workflow-toolbox' ), 400 );
 		}
@@ -66,7 +66,7 @@ final class Editor_Content_Format {
 			|| false !== ( $result['direct_wordpress_write'] ?? null )
 			|| ! is_bool( $result['protected_content_skipped'] ?? null )
 			|| ! is_string( $result['candidate'] ?? null )
-			|| strlen( $result['candidate'] ) > 200000
+			|| strlen( $result['candidate'] ) > 524288
 			|| hash( 'sha256', $source ) !== ( $result['source_sha256'] ?? null )
 			|| hash( 'sha256', $result['candidate'] ) !== ( $result['candidate_sha256'] ?? null ) ) {
 			return false;
@@ -108,7 +108,7 @@ final class Editor_Content_Format {
 			|| 'html' !== $result['format'] || false !== $result['direct_wordpress_write'] || true !== $result['visible_characters_preserved']
 			|| ! is_bool( $result['protected_content_skipped'] ) || ! is_int( $result['structural_changes'] ) || $result['structural_changes'] < 0
 			|| ! is_int( $result['inserted_spaces'] ) || $result['inserted_spaces'] < 0
-			|| ! is_string( $result['candidate'] ) || strlen( $result['candidate'] ) > 200000
+			|| ! is_string( $result['candidate'] ) || strlen( $result['candidate'] ) > 524288
 			|| hash( 'sha256', $source ) !== $result['source_sha256'] || hash( 'sha256', $result['candidate'] ) !== $result['candidate_sha256'] ) {
 			return false; }
 		$changed = $source !== $result['candidate'];
