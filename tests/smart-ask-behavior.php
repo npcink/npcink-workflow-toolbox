@@ -94,6 +94,15 @@ namespace {
 		check( is_wp_error( $controller->smart_ask( $request ) ), 'Invalid or extra inputs fail before selection.' );
 	}
 	check( ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'Invalid input has zero reads or paid calls.' );
+	foreach ( array( '中', '😀', 'a' ) as $char ) {
+		reset_case();
+		$request->input = array( 'question' => str_repeat( $char, 2000 ) );
+		check( ! is_wp_error( $controller->smart_ask( $request ) ), '2000 Unicode characters reach the existing answer path.' );
+		check( $GLOBALS['dispatch'][0][1]['question'] === $request->input['question'], 'The complete multilingual question is preserved.' );
+		reset_case();
+		$request->input['question'] .= $char;
+		check( is_wp_error( $controller->smart_ask( $request ) ) && ! $GLOBALS['calls'], '2001 characters fail before Cloud.' );
+	}
 	foreach ( Smart_Ask::SOURCES as $source ) {
 		reset_case( 'route', $source );
 		$request->input = array( 'question'=>'Changed question in my own words', 'source_hint'=>'site_ops' );

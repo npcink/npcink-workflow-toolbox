@@ -456,4 +456,7 @@ $GLOBALS['page_quality_filters'][ $builder_cls::SAMPLE_LIMIT_FILTER ] = -9;
 page_quality_rest_assert( 6 === $builder_cls::sample_limit(), 'The existing public filter remains lower-clamped.' );
 unset( $GLOBALS['page_quality_filters'] );
 
+require_once __DIR__ . '/fixtures/insight-question-budget.php';
+assert_insight_question_budget( array( $bridge, 'page_quality_insight_pack_qa' ), 'page_quality_rest_assert' );
+
 echo "All page-quality insight pack REST behavior checks passed.\n";

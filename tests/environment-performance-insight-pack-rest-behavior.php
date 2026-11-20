@@ -318,4 +318,7 @@ $GLOBALS['environment_performance_filters'][ Npcink_Toolbox\Environment_Performa
 environment_performance_rest_assert( 10 === Npcink_Toolbox\Environment_Performance_Insight_Builder::plugin_list_limit(), 'The existing plugin-list hook name remains lower-clamped.' );
 unset( $GLOBALS['environment_performance_filters'] );
 
+require_once __DIR__ . '/fixtures/insight-question-budget.php';
+assert_insight_question_budget( array( $bridge, 'environment_performance_insight_pack_qa' ), 'environment_performance_rest_assert' );
+
 echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;

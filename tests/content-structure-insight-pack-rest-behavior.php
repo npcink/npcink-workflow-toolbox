@@ -424,4 +424,7 @@ $GLOBALS['content_structure_filters'][ $builder_cls::SAMPLE_LIMIT_FILTER ] = -9;
 content_structure_rest_assert( 6 === $builder_cls::sample_limit(), 'The existing public filter remains lower-clamped.' );
 unset( $GLOBALS['content_structure_filters'] );
 
+require_once __DIR__ . '/fixtures/insight-question-budget.php';
+assert_insight_question_budget( array( $bridge, 'content_structure_insight_pack_qa' ), 'content_structure_rest_assert' );
+
 echo "All content-structure insight pack REST behavior checks passed.\n";
