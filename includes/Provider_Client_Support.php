@@ -295,7 +295,7 @@ abstract class Provider_Client_Support {
 
 
 	protected function hosted_ai_text_length( string $value ): int {
-		return function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : strlen( $value );
+		return function_exists( 'mb_strlen' ) ? mb_strlen( $value, 'UTF-8' ) : (int) preg_match_all( '/./us', $value );
 	}
 
 
@@ -304,7 +304,7 @@ abstract class Provider_Client_Support {
 			return trim( mb_substr( $value, $start, $length, 'UTF-8' ) );
 		}
 
-		return trim( substr( $value, $start, $length ) );
+		return trim( implode( '', array_slice( preg_split( '//u', $value, -1, PREG_SPLIT_NO_EMPTY ) ?: array(), $start, $length ) ) );
 	}
 
 
@@ -408,7 +408,7 @@ abstract class Provider_Client_Support {
 			return mb_strlen( $value ) > $max_chars ? mb_substr( $value, 0, $max_chars ) : $value;
 		}
 
-		return strlen( $value ) > $max_chars ? substr( $value, 0, $max_chars ) : $value;
+		return $this->hosted_ai_text_slice( $value, 0, $max_chars );
 	}
 
 
@@ -523,14 +523,7 @@ abstract class Provider_Client_Support {
 	protected function bounded_text( string $value, int $max_chars ): string {
 		$value     = sanitize_textarea_field( $value );
 		$max_chars = max( 1, $max_chars );
-		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) && mb_strlen( $value ) > $max_chars ) {
-			return mb_substr( $value, 0, $max_chars );
-		}
-		if ( strlen( $value ) > $max_chars ) {
-			return substr( $value, 0, $max_chars );
-		}
-
-		return $value;
+		return $this->trim_chars( $value, $max_chars );
 	}
 
 

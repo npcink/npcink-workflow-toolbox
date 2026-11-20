@@ -8162,6 +8162,11 @@
 					resultEl.hidden = true;
 					return;
 				}
+				if (Array.from(question).length > 2000 || new TextEncoder().encode(question).length > 8000) {
+					setStatus(t('Enter a question of up to 2000 characters.'), 'is-warning');
+					resultEl.hidden = true;
+					return;
+				}
 				const endpoint = 'smart-ask';
 				if (!config.restUrl) {
 					setStatus(t('REST URL is missing.'), 'is-error');

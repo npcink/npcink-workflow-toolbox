@@ -11,7 +11,7 @@ const wp = { element: {}, components: {}, blocks: { serialize, parse: JSON.parse
 class FeedbackDOMParser {
 	parseFromString(html) { return { body: { querySelectorAll: () => html.match(/<br\s*\/?\s*>/g) || [] } }; }
 }
-const context = vm.createContext({ window: { wp }, DOMParser: FeedbackDOMParser });
+const context = vm.createContext({ TextEncoder, window: { wp }, DOMParser: FeedbackDOMParser });
 const script = fs.readFileSync(new URL('../assets/editor-content-format.js', import.meta.url), 'utf8');
 vm.runInContext(script, context);
 const { prepare, onlyInsertedSpaces, formatFeedback } = context.window.NpcinkToolboxContentFormat;
@@ -63,11 +63,25 @@ assert.equal(skipped.skipped, true);
 assert.equal(skipped.metrics.length, 0);
 assert.equal(formatFeedback(sourceBlocks, { ...result, status: 'UNCHANGED', candidate: source }, false).text, 'The article body needs no changes.');
 
+// Candidate validation measures UTF-8 bytes, including non-ASCII output that
+// stays below the old JS string-length cap but exceeds the byte allowance.
+for (const contract_version of ['content_format_candidate.v1', 'content_format_candidate.v2']) {
+	for (const bytes of [524288, 524289]) {
+		const largeBlocks = [p('中'.repeat(174000))];
+		const padding = bytes - new TextEncoder().encode(serialize(largeBlocks)).length;
+		largeBlocks[0].attributes.content += 'a'.repeat(padding);
+		const large = serialize(largeBlocks);
+		const review = { ...result, contract_version, status: 'UNCHANGED', candidate: large };
+		if (bytes === 524288) assert.equal(prepare(largeBlocks, large, review).length, 0);
+		else assert.throws(() => prepare(largeBlocks, large, review), /body protection/);
+	}
+}
+
 // Exercise the actual click handler: sub-500ms edits/undo and post switches
 // must discard a delayed response without any block mutation.
-for (const change of ['edit', 'edit-undo', 'identity', 'post']) {
+for (const change of ['edit', 'edit-undo', 'identity', 'post', 'oversize']) {
 	let blocks = sourceBlocks;
-	let body = source;
+	let body = change === 'oversize' ? '文'.repeat(50001) : source;
 	let postId = 42;
 	let listener;
 	let finish;
@@ -88,10 +102,17 @@ for (const change of ['edit', 'edit-undo', 'identity', 'post']) {
 		},
 		apiFetch: () => new Promise((resolve) => { finish = resolve; }),
 	};
-	const harness = vm.createContext({ window: { wp: testWp, setTimeout, clearTimeout, NpcinkToolboxEditorSupport: { restUrl: '/toolbox', nonce: 'test' } }, AbortController });
+	const harness = vm.createContext({ TextEncoder, window: { wp: testWp, setTimeout, clearTimeout, NpcinkToolboxEditorSupport: { restUrl: '/toolbox', nonce: 'test' } }, AbortController });
 	vm.runInContext(script, harness);
 	const control = harness.window.NpcinkToolboxContentFormat.Control({});
 	const pending = control.children[1].children[0].props.onClick();
+	if (change === 'oversize') {
+		await pending;
+		assert.equal(finish, undefined, 'Oversize content never reaches HTTP.');
+		assert.equal(mutations, 0);
+		assert.ok(notices.some((value) => value?.text?.includes('50000 characters')));
+		continue;
+	}
 	if (change === 'post') postId = 43;
 	else {
 		blocks = [{ ...sourceBlocks[0], clientId: change === 'identity' ? 'new-id' : 'keep-id' }];

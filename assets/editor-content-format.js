@@ -83,7 +83,7 @@
 		if (!result || result.contract_version !== 'content_format_candidate.v1' || result.format !== 'html'
 			|| !['CHANGED', 'UNCHANGED', 'PARTIAL', 'REVIEW'].includes(result.status) || result.visible_characters_preserved !== true
 			|| result.direct_wordpress_write !== false || result.persisted !== false
-			|| typeof result.candidate !== 'string' || result.candidate.length > 200000
+			|| typeof result.candidate !== 'string' || new TextEncoder().encode(result.candidate).length > 524288
 			|| !onlyInsertedSpaces(source, result.candidate) || wp.blocks.serialize(sourceBlocks) !== source) {
 			throw new Error(t('The formatting result failed the body protection check. The original text is unchanged.'));
 		}
@@ -139,7 +139,7 @@
 
 	function prepareStructure(sourceBlocks, source, result) {
 		if (result.format !== 'html' || result.visible_characters_preserved !== true || result.direct_wordpress_write !== false
-			|| result.persisted !== false || typeof result.candidate !== 'string' || result.candidate.length > 200000
+			|| result.persisted !== false || typeof result.candidate !== 'string' || new TextEncoder().encode(result.candidate).length > 524288
 			|| !['CHANGED', 'UNCHANGED', 'PARTIAL', 'REVIEW'].includes(result.status) || wp.blocks.serialize(sourceBlocks) !== source) {
 			throw new Error(t('The formatting result failed the body protection check. The original text is unchanged.'));
 		}
@@ -261,6 +261,7 @@
 			if (active.current || disabled) return;
 			const source = snapshot();
 			if (!source.postId || !source.content.trim()) { setNotice({ status: 'warning', text: t('The article body is empty. Nothing to format.') }); return; }
+			if (Array.from(source.content).length > 50000 || new TextEncoder().encode(source.content).length > 262144) { setNotice({ status: 'warning', text: t('Use up to 50000 characters for article formatting. The original text is unchanged.') }); return; }
 			const controller = new AbortController();
 			active.current = controller;
 			setBusy(true);

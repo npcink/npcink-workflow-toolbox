@@ -9,6 +9,7 @@
         "lang": "zh_CN",
         "plural-forms": "nplurals=1; plural=0;"
       },
+      "Use up to 50000 characters for article formatting. The original text is unchanged.": ["文章排版最多支持 50,000 个字符（含格式标记）。请缩短内容后重试，原文未被修改。"],
       "Adjust spacing and layout only.": ["仅整理间距和版式。"],
       "Expand": ["展开"],
       "Collapse": ["收起"],

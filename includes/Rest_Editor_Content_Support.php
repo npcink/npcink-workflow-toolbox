@@ -24,8 +24,8 @@ defined( 'ABSPATH' ) || exit;
 
 final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 
-	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 30000;
-	private const EDITOR_SELECTED_TEXT_MAX_CHARS        = 2000;
+	private const EDITOR_SUMMARY_FULL_CONTENT_MAX_CHARS = 50000;
+	private const EDITOR_SELECTED_TEXT_MAX_CHARS        = 12000;
 	private const EDITOR_COMMENT_TEXT_MAX_CHARS         = 1200;
 
 	private Publish_Preflight_Service $publish_preflight;
@@ -77,6 +77,9 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$context = $writing_pack_context;
 		}
 		if ( 'polish_notes' === $intent ) {
+			if ( ! empty( $context['selection_truncated'] ) ) {
+				return new WP_Error( 'npcink_toolbox_editor_selection_too_long', __( 'Select up to 12000 characters for paragraph review. The original text is unchanged.', 'npcink-workflow-toolbox' ), array( 'status' => 400 ) );
+			}
 			if ( '' === $this->editor_polish_notes_selected_text( $context ) ) {
 				return new WP_Error(
 					'npcink_toolbox_missing_editor_selection',
@@ -259,6 +262,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			'content_audio_text'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( Rest_Editor_Audio_Text::editor_audio_text_from_raw_content( $content_raw, $audio_preferences ), Rest_Editor_Audio_Text::EDITOR_AUDIO_TEXT_MAX_CHARS ) ),
 			'selected_text'              => wp_trim_words( sanitize_textarea_field( $selected_text ), 110, '' ),
 			'selected_block_text'        => wp_trim_words( sanitize_textarea_field( $selected_block_text ), 110, '' ),
+			'selection_truncated'        => $this->editor_text_length( $selected_text ?: $selected_block_text ) > self::EDITOR_SELECTED_TEXT_MAX_CHARS,
 			'selected_text_full'         => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $selected_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
 			'selected_block_text_full'   => sanitize_textarea_field( Rest_Editor_Audio_Text::trim( $selected_block_text, self::EDITOR_SELECTED_TEXT_MAX_CHARS ) ),
 			'selected_block_name'        => sanitize_text_field( (string) $request->get_param( 'selected_block_name' ) ),
@@ -2410,30 +2414,13 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 	}
 
 	private function editor_text_length( string $text ): int {
-		return function_exists( 'mb_strlen' ) ? mb_strlen( $text, 'UTF-8' ) : strlen( $text );
+		return function_exists( 'mb_strlen' ) ? mb_strlen( $text, 'UTF-8' ) : (int) preg_match_all( '/./us', $text );
 	}
 
 	private function editor_hosted_draft_support( array $context, string $provider_intent ): array {
 		$content = (string) ( $context['content_text'] ?? '' );
 		if ( 'polish_notes' === $provider_intent ) {
-			$selected = trim(
-				implode(
-					"\n\n",
-					array_values(
-						array_unique(
-							array_filter(
-								array_map(
-									'trim',
-									array(
-										(string) ( $context['selected_text_full'] ?? $context['selected_text'] ?? '' ),
-										(string) ( $context['selected_block_text_full'] ?? $context['selected_block_text'] ?? '' ),
-									)
-								)
-							)
-						)
-					)
-				)
-			);
+			$selected = trim( (string) ( ( $context['selected_text_full'] ?? '' ) ?: ( $context['selected_block_text_full'] ?? '' ) ) );
 			if ( '' !== $selected ) {
 				$content = $selected;
 			}
