@@ -318,15 +318,7 @@ $GLOBALS['environment_performance_filters'][ Npcink_Toolbox\Environment_Performa
 environment_performance_rest_assert( 10 === Npcink_Toolbox\Environment_Performance_Insight_Builder::plugin_list_limit(), 'The existing plugin-list hook name remains lower-clamped.' );
 unset( $GLOBALS['environment_performance_filters'] );
 
-echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;
+require_once __DIR__ . '/fixtures/insight-question-budget.php';
+assert_insight_question_budget( array( $bridge, 'environment_performance_insight_pack_qa' ), 'environment_performance_rest_assert' );
 
-// Question limits count Unicode characters independently of UTF-8 bytes.
-foreach ( array( '中', '😀', 'a' ) as $char ) {
-	$q = new WP_REST_Request();
-	$q->set_param( 'question', str_repeat( $char, 2000 ) );
-	$r = $bridge->environment_performance_insight_pack_qa( $q );
-	environment_performance_rest_assert( ! is_wp_error( $r ) || ! str_contains( $r->get_error_code(), 'question_' ), '2000 characters pass the question guard.' );
-	$q->set_param( 'question', str_repeat( $char, 2001 ) );
-	$r = $bridge->environment_performance_insight_pack_qa( $q );
-	environment_performance_rest_assert( is_wp_error( $r ) && str_contains( $r->get_error_code(), 'question_too_long' ), '2001 characters are rejected.' );
-}
+echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;

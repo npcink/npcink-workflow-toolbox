@@ -104,7 +104,23 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 		return strtolower( preg_replace( '/[^a-zA-Z0-9_\-]/', '', (string) $key ) );
 	}
 }
-function sanitize_textarea_field( $value ) { return trim( strip_tags( $value ) ); }
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	function sanitize_textarea_field( $value ) {
+		return trim( strip_tags( (string) $value ) );
+	}
+}
+
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $data, $options = 0, $depth = 512 ) {
+		return json_encode( $data, $options, $depth );
+	}
+}
+
+if ( ! function_exists( 'wp_generate_uuid4' ) ) {
+	function wp_generate_uuid4(): string {
+		return '00000000-0000-4000-8000-000000000000';
+	}
+}
 
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	function sanitize_text_field( $value ) {
@@ -309,15 +325,7 @@ site_ops_rest_assert( '“甲”和“乙”' === $guidance_cls::strip_first_lin
 site_ops_rest_assert( '' === $guidance_cls::strip_first_line_quotes( '' ) && '「」' === $guidance_cls::strip_first_line_quotes( '「」' ), 'Empty input and empty pair are left alone.' );
 site_ops_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
-echo "All Site Ops insight pack REST behavior checks passed.\n";
+require_once __DIR__ . '/fixtures/insight-question-budget.php';
+assert_insight_question_budget( array( $bridge, 'site_ops_insight_pack_qa' ), 'site_ops_rest_assert' );
 
-// Question limits count Unicode characters independently of UTF-8 bytes.
-foreach ( array( '中', '😀', 'a' ) as $char ) {
-	$q = new WP_REST_Request();
-	$q->set_param( 'question', str_repeat( $char, 2000 ) );
-	$r = $bridge->site_ops_insight_pack_qa( $q );
-	site_ops_rest_assert( ! is_wp_error( $r ) || ! str_contains( $r->get_error_code(), 'question_' ), '2000 characters pass the question guard.' );
-	$q->set_param( 'question', str_repeat( $char, 2001 ) );
-	$r = $bridge->site_ops_insight_pack_qa( $q );
-	site_ops_rest_assert( is_wp_error( $r ) && str_contains( $r->get_error_code(), 'question_too_long' ), '2001 characters are rejected.' );
-}
+echo "All Site Ops insight pack REST behavior checks passed.\n";
