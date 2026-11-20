@@ -124,8 +124,9 @@ Reuse `POST /npcink-toolbox/v1/editor/content-support` with exactly:
 
 Cookie/REST-nonce authentication, the ADR-018 scoped editor capability
 (`edit_posts`), and the target `edit_post`
-capability are required. Text must be valid UTF-8, nonempty, at most 100000
-bytes. This intent bypasses the ordinary sanitized/truncated context builder
+capability are required. Text must be valid UTF-8, nonempty, at most 50,000
+Unicode characters including markup and 256 KiB of UTF-8 input. Candidate output
+is independently bounded at 512 KiB of UTF-8 on Cloud, PHP and browser consumers. This intent bypasses the ordinary sanitized/truncated context builder
 and transient cache. No draft body or result is persisted by Toolbox.
 
 The Addon facade `npcink_cloud_addon_execute_toolbox_content_format_runtime`
@@ -283,3 +284,11 @@ help, native block validity, Undo and unchanged database content passed;
 temporary drafts, login sessions and locale observers were removed. Screenshots
 and the local receipt are under ignored `output/playwright/format-feedback-*`.
 These runs make no live Cloud or model calls and do not prove runtime rollout.
+
+## Text budget maintenance — 2026-11-17
+
+Operator-approved development candidate; no production release. The prior 100k-byte
+input bound is superseded by 50k Unicode characters + 256 KiB. Both v1 spacing and
+v2 structure keep their invariants, hashes, immutable snapshot, protected blocks,
+stale-result refusal and ordinary editor save ownership. No auto chunking or
+provider spend. See [current text budgets and lessons](editor-text-budgets-2026-11-17.md).
