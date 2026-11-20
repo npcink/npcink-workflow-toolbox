@@ -13,6 +13,16 @@ Last reviewed: 2026-11-12.
 preserved unrelated Toolkit edits and remaining release/value/acceptance limits.
 This closes the development session, not production or natural-use acceptance.
 
+## Text budget maintenance — 2026-11-17
+
+Approved development candidate: Smart Ask/four bridges accept 2,000 Unicode
+characters; editor full context 50k and paragraph selection 12k survive downstream
+prompt construction; formatting accepts 50k raw characters + 256 KiB input with
+512 KiB result validation. Unicode helper fallthrough is repaired, oversize inputs
+have specific guidance, and existing short-output/snapshot/paused contracts stay.
+See [current limits, tests and installed evidence](editor-text-budgets-2026-11-17.md).
+No production release, paid-model quality acceptance or restored feature is claimed.
+
 ## Legacy backup settings removed — 2026-11-13
 
 Operator-approved: remove the entire Image Processing backup-settings disclosure,

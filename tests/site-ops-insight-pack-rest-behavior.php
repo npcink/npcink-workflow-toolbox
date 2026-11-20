@@ -56,6 +56,7 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 	class WP_REST_Request {
 		private string $route  = '';
 		private string $method = 'GET';
+		private array $params = array();
 
 		public function __construct( string $route = '', string $method = 'GET' ) {
 			$this->route  = $route;
@@ -75,7 +76,10 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 		}
 
 		public function get_param( string $key ) {
-			return null;
+			return $this->params[ $key ] ?? null;
+		}
+		public function set_param( string $key, $value ): void {
+			$this->params[ $key ] = $value;
 		}
 	}
 }
@@ -100,6 +104,8 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 		return strtolower( preg_replace( '/[^a-zA-Z0-9_\-]/', '', (string) $key ) );
 	}
 }
+function sanitize_textarea_field( $value ) { return trim( strip_tags( $value ) ); }
+
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	function sanitize_text_field( $value ) {
 		return trim( strip_tags( (string) $value ) );
@@ -304,3 +310,14 @@ site_ops_rest_assert( '' === $guidance_cls::strip_first_line_quotes( '' ) && '�
 site_ops_rest_assert( false !== strpos( $bridge_source, 'Insight_Pack_Answer_Guidance::system_prompt' ), 'Bridge uses the shared plain-language guidance.' );
 
 echo "All Site Ops insight pack REST behavior checks passed.\n";
+
+// Question limits count Unicode characters independently of UTF-8 bytes.
+foreach ( array( '中', '😀', 'a' ) as $char ) {
+	$q = new WP_REST_Request();
+	$q->set_param( 'question', str_repeat( $char, 2000 ) );
+	$r = $bridge->site_ops_insight_pack_qa( $q );
+	site_ops_rest_assert( ! is_wp_error( $r ) || ! str_contains( $r->get_error_code(), 'question_' ), '2000 characters pass the question guard.' );
+	$q->set_param( 'question', str_repeat( $char, 2001 ) );
+	$r = $bridge->site_ops_insight_pack_qa( $q );
+	site_ops_rest_assert( is_wp_error( $r ) && str_contains( $r->get_error_code(), 'question_too_long' ), '2001 characters are rejected.' );
+}

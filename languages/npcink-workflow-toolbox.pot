@@ -10022,7 +10022,9 @@ msgstr ""
 msgid "Only a question is accepted."
 msgstr ""
 
-#: includes/Site_Content_Answer.php
+#: includes/Site_Content_Answer.php includes/Smart_Ask.php
+#: includes/Rest_Content_Structure_Insight_Bridges.php includes/Rest_Environment_Performance_Insight_Bridges.php
+#: includes/Rest_Page_Quality_Insight_Bridges.php includes/Rest_Site_Ops_Insight_Bridges.php
 msgid "Enter a question of up to 2000 characters."
 msgstr ""
 
@@ -10724,4 +10726,13 @@ msgstr ""
 
 #: includes/Admin_Page.php assets/admin.js
 msgid "These settings apply to legacy backups only: eligible after 30 days, with existing manual or automatic policy. New single-image replacements retain original files for 7 days and clean them up automatically when safe."
+msgstr ""
+
+msgid "Select up to 12000 characters for paragraph review. The original text is unchanged."
+msgstr ""
+
+msgid "Use up to %d characters for this action. The original text is unchanged."
+msgstr ""
+
+msgid "Use up to 50000 characters for article formatting. The original text is unchanged."
 msgstr ""

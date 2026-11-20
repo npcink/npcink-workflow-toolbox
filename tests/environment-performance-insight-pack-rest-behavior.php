@@ -319,3 +319,14 @@ environment_performance_rest_assert( 10 === Npcink_Toolbox\Environment_Performan
 unset( $GLOBALS['environment_performance_filters'] );
 
 echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;
+
+// Question limits count Unicode characters independently of UTF-8 bytes.
+foreach ( array( '中', '😀', 'a' ) as $char ) {
+	$q = new WP_REST_Request();
+	$q->set_param( 'question', str_repeat( $char, 2000 ) );
+	$r = $bridge->environment_performance_insight_pack_qa( $q );
+	environment_performance_rest_assert( ! is_wp_error( $r ) || ! str_contains( $r->get_error_code(), 'question_' ), '2000 characters pass the question guard.' );
+	$q->set_param( 'question', str_repeat( $char, 2001 ) );
+	$r = $bridge->environment_performance_insight_pack_qa( $q );
+	environment_performance_rest_assert( is_wp_error( $r ) && str_contains( $r->get_error_code(), 'question_too_long' ), '2001 characters are rejected.' );
+}

@@ -425,3 +425,14 @@ content_structure_rest_assert( 6 === $builder_cls::sample_limit(), 'The existing
 unset( $GLOBALS['content_structure_filters'] );
 
 echo "All content-structure insight pack REST behavior checks passed.\n";
+
+// Question limits count Unicode characters independently of UTF-8 bytes.
+foreach ( array( '中', '😀', 'a' ) as $char ) {
+	$q = new WP_REST_Request();
+	$q->set_param( 'question', str_repeat( $char, 2000 ) );
+	$r = $bridge->content_structure_insight_pack_qa( $q );
+	content_structure_rest_assert( ! is_wp_error( $r ) || ! str_contains( $r->get_error_code(), 'question_' ), '2000 characters pass the question guard.' );
+	$q->set_param( 'question', str_repeat( $char, 2001 ) );
+	$r = $bridge->content_structure_insight_pack_qa( $q );
+	content_structure_rest_assert( is_wp_error( $r ) && str_contains( $r->get_error_code(), 'question_too_long' ), '2001 characters are rejected.' );
+}
