@@ -56,19 +56,19 @@ final class Provider_Hosted_AI_Service extends Provider_Client_Support {
 			array( 'source_adaptation_review', 'article_draft_from_writing_pack' ),
 			true
 		) || ( 'summary_suggestions' === $intent && 'full_context' === $summary_generation_mode );
-		$plain_content = $this->hosted_ai_normalized_text( $raw_content );
-		$limit = 'polish_notes' === $intent ? 12000 : 50000;
+		$plain_content                = $this->hosted_ai_normalized_text( $raw_content );
+		$limit                        = 'polish_notes' === $intent ? 12000 : 50000;
 		if ( ( 'polish_notes' === $intent || ( 'summary_suggestions' === $intent && 'full_context' === $summary_generation_mode ) ) && $this->hosted_ai_text_length( $plain_content ) > $limit ) {
 			return new WP_Error( 'npcink_toolbox_editor_context_too_long', sprintf( /* translators: %d: maximum input characters. */ __( 'Use up to %d characters for this action. The original text is unchanged.', 'npcink-workflow-toolbox' ), $limit ), array( 'status' => 400 ) );
 		}
-		$content                      = 'summary_suggestions' === $intent
+		$content          = 'summary_suggestions' === $intent
 			? $this->hosted_ai_summary_source_content_for_mode( $raw_content, $summary_generation_mode, $summary_vector_context )
 			: ( 'source_adaptation_review' === $intent
 				? $this->hosted_ai_source_article_context( $raw_content )
 				: ( 'polish_notes' === $intent ? sanitize_textarea_field( $plain_content ) : wp_trim_words( wp_strip_all_tags( $raw_content ), 420, '' ) ) );
-		$post_id                      = absint( $input['post_id'] ?? 0 );
-		$user_instruction             = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $input['user_instruction'] ?? '' ) ) ), 60, '' );
-		$quality_contract             = $is_fast_summary ? $this->hosted_ai_fast_summary_quality_contract() : $this->hosted_ai_quality_contract( $intent );
+		$post_id          = absint( $input['post_id'] ?? 0 );
+		$user_instruction = wp_trim_words( sanitize_textarea_field( wp_strip_all_tags( (string) ( $input['user_instruction'] ?? '' ) ) ), 60, '' );
+		$quality_contract = $is_fast_summary ? $this->hosted_ai_fast_summary_quality_contract() : $this->hosted_ai_quality_contract( $intent );
 		if ( '' === trim( $title . $excerpt . $content ) && 0 === $post_id && empty( $writing_pack ) && empty( $editorial_brief ) ) {
 			return new WP_Error(
 				'npcink_toolbox_missing_hosted_ai_context',
