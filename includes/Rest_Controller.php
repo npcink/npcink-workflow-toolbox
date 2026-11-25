@@ -410,7 +410,11 @@ final class Rest_Controller extends Rest_Controller_Support {
 			return $decision;
 		}
 		if ( 'route' !== $decision['action'] ) {
-			$basis = array( 'clarify' => 'clarification', 'local_summary' => 'site_summary', 'guidance' => 'general_guidance' );
+			$basis  = array(
+				'clarify'       => 'clarification',
+				'local_summary' => 'site_summary',
+				'guidance'      => 'general_guidance',
+			);
 			$result = array(
 				'ok'           => true,
 				'answer'       => $decision['message'],
