@@ -59,7 +59,10 @@ final class Editor_Body_FAQ {
 						'content' => $body_json,
 					),
 				),
-				'params'   => array( 'temperature' => 0.2, 'max_tokens' => 1000 ),
+				'params'   => array(
+					'temperature' => 0.2,
+					'max_tokens'  => 1000,
+				),
 			),
 			'data_classification'     => 'pii',
 			'storage_mode'            => 'no_store',
