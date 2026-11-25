@@ -11237,3 +11237,79 @@ msgstr "此操作最多支持 %d 个字符。请精简内容后重试，原文�
 
 msgid "Use up to 50000 characters for article formatting. The original text is unchanged."
 msgstr "文章排版最多支持 50,000 个字符（含格式标记）。请缩短内容后重试，原文未被修改。"
+
+#: includes/Editor_Body_FAQ.php
+msgid "The FAQ request must contain the current article body."
+msgstr "FAQ 请求必须包含当前文章正文。"
+
+#: includes/Editor_Body_FAQ.php
+msgid "You do not have permission to use this article for FAQ suggestions."
+msgstr "你没有权限为这篇文章生成 FAQ 建议。"
+
+#: includes/Editor_Body_FAQ.php
+msgid "The article body could not be read."
+msgstr "无法读取文章正文。"
+
+#: includes/Editor_Body_FAQ.php assets/editor-content-support.js
+msgid "Add body text before generating FAQ suggestions."
+msgstr "请先填写正文，再生成 FAQ 建议。"
+
+#: includes/Editor_Body_FAQ.php
+msgid "Cloud is not available for FAQ suggestions."
+msgstr "云端尚不可用于生成 FAQ 建议。"
+
+#: includes/Editor_Body_FAQ.php assets/editor-content-support.js
+msgid "FAQ generation is temporarily unavailable. Try again later."
+msgstr "暂时无法生成 FAQ，请稍后重试。"
+
+#: includes/Editor_Body_FAQ.php
+msgid "The FAQ result could not be verified against the article body."
+msgstr "无法用文章正文核实这次 FAQ 结果。"
+
+#: includes/Editor_Body_FAQ.php
+msgid "The article is too long for FAQ suggestions. No partial body was sent."
+msgstr "正文过长，无法生成 FAQ。未发送截断后的正文。"
+
+#: assets/editor-content-support.js
+msgid "FAQ generation timed out. Nothing was written."
+msgstr "FAQ 生成超时，未改动文章。"
+
+#: assets/editor-content-support.js
+msgid "FAQ copied. The article was not changed."
+msgstr "问答已复制，文章未改动。"
+
+#: assets/editor-content-support.js
+msgid "Could not copy the FAQ."
+msgstr "未能复制问答。"
+
+#: assets/editor-content-support.js
+msgid "FAQ from article body"
+msgstr "根据正文生成 FAQ"
+
+#: assets/editor-content-support.js
+msgid "Generating sends only the current article body to Cloud, including unsaved edits."
+msgstr "生成时只向云端发送当前文章正文，包括尚未保存的修改。"
+
+#: assets/editor-content-support.js
+msgid "Generate FAQ"
+msgstr "生成 FAQ"
+
+#: assets/editor-content-support.js
+msgid "Generating FAQ suggestions…"
+msgstr "正在生成 FAQ 建议…"
+
+#: assets/editor-content-support.js
+msgid "No FAQ additions supported by this article body."
+msgstr "这篇正文没有适合补充的问答。"
+
+#: assets/editor-content-support.js
+msgid "The article changed. Generate again to review current suggestions."
+msgstr "文章已变化，请重新生成后再核对。"
+
+#: assets/editor-content-support.js
+msgid "Evidence from the article"
+msgstr "原文依据"
+
+#: assets/editor-content-support.js
+msgid "Copy selected FAQ"
+msgstr "复制选中的问答"

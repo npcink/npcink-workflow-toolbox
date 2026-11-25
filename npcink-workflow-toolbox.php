@@ -85,6 +85,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Progressive_Recommendati
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Media_Alt.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Internal_Links.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Content_Support.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Body_FAQ.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Content_Format.php';
 require_once NPCINK_TOOLBOX_DIR . 'modules/local-automation-runtime/src/Contract/Replay_Validator.php';

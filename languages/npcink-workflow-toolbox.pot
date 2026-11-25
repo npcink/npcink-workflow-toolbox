@@ -10736,3 +10736,79 @@ msgstr ""
 
 msgid "Use up to 50000 characters for article formatting. The original text is unchanged."
 msgstr ""
+
+#: includes/Editor_Body_FAQ.php
+msgid "The FAQ request must contain the current article body."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php
+msgid "You do not have permission to use this article for FAQ suggestions."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php
+msgid "The article body could not be read."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php assets/editor-content-support.js
+msgid "Add body text before generating FAQ suggestions."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php
+msgid "Cloud is not available for FAQ suggestions."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php assets/editor-content-support.js
+msgid "FAQ generation is temporarily unavailable. Try again later."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php
+msgid "The FAQ result could not be verified against the article body."
+msgstr ""
+
+#: includes/Editor_Body_FAQ.php
+msgid "The article is too long for FAQ suggestions. No partial body was sent."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "FAQ generation timed out. Nothing was written."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "FAQ copied. The article was not changed."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Could not copy the FAQ."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "FAQ from article body"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Generating sends only the current article body to Cloud, including unsaved edits."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Generate FAQ"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Generating FAQ suggestions…"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "No FAQ additions supported by this article body."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "The article changed. Generate again to review current suggestions."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Evidence from the article"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Copy selected FAQ"
+msgstr ""
