@@ -126,9 +126,8 @@ final class Editor_Body_FAQ {
 			return null;
 		}
 		$body_text = self::compact( $body );
-		$body_key  = self::question_key( $body );
 		$accepted  = array();
-		$seen      = array();
+		$seen      = self::body_question_keys( $body );
 		$invalid   = false;
 		foreach ( $items as $item ) {
 			if ( ! $item instanceof \stdClass ) {
@@ -143,13 +142,26 @@ final class Editor_Body_FAQ {
 				$invalid = true;
 				continue;
 			}
-			if ( isset( $seen[ $key ] ) || false !== strpos( $body_key, $key ) ) {
+			if ( isset( $seen[ $key ] ) ) {
 				continue;
 			}
 			$seen[ $key ] = true;
 			$accepted[]   = compact( 'question', 'answer', 'evidence' );
 		}
 		return ! $accepted && $invalid ? null : $accepted;
+	}
+
+	/** @return array<string,true> */
+	private static function body_question_keys( string $body ): array {
+		$keys = array();
+		// Compare complete, explicitly punctuated questions, not fragments of prose.
+		foreach ( preg_split( '/\R|(?<=[!?。！？])|(?<=\.)\h+/u', $body ) ?: array() as $sentence ) {
+			$sentence = self::compact( $sentence );
+			if ( preg_match( '/[?？]$/u', $sentence ) ) {
+				$keys[ self::question_key( $sentence ) ] = true;
+			}
+		}
+		return $keys;
 	}
 
 	private static function field( $value, int $limit ): string {

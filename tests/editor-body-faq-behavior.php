@@ -78,6 +78,10 @@ faq_assert( array( 'messages', 'params' ) === array_keys( $payload['input'] ), '
 
 faq_remote_items( array( $candidate, array_replace( $candidate, array( 'question' => 'why are some tags missing!' ) ), array_replace( $candidate, array( 'question' => 'Can the limit change?' ) ) ) );
 faq_assert( array( $candidate ) === faq_request()->data['items'], 'Skip duplicate proposals and questions already in body.' );
+$export = array( 'question' => 'Which plan supports export?', 'answer' => 'Only the Pro plan.', 'evidence' => 'Only the Pro plan includes export.' );
+faq_remote_items( array( $export ) );
+faq_assert( array( $export ) === faq_request( array( 'content' => '<p>Compare which plan supports export before choosing. Only the Pro plan includes export.</p>' ) )->data['items'], 'Do not treat a matching phrase in ordinary prose as an existing question.' );
+faq_assert( 'empty' === faq_request( array( 'content' => '<p>Compare the plans. Which plan supports export？ Only the Pro plan includes export.</p>' ) )->data['status'], 'A whole question sentence with full-width punctuation still suppresses a duplicate.' );
 faq_remote_items( array( array_replace( $candidate, array( 'evidence' => 'This is absent.' ) ), $candidate ) );
 faq_assert( array( $candidate ) === faq_request()->data['items'], 'Drop unsupported candidates individually.' );
 faq_remote_items( array( array_replace( $candidate, array( 'evidence' => 'This is absent.' ) ) ) );

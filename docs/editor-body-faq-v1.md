@@ -22,8 +22,10 @@ and `direct_wordpress_write: false`. Invalid provider output is distinct from
 an explicit empty result. Evidence must be a contiguous body excerpt after
 whitespace normalization; this confirms location, not semantic support. The
 model is instructed to skip repetitive questions, facts requiring outside
-verification and claims the source does not support. The author reviews each
-answer against its evidence. No rendered or model-supplied HTML is inserted.
+verification and claims the source does not support. Exact normalized repeats
+of explicit questions in the body or candidate list are suppressed; matching
+words within ordinary prose are not. The author reviews each answer against
+its evidence. No rendered or model-supplied HTML is inserted.
 
 Only checked question/answer text goes to the clipboard. The UI disables copy
 when the current post/body no longer matches the request and checks again on
