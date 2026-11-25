@@ -116,7 +116,7 @@ final class Environment_Performance_Insight_Builder {
 
 		$uploads_writable = null;
 		if ( function_exists( 'wp_upload_dir' ) ) {
-			$uploads = wp_upload_dir();
+			$uploads = wp_upload_dir( null, false, true );
 			if ( is_array( $uploads ) && empty( $uploads['error'] ) && isset( $uploads['basedir'] ) && is_string( $uploads['basedir'] ) ) {
 				$uploads_writable = is_writable( $uploads['basedir'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- boolean only; path never returned.
 			}
@@ -131,6 +131,7 @@ final class Environment_Performance_Insight_Builder {
 			'home_is_https'        => 0 === strpos( $home, 'https://' ),
 			'site_is_https'        => 0 === strpos( $site, 'https://' ),
 			'uploads_dir_writable' => $uploads_writable,
+			'wp_upload_max_bytes'  => function_exists( 'wp_max_upload_size' ) ? max( 0, (int) wp_max_upload_size() ) : null,
 		);
 	}
 

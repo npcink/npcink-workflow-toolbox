@@ -155,7 +155,7 @@ final class Rest_Page_Quality_Insight_Bridges {
 			'timeout_seconds'     => 45,
 			'retry_max'           => 0,
 			'policy'              => array(
-				'allow_fallback' => false,
+				'allow_fallback' => true,
 			),
 		);
 

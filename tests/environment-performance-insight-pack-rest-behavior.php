@@ -205,8 +205,16 @@ if ( ! function_exists( 'wp_using_ext_object_cache' ) ) {
 	}
 }
 if ( ! function_exists( 'wp_upload_dir' ) ) {
-	function wp_upload_dir() {
+	function wp_upload_dir( $time = null, $create_dir = true, $refresh_cache = false ) {
+		if ( $create_dir || ! $refresh_cache ) {
+			throw new RuntimeException( 'Inspect upload directory without creating it or serving a cached path.' );
+		}
 		return array( 'basedir' => sys_get_temp_dir(), 'error' => false );
+	}
+}
+if ( ! function_exists( 'wp_max_upload_size' ) ) {
+	function wp_max_upload_size() {
+		return $GLOBALS['environment_upload_limit'] ?? 8388608;
 	}
 }
 if ( ! function_exists( 'apply_filters' ) ) {
@@ -320,5 +328,15 @@ unset( $GLOBALS['environment_performance_filters'] );
 
 require_once __DIR__ . '/fixtures/insight-question-budget.php';
 assert_insight_question_budget( array( $bridge, 'environment_performance_insight_pack_qa' ), 'environment_performance_rest_assert' );
+
+$upload_question = new WP_REST_Request();
+$upload_question->set_param( 'question', "图片为什么上传不了？\n\n18 MB 的图片在媒体库提示超限。" );
+foreach ( array( 8388608, 33554432 ) as $limit ) {
+	$GLOBALS['environment_upload_limit'] = $limit;
+	Npcink_Cloud_Runtime_Client_Factory::$requests = array();
+	$answer = $bridge->environment_performance_insight_pack_qa( $upload_question );
+	$prompt = Npcink_Cloud_Runtime_Client_Factory::$requests[0]['input']['messages'][1]['content'] ?? '';
+	environment_performance_rest_assert( $answer instanceof WP_REST_Response && $answer->get_data()['ok'] && 1 === count( Npcink_Cloud_Runtime_Client_Factory::$requests ) && str_contains( $prompt, '"wp_upload_max_bytes":' . $limit ), 'Each answer reads the current WordPress upload limit and sends it once.' );
+}
 
 echo 'All environment-performance insight pack REST behavior checks passed.' . PHP_EOL;

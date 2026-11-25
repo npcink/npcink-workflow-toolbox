@@ -119,6 +119,16 @@ final class Rest_Controller extends Rest_Controller_Support {
 					'type' => 'string',
 					'enum' => array_merge( array( '' ), Smart_Ask::SOURCES ),
 				),
+				'details'     => array(
+					'type'     => 'array',
+					'maxItems' => Smart_Ask::MAX_DETAILS,
+					'items'    => array(
+						'type'      => 'string',
+						'minLength' => 1,
+						'maxLength' => 2000,
+					),
+				),
+				'recheck'     => array( 'type' => 'boolean' ),
 			)
 		);
 		$this->post( '/site-knowledge/sync', 'site_knowledge_sync' );
@@ -393,17 +403,18 @@ final class Rest_Controller extends Rest_Controller_Support {
 		return $response;
 	}
 
-	/** One decision and at most one existing read-only answer; no retries or writes. */
+	/** One decision and at most one existing read-only answer; no Toolbox replay or writes. */
 	public function smart_ask( WP_REST_Request $request ) {
 		$decision = Smart_Ask::resolve( $request->get_json_params() );
 		if ( is_wp_error( $decision ) ) {
 			return $decision;
 		}
 		if ( 'route' !== $decision['action'] ) {
+			$basis = array( 'clarify' => 'clarification', 'local_summary' => 'site_summary', 'guidance' => 'general_guidance' );
 			$result = array(
 				'ok'           => true,
 				'answer'       => $decision['message'],
-				'answer_basis' => 'clarify' === $decision['action'] ? 'clarification' : 'general_guidance',
+				'answer_basis' => $basis[ $decision['action'] ],
 				'run_id'       => $decision['run_id'],
 			);
 		} else {
