@@ -138,7 +138,11 @@ final class Smart_Ask {
 		// Do not mistake a number quoted from the limit notice for the file's own size.
 		$context = preg_replace( '/(?:上限|限制|最大(?:上传)?(?:文件)?大小|\blimit|\bmaximum(?: upload size)?)[\s:：=]*(?:(?:为|是|of|is)\s*)?[0-9]+(?:\.[0-9]+)?\s*[KMG]i?B/iu', '', $context ) ?? $context;
 		preg_match_all( '/(?<![a-z0-9_.,+\-])([0-9]{1,9}(?:\.[0-9]{1,3})?)\s*([KMG])i?B(?![a-z0-9])/iu', $context, $matches, PREG_SET_ORDER );
-		$units = array( 'K' => KB_IN_BYTES, 'M' => MB_IN_BYTES, 'G' => GB_IN_BYTES );
+		$units = array(
+			'K' => KB_IN_BYTES,
+			'M' => MB_IN_BYTES,
+			'G' => GB_IN_BYTES,
+		);
 		$sizes = array();
 		foreach ( $matches as $match ) {
 			$size = (float) $match[1] * $units[ strtoupper( $match[2] ) ];
