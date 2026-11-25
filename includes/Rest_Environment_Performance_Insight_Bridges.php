@@ -155,7 +155,7 @@ final class Rest_Environment_Performance_Insight_Bridges {
 			'timeout_seconds'     => 45,
 			'retry_max'           => 0,
 			'policy'              => array(
-				'allow_fallback' => false,
+				'allow_fallback' => true,
 			),
 		);
 
@@ -302,6 +302,7 @@ final class Rest_Environment_Performance_Insight_Bridges {
 				'home_is_https'        => (bool) ( $runtime['home_is_https'] ?? false ),
 				'site_is_https'        => (bool) ( $runtime['site_is_https'] ?? false ),
 				'uploads_dir_writable' => $runtime['uploads_dir_writable'] ?? null,
+				'wp_upload_max_bytes'  => $runtime['wp_upload_max_bytes'] ?? null,
 			),
 			'theme'                  => array(
 				'stylesheet' => (string) ( $theme['stylesheet'] ?? '' ),

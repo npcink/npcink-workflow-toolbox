@@ -621,16 +621,21 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<?php if ( '' !== $seed && 'site_ops' === $hint ) : ?>
 				<p class="description" data-toolbox-smart-ask-from-check><?php esc_html_e( 'Question drafted from your current Site Check summary. Edit it, then ask.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php endif; ?>
-			<label for="npcink-toolbox-smart-ask-question" class="screen-reader-text"><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
+			<p data-toolbox-smart-ask-original hidden></p>
+			<label for="npcink-toolbox-smart-ask-question" class="screen-reader-text" data-toolbox-smart-ask-label><?php esc_html_e( 'Question', 'npcink-workflow-toolbox' ); ?></label>
 			<textarea id="npcink-toolbox-smart-ask-question" class="large-text" rows="3" aria-describedby="npcink-toolbox-smart-ask-help" placeholder="<?php esc_attr_e( 'What would you like help with?', 'npcink-workflow-toolbox' ); ?>" data-toolbox-smart-ask-question><?php echo esc_textarea( $seed ); ?></textarea>
 			<div class="npcink-toolbox__ask-actions">
 				<button type="button" class="button button-primary" data-toolbox-smart-ask-submit><?php esc_html_e( 'Ask question', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button" data-toolbox-smart-ask-continue hidden><?php esc_html_e( 'Continue with more detail', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button" data-toolbox-smart-ask-recheck hidden><?php esc_html_e( 'Recheck now', 'npcink-workflow-toolbox' ); ?></button>
+				<button type="button" class="button" data-toolbox-smart-ask-new hidden><?php esc_html_e( 'Start new question', 'npcink-workflow-toolbox' ); ?></button>
 				<button type="button" class="button" aria-describedby="npcink-toolbox-smart-ask-stop-note" data-toolbox-smart-ask-stop hidden><?php esc_html_e( 'Stop waiting', 'npcink-workflow-toolbox' ); ?></button>
 				<span class="description" data-toolbox-smart-ask-notice><?php esc_html_e( 'Answers are for reference only and will not change your site.', 'npcink-workflow-toolbox' ); ?></span>
 			</div>
 			<p class="description npcink-toolbox__ask-stop-note" id="npcink-toolbox-smart-ask-stop-note" data-toolbox-smart-ask-stop-note hidden><?php esc_html_e( 'Stopping the wait does not cancel Cloud processing.', 'npcink-workflow-toolbox' ); ?></p>
 			<div class="npcink-toolbox__result-notice" data-toolbox-smart-ask-status aria-live="polite" hidden></div>
 			<div data-toolbox-smart-ask-result hidden>
+				<p class="description" data-toolbox-smart-ask-previous hidden><?php esc_html_e( 'Last successful response', 'npcink-workflow-toolbox' ); ?></p>
 				<div class="npcink-toolbox__markdown" data-toolbox-smart-ask-answer></div>
 				<p class="description" data-toolbox-smart-ask-basis hidden></p>
 				<p data-toolbox-smart-ask-completeness hidden></p>

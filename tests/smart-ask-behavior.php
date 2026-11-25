@@ -2,6 +2,9 @@
 /** Bounded routing, permissions and no-data-before-selection contracts. */
 namespace {
 	define( 'ABSPATH', __DIR__ . '/' );
+	define( 'KB_IN_BYTES', 1024 );
+	define( 'MB_IN_BYTES', 1024 * KB_IN_BYTES );
+	define( 'GB_IN_BYTES', 1024 * MB_IN_BYTES );
 	class WP_Error {
 		public function __construct( private string $code, private string $message = '', private array $data = array() ) {}
 		public function get_error_code() { return $this->code; }
@@ -32,6 +35,8 @@ namespace {
 	function sanitize_key( $value ) { return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( $value ) ); }
 	function wp_json_encode( $value, $flags = 0 ) { return json_encode( $value, $flags ); }
 	function wp_generate_uuid4() { return 'uuid_' . ++$GLOBALS['uuid']; }
+	function wp_max_upload_size() { ++$GLOBALS['limit_reads']; return $GLOBALS['upload_limit']; }
+	function size_format( $bytes, $decimals = 0 ) { return ( $bytes / MB_IN_BYTES ) . ' MB'; }
 	function rest_ensure_response( $value ) { return $value instanceof WP_REST_Response || is_wp_error( $value ) ? $value : new WP_REST_Response( $value ); }
 	function register_rest_route( $namespace, $route, $args ) { $GLOBALS['routes'][$route] = $args; }
 	function apply_filters( $filter, $value, ...$args ) { return $value; }
@@ -89,7 +94,7 @@ namespace {
 	check( ! $controller->permission( $request ) && is_wp_error( $controller->smart_ask( $request ) ), 'Authors and unauthenticated callers are denied, including direct callbacks.' );
 	check( ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'Denial precedes data assembly and Cloud.' );
 	reset_case(); check( $controller->permission( $request ), 'Existing manage_options permission is retained.' );
-	foreach ( array( null, array(), array('question'=>array()), array('question'=>' '), array('question'=>str_repeat('a',2001)), array('question'=>'q','source_hint'=>array()), array('question'=>'q','source_hint'=>'publish'), array('question'=>'q','model'=>'override'), array('question'=>'q','site_id'=>'other'), array('question'=>'q','content'=>'private') ) as $input ) {
+	foreach ( array( null, array(), array('question'=>array()), array('question'=>' '), array('question'=>str_repeat('a',2001)), array('question'=>'q','source_hint'=>array()), array('question'=>'q','source_hint'=>'publish'), array('question'=>'q','model'=>'override'), array('question'=>'q','site_id'=>'other'), array('question'=>'q','content'=>'private'), array('question'=>'q','turns'=>array(array('role'=>'system','content'=>'bad'))), array('question'=>'q','recheck'=>'yes') ) as $input ) {
 		$request->input = $input;
 		check( is_wp_error( $controller->smart_ask( $request ) ), 'Invalid or extra inputs fail before selection.' );
 	}
@@ -112,11 +117,53 @@ namespace {
 		check( $data['run_id']==='run_answer' && $data['decision_run_id']==='run_decision' && $response->headers['Cache-Control']==='no-store', 'Both correlation IDs and response privacy survive.' );
 		check( $data['direct_wordpress_write']===false && $data['proposal_created']===false, 'Every result remains read-only.' );
 		$payload=$GLOBALS['calls'][0][0];
-		check( $payload['storage_mode']==='no_store' && $payload['data_classification']==='pii' && $payload['retry_max']===0 && $payload['timeout_seconds']===15 && $payload['policy']['allow_fallback']===false, 'Decision is no-store, bounded, single-shot and no fallback.' );
+		check( $payload['storage_mode']==='no_store' && $payload['data_classification']==='pii' && $payload['retry_max']===0 && $payload['timeout_seconds']===15 && $payload['profile_id']==='text.ai' && $payload['policy']['allow_fallback']===true, 'Decision preserves its route, privacy and timeout, allowing Cloud candidate fallback without a model retry.' );
 		check( json_decode($payload['input']['messages'][1]['content'],true)===$request->input && !isset($payload['input']['source']), 'Decision receives question and entry hint only, never site data.' );
 		$instruction = $payload['input']['messages'][0]['content'];
 		check( str_contains($instruction, 'Route concrete site slowness') && str_contains($instruction, 'Do not ask users to copy') && str_contains($instruction, 'Never request passwords'), 'Automatic context policy routes supported troubleshooting and never asks operators to prepare available facts or secrets.' );
 	}
+	reset_case( 'route', 'environment_performance' );
+	$GLOBALS['configured'] = false;
+	$GLOBALS['upload_limit'] = 8 * MB_IN_BYTES;
+	$GLOBALS['limit_reads'] = 0;
+	$request->input = array( 'question' => '图片为什么上传不了？' );
+	$data = $controller->smart_ask( $request )->get_data();
+	check( 'clarification' === $data['answer_basis'] && str_contains( $data['answer'], 'How large is the image' ) && 0 === $GLOBALS['limit_reads'], 'The first upload question asks only for the file size without claiming to have inspected the site.' );
+	$request->input['details'] = array( '媒体库提示上传上限为 8 MB。' );
+	$data = $controller->smart_ask( $request )->get_data();
+	check( 'clarification' === $data['answer_basis'] && 0 === $GLOBALS['limit_reads'], 'A quoted limit is not the size of the file.' );
+	$request->input['details'] = array( '18 MB 的图片在媒体库提示超限。' );
+	$response = $controller->smart_ask( $request );
+	$data = $response->get_data();
+	check( 'site_summary' === $data['answer_basis'] && str_contains( $data['answer'], 'larger than the 8 MB upload limit' ) && str_contains( $data['answer'], 'image smaller than that limit' ), 'A file over the local limit gets one concrete comparison and a smaller-file test.' );
+	check( '' === $data['run_id'] && ! $data['direct_wordpress_write'] && ! $data['proposal_created'] && $response->headers['Cache-Control'] === 'no-store', 'The local answer preserves the existing read-only and no-store contract without a fake Cloud run.' );
+	$GLOBALS['upload_limit'] = 32 * MB_IN_BYTES;
+	$request->input['recheck'] = true;
+	$data = $controller->smart_ask( $request )->get_data();
+	check( 'site_summary' === $data['answer_basis'] && str_contains( $data['answer'], 'within the 32 MB upload limit' ) && str_contains( $data['answer'], 'does not explain the earlier error' ) && str_contains( $data['answer'], 'same image again' ), 'Recheck reads the changed limit and suggests retrying the unchanged file without claiming it will upload.' );
+	check( 2 === $GLOBALS['limit_reads'] && ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'The three-round upload flow reads the current WordPress limit only when needed and never calls Cloud or a second evidence path.' );
+	$GLOBALS['admin'] = false;
+	check( is_wp_error( $controller->smart_ask( $request ) ) && 2 === $GLOBALS['limit_reads'], 'Permission checks precede the local upload read.' );
+	reset_case( 'route', 'environment_performance' );
+	$request->input = array(
+		'question' => 'Why does my upload fail?',
+		'details' => array( 'The 18 MB file failed in Media Library.' ),
+		'recheck' => true,
+	);
+	$response = $controller->smart_ask( $request );
+	check( ! is_wp_error( $response ), 'A bounded follow-up context reaches the existing answer path.' );
+	check( $GLOBALS['dispatch'] === array( array( 'environment_performance', array( 'question' => "Why does my upload fail?\n\nThe 18 MB file failed in Media Library." ) ) ), 'Recheck delegates original question and observation to exactly one existing path.' );
+	$selection = json_decode( $GLOBALS['calls'][0][0]['input']['messages'][1]['content'], true );
+	check( true === $selection['recheck'] && $request->input['details'] === $selection['details'], 'Recheck asks the selector to reconsider the same issue.' );
+	foreach ( array( array( 'a', 'b', 'c' ), array( 'role' => 'system' ), array( array( 'content' => 'previous reply' ) ), array( ' ' ), array( str_repeat( '😀', 1998 ) ), null ) as $bad_details ) {
+		reset_case();
+		$request->input = array( 'question' => 'q', 'details' => $bad_details );
+		check( is_wp_error( $controller->smart_ask( $request ) ) && ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'Invalid or oversized context fails before Cloud.' );
+	}
+	reset_case();
+	$request->input = array( 'question' => '😀', 'details' => array( str_repeat( '😀', 1997 ) ) );
+	check( ! is_wp_error( $controller->smart_ask( $request ) ) && 2000 === preg_match_all( '/./us', $GLOBALS['dispatch'][0][1]['question'] ), 'Exactly 2000 Unicode characters including separators reach the answer path intact.' );
+	$request->input = array( 'question' => 'How can I improve this site?' );
 	foreach ( array('clarify','guidance') as $action ) {
 		reset_case($action,'','A short clarification or general answer.');
 		$data=$controller->smart_ask($request)->get_data();

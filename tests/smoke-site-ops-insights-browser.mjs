@@ -237,8 +237,50 @@ async function verifySmartAskLayout(page) {
 			releaseResponse({ status: 503, body: '{}' });
 			await page.unroute(routePattern, handler);
 		}
+		if (mode === 'success') await ask.locator('[data-toolbox-smart-ask-new]').click();
 	}
 	assert(calls === 3, 'Three controlled Ask requests were intercepted without live Cloud calls.');
+
+	const field = name => ask.locator(`[data-toolbox-smart-ask-${name}]`);
+	const payloads = [];
+	const fixture = [
+		{ answer: '图片有多大？', answer_basis: 'clarification' },
+		{ answer: 'WordPress 报告的上限为 8 MB。', answer_basis: 'site_summary' },
+		{ answer: 'WordPress 现在报告的上限为 32 MB。请实际重试上传。', answer_basis: 'site_summary' },
+	];
+	const followUp = async route => {
+		payloads.push(route.request().postDataJSON());
+		const reply = fixture[payloads.length - 1];
+		await route.fulfill({ json: { ok: true, run_id: `follow_up_${payloads.length}`, ...reply } });
+	};
+	await page.route(routePattern, followUp);
+	try {
+		await page.setViewportSize({ width: 1440, height: 1000 });
+		const question = '图片为什么上传不了？';
+		const detail = '18 MB 的图片在媒体库提示超限。';
+		await field('question').fill(question);
+		await field('submit').click();
+		await field('continue').waitFor();
+		assert(await field('question').isHidden() && await field('recheck').isHidden(), 'Clarification offers a focused follow-up without suggesting the site has already been checked.');
+		for (const width of [1440, 900]) {
+			await page.setViewportSize({ width, height: 1000 });
+			assert(await ask.evaluate(element => element.scrollWidth <= element.clientWidth), `Follow-up controls fit the ${width}px PC viewport.`);
+			await ask.screenshot({ path: resolve(`output/playwright/smart-ask-layout/clarification-${width}.png`) });
+		}
+		await field('continue').click();
+		await field('question').fill(detail);
+		await field('submit').click();
+		await field('recheck').waitFor();
+		await field('recheck').click();
+		await field('answer').getByText('32 MB', { exact: false }).waitFor();
+		assert(payloads.length === 3 && payloads[1].question === question && payloads[1].details?.[0] === detail && payloads[2].recheck === true && payloads[2].details?.[0] === detail, 'Follow-up and recheck carry the original question and the same operator detail.');
+		assert(payloads.every(payload => Object.keys(payload).every(key => ['question', 'source_hint', 'details', 'recheck'].includes(key))), 'The browser never sends previous model answers.');
+		assert(await field('recheck').isHidden() && await field('continue').isHidden(), 'The third successful round offers a fresh question.');
+		await field('new').click();
+		assert(await field('result').isHidden() && await field('question').inputValue() === '', 'The new question clears the response and the input.');
+	} finally {
+		await page.unroute(routePattern, followUp);
+	}
 }
 
 const { chromium } = await loadPlaywright();

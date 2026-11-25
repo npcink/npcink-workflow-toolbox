@@ -14,6 +14,23 @@ msgstr ""
 "X-Domain: npcink-workflow-toolbox\n"
 "X-Generator: Codex\n"
 
+msgid "How large is the image that failed to upload? You can reply with a size such as 18 MB."
+msgstr "上传失败的图片有多大？可以回复文件大小，例如 18 MB。"
+
+msgid "Try uploading the same image again in the Media Library. If it fails, note the exact error shown."
+msgstr "请在媒体库重传同一张图片。如果仍然失败，记下屏幕上的完整报错。"
+
+msgid "WordPress did not report a usable upload limit, so the file size alone does not explain the error."
+msgstr "目前读不到 WordPress 的上传上限，单凭文件大小无法解释这次报错。"
+
+#, php-format
+msgid "The image is larger than the %s upload limit WordPress currently reports. Try uploading an image smaller than that limit to see whether the Media Library accepts it."
+msgstr "这张图片超过了 WordPress 当前报告的 %s 上传上限。请用一张小于这个上限的图片试传，看看媒体库能否接收。"
+
+#, php-format
+msgid "The image is within the %s upload limit WordPress currently reports. This limit does not explain the earlier error."
+msgstr "这张图片没有超过 WordPress 当前报告的 %s 上传上限。这个上限解释不了之前的报错。"
+
 msgid "Npcink Workflow Toolbox"
 msgstr "Npcink Workflow Toolbox"
 
@@ -11313,3 +11330,42 @@ msgstr "原文依据"
 #: assets/editor-content-support.js
 msgid "Copy selected FAQ"
 msgstr "复制选中的问答"
+
+msgid "Continue with more detail"
+msgstr "继续补充"
+
+msgid "Recheck now"
+msgstr "重新检查"
+
+msgid "Start new question"
+msgstr "开始新问题"
+
+msgid "Last successful response"
+msgstr "上一次成功答复"
+
+msgid "The question details could not be understood."
+msgstr "无法读取补充信息，请检查输入后重试。"
+
+msgid "Additional detail"
+msgstr "补充信息"
+
+msgid "What else did you notice?"
+msgstr "你还观察到了什么？"
+
+msgid "Send detail"
+msgstr "提交补充"
+
+msgid "Enter an additional detail."
+msgstr "请输入补充信息。"
+
+msgid "Keep the question and details within 2000 characters."
+msgstr "问题和补充合计最多 2,000 个字符。"
+
+msgid "This site has not been checked for this response."
+msgstr "这次答复尚未检查本站。"
+
+msgid "This question has reached its limit. Start a new question to continue."
+msgstr "当前问题已达轮次上限。开始新问题可继续提问。"
+
+msgid "Site information checked again."
+msgstr "已重新检查站点信息。"

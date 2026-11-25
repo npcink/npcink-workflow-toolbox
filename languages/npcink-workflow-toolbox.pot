@@ -20,6 +20,28 @@ msgstr ""
 #: includes/Abilities.php:56
 #: includes/Admin_Page.php:52
 #: includes/Admin_Page.php:552
+#: includes/Smart_Ask.php
+msgid "How large is the image that failed to upload? You can reply with a size such as 18 MB."
+msgstr ""
+
+#: includes/Smart_Ask.php
+msgid "Try uploading the same image again in the Media Library. If it fails, note the exact error shown."
+msgstr ""
+
+#: includes/Smart_Ask.php
+msgid "WordPress did not report a usable upload limit, so the file size alone does not explain the error."
+msgstr ""
+
+#: includes/Smart_Ask.php
+#, php-format
+msgid "The image is larger than the %s upload limit WordPress currently reports. Try uploading an image smaller than that limit to see whether the Media Library accepts it."
+msgstr ""
+
+#: includes/Smart_Ask.php
+#, php-format
+msgid "The image is within the %s upload limit WordPress currently reports. This limit does not explain the earlier error."
+msgstr ""
+
 msgid "Npcink Workflow Toolbox"
 msgstr ""
 
@@ -10811,4 +10833,48 @@ msgstr ""
 
 #: assets/editor-content-support.js
 msgid "Copy selected FAQ"
+msgstr ""
+
+#: includes/Admin_Page.php:629
+msgid "Continue with more detail"
+msgstr ""
+
+#: includes/Admin_Page.php:630
+msgid "Recheck now"
+msgstr ""
+
+#: includes/Admin_Page.php:631
+msgid "Start new question"
+msgstr ""
+
+#: includes/Admin_Page.php:638
+msgid "Last successful response"
+msgstr ""
+
+#: includes/Smart_Ask.php:128
+msgid "The question details could not be understood."
+msgstr ""
+
+msgid "Additional detail"
+msgstr ""
+
+msgid "What else did you notice?"
+msgstr ""
+
+msgid "Send detail"
+msgstr ""
+
+msgid "Enter an additional detail."
+msgstr ""
+
+msgid "Keep the question and details within 2000 characters."
+msgstr ""
+
+msgid "This site has not been checked for this response."
+msgstr ""
+
+msgid "This question has reached its limit. Start a new question to continue."
+msgstr ""
+
+msgid "Site information checked again."
 msgstr ""

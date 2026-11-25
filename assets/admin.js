@@ -8017,6 +8017,9 @@
 	function initSmartAsk() {
 		document.querySelectorAll('[data-toolbox-smart-ask]').forEach((root) => {
 			const button = root.querySelector('[data-toolbox-smart-ask-submit]');
+			const continueButton = root.querySelector('[data-toolbox-smart-ask-continue]');
+			const recheckButton = root.querySelector('[data-toolbox-smart-ask-recheck]');
+			const newButton = root.querySelector('[data-toolbox-smart-ask-new]');
 			const stopButton = root.querySelector('[data-toolbox-smart-ask-stop]');
 			const stopNote = root.querySelector('[data-toolbox-smart-ask-stop-note]');
 			const questionField = root.querySelector('[data-toolbox-smart-ask-question]');
@@ -8028,6 +8031,9 @@
 			const basisEl = root.querySelector('[data-toolbox-smart-ask-basis]');
 			const sourcesEl = root.querySelector('[data-toolbox-smart-ask-sources]');
 			const completenessEl = root.querySelector('[data-toolbox-smart-ask-completeness]');
+			const originalEl = root.querySelector('[data-toolbox-smart-ask-original]');
+			const labelEl = root.querySelector('[data-toolbox-smart-ask-label]');
+			const previousEl = root.querySelector('[data-toolbox-smart-ask-previous]');
 			if (!button || !questionField || !statusEl || !resultEl || !answerEl || !runIdEl) {
 				return;
 			}
@@ -8072,7 +8078,31 @@
 
 			let inFlight = false;
 			let activeRequest = null;
+			let question = '';
+			let details = [];
+			let rounds = 0;
+			let addingDetail = false;
+			let recheckable = false;
+			let sourceHint = root.getAttribute('data-source-hint') || '';
 			const idleLabel = button.textContent;
+			const idlePlaceholder = questionField.getAttribute('placeholder');
+			const withinBudget = (value) => Array.from(value).length <= 2000 && new TextEncoder().encode(value).length <= 8000;
+			const canContinue = () => rounds > 0 && rounds < 3;
+			const updateControls = () => {
+				button.hidden = questionField.hidden = rounds > 0 && !addingDetail;
+				if (labelEl) {
+					labelEl.hidden = questionField.hidden;
+					labelEl.textContent = addingDetail ? t('Additional detail') : t('Question');
+				}
+				questionField.setAttribute('placeholder', addingDetail ? t('What else did you notice?') : idlePlaceholder);
+				if (continueButton) continueButton.hidden = !canContinue() || addingDetail || !withinBudget([question, ...details, 'x'].join('\n\n'));
+				if (recheckButton) recheckButton.hidden = !canContinue() || !recheckable || (addingDetail && Boolean(questionField.value.trim()));
+				if (newButton) newButton.hidden = rounds === 0;
+				if (originalEl) {
+					originalEl.hidden = rounds === 0;
+					originalEl.textContent = [question, ...details].join('\n\n');
+				}
+			};
 
 			const setStatus = (message, kind) => {
 				statusEl.hidden = !message;
@@ -8090,7 +8120,10 @@
 				button.disabled = busy;
 				button.setAttribute('aria-busy', busy ? 'true' : 'false');
 				questionField.disabled = busy;
-				button.textContent = busy ? t('In progress…') : idleLabel;
+				[continueButton, recheckButton, newButton].forEach((control) => {
+					if (control) control.disabled = busy;
+				});
+				button.textContent = busy ? t('In progress…') : addingDetail ? t('Send detail') : idleLabel;
 				if (stopButton) {
 					stopButton.hidden = !busy;
 				}
@@ -8145,26 +8178,57 @@
 
 			questionField.addEventListener('input', () => {
 				if (inFlight) return;
-				resetSources();
-				resultEl.hidden = true;
-				setStatus('', '');
+				if (!rounds) resultEl.hidden = true;
+				updateControls();
 			});
+			if (continueButton) {
+				continueButton.addEventListener('click', () => {
+					if (inFlight || !canContinue()) return;
+					addingDetail = true;
+					button.textContent = t('Send detail');
+					updateControls();
+					questionField.focus();
+				});
+			}
+			if (newButton) {
+				newButton.addEventListener('click', () => {
+					if (inFlight) return;
+					question = '';
+					details = [];
+					rounds = 0;
+					addingDetail = recheckable = false;
+					sourceHint = '';
+					questionField.value = '';
+					button.textContent = idleLabel;
+					resultEl.hidden = true;
+					answerEl.textContent = runIdEl.textContent = '';
+					if (metaEl) metaEl.textContent = '';
+					if (previousEl) previousEl.hidden = true;
+					const fromCheck = root.querySelector('[data-toolbox-smart-ask-from-check]');
+					if (fromCheck) fromCheck.hidden = true;
+					resetSources();
+					setStatus('', '');
+					updateControls();
+					questionField.focus();
+				});
+			}
 
-			button.addEventListener('click', async () => {
+			const ask = async (recheck) => {
 				if (inFlight) {
 					setStatus(t('A question is already in progress. Please wait.'), 'is-pending');
 					return;
 				}
 
-				const question = String(questionField.value || '').trim();
-				if (!question) {
-					setStatus(t('Enter a question first.'), 'is-warning');
-					resultEl.hidden = true;
+				const typed = String(questionField.value || '').trim();
+				if (rounds && (!canContinue() || (recheck ? !recheckable || Boolean(typed) : !addingDetail))) return;
+				if (!recheck && !typed) {
+					setStatus(addingDetail ? t('Enter an additional detail.') : t('Enter a question first.'), 'is-warning');
 					return;
 				}
-				if (Array.from(question).length > 2000 || new TextEncoder().encode(question).length > 8000) {
-					setStatus(t('Enter a question of up to 2000 characters.'), 'is-warning');
-					resultEl.hidden = true;
+				const nextQuestion = rounds ? question : typed;
+				const nextDetails = rounds && !recheck ? [...details, typed] : details;
+				if (!withinBudget([nextQuestion, ...nextDetails].join('\n\n'))) {
+					setStatus(t('Keep the question and details within 2000 characters.'), 'is-warning');
 					return;
 				}
 				const endpoint = 'smart-ask';
@@ -8175,13 +8239,8 @@
 
 				setBusy(true);
 				setStatus(t('Understanding your question and preparing relevant site context as needed…'), 'is-pending');
-				resultEl.hidden = true;
-				setMarkdownContent(answerEl, '');
-				resetSources();
-				runIdEl.textContent = '';
-				if (metaEl) {
-					metaEl.textContent = '';
-				}
+				resultEl.hidden = !rounds;
+				if (previousEl) previousEl.hidden = !rounds;
 
 				const request = { controller: new AbortController(), timedOut: false };
 				activeRequest = request;
@@ -8190,16 +8249,23 @@
 					request.controller.abort();
 				}, 90000);
 				try {
-					const body = await postJson(config.restUrl, endpoint, { question, source_hint: root.getAttribute('data-source-hint') || '' }, request.controller.signal);
+					const payload = { question: nextQuestion, source_hint: sourceHint };
+					if (nextDetails.length) payload.details = nextDetails;
+					if (recheck) payload.recheck = true;
+					const body = await postJson(config.restUrl, endpoint, payload, request.controller.signal);
 					if (request.controller.signal.aborted) throw new Error('aborted');
 					const runId = String((body && body.run_id) || '');
 					const answer = String((body && body.answer) || '');
+					if (!answer.trim() || !(body.ok || body.grounded_evidence)) {
+						throw Object.assign(new Error(t('The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.')), { data: { run_id: runId } });
+					}
 					const packRunId = String((body && body.pack_run_id) || '');
 					const elapsed = body && body.elapsed_ms != null ? String(body.elapsed_ms) + 'ms' : '';
 					runIdEl.textContent = runId || '—';
 					// run_id / pack_run_id live in the folded support details only.
 					const grounded = Boolean(body && body.grounded_evidence);
 					answerEl.style.whiteSpace = grounded ? 'pre-wrap' : '';
+					resetSources();
 					if (grounded) { answerEl.textContent = answer; renderSources(body); }
 					else { setMarkdownContent(answerEl, answer || t('(empty answer)')); }
 					if (basisEl) {
@@ -8207,7 +8273,7 @@
 							site_summary: t('Based on a bounded site summary, not a full-site audit.'),
 							public_content: t('Based on retrieved public articles; check the references below.'),
 							general_guidance: t('General guidance only. This site has not been checked for this answer.'),
-							clarification: t('Add the requested detail to your question above, then ask again.'),
+							clarification: t('This site has not been checked for this response.'),
 						};
 						basisEl.textContent = labels[body && body.answer_basis] || '';
 						basisEl.hidden = !basisEl.textContent;
@@ -8216,11 +8282,19 @@
 						metaEl.textContent = [body.decision_run_id ? ('decision_run_id ' + String(body.decision_run_id)) : '', packRunId ? ('pack_run_id ' + packRunId) : '', elapsed].filter(Boolean).join(' · '); // inside support <details>
 					}
 					resultEl.hidden = false;
-					if (body && (body.ok || body.grounded_evidence) && answer) {
-						setStatus(body.answer_basis === 'clarification' ? t('Please add a little more detail.') : t('Suggestion ready (no WordPress write).'), body.answer_basis === 'clarification' ? 'is-pending' : 'is-ok');
-					} else {
-						setStatus(t('The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.'), 'is-warning');
-					}
+					if (previousEl) previousEl.hidden = true;
+					question = nextQuestion;
+					details = nextDetails;
+					rounds++;
+					addingDetail = false;
+					recheckable = body.answer_basis === 'site_summary';
+					questionField.value = '';
+					updateControls();
+					const clarify = body.answer_basis === 'clarification';
+					let message = clarify ? t('Please add a little more detail.') : t('Suggestion ready (no WordPress write).');
+					if (recheck && recheckable) message = t('Site information checked again.');
+					if (!canContinue()) message = t('This question has reached its limit. Start a new question to continue.');
+					setStatus(message, clarify ? 'is-pending' : 'is-ok');
 				} catch (error) {
 					if (request.controller.signal.aborted) {
 						setStatus(request.timedOut
@@ -8228,12 +8302,14 @@
 							: t('Stopped waiting. Cloud may still be processing; wait before asking again.'), 'is-warning');
 						return;
 					}
-					resetSources();
-					answerEl.textContent = '';
 					const errorData = error && error.data || {};
 					const failedRun = String(errorData.run_id || errorData.diagnostic && errorData.diagnostic.run_id || '');
-					runIdEl.textContent = failedRun;
-					resultEl.hidden = !failedRun;
+					if (!rounds) {
+						runIdEl.textContent = failedRun;
+						resultEl.hidden = !failedRun;
+					} else if (metaEl && failedRun) {
+						metaEl.textContent = 'failed_run_id ' + failedRun;
+					}
 					const busySlot = isBusySlotError(error);
 					setStatus(formatAskError(error), busySlot ? 'is-warning' : 'is-error');
 				} finally {
@@ -8241,7 +8317,9 @@
 					activeRequest = null;
 					setBusy(false);
 				}
-			});
+			};
+			button.addEventListener('click', () => ask(false));
+			if (recheckButton) recheckButton.addEventListener('click', () => ask(true));
 		});
 	}
 

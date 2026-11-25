@@ -3395,6 +3395,8 @@ toolbox_assert( false !== strpos( $pack_answer_guidance, '本次范围内已发�
 $smart_ask_source = (string) file_get_contents( $root . '/includes/Smart_Ask.php' );
 toolbox_assert( false !== strpos( $main, "includes/Smart_Ask.php" ) && 1 === preg_match( "~'/smart-ask'\\s+=> 'cap\\.toolbox\\.admin'~", $rest_controller ), 'Unified Smart Ask retains manage_options through the shared admin scope.' );
 toolbox_assert( false !== strpos( $smart_ask_source, "'storage_mode'" ) && false !== strpos( $smart_ask_source, "'no_store'" ) && false !== strpos( $smart_ask_source, "'retry_max'" ) && false !== strpos( $smart_ask_source, 'valid_decision' ), 'Question selection uses a bounded no-store request and validates its closed decision before collecting evidence.' );
+$ask_zh_catalog = (string) file_get_contents( $root . '/languages/npcink-workflow-toolbox-zh_CN.po' );
+toolbox_assert( str_contains( $ask_zh_catalog, '这个上限解释不了之前的报错。' ) && str_contains( $ask_zh_catalog, '请在媒体库重传同一张图片。' ), 'The local upload recheck ships Chinese copy for the evidence boundary and next action.' );
 toolbox_assert( false !== strpos( $admin_page_source, "'content-preferences' === \$this->query_text_param" ), 'Content preferences render only in the explicit support view.' );
 
 if ( '' !== $toolbox_test_options['filter'] && 0 === $toolbox_test_counts['passed'] ) {

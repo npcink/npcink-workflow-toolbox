@@ -819,7 +819,7 @@
 	gap: 10px;
 }
 
-.npcink-toolbox [data-toolbox-smart-ask-stop][hidden],
+.npcink-toolbox__ask-actions button[hidden],
 .npcink-toolbox [data-toolbox-smart-ask-stop-note][hidden],
 .npcink-toolbox__ops-panel[hidden] {
 	display: none;
@@ -2099,11 +2099,16 @@
 	font-weight: 600;
 }
 
-.npcink-toolbox__ask textarea {
+.npcink-toolbox__ask textarea:not([hidden]) {
 	display: block;
 	width: 100%;
 	min-height: 100px;
 	resize: vertical;
+}
+
+.npcink-toolbox__ask [data-toolbox-smart-ask-original] {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 
 .npcink-toolbox__ask-actions {
