@@ -5939,6 +5939,128 @@
 		});
 	}
 
+	function bodyFaqSource() {
+		const store = data.select('core/editor');
+		return {
+			post_id: Number(store?.getCurrentPostId() || 0),
+			content: normalizeText(store?.getEditedPostAttribute('content')),
+		};
+	}
+
+	function bodyFaqMatches(source, current) {
+		return source.post_id === current.post_id && source.content === current.content;
+	}
+
+	function BodyFaqPreview({ onClose }) {
+		const [phase, setPhase] = useState('idle');
+		const [items, setItems] = useState([]);
+		const [selected, setSelected] = useState({});
+		const [notice, setNotice] = useState(null);
+		const active = useRef(null);
+
+		function invalidate() {
+			active.current?.controller?.abort();
+			active.current = null;
+			setItems([]);
+			setSelected({});
+			setNotice(null);
+			setPhase('stale');
+		}
+
+		useEffect(() => {
+			const stop = data.subscribe(() => {
+				if (active.current && !bodyFaqMatches(active.current.source, bodyFaqSource())) {
+					invalidate();
+				}
+			});
+			return () => {
+				stop();
+				active.current?.controller?.abort();
+				active.current = null;
+			};
+		}, []);
+
+		async function generate() {
+			if (active.current?.pending) return;
+			const source = bodyFaqSource();
+			setItems([]);
+			setSelected({});
+			setNotice(null);
+			if (!source.post_id || !plainTextFromHtml(source.content)) {
+				setPhase('error');
+				setNotice({ status: 'error', message: __('Add body text before generating FAQ suggestions.', 'npcink-workflow-toolbox') });
+				return;
+			}
+			const controller = typeof window.AbortController === 'function' ? new window.AbortController() : null;
+			const request = { source, controller, pending: true };
+			active.current = request;
+			setPhase('running');
+			try {
+				const response = await postJsonWithTimeout('/editor/content-support', { intent: 'body_faq', ...source }, 40000, __('FAQ generation timed out. Nothing was written.', 'npcink-workflow-toolbox'), 'npcink_toolbox_faq_timeout', controller?.signal);
+				if (active.current !== request) return;
+				if (!bodyFaqMatches(source, bodyFaqSource())) {
+					invalidate();
+					return;
+				}
+				if (response?.contract_version !== 'editor_body_faq.v1' || response.post_id !== source.post_id || !Array.isArray(response.items)
+					|| response.items.length > 3 || response.status !== (response.items.length ? 'ready' : 'empty')
+					|| !response.items.every((item) => item && ['question', 'answer', 'evidence'].every((key) => typeof item[key] === 'string' && item[key].trim()))) {
+					throw new Error('invalid_faq_response');
+				}
+				request.pending = false;
+				setItems(response.items);
+				setPhase(response.status);
+			} catch (error) {
+				if (active.current !== request) return;
+				active.current = null;
+				setPhase('error');
+				const safeCode = ['npcink_toolbox_faq_input', 'npcink_toolbox_faq_empty_body', 'npcink_toolbox_faq_too_long', 'npcink_toolbox_faq_forbidden', 'npcink_toolbox_faq_result', 'npcink_toolbox_faq_unavailable', 'npcink_toolbox_faq_timeout'];
+				setNotice({ status: 'error', message: safeCode.includes(error?.code) && error.message ? error.message : __('FAQ generation is temporarily unavailable. Try again later.', 'npcink-workflow-toolbox') });
+			}
+		}
+
+		async function copySelected() {
+			const request = active.current;
+			if (!request || !bodyFaqMatches(request.source, bodyFaqSource())) {
+				invalidate();
+				return;
+			}
+			const text = items.filter((item, index) => selected[index]).map(({ question, answer }) => `${question}\n${answer}`).join('\n\n');
+			if (!text) return;
+			try {
+				await copyTextToClipboard(text);
+				if (active.current === request) setNotice({ status: 'success', message: __('FAQ copied. The article was not changed.', 'npcink-workflow-toolbox') });
+			} catch {
+				if (active.current === request) setNotice({ status: 'error', message: __('Could not copy the FAQ.', 'npcink-workflow-toolbox') });
+			}
+		}
+
+		return createElement(Modal, { title: __('FAQ from article body', 'npcink-workflow-toolbox'), onRequestClose: onClose, size: 'medium' },
+			createElement('p', null, __('Generating sends only the current article body to Cloud, including unsaved edits.', 'npcink-workflow-toolbox')),
+			createElement(Button, { type: 'button', variant: phase === 'ready' ? 'secondary' : 'primary', isBusy: phase === 'running', disabled: phase === 'running', onClick: generate }, __('Generate FAQ', 'npcink-workflow-toolbox')),
+			createElement('div', { role: 'status' },
+				phase === 'running' ? __('Generating FAQ suggestions…', 'npcink-workflow-toolbox') :
+					phase === 'empty' ? __('No FAQ additions supported by this article body.', 'npcink-workflow-toolbox') :
+						phase === 'stale' ? __('The article changed. Generate again to review current suggestions.', 'npcink-workflow-toolbox') : null
+			),
+			phase === 'ready' ? createElement('ol', null, items.map((item, index) => createElement('li', { key: index, style: { overflowWrap: 'anywhere' } },
+				createElement(CheckboxControl, { label: item.question, checked: Boolean(selected[index]), onChange: (value) => setSelected((previous) => ({ ...previous, [index]: value })) }),
+				createElement('p', null, item.answer),
+				createElement('details', null, createElement('summary', null, __('Evidence from the article', 'npcink-workflow-toolbox')), createElement('blockquote', null, item.evidence))
+			))) : null,
+			phase === 'ready' ? createElement(Button, { type: 'button', variant: 'primary', disabled: !items.some((item, index) => selected[index]), onClick: copySelected }, __('Copy selected FAQ', 'npcink-workflow-toolbox')) : null,
+			notice ? createElement(Notice, { status: notice.status, isDismissible: false }, notice.message) : null
+		);
+	}
+
+	function BodyFaqControl({ disabled }) {
+		const [open, setOpen] = useState(false);
+		return createElement(Fragment, null,
+			createElement(Button, { type: 'button', variant: 'secondary', disabled, onClick: () => setOpen(true) }, __('FAQ from article body', 'npcink-workflow-toolbox')),
+			open ? createElement(BodyFaqPreview, { onClose: () => setOpen(false) }) : null
+		);
+	}
+
 	function internalLinkBatchReasonLabel(reason) {
 		const labels = {
 			selection_limit_exceeded: __('The selection exceeds the limit of 8 links.', 'npcink-workflow-toolbox'),
@@ -9832,6 +9954,7 @@
 										onClick: () => flow.intent === 'source_adaptation_review' ? openSourceAdaptationReview() : runFlow(flow.intent),
 										'aria-label': flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel + ' ' + flow.label,
 									}, flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel),
+									flow.intent === 'publish_preflight' ? createElement(BodyFaqControl, { disabled: Boolean(running) }) : null,
 									flow.intent === 'internal_links' ? createElement(Button, {
 										type: 'button', variant: 'secondary', disabled: Boolean(running),
 										onClick: () => runFlow('related_content'),

@@ -131,6 +131,7 @@ Start from the active documents below before changing code.
 - [Content Support Writing Checkup History](content-support-writing-checkup-history.md)
 - [Editor Progressive Recommendations Trial](editor-progressive-recommendations-trial.md)
 - [Editor AI Image Recommendation Summary](editor-ai-image-recommendation-summary.md)
+- [Current-article FAQ preview](editor-body-faq-v1.md)
 - [Editor Recommendation Logic](editor-recommendation-logic.md)
 - [Installed editor real-role acceptance (2026-11-09)](editor-real-role-acceptance-2026-11-09.md) — real role authorization, native taxonomy panels, ALT save/readback, image request cleanup repair and separate live retrieval timeout.
 - [Site-media timeout follow-up (2026-11-09)](site-media-timeout-followup-2026-11-09.md) — successful slow Cloud run, separate browser budget and unresolved local/Cloud media identities; no index repair or full live adoption claim.

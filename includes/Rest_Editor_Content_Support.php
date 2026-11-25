@@ -49,6 +49,9 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		if ( 'format_content' === $intent ) {
 			return Editor_Content_Format::request( $request );
 		}
+		if ( 'body_faq' === $intent ) {
+			return Editor_Body_FAQ::request( $request );
+		}
 		if ( ! in_array( $intent, array( 'progressive_recommendations', 'source_adaptation_review', 'polish_notes', 'article_narration', 'article_audio_summary', 'category_suggestions', 'tag_suggestions', 'summary_terms_optimization', 'internal_links', 'related_content', 'image_candidates', 'image_alt_suggestions', 'publish_preflight' ), true ) ) {
 			return new WP_Error(
 				'npcink_toolbox_invalid_editor_support_intent',
