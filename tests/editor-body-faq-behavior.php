@@ -74,6 +74,7 @@ faq_assert( array( $candidate ) === $result->data['items'] && 'ready' === $resul
 faq_assert( 'no-store' === $result->headers['Cache-Control'], 'Do not cache response.' );
 faq_assert( array( 'body' => "The limit is 100 tags & no more.\nCan the limit change?\nYes." ) === json_decode( $payload['input']['messages'][1]['content'], true ), 'Only current plain body is sent, without block metadata or script.' );
 faq_assert( 'pii' === $payload['data_classification'] && 'no_store' === $payload['storage_mode'] && 0 === $payload['retention_ttl'] && 0 === $payload['retry_max'] && false === $payload['policy']['allow_fallback'], 'Private synchronous payload and no retries, retention or fallback.' );
+faq_assert( 30 === $payload['timeout_seconds'] && ! array_key_exists( 'http_timeout_seconds', $payload ) && ! array_key_exists( 'connect_timeout_seconds', $payload ), 'Keep the Cloud timeout without adding either transport-only field.' );
 faq_assert( array( 'messages', 'params' ) === array_keys( $payload['input'] ), 'No extra context is sent downstream.' );
 
 faq_remote_items( array( $candidate, array_replace( $candidate, array( 'question' => 'why are some tags missing!' ) ), array_replace( $candidate, array( 'question' => 'Can the limit change?' ) ) ) );
