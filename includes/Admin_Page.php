@@ -209,14 +209,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		);
 	}
 
-	private function media_library_url(): string {
-		return add_query_arg(
-			array(
-				'mode' => 'list',
-			),
-			admin_url( 'upload.php' )
-		);
-	}
 
 	private function image_batch_tool_url( string $tool, array $attachment_ids = array() ): string {
 		$args           = array(
@@ -1803,9 +1795,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					if ( $active_group_id === $group_id ) {
 						$group_classes[] = 'is-active';
 					}
-					if ( ! empty( $group_meta['secondary'] ) ) {
-						$group_classes[] = 'is-secondary';
-					}
 					?>
 					<a href="<?php echo esc_url( $this->image_batch_tool_url( (string) $tool['id'] ) ); ?>" class="<?php echo esc_attr( implode( ' ', $group_classes ) ); ?>" data-toolbox-tool-group-target="<?php echo esc_attr( $group_id ); ?>" aria-selected="<?php echo $active_group_id === $group_id ? 'true' : 'false'; ?>">
 						<span><?php echo esc_html( (string) $group_meta['title'] ); ?></span>
@@ -2376,6 +2365,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		return $this->settings->media_optimization_policy_summary();
 	}
 
+
 	private function get_media_derivative_watermark_details( array $toolbox_policy ): string {
 		if ( 'text' === (string) ( $toolbox_policy['watermark_type'] ?? '' ) ) {
 			return sprintf(
@@ -2403,6 +2393,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		);
 	}
 
+
 	private function render_media_derivative_toolbox_defaults( array $toolbox_policy ): void {
 		?>
 		<div class="npcink-toolbox__example">
@@ -2422,6 +2413,38 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		</div>
 		<?php
 	}
+
+
+	private function render_media_derivative_crop_controls(): void {
+		?>
+		<div class="npcink-toolbox__batch-panel">
+			<h3><?php esc_html_e( 'Crop override', 'npcink-workflow-toolbox' ); ?></h3>
+			<p><?php esc_html_e( 'Optional one-run crop for common publishing ratios. Cloud returns only a preview; final adoption still requires review.', 'npcink-workflow-toolbox' ); ?></p>
+			<div class="npcink-toolbox__split">
+				<label>
+					<span><?php esc_html_e( 'Crop ratio', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="crop_aspect_ratio">
+						<option value=""><?php esc_html_e( 'No crop', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="16:9"><?php esc_html_e( '16:9 landscape', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="4:3"><?php esc_html_e( '4:3 landscape', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="1:1"><?php esc_html_e( '1:1 square', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="3:4"><?php esc_html_e( '3:4 portrait', 'npcink-workflow-toolbox' ); ?></option>
+						<option value="9:16"><?php esc_html_e( '9:16 portrait', 'npcink-workflow-toolbox' ); ?></option>
+					</select>
+				</label>
+				<label>
+					<span><?php esc_html_e( 'Crop anchor', 'npcink-workflow-toolbox' ); ?></span>
+					<select name="crop_position">
+						<?php foreach ( array( 'center', 'top', 'bottom', 'left', 'right', 'top_left', 'top_right', 'bottom_left', 'bottom_right' ) as $position ) : ?>
+							<option value="<?php echo esc_attr( $position ); ?>"><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+			</div>
+		</div>
+		<?php
+	}
+
 
 	private function render_media_derivative_picker_controls(): void {
 		?>
@@ -2449,29 +2472,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
-	private function render_media_derivative_format_controls( array $toolbox_policy, bool $single_mode = false ): void {
-		?>
-		<div class="npcink-toolbox__split">
-			<label>
-				<span><?php echo esc_html( $single_mode ? __( 'Output format', 'npcink-workflow-toolbox' ) : __( 'Format override', 'npcink-workflow-toolbox' ) ); ?></span>
-				<select name="target_format">
-					<option value=""><?php echo esc_html( $single_mode ? __( 'Use default setting', 'npcink-workflow-toolbox' ) : __( 'Use Toolbox default', 'npcink-workflow-toolbox' ) ); ?></option>
-					<?php foreach ( array( 'webp', 'avif', 'jpeg', 'png', 'original' ) as $format ) : ?>
-						<option value="<?php echo esc_attr( $format ); ?>"><?php echo esc_html( strtoupper( $format ) ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</label>
-			<label>
-				<span><?php echo esc_html( $single_mode ? __( 'Max width', 'npcink-workflow-toolbox' ) : __( 'Max width override', 'npcink-workflow-toolbox' ) ); ?></span>
-				<input type="number" min="320" max="7680" step="1" name="max_width" placeholder="<?php echo esc_attr( (string) $toolbox_policy['max_width'] ); ?>" />
-			</label>
-		</div>
-		<label>
-			<span><?php echo esc_html( $single_mode ? __( 'Image quality', 'npcink-workflow-toolbox' ) : __( 'Quality override', 'npcink-workflow-toolbox' ) ); ?></span>
-			<input type="number" min="1" max="100" step="1" name="quality" placeholder="<?php echo esc_attr( (string) $toolbox_policy['quality'] ); ?>" />
-		</label>
-		<?php
-	}
 
 	private function render_media_derivative_watermark_controls( array $toolbox_policy, bool $advanced_only = false ): void {
 		$templates = is_array( $toolbox_policy['watermark_templates'] ?? null ) ? $toolbox_policy['watermark_templates'] : array();
@@ -2548,49 +2548,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<span><?php esc_html_e( 'Margin', 'npcink-workflow-toolbox' ); ?></span>
 				<input type="number" min="0" max="1000" step="1" name="watermark_margin" value="<?php echo esc_attr( (string) ( $toolbox_policy['watermark_margin'] ?? 24 ) ); ?>" />
 			</label>
-		</div>
-		<?php
-	}
-
-	private function render_media_derivative_crop_controls(): void {
-		?>
-		<div class="npcink-toolbox__batch-panel">
-			<h3><?php esc_html_e( 'Crop override', 'npcink-workflow-toolbox' ); ?></h3>
-			<p><?php esc_html_e( 'Optional one-run crop for common publishing ratios. Cloud returns only a preview; final adoption still requires review.', 'npcink-workflow-toolbox' ); ?></p>
-			<div class="npcink-toolbox__split">
-				<label>
-					<span><?php esc_html_e( 'Crop ratio', 'npcink-workflow-toolbox' ); ?></span>
-					<select name="crop_aspect_ratio">
-						<option value=""><?php esc_html_e( 'No crop', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="16:9"><?php esc_html_e( '16:9 landscape', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="4:3"><?php esc_html_e( '4:3 landscape', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="1:1"><?php esc_html_e( '1:1 square', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="3:4"><?php esc_html_e( '3:4 portrait', 'npcink-workflow-toolbox' ); ?></option>
-						<option value="9:16"><?php esc_html_e( '9:16 portrait', 'npcink-workflow-toolbox' ); ?></option>
-					</select>
-				</label>
-				<label>
-					<span><?php esc_html_e( 'Crop anchor', 'npcink-workflow-toolbox' ); ?></span>
-					<select name="crop_position">
-						<?php foreach ( array( 'center', 'top', 'bottom', 'left', 'right', 'top_left', 'top_right', 'bottom_left', 'bottom_right' ) as $position ) : ?>
-							<option value="<?php echo esc_attr( $position ); ?>"><?php echo esc_html( $this->media_derivative_position_label( $position ) ); ?></option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-			</div>
-		</div>
-		<?php
-	}
-
-	private function render_media_derivative_output_controls(): void {
-		?>
-		<div class="npcink-toolbox__batch-panel">
-			<h3><?php esc_html_e( 'Output and replacement', 'npcink-workflow-toolbox' ); ?></h3>
-			<label>
-				<span><?php esc_html_e( 'Output filename (optional)', 'npcink-workflow-toolbox' ); ?></span>
-				<input type="text" name="output_filename" maxlength="96" placeholder="<?php esc_attr_e( 'Example: product-guide-cover', 'npcink-workflow-toolbox' ); ?>" />
-			</label>
-			<p class="description"><?php esc_html_e( 'Enter a basename only. Toolbox removes unsafe path characters and matches the extension to the generated format; the WordPress write ability performs the final sanitize-and-unique check.', 'npcink-workflow-toolbox' ); ?></p>
 		</div>
 		<?php
 	}
@@ -2789,14 +2746,6 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		<?php
 	}
 
-	private function render_checkbox( string $key, string $label, array $settings ): void {
-		?>
-		<label class="npcink-toolbox__check">
-			<input type="checkbox" name="<?php echo esc_attr( Plugin::OPTION_NAME ); ?>[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( ! empty( $settings[ $key ] ) ); ?> />
-			<span><?php echo esc_html( $label ); ?></span>
-		</label>
-		<?php
-	}
 
 	private function render_context_textarea( string $key, string $label, array $context ): void {
 		?>
