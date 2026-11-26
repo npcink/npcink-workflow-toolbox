@@ -397,7 +397,7 @@ abstract class Admin_Page_Site_Ops_Panel {
 			</div>
 			<div class="npcink-toolbox__ops-path-grid">
 				<?php foreach ( $paths as $path ) : ?>
-					<?php $finding = is_array( $path['finding'] ?? null ) ? $path['finding'] : array(); ?>
+					<?php $finding = $path['finding']; ?>
 					<div class="npcink-toolbox__ops-path-row npcink-toolbox__ops-path-row--<?php echo esc_attr( (string) $path['key'] ); ?>">
 						<div class="npcink-toolbox__ops-path-head">
 							<strong><?php echo esc_html( (string) $path['label'] ); ?></strong>

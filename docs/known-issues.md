@@ -34,18 +34,24 @@ and repeated research stay frozen under the decision's restart rules.
   defaults should be removed in focused groups; validate each group without
   connecting to a live site by default. PHPStan 2.3.7 landed independently in
   [#414](https://github.com/npcink/npcink-workflow-toolbox/pull/414) with the
-  same 48 baseline rules at that revision. Reduce by one verified root-cause
-  group at a time, preserving guards and contract-pinned methods. Hold
+  same 48 baseline rules at that revision. The first focused reduction leaves
+  46 rules: the Site Check handling panel always supplies its internally built
+  `finding` array, including an empty array when there is no matching finding.
+  Reduce by one verified root-cause group at a time, preserving external-input
+  guards and contract-pinned methods. Hold
   PHPCompatibility at 9.3.5; reassess only with a compatible stable release.
-  The PHP 8.0/8.4 deterministic CI runs are not installed WordPress runtime
-  evidence. [Audit dispositions](smart-ask-audit-closeout-2026-11-26.md).
+  PHP 8.0/8.4 deterministic CI and focused Smart Ask/Site Check fixtures on
+  PHP 8.2.35/8.5.6 are not installed WordPress runtime evidence.
+  [Audit dispositions](smart-ask-audit-closeout-2026-11-26.md).
 
 - **Installed Site Check browser smoke finding assertions (Toolbox test, 2026-11-10, updated 2026-11-26).**
   `tests/smoke-site-ops-insights-browser.mjs` now asserts the
   internal-link health finding only when the scan-detail disclosure reports a
   positive issue count, and asserts the finding is absent when the count is
-  zero. The smoke still reads the mutable local site's bounded sample rather
-  than a disposable content fixture. Source: [focused admin verification](admin-ia-site-and-ask-v1.md#本地验证与限制).
+  zero. `composer smoke:site-ops-insights-builder` exercises both outcomes
+  with deterministic fixtures. The browser smoke still observes the active
+  site's bounded sample, not two controlled browser fixtures.
+  Source: [focused admin verification](admin-ia-site-and-ask-v1.md#本地验证与限制).
   Do not change live site content or scanning rules to manufacture a result.
 
 - **Media withdrawal compensation completed (Addon / Cloud, development, 2026-11-11).**

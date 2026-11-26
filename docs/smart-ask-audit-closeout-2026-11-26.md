@@ -66,3 +66,27 @@ The two application topic branches (`codex/smart-ask-follow-up` and
 `codex/toolbox-audit-maintenance`) and this delivery's temporary maintenance
 worktree were removed after verification. Other sessions' worktrees and the
 current and rollback site slots were left in place.
+
+## Follow-up maintenance
+
+- The follow-up removed the clean worktrees and local and remote topic branches
+  of [#417](https://github.com/npcink/npcink-workflow-toolbox/pull/417) and
+  [#420](https://github.com/npcink/npcink-workflow-toolbox/pull/420). Each final
+  PR head matched its squash tree; their original heads were saved in a verified
+  bundle outside the worktrees. The three unrelated dirty worktrees, including
+  the two locked ones, remain untouched pending owner disposition.
+- [#425](https://github.com/npcink/npcink-workflow-toolbox/pull/425) ignores
+  the retired OpenCodeReview action in Dependabot, not other dependencies.
+  The workflow remains disabled and [#413](https://github.com/npcink/npcink-workflow-toolbox/pull/413)
+  closed without merge. [#414](https://github.com/npcink/npcink-workflow-toolbox/pull/414)
+  updated PHPStan independently of the baseline. Full behavior, PHPStan and
+  PHPCS checks ran with the new lock file on the updated PR tree.
+- [#426](https://github.com/npcink/npcink-workflow-toolbox/pull/426) requires
+  an explicit WordPress root for all four pack QA scripts. Fake WP-CLI proves
+  rejection and argument forwarding without a Cloud call. The
+  [real API checklist](known-issues.md#smart-ask-third-party-api-acceptance-checklist)
+  stays open until the operator identifies the test site, model and budget.
+- The Site Check builder fixture now tests both an available graph scan with
+  zero issues and a positive scan. Installed browser smoke still observes its
+  chosen site's actual sample. No live content or installed snapshot was changed
+  for these maintenance checks.

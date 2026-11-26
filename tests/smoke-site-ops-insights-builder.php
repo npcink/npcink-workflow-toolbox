@@ -185,6 +185,28 @@ $link_health = $link_health_findings[0];
 site_ops_smoke_assert( 'npcink-abilities-toolkit/get-internal-link-graph-health' === (string) ( $link_health['source_ability_id'] ?? '' ) && 'bounded_local_internal_graph' === (string) ( $link_health['scope'] ?? '' ), 'Internal-link health finding identifies the existing Toolkit source and bounded local scope.' );
 site_ops_smoke_assert( 'human_editor' === (string) ( $link_health['owner_label'] ?? '' ) && 'open_existing_internal_link_review' === (string) ( $link_health['next_safe_action'] ?? '' ) && 'operator_review_only_no_fix' === (string) ( $link_health['action_policy'] ?? '' ), 'Internal-link health finding keeps human review ownership and no-fix action policy.' );
 site_ops_smoke_assert( 2 === (int) ( $pack['summary']['internal_link_graph_scanned_posts'] ?? 0 ) && 2 === (int) ( $pack['summary']['internal_link_graph_issue_count'] ?? 0 ), 'Site Ops summary exposes bounded internal-link graph scan and issue counts.' );
+
+$zero_link_issues = $builder->build(
+	$snapshot,
+	array(
+		'internal_link_graph_health' => array(
+			'available'         => true,
+			'source_ability_id' => 'npcink-abilities-toolkit/get-internal-link-graph-health',
+			'data'              => array(
+				'summary'      => array( 'scanned_count' => 2 ),
+				'issue_counts' => array(
+					'orphan_post'             => 0,
+					'low_outbound_links'      => 0,
+					'excessive_outbound_links' => 0,
+				),
+				'items'        => array(),
+			),
+		),
+	)
+);
+site_ops_smoke_assert( 2 === ( $zero_link_issues['summary']['internal_link_graph_scanned_posts'] ?? null ) && 0 === ( $zero_link_issues['summary']['internal_link_graph_issue_count'] ?? null ), 'A successful clean graph scan reports the sample count and zero issues.' );
+site_ops_smoke_assert( ! in_array( 'internal_link_health', array_column( $zero_link_issues['top_findings'], 'id' ), true ), 'A successful clean graph scan does not generate an internal-link finding.' );
+
 site_ops_smoke_assert( false === ( $pack['safety']['comment_text_returned'] ?? true ), 'Site Ops insight pack omits full comment text.' );
 site_ops_smoke_assert( false === ( $pack['safety']['comment_author_email_returned'] ?? true ), 'Site Ops insight pack omits comment author emails.' );
 site_ops_smoke_assert( false === ( $pack['safety']['comment_ip_returned'] ?? true ), 'Site Ops insight pack omits comment IP addresses.' );
