@@ -10571,6 +10571,10 @@ msgstr "暂时无法检索本站资料，请稍后重试。"
 msgid "The answer did not include verified source references. Please try again."
 msgstr "回答未通过原文依据核验，请重试。"
 
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "There was not enough verified evidence from the article you named. Check its title or read the original article."
+msgstr "没有足够的原文依据回答这道问题。请核对文章标题，或直接查看原文。"
+
 #: includes/Site_Content_Answer.php
 msgid "The site-answer ability is unavailable."
 msgstr "本站资料问答能力暂不可用。"

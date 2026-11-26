@@ -62,8 +62,11 @@ final class Insight_Pack_Answer_Guidance {
 		} else {
 			$pack_label = '站点巡检摘要';
 		}
-		$upload_guidance = self::PACK_ENVIRONMENT_PERFORMANCE === $pack
+		$upload_guidance    = self::PACK_ENVIRONMENT_PERFORMANCE === $pack
 			? "\n- 排查上传时，将 WordPress 报告的上传上限换算成易读单位，与用户实际提供的文件大小比较。上限是配置线索，不能证明代理限制、上传结果或故障根因。若缺少关键现象，只问一个用户可观察的细节；处理后请用户实际重试上传。"
+			: '';
+		$structure_guidance = in_array( $pack, array( self::PACK_CONTENT_STRUCTURE, self::PACK_PAGE_QUALITY ), true )
+			? "\n- 区分 WordPress 的文章和页面发布总数、筛选后的抽样范围，以及 WordPress 的分类汇总。分类计数来自独立汇总，不用抽样数作分母，不假设各分类互斥。界面会另列发布总数和抽样范围，不要另写抽样免责声明。"
 			: '';
 
 		$terms = array();
@@ -93,7 +96,7 @@ final class Insight_Pack_Answer_Guidance {
 				'4. 不要写长篇背景、免责声明或总结段。',
 				'',
 				'【边界】',
-				'- 只依据摘要里真实存在的数据。摘要不含流量、访问量、排名、点击、转化、收入等数据：回答里直接不谈这些，不得提及或假设“高流量页面”“热门文章”“排名下降”等。',
+				'- 只依据摘要里真实存在的数据。摘要不含流量、访问量、排名、点击、转化、收入等数据：回答里直接不谈这些，不得提及或假设“高流量页面”“热门文章”“排名下降”等。' . $structure_guidance,
 				'- 摘要若标明只是环境清单（不是测速）：禁止编造网站得分、Lighthouse/PageSpeed 分数、LCP/CLS 实测或“测速结果”；只能根据清单给检查建议。',
 				'- 环境清单里的调试/缓存/内存只是配置信号：最多说“可能拖慢/可能有帮助”，不要写成已经测到的变慢或变快。' . $upload_guidance,
 				'- 不要在回答里解释或复述这些规则，也不要说明摘要缺少哪些数据；直接给建议即可。',
@@ -124,24 +127,30 @@ final class Insight_Pack_Answer_Guidance {
 	}
 
 	/**
-	 * Chinese caveat for a publish-date stratified sample (no field names).
+	 * Keep WordPress totals separate from the population returned by the sampling query.
+	 *
+	 * @param int                 $published_posts WordPress post count.
+	 * @param int                 $published_pages WordPress page count.
+	 * @param array<string,mixed> $sampling Compact sample metadata.
 	 */
-	public static function stratified_sample_note( int $strata_count, int $sampled, int $published_total ): string {
+	public static function stratified_sample_note( int $published_posts, int $published_pages, array $sampling ): string {
+		$note       = sprintf( 'WordPress 统计：已发布 %1$d 篇文章、%2$d 个页面。', $published_posts, $published_pages );
+		$population = (int) ( $sampling['total_published'] ?? 0 );
+		$sampled    = (int) ( $sampling['total_sampled'] ?? 0 );
 		if ( $sampled <= 0 ) {
-			return '';
+			return $note . '本次没有可用的抽样内容。';
 		}
-		if ( $strata_count <= 1 || $published_total <= $sampled ) {
-			return self::sample_note( $sampled, $published_total );
+		if ( $sampled === $population ) {
+			return $note . sprintf( '本次检查覆盖抽样范围内全部 %d 条内容。', $sampled );
 		}
-		$batches = array(
-			2 => '两',
-			3 => '三',
-			4 => '四',
-			5 => '五',
-		);
-		$label   = $batches[ $strata_count ] ?? (string) $strata_count;
+		if ( $sampled > $population ) {
+			return $note . sprintf( '本次检查了 %d 条内容；抽样指标仅供参考。', $sampled );
+		}
+		$strata  = is_array( $sampling['strata'] ?? null ) ? $sampling['strata'] : array();
+		$batches = count( array_filter( $strata, static fn( array $stratum ): bool => (int) ( $stratum['sample_count'] ?? 0 ) > 0 ) );
+		$method  = $batches > 1 ? sprintf( '按发布时间分 %d 批', $batches ) : '';
 
-		return sprintf( '按发布时间分%1$s批共抽查 %2$d 篇（本次范围内已发布 %3$d 篇），结论仅供参考。', $label, $sampled, $published_total );
+		return $note . sprintf( '本次从抽样范围的 %1$d 条内容中%2$s抽查 %3$d 条；抽样指标仅供参考。', $population, $method, $sampled );
 	}
 
 	/**

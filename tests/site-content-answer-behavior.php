@@ -33,7 +33,7 @@ function fixture() {
 		'grounded_evidence' => array( 'contract_version' => 'grounded_answer_evidence.v1', 'status' => 'available', 'verification' => 'citation_identity_and_exact_quote', 'sources' => array( array( 'id' => 'source-1', 'title' => '<script>bad()</script>', 'url' => 'javascript:bad()', 'source_completeness' => 'complete', 'text' => 'must not leak the full source', 'unexpected' => 'must not leak' ) ) ),
 	) ) ) );
 }
-function answer() { return Site_Content_Answer::answer( array( 'question' => 'When is the launch?' ) ); }
+function answer( $question = 'When is the launch?' ) { return Site_Content_Answer::answer( array( 'question' => $question ) ); }
 function rejected( $result, $code ) { check( is_wp_error( $result ) && $result->get_error_code() === $code, $code ); }
 $GLOBALS['admin'] = false;
 $GLOBALS['calls'] = array();
@@ -53,10 +53,39 @@ check( ! is_wp_error( $r ) && $r['answer'] === 'The launch is in May. [1]' && $r
 check( ! isset( $r['grounded_evidence']['sources'][0]['text'] ) && ! isset( $r['grounded_evidence']['sources'][0]['unexpected'] ), 'Only the reference projection is returned.' );
 $call = $GLOBALS['calls'][0];
 check( $call[0] === Site_Content_Answer::ABILITY && array_keys( $call[1] ) === array( 'prompt', 'max_tokens', 'system_instruction' ), 'Registered contract transports a question without local corpus, route, or model overrides.' );
+check( false === strpos( $call[1]['system_instruction'], '点名了一篇文章' ), 'General questions do not receive named-source instructions.' );
 check( $call[2] !== $call[3], 'Trace and idempotency are independent.' );
 $GLOBALS['reply']['data']['result']['output']['grounded_evidence']['status'] = 'partial';
 $GLOBALS['reply']['data']['result']['output']['grounded_evidence']['sources'][0]['source_completeness'] = 'partial_or_unknown';
 check( answer()['grounded_evidence']['status'] === 'partial', 'Partial evidence is not promoted to complete.' );
+$named = '请只根据《intro.js - 网站引导页插件》回答，文中有哪些步骤？';
+$output = &$GLOBALS['reply']['data']['result']['output'];
+$output['grounded_evidence']['sources'] = array(
+	array( 'id' => 'overview-1', 'title' => 'intro.js &ndash;&nbsp;网站引导页插件', 'url' => 'https://example.test/overview', 'source_completeness' => 'partial_or_unknown' ),
+	array( 'id' => 'tutorial', 'title' => 'intro.js 使用教程', 'url' => 'https://example.test/tutorial', 'source_completeness' => 'complete' ),
+);
+$citations = array(
+	array( 'id' => 'overview-1', 'quote' => '用于制作网站引导页。' ),
+	array( 'id' => 'tutorial', 'quote' => '通过 data-step 指定顺序。' ),
+);
+$output['output_text'] = json_encode( array( 'answer' => '用途见 [1]，步骤见 [2]。', 'citations' => $citations ) );
+$before = count( $GLOBALS['calls'] );
+$r = answer( $named );
+rejected( $r, 'npcink_toolbox_site_answer_source_mismatch' );
+check( 422 === $r->get_error_data()['status'] && 'run_fixture' === $r->get_error_data()['run_id'] && $before + 1 === count( $GLOBALS['calls'] ), 'A named-source mismatch is actionable, correlated and not retried.' );
+check( false !== strpos( $GLOBALS['calls'][ $before ][1]['system_instruction'], '点名了一篇文章' ), 'Named questions constrain the Cloud answer to the named source.' );
+check( ! is_wp_error( answer( '《intro.js - 网站引导页插件》和《intro.js 使用教程》有什么区别？' ) ) && ! is_wp_error( answer() ), 'Multi-title and general questions retain multi-source evidence.' );
+$output['grounded_evidence']['sources'][1] = array( 'id' => 'overview-2', 'title' => 'intro.js – 网站引导页插件', 'url' => 'https://example.test/overview', 'source_completeness' => 'partial_or_unknown' );
+$citations[1] = array( 'id' => 'overview-2', 'quote' => '文章提到需要引入脚本。' );
+$output['output_text'] = json_encode( array( 'answer' => '用途见 [1]，文中只提到引入脚本 [2]，未说明具体步骤。', 'citations' => $citations ) );
+$r = answer( $named );
+check( ! is_wp_error( $r ) && 'partial' === $r['grounded_evidence']['status'] && 2 === count( $r['citations'] ), 'Normalizes title punctuation, entities and spaces, and accepts two fragments from the same article.' );
+$output['grounded_evidence']['sources'][1]['url'] = 'https://example.test/another-overview';
+rejected( answer( $named ), 'npcink_toolbox_site_answer_source_mismatch' );
+$output['grounded_evidence']['sources'][0]['title'] = 'A similar article';
+$output['grounded_evidence']['sources'][1]['title'] = 'An unrelated article';
+rejected( answer( $named ), 'npcink_toolbox_site_answer_source_mismatch' );
+unset( $output );
 foreach ( array( 'verification', 'sources', 'contract_version' ) as $field ) {
 	$GLOBALS['reply'] = fixture();
 	unset( $GLOBALS['reply']['data']['result']['output']['grounded_evidence'][ $field ] );
