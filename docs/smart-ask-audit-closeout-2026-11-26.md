@@ -87,6 +87,12 @@ current and rollback site slots were left in place.
   [real API checklist](known-issues.md#smart-ask-third-party-api-acceptance-checklist)
   stays open until the operator identifies the test site, model and budget.
 - The Site Check builder fixture now tests both an available graph scan with
-  zero issues and a positive scan. Installed browser smoke still observes its
-  chosen site's actual sample. No live content or installed snapshot was changed
-  for these maintenance checks.
+  zero issues and a positive scan. That repair narrowed the PHPStan baseline
+  from 48 to 46 entries; contract-pinned methods remain. Installed browser smoke
+  still observes its chosen site's actual sample. No live content or installed
+  snapshot was changed for these maintenance checks.
+- Nine additional optional browser smokes now validate their explicit WordPress
+  target before side effects and use no site-specific CLI runtime defaults. The
+  [development workflow](development-workflow.md) documents the configuration.
+  The deterministic gate checks executable entry points with missing targets and
+  a fake CLI; it does not certify any installed UI or provider response.
