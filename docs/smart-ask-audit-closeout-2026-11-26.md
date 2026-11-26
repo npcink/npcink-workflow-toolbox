@@ -96,3 +96,43 @@ current and rollback site slots were left in place.
   [development workflow](development-workflow.md) documents the configuration.
   The deterministic gate checks executable entry points with missing targets and
   a fake CLI; it does not certify any installed UI or provider response.
+
+## Final audit handoff (2026-11-26)
+
+[#429](https://github.com/npcink/npcink-workflow-toolbox/pull/429) merged at
+`83b5d7eeb2edae4d3672e560124af328a581a83d`. The final reviewed head
+`e7cd8539b4c7e3f735cd3fe8839061a8909d9b32` had the same tree. After
+[#428](https://github.com/npcink/npcink-workflow-toolbox/pull/428) landed, the
+gate and exact-diff review were run on the updated topic: `composer test:all`
+passed with 4,651 static checks, along with Composer validation, the WordPress.org
+guard, PHPCS, PHPStan and the configured `gpt-6.1-sol` review. All three GitHub
+checks passed. #429 changed tests and documentation, not plugin runtime code.
+
+| Question | Disposition |
+| --- | --- |
+| Is Nightly fully disabled? | Submission and retry stop before snapshot/Addon work with non-retryable `409`. Legacy recent, status, result and entitlement reads keep their REST permission and defer to Addon. Fake-Addon tests cover forwarding and denial; they do not certify production authorization. Do not blanket-block compatibility reads. |
+| Does the retained Nightly snapshot builder prove live disclosure? | No live transfer was demonstrated; the paused execution path stops before building the payload. Before any separately approved restoration, Toolbox and Addon/Cloud must verify outbound field minimization, permission and the restored path against the deployed revisions. |
+| Should all routes copy the Smart Ask changes? | No mechanical `get_json_params()` migration, fallback changes outside Smart Ask, or local throttling was accepted. Preserve JSON body presence, validation and provider ownership; revisit only with a concrete affected caller or an approved policy change. |
+| Should large files or suspected hot paths be rewritten now? | No. Toolbox tooling debt stays in [Known Issues](known-issues.md#open). Reopen performance work only with a repeatable workload and measured bottleneck; file size does not establish one. |
+| What did the Git fixture repair establish? | The PHP child-process setup omitted empty `GIT_CONFIG_VALUE_*` values while retaining `GIT_CONFIG_COUNT`, breaking temporary Git setup. Both sibling fixtures now isolate host Git configuration and pass with an explicitly injected empty value. This was a test-harness failure, not a Cloud or plugin runtime failure. |
+
+The audit topic `codex/audit-maintenance-2026-11-26` is absent locally and
+on GitHub and has no registered worktree. At the #429 closeout snapshot, the
+primary worktree was clean and `master` and `origin/master` both pointed at the
+merge. GitHub had no open PRs and only `master` and `codex/editor-text-budgets`.
+The latter exists locally and on GitHub at `3274e33`; its [#410](https://github.com/npcink/npcink-workflow-toolbox/pull/410)
+closed without merge and its unique commits were preserved. The two locked
+code-format pilot worktrees (one detached) and the dirty FAQ sidebar worktree
+belong to other work and were not changed. The primary checkout and the
+separate `audit-b933263` Local install slot remain in use; neither site link nor
+its rollback slot was changed. This is task cleanup, not a globally clean repo.
+
+**Remaining acceptance:** Toolbox/Cloud still need independent editor feedback
+for representative usefulness and the operator's chosen site/model/budget for
+the [third-party API checklist](known-issues.md#smart-ask-third-party-api-acceptance-checklist).
+The previously verified installed snapshot is separate from #429. WordPress.org
+remains at the audited `0.6.0` package; a new package requires an approved scope
+and the [release gate](wordpress-org-release-gate.md). No real Cloud, M4 or
+production run was performed for #429. These are not blockers to closing this
+bounded development audit, and the [freeze](development-freeze-2026-11-09.md)
+remains active.
