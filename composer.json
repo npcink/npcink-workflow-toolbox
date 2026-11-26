@@ -185,6 +185,7 @@
             "@test:editor-content-support",
             "@test:editor-body-faq",
             "@test:site-ops-insight-pack-rest",
+            "@test:insight-pack-cloud-qa-cli",
             "@test:site-content-answer",
             "@test:site-content-answer-ui",
             "@test:smart-ask",
@@ -230,6 +231,7 @@
         "test:taxonomy-tag-review": "php tests/taxonomy-tag-review-set-behavior.php",
         "test:internal-link-review": "php tests/internal-link-review-set-behavior.php",
         "test:content-structure-insight-pack-rest": "php tests/content-structure-insight-pack-rest-behavior.php",
+        "test:insight-pack-cloud-qa-cli": "sh tests/insight-pack-cloud-qa-cli-behavior.sh",
         "test:cloud-error-plain-messages": "php tests/cloud-error-plain-messages-behavior.php",
         "test:page-quality-insight-pack-rest": "php tests/page-quality-insight-pack-rest-behavior.php",
         "test:environment-performance-insight-pack-rest": "php tests/environment-performance-insight-pack-rest-behavior.php"

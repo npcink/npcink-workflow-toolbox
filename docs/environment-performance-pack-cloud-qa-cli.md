@@ -29,9 +29,10 @@
 ## CLI
 
 ```bash
+export WP_PATH="/path/to/wordpress"
 scripts/environment-performance-pack-cloud-qa.sh
 scripts/environment-performance-pack-cloud-qa.sh "根据这份环境与性能相关摘要，站长先检查哪 1–3 件事更合适？用大白话，不要假装做过测速。"
 NPCINK_ENVIRONMENT_PERFORMANCE_QA_OUT=/tmp/env-perf.json scripts/environment-performance-pack-cloud-qa.sh
 ```
 
-默认 WP 路径与用户与其它 insight-pack CLI 相同（Local magick-ai / user 178）。
+必须显式传入 WordPress 根目录，第二位置参数优先于 `WP_PATH`，不再默认选择本机站点。通过 `NPCINK_ENVIRONMENT_PERFORMANCE_QA_USER` 设置测试站管理员，未指定时回退到 `NPCINK_INSIGHT_QA_USER` 或 `178`。WP-CLI、PHP 和 socket 设置见[共用运行说明](insight-pack-cloud-qa-cli.md#怎么跑)。

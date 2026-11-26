@@ -64,7 +64,7 @@ Cap：`manage_options`（`cap.toolbox.admin`）。实现：`includes/Rest_Page_Q
 
 `https://magick-ai.local/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=context`
 
-与「本次站点检查」在同一个 **智能提问** 页用下拉切换；包不同，共享 hosted AI 通道。
+在 **智能提问** 页直接描述页面质量问题；与巡检摘要共用 hosted AI 通道，不手选资料包。
 
 硬刷新后验证：进行中态、Markdown 答复、忙位/429 中文提示。
 
@@ -73,17 +73,19 @@ Cap：`manage_options`（`cap.toolbox.admin`）。实现：`includes/Rest_Page_Q
 ## CLI
 
 ```bash
-cd /Users/muze/gitee/npcink-workflow-toolbox
+export WP_PATH="/path/to/wordpress"
 ./scripts/page-quality-pack-cloud-qa.sh
-./scripts/page-quality-pack-cloud-qa.sh "内容结构优先该处理什么？"
+./scripts/page-quality-pack-cloud-qa.sh "页面质量优先该处理什么？"
 ```
 
 | Env | 含义 | 默认 |
 | --- | --- | --- |
-| `WP_PATH` | WordPress 根 | Local magick-ai |
+| `WP_PATH` | WordPress 根；第二位置参数优先 | 必填，无默认站点 |
 | `NPCINK_PAGE_QUALITY_QA_USER` | WP 用户 ID/login | `178`（可回退 `NPCINK_INSIGHT_QA_USER`） |
 | `NPCINK_PAGE_QUALITY_QA_QUESTION` | 问题 | 脚本默认中文问法 |
 | `NPCINK_PAGE_QUALITY_QA_OUT` | 结果 JSON | `tmp/page-quality-pack-cloud-qa-result.json` |
+
+WP-CLI、PHP 和 socket 设置见[共用运行说明](insight-pack-cloud-qa-cli.md#怎么跑)。
 
 ---
 
@@ -96,6 +98,6 @@ cd /Users/muze/gitee/npcink-workflow-toolbox
 ## 给其它 AI 的最短路径
 
 1. 读本页 + [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)  
-2. 后台 **智能提问** → 选择「内容结构」，或跑 `./scripts/page-quality-pack-cloud-qa.sh`  
+2. 后台 **智能提问** 直接描述页面质量问题，或按上文显式选站后跑 CLI。
 3. 排障带 Cloud `run_id`；遇 429 先清槽  
 4. **不要**恢复 `cloud_inspection`；**不要**开第三包；**不要**合入未获用户确认的 PR  
