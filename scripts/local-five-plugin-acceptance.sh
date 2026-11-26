@@ -3,7 +3,7 @@ set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 NPCINK_REPO_FAMILY_ROOT="${NPCINK_REPO_FAMILY_ROOT:-$(dirname "$ROOT")}"
-WP_PATH="${WP_PATH:-/Users/muze/Local Sites/npcink/app/public}"
+WP_PATH="${WP_PATH:?WP_PATH must be set to a WordPress root}"
 WP_CLI_BIN="${WP_CLI_BIN:-/opt/homebrew/bin/wp}"
 WP_CLI_PHP="${WP_CLI_PHP:-$HOME/Library/Application Support/Local/lightning-services/php-8.5.3+1/bin/darwin-arm64/bin/php}"
 SOCKET="${WP_DB_SOCKET:-$HOME/Library/Application Support/Local/run/NPb24Zg9g/mysql/mysqld.sock}"
@@ -50,7 +50,7 @@ wp_cli() {
 	return "$status"
 }
 
-[ -d "$WP_PATH" ] || fail "WordPress path does not exist: $WP_PATH"
+[ -f "$WP_PATH/wp-load.php" ] || fail "WP_PATH must contain wp-load.php: $WP_PATH"
 if [ -n "$WP_CLI_PHP" ]; then
 	[ -x "$WP_CLI_PHP" ] || fail "Local PHP is not executable: $WP_CLI_PHP"
 	[ -r "$WP_CLI_BIN" ] || fail "WP-CLI is not readable: $WP_CLI_BIN"
