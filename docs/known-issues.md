@@ -28,16 +28,12 @@ and repeated research stay frozen under the decision's restart rules.
   Record ordinary feedback and separately accept the configured production API.
   [Current evidence](maintenance-acceptance-2026-11-10.md).
 
-- **Installed Site Check browser smoke assumes a particular finding (Toolbox test, 2026-11-10).**
-  `tests/smoke-site-ops-insights-browser.mjs:272` unconditionally expects an
-  internal-link-health finding from the mutable local site's bounded sample.
-  The admin maintenance browser run reaches this unrelated failure after
-  passing the repaired snapshot-state assertion. An `origin/master`
-  Admin_Page probe, omitting only the already known old snapshot assertion,
-  fails at the same finding assertion. Source: [focused admin verification](admin-ia-site-and-ask-v1.md#本地验证与限制).
-  Next bounded action, only when this smoke is needed: give it a disposable
-  deterministic content fixture and cleanup, or make finding-specific
-  assertions conditional on actual scan counts while retaining coverage.
+- **Installed Site Check browser smoke finding assertions (Toolbox test, 2026-11-10, updated 2026-11-25).**
+  `tests/smoke-site-ops-insights-browser.mjs:424–445` now asserts the
+  internal-link health finding only when the scan-detail disclosure reports a
+  positive issue count, and asserts the finding is absent when the count is
+  zero. The smoke still reads the mutable local site's bounded sample rather
+  than a disposable content fixture. Source: [focused admin verification](admin-ia-site-and-ask-v1.md#本地验证与限制).
   Do not change live site content or scanning rules to manufacture a result.
 
 - **Media withdrawal compensation completed (Addon / Cloud, development, 2026-11-11).**

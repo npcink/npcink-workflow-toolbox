@@ -245,8 +245,8 @@ async function verifySmartAskLayout(page) {
 	const payloads = [];
 	const fixture = [
 		{ answer: '图片有多大？', answer_basis: 'clarification' },
-		{ answer: 'WordPress 报告的上限为 8 MB。', answer_basis: 'site_summary' },
-		{ answer: 'WordPress 现在报告的上限为 32 MB。请实际重试上传。', answer_basis: 'site_summary' },
+		{ answer: 'WordPress 报告的上限为 8 MB。', answer_basis: 'upload_limit' },
+		{ answer: 'WordPress 现在报告的上限为 32 MB。请实际重试上传。', answer_basis: 'upload_limit' },
 	];
 	const followUp = async route => {
 		payloads.push(route.request().postDataJSON());
@@ -421,12 +421,29 @@ try {
 		const scanDetailText = await page.locator('.npcink-toolbox__ops-scan-details').nth(2).innerText();
 		assert(/Local analysis summary|本地分析摘要|Coverage snapshot|覆盖快照/.test(scanDetailText), 'Scan-detail disclosure contains local coverage detail and charts.');
 		assert(/\d+ posts checked; \d+ internal-link issues|已检查\s*\d+\s*篇文章.*\d+\s*个内链问题/.test(scanDetailText), 'Scan-detail disclosure shows bounded internal-link health counts without raw JSON.');
+		const internalLinkIssueCount = (() => {
+			const english = scanDetailText.match(/(\d+) internal-link issues/);
+			const chinese = scanDetailText.match(/(\d+)\s*个内链问题/);
+			if (english) {
+				return Number(english[1]);
+			}
+			if (chinese) {
+				return Number(chinese[1]);
+			}
+			return null;
+		})();
+		assert(internalLinkIssueCount !== null, 'Internal-link health counts in the scan-detail disclosure are parseable.');
 		await page.locator('.npcink-toolbox__ops-dimension-fold > summary').click();
 		await openOpsTab(page, 'content');
 		const contentText = await page.locator('[data-toolbox-ops-panel="content"]').innerText();
-		assert(/Internal-link health needs review|内链健康状况需要审核/.test(contentText), 'Content analysis renders the internal-link health finding for operator review.');
-		assert(/Owner|负责人/.test(contentText) && /Human editor|人工编辑/.test(contentText), 'Internal-link health finding names the human editor as the responsible owner.');
-		assert(/Open first link review|打开首个内链审核/.test(contentText), 'Internal-link health finding exposes the existing manual link-review entry point.');
+		const hasInternalLinkFinding = /Internal-link health needs review|内链健康状况需要审核/.test(contentText);
+		if (internalLinkIssueCount > 0) {
+			assert(hasInternalLinkFinding, 'When the scan reports internal-link issues, content analysis renders the internal-link health finding for operator review.');
+			assert(/Owner|负责人/.test(contentText) && /Human editor|人工编辑/.test(contentText), 'Internal-link health finding names the human editor as the responsible owner.');
+			assert(/Open first link review|打开首个内链审核/.test(contentText), 'Internal-link health finding exposes the existing manual link-review entry point.');
+		} else {
+			assert(!hasInternalLinkFinding, 'When the scan reports zero internal-link issues, content analysis does not invent that finding.');
+		}
 		const contentPanel = page.locator('[data-toolbox-ops-panel="content"]');
 		const firstContentFinding = contentPanel.locator('.npcink-toolbox__ops-priority-row').first();
 		assert(await contentPanel.locator('.npcink-toolbox__ops-summary-bar--dimension').count() === 1, 'Content analysis keeps a single compact inline summary.');

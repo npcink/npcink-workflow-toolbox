@@ -56,6 +56,8 @@
 - `memory_limit`、`max_execution_time` 的**字符串/整数原值**（配置级，非进程实测）
 - `is_multisite` 布尔
 - `wp_is_writable` 类信号：仅「上传目录是否可写」等布尔（若已有安全采集路径）
+- 读取上传目录时必须调用 `wp_upload_dir( null, false, true )`（`$create_dir = false`，并刷新缓存），**不得**创建 uploads 目录。
+- `wp_upload_max_bytes`：类型为整数（单位：字节）或 `null`。当 `wp_max_upload_size()` 存在时，取值是 `max( 0, (int) wp_max_upload_size() )`；`0` 表示函数返回了非正值，即上限未知或不可用，**不是**“无限制”。函数不存在时为 `null`。该字段只报告 WordPress 当前声明的上传上限，不是测速或故障确诊。
 - HTTPS：home/siteurl 是否 `https`
 - 调试：`WP_DEBUG` / `WP_DEBUG_DISPLAY` / `SCRIPT_DEBUG` 等**布尔**（不读 debug.log 内容）
 

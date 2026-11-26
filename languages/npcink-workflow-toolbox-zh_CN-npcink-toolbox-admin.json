@@ -1170,7 +1170,9 @@
       "Submitting the image replacement request...": ["正在提交原图替换申请……"],
       "Replace image with reviewed result": ["用已审阅的结果替换图片"],
       "Replace the selected attachment, back up the original and repair recognized article image URLs. Review all affected uses before approval.": ["替换所选媒体附件、备份原图并修复已识别的文章图片地址。请在审批前核对所有受影响的使用位置。"],
-      "Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires.": ["替换申请已提交，审批前原图保持不变。请在预览到期前进入 Core 审核。"]
+      "Replacement request submitted. The original is unchanged until approval. Continue in Core review before the preview expires.": ["替换申请已提交，审批前原图保持不变。请在预览到期前进入 Core 审核。"],
+      "Compared with the upload limit WordPress currently reports. This is not an environment summary or a diagnosis.": ["仅与 WordPress 当前报告的上传上限比较，不是环境摘要，也不是故障确诊。"],
+      "The upload limit was read again. This is not a new environment summary.": ["已再次读取当前上传上限。这不是新的环境摘要。"]
     }
   }
 }

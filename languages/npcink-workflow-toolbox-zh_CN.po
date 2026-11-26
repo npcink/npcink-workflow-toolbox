@@ -20,16 +20,16 @@ msgstr "上传失败的图片有多大？可以回复文件大小，例如 18 MB
 msgid "Try uploading the same image again in the Media Library. If it fails, note the exact error shown."
 msgstr "请在媒体库重传同一张图片。如果仍然失败，记下屏幕上的完整报错。"
 
-msgid "WordPress did not report a usable upload limit, so the file size alone does not explain the error."
-msgstr "目前读不到 WordPress 的上传上限，单凭文件大小无法解释这次报错。"
+msgid "WordPress did not report a usable upload limit, so the file size alone does not explain the error. This is not an environment inspection or a diagnosis of the fault."
+msgstr "目前读不到 WordPress 的可用上传上限，单凭文件大小无法解释这次报错。这不是环境检查，也不是故障确诊。"
 
 #, php-format
-msgid "The image is larger than the %s upload limit WordPress currently reports. Try uploading an image smaller than that limit to see whether the Media Library accepts it."
-msgstr "这张图片超过了 WordPress 当前报告的 %s 上传上限。请用一张小于这个上限的图片试传，看看媒体库能否接收。"
+msgid "The image is larger than the %s upload limit WordPress currently reports. This is only a comparison with that limit, not an environment inspection or a diagnosis. Try uploading an image smaller than that limit to see whether the Media Library accepts it."
+msgstr "这张图片超过了 WordPress 当前报告的 %s 上传上限。这只是与该上限的比较，不是环境检查，也不是故障确诊。请用一张小于这个上限的图片试传，看看媒体库能否接收。"
 
 #, php-format
-msgid "The image is within the %s upload limit WordPress currently reports. This limit does not explain the earlier error."
-msgstr "这张图片没有超过 WordPress 当前报告的 %s 上传上限。这个上限解释不了之前的报错。"
+msgid "The image is within the %s upload limit WordPress currently reports. This is only a comparison with that limit, not an environment inspection or a diagnosis of the fault."
+msgstr "这张图片没有超过 WordPress 当前报告的 %s 上传上限。这只是与该上限的比较，不是环境检查，也不是对故障的确诊。"
 
 msgid "Npcink Workflow Toolbox"
 msgstr "Npcink Workflow Toolbox"
@@ -10888,6 +10888,9 @@ msgstr "正在理解问题，并按需准备本站背景…"
 msgid "Based on a bounded site summary, not a full-site audit."
 msgstr "回答依据有限范围的站点摘要，未做全站审查。"
 
+msgid "Compared with the upload limit WordPress currently reports. This is not an environment summary or a diagnosis."
+msgstr "仅与 WordPress 当前报告的上传上限比较，不是环境摘要，也不是故障确诊。"
+
 msgid "Based on retrieved public articles; check the references below."
 msgstr "回答依据检索到的公开文章，请核对下方引用。"
 
@@ -11369,3 +11372,6 @@ msgstr "当前问题已达轮次上限。开始新问题可继续提问。"
 
 msgid "Site information checked again."
 msgstr "已重新检查站点信息。"
+
+msgid "The upload limit was read again. This is not a new environment summary."
+msgstr "已再次读取当前上传上限。这不是新的环境摘要。"

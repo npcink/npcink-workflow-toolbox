@@ -958,11 +958,13 @@ checklist is documented in
 
 ## Development
 
+`composer test` runs `tests/run.php` (static contract checks). It is not the CI gate.
+
 ```bash
 composer test:all
 ```
 
-The current gate runs PHP syntax linting and static contract checks.
+CI runs `composer test:all`: PHP syntax linting, static contracts, deterministic PHP/JS behavior tests, and the configured isolated smoke fixtures. Optional installed-browser, live WordPress, and live Cloud acceptance smokes are intentionally excluded; see [Development Workflow](docs/development-workflow.md).
 
 ### Answers from public site content
 

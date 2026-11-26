@@ -238,7 +238,7 @@ final class Rest_Site_Ops_Insight_Bridges {
 			'timeout_seconds'     => 45,
 			'retry_max'           => 0,
 			'policy'              => array(
-				'allow_fallback' => true,
+				'allow_fallback' => false,
 			),
 		);
 
@@ -365,7 +365,6 @@ final class Rest_Site_Ops_Insight_Bridges {
 			'contract_version'       => (string) ( $pack['contract_version'] ?? '' ),
 			'artifact_type'          => (string) ( $pack['artifact_type'] ?? '' ),
 			'run_id'                 => (string) ( $pack['run_id'] ?? '' ),
-			'site_id'                => (string) ( $pack['site_id'] ?? '' ),
 			'generated_at'           => (string) ( $pack['generated_at'] ?? '' ),
 			'write_posture'          => (string) ( $pack['write_posture'] ?? '' ),
 			'direct_wordpress_write' => (bool) ( $pack['direct_wordpress_write'] ?? false ),

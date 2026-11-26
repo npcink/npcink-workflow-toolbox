@@ -511,19 +511,4 @@ final class Abilities {
 	private function can_execute_ability( string $ability_id, string $required_scope = '' ): bool {
 		return (bool) apply_filters( 'npcink_toolbox_ability_permission', current_user_can( 'manage_options' ), $ability_id, $required_scope );
 	}
-
-	private function sanitize_string_list( $value ): array {
-		if ( is_array( $value ) ) {
-			$items = $value;
-		} else {
-			$items = preg_split( '/[\r\n,]+/', (string) $value );
-		}
-
-		$items = array_map(
-			static fn( $item ): string => sanitize_text_field( trim( (string) $item ) ),
-			is_array( $items ) ? $items : array()
-		);
-
-		return array_values( array_filter( array_unique( $items ) ) );
-	}
 }

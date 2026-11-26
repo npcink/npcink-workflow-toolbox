@@ -34,6 +34,8 @@ function assert_insight_question_budget( callable $handle, callable $assert ): v
 		$payload  = Npcink_Cloud_Runtime_Client_Factory::$requests[0] ?? array();
 		$assert( $response instanceof WP_REST_Response && true === $response->get_data()['ok'], '2000 Unicode characters return an answer from the fixture.' );
 		$assert( str_starts_with( $payload['input']['messages'][1]['content'] ?? '', '站长的问题：' . $question . "\n\n" ), 'The full question reaches the Cloud request.' );
+		$messages = $payload['input']['messages'] ?? null;
+		$assert( is_array( $messages ) && false === strpos( (string) wp_json_encode( $messages ), '"site_id"' ), 'Outbound Cloud input.messages omit site_id.' );
 		$request->set_param( 'question', $question . $character );
 		$response = $handle( $request );
 		$assert( is_wp_error( $response ) && str_ends_with( $response->get_error_code(), '_question_too_long' ), '2001 characters fail with the limit error.' );

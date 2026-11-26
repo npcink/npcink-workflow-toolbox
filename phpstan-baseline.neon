@@ -1,19 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method Npcink_Toolbox\\Abilities\:\:sanitize_string_list\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Abilities.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:media_library_url\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_checkbox\(\) is unused\.$#'
+			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_toolbox_defaults\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
 			path: includes/Admin_Page.php
@@ -25,25 +13,7 @@ parameters:
 			path: includes/Admin_Page.php
 
 		-
-			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_format_controls\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_output_controls\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
 			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_picker_controls\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
-			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_toolbox_defaults\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
 			path: includes/Admin_Page.php
@@ -51,12 +21,6 @@ parameters:
 		-
 			message: '#^Method Npcink_Toolbox\\Admin_Page\:\:render_media_derivative_watermark_controls\(\) is unused\.$#'
 			identifier: method.unused
-			count: 1
-			path: includes/Admin_Page.php
-
-		-
-			message: '#^Offset ''secondary'' on array\{title\: mixed, description\: mixed\} in empty\(\) does not exist\.$#'
-			identifier: empty.offset
 			count: 1
 			path: includes/Admin_Page.php
 
@@ -103,128 +67,14 @@ parameters:
 			path: includes/Media_Recognition_Continuation.php
 
 		-
-			message: '#^Variable \$post_title on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: includes/Provider_Ai_Image_Service.php
-
-		-
 			message: '#^Strict comparison using \=\=\= between '''' and non\-falsy\-string will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: includes/Provider_Client_Support.php
 
 		-
-			message: '#^Property WP_Comment\:\:\$comment_ID \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Comment\:\:\$comment_author \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Comment\:\:\$comment_author_url \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Comment\:\:\$comment_content \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Comment\:\:\$comment_date_gmt \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Comment\:\:\$comment_post_ID \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$ID \(int\<0, max\>\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 3
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_content \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_modified_gmt \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_status \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_title \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_type \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Term\:\:\$count \(int\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Term\:\:\$name \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
-			message: '#^Property WP_Term\:\:\$taxonomy \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Content_Collector_Service.php
-
-		-
 			message: '#^Parameter \#1 \$array \(non\-empty\-list\<non\-falsy\-string\>\) to function array_filter does not contain falsy values, the array will always stay the same\.$#'
 			identifier: arrayFilter.same
-			count: 1
-			path: includes/Provider_Hosted_AI_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_content \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: includes/Provider_Hosted_AI_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_excerpt \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: includes/Provider_Hosted_AI_Service.php
-
-		-
-			message: '#^Property WP_Post\:\:\$post_title \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
 			count: 1
 			path: includes/Provider_Hosted_AI_Service.php
 

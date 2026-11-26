@@ -862,4 +862,20 @@ abstract class Provider_Client_Support {
 
 		return $matches[1] . ( is_string( $suffix ) ? $suffix : '' );
 	}
+
+
+	/**
+	 * Read a property from a WordPress object that may be incomplete at runtime.
+	 *
+	 * Vendor stubs type WP_Post, WP_Comment, and WP_Term properties as
+	 * non-nullable; collectors still defend against filtered or partial objects.
+	 *
+	 * @param object $object   WordPress object that may omit expected properties.
+	 * @param string $property Property name.
+	 * @param mixed  $default  Fallback when the property is missing or null.
+	 * @return mixed
+	 */
+	protected static function object_property( object $object, string $property, $default = '' ) {
+		return $object->{$property} ?? $default;
+	}
 }
