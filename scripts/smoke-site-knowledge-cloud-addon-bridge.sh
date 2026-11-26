@@ -1,7 +1,12 @@
 #!/bin/sh
 set -u
 
-WP_PATH="${WP_PATH:-/Users/muze/Local Sites/npcink/app/public}"
+WP_PATH="${WP_PATH:?WP_PATH must be set to a WordPress root}"
+if [ ! -f "$WP_PATH/wp-load.php" ]; then
+	printf 'FAIL: WP_PATH must contain wp-load.php: %s\n' "$WP_PATH" >&2
+	exit 1
+fi
+
 WP_CLI_BIN="${WP_CLI_BIN:-/opt/homebrew/bin/wp}"
 WP_CLI_PHP="${WP_CLI_PHP:-$HOME/Library/Application Support/Local/lightning-services/php-8.5.3+1/bin/darwin-arm64/bin/php}"
 SOCKET="${WP_DB_SOCKET:-$HOME/Library/Application Support/Local/run/NPb24Zg9g/mysql/mysqld.sock}"

@@ -286,10 +286,11 @@ After changing a boundary shared by Toolbox, Toolkit, Core, Adapter, or Cloud
 Addon, run the focused local stack acceptance:
 
 ```bash
-composer accept:local-five-plugin
+WP_PATH="/path/to/local/wordpress" composer accept:local-five-plugin
 ```
 
-The command requires an exclusive local development site: do not run it while
+The command requires an explicit `WP_PATH` containing `wp-load.php` and an
+exclusive local development site: do not run it while
 another browser, worker, or acceptance process is mutating the same WordPress
 database. It verifies that all five plugins are active and that each mounted
 plugin directory resolves to the current Toolbox or sibling repository, then
@@ -890,16 +891,19 @@ REST, Adapter, Core proposal intake, or WordPress write paths.
 For the Cloud Addon-owned Site Knowledge change bridge, run:
 
 ```bash
-composer smoke:site-knowledge-cloud-addon-bridge
+WP_PATH="/path/to/local/wordpress" composer smoke:site-knowledge-cloud-addon-bridge
 ```
 
-This is a local WordPress smoke. It temporarily activates Cloud Addon before
-Toolbox, verifies Toolbox reports `owner=cloud_addon`, confirms the Cloud Addon
-public post hook is registered, and confirms the retired Toolbox legacy
-auto-sync cron hook is not registered.
+This is a local WordPress smoke and rejects a missing `WP_PATH` or a root
+without `wp-load.php` before WP-CLI can run. It temporarily activates Cloud Addon
+before Toolbox, verifies Toolbox reports `owner=cloud_addon`, confirms the
+Cloud Addon public post hook is registered, and confirms the retired Toolbox
+legacy auto-sync cron hook is not registered.
 It restores the original plugin activation state.
 It is intentionally outside `composer test:all` because it depends on a local
 WordPress site with both plugins symlinked or installed.
+`composer test:local-wp-cli-target` checks both commands' target handling with
+a fake WP-CLI runner in `composer test:all`; it never touches a real site.
 
 For the bundled local automation runtime Phase 1 skeleton, run:
 

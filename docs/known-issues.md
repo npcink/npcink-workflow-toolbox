@@ -35,7 +35,9 @@ and repeated research stay frozen under the decision's restart rules.
   request-level Cloud evidence; then replay only those two questions once each.
 
 - **Remaining audit maintenance (Toolbox tooling).** The four insight-pack Cloud
-  QA wrappers now require an explicit WordPress root. Other browser smoke
+  QA wrappers, the five-plugin acceptance, and the Site Knowledge Cloud Addon
+  bridge smoke now require an explicit WordPress root. The last two are checked
+  offline before any real WP-CLI use. Other browser smoke
   defaults should be removed in focused groups; validate each group without
   connecting to a live site by default. PHPStan 2.3.7 landed independently in
   [#414](https://github.com/npcink/npcink-workflow-toolbox/pull/414) with the
