@@ -5,19 +5,18 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-25.
+Last reviewed: 2026-11-26.
 
-## Smart Ask follow-up and review corrections — 2026-11-25
+## Smart Ask review closeout — 2026-11-26
 
-The tree is based on `origin/master` through
-[Smart Ask coding standards (#420)](https://github.com/npcink/npcink-workflow-toolbox/commit/d173aa27),
-including article-body FAQ (#415–#417) and the pre-review Smart Ask follow-up
-(#418). Uncommitted review corrections keep Smart Ask and the four insight QA
-bridges at `allow_fallback=false`; a local upload comparison uses
-`action=local_limit` mapped to `answer_basis=upload_limit` (not `site_summary`);
-and unit parsing accepts `18M` / `18MB` / `18 兆` / `18兆字节` plus more than
-three decimal places. This updates the orientation date and scope only. It does
-not expand the feature freeze.
+The Smart Ask corrections merged in [#422](https://github.com/npcink/npcink-workflow-toolbox/pull/422),
+following maintenance [#421](https://github.com/npcink/npcink-workflow-toolbox/pull/421).
+Five routes keep fallback disabled; a local upload comparison is labeled
+`upload_limit`, not `site_summary`; and the three successful turns are a page-local
+UI limit, not a service quota. The maintenance PR requires explicit `WP_PATH` in
+the affected Composer scripts and leaves 48 PHPStan baseline rules. The existing
+feature freeze continues. See the [closeout](smart-ask-audit-closeout-2026-11-26.md)
+for the installed local snapshot, remaining debt, and verification and rollback checklist.
 
 
 **Image/admin session closeout — 2026-11-16:** the
