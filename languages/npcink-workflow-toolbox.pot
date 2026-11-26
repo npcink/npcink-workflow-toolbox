@@ -29,17 +29,17 @@ msgid "Try uploading the same image again in the Media Library. If it fails, not
 msgstr ""
 
 #: includes/Smart_Ask.php
-msgid "WordPress did not report a usable upload limit, so the file size alone does not explain the error."
+msgid "WordPress did not report a usable upload limit, so the file size alone does not explain the error. This is not an environment inspection or a diagnosis of the fault."
 msgstr ""
 
 #: includes/Smart_Ask.php
 #, php-format
-msgid "The image is larger than the %s upload limit WordPress currently reports. Try uploading an image smaller than that limit to see whether the Media Library accepts it."
+msgid "The image is larger than the %s upload limit WordPress currently reports. This is only a comparison with that limit, not an environment inspection or a diagnosis. Try uploading an image smaller than that limit to see whether the Media Library accepts it."
 msgstr ""
 
 #: includes/Smart_Ask.php
 #, php-format
-msgid "The image is within the %s upload limit WordPress currently reports. This limit does not explain the earlier error."
+msgid "The image is within the %s upload limit WordPress currently reports. This is only a comparison with that limit, not an environment inspection or a diagnosis of the fault."
 msgstr ""
 
 msgid "Npcink Workflow Toolbox"
@@ -10384,6 +10384,9 @@ msgstr ""
 msgid "Based on a bounded site summary, not a full-site audit."
 msgstr ""
 
+msgid "Compared with the upload limit WordPress currently reports. This is not an environment summary or a diagnosis."
+msgstr ""
+
 msgid "Based on retrieved public articles; check the references below."
 msgstr ""
 
@@ -10877,4 +10880,7 @@ msgid "This question has reached its limit. Start a new question to continue."
 msgstr ""
 
 msgid "Site information checked again."
+msgstr ""
+
+msgid "The upload limit was read again. This is not a new environment summary."
 msgstr ""

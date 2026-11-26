@@ -266,6 +266,8 @@ environment_performance_rest_assert( empty( $pack['safety']['secrets_returned'] 
 environment_performance_rest_assert( isset( $pack['runtime'], $pack['plugins'], $pack['inventory_signals'], $pack['top_findings'] ), 'Pack includes runtime, plugins, inventory_signals, top_findings.' );
 environment_performance_rest_assert( ! isset( $pack['post_content'] ) && false === strpos( wp_json_encode( $pack ), 'ABSPATH' ), 'Pack JSON omits bodies and ABSPATH token.' );
 environment_performance_rest_assert( isset( $pack['runtime']['php_version'] ) && isset( $pack['runtime']['wordpress_version'] ), 'Runtime exposes php and wordpress versions.' );
+environment_performance_rest_assert( array_key_exists( 'uploads_dir_writable', $pack['runtime'] ) && array_key_exists( 'wp_upload_max_bytes', $pack['runtime'] ), 'Runtime contract exposes directory writability and WordPress upload limit as separate signals.' );
+environment_performance_rest_assert( ! isset( $pack['runtime']['uploads_dir'] ) && ! isset( $pack['runtime']['upload_limit'] ), 'Runtime contract does not replace the named upload signals with paths or ambiguous aliases.' );
 environment_performance_rest_assert( (int) ( $pack['plugins']['active_plugin_count'] ?? 0 ) >= 1, 'Plugin inventory counts active plugins.' );
 
 $response = $bridge->environment_performance_insight_pack( new WP_REST_Request( '/npcink-toolbox/v1/environment-performance/insight-pack', 'GET' ) );

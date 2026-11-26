@@ -918,15 +918,26 @@ local run tables, and no Core proposal creation. It is intentionally outside
 For the optional real admin UI browser check, run:
 
 ```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:site-ops-insights-browser
+WP_PATH="/path/to/local/site/app/public" \
+WP_BASE_URL="https://your-local-site.test" \
+composer smoke:site-ops-insights-browser
 ```
+
+Set `NODE_PATH` if Playwright is supplied by a separate runtime. `WP_PATH` and
+`WP_BASE_URL` must identify the same local installation; the smoke does not
+guess either value. After switching a snapshot, check that the actual admin
+page enqueues the expected asset URL, not just that the canonical static URL
+returns 200. If it still points at the previous slot, refresh that site's PHP
+workers and verify the page again before treating a missing request as a UI bug.
 
 This opens the local Site Check wp-admin panel, generates the local report,
 verifies the summary-first overview and priority decision queue,
-switches the content, media, comments, structure, findings, evidence, Cloud,
-and advanced sub-tabs, and captures a screenshot under `build/smoke/`. It uses
+switches the content, media, comments, structure, findings, evidence,
+and advanced sub-tabs, verifies that the paused Cloud tab stays absent, and
+captures a screenshot under `build/smoke/`. It uses
 a short-lived local login helper so WordPress sets the administrator auth
-cookie in the same Web request context as the browser. It does not click Cloud
+cookie in the same Web request context as the browser, then removes it before
+the remaining assertions. Smart Ask answers are intercepted fixtures. It does not click Cloud
 detail, create Core proposals, call execute routes, store a local run, or
 write WordPress data. It is intentionally outside `composer test:all` because
 it depends on a running local WordPress site, a writable local WordPress root,

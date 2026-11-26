@@ -5,7 +5,26 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-12.
+Last reviewed: 2026-11-26.
+
+## Smart Ask review closeout — 2026-11-26
+
+The Smart Ask corrections merged in [#422](https://github.com/npcink/npcink-workflow-toolbox/pull/422),
+following maintenance [#421](https://github.com/npcink/npcink-workflow-toolbox/pull/421).
+Five routes keep fallback disabled; a local upload comparison is labeled
+`upload_limit`, not `site_summary`; and the three successful turns are a page-local
+UI limit, not a service quota. The maintenance PR requires explicit `WP_PATH` in
+the affected Composer scripts and leaves 48 PHPStan baseline rules. The existing
+feature freeze continues. See the [closeout](smart-ask-audit-closeout-2026-11-26.md)
+for the installed local snapshot, remaining debt, and verification and rollback checklist.
+
+**Follow-up maintenance — 2026-11-26:** the optional Site Check browser smoke now
+requires explicit `WP_PATH` and `WP_BASE_URL`, waits for observable navigation and
+cleans its temporary login helper through failure paths. The environment-pack
+contract names `uploads_dir_writable` and `wp_upload_max_bytes` as separate,
+non-diagnostic signals. The smoke remains fixture-backed and outside the default
+gate; it does not certify Cloud quality or production acceptance.
+
 
 **Image/admin session closeout — 2026-11-16:** the
 [closeout and lessons](processed-image-session-closeout-2026-11-16.md) index the
