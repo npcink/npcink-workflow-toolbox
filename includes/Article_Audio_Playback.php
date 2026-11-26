@@ -93,47 +93,47 @@ final class Article_Audio_Playback {
 			self::META_URL                 => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'esc_url_raw',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_ATTACHMENT_ID       => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_TITLE               => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_KIND                => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_key',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_DURATION_SECONDS    => array(
 				'type'              => 'number',
 				'sanitize_callback' => static fn( $value ): float => max( 0.0, (float) $value ),
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_MIME_TYPE           => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_mime_type',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_SOURCE_HASH         => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_SOURCE_WORD_COUNT   => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 			self::META_SOURCE_GENERATED_AT => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => static fn(): bool => current_user_can( 'edit_posts' ),
+				'auth_callback'     => static fn( $allowed, $meta_key, $object_id ): bool => current_user_can( 'edit_post', (int) $object_id ),
 			),
 		);
 	}

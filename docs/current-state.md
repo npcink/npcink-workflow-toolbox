@@ -5,7 +5,20 @@ start; every deep document below is read on demand, not up front. This page
 records where things are, not the contracts themselves — when this page and
 a canonical contract doc disagree, the contract doc wins.
 
-Last reviewed: 2026-11-12.
+Last reviewed: 2026-11-25.
+
+## Smart Ask follow-up and review corrections — 2026-11-25
+
+The tree is based on `origin/master` through
+[Smart Ask coding standards (#420)](https://github.com/npcink/npcink-workflow-toolbox/commit/d173aa27),
+including article-body FAQ (#415–#417) and the pre-review Smart Ask follow-up
+(#418). Uncommitted review corrections keep Smart Ask and the four insight QA
+bridges at `allow_fallback=false`; a local upload comparison uses
+`action=local_limit` mapped to `answer_basis=upload_limit` (not `site_summary`);
+and unit parsing accepts `18M` / `18MB` / `18 兆` / `18兆字节` plus more than
+three decimal places. This updates the orientation date and scope only. It does
+not expand the feature freeze.
+
 
 **Image/admin session closeout — 2026-11-16:** the
 [closeout and lessons](processed-image-session-closeout-2026-11-16.md) index the

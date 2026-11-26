@@ -5,6 +5,7 @@ Start from the active documents below before changing code.
 
 ## Current Reviews And Proposals
 
+- [Current State](current-state.md) — last reviewed 2026-11-25; includes the Smart Ask follow-up and review-correction scope without expanding the feature freeze.
 - [Editor and Smart Ask text budgets — 2026-11-17](editor-text-budgets-2026-11-17.md) — approved Unicode/input/output limits, end-to-end regressions and candidate evidence.
 - [图片处理与后台收敛：会话收尾 — 2026-11-16](processed-image-session-closeout-2026-11-16.md) — 17 个应用 PR 的合并、任务分支清理、受保护工作区、剩余验收与开发经验。
 - [Legacy backup settings removal — 2026-11-13](legacy-backup-settings-removal-2026-11-13.md) — product decision, disposition ledger and PC evidence.

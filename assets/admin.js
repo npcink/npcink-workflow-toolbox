@@ -8274,6 +8274,7 @@
 							public_content: t('Based on retrieved public articles; check the references below.'),
 							general_guidance: t('General guidance only. This site has not been checked for this answer.'),
 							clarification: t('This site has not been checked for this response.'),
+							upload_limit: t('Compared with the upload limit WordPress currently reports. This is not an environment summary or a diagnosis.'),
 						};
 						basisEl.textContent = labels[body && body.answer_basis] || '';
 						basisEl.hidden = !basisEl.textContent;
@@ -8287,12 +8288,16 @@
 					details = nextDetails;
 					rounds++;
 					addingDetail = false;
-					recheckable = body.answer_basis === 'site_summary';
+					recheckable = body.answer_basis === 'site_summary' || body.answer_basis === 'upload_limit';
 					questionField.value = '';
 					updateControls();
 					const clarify = body.answer_basis === 'clarification';
 					let message = clarify ? t('Please add a little more detail.') : t('Suggestion ready (no WordPress write).');
-					if (recheck && recheckable) message = t('Site information checked again.');
+					if (recheck && recheckable) {
+						message = body.answer_basis === 'upload_limit'
+							? t('The upload limit was read again. This is not a new environment summary.')
+							: t('Site information checked again.');
+					}
 					if (!canContinue()) message = t('This question has reached its limit. Start a new question to continue.');
 					setStatus(message, clarify ? 'is-pending' : 'is-ok');
 				} catch (error) {

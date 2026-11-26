@@ -100,7 +100,7 @@ final class Smart_Ask {
 				'retention_ttl'       => 0,
 				'timeout_seconds'     => 15,
 				'retry_max'           => 0,
-				'policy'              => array( 'allow_fallback' => true ),
+				'policy'              => array( 'allow_fallback' => false ),
 			),
 			'smart_ask_' . wp_generate_uuid4(),
 			'smart_ask_' . wp_generate_uuid4()
@@ -129,15 +129,16 @@ final class Smart_Ask {
 	}
 
 	private static function image_upload_decision( string $question, string $context ): ?array {
-		// Classify only the original question. A follow-up supplies observations, not a new task.
-		if ( ! preg_match( '/图片|图像|照片|媒体库|\b(?:images?|photos?|media library)\b/iu', $question ) ||
-			! preg_match( '/上传.{0,8}(?:不[了动]|失败|报错|超限|超出)|(?:无法|不能|没法)上传|传不上|\bupload\w*\b.{0,30}\b(?:fail\w*|error|too large)\b|\b(?:can[’\']t|cannot|won[’\']t|unable to|failed to)\s+upload\b/iu', $question ) ) {
+		// Upload-failure intent must remain in the original question so a follow-up cannot retarget the task.
+		// Image or media-library wording may appear in the question or in the operator's details.
+		if ( ! preg_match( '/上传.{0,8}(?:不[了动]|失败|报错|超限|超出)|(?:无法|不能|没法)上传|传不上|\bupload\w*\b.{0,30}\b(?:fail\w*|error|too large)\b|\b(?:can[’\']t|cannot|won[’\']t|unable to|failed to)\s+upload\b/iu', $question ) ||
+			! preg_match( '/图片|图像|照片|媒体库|\b(?:images?|photos?|media library)\b/iu', $context ) ) {
 			return null;
 		}
 
 		// Do not mistake a number quoted from the limit notice for the file's own size.
-		$context = preg_replace( '/(?:上限|限制|最大(?:上传)?(?:文件)?大小|\blimit|\bmaximum(?: upload size)?)[\s:：=]*(?:(?:为|是|of|is)\s*)?[0-9]+(?:\.[0-9]+)?\s*[KMG]i?B/iu', '', $context ) ?? $context;
-		preg_match_all( '/(?<![a-z0-9_.,+\-])([0-9]{1,9}(?:\.[0-9]{1,3})?)\s*([KMG])i?B(?![a-z0-9])/iu', $context, $matches, PREG_SET_ORDER );
+		$context = preg_replace( '/(?:上限|限制|最大(?:上传)?(?:文件)?大小|\blimit|\bmaximum(?: upload size)?)[\s:：=]*(?:(?:为|是|of|is)\s*)?[0-9]+(?:\.[0-9]+)?\s*(?:[KMG]i?B?|兆字节|兆)/iu', '', $context ) ?? $context;
+		preg_match_all( '/(?<![a-z0-9_.,+\-])([0-9]{1,9}(?:\.[0-9]+)?)\s*(?:([KMG])i?B?|兆字节|兆)(?![a-z0-9兆字])/iu', $context, $matches, PREG_SET_ORDER );
 		$units = array(
 			'K' => KB_IN_BYTES,
 			'M' => MB_IN_BYTES,
@@ -145,7 +146,8 @@ final class Smart_Ask {
 		);
 		$sizes = array();
 		foreach ( $matches as $match ) {
-			$size = (float) $match[1] * $units[ strtoupper( $match[2] ) ];
+			$unit = ( isset( $match[2] ) && '' !== $match[2] ) ? $units[ strtoupper( $match[2] ) ] : MB_IN_BYTES;
+			$size = (int) round( (float) $match[1] * $unit );
 			if ( $size > 0 ) {
 				$sizes[ (string) $size ] = $size;
 			}
@@ -159,20 +161,20 @@ final class Smart_Ask {
 		}
 
 		// Read the same limit as the WordPress uploader on every answer, including a recheck.
-		$limit = wp_max_upload_size();
+		$limit = (int) wp_max_upload_size();
 		$retry = __( 'Try uploading the same image again in the Media Library. If it fails, note the exact error shown.', 'npcink-workflow-toolbox' );
 		if ( $limit <= 0 ) {
-			$message = __( 'WordPress did not report a usable upload limit, so the file size alone does not explain the error.', 'npcink-workflow-toolbox' ) . "\n\n" . $retry;
+			$message = __( 'WordPress did not report a usable upload limit, so the file size alone does not explain the error. This is not an environment inspection or a diagnosis of the fault.', 'npcink-workflow-toolbox' ) . "\n\n" . $retry;
 		} elseif ( reset( $sizes ) > $limit ) {
 			/* translators: %s: The file upload limit reported by WordPress. */
-			$message = sprintf( __( 'The image is larger than the %s upload limit WordPress currently reports. Try uploading an image smaller than that limit to see whether the Media Library accepts it.', 'npcink-workflow-toolbox' ), size_format( $limit, 2 ) );
+			$message = sprintf( __( 'The image is larger than the %s upload limit WordPress currently reports. This is only a comparison with that limit, not an environment inspection or a diagnosis. Try uploading an image smaller than that limit to see whether the Media Library accepts it.', 'npcink-workflow-toolbox' ), size_format( $limit, 2 ) );
 		} else {
 			/* translators: %s: The file upload limit reported by WordPress. */
-			$message = sprintf( __( 'The image is within the %s upload limit WordPress currently reports. This limit does not explain the earlier error.', 'npcink-workflow-toolbox' ), size_format( $limit, 2 ) ) . "\n\n" . $retry;
+			$message = sprintf( __( 'The image is within the %s upload limit WordPress currently reports. This is only a comparison with that limit, not an environment inspection or a diagnosis of the fault.', 'npcink-workflow-toolbox' ), size_format( $limit, 2 ) ) . "\n\n" . $retry;
 		}
 
 		return array(
-			'action'  => 'local_summary',
+			'action'  => 'local_limit',
 			'message' => $message,
 			'run_id'  => '',
 		);

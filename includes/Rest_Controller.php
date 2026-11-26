@@ -405,15 +405,24 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	/** One decision and at most one existing read-only answer; no Toolbox replay or writes. */
 	public function smart_ask( WP_REST_Request $request ) {
-		$decision = Smart_Ask::resolve( $request->get_json_params() );
+		// Keep the JSON key set and explicit nulls so the resolver can reject invalid input.
+		$input = $request->get_json_params();
+		if ( is_array( $input ) ) {
+			foreach ( array( 'question', 'source_hint', 'details', 'recheck' ) as $key ) {
+				if ( isset( $input[ $key ] ) ) {
+					$input[ $key ] = $request->get_param( $key );
+				}
+			}
+		}
+		$decision = Smart_Ask::resolve( $input );
 		if ( is_wp_error( $decision ) ) {
 			return $decision;
 		}
 		if ( 'route' !== $decision['action'] ) {
 			$basis  = array(
-				'clarify'       => 'clarification',
-				'local_summary' => 'site_summary',
-				'guidance'      => 'general_guidance',
+				'clarify'     => 'clarification',
+				'local_limit' => 'upload_limit',
+				'guidance'    => 'general_guidance',
 			);
 			$result = array(
 				'ok'           => true,
