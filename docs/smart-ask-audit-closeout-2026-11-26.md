@@ -1,8 +1,9 @@
 # Smart Ask audit closeout: 2026-11-26
 
-Status: the review corrections are merged and verified on a local WordPress
-installation. This is a dated closeout, not a production release, a Cloud
-compatibility receipt, or an amendment to the [active freeze](development-freeze-2026-11-09.md).
+Status: the review corrections and the follow-up in [#431](https://github.com/npcink/npcink-workflow-toolbox/pull/431)
+are merged. The installed, fixture-backed verification passed; live API
+acceptance remains open. This is a dated closeout, not a production release,
+a Cloud compatibility receipt, or an amendment to the [active freeze](development-freeze-2026-11-09.md).
 The [Smart Ask contract](admin-operator-focus-2026-11-10.md) and
 [de-identification boundary](deidentified-assistant-boundary-v1.md) remain authoritative.
 
@@ -13,7 +14,7 @@ The [Smart Ask contract](admin-operator-focus-2026-11-10.md) and
 | F1, F12: upload diagnosis and units | A local comparison is labeled `upload_limit`. It reads the current WordPress limit, not the environment pack; supported short, Chinese and decimal units are covered by behavior tests. Within-limit or unknown values are not diagnoses. |
 | F2, F3: fallback and attempts | Fallback is off for the selector and all four summary requests. Three successful turns are a single-question UI limit on the current page, not REST rate limiting or a billing guarantee. |
 | F4, F6, F9: test evidence | The README distinguishes static contracts from behavior. Site Check asserts the finding if its scan reports a positive internal-link issue count and requires its absence at zero. PO text and static contracts do not prove runtime behavior. |
-| F5, F13, F15: toolchain | The affected Composer commands require `WP_PATH`; the Site Check browser smoke also requires an explicit site URL. Other machine-specific defaults are outside this change. PHPCompatibility stays at `9.3.5` rather than moving to prereleases, and is not a substitute for a target-version runtime check. PHPStan has **48** baseline rules; contract-pinned methods are retained. |
+| F5, F13, F15: toolchain | The affected Composer commands require `WP_PATH`; the Site Check browser smoke also requires an explicit site URL. Other machine-specific defaults are outside this change. PHPCompatibility stays at `9.3.5` rather than moving to prereleases, and is not a substitute for a target-version runtime check. PHPStan has **46** baseline rules; contract-pinned methods are retained. |
 | F7, F8: pack contract and privacy | The environment contract documents `wp_upload_max_bytes` and `uploads_dir_writable` as separate inventory signals, neither of which proves a particular upload failure. The four compact outbound packs omit `site_id`; local packs and signed transport identity are unchanged. |
 | F10: orientation | The published contracts are indexed and the stale uncommitted-work note is replaced by the merged state. No new task or freeze exception is created. |
 | F11, F14: REST and audio authorization | Smart Ask reads dispatched values only for fields present in the JSON body and preserves rejection of unknown keys, explicit nulls and invalid aggregate lengths. The resolver remains the aggregate budget authority; other routes were not migrated. Audio meta checks `edit_post` for the specific object. |
@@ -44,6 +45,41 @@ REST parameters, so query values cannot supply an omitted body field.
   smoke passed against the active local snapshot, including the upload limit
   recheck and Site Check. It used fixture answers, not live Cloud; no business-
   content writes or public release were performed.
+
+### Live API acceptance follow-up
+
+[#431](https://github.com/npcink/npcink-workflow-toolbox/pull/431) merged at
+`05557ed308bea4c476d8823aac7d39b584aa050e` with the same tree as reviewed head
+`3555369a7fb1fbd5007f5a346061a0ff3b34b733`. A named-article answer now rejects
+missing or mixed-source references; same-article fragments can pass. This is
+not claim-by-claim verification. The structure and page-quality answers now
+show independently counted published posts and pages separately from the
+filtered sampling population. Category aggregates are not sample estimates.
+
+The local snapshot was switched to the full merge tree (585 Git blobs), with
+the prior slot retained. After reloading only the site's PHP workers, the
+actual admin page enqueued the canonical plugin `admin.js` URL; its HTTP bytes
+matched the new snapshot. The fixture-backed Site Ops browser smoke passed,
+and its temporary login helper was removed. No business content was changed.
+
+In the first live baseline, two questions incurred four observed external text
+calls and one local embedding. They exposed the mixed-article attribution and
+the ambiguous posts-plus-pages wording. After installing #431, the category
+question hit a stale REST nonce on an existing admin page; after reload, one
+manual submission reached the Smart Ask flow but returned a generic failure
+without an answer or a Cloud `run_id`. The Addon snapshot was
+`aed35299d8ebfc1da400d080f20e77a803407cfc`. Read-only checks of its configured
+M4 endpoint returned TCP resets and the SSH forward reported connection refusal
+from the remote target. The article question was not sent, and no model call is
+confirmed for the failed category attempt. No Cloud receipt was available to
+verify its provider count or billing. No shared runtime or route was changed.
+
+**Resume condition:** the M4 runtime owner restores the approved endpoint.
+Before either replay, Toolbox/Cloud verify runtime revision, exact route and
+model, conservative remaining budget and the ability to reconcile runs. Then
+submit only the two original questions once each, stopping on failure. Verify
+the displayed counts and exact article support independently of transport
+success. See the [acceptance checklist](known-issues.md#smart-ask-third-party-api-acceptance-checklist).
 
 ## Local snapshot and cleanup checklist
 
