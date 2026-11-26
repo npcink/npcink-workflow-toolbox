@@ -2377,6 +2377,7 @@ $cloud_bridge_ids    = array();
 $site_answer_source = (string) file_get_contents( $root . '/includes/Site_Content_Answer.php' );
 toolbox_assert( false !== strpos( $abilities, "'context_requirements' => array( 'site_knowledge_evidence' )" ) && false !== strpos( $rest, '$ability->execute( $request->get_json_params() )' ), 'Site content answers execute the registered evidence-required ability.' );
 toolbox_assert( false !== strpos( $site_answer_source, "current_user_can( 'manage_options' )" ) && false !== strpos( $site_answer_source, "array_diff( array_keys( \$input ), array( 'question' ) )" ), 'Site content answers retain administrator permission and reject input overrides.' );
+toolbox_assert( false !== strpos( $site_answer_source, "'diagnostic_code' => 'named_source_mismatch'" ), 'The site content answer contract exposes a distinct named-source diagnostic.' );
 toolbox_assert( false !== strpos( $admin_js, 'answerEl.textContent = answer' ) && false !== strpos( $admin_js, 'url.origin === window.location.origin' ) && false !== strpos( $admin_js, 'quote.textContent' ), 'Site content answers render inert answer and quotes with same-origin source links.' );
 $cloud_bridge_source = $site_answer_source . $client . $rest . $abilities . $auto_sync . $architecture_doc . $boundary_doc . $connector_exposure_doc . file_get_contents( $root . '/includes/Editor_Content_Format.php' );
 foreach ( $cloud_bridge_rows as $cloud_bridge_row ) {

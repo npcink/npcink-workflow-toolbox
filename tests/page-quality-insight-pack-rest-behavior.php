@@ -370,8 +370,8 @@ page_quality_rest_assert( 0.45 === $sampling['weighted_rates']['missing_meta_des
 page_quality_rest_assert( false !== strpos( (string) $sampling['rate_basis'], 'weighted' ) && 'publish_date_thirds_systematic' === $sampling['method'], 'Rate basis is labeled.' );
 $sampling_json = (string) json_encode( $sampling );
 page_quality_rest_assert( false === strpos( $sampling_json, 'post_content' ) && false === strpos( $sampling_json, '"ids"' ), 'Sampling metadata carries no bodies or raw ID lists.' );
-page_quality_rest_assert( '按发布时间分三批共抽查 60 篇（本次范围内已发布 2000 篇），结论仅供参考。' === $guidance_cls::stratified_sample_note( 3, 60, 2000 ), 'Stratified caveat is plain Chinese without field names.' );
-page_quality_rest_assert( '' === $guidance_cls::stratified_sample_note( 3, 20, 20 ), 'Full coverage adds no caveat.' );
+page_quality_rest_assert( 'WordPress 统计：已发布 0 篇文章、3 个页面。本次检查覆盖抽样范围内全部 2 条内容。' === $guidance_cls::stratified_sample_note( 0, 3, array( 'total_published' => 2, 'total_sampled' => 2 ) ), 'Full coverage applies only to the filtered population.' );
+page_quality_rest_assert( 'WordPress 统计：已发布 4 篇文章、1 个页面。本次没有可用的抽样内容。' === $guidance_cls::stratified_sample_note( 4, 1, array() ), 'An empty sample makes no coverage claim.' );
 page_quality_rest_assert( is_array( $pack['sampling'] ?? null ) && isset( $pack['sampling']['strata'] ), 'Pack exposes sampling metadata.' );
 page_quality_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
 page_quality_rest_assert( false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), "：\n只抽查了 1 篇。" ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), '「只抽查' ), 'Caveat is a plain standalone line, not wrapped in quotes.' );
@@ -458,5 +458,7 @@ unset( $GLOBALS['page_quality_filters'] );
 
 require_once __DIR__ . '/fixtures/insight-question-budget.php';
 assert_insight_question_budget( array( $bridge, 'page_quality_insight_pack_qa' ), 'page_quality_rest_assert' );
+$GLOBALS['page_quality_query_ids'] = array( 11, 12 );
+assert_insight_scope_note( array( $bridge, 'page_quality_insight_pack_qa' ), 'page_quality_rest_assert' );
 
 echo "All page-quality insight pack REST behavior checks passed.\n";

@@ -41,6 +41,15 @@ schema, contract, verification status and reference membership; its bounded
 projection returns at most six source identities, titles, URLs and completeness
 values, without the whole retrieved passages.
 
+When a question names one article with a single `《…》` title, every citation
+must match the normalized title and the same nonempty source URL. Multiple
+fragments from that article are allowed. If the article only supports part of
+the answer, cite that part and say what the evidence does not establish.
+Mismatched titles or conflicting cited URLs fail with HTTP 422 and
+`named_source_mismatch`; the run ID is retained and no second request is sent.
+This checks the cited sources, not uncited same-title articles in the index.
+General and multiple-title questions retain the existing multi-source behavior.
+
 The answer and quotes render as text. Only same-origin HTTP(S) source URLs are
 clickable, with `noopener noreferrer`. A partial/unknown delivery warning stays
 visible. “Delivered in full” describes the cited document delivery, not all-site

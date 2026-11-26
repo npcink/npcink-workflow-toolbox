@@ -83,7 +83,7 @@
 - 默认上限 **60**（filterable，夹在约 6–120）
 - 按**发布日期**分约 **三层**（旧 / 中 / 新），层内均匀抽，层间交错，避免只抽最新
 - 仅 `post` + `page`、`publish`
-- 首行 caveat 复用 `Insight_Pack_Answer_Guidance::stratified_sample_note()`（「按发布时间分三批共抽查 N 篇…」）
+- Toolbox 用 `Insight_Pack_Answer_Guidance::stratified_sample_note()` 在回答上方分别列出 WordPress 的文章和页面发布总数、实际抽查数与过滤后的抽样范围。样本指标仅代表抽样范围；分类数量是独立汇总。
 - 不按「流量」加权（站点无可靠流量真相，也禁止假装有）
 
 与 `site_ops` 的差异：本包**更偏单页可读性/基础完备度**；不做评论信号、不做媒体库附件普查（除非后续合同显式加入「文内图 alt」计数——已在 §4.1 可选）。

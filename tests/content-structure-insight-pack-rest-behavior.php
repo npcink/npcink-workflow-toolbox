@@ -368,8 +368,8 @@ content_structure_rest_assert( 0.45 === $sampling['weighted_rates']['missing_met
 content_structure_rest_assert( false !== strpos( (string) $sampling['rate_basis'], 'weighted' ) && 'publish_date_thirds_systematic' === $sampling['method'], 'Rate basis is labeled.' );
 $sampling_json = (string) json_encode( $sampling );
 content_structure_rest_assert( false === strpos( $sampling_json, 'post_content' ) && false === strpos( $sampling_json, '"ids"' ), 'Sampling metadata carries no bodies or raw ID lists.' );
-content_structure_rest_assert( '按发布时间分三批共抽查 60 篇（本次范围内已发布 2000 篇），结论仅供参考。' === $guidance_cls::stratified_sample_note( 3, 60, 2000 ), 'Stratified caveat is plain Chinese without field names.' );
-content_structure_rest_assert( '' === $guidance_cls::stratified_sample_note( 3, 20, 20 ), 'Full coverage adds no caveat.' );
+content_structure_rest_assert( 'WordPress 统计：已发布 1965 篇文章、33 个页面。本次从抽样范围的 1000 条内容中按发布时间分 2 批抽查 3 条；抽样指标仅供参考。' === $guidance_cls::stratified_sample_note( 1965, 33, $sampling ), 'Separates published types, sampled population and nonempty batches.' );
+content_structure_rest_assert( 'WordPress 统计：已发布 20 篇文章、0 个页面。本次从抽样范围的 10 条内容中抽查 1 条；抽样指标仅供参考。' === $guidance_cls::stratified_sample_note( 20, 0, array( 'total_published' => 10, 'total_sampled' => 1 ) ), 'A small single-batch sample is not described as stratified or site-wide.' );
 content_structure_rest_assert( is_array( $pack['sampling'] ?? null ) && isset( $pack['sampling']['strata'] ), 'Pack exposes sampling metadata.' );
 content_structure_rest_assert( 0 === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '站长的问题：Q' ) && false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '第一行要写的话' ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇' ), '抽样提示' ), 'User message carries the sample caveat ahead of the pack JSON without an echo-able label.' );
 content_structure_rest_assert( false !== strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), "：\n只抽查了 1 篇。" ) && false === strpos( $guidance_cls::user_message( 'Q', 'x', '{}', '只抽查了 1 篇。' ), '「只抽查' ), 'Caveat is a plain standalone line, not wrapped in quotes.' );
@@ -426,5 +426,7 @@ unset( $GLOBALS['content_structure_filters'] );
 
 require_once __DIR__ . '/fixtures/insight-question-budget.php';
 assert_insight_question_budget( array( $bridge, 'content_structure_insight_pack_qa' ), 'content_structure_rest_assert' );
+$GLOBALS['content_structure_query_ids'] = array( 11, 12 );
+assert_insight_scope_note( array( $bridge, 'content_structure_insight_pack_qa' ), 'content_structure_rest_assert' );
 
 echo "All content-structure insight pack REST behavior checks passed.\n";

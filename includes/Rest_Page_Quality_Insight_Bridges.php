@@ -120,11 +120,11 @@ final class Rest_Page_Quality_Insight_Bridges {
 		$summary      = is_array( $compact['summary'] ?? null ) ? $compact['summary'] : array();
 		$sampling     = is_array( $compact['sampling'] ?? null ) ? $compact['sampling'] : array();
 		$sample_note  = Insight_Pack_Answer_Guidance::stratified_sample_note(
-			(int) ( $sampling['strata_count'] ?? 1 ),
-			(int) ( $summary['sample_size'] ?? 0 ),
-			(int) ( $summary['published_posts'] ?? 0 ) + (int) ( $summary['published_pages'] ?? 0 )
+			(int) ( $summary['published_posts'] ?? 0 ),
+			(int) ( $summary['published_pages'] ?? 0 ),
+			$sampling
 		);
-		$user_content = Insight_Pack_Answer_Guidance::user_message( $question, 'page_quality insight pack', $pack_json, $sample_note );
+		$user_content = Insight_Pack_Answer_Guidance::user_message( $question, 'page_quality insight pack', $pack_json, '' );
 
 		// Cloud RuntimePayload: extra=forbid. Do NOT forward Addon-local-only extras.
 		$runtime_payload = array(
@@ -234,7 +234,7 @@ final class Rest_Page_Quality_Insight_Bridges {
 				'idempotency_key' => $idempotency_key,
 				'elapsed_ms'      => $elapsed_ms,
 				'question'        => $question,
-				'answer'          => $answer,
+				'answer'          => '' === $answer ? '' : $sample_note . "\n\n" . $answer,
 			)
 		);
 	}

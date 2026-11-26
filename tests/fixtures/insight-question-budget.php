@@ -51,3 +51,13 @@ function assert_insight_question_budget( callable $handle, callable $assert ): v
 		$assert( 1 === count( Npcink_Cloud_Runtime_Client_Factory::$requests ), 'The oversized question never reaches the Cloud client.' );
 	}
 }
+
+function assert_insight_scope_note( callable $handle, callable $assert ): void {
+	Npcink_Cloud_Runtime_Client_Factory::$requests = array();
+	$request = new WP_REST_Request();
+	$request->set_param( 'question', '分类分布与抽样范围？' );
+	$response = $handle( $request );
+	$assert( $response instanceof WP_REST_Response && 'WordPress 统计：已发布 4 篇文章、1 个页面。本次从抽样范围的 2 条内容中抽查 1 条；抽样指标仅供参考。' . "\n\nFixture answer" === $response->get_data()['answer'], 'Bridge supplies the correct scope even when the model returns none.' );
+	$messages = Npcink_Cloud_Runtime_Client_Factory::$requests[0]['input']['messages'];
+	$assert( ! str_contains( $messages[1]['content'], '第一行要写的话' ) && str_contains( $messages[0]['content'], '分类计数来自独立汇总' ), 'Cloud is not asked to reproduce authoritative numeric scope or treat taxonomy counts as sample counts.' );
+}

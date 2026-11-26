@@ -10070,6 +10070,10 @@ msgstr ""
 msgid "The answer did not include verified source references. Please try again."
 msgstr ""
 
+#: includes/Cloud_Error_Plain_Messages.php
+msgid "There was not enough verified evidence from the article you named. Check its title or read the original article."
+msgstr ""
+
 #: includes/Site_Content_Answer.php
 msgid "The site-answer ability is unavailable."
 msgstr ""

@@ -270,6 +270,10 @@ namespace {
 	reset_case(); $GLOBALS['answer_error']=new WP_Error('upstream_failed','secret body',array('status'=>503,'run_id'=>'run_failed_answer','private'=>'secret'));
 	$error=$controller->smart_ask($request);
 	check( is_wp_error($error) && $error->get_error_data()['run_id']==='run_failed_answer' && !isset($error->get_error_data()['private']) && count($GLOBALS['dispatch'])===1, 'Selected-source failure is final and bounded.' );
+	reset_case( 'route', 'site_content' );
+	$GLOBALS['answer_error'] = new WP_Error( 'npcink_toolbox_site_answer_source_mismatch', 'raw fixture detail', array( 'status' => 422, 'run_id' => 'run_named_source' ) );
+	$error = $controller->smart_ask( $request );
+	check( is_wp_error( $error ) && str_contains( $error->get_error_message(), 'article you named' ) && 422 === $error->get_error_data()['status'] && 'run_named_source' === $error->get_error_data()['run_id'] && 1 === count( $GLOBALS['dispatch'] ), 'Smart Ask surfaces the named-source evidence failure without retry or raw detail.' );
 	reset_case(); $GLOBALS['answer_error']=new WP_Error('qa_cloud_failed','secret body',array('status'=>502,'error_data'=>array('cloud_error_data'=>array('run_id'=>'run_nested','input'=>'secret'))));
 	$error=$controller->smart_ask($request);
 	check( $error->get_error_data()['run_id']==='run_nested' && strpos(json_encode($error->get_error_data()),'secret')===false, 'Nested bridge errors retain the final Cloud run without retaining raw error data.' );

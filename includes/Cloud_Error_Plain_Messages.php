@@ -32,6 +32,7 @@ final class Cloud_Error_Plain_Messages {
 	public const KEY_SITE_INACTIVE       = 'plain_site_inactive';
 	public const KEY_RATE_LIMITED        = 'plain_rate_limited';
 	public const KEY_SERVICE_UNAVAILABLE = 'plain_service_unavailable';
+	public const KEY_NAMED_SOURCE        = 'named_source_mismatch';
 	public const KEY_FAILED              = 'runtime_failed';
 
 	/**
@@ -60,6 +61,8 @@ final class Cloud_Error_Plain_Messages {
 				return __( 'Too many AI requests right now. Wait a minute, then try again.', 'npcink-workflow-toolbox' );
 			case self::KEY_SERVICE_UNAVAILABLE:
 				return __( 'Npcink Cloud is temporarily unavailable. Try again in a few minutes.', 'npcink-workflow-toolbox' );
+			case self::KEY_NAMED_SOURCE:
+				return __( 'There was not enough verified evidence from the article you named. Check its title or read the original article.', 'npcink-workflow-toolbox' );
 		}
 		return __( 'The AI request did not succeed. Try again later; if it keeps failing, share any run ID shown in Details for support.', 'npcink-workflow-toolbox' );
 	}
@@ -72,6 +75,9 @@ final class Cloud_Error_Plain_Messages {
 	 * @param int    $status     HTTP status, if known.
 	 */
 	public static function classify( string $code, string $diagnostic = '', int $status = 0 ): string {
+		if ( 'npcink_toolbox_site_answer_source_mismatch' === $code ) {
+			return self::KEY_NAMED_SOURCE;
+		}
 		$haystack = strtolower( $code . ' ' . $diagnostic );
 		if ( false !== strpos( $haystack, 'concurrency' ) || false !== strpos( $haystack, 'max_active' ) ) {
 			return self::KEY_BUSY;
