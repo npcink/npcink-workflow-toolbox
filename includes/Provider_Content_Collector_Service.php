@@ -33,7 +33,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			return array();
 		}
 
-		$content = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
+		$content = wp_strip_all_tags( (string) ( self::object_property( $post, 'post_content', '' ) ) );
 		$terms   = array();
 		if ( function_exists( 'get_the_terms' ) ) {
 			foreach ( array( 'category', 'post_tag' ) as $taxonomy ) {
@@ -42,7 +42,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 					continue;
 				}
 				foreach ( $items as $term ) {
-					$terms[] = sanitize_text_field( (string) ( $term->name ?? '' ) );
+					$terms[] = sanitize_text_field( (string) ( self::object_property( $term, 'name', '' ) ) );
 				}
 			}
 		}
@@ -51,16 +51,16 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 
 		return array(
 			'post_id'             => $post_id,
-			'post_type'           => function_exists( 'get_post_type' ) ? sanitize_key( (string) get_post_type( $post_id ) ) : sanitize_key( (string) ( $post->post_type ?? '' ) ),
-			'post_status'         => function_exists( 'get_post_status' ) ? sanitize_key( (string) get_post_status( $post_id ) ) : sanitize_key( (string) ( $post->post_status ?? '' ) ),
-			'title'               => function_exists( 'get_the_title' ) ? sanitize_text_field( (string) get_the_title( $post_id ) ) : sanitize_text_field( (string) ( $post->post_title ?? '' ) ),
+			'post_type'           => function_exists( 'get_post_type' ) ? sanitize_key( (string) get_post_type( $post_id ) ) : sanitize_key( (string) ( self::object_property( $post, 'post_type', '' ) ) ),
+			'post_status'         => function_exists( 'get_post_status' ) ? sanitize_key( (string) get_post_status( $post_id ) ) : sanitize_key( (string) ( self::object_property( $post, 'post_status', '' ) ) ),
+			'title'               => function_exists( 'get_the_title' ) ? sanitize_text_field( (string) get_the_title( $post_id ) ) : sanitize_text_field( (string) ( self::object_property( $post, 'post_title', '' ) ) ),
 			'url'                 => function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post_id ) ) : '',
 			'excerpt'             => function_exists( 'get_the_excerpt' ) ? sanitize_textarea_field( (string) wp_strip_all_tags( get_the_excerpt( $post ) ) ) : '',
 			'content_excerpt'     => sanitize_textarea_field( wp_trim_words( $content, 180, '' ) ),
 			'terms'               => array_values( array_filter( array_unique( $terms ) ) ),
 			'featured_image_id'   => $thumbnail_id,
 			'featured_image_alt'  => $thumbnail_id && function_exists( 'get_post_meta' ) ? sanitize_text_field( (string) get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true ) ) : '',
-			'modified_gmt'        => sanitize_text_field( (string) ( $post->post_modified_gmt ?? '' ) ),
+			'modified_gmt'        => sanitize_text_field( (string) ( self::object_property( $post, 'post_modified_gmt', '' ) ) ),
 			'operator_reviewable' => true,
 		);
 	}
@@ -80,7 +80,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 				if ( ! is_object( $post ) ) {
 					continue;
 				}
-				$post_id = absint( $post->ID ?? 0 );
+				$post_id = absint( self::object_property( $post, 'ID', 0 ) );
 				if ( 0 >= $post_id ) {
 					continue;
 				}
@@ -93,18 +93,18 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 					continue;
 				}
 
-				$content                 = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
+				$content                 = wp_strip_all_tags( (string) ( self::object_property( $post, 'post_content', '' ) ) );
 				$excerpt                 = function_exists( 'get_the_excerpt' ) ? wp_strip_all_tags( (string) get_the_excerpt( $post ) ) : '';
 				$items_by_id[ $post_id ] = array(
 					'post_id'            => $post_id,
-					'post_type'          => function_exists( 'get_post_type' ) ? sanitize_key( (string) get_post_type( $post_id ) ) : sanitize_key( (string) ( $post->post_type ?? '' ) ),
-					'title'              => function_exists( 'get_the_title' ) ? sanitize_text_field( (string) get_the_title( $post_id ) ) : sanitize_text_field( (string) ( $post->post_title ?? '' ) ),
+					'post_type'          => function_exists( 'get_post_type' ) ? sanitize_key( (string) get_post_type( $post_id ) ) : sanitize_key( (string) ( self::object_property( $post, 'post_type', '' ) ) ),
+					'title'              => function_exists( 'get_the_title' ) ? sanitize_text_field( (string) get_the_title( $post_id ) ) : sanitize_text_field( (string) ( self::object_property( $post, 'post_title', '' ) ) ),
 					'url'                => function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post_id ) ) : '',
 					'excerpt'            => sanitize_textarea_field( (string) $excerpt ),
 					'content_excerpt'    => sanitize_textarea_field( wp_trim_words( $content, 90, '' ) ),
 					'word_count_approx'  => str_word_count( wp_strip_all_tags( $content ) ),
-					'modified_gmt'       => sanitize_text_field( (string) ( $post->post_modified_gmt ?? '' ) ),
-					'published_gmt'      => sanitize_text_field( (string) ( $post->post_date_gmt ?? '' ) ),
+					'modified_gmt'       => sanitize_text_field( (string) ( self::object_property( $post, 'post_modified_gmt', '' ) ) ),
+					'published_gmt'      => sanitize_text_field( (string) ( self::object_property( $post, 'post_date_gmt', '' ) ) ),
 					'has_featured_image' => function_exists( 'has_post_thumbnail' ) ? (bool) has_post_thumbnail( $post_id ) : false,
 					'sample_groups'      => array( $sample_group ),
 					'sample_reasons'     => array( $sample_reason ),
@@ -154,7 +154,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 								)
 							),
 							static function ( $post ): bool {
-								$post_id = is_object( $post ) ? absint( $post->ID ?? 0 ) : 0;
+								$post_id = is_object( $post ) ? absint( self::object_property( $post, 'ID', 0 ) ) : 0;
 								return 0 < $post_id && ! has_post_thumbnail( $post_id );
 							}
 						)
@@ -208,9 +208,9 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			if ( ! is_wp_error( $term_items ) && is_array( $term_items ) ) {
 				foreach ( $term_items as $term ) {
 					$terms[] = array(
-						'name'     => sanitize_text_field( (string) ( $term->name ?? '' ) ),
-						'taxonomy' => sanitize_key( (string) ( $term->taxonomy ?? '' ) ),
-						'count'    => absint( $term->count ?? 0 ),
+						'name'     => sanitize_text_field( (string) ( self::object_property( $term, 'name', '' ) ) ),
+						'taxonomy' => sanitize_key( (string) ( self::object_property( $term, 'taxonomy', '' ) ) ),
+						'count'    => absint( self::object_property( $term, 'count', 0 ) ),
 					);
 				}
 			}
@@ -254,7 +254,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			}
 		}
 
-		$content = $post ? (string) ( $post->post_content ?? '' ) : '';
+		$content = $post ? (string) ( self::object_property( $post, 'post_content', '' ) ) : '';
 		foreach ( $this->client->hosted_ai_content_image_attachment_ids( $content ) as $attachment_id ) {
 			if ( in_array( $attachment_id, $seen, true ) ) {
 				continue;
@@ -289,8 +289,8 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			'media_filter'      => 'missing_or_weak_alt',
 			'post_context'      => array(
 				'post_id' => $post_id,
-				'title'   => $post ? sanitize_text_field( (string) ( $post->post_title ?? '' ) ) : '',
-				'status'  => $post ? sanitize_key( (string) ( $post->post_status ?? '' ) ) : '',
+				'title'   => $post ? sanitize_text_field( (string) ( self::object_property( $post, 'post_title', '' ) ) ) : '',
+				'status'  => $post ? sanitize_key( (string) ( self::object_property( $post, 'post_status', '' ) ) ) : '',
 			),
 		);
 	}
@@ -318,7 +318,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			if ( ! is_object( $attachment ) ) {
 				continue;
 			}
-			$attachment_id = absint( $attachment->ID ?? 0 );
+			$attachment_id = absint( self::object_property( $attachment, 'ID', 0 ) );
 			if ( 0 >= $attachment_id ) {
 				continue;
 			}
@@ -437,13 +437,13 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 				continue;
 			}
 
-			$post_id = absint( $post->ID ?? 0 );
+			$post_id = absint( self::object_property( $post, 'ID', 0 ) );
 			if ( 0 >= $post_id ) {
 				continue;
 			}
 
 			$indexed_post_ids[] = $post_id;
-			$content            = wp_strip_all_tags( (string) ( $post->post_content ?? '' ) );
+			$content            = wp_strip_all_tags( (string) ( self::object_property( $post, 'post_content', '' ) ) );
 			$excerpt            = function_exists( 'get_the_excerpt' ) ? wp_strip_all_tags( get_the_excerpt( $post ) ) : '';
 			$document           = array(
 				'post_id'         => $post_id,
@@ -451,7 +451,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 				'post_status'     => function_exists( 'get_post_status' ) ? sanitize_key( (string) get_post_status( $post ) ) : 'publish',
 				'title'           => function_exists( 'get_the_title' ) ? sanitize_text_field( (string) get_the_title( $post ) ) : '',
 				'url'             => function_exists( 'get_permalink' ) ? esc_url_raw( (string) get_permalink( $post ) ) : '',
-				'modified_gmt'    => sanitize_text_field( (string) ( $post->post_modified_gmt ?? '' ) ),
+				'modified_gmt'    => sanitize_text_field( (string) ( self::object_property( $post, 'post_modified_gmt', '' ) ) ),
 				'excerpt'         => sanitize_textarea_field( (string) $excerpt ),
 				'content_excerpt' => $this->trim_site_knowledge_content( $content ),
 				'content_hash'    => md5( $content ),
@@ -553,13 +553,13 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 				continue;
 			}
 
-			$comment_id = absint( $comment->comment_ID ?? 0 );
-			$post_id    = absint( $comment->comment_post_ID ?? 0 );
+			$comment_id = absint( self::object_property( $comment, 'comment_ID', 0 ) );
+			$post_id    = absint( self::object_property( $comment, 'comment_post_ID', 0 ) );
 			if ( 0 >= $comment_id || 0 >= $post_id || ! in_array( $post_id, $post_ids, true ) ) {
 				continue;
 			}
 
-			$content = wp_strip_all_tags( (string) ( $comment->comment_content ?? '' ) );
+			$content = wp_strip_all_tags( (string) ( self::object_property( $comment, 'comment_content', '' ) ) );
 			if ( '' === trim( $content ) ) {
 				continue;
 			}
@@ -568,7 +568,7 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 				'comment_id'      => $comment_id,
 				'post_id'         => $post_id,
 				'comment_status'  => 'approve',
-				'created_gmt'     => sanitize_text_field( (string) ( $comment->comment_date_gmt ?? '' ) ),
+				'created_gmt'     => sanitize_text_field( (string) ( self::object_property( $comment, 'comment_date_gmt', '' ) ) ),
 				'url'             => function_exists( 'get_comment_link' ) ? esc_url_raw( (string) get_comment_link( $comment ) ) : '',
 				'content_excerpt' => wp_trim_words( $content, 280, '' ),
 				'content_hash'    => md5( $content ),
@@ -609,19 +609,19 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 			if ( ! is_object( $comment ) ) {
 				continue;
 			}
-			$comment_id = absint( $comment->comment_ID ?? 0 );
+			$comment_id = absint( self::object_property( $comment, 'comment_ID', 0 ) );
 			if ( 0 >= $comment_id ) {
 				continue;
 			}
 
-			$post_id    = absint( $comment->comment_post_ID ?? 0 );
+			$post_id    = absint( self::object_property( $comment, 'comment_post_ID', 0 ) );
 			$post_title = '';
 			if ( $post_id && function_exists( 'get_post_status' ) && 'publish' === (string) get_post_status( $post_id ) && function_exists( 'get_the_title' ) ) {
 				// Explicit character bound: wp_trim_words switches to character mode on character-count locales and would truncate mid-word.
 				$post_title = sanitize_text_field( (string) get_the_title( $post_id ) );
 				$post_title = function_exists( 'mb_substr' ) ? mb_substr( $post_title, 0, 80 ) : substr( $post_title, 0, 80 );
 			}
-			$content = (string) ( $comment->comment_content ?? '' );
+			$content = (string) ( self::object_property( $comment, 'comment_content', '' ) );
 			if ( function_exists( 'mb_substr' ) ) {
 				$content = mb_substr( $content, 0, 2000 );
 			} else {
@@ -632,10 +632,10 @@ final class Provider_Content_Collector_Service extends Provider_Client_Support {
 				'comment_id'  => $comment_id,
 				'post_id'     => $post_id,
 				'post_title'  => $post_title,
-				'author_name' => sanitize_text_field( (string) ( $comment->comment_author ?? '' ) ),
-				'author_url'  => esc_url_raw( (string) ( $comment->comment_author_url ?? '' ) ),
+				'author_name' => sanitize_text_field( (string) ( self::object_property( $comment, 'comment_author', '' ) ) ),
+				'author_url'  => esc_url_raw( (string) ( self::object_property( $comment, 'comment_author_url', '' ) ) ),
 				'content'     => sanitize_textarea_field( $content ),
-				'date_gmt'    => sanitize_text_field( (string) ( $comment->comment_date_gmt ?? '' ) ),
+				'date_gmt'    => sanitize_text_field( (string) ( self::object_property( $comment, 'comment_date_gmt', '' ) ) ),
 			);
 		}
 

@@ -590,8 +590,6 @@ final class Provider_Ai_Image_Service extends Provider_Client_Support {
 					$input['media_title']
 					?? $raw_context['title']
 					?? $post_title
-					?? $input['title']
-					?? ''
 				)
 			)
 		);
