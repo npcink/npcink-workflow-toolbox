@@ -8,6 +8,9 @@ updates:
       time: "09:00"
       timezone: Asia/Shanghai
     open-pull-requests-limit: 5
+    ignore:
+      # The source is retained for history; GitHub AI review is retired.
+      - dependency-name: alibaba/open-code-review
     labels:
       - dependencies
       - github-actions
