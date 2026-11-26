@@ -302,15 +302,6 @@ and repeated research stay frozen under the decision's restart rules.
 - **Legacy Chinese-source msgids migrate file-by-file** under the
   [Translation Source Language Policy](translation-source-language-policy.md);
   bulk regeneration of the JED catalogs is forbidden by the same policy.
-- **`plainTextFromHtml` parses with `innerHTML` on a detached div**, which
-  is not inert: inline error handlers and resource fetches inside block
-  HTML can execute when the helper runs. The exposure is bounded by the
-  fact that the Gutenberg editor already renders the same block HTML, and
-  the helper predates the text-utils split (moved verbatim). Hardening
-  (DOMParser-based extraction or attribute stripping) is deferred to a
-  dedicated behavior-change session; flagged by the 2026-10 split-session
-  advisory review. (Superseded: the 2026-10-08 acceleration batch landed
-  the DOMParser extraction — see Recently Closed.)
 - **Security/performance review deferred findings (2026-10-11) — closed
   same day by PR #247.** Seven of the nine accepted low-severity items
   shipped (route allow-listing and spend coalescing, flow-cache user
@@ -382,8 +373,9 @@ and repeated research stay frozen under the decision's restart rules.
   Remaining: the summary and taxonomy cached-flow orchestrators,
   inheriting the cache base and movable with the same pattern.
 - **PHPStan baseline ratchet** (2026-10-06; tooling refreshed in PR #262):
-  100 remaining level-5 findings across 75 baseline patterns, verified on
-  2026-11-02. Declaring the five already-constructed Provider service properties
+  The 2026-11-02 snapshot had 100 level-5 findings across 75 baseline patterns;
+  the current count is tracked under Remaining audit maintenance above.
+  Declaring the five already-constructed Provider service properties
   removes 13 undefined-property findings from the previous 121/86 baseline.
   Passing the existing taxonomy/tag and internal-link review sets to response
   normalization removes two undefined-variable findings; both filter and Addon
@@ -535,10 +527,8 @@ representative test-site acceptance, not a release or a broad model evaluation.
   session.
 
 - **`plainTextFromHtml` innerHTML hardening — closed 2026-10-08 (PR
-  #222)**, recorded here because the open entry above had not been
-  retired. The helper now extracts text through
-  `window.DOMParser().parseFromString(source, 'text/html')` (inert by
-  specification: no script execution, no resource fetches), with a
+  #222).** The helper now extracts text from a detached document through
+  `window.DOMParser().parseFromString(source, 'text/html')`, with a
   tag-stripping fallback for environments without DOMParser; the
   node behavior test `test:text-utils-inert-extraction` in `test:all`
   fails loudly if `innerHTML` extraction ever returns.

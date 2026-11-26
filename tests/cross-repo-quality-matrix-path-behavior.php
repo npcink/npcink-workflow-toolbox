@@ -5,6 +5,8 @@
  * @package Npcink_Toolbox
  */
 
+require_once __DIR__ . '/git-fixture-environment.php';
+
 $root = dirname( __DIR__ );
 $temp = sys_get_temp_dir() . '/npcink-quality-matrix-path-' . bin2hex( random_bytes( 6 ) );
 mkdir( $temp, 0700, true );
@@ -46,7 +48,7 @@ function npcink_quality_matrix_path_remove_tree( string $path ): void {
  */
 function npcink_quality_matrix_path_run( string $command, array $env = array() ): array {
 	$process = proc_open(
-		'bash -lc ' . escapeshellarg( $command ),
+		array( 'bash', '-c', $command ),
 		array(
 			0 => array( 'pipe', 'r' ),
 			1 => array( 'pipe', 'w' ),
@@ -54,7 +56,7 @@ function npcink_quality_matrix_path_run( string $command, array $env = array() )
 		),
 		$pipes,
 		null,
-		array_merge( getenv(), $env )
+		npcink_toolbox_git_fixture_environment( $env )
 	);
 	if ( ! is_resource( $process ) ) {
 		throw new RuntimeException( 'Failed to start test process.' );

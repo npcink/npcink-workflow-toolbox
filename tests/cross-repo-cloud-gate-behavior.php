@@ -5,6 +5,8 @@
  * @package Npcink_Toolbox
  */
 
+require_once __DIR__ . '/git-fixture-environment.php';
+
 $root = dirname( __DIR__ );
 $temp = sys_get_temp_dir() . '/npcink-cloud-gate-' . bin2hex( random_bytes( 6 ) );
 mkdir( $temp, 0700, true );
@@ -46,7 +48,7 @@ function npcink_cloud_gate_remove_tree( string $path ): void {
  */
 function npcink_cloud_gate_test_run( string $command, array $env = array() ): array {
 	$process = proc_open(
-		'bash -lc ' . escapeshellarg( $command ),
+		array( 'bash', '-c', $command ),
 		array(
 			0 => array( 'pipe', 'r' ),
 			1 => array( 'pipe', 'w' ),
@@ -54,7 +56,7 @@ function npcink_cloud_gate_test_run( string $command, array $env = array() ): ar
 		),
 		$pipes,
 		null,
-		array_merge( getenv(), $env )
+		npcink_toolbox_git_fixture_environment( $env )
 	);
 	if ( ! is_resource( $process ) ) {
 		throw new RuntimeException( 'Failed to start test process.' );
@@ -92,7 +94,7 @@ try {
 		. ' && git -C ' . escapeshellarg( $temp ) . ' add README.md'
 		. ' && git -C ' . escapeshellarg( $temp ) . ' commit -qm fixture'
 	);
-	npcink_cloud_gate_assert( 0 === $setup['exit'], 'Unable to create fixture Git repository.' );
+	npcink_cloud_gate_assert( 0 === $setup['exit'], 'Unable to create fixture Git repository: ' . $setup['output'] );
 	$head = trim(
 		npcink_cloud_gate_test_run(
 			'git -C ' . escapeshellarg( $temp ) . ' rev-parse HEAD'

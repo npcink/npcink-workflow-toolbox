@@ -546,7 +546,32 @@ function wp_get_attachment_url( int $attachment_id ): string {
 }
 
 function npcink_cloud_addon_get_connection_state(): array {
-	return array( 'configured' => false, 'verified' => false );
+	$verified = $GLOBALS['npcink_toolbox_nightly_addon_verified'] ?? false;
+	return array( 'configured' => $verified, 'verified' => $verified );
+}
+
+function has_filter( string $hook ): bool {
+	return false;
+}
+
+function npcink_cloud_addon_get_toolbox_nightly_inspection_recent_runs( int $limit, string $trace_id ): array {
+	$GLOBALS['npcink_toolbox_nightly_addon_reads'][] = array( 'recent', $limit );
+	return array( 'items' => array( array( 'run_id' => 'fixture-run' ) ) );
+}
+
+function npcink_cloud_addon_get_toolbox_runtime_run( string $run_id, string $trace_id ): array {
+	$GLOBALS['npcink_toolbox_nightly_addon_reads'][] = array( 'status', $run_id );
+	return array( 'status' => 'succeeded', 'run_id' => $run_id );
+}
+
+function npcink_cloud_addon_get_toolbox_runtime_run_result( string $run_id, string $trace_id ): WP_Error {
+	$GLOBALS['npcink_toolbox_nightly_addon_reads'][] = array( 'result', $run_id );
+	return new WP_Error( 'fixture_run_forbidden', 'The Addon denied this run.', array( 'status' => 403 ) );
+}
+
+function npcink_cloud_addon_get_toolbox_runtime_entitlement( string $trace_id ): array {
+	$GLOBALS['npcink_toolbox_nightly_addon_reads'][] = array( 'entitlement' );
+	return array( 'status' => 'ok' );
 }
 
 if ( ! class_exists( 'Npcink_Toolbox\\Plugin' ) ) {
@@ -646,6 +671,33 @@ $paused_site_ops = $client->run_site_ops_cloud_analysis( array() );
 npcink_toolbox_provider_services_assert( is_wp_error( $paused_inspection ) && 'npcink_toolbox_feature_paused' === $paused_inspection->get_error_code(), 'Cloud inspection is paused before sampling or transport.' );
 npcink_toolbox_provider_services_assert( is_wp_error( $paused_site_ops ) && 'npcink_toolbox_feature_paused' === $paused_site_ops->get_error_code(), 'Site Ops Cloud analysis is paused before transport.' );
 npcink_toolbox_provider_services_assert( $pause_before_calls === $npcink_toolbox_progressive_cloud_calls, 'Paused Cloud features perform zero provider calls.' );
+
+// Exercise the REST bridge with the real provider service and an isolated Addon fixture.
+$GLOBALS['npcink_toolbox_nightly_addon_reads']    = array();
+$GLOBALS['npcink_toolbox_nightly_addon_verified'] = true;
+$nightly_bridge = new Npcink_Toolbox\Rest_Nightly_Inspection_Bridges( $settings, $client );
+$nightly_request = new WP_REST_Request( array( 'run_id' => 'fixture-run' ) );
+foreach ( array( $nightly_bridge->nightly_inspection_cloud_batch( $nightly_request ), $nightly_bridge->nightly_inspection_cloud_batch_retry( $nightly_request ), $client->retry_nightly_inspection_cloud_batch( 'fixture-run', array() ) ) as $paused_operation ) {
+	npcink_toolbox_provider_services_assert(
+		409 === npcink_toolbox_provider_services_error_status( $paused_operation ) && 'npcink_toolbox_feature_paused' === $paused_operation->get_error_code() && false === $paused_operation->get_error_data()['retryable'],
+		'Nightly submission and retry stop with a non-retryable pause even when Addon is connected.'
+	);
+}
+npcink_toolbox_provider_services_assert( array() === $GLOBALS['npcink_toolbox_nightly_addon_reads'] && $pause_before_calls === $npcink_toolbox_progressive_cloud_calls, 'Paused Nightly operations do not call Addon or the provider.' );
+$nightly_recent = $nightly_bridge->nightly_inspection_cloud_batch_recent( new WP_REST_Request( array( 'limit' => 2 ) ) );
+$nightly_status = $nightly_bridge->nightly_inspection_cloud_batch_status( $nightly_request );
+$nightly_result = $nightly_bridge->nightly_inspection_cloud_batch_result( $nightly_request );
+$nightly_entitlement = $nightly_bridge->nightly_inspection_cloud_runtime_entitlement();
+npcink_toolbox_provider_services_assert( $nightly_recent instanceof WP_REST_Response && 'fixture-run' === $nightly_recent->get_data()['items'][0]['run_id'], 'Legacy recent reads remain available during the pause.' );
+npcink_toolbox_provider_services_assert( $nightly_status instanceof WP_REST_Response && 'fixture-run' === $nightly_status->get_data()['cloud_run']['run_id'], 'Legacy status reads remain available during the pause.' );
+npcink_toolbox_provider_services_assert( 403 === npcink_toolbox_provider_services_error_status( $nightly_result ) && 'fixture_run_forbidden' === $nightly_result->get_error_code(), 'Legacy result reads preserve the Addon denial.' );
+npcink_toolbox_provider_services_assert( $nightly_entitlement instanceof WP_REST_Response && 'ok' === $nightly_entitlement->get_data()['status'], 'Legacy entitlement remains a read during the pause.' );
+$nightly_reads = array( array( 'recent', 2 ), array( 'status', 'fixture-run' ), array( 'result', 'fixture-run' ), array( 'entitlement' ) );
+$GLOBALS['npcink_toolbox_nightly_addon_verified'] = false;
+$nightly_disconnected = $nightly_bridge->nightly_inspection_cloud_batch_status( $nightly_request );
+npcink_toolbox_provider_services_assert( 503 === npcink_toolbox_provider_services_error_status( $nightly_disconnected ) && $nightly_reads === $GLOBALS['npcink_toolbox_nightly_addon_reads'], 'Legacy reads use only the expected Addon calls and refuse disconnected access before transport.' );
+unset( $GLOBALS['npcink_toolbox_nightly_addon_verified'], $GLOBALS['npcink_toolbox_nightly_addon_reads'] );
+
 $paused_audio = $client->run_audio_generation( array( 'intent' => 'article_narration' ) );
 npcink_toolbox_provider_services_assert( is_wp_error( $paused_audio ) && 'npcink_toolbox_feature_paused' === $paused_audio->get_error_code(), 'Audio is paused before summary generation or transport.' );
 $paused_media = $client->build_media_derivative_handoff( array() );

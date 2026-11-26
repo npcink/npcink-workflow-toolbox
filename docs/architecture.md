@@ -580,13 +580,15 @@ queue/scheduler ownership, approval, write confirmation, featured-image
 mutation, media upload/import, SEO mutation, indexing, or re-indexing.
 
 `/editor/content-support` is the post-editor entrypoint for fixed, bounded
-support flows. It accepts current draft context plus one intent from the
-twelve-intent allowlist frozen by the 2026-10-07 convergence:
+support flows. The 2026-10-07 convergence narrowed the main allowlist;
+it currently contains thirteen intents:
 `source_adaptation_review`, `polish_notes`, `publish_preflight`,
 `article_narration`, `article_audio_summary`, `category_suggestions`,
 `tag_suggestions`, `summary_terms_optimization`, `internal_links`,
-`image_candidates`, `image_alt_suggestions`, and the automatic local
-`progressive_recommendations` prefetch. The retired route-only intents
+`image_candidates`, `image_alt_suggestions`, `related_content`, and the
+automatic local `progressive_recommendations` prefetch. `format_content`
+and `body_faq` dispatch separately. Not all allowlisted intents are enabled
+or visible by default. The retired route-only intents
 (`writing_support`, `zhihu_research`, `zhihu_hot_topics`, `article_checkup`,
 `title_suggestions`, `article_outline`, `summary_suggestions`, `taxonomy_tags`,
 `comment_reply_suggestion`, `discoverability`) return the invalid-intent

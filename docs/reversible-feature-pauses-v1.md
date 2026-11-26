@@ -23,6 +23,12 @@ Existing media snapshots, completed batches, backups, restoration, retention
 cleanup and public content remain intact. Toolkit and Core keep their current
 contracts and all final-write authority; this plugin adds no second registry.
 
+Nightly inspection's legacy recent, status, result and entitlement reads are
+not execution paths. They retain the existing REST permission and defer to
+Cloud Addon on availability and authorization. The Toolbox panel does not
+offer Cloud run controls. Entitlement reads do not override the local
+submission and retry pause.
+
 ## Toolbox-local source drafting pause — 2026-11-09
 
 `source_drafting` blocks `source_adaptation_review` at editor REST entry and
