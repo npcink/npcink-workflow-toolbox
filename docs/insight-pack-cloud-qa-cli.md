@@ -24,7 +24,7 @@
 
 - **Route:** `GET /wp-json/npcink-toolbox/v1/site-ops/insight-pack`
 - **QA Route:** `POST /wp-json/npcink-toolbox/v1/site-ops/insight-pack-qa`（body `{ "question": "..." }`；`manage_options`；本地拼包 + Hosted AI content-support，与 CLI 同路径）
-- **Admin UI:** Npcink AI → 流程工具箱 → **智能提问** → 选择「本次站点检查」（或 站点检查 → 当前检查 → 「去智能提问」）
+- **Admin UI:** Npcink AI → 流程工具箱 → **智能提问** → 描述站点检查问题（或 站点检查 → 当前检查 → 「去智能提问」）
 - **Cap:** `manage_options`（注册为 `cap.toolbox.admin`）
 - **行为:** 本地 `Site_Ops_Snapshot_Collector` + `Site_Ops_Insight_Builder`；**不调 Cloud**、不写站
 - **契约:** `contract_version = site_ops_insight_pack.v1`，`write_posture = suggestion_only`
@@ -38,7 +38,7 @@
 
 | 文件 | 作用 |
 | --- | --- |
-| [`scripts/insight-pack-cloud-qa.sh`](../scripts/insight-pack-cloud-qa.sh) | 推荐入口：设 Local PHP/socket、默认 admin、写结果 JSON |
+| [`scripts/insight-pack-cloud-qa.sh`](../scripts/insight-pack-cloud-qa.sh) | 推荐入口：显式选站，通过 WP-CLI 运行并写结果 JSON |
 | [`scripts/insight-pack-cloud-qa.php`](../scripts/insight-pack-cloud-qa.php) | `wp eval-file` 主体：拼包 + `execute_runtime` |
 
 ---
@@ -50,7 +50,7 @@
 1. 左侧：**Npcink AI** → **流程工具箱**
 2. 顶部页签点 **站点检查**（不是「图片处理」，也不是「设置」）
 3. 站点检查内再点 **当前检查**
-4. **智能提问** 页选择「本次站点检查」→ 改问题 → 点 **提问**
+4. 在 **智能提问** 页描述站点检查问题，点 **提问**。
 
 直达链接（magick-ai）：
 
@@ -62,26 +62,28 @@
 
 ## 怎么跑
 
-在仓库根（本机 Local 站点默认 magick-ai）：
+在仓库根，显式指定已授权测试站的 WordPress 根目录（须有 `wp-load.php`）：
 
 ```bash
-cd /Users/muze/gitee/npcink-workflow-toolbox
+export WP_PATH="/path/to/wordpress"
 ./scripts/insight-pack-cloud-qa.sh
 ./scripts/insight-pack-cloud-qa.sh "站点优先该处理什么？"
-./scripts/insight-pack-cloud-qa.sh "问题" "/Users/muze/Local Sites/magick-ai/app/public"
+./scripts/insight-pack-cloud-qa.sh "问题" "/path/to/another/authorized/wordpress"
 ```
 
-环境变量（可选）：
+环境变量：
 
 | Env | 含义 | 默认 |
 | --- | --- | --- |
-| `WP_PATH` | WordPress 根 | `/Users/muze/Local Sites/magick-ai/app/public` |
-| `WP_CLI_BIN` / `WP_CLI_PHP` / `WP_DB_SOCKET` | Local WP-CLI | Homebrew wp + Local PHP 8.2 + 站点 socket |
+| `WP_PATH` | WordPress 根；第二位置参数优先 | 必填，无默认站点 |
+| `WP_CLI_BIN` / `WP_CLI_PHP` / `WP_DB_SOCKET` | WP-CLI / PHP / 数据库 socket | 默认运行 PATH 中的 `wp`；PHP 和 socket 不使用本机固定值 |
 | `NPCINK_INSIGHT_QA_USER` | WP 用户 **ID 或 login** | `178` |
 | `NPCINK_INSIGHT_QA_QUESTION` | 问题文案 | 脚本内默认「优先 1–3 件事…」 |
 | `NPCINK_INSIGHT_QA_OUT` | 完整 JSON 输出路径 | `tmp/insight-pack-cloud-qa-result.json` |
 
 Stdout/stderr 会打印 `pack_run_id`、Cloud `run_id`、答案摘要；完整载荷见 OUT。
+
+若指定 PHP 或 socket，`WP_CLI_BIN` 应指向可由 PHP 执行的 WP-CLI 入口（例如 PHAR）。只指定 socket 时用 PATH 中的 `php`。用其他站点时，请设置该站的管理员标识；不要把旧本机账号或 socket 当成跨站默认值。验收站点和调用预算须先确认；假 WP-CLI 门禁 `composer test:insight-pack-cloud-qa-cli` 不连接 WordPress 或 Cloud。
 
 联调排障优先用 Cloud **`run_id`**，不要指望本地 prefix 能直接 grep Cloud 日志。
 
@@ -143,7 +145,7 @@ Cloud `RuntimePayload` 为 `extra=forbid`。以下键 **不要** 放进 runtime 
 ## 给其它 AI 的最短路径
 
 1. 读本页 + [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md)  
-2. 优先用后台 **智能提问** → 选择「本次站点检查」，或在当前 master 跑 `./scripts/insight-pack-cloud-qa.sh`  
+2. 优先用后台 **智能提问** 直接描述站点问题，或按上文显式选站后跑 CLI。
 3. 排障带上 Cloud `run_id`；遇 429 先清槽再跑  
 4. **不要**恢复 `cloud_inspection`；**不要**合入未获用户确认的 PR  
 5. 不要把 `summary_prompt_mode` / timeout 字段塞进 runtime payload  

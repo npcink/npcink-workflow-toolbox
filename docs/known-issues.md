@@ -26,7 +26,19 @@ and repeated research stay frozen under the decision's restart rules.
   or representative answer quality. The operator will use a third-party API in
   production; local model tuning and repeated evaluation are not scheduled.
   Record ordinary feedback and separately accept the configured production API.
-  [Current evidence](maintenance-acceptance-2026-11-10.md).
+  [Current evidence](maintenance-acceptance-2026-11-10.md) and
+  [bounded acceptance checklist](#smart-ask-third-party-api-acceptance-checklist).
+
+- **Remaining audit maintenance (Toolbox tooling).** The four insight-pack Cloud
+  QA wrappers now require an explicit WordPress root. Other browser smoke
+  defaults should be removed in focused groups; validate each group without
+  connecting to a live site by default. PHPStan 2.3.7 landed independently in
+  [#414](https://github.com/npcink/npcink-workflow-toolbox/pull/414) with the
+  same 48 baseline rules at that revision. Reduce by one verified root-cause
+  group at a time, preserving guards and contract-pinned methods. Hold
+  PHPCompatibility at 9.3.5; reassess only with a compatible stable release.
+  The PHP 8.0/8.4 deterministic CI runs are not installed WordPress runtime
+  evidence. [Audit dispositions](smart-ask-audit-closeout-2026-11-26.md).
 
 - **Installed Site Check browser smoke finding assertions (Toolbox test, 2026-11-10, updated 2026-11-26).**
   `tests/smoke-site-ops-insights-browser.mjs` now asserts the
@@ -384,6 +396,28 @@ and repeated research stay frozen under the decision's restart rules.
   are fixed. Moving code between files does not count as reducing debt.
   The 12 unused-method candidates remain in the baseline (mostly `Admin_Page`
   media-derivative render helpers); inspect actual call sites before removal.
+
+### Smart Ask third-party API acceptance checklist
+
+Before running: the operator names the authorized test site, configured
+provider/model and maximum request or spend budget. Use existing secure
+configuration, not chat or Git. Record the installed Toolbox and Addon revisions
+and Cloud runtime identity. Do not enable fallback, a paused path or a write
+action to make the test pass.
+
+| Case | Acceptance |
+| --- | --- |
+| Media upload with a stated size, then recheck | Use the Web PHP-reported WordPress limit as ground truth. Both results use `upload_limit`; recheck reads the current limit again. No Cloud or environment pack call; no claim of a diagnosed root cause or completed upload. |
+| Published article category distribution | Route to one content-structure summary, label `site_summary`, state the bounded sample, and give a practical next step. |
+| Question about a known public article | Label `public_content`; verify the cited article supports the answer. Do not present the index as a live site scan. |
+| Final upstream failure | Test with a controlled failure fixture, not a shared service outage. Preserve the previous successful result and draft details; no automatic retry, fallback or extra successful round. |
+
+For live cases record sanitized inputs, expected and observed basis, browser
+elapsed time, decision/answer Cloud `run_id` where present and observed attempt
+count from authorized runtime evidence. Stop at the budget or an unsafe result;
+if the provider call or billing evidence is unavailable, record it as unverified.
+Keep operator usefulness feedback separate from technical pass/fail. This is
+representative test-site acceptance, not a release or a broad model evaluation.
 
 ## Recently Closed
 
