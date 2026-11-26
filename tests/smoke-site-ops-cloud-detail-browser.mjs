@@ -14,6 +14,10 @@ import { existsSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from 'n
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { requireSmokeBaseUrl, requireSmokeWordPressPath } from './browser-smoke-target.mjs';
+
+const smokeWpPath = requireSmokeWordPressPath();
+const baseUrl = requireSmokeBaseUrl();
 
 function pass(message) {
 	console.log(`PASS: ${message}`);
@@ -52,7 +56,7 @@ function env(name, fallback) {
 }
 
 function wpPath() {
-	return env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public');
+	return smokeWpPath;
 }
 
 function createLoginHelper(baseUrl) {
@@ -182,7 +186,6 @@ async function captureViewportScreenshot(page, screenshotPath) {
 }
 
 const { chromium } = await loadPlaywright();
-const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const cloudScreenshotPath = resolve(env('SITE_OPS_CLOUD_DETAIL_BROWSER_SCREENSHOT', 'build/smoke/site-ops-cloud-detail-browser.png'));
 const scheduledScreenshotPath = resolve(env('SITE_OPS_SCHEDULED_REVIEW_BROWSER_SCREENSHOT', 'build/smoke/site-ops-scheduled-review-browser.png'));
 const browserOptions = {

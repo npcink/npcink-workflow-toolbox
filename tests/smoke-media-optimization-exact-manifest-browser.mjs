@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 /** Browser smoke for one confirmed exact-manifest foreground optimization batch. */
 
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { requireSmokeBaseUrl, requireSmokeWordPressPath, runSmokeWpCli } from './browser-smoke-target.mjs';
+
+const smokeWpPath = requireSmokeWordPressPath();
+const baseUrl = requireSmokeBaseUrl();
 
 function env(name, fallback) {
 	return process.env[name] || fallback;
@@ -17,17 +20,7 @@ function assert(condition, message) {
 }
 
 function wpCli(args) {
-	return execFileSync(
-		env('WP_CLI_PHP', `${process.env.HOME}/Library/Application Support/Local/lightning-services/php-8.5.3+1/bin/darwin-arm64/bin/php`),
-		[
-			'-d', 'display_errors=0', '-d', 'error_reporting=8191',
-			'-d', `mysqli.default_socket=${env('WP_DB_SOCKET', `${process.env.HOME}/Library/Application Support/Local/run/NPb24Zg9g/mysql/mysqld.sock`)}`,
-			env('WP_CLI_BIN', '/opt/homebrew/bin/wp'),
-			`--path=${env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public')}`,
-			'--no-color', ...args,
-		],
-		{ encoding: 'utf8' }
-	).trim();
+	return runSmokeWpCli(smokeWpPath, args);
 }
 
 async function loadPlaywright() {
@@ -62,7 +55,6 @@ function forbiddenRequests(requests) {
 	return requests.filter((request) => /proposals|governance-core|approve-and-execute|run-read-ability/.test(request.url));
 }
 
-const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const fixtureDate = '2001-01-03';
 const artifactDir = env('SMOKE_ARTIFACT_DIR', 'build/smoke');
 const screenshotPath = `${artifactDir}/media-optimization-exact-manifest-browser.png`;

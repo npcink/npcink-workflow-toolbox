@@ -4,6 +4,11 @@ import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { requireSmokeBaseUrl, requireSmokeWordPressPath } from './browser-smoke-target.mjs';
+
+const smokeWpPath = requireSmokeWordPressPath();
+const baseUrl = requireSmokeBaseUrl();
+
 function fail(message) { throw new Error(message); }
 function assert(condition, message) { if (!condition) fail(message); console.log(`PASS: ${message}`); }
 async function loadPlaywright() {
@@ -21,12 +26,11 @@ async function loadPlaywright() {
 		}
 	}
 }
-
 function env(name, fallback) {
 	return process.env[name] || fallback;
 }
 
-function wpPath() { return env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public'); }
+function wpPath() { return smokeWpPath; }
 function createLoginHelper(baseUrl) {
 	const token = randomBytes(24).toString('hex');
 	const fileName = `npcink-toolbox-media-alt-smoke-login-${randomBytes(8).toString('hex')}.php`;
@@ -82,7 +86,6 @@ function findPlaywrightChromiumExecutable(chromium) {
 }
 
 const { chromium } = await loadPlaywright();
-const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const artifactDir = env('SMOKE_ARTIFACT_DIR', 'output/playwright/image-task-hierarchy');
 mkdirSync(artifactDir, { recursive: true });
 const executablePath = process.env.BROWSER_EXECUTABLE || findPlaywrightChromiumExecutable(chromium);

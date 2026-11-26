@@ -6,11 +6,14 @@
  * deterministic suggestion-only fixtures. It does not call Cloud or a real
  * provider, import media, create Core proposals, or write WordPress content.
  */
-
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { requireSmokeBaseUrl, requireSmokeWordPressPath } from './browser-smoke-target.mjs';
+
+const smokeWpPath = requireSmokeWordPressPath();
+const baseUrl = requireSmokeBaseUrl();
 
 function pass(message) {
 	console.log(`PASS: ${message}`);
@@ -40,7 +43,7 @@ async function loadPlaywright() {
 }
 
 function wpPath() {
-	return env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public');
+	return smokeWpPath;
 }
 
 function createLoginHelper(baseUrl) {
@@ -248,7 +251,6 @@ async function dismissEditorOverlays(page) {
 }
 
 const { chromium } = await loadPlaywright();
-const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const artifactDir = env('SMOKE_ARTIFACT_DIR', 'build/smoke');
 const screenshotPath = `${artifactDir}/editor-image-recommendation-browser.png`;
 const libraryScreenshotPath = `${artifactDir}/editor-site-media-evidence-browser.png`;

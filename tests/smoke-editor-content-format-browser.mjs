@@ -1,16 +1,15 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { requireSmokeWordPressPath, runSmokeWpCli } from './browser-smoke-target.mjs';
+
+const root = requireSmokeWordPressPath();
 
 const require = createRequire(import.meta.url);
-const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules'] }));
-const root = process.env.WP_PATH || '/Users/muze/Local Sites/magick-toolbox/app/public';
-const php = process.env.WP_CLI_PHP || '/Users/muze/Library/Application Support/Local/lightning-services/php-8.2.29+0/bin/darwin-arm64/bin/php';
-const socket = process.env.WP_DB_SOCKET || '/Users/muze/Library/Application Support/Local/run/0rmB6u8JC/mysql/mysqld.sock';
+const { chromium } = require(require.resolve('playwright', { paths: process.env.NODE_PATH ? [process.env.NODE_PATH] : undefined }));
 function cli(args) {
 	const bootstrap = process.env.FORMAT_TOOLBOX_BOOTSTRAP;
-	return execFileSync(php, ['-d', 'display_errors=stderr', '-d', `mysqli.default_socket=${socket}`, '/opt/homebrew/bin/wp', `--path=${root}`, '--no-color', ...(bootstrap ? ['--skip-plugins=npcink-workflow-toolbox', `--require=${bootstrap}`] : []), ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+	return runSmokeWpCli(root, [...(bootstrap ? ['--skip-plugins=npcink-workflow-toolbox', `--require=${bootstrap}`] : []), ...args], { phpArgs: ['-d', 'display_errors=stderr'] });
 }
 const auth = JSON.parse(cli(['eval', '$u=get_users(array("role"=>"administrator","number"=>1))[0]; $e=time()+1800; $t=WP_Session_Tokens::get_instance($u->ID)->create($e); echo wp_json_encode(array("user"=>$u->ID,"token"=>$t,"cookie"=>wp_generate_auth_cookie($u->ID,$e,"logged_in",$t),"admin_cookie"=>wp_generate_auth_cookie($u->ID,$e,"auth",$t),"admin_name"=>AUTH_COOKIE,"name"=>LOGGED_IN_COOKIE,"url"=>home_url()));']));
 const sourcePostId = Number(process.env.FORMAT_SOURCE_POST_ID || 0);
