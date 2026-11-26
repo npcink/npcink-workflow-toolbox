@@ -28,6 +28,11 @@ and repeated research stay frozen under the decision's restart rules.
   Record ordinary feedback and separately accept the configured production API.
   [Current evidence](maintenance-acceptance-2026-11-10.md) and
   [bounded acceptance checklist](#smart-ask-third-party-api-acceptance-checklist).
+  The 2026-11-26 follow-up confirmed the local snapshot and fixture-backed
+  browser flow, but the authorized M4 endpoint was unavailable: one live
+  question failed before a usable answer or `run_id`, and the second was not
+  sent. Do not retry until the owner restores the runtime and can provide
+  request-level Cloud evidence; then replay only those two questions once each.
 
 - **Remaining audit maintenance (Toolbox tooling).** The four insight-pack Cloud
   QA wrappers now require an explicit WordPress root. Other browser smoke
@@ -400,8 +405,11 @@ and repeated research stay frozen under the decision's restart rules.
 Before running: the operator names the authorized test site, configured
 provider/model and maximum request or spend budget. Use existing secure
 configuration, not chat or Git. Record the installed Toolbox and Addon revisions
-and Cloud runtime identity. Do not enable fallback, a paused path or a write
-action to make the test pass.
+and verify live Cloud health, runtime identity, route/model and per-question
+call bound through read-only preflight. A listening tunnel or cached verification
+flag is not evidence of runtime health. If any of these checks fails, do not
+submit a question. Do not enable fallback, a paused path or a write action to
+make the test pass.
 
 | Case | Acceptance |
 | --- | --- |

@@ -7,6 +7,14 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-26.
 
+**Smart Ask live acceptance update — 2026-11-26:** PR [#431](https://github.com/npcink/npcink-workflow-toolbox/pull/431)
+is merged at `05557ed308bea4c476d8823aac7d39b584aa050e` and the active local
+snapshot points to that tree. The post-refresh Site Ops browser smoke passed.
+The category question returned a generic AI failure without an answer or
+Cloud `run_id`; the configured M4 preview endpoint was unreachable, so the
+article question was not sent and acceptance remains open. This is not production or model-quality
+evidence. See the [closeout](smart-ask-audit-closeout-2026-11-26.md#live-api-acceptance-follow-up).
+
 ## Smart Ask review closeout — 2026-11-26
 
 The Smart Ask corrections merged in [#422](https://github.com/npcink/npcink-workflow-toolbox/pull/422),
