@@ -28,8 +28,8 @@ and repeated research stay frozen under the decision's restart rules.
   Record ordinary feedback and separately accept the configured production API.
   [Current evidence](maintenance-acceptance-2026-11-10.md).
 
-- **Installed Site Check browser smoke finding assertions (Toolbox test, 2026-11-10, updated 2026-11-25).**
-  `tests/smoke-site-ops-insights-browser.mjs:424–445` now asserts the
+- **Installed Site Check browser smoke finding assertions (Toolbox test, 2026-11-10, updated 2026-11-26).**
+  `tests/smoke-site-ops-insights-browser.mjs` now asserts the
   internal-link health finding only when the scan-detail disclosure reports a
   positive issue count, and asserts the finding is absent when the count is
   zero. The smoke still reads the mutable local site's bounded sample rather

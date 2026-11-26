@@ -55,9 +55,9 @@
 - PHP 版本 `major.minor`（可带 patch；**不要** Zend 扩展完整清单）
 - `memory_limit`、`max_execution_time` 的**字符串/整数原值**（配置级，非进程实测）
 - `is_multisite` 布尔
-- `wp_is_writable` 类信号：仅「上传目录是否可写」等布尔（若已有安全采集路径）
+- `runtime.uploads_dir_writable`：上传基目录检查结果，`true` 为可写、`false` 为不可写、`null` 为无法取得检查结果。只出布尔或 `null`，不出目录路径；这不是实际上传测试。
 - 读取上传目录时必须调用 `wp_upload_dir( null, false, true )`（`$create_dir = false`，并刷新缓存），**不得**创建 uploads 目录。
-- `wp_upload_max_bytes`：类型为整数（单位：字节）或 `null`。当 `wp_max_upload_size()` 存在时，取值是 `max( 0, (int) wp_max_upload_size() )`；`0` 表示函数返回了非正值，即上限未知或不可用，**不是**“无限制”。函数不存在时为 `null`。该字段只报告 WordPress 当前声明的上传上限，不是测速或故障确诊。
+- `runtime.wp_upload_max_bytes`：类型为整数（单位：字节）或 `null`。当 `wp_max_upload_size()` 存在时，取值是 `max( 0, (int) wp_max_upload_size() )`；`0` 表示函数返回了非正值，即上限未知或不可用，**不是**“无限制”。函数不存在时为 `null`。该字段只报告 WordPress 当前声明的上传上限，不是测速或故障确诊。
 - HTTPS：home/siteurl 是否 `https`
 - 调试：`WP_DEBUG` / `WP_DEBUG_DISPLAY` / `SCRIPT_DEBUG` 等**布尔**（不读 debug.log 内容）
 
@@ -94,6 +94,7 @@
 - 插件列表：活跃插件按 slug 排序后 **截断**（保留 count 全量数字 + 列表上限）
 - 生成 `generated_at`；可选 `sample_note`：若插件列表被截断，首行写「只列出了前 N 个插件名称（共 M 个在用），结论仅供参考。」
 - 不把「慢」写成已测量事实；finding 用「可能偏旧 / 调试开着可能拖慢 / 无对象缓存」等**条件语气**
+- 上传排障必须区分两个信号：`uploads_dir_writable` 只反映目录权限，`wp_upload_max_bytes` 只反映 WordPress 声明的字节上限；二者都不能单独证明具体文件上传失败的根因。
 
 ## 6. 回答形态（复用 Guidance）
 

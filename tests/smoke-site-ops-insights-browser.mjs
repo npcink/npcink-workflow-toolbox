@@ -18,8 +18,7 @@ function pass(message) {
 }
 
 function fail(message) {
-	console.error(`FAIL: ${message}`);
-	process.exit(1);
+	throw new Error(message);
 }
 
 function assert(condition, message) {
@@ -49,14 +48,10 @@ function env(name, fallback) {
 	return process.env[name] || fallback;
 }
 
-function wpPath() {
-	return env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public');
-}
-
-function createLoginHelper(baseUrl) {
+function createLoginHelper(baseUrl, wpPath) {
 	const token = randomBytes(24).toString('hex');
 	const fileName = `npcink-toolbox-site-ops-smoke-login-${randomBytes(8).toString('hex')}.php`;
-	const filePath = `${wpPath().replace(/\/$/, '')}/${fileName}`;
+	const filePath = resolve(wpPath, fileName);
 	writeFileSync(filePath, `<?php
 declare(strict_types=1);
 $expected = '${token}';
@@ -82,7 +77,7 @@ exit;
 			try {
 				unlinkSync(filePath);
 			} catch (error) {
-				// The smoke should not fail only because cleanup raced a local server.
+				if (error.code !== 'ENOENT') throw error;
 			}
 		},
 	};
@@ -128,16 +123,18 @@ async function openToolboxPage(page, baseUrl) {
 	fail(`Could not find the Site Check admin panel. Last URL: ${page.url()}. Last page title: ${title}. Body: ${body.slice(0, 500)}`);
 }
 
-async function captureDiagnostics(page, requests, error) {
+async function captureDiagnostics(page, requests, browserErrors, error) {
 	const artifactDir = env('SMOKE_ARTIFACT_DIR', 'tests/artifacts');
 	mkdirSync(artifactDir, { recursive: true });
 	const screenshotPath = `${artifactDir}/site-ops-insights-browser-failure.png`;
-	await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
+	await page.screenshot({ path: screenshotPath, fullPage: true, timeout: 5000 }).catch(() => {});
 	const pageText = await page.locator('body').innerText({ timeout: 2000 }).catch(() => '');
 	console.error(`FAIL: Site Check browser smoke diagnostic screenshot: ${screenshotPath}`);
 	console.error(`FAIL: Site Check browser smoke current URL: ${page.url()}`);
 	console.error(`FAIL: Site Check browser smoke page title: ${await page.title().catch(() => '')}`);
 	console.error(`FAIL: Site Check browser smoke wp-admin/wp-json requests: ${requests.length}`);
+	console.error(`FAIL: Site Check browser smoke POST paths: ${requests.filter(request => request.method === 'POST').map(request => new URL(request.url).pathname).join(', ')}`);
+	console.error(`FAIL: Site Check browser smoke page errors: ${browserErrors.slice(0, 5).join('; ')}`);
 	console.error(`FAIL: Site Check browser smoke visible text sample: ${pageText.replace(/\s+/g, ' ').trim().slice(0, 1200)}`);
 	console.error(`FAIL: Site Check browser smoke error: ${error && error.message ? error.message : String(error || 'unknown error')}`);
 }
@@ -182,7 +179,7 @@ async function verifySmartAskLayout(page) {
 	const stopNote = ask.locator('[data-toolbox-smart-ask-stop-note]');
 	assert(await page.locator('[data-toolbox-tab-panel="site-and-ask"] h2').count() === 1, 'Default Ask has one heading.');
 	assert(!await stopNote.isVisible(), 'Idle Ask omits stop guidance.');
-	const routePattern = /\/smart-ask(?:\?|$)/;
+	const routePattern = /\/smart-ask\/?(?:\?|$)/;
 	let calls = 0;
 	for (const mode of ['success', 'failure', 'stop']) {
 		let releaseResponse;
@@ -283,8 +280,16 @@ async function verifySmartAskLayout(page) {
 	}
 }
 
+const wpPath = process.env.WP_PATH;
+const siteUrl = process.env.WP_BASE_URL;
+if (!wpPath || !existsSync(resolve(wpPath, 'wp-load.php'))) {
+	fail('Set WP_PATH to the local WordPress root containing wp-load.php.');
+}
+if (!siteUrl) {
+	fail('Set WP_BASE_URL to the matching local WordPress URL.');
+}
+const baseUrl = siteUrl.replace(/\/$/, '');
 const { chromium } = await loadPlaywright();
-const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const screenshotPath = resolve(env('SITE_OPS_BROWSER_SCREENSHOT', 'build/smoke/site-ops-insights.png'));
 const contentDesktopScreenshotPath = resolve(env('SITE_OPS_CONTENT_DESKTOP_SCREENSHOT', 'build/smoke/site-ops-content-desktop.png'));
 const contentNarrowScreenshotPath = resolve(env('SITE_OPS_CONTENT_NARROW_SCREENSHOT', 'build/smoke/site-ops-content-narrow.png'));
@@ -312,6 +317,13 @@ try {
 	const context = await browser.newContext({ ignoreHTTPSErrors: true });
 	page = await context.newPage();
 	const requests = [];
+	const browserErrors = [];
+	page.on('pageerror', error => browserErrors.push(error.message));
+	page.on('requestfailed', request => {
+		if (request.resourceType() === 'script') {
+			browserErrors.push(`${new URL(request.url()).pathname}: ${request.failure()?.errorText}`);
+		}
+	});
 	page.on('request', (request) => {
 		const url = request.url();
 		if (url.includes('/wp-admin/') || url.includes('/wp-json/')) {
@@ -320,16 +332,26 @@ try {
 	});
 
 	try {
-		loginHelper = createLoginHelper(baseUrl);
-		await page.goto(loginHelper.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+		loginHelper = createLoginHelper(baseUrl, wpPath);
+		try {
+			await page.goto(loginHelper.url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+		} finally {
+			loginHelper.cleanup();
+			loginHelper = null;
+		}
 		await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox`, { waitUntil: 'domcontentloaded' });
 		assert(await page.locator('[data-toolbox-start-route]').count() === 2 && await page.locator('[data-toolbox-start-route="check"]').count() === 0, 'Start offers Ask and Images without a check task card.');
 		assert(await page.locator('[data-toolbox-site-check-fold]').count() === 0, 'Default Start does not render the manual report.');
 		const supportLink = page.locator('.npcink-toolbox__start-support a[href*="toolbox_support=site-check"]');
 		assert(await supportLink.count() === 1 && !await supportLink.isVisible(), 'Manual Site Check is available only inside folded support details.');
 		await page.locator('.npcink-toolbox__start-support summary').click();
-		await supportLink.click();
-		assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support link opens the manual report.');
+		const siteCheckFold = page.locator('[data-toolbox-site-check-fold]');
+		await Promise.all([
+			page.waitForURL(url => url.searchParams.get('toolbox_support') === 'site-check', { waitUntil: 'domcontentloaded' }),
+			supportLink.click(),
+		]);
+		await siteCheckFold.waitFor({ state: 'visible' });
+		pass('Support link opens the manual report.');
 		await page.reload({ waitUntil: 'domcontentloaded' });
 		assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support report remains reachable after reload.');
 		await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask`, { waitUntil: 'domcontentloaded' });
@@ -360,8 +382,11 @@ try {
 			await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&${query}`, { waitUntil: 'domcontentloaded' });
 			assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), `Explicit compatibility query remains available: ${query}.`);
 		}
-		await page.locator('[data-toolbox-site-check-target="current-check"]').click();
-		assert(new URL(page.url()).searchParams.get('site_check_tab') === 'current-check', 'Scheduled-to-current navigation preserves an explicit check URL.');
+		await Promise.all([
+			page.waitForURL(url => url.searchParams.get('site_check_tab') === 'current-check'),
+			page.locator('[data-toolbox-site-check-target="current-check"]').click(),
+		]);
+		pass('Scheduled-to-current navigation preserves an explicit check URL.');
 		await page.reload({ waitUntil: 'domcontentloaded' });
 		assert(await page.locator('[data-toolbox-site-check-panel="current-check"]').isVisible(), 'Current check remains available after tab navigation and reload.');
 		await page.setViewportSize({ width: 1440, height: 1000 });
@@ -374,9 +399,13 @@ try {
 		}
 		await page.waitForSelector('[data-toolbox-tab-panel="site-and-ask"]:not([hidden])', { timeout: 30000 });
 		await page.waitForSelector('[data-toolbox-site-check-fold]', { timeout: 30000 });
-		await page.locator('.npcink-toolbox__ops-status-row .npcink-toolbox__ops-status-actions a.button-primary').click();
-		await page.waitForLoadState('domcontentloaded');
-		await page.waitForSelector('[data-toolbox-ops-tabs]', { timeout: 30000 });
+		const scanLink = page.locator('.npcink-toolbox__ops-status-row .npcink-toolbox__ops-status-actions a.button-primary');
+		const scanUrl = await scanLink.evaluate(link => link.href);
+		await Promise.all([
+			page.waitForURL(scanUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }),
+			scanLink.click(),
+		]);
+		await page.locator('[data-toolbox-ops-tabs]').waitFor({ state: 'visible', timeout: 30000 });
 		assert(await page.locator('[data-toolbox-site-ops-insights] > .npcink-toolbox__section-heading').count() === 0, 'Generated report does not keep the large report action header in the default view.');
 		assert(await page.locator('[data-toolbox-site-ops-insights] .npcink-toolbox__ops-report-toolbar').count() === 0, 'Generated report does not keep a report-internal rescan toolbar.');
 		const statusActionText = await page.locator('.npcink-toolbox__ops-status-row .npcink-toolbox__ops-status-actions').innerText();
@@ -485,19 +514,24 @@ try {
 		mkdirSync(dirname(screenshotPath), { recursive: true });
 		await captureViewportScreenshot(page, screenshotPath);
 		assert(existsSync(screenshotPath), `Screenshot captured at ${screenshotPath}.`);
-		await page.locator('[data-toolbox-check-to-ask]').click();
-		await page.waitForLoadState('domcontentloaded');
+		const askLink = page.locator('[data-toolbox-check-to-ask]');
+		const askUrl = await askLink.evaluate(link => link.href);
+		await Promise.all([
+			page.waitForURL(askUrl, { waitUntil: 'domcontentloaded' }),
+			askLink.click(),
+		]);
 		assert(await page.locator('[data-toolbox-smart-ask-question]').inputValue() !== '' && await page.locator('[data-toolbox-site-check-fold]').count() === 0, 'Check-to-Ask preserves the seeded question and returns to the ordinary Ask surface.');
 
 	} catch (error) {
-		await captureDiagnostics(page, requests, error);
+		await captureDiagnostics(page, requests, browserErrors, error).catch(diagnosticError => console.error(diagnosticError.message));
 		throw error;
 	}
 } finally {
-	if (loginHelper) {
-		loginHelper.cleanup();
+	try {
+		loginHelper?.cleanup();
+	} finally {
+		await browser.close();
 	}
-	await browser.close();
 }
 
 pass(`Site Check browser smoke completed at ${baseUrl}.`);
