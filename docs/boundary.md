@@ -337,11 +337,13 @@ ownership.
 Nightly Inspection Cloud runtime routes are compatibility bridges for existing
 callers only. Runtime entitlement, quota, batch limit, retention, recent run,
 status, result, and retry detail belong in Cloud Addon Runtime Runs, not in a
-Toolbox recovery workspace. `/cloud-batch/recent` may read Cloud-owned run cards
-for legacy callers, and `/cloud-batch/{run_id}/retry` may ask Cloud to queue a
-retry with a fresh idempotency key and a new bounded local snapshot. Neither
-route stores a server-side Toolbox run history, claims retry ownership, creates
-Core proposals, or writes WordPress data.
+Toolbox recovery workspace. Under the [runtime pause](reversible-feature-pauses-v1.md),
+Toolbox rejects submission and retry before collecting a snapshot or calling
+Addon. The permission-gated recent, status, result and entitlement bridges can
+still request Cloud-owned data for legacy callers, subject to Addon availability
+and authorization. A result merge with a supplied Morning Brief is only a local
+response preview. No bridge stores Toolbox run history, creates Core proposals,
+or writes WordPress data.
 
 `local_admin_consent` is now implemented only for one narrow proof:
 `/local-admin-consent/featured-image` may set one existing WordPress image

@@ -13,8 +13,9 @@ The Smart Ask corrections merged in [#422](https://github.com/npcink/npcink-work
 following maintenance [#421](https://github.com/npcink/npcink-workflow-toolbox/pull/421).
 Five routes keep fallback disabled; a local upload comparison is labeled
 `upload_limit`, not `site_summary`; and the three successful turns are a page-local
-UI limit, not a service quota. The maintenance PR requires explicit `WP_PATH` in
-the affected Composer scripts and leaves 48 PHPStan baseline rules. The existing
+UI limit, not a service quota. The affected Composer scripts require explicit
+`WP_PATH`. [#427](https://github.com/npcink/npcink-workflow-toolbox/pull/427)
+reduced the PHPStan baseline from 48 to 46 rules. The existing
 feature freeze continues. See the [closeout](smart-ask-audit-closeout-2026-11-26.md)
 for the installed local snapshot, remaining debt, and verification and rollback checklist.
 
@@ -372,6 +373,12 @@ ordinary generation and Site Knowledge remain available. See
   revision 3739544); the API reports stable 0.6.0 and the live zip carries
   the nine minified asset siblings. 0.6.0 shipped the 2026-10-11
   security/performance hardening arc (PRs #242–#247).
+- **Distribution decision (2026-11-26):** retain 0.6.0 on WordPress.org for
+  this maintenance pass. Later `master` commits and the Local snapshot are
+  separate from the public package. An `admin.js` hash match verifies only
+  that served asset, not the whole installed tree. A future public release
+  requires a separately approved scope and the
+  [release gate](wordpress-org-release-gate.md).
 - The five-review-set arc is complete and shipped: Media ALT (0.2.0),
   Comment Moderation and Flagged Media (0.3.0), Taxonomy/Tag and
   Internal-Link (0.4.0). All share one pattern: bounded sampling (<=50),
@@ -397,21 +404,21 @@ ordinary generation and Site Knowledge remain available. See
   `Rest_Editor_Content_Support.php`.
 - `includes/Provider_Client.php` — provider facade; cluster services in
   `Provider_*_Service.php` over abstract `Provider_Client_Support.php`.
-- `includes/Admin_Page.php` — admin page facade (~3.0k lines);
+- `includes/Admin_Page.php` — admin page facade;
   `Admin_Page_Site_Ops_Panel.php` holds the extracted Site Check render
   cluster (parent class).
 - `includes/Rest_Editor_Content_Support.php` — editor content-support
-  service (~3.2k lines) plus eight static sibling clusters and the
+  service plus eight static sibling clusters and the
   `Rest_Editor_Media_Alt` instance service over the shared
   `Rest_Editor_Flow_Cache` base; only the summary/taxonomy cached-flow
   orchestrators remain inside the facade.
-- `assets/editor-content-support.js` — editor bundle (~10.7k lines) plus
+- `assets/editor-content-support.js` — editor bundle plus
   pure part files under `assets/editor-content-support/` behind frozen
   `window.NpcinkToolbox*` namespaces.
-- `assets/admin.js` — admin bundle (~9.1k lines; split when product work
+- `assets/admin.js` — admin bundle (split when product work
   touches a qualified cluster).
-- `tests/run.php` — static contract suite (4,548 assertions on 2026-11-02, needles pin
-  exact source strings; aggregation helpers keep them file-portable).
+- `tests/run.php` — static contract suite (4,650 passes at `635cf83` on
+  2026-11-26; use the test output rather than counting source call sites).
 - `docs/route-boundary-table.json`, `ability-boundary-table.json`,
   `cloud-bridge-contract-table.json`, `fixed-button-contract-table.json` —
   machine-readable contract truth.
@@ -561,16 +568,15 @@ from structural changes. See [the maintenance ledger](known-issues.md).
    are conditional backlog under the current UI/feature pauses; they do not
    authorize production observation, hidden surfaces or Cloud scheduling.
 1. Editor JS clusters (image candidates, audio, preflight, progressive,
-   draft) still inside the ~10.7k main bundle.
-2. `Rest_Editor_Content_Support.php` sub-division (~3.2k facade lines;
-   only the summary/taxonomy cached-flow orchestrators remain).
-3. `assets/admin.js` (~9.1k) and remaining `Admin_Page.php` clusters
+   draft) still inside the main bundle.
+2. `Rest_Editor_Content_Support.php` sub-division (only the summary/taxonomy
+   cached-flow orchestrators remain).
+3. `assets/admin.js` and remaining `Admin_Page.php` clusters
    (review-set tools, media derivative controls, content context form).
-4. Editor intent convergence shipped 2026-10-07: thirteen-intent editor
-   allowlist; see `docs/editor-intent-convergence-decision.md` before
-   adding any new editor intent.
-5. PHPStan baseline ratchet (100 findings across 75 baseline patterns after the
-   2026-11-02 Provider and REST maintenance fixes; reduce verified causes,
+4. The editor route has 13 allowlisted intents and separately dispatches
+   `format_content` and `body_faq`. This is not a count of visible or enabled
+   actions. See `docs/editor-intent-convergence-decision.md` before adding one.
+5. PHPStan baseline ratchet (46 rules after #427; reduce verified causes,
    not just move findings with cluster splits).
 6. Guided onboarding tour awaiting the operator trial answers
    (`docs/onboarding-tour-design-v1.md`); "Core proposal" terminology
