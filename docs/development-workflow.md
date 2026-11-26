@@ -517,11 +517,27 @@ block fingerprint changes, confirms the no-Cloud source layer, and checks that
 Core handoff targets remain definition-only even when Core routes are present.
 
 For a real editor lifecycle smoke with iframe editor and Block API behavior,
-run the optional browser gate:
+run the optional browser gate against an authorized local test installation:
 
 ```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-progressive-browser
+export WP_PATH="/path/to/local/site/app/public"
+export WP_BASE_URL="https://your-local-site.test"
+composer smoke:editor-progressive-browser
 ```
+
+Use the same settings for the editor contextual ALT, image recommendation,
+media ALT/caption, media optimization/derivative preview, processed-image, and
+Site Check Cloud-detail browser smokes. `WP_PATH` must contain `wp-load.php`
+and both settings must refer to the same test installation. `WP_BASE_URL`
+must be HTTP(S) without credentials, query, or fragment. The editor content
+format browser script requires `WP_PATH` and reads its URL from that site's
+WordPress configuration. Set `NODE_PATH` only if Playwright is supplied by a
+separate runtime. CLI-backed scripts resolve `wp` and `php` on `PATH`; override
+with `WP_CLI_BIN` (a PHP entry point or PHAR, not a shell wrapper), `WP_CLI_PHP`,
+and `WP_DB_SOCKET` as needed. Do not target a production site: some smokes use
+temporary fixtures or login helpers. The deterministic `test:browser-smoke-target`
+gate checks startup failures and CLI argument forwarding without WordPress,
+a browser, or Cloud; a pass is not installed-site or provider evidence.
 
 This opens the local editor, opens the Npcink Content Support sidebar, verifies
 the automatic local progressive request stays hidden on success, confirms it
@@ -535,7 +551,6 @@ transaction without introducing a second framework:
 
 ```bash
 POST_ID=<real-post-id> \
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" \
 composer smoke:editor-internal-link-batch-browser
 ```
 
@@ -593,7 +608,6 @@ source post:
 NPCINK_INTERNAL_LINK_NATIVE_SAVE_SMOKE=1 \
 NPCINK_INTERNAL_LINK_FIXTURE_SOURCE_POST_ID=<source-post-id> \
 NPCINK_INTERNAL_LINK_REQUIRE_APPLY=1 \
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" \
 composer smoke:editor-internal-link-batch-browser
 ```
 
@@ -617,7 +631,7 @@ for the reproducible invocation, failed attempts and corpus limitation.
 For the per-occurrence article image ALT prototype, run:
 
 ```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-contextual-alt-browser
+composer smoke:editor-contextual-alt-browser
 ```
 
 The smoke creates and deletes a temporary draft that reuses one attachment in
@@ -629,7 +643,7 @@ WordPress content write path, then saves a review screenshot under
 For the editor image recommendation modal, run:
 
 ```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:editor-image-recommendation-browser
+composer smoke:editor-image-recommendation-browser
 ```
 
 This opens the real Gutenberg sidebar on a disposable local draft and
@@ -946,7 +960,9 @@ Playwright, and a local browser.
 For the optional real Cloud-detail UI trial, run:
 
 ```bash
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:site-ops-cloud-detail-browser
+WP_PATH="/path/to/local/site/app/public" \
+WP_BASE_URL="https://your-local-site.test" \
+composer smoke:site-ops-cloud-detail-browser
 ```
 
 This opens the same local Site Check wp-admin panel, generates the local
@@ -1095,17 +1111,17 @@ plus URL/settings repair, open-ended media batches, and article/media creation,
 remain Core/Adapter governed. Do not route those paths through the ADR-015
 exact-manifest exception.
 
-For the media ALT/caption Toolkit extraction gate, run:
+For the media ALT/caption Toolkit extraction gate, use the explicit test site
+settings above and run:
 
 ```bash
 composer smoke:media-alt-caption-trial
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" composer smoke:media-alt-caption-browser
+composer smoke:media-alt-caption-browser
 MEDIA_ALT_CAPTION_TRIAL_ATTACHMENT_IDS="764,761,759,758,757" \
 NPCINK_TOOLBOX_MEDIA_ALT_TRIAL_MAX_ITEMS=5 \
 NPCINK_TOOLBOX_MEDIA_ALT_TRIAL_OUTPUT_JSON="build/eval/media-alt-caption-second-sample-cases.json" \
 NPCINK_TOOLBOX_MEDIA_ALT_TRIAL_OUTPUT_MD="build/eval/media-alt-caption-second-sample-cases.md" \
 composer smoke:media-alt-caption-trial
-NODE_PATH="${NODE_PATH:-/Users/muze/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules}" \
 MEDIA_ALT_CAPTION_BROWSER_ATTACHMENT_IDS="764,761,759,758,757" \
 MEDIA_ALT_CAPTION_BROWSER_EXPECT_CAPTION_ONLY_MIN=0 \
 MEDIA_ALT_CAPTION_BROWSER_EXPECT_CONTEXT_ROWS_MIN=4 \

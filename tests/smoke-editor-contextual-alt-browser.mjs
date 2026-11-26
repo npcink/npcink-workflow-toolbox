@@ -6,11 +6,14 @@
  * WordPress site, WP-CLI access, and Playwright.
  */
 
-import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { requireSmokeBaseUrl, requireSmokeWordPressPath, runSmokeWpCli } from './browser-smoke-target.mjs';
+
+const smokeWpPath = requireSmokeWordPressPath();
+const baseUrl = requireSmokeBaseUrl();
 
 function pass(message) {
 	console.log(`PASS: ${message}`);
@@ -51,29 +54,11 @@ async function loadPlaywright() {
 }
 
 function wpPath() {
-	return env('WP_PATH', '/Users/muze/Local Sites/magick-ai/app/public');
+	return smokeWpPath;
 }
 
 function wpCli(args) {
-	const php = env('WP_CLI_PHP', `${process.env.HOME}/Library/Application Support/Local/lightning-services/php-8.5.3+1/bin/darwin-arm64/bin/php`);
-	const wp = env('WP_CLI_BIN', '/opt/homebrew/bin/wp');
-	const socket = env('WP_DB_SOCKET', `${process.env.HOME}/Library/Application Support/Local/run/NPb24Zg9g/mysql/mysqld.sock`);
-	return execFileSync(
-		php,
-		[
-			'-d',
-			'display_errors=0',
-			'-d',
-			'error_reporting=8191',
-			'-d',
-			`mysqli.default_socket=${socket}`,
-			wp,
-			`--path=${wpPath()}`,
-			'--no-color',
-			...args,
-		],
-		{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
-	).trim();
+	return runSmokeWpCli(smokeWpPath, args);
 }
 
 function createLoginHelper(baseUrl, postId) {
@@ -153,7 +138,6 @@ const fixture = createFixture();
 const postId = fixture.postId;
 
 const { chromium } = await loadPlaywright();
-const baseUrl = env('WP_BASE_URL', 'https://magick-ai.local').replace(/\/$/, '');
 const artifactDir = env('SMOKE_ARTIFACT_DIR', 'build/smoke');
 mkdirSync(artifactDir, { recursive: true });
 const screenshotPath = `${artifactDir}/contextual-alt-seo-editor.png`;
