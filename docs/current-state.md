@@ -18,6 +18,13 @@ the affected Composer scripts and leaves 48 PHPStan baseline rules. The existing
 feature freeze continues. See the [closeout](smart-ask-audit-closeout-2026-11-26.md)
 for the installed local snapshot, remaining debt, and verification and rollback checklist.
 
+**Follow-up maintenance — 2026-11-26:** the optional Site Check browser smoke now
+requires explicit `WP_PATH` and `WP_BASE_URL`, waits for observable navigation and
+cleans its temporary login helper through failure paths. The environment-pack
+contract names `uploads_dir_writable` and `wp_upload_max_bytes` as separate,
+non-diagnostic signals. The smoke remains fixture-backed and outside the default
+gate; it does not certify Cloud quality or production acceptance.
+
 
 **Image/admin session closeout — 2026-11-16:** the
 [closeout and lessons](processed-image-session-closeout-2026-11-16.md) index the

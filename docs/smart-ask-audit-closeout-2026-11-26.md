@@ -13,8 +13,8 @@ The [Smart Ask contract](admin-operator-focus-2026-11-10.md) and
 | F1, F12: upload diagnosis and units | A local comparison is labeled `upload_limit`. It reads the current WordPress limit, not the environment pack; supported short, Chinese and decimal units are covered by behavior tests. Within-limit or unknown values are not diagnoses. |
 | F2, F3: fallback and attempts | Fallback is off for the selector and all four summary requests. Three successful turns are a single-question UI limit on the current page, not REST rate limiting or a billing guarantee. |
 | F4, F6, F9: test evidence | The README distinguishes static contracts from behavior. Site Check asserts the finding if its scan reports a positive internal-link issue count and requires its absence at zero. PO text and static contracts do not prove runtime behavior. |
-| F5, F13, F15: toolchain | The affected Composer commands require `WP_PATH`; other machine-specific CLI and browser defaults remain. PHPCompatibility stays at `9.3.5` rather than moving to prereleases, and is not a substitute for a target-version runtime check. PHPStan has **48** baseline rules; contract-pinned methods are retained. |
-| F7, F8: pack contract and privacy | `wp_upload_max_bytes` is documented. Upload directory writability remains a separate runtime inventory signal; this change does not document every parameter. The four compact outbound packs omit `site_id`; local packs and signed transport identity are unchanged. |
+| F5, F13, F15: toolchain | The affected Composer commands require `WP_PATH`; the Site Check browser smoke also requires an explicit site URL. Other machine-specific defaults are outside this change. PHPCompatibility stays at `9.3.5` rather than moving to prereleases, and is not a substitute for a target-version runtime check. PHPStan has **48** baseline rules; contract-pinned methods are retained. |
+| F7, F8: pack contract and privacy | The environment contract documents `wp_upload_max_bytes` and `uploads_dir_writable` as separate inventory signals, neither of which proves a particular upload failure. The four compact outbound packs omit `site_id`; local packs and signed transport identity are unchanged. |
 | F10: orientation | The published contracts are indexed and the stale uncommitted-work note is replaced by the merged state. No new task or freeze exception is created. |
 | F11, F14: REST and audio authorization | Smart Ask reads dispatched values only for fields present in the JSON body and preserves rejection of unknown keys, explicit nulls and invalid aggregate lengths. The resolver remains the aggregate budget authority; other routes were not migrated. Audio meta checks `edit_post` for the specific object. |
 
@@ -36,13 +36,14 @@ REST parameters, so query values cannot supply an omitted body field.
 - The local installation used a complete archive of `b933263`, verified against
   579 Git blobs. WordPress loaded from the new slot and the HTTP response for
   `admin.js` matched it. The prior slot was retained for rollback.
-- The unmodified browser smoke failed before observing Site Check navigation on
-  both the old and new snapshots. An out-of-tree smoke with explicit navigation
-  waiting and diagnostics passed against the new snapshot, including the upload
-  limit recheck and Site Check. It used fixture answers, not live Cloud. Temporary
-  login helpers were removed. The committed smoke still needs a bounded follow-up:
-  wait for observable UI state and throw failures through `finally` instead of
-  exiting before cleanup. No business-content writes or public release were performed.
+- The follow-up reproduced a stale `admin.js` path in the admin page despite a
+  correctly switched symlink. A site-specific PHP worker reload cleared it.
+  Separately, the smoke now requires explicit `WP_PATH`/`WP_BASE_URL`,
+  waits for observable URL and panel states, records script/request diagnostics,
+  and cleans its temporary login helper through failure paths. The installed
+  smoke passed against the active local snapshot, including the upload limit
+  recheck and Site Check. It used fixture answers, not live Cloud; no business-
+  content writes or public release were performed.
 
 ## Local snapshot and cleanup checklist
 
