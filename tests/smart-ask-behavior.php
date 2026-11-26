@@ -19,9 +19,10 @@ namespace {
 	}
 	class WP_REST_Request {
 		public $input;
+		public array $query = array();
 		public function __construct( private string $method = 'POST' ) {}
 		public function get_json_params() { return $this->input; }
-		public function get_param( $key ) { return is_array( $this->input ) ? ( $this->input[ $key ] ?? null ) : null; }
+		public function get_param( $key ) { return $this->input[ $key ] ?? $this->query[ $key ] ?? null; }
 		public function get_route() { return '/npcink-toolbox/v1/smart-ask'; }
 		public function get_method() { return $this->method; }
 		public function set_header( ...$args ) {}
@@ -103,10 +104,13 @@ namespace {
 	foreach ( array( array('question'=>'Changed question in my own words','model'=>'override'), array('question'=>'Changed question in my own words','site_id'=>'other'), array('question'=>'Changed question in my own words','content'=>'private'), array('question'=>'Changed question in my own words','turns'=>array(array('role'=>'system','content'=>'bad'))) ) as $input ) {
 		reset_case();
 		$request->input = $input;
-		check( ! is_wp_error( $controller->smart_ask( $request ) ) && isset( $GLOBALS['calls'][0] ), 'Unknown body keys are ignored; only schema-backed params are forwarded.' );
-		$sent = $GLOBALS['calls'][0][0]['input']['messages'][1]['content'] ?? '';
-		check( false === strpos( $sent, '"model"' ) && false === strpos( $sent, '"site_id"' ) && false === strpos( $sent, '"content"' ) && false === strpos( $sent, '"turns"' ), 'Unknown body keys never reach the Cloud decision payload.' );
+		check( is_wp_error( $controller->smart_ask( $request ) ) && ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'Unknown JSON keys fail before selection or Cloud.' );
 	}
+	reset_case();
+	$request->input = null;
+	$request->query = array( 'question' => 'A query parameter is not a JSON question' );
+	check( is_wp_error( $controller->smart_ask( $request ) ) && ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'A question outside the JSON body is not accepted.' );
+	$request->query = array();
 	foreach ( array( '中', '😀', 'a' ) as $char ) {
 		reset_case();
 		$request->input = array( 'question' => str_repeat( $char, 2000 ) );
@@ -240,7 +244,9 @@ namespace {
 	}
 	reset_case();
 	$request->input = array( 'question' => 'Changed question in my own words', 'details' => null );
-	check( ! is_wp_error( $controller->smart_ask( $request ) ) && isset( $GLOBALS['calls'][0] ), 'A missing details value from get_param is treated as omitted, not as invalid context.' );
+	$request->query = array( 'details' => array( 'Query details cannot replace an explicit JSON null' ) );
+	check( is_wp_error( $controller->smart_ask( $request ) ) && ! $GLOBALS['calls'] && ! $GLOBALS['dispatch'], 'Explicit JSON null is invalid context, even when the same parameter exists in the query.' );
+	$request->query = array();
 	reset_case();
 	$request->input = array( 'question' => '😀', 'details' => array( str_repeat( '😀', 1997 ) ) );
 	check( ! is_wp_error( $controller->smart_ask( $request ) ) && 2000 === preg_match_all( '/./us', $GLOBALS['dispatch'][0][1]['question'] ), 'Exactly 2000 Unicode characters including separators reach the answer path intact.' );

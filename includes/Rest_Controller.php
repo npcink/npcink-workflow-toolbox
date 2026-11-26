@@ -405,13 +405,13 @@ final class Rest_Controller extends Rest_Controller_Support {
 
 	/** One decision and at most one existing read-only answer; no Toolbox replay or writes. */
 	public function smart_ask( WP_REST_Request $request ) {
-		// Use schema-validated, sanitized params from dispatch; get_json_params() is the raw body.
-		// Pass values through unchanged so Smart_Ask still type-checks when sanitization is not in play.
-		$input = array();
-		foreach ( array( 'question', 'source_hint', 'details', 'recheck' ) as $key ) {
-			$value = $request->get_param( $key );
-			if ( null !== $value ) {
-				$input[ $key ] = $value;
+		// Keep the JSON key set and explicit nulls so the resolver can reject invalid input.
+		$input = $request->get_json_params();
+		if ( is_array( $input ) ) {
+			foreach ( array( 'question', 'source_hint', 'details', 'recheck' ) as $key ) {
+				if ( isset( $input[ $key ] ) ) {
+					$input[ $key ] = $request->get_param( $key );
+				}
 			}
 		}
 		$decision = Smart_Ask::resolve( $input );
