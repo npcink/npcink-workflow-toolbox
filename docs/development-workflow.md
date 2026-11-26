@@ -432,6 +432,27 @@ The [2026-10-26 five-session audit](session-closeout-audit-2026-10-26.md)
 applies this gate, including the retired local OCR route. This is a Git and
 documentation handoff rule, not a new runtime, approval store or write lane.
 
+### Evidence rules for external audits
+
+- Verify each finding against an exact revision and the actual entry point,
+  permission, data flow and downstream owner. Separate defects from coverage
+  gaps and suggestions; do not infer production impact from retained code or
+  equate an execution pause with a read permission change.
+- Record the revision and environment for each check. Fake-provider behavior,
+  merged source, installed WordPress, distributed package, live provider
+  acceptance and representative human use answer different questions.
+- When temporary Git setup fails, check sibling fixtures before treating the
+  failure as a product regression. Use the shared fixture environment helper
+  for isolated Git child processes and test with an inherited empty
+  `GIT_CONFIG_VALUE_*` as well as the ordinary environment. Keep operator Git
+  configuration intact for real repository operations.
+- If the default branch moves during review, verify against the new base,
+  rerun the affected gates, and bind the review and CI to the final PR head.
+  A previous head's good result does not certify the new diff.
+
+See the [Smart Ask audit handoff](smart-ask-audit-closeout-2026-11-26.md#final-audit-handoff-2026-11-26)
+for the applied decisions and the boundary between audit and acceptance.
+
 ## WordPress Smoke Gate
 
 When a local WordPress site and WP-CLI are available, mount or install the
