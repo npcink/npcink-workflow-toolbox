@@ -274,6 +274,14 @@ sibling repositories have adopted a new policy.
 
 ## Work Admission And Restart Rules
 
+**2026-11-27, approved article credential-check exception:** the operator
+requested both the current editor check and the site-wide article scan. Toolbox
+may provide both using shared local rules and no Cloud execution. Only a reviewed
+single value may be replaced in the current editor; the site scan remains
+manual, read-only and administrator-only. No general privacy dashboard, batch
+updates, background scans or other frozen surfaces are authorized. See the
+[article credential check contract](article-credential-check-v1.md).
+
 **2026-11-25, approved FAQ-only exception:** Toolbox may add an explicitly
 triggered current-article FAQ preview below Site citation suggestions. The npc.ink
 editorial trial exposed useful questions grounded in the body, alongside many

@@ -41,6 +41,9 @@ function npcink_cloud_addon_execute_toolbox_content_support_runtime( array $payl
 	return $GLOBALS['faq_remote'];
 }
 
+require_once dirname( __DIR__ ) . '/includes/Toolbox_Asset_Paths.php';
+require_once dirname( __DIR__ ) . '/includes/Article_Credential_Rules.php';
+require_once dirname( __DIR__ ) . '/includes/Article_Credential_Check.php';
 require_once dirname( __DIR__ ) . '/includes/Editor_Body_FAQ.php';
 
 function faq_assert( bool $condition, string $label ): void {
@@ -72,6 +75,10 @@ faq_assert( 'npcink_toolbox_faq_empty_body' === faq_request( array( 'content' =>
 faq_assert( 'npcink_toolbox_faq_too_long' === faq_request( array( 'content' => str_repeat( '字', 4001 ) ) )->code, 'Oversize article is not truncated.' );
 faq_assert( 'npcink_toolbox_faq_too_long' === faq_request( array( 'content' => str_repeat( ' ', 262145 ) ) )->code, 'Bound serialized input before parsing.' );
 faq_assert( 'npcink_toolbox_faq_too_long' === faq_request( array( 'content' => str_repeat( '𠀀', 4000 ) ) )->code, 'Enforce transport byte cap before the Addon.' );
+$fixture = 'gh' . 'p_' . str_repeat( 'a', 36 );
+$formatted = '<p>' . substr( $fixture, 0, 2 ) . '<strong>' . substr( $fixture, 2 ) . '</strong></p>';
+faq_assert( array() === Npcink_Toolbox\Article_Credential_Rules::categories( $formatted, true ), 'Synthetic token is absent from raw HTML as a contiguous match.' );
+faq_assert( 'npcink_article_credential_check_hit' === faq_request( array( 'content' => $formatted ) )->code, 'Stop when the final FAQ plain body contains a credential.' );
 faq_assert( array() === $faq_calls, 'No provider work on rejected requests.' );
 
 $result  = faq_request();
@@ -82,6 +89,8 @@ faq_assert( array( 'body' => "The limit is 100 tags & no more.\nCan the limit ch
 faq_assert( 'pii' === $payload['data_classification'] && 'no_store' === $payload['storage_mode'] && 0 === $payload['retention_ttl'] && 0 === $payload['retry_max'] && false === $payload['policy']['allow_fallback'], 'Private synchronous payload and no retries, retention or fallback.' );
 faq_assert( 30 === $payload['timeout_seconds'] && ! array_key_exists( 'http_timeout_seconds', $payload ) && ! array_key_exists( 'connect_timeout_seconds', $payload ), 'Keep the Cloud timeout without adding either transport-only field.' );
 faq_assert( array( 'messages', 'params' ) === array_keys( $payload['input'] ), 'No extra context is sent downstream.' );
+$before = count( $faq_calls );
+faq_assert( 'ready' === faq_request( array( 'content' => $faq_request['content'] . '<p>password = "not-a-real-value"</p>' ) )->data['status'] && count( $faq_calls ) === $before + 1, 'A generic password assignment is advisory and does not block FAQ.' );
 
 faq_remote_items( array( $candidate, array_replace( $candidate, array( 'question' => 'why are some tags missing!' ) ), array_replace( $candidate, array( 'question' => 'Can the limit change?' ) ) ) );
 faq_assert( array( $candidate ) === faq_request()->data['items'], 'Skip duplicate proposals and questions already in body.' );

@@ -26,6 +26,12 @@ Toolbox adds no maintenance task, filesystem deletion or approval truth.
 
 Npcink Toolbox owns product-facing tools and fixed-flow buttons.
 
+The local article credential check is a security/privacy maintenance surface.
+It owns only bounded local detection, editor-state replacement for the current
+article, and administrator-only read-only site scan results. It does not own
+secret revocation, credential rotation, article batch replacement, Cloud
+privacy certification, or a general personal-data inventory.
+
 ADR-006 is the active authority for choosing between native editor commit and
 Core-governed handoff. ADR-014 refines that authority for one bounded
 current-article multi-link editor transaction. The former proposal-intent and

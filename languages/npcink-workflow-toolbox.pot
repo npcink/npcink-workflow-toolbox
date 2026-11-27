@@ -10907,3 +10907,195 @@ msgstr ""
 #: assets/editor-content-support.js
 msgid "Could not add the FAQ to the end of this article. Check the editor or copy the selected answers."
 msgstr ""
+
+#: assets/article-credential-admin.js:18
+msgid "Checked: %1$d. Skipped: %2$d. Articles with possible credentials: %3$d."
+msgstr ""
+
+#: assets/article-credential-admin.js:24
+msgid "Edit article #%d"
+msgstr ""
+
+#: assets/article-credential-admin.js:53
+msgid "Scanning saved articles..."
+msgstr ""
+
+#: assets/article-credential-admin.js:75 assets/article-credential-admin.js:81
+msgid "Scan stopped. Results are partial."
+msgstr ""
+
+#: assets/article-credential-admin.js:76
+msgid "Scan finished with gaps."
+msgstr ""
+
+#: assets/article-credential-admin.js:77
+msgid "Scan finished."
+msgstr ""
+
+#: assets/article-credential-admin.js:77
+msgid "No potential credentials found in the checked fields."
+msgstr ""
+
+#: assets/article-credential-admin.js:81
+msgid "Scan interrupted. Resume to finish checking the remaining articles."
+msgstr ""
+
+#: assets/article-credential-admin.js:84
+msgid "Resume scan"
+msgstr ""
+
+#: assets/article-credential-admin.js:84 includes/Article_Credential_Check.php:95
+msgid "Scan site articles"
+msgstr ""
+
+#: assets/article-credential-editor.js:14
+msgid "Credential check incomplete. Some content or findings could not be shown."
+msgstr ""
+
+#: assets/article-credential-editor.js:15
+msgid "If already shared, revoke or rotate the credential. Replacing it here does not invalidate it."
+msgstr ""
+
+#: assets/article-credential-editor.js:59 includes/Article_Credential_Check.php:53
+msgid "The article is too large for the credential check. Nothing was sent to Cloud."
+msgstr ""
+
+#: assets/article-credential-editor.js:60 includes/Article_Credential_Check.php:56
+msgid "Possible credential found. Review it with Check credentials before sending the article to Cloud."
+msgstr ""
+
+#: assets/article-credential-editor.js:83
+msgid "Block %d"
+msgstr ""
+
+#: assets/article-credential-editor.js:104
+msgid "Article body (manual review)"
+msgstr ""
+
+#: assets/article-credential-editor.js:147 assets/article-credential-editor.js:181 includes/Article_Credential_Check.php:63 includes/Article_Credential_Check.php:92
+msgid "Article credential check"
+msgstr ""
+
+#: assets/article-credential-editor.js:154
+msgid "Masked value"
+msgstr ""
+
+#: assets/article-credential-editor.js:158
+msgid "Locate block"
+msgstr ""
+
+#: assets/article-credential-editor.js:160
+msgid "Replaced in the editor. Review and save the article manually."
+msgstr ""
+
+#: assets/article-credential-editor.js:161
+msgid "The block changed or cannot be edited. Run the check again."
+msgstr ""
+
+#: assets/article-credential-editor.js:162
+msgid "Replace this value"
+msgstr ""
+
+#: assets/article-credential-editor.js:171
+msgid "Check credentials"
+msgstr ""
+
+#: assets/article-credential-editor.js:183
+msgid "Possible credentials found in this article."
+msgstr ""
+
+#: includes/Article_Credential_Check.php:88
+msgid "You do not have permission to scan articles."
+msgstr ""
+
+#: includes/Article_Credential_Check.php:93
+msgid "Checks saved article titles, excerpts and bodies, including drafts and private articles you can edit. Nothing is sent to Cloud or changed."
+msgstr ""
+
+#: includes/Article_Credential_Check.php:94
+msgid "If a real credential was already shared, revoke or rotate it before editing the article."
+msgstr ""
+
+#: includes/Article_Credential_Check.php:96
+msgid "Stop scan"
+msgstr ""
+
+#: includes/Article_Credential_Check.php:99
+msgid "Article"
+msgstr ""
+
+#: includes/Article_Credential_Check.php:99
+msgid "Possible credential types"
+msgstr ""
+
+#: includes/Article_Credential_Check.php:102
+msgid "Enable JavaScript to run the scan."
+msgstr ""
+
+#: includes/Article_Credential_Rules.php:18
+msgid "API key"
+msgstr ""
+
+#: includes/Article_Credential_Rules.php:24
+msgid "Access token"
+msgstr ""
+
+#: includes/Article_Credential_Rules.php:30
+msgid "Private key (review manually)"
+msgstr ""
+
+#: includes/Article_Credential_Rules.php:36
+msgid "Connection string with password (review manually)"
+msgstr ""
+
+#: assets/article-credential-editor.js:300
+msgid "Continue generating FAQ"
+msgstr ""
+
+#: assets/article-credential-editor.js:300
+msgid "Continue article review"
+msgstr ""
+
+#: assets/article-credential-editor.js:302
+msgid "WordPress blocked the request, but the browser could not locate the credential. Review and edit the content before trying again."
+msgstr ""
+
+#: assets/article-credential-editor.js:305
+msgid "Possible credentials found. Nothing was sent to Cloud."
+msgstr ""
+
+#: assets/article-credential-editor.js:306
+msgid "No known credential formats found in the content to send."
+msgstr ""
+
+#: assets/article-credential-editor.js:311
+msgid "Review and fix"
+msgstr ""
+
+#: assets/article-credential-editor.js:317
+msgid "Return to editor"
+msgstr ""
+
+#: includes/Article_Credential_Check.php
+msgid "Body"
+msgstr ""
+
+#: includes/Article_Credential_Rules.php
+msgid "Password or token assignment"
+msgstr ""
+
+#: assets/article-credential-admin.js assets/article-credential-editor.js
+msgid "%s (advisory only)"
+msgstr ""
+
+#: assets/article-credential-editor.js
+msgid "Selected text"
+msgstr ""
+
+#: assets/article-credential-editor.js
+msgid "Instruction"
+msgstr ""
+
+#: assets/article-credential-editor.js
+msgid "Possible password or token assignment. Review before sending; this warning does not block sending."
+msgstr ""

@@ -517,6 +517,9 @@ require_once dirname( __DIR__ ) . '/includes/Settings.php';
 require_once dirname( __DIR__ ) . '/tests/load-provider-client.php';
 require_once dirname( __DIR__ ) . '/includes/Publish_Preflight_Service.php';
 require_once dirname( __DIR__ ) . '/includes/Editor_Content_Format.php';
+require_once dirname( __DIR__ ) . '/includes/Toolbox_Asset_Paths.php';
+require_once dirname( __DIR__ ) . '/includes/Article_Credential_Rules.php';
+require_once dirname( __DIR__ ) . '/includes/Article_Credential_Check.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Controller_Support.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Flow_Cache.php';
 require_once dirname( __DIR__ ) . '/includes/Rest_Editor_Taxonomy_Shaping.php';
@@ -855,6 +858,24 @@ $preflight_run = npcink_toolbox_editor_flow_call( $controller, array( 'intent' =
 npcink_toolbox_editor_flow_assert( isset( $preflight_run['data'] ), 'Publish preflight returns a flow response.' );
 npcink_toolbox_editor_flow_assert_flow_contract( $preflight_run['data'], 'publish_preflight', 'Publish preflight' );
 npcink_toolbox_editor_flow_assert( empty( $preflight_run['data']['sections']['discoverability'] ) && ! isset( $preflight_run['data']['sections']['seo_handoff'] ), 'Publish preflight omits specialist candidates and SEO handoff.' );
+$fixture = 'gh' . 'p_' . str_repeat( 'b', 36 );
+$credential_payload = array(
+	'intent' => 'publish_preflight',
+	'title' => 'Synthetic credential test',
+	'content' => '<p>' . substr( $fixture, 0, 2 ) . '<strong>' . substr( $fixture, 2 ) . '</strong></p>',
+	'article_review_snapshot' => array( 'blocks' => array( array( 'client_id' => 'cloud-review-block', 'kind' => 'body', 'text' => 'Clean review block' ) ), 'coverage' => array( 'eligible' => 1 ) ),
+);
+$remote_counts = static fn(): array => array(
+	(int) $GLOBALS['npcink_toolbox_progressive_cloud_calls'],
+	count( $GLOBALS['npcink_toolbox_progressive_site_knowledge_inputs'] ),
+	count( $GLOBALS['npcink_toolbox_article_review_inputs'] ?? array() ),
+);
+$before = $remote_counts();
+$from_query = npcink_toolbox_editor_flow_call( $controller, $credential_payload );
+$credential_payload['content'] = 'Clean body';
+$credential_payload['article_review_snapshot']['blocks'][0]['text'] = $fixture;
+$from_snapshot = npcink_toolbox_editor_flow_call( $controller, $credential_payload );
+npcink_toolbox_editor_flow_assert( 'npcink_article_credential_check_hit' === ( $from_query['error'] ?? null )?->get_error_code() && 'npcink_article_credential_check_hit' === ( $from_snapshot['error'] ?? null )?->get_error_code() && $before === $remote_counts(), 'Preflight scans the derived query and validated Cloud blocks before any remote section starts.' );
 
 $review_response_backup = $npcink_toolbox_article_review_response;
 $npcink_toolbox_article_review_response['data']['result']['findings'] = array(

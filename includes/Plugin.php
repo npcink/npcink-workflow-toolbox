@@ -60,6 +60,7 @@ final class Plugin {
 	}
 
 	public function register_hooks(): void {
+		( new Article_Credential_Check() )->register_hooks();
 		add_action( 'admin_init', array( $this->settings, 'register' ) );
 		add_action( 'admin_menu', array( $this->admin_page, 'register_navigation' ), 5 );
 		add_action( 'admin_menu', array( $this->admin_page, 'register_menu' ), 45 );
