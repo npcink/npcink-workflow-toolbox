@@ -662,8 +662,9 @@ The discoverability result may show a current-draft image ALT/caption check and
 CTA that reuses the `image_alt_suggestions` intent; generated suggestions merge
 back into the discoverability panel while preserving the
 `current_article_media_metadata_only` and no-media-write boundary.
-The backend Image Handling tab uses the same hosted site-helper intent only for
-an explicit small media-library review set. For missing ALT only, operators can
+The retired backend ALT review surface (formerly under Image Handling) used the
+same hosted site-helper intent for a small selected media-library review set.
+The retained contract is not a current admin entry. For missing ALT only, operators could
 select a row, edit the suggestion, confirm that they reviewed the image, run
 `npcink-abilities-toolkit/build-media-alt-apply-plan` through Adapter, and send
 the returned `media_alt_apply_plan.v1` to `/proposals/from-plan`. Each row creates
@@ -817,9 +818,14 @@ executor. This summary is not a generic Abilities Explorer, provider picker,
 request log, or connector approval surface. It does not create proposals or
 writes. Single-post article
 support stays in the post editor sidebar and is not rendered as an Overview
-work block. The visible top-level admin tabs after **Start** (formerly Overview) are **Site & Ask**
-(defaults to Smart Ask; Site Profile and **Site Check** are support-only) and **Image Handling** (three top-level tabs).
-Start remains the default landing page; see `docs/admin-ia-site-and-ask-v1.md`. Start has Ask and Images cards; folded support details link to `toolbox_support=site-check`. The report renders only for that support request or explicit legacy check/preview URLs. The visibility projection keeps `full_site_insights` with `default_visible=false`. The stable `operations-insights` compatibility query still maps into Site & Ask and builds a local
+work block. The three top-level tabs are **Start**, **Site & Ask** and
+**Image Processing** (`toolbox_tab=tools`). Start is the default, with Ask and Image
+Processing cards. Site & Ask defaults to Smart Ask. Explicit support and
+legacy URLs show the requested **Site Check**, Scheduled Review preview or Site
+Profile rather than the default Ask form. See the [current admin IA](admin-ia-site-and-ask-v1.md).
+The Site Check visibility projection keeps `full_site_insights` with
+`default_visible=false`. The stable `operations-insights` compatibility query
+still maps into Site & Ask. The requested local report builds a
 `site_ops_insight_pack.v1` from bounded public content, approved comment signal
 counts, media metadata, taxonomy summaries, Site Context readiness, and Cloud
 availability, then presents it as a current-run decision queue for manual
@@ -829,10 +835,10 @@ structure, findings, Cloud detail, and advanced data views are supporting
 detail, including site content opportunity findings.
 It can also prepare a copyable
 `site_ops_cloud_analysis_request.v1` for Cloud runtime/detail analysis. The
-local preview does not auto-send the request; when Cloud is ready, the
-administrator may explicitly run Cloud detail and render the suggestion-only
-`site_ops_cloud_analysis_result.v1`. It is a manual review surface, not a
-Cloud batch owner, local queue, Core proposal creator, or WordPress write path.
+local preview does not auto-send the request. Cloud Inspection execution is
+paused; the retained `site_ops_cloud_analysis_result.v1` contract is not an
+availability promise. The local report is not a Cloud batch owner, local
+queue, Core proposal creator or WordPress write path.
 Nightly Inspection fallback preview settings live in the low-frequency
 **Scheduled Review** sub tab inside the Site Check fold under Site & Ask, beside the **Current Check**
 manual report. The former Advanced directory is not rendered as a separate top-level tab, and the `toolbox_tab=advanced` and `toolbox_tab=morning-brief` aliases have been removed; use `toolbox_tab=site-and-ask` (or legacy `toolbox_tab=operations-insights`) with `site_check_tab=scheduled-review` instead. Cloud run status, result reads, recent runs,
@@ -844,29 +850,19 @@ including connection, refresh, indexing, retrieval acceptance, and deep
 delivery detail. Toolbox only consumes Site Knowledge results inside its other
 workflows.
 
-The admin **Image Handling** tab groups image-first buttons by operator job and
-defaults to **Media Library Optimization**. Media Library row and attachment
-details expose ALT review only; single-image import, replacement, and restore
-use the governed external-client path.
-It no longer exposes a standalone one-image optimization picker or a
-single-article image text helper; article-specific image text needs current
-	editor context in the editor sidebar. The separate **Batch Image ALT Review** group
-	builds a small selected media-library review set and can prepare only a local
-	dry-run summary without creating or submitting a proposal or writing media metadata. The separate
-standalone content opportunity admin tool is retired; site-level opportunities
-are reviewed through Site Check.
-The old Article Planning Bundle is not an operator-facing admin tool;
-The `/flows/article-brief` compatibility REST route has been removed; OpenClaw
-and external AI callers use `npcink-toolbox/build-ai-article-writing-pack` and
-the editor content-support routes. Old `tool=article-assistant` and
-`tool=article-plan` URLs now fall back to the default Image Handling tool.
-Batch entry points use `toolbox_tab=tools&toolbox_tool=media-alt-caption-review`
-and `toolbox_tab=tools&toolbox_tool=media-batch-optimize`; the deprecated
-`tab`/`tool` alias URLs were removed in the pre-release compatibility cleanup.
-The writing-pack entry, publish preflight, direct existing-category and
-existing-tag suggestions, internal-link candidates, current-article ALT review,
-and image candidates stay as default post editor buttons. Article narration and
-audio summary stay callable but hidden. The retired generic intents
+**Image Processing** defaults to single-image compression/conversion, with
+watermark as a separate task. The legacy `media-batch-optimize` tool id leads
+to compression; it does not re-enable batch execution. Backend ALT review
+and its Media Library shortcuts are retired. Article-specific ALT stays in the
+editor. For reviewed single-image previews and Adapter/Core handoff, see the
+[single-image contract](processed-image-save-as-new-v1.md); Toolkit owns media
+writes and recovery. The standalone content opportunity admin tool is retired;
+site-level opportunities are reviewed through Site Check. The old Article
+Planning Bundle is not an operator-facing admin tool.
+The `/flows/article-brief` compatibility REST route has been removed.
+See [Current State](current-state.md) for the current editor defaults. Retained
+writing-pack, narration and audio-summary contracts do not enable paused
+generation or restore hidden entries. The retired generic intents
 (summary/title suggestions, combined taxonomy support, article checkup,
 discoverability, outline, comment reply, writing support, and the Zhihu
 editor-route aliases) are removed from the route, with the local checkup
@@ -978,7 +974,8 @@ SEO suggestions. This keeps image-source reuse fast for editor and settings
 surfaces without turning Toolbox into an image index, provider router, media
 registry, or write executor.
 
-`media_optimization_v1` is the architecture name for the default Media Library Optimization workbench. ADR-015 permits
+`media_optimization_v1` names the paused ADR-015 Media Library Optimization
+batch contract, not the default Image Processing workbench. ADR-015 permits
 one bounded exception for the present administrator: Toolbox freezes an exact
 attachment-and-SHA-256 manifest, renders representative Cloud-qualified samples,
 records one confirmation, and runs a foreground loop that delegates every
@@ -989,7 +986,7 @@ file, backup, verification, lineage, idempotency, and restore owner.
 The bounded batch manifest is stored in an existing WordPress option for resume
 and history. It is not a custom table, `/workflow-runs` route, queue, scheduler,
 retry lease, approval registry, artifact registry, or second media truth. The
-default flow creates no Core proposal and cannot be invoked by OpenClaw, an
+historical batch flow creates no Core proposal and cannot be invoked by OpenClaw, an
 external Agent, Cron, or a background worker. Those callers, open-ended media
 batches, article/media creation, URL/settings repair, and single-image
 transforms continue through the governed Core/Adapter path.
@@ -1001,8 +998,8 @@ content-operations coverage, and Agent quality summaries belong in
 `npcink-cloud-addon` or Cloud service-plane surfaces. Toolbox keeps only
 task-owned product panels: Content Library Usage for read-only Site Knowledge
 status/result consumption, a hidden Site Check compatibility route for manual
-site checks and Nightly/Morning Brief preview, plus Image Handling for
-selected-media review/handoff flows. The hidden Site Check compatibility panel has two
+site checks and Nightly/Morning Brief preview, plus Image Processing for
+single-image preview and reviewed handoff. The hidden Site Check compatibility panel has two
 internal sections: **Current Check** contains the manual report, while
 **Scheduled Review** exposes scheduled preview, optional local fallback settings,
 and Cloud recovery links. The former `toolbox_tab=advanced` and
