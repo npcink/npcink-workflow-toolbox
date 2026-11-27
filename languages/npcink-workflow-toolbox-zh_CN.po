@@ -11590,3 +11590,7 @@ msgstr "输入的指令"
 #: assets/article-credential-editor.js
 msgid "Possible password or token assignment. Review before sending; this warning does not block sending."
 msgstr "发现疑似密码或令牌赋值。建议发送前核对，此提醒不会阻止发送。"
+
+#: includes/Editor_Code_Format.php assets/editor-content-format.js
+msgid "The code preview is unavailable. The original code is unchanged."
+msgstr "暂时无法预览整理结果，原代码未改动。"

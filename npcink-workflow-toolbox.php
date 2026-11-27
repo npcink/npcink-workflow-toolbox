@@ -90,6 +90,7 @@ require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Editor_Content_Support.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Body_FAQ.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Rest_Controller.php';
 require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Content_Format.php';
+require_once NPCINK_TOOLBOX_DIR . 'includes/Editor_Code_Format.php';
 require_once NPCINK_TOOLBOX_DIR . 'modules/local-automation-runtime/src/Contract/Replay_Validator.php';
 require_once NPCINK_TOOLBOX_DIR . 'modules/local-automation-runtime/src/NightlyInspection/Rule_Scorer.php';
 require_once NPCINK_TOOLBOX_DIR . 'modules/local-automation-runtime/src/NightlyInspection/Morning_Brief_Builder.php';

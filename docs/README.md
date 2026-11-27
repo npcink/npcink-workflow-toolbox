@@ -150,6 +150,7 @@ Start from the active documents below before changing code.
 - [Formatting compatibility follow-up (2026-10-31)](article-format-compatibility-2026-10-31.md) and [body-free receipt](article-format-compatibility-evidence-2026-10-31.json) — two known validator refusals resolved with opaque blocks and v1-safe heading/quote spacing.
 - [Formatting preservation acceptance (2026-10-30)](article-format-preservation-acceptance-2026-10-30.md) and [body-free evidence](article-format-preservation-evidence-2026-10-30.json).
 - [Editor Content Format V1](editor-content-format-v1.md)
+- [Single Code Block Formatting Pilot](editor-code-format-pilot-v1.md)
 - [Editor Content Support Recommendation Review](editor-content-support-recommendation-review.md)
 - [相关文章与内链推荐开发规范 v1](related-article-and-internal-link-recommendation-standard-v1.md)
 - [编辑器推荐、图片与运行环境验证规范 v1](editor-recommendation-image-and-runtime-validation-standard-v1.md)

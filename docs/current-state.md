@@ -49,6 +49,9 @@ non-diagnostic signals. The smoke remains fixture-backed and outside the default
 gate; it does not certify Cloud quality or production acceptance.
 
 
+**Single-code-block pilot (2026-11-25):** operator-approved opt-in development
+candidate, separate from whole-body formatting. See the [pilot contract](editor-code-format-pilot-v1.md).
+
 **Image/admin session closeout — 2026-11-16:** the
 [closeout and lessons](processed-image-session-closeout-2026-11-16.md) index the
 17 merged application PRs, exact-head branch cleanup, protected primary worktree,
