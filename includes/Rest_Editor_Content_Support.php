@@ -198,9 +198,9 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		}
 
 		if ( 'publish_preflight' === $intent ) {
-			$review_blocks    = $this->editor_article_review_blocks_from_request( $request );
-			$search_topic     = sanitize_text_field( $query );
-			$knowledge_query  = sanitize_textarea_field( $query );
+			$review_blocks   = $this->editor_article_review_blocks_from_request( $request );
+			$search_topic    = sanitize_text_field( $query );
+			$knowledge_query = sanitize_textarea_field( $query );
 			// Check every derived outbound field before starting any remote section.
 			$credential_error = Article_Credential_Check::guard_fields( array_merge( array( $search_topic, $knowledge_query ), array_column( $review_blocks, 'text' ) ) );
 			if ( null !== $credential_error ) {

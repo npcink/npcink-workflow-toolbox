@@ -59,7 +59,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 		// Core checks plugin-page access before admin_init, so handle old bookmarks here.
 		if ( 'edit.php' === $pagenow && 'npcink-toolbox-article-credentials' === $plugin_page && current_user_can( self::MENU_CAPABILITY ) ) {
-			wp_safe_redirect( $this->toolbox_admin_url( array( 'toolbox_tab' => 'start', 'toolbox_support' => self::CREDENTIAL_SECTION ) ) . '#npcink-toolbox-article-credentials' );
+			wp_safe_redirect(
+				$this->toolbox_admin_url(
+					array(
+						'toolbox_tab'     => 'start',
+						'toolbox_support' => self::CREDENTIAL_SECTION,
+					)
+				) . '#npcink-toolbox-article-credentials'
+			);
 			exit;
 		}
 
