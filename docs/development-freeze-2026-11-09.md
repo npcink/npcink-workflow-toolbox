@@ -275,14 +275,17 @@ sibling repositories have adopted a new policy.
 ## Work Admission And Restart Rules
 
 **2026-11-25, approved FAQ-only exception:** Toolbox may add an explicitly
-triggered current-article FAQ preview under Article check. The npc.ink
+triggered current-article FAQ preview below Site citation suggestions. The npc.ink
 editorial trial exposed useful questions grounded in the body, alongside many
 duplicate or insufficiently supported suggestions. This exception is for
-0–3 evidence-backed, selectable, copy-only candidates; it does not restore
-SEO/AEO/GEO specialist runtime, broaden the default Article check request, or
-authorize insertion, storage, batch processing, or publication. Completion
-requires payload, permission, evidence, freshness, and editor copy verification.
-See [FAQ preview contract](editor-body-faq-v1.md).
+0–3 evidence-backed candidates. Checking a candidate does not edit the article.
+The author may copy the checked pairs or explicitly append them as visible,
+undoable Gutenberg blocks in the one open article. Only the author's normal
+WordPress save or publish persists the changes. This does not broaden Article
+check, restore SEO/AEO/GEO specialist runtime, or authorize Toolbox storage,
+metadata or schema writes, batch processing, or publication. Verify the payload,
+permissions, evidence, freshness, locked-editor rejection, selected-only
+insertion, clipboard and native Undo. See the [FAQ contract](editor-body-faq-v1.md).
 
 1. Continue security, authorization, privacy, data-integrity, necessary
    compatibility and release fixes. Concrete defects in supported behavior

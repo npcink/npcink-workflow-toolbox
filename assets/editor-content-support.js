@@ -5951,6 +5951,24 @@
 		return source.post_id === current.post_id && source.content === current.content;
 	}
 
+	function hasFinalBodyFaqSection(currentBlocks, title) {
+		let sectionIndex = currentBlocks.length - 1;
+		for (; sectionIndex >= 0; sectionIndex--) {
+			const { name, attributes } = currentBlocks[sectionIndex];
+			if (name === 'core/heading' && (attributes.level ?? 2) <= 2) break;
+		}
+		const section = currentBlocks[sectionIndex];
+		const titles = [title.toLowerCase(), 'faq', 'frequently asked questions', '常见问题'];
+		if (!section || !titles.includes(plainTextFromHtml(section.attributes.content).trim().toLowerCase())) return false;
+		const tail = currentBlocks.slice(sectionIndex + 1);
+		return tail.length % 2 === 0 && tail.every(({ name, attributes }, index) => {
+			const text = plainTextFromHtml(attributes.content || '').trim();
+			return index % 2 === 0
+				? name === 'core/heading' && attributes.level === 3 && (/^Q\s*[:：]/i.test(text) || /[?？]$/.test(text))
+				: name === 'core/paragraph' && Boolean(text);
+		});
+	}
+
 	function BodyFaqPreview({ onClose }) {
 		const [phase, setPhase] = useState('idle');
 		const [items, setItems] = useState([]);
@@ -5996,7 +6014,7 @@
 			active.current = request;
 			setPhase('running');
 			try {
-				const response = await postJsonWithTimeout('/editor/content-support', { intent: 'body_faq', ...source }, 40000, __('FAQ generation timed out. Nothing was written.', 'npcink-workflow-toolbox'), 'npcink_toolbox_faq_timeout', controller?.signal);
+				const response = await postJsonWithTimeout('/editor/content-support', { intent: 'body_faq', ...source }, 45000, __('FAQ generation timed out. Nothing was written.', 'npcink-workflow-toolbox'), 'npcink_toolbox_faq_timeout', controller?.signal);
 				if (active.current !== request) return;
 				if (!bodyFaqMatches(source, bodyFaqSource())) {
 					invalidate();
@@ -6008,6 +6026,7 @@
 					throw new Error('invalid_faq_response');
 				}
 				request.pending = false;
+				request.items = response.items;
 				setItems(response.items);
 				setPhase(response.status);
 			} catch (error) {
@@ -6019,13 +6038,51 @@
 			}
 		}
 
-		async function copySelected() {
+		const checkedItems = items.filter((item, index) => selected[index]);
+
+		function insertSelected() {
 			const request = active.current;
-			if (!request || !bodyFaqMatches(request.source, bodyFaqSource())) {
+			if (!request || request.items !== items || !checkedItems.length) return;
+			if (!bodyFaqMatches(request.source, bodyFaqSource())) {
 				invalidate();
 				return;
 			}
-			const text = items.filter((item, index) => selected[index]).map(({ question, answer }) => `${question}\n${answer}`).join('\n\n');
+			const selector = data.select('core/block-editor');
+			const dispatcher = data.dispatch('core/block-editor');
+			try {
+				const currentBlocks = selector.getBlocks();
+				const title = __('Frequently asked questions', 'npcink-workflow-toolbox');
+				if (!selector.canInsertBlockType('core/heading') || !selector.canInsertBlockType('core/paragraph')) throw new Error('insertion_blocked');
+				const textAsHtml = (text) => richText.toHTMLString({ value: richText.create({ text }) });
+				const additions = hasFinalBodyFaqSection(currentBlocks, title) ? [] : [createBlock('core/heading', { level: 2, content: textAsHtml(title) })];
+				for (const { question, answer } of checkedItems) {
+					additions.push(createBlock('core/heading', { level: 3, content: textAsHtml(`Q: ${question}`) }));
+					additions.push(createBlock('core/paragraph', { content: textAsHtml(`A: ${answer}`) }));
+				}
+				// Retire the preview before the synchronous editor change notifies subscribers.
+				active.current = null;
+				dispatcher.insertBlocks(additions, currentBlocks.length, undefined, false);
+				const tail = selector.getBlocks().slice(currentBlocks.length);
+				if (tail.length !== additions.length || !additions.every(({ clientId }, index) => tail[index].clientId === clientId)) throw new Error('insertion_rejected');
+				setItems([]);
+				setSelected({});
+				setPhase('inserted');
+				setNotice({ status: 'success', message: __('FAQ added to the end of the article in the editor. Save or update when ready.', 'npcink-workflow-toolbox') });
+			} catch {
+				if (bodyFaqMatches(request.source, bodyFaqSource())) active.current = request;
+				else invalidate();
+				setNotice({ status: 'warning', message: __('Could not add the FAQ to the end of this article. Check the editor or copy the selected answers.', 'npcink-workflow-toolbox') });
+			}
+		}
+
+		async function copySelected() {
+			const request = active.current;
+			if (!request || request.items !== items) return;
+			if (!bodyFaqMatches(request.source, bodyFaqSource())) {
+				invalidate();
+				return;
+			}
+			const text = checkedItems.map(({ question, answer }) => `${question}\n${answer}`).join('\n\n');
 			if (!text) return;
 			try {
 				await copyTextToClipboard(text);
@@ -6038,7 +6095,7 @@
 		return createElement(Modal, { title: __('FAQ from article body', 'npcink-workflow-toolbox'), onRequestClose: onClose, size: 'medium' },
 			createElement('p', null, __('Generating sends only the current article body to Cloud, including unsaved edits.', 'npcink-workflow-toolbox')),
 			createElement(Button, { type: 'button', variant: phase === 'ready' ? 'secondary' : 'primary', isBusy: phase === 'running', disabled: phase === 'running', onClick: generate }, __('Generate FAQ', 'npcink-workflow-toolbox')),
-			createElement('div', { role: 'status' },
+			createElement('div', { className: 'npcink-toolbox-editor-support__faq-status', role: 'status' },
 				phase === 'running' ? __('Generating FAQ suggestions…', 'npcink-workflow-toolbox') :
 					phase === 'empty' ? __('No FAQ additions supported by this article body.', 'npcink-workflow-toolbox') :
 						phase === 'stale' ? __('The article changed. Generate again to review current suggestions.', 'npcink-workflow-toolbox') : null
@@ -6048,8 +6105,13 @@
 				createElement('p', null, item.answer),
 				createElement('details', null, createElement('summary', null, __('Evidence from the article', 'npcink-workflow-toolbox')), createElement('blockquote', null, item.evidence))
 			))) : null,
-			phase === 'ready' ? createElement(Button, { type: 'button', variant: 'primary', disabled: !items.some((item, index) => selected[index]), onClick: copySelected }, __('Copy selected FAQ', 'npcink-workflow-toolbox')) : null,
-			notice ? createElement(Notice, { status: notice.status, isDismissible: false }, notice.message) : null
+			phase === 'ready' ? createElement('div', { className: 'npcink-toolbox-editor-support__faq-actions' },
+				createElement(Button, { type: 'button', variant: 'primary', disabled: !checkedItems.length, onClick: insertSelected }, __('Add selected FAQ to the end', 'npcink-workflow-toolbox')),
+				createElement(Button, { type: 'button', variant: 'secondary', disabled: !checkedItems.length, onClick: copySelected }, __('Copy selected FAQ', 'npcink-workflow-toolbox'))
+			) : null,
+			notice ? createElement('div', { className: 'npcink-toolbox-editor-support__faq-notice' },
+				createElement(Notice, { status: notice.status, isDismissible: false }, notice.message)
+			) : null
 		);
 	}
 
@@ -9933,7 +9995,7 @@
 								: (flow.intent === 'source_adaptation_review'
 									? ((sourceExtractionReady || sourceAdaptationComplete || sourceDraftComplete) ? __('Continue', 'npcink-workflow-toolbox') : __('Start', 'npcink-workflow-toolbox'))
 									: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : (flow.intent === 'publish_preflight' ? __('Check article', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox'))));
-							return createElement(
+							const row = createElement(
 								'div',
 								{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : ''), key: flow.intent },
 								createElement('div', { className: 'npcink-toolbox-editor-support__flow-main' },
@@ -9954,7 +10016,6 @@
 										onClick: () => flow.intent === 'source_adaptation_review' ? openSourceAdaptationReview() : runFlow(flow.intent),
 										'aria-label': flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel + ' ' + flow.label,
 									}, flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel),
-									flow.intent === 'publish_preflight' ? createElement(BodyFaqControl, { disabled: Boolean(running) }) : null,
 									flow.intent === 'internal_links' ? createElement(Button, {
 										type: 'button', variant: 'secondary', disabled: Boolean(running),
 										onClick: () => runFlow('related_content'),
@@ -9962,6 +10023,15 @@
 								),
 								createElement(window.NpcinkToolboxContentFormat.Description, { text: flow.description, details: flow.details })
 							);
+							return flow.intent === 'internal_links' ? createElement(
+								Fragment,
+								{ key: flow.intent },
+								row,
+								createElement('div', { className: 'npcink-toolbox-editor-support__flow' },
+									createElement('div', { className: 'npcink-toolbox-editor-support__flow-main' }, createElement('strong', null, 'FAQ')),
+									createElement('div', { className: 'npcink-toolbox-editor-support__flow-actions' }, createElement(BodyFaqControl, { disabled: Boolean(running) }))
+								)
+							) : row;
 						})
 					)
 				)

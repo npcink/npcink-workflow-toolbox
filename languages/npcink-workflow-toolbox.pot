@@ -10891,3 +10891,19 @@ msgstr ""
 
 msgid "The upload limit was read again. This is not a new environment summary."
 msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Add selected FAQ to the end"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Frequently asked questions"
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "FAQ added to the end of the article in the editor. Save or update when ready."
+msgstr ""
+
+#: assets/editor-content-support.js
+msgid "Could not add the FAQ to the end of this article. Check the editor or copy the selected answers."
+msgstr ""

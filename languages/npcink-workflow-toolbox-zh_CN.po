@@ -11382,3 +11382,19 @@ msgstr "已重新检查站点信息。"
 
 msgid "The upload limit was read again. This is not a new environment summary."
 msgstr "已再次读取当前上传上限。这不是新的环境摘要。"
+
+#: assets/editor-content-support.js
+msgid "Add selected FAQ to the end"
+msgstr "将选中的问答添加到文末"
+
+#: assets/editor-content-support.js
+msgid "Frequently asked questions"
+msgstr "常见问题"
+
+#: assets/editor-content-support.js
+msgid "FAQ added to the end of the article in the editor. Save or update when ready."
+msgstr "问答已添加到文末。检查后请手动保存或更新。"
+
+#: assets/editor-content-support.js
+msgid "Could not add the FAQ to the end of this article. Check the editor or copy the selected answers."
+msgstr "无法将问答添加到文末。请检查编辑器限制，或复制选中的问答。"

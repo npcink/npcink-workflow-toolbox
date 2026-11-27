@@ -5,7 +5,12 @@ define( 'ABSPATH', __DIR__ );
 
 class WP_Error {
 	public string $code;
-	public function __construct( string $code, string $message, array $data ) { $this->code = $code; }
+	private string $message;
+	private array $data;
+	public function __construct( string $code, string $message, array $data ) { $this->code = $code; $this->message = $message; $this->data = $data; }
+	public function get_error_code(): string { return $this->code; }
+	public function get_error_message(): string { return $this->message; }
+	public function get_error_data(): array { return $this->data; }
 }
 class WP_REST_Request {
 	private array $params;
@@ -29,6 +34,7 @@ function current_user_can( string $cap, int $id ): bool { return 'edit_post' ===
 function wp_strip_all_tags( string $html ): string { return strip_tags( preg_replace( '~<(script|style)[^>]*>.*?</\1>~is', '', $html ) ); }
 function wp_json_encode( $data, int $flags = 0 ) { return json_encode( $data, $flags ); }
 function wp_generate_uuid4(): string { return 'uuid'; }
+function is_wp_error( $value ): bool { return $value instanceof WP_Error; }
 function rest_ensure_response( array $data ): FAQ_Test_Response { return new FAQ_Test_Response( $data ); }
 function npcink_cloud_addon_execute_toolbox_content_support_runtime( array $payload, string $trace, string $key ) {
 	$GLOBALS['faq_calls'][] = $payload;
@@ -83,6 +89,8 @@ $export = array( 'question' => 'Which plan supports export?', 'answer' => 'Only 
 faq_remote_items( array( $export ) );
 faq_assert( array( $export ) === faq_request( array( 'content' => '<p>Compare which plan supports export before choosing. Only the Pro plan includes export.</p>' ) )->data['items'], 'Do not treat a matching phrase in ordinary prose as an existing question.' );
 faq_assert( 'empty' === faq_request( array( 'content' => '<p>Compare the plans. Which plan supports export？ Only the Pro plan includes export.</p>' ) )->data['status'], 'A whole question sentence with full-width punctuation still suppresses a duplicate.' );
+faq_assert( 'empty' === faq_request( array( 'content' => '<p>Only the Pro plan includes export.</p><h2>Frequently asked questions</h2><h3>Q: Which plan supports export?</h3><p>A: Only the Pro plan includes export.</p>' ) )->data['status'], 'Suppress a question already in the editor’s native Q&A blocks.' );
+faq_assert( 'empty' === faq_request( array( 'content' => '<p>Only the Pro plan includes export.</p><h2>FAQ</h2><h3>Q: Which plan supports export</h3><p>A: Only the Pro plan includes export.</p>' ) )->data['status'], 'An explicit Q label also catches a previous FAQ without final punctuation.' );
 faq_remote_items( array( array_replace( $candidate, array( 'evidence' => 'This is absent.' ) ), $candidate ) );
 faq_assert( array( $candidate ) === faq_request()->data['items'], 'Drop unsupported candidates individually.' );
 faq_remote_items( array( array_replace( $candidate, array( 'evidence' => 'This is absent.' ) ) ) );
@@ -100,5 +108,20 @@ $faq_remote['data']['result']['output_text'] = '{"items":[]}';
 faq_assert( 'npcink_toolbox_faq_cloud' === faq_request()->code, 'An unfinished run is not a successful empty result.' );
 $faq_remote = new WP_Error( 'cloud_unavailable', 'upstream details', array() );
 faq_assert( 'npcink_toolbox_faq_cloud' === faq_request()->code, 'Hide upstream failures and return a stable error.' );
+
+$time_limits = array(
+	array( 'data' => array( 'status' => 'failed', 'error_code' => 'provider.timeout' ) ),
+	new WP_Error( 'cloud_runtime_failed', 'upstream details', array( 'cloud_error_code' => 'provider.timeout' ) ),
+	new WP_Error( 'cloud_runtime_failed', 'upstream details', array( 'cloud_error_data' => array( 'error_code' => 'provider.timeout' ) ) ),
+	new WP_Error( 'cloud_runtime_request_failed', 'Cannot connect. Original error: cURL error 28: Operation timed out.', array( 'status' => 502 ) ),
+);
+foreach ( $time_limits as $faq_remote ) {
+	$before = count( $faq_calls );
+	$error  = faq_request();
+	faq_assert( 'npcink_toolbox_faq_timeout' === $error->code && 504 === $error->get_error_data()['status'] && 'FAQ generation timed out. Nothing was written.' === $error->get_error_message(), 'Use safe timeout guidance for known timeouts.' );
+	faq_assert( $before + 1 === count( $faq_calls ), 'No automatic retry after timeout.' );
+}
+$faq_remote = new WP_Error( 'cloud_runtime_request_failed', 'cURL error 7: connection refused', array( 'status' => 502 ) );
+faq_assert( 'npcink_toolbox_faq_cloud' === faq_request()->code, 'Other transport failures stay distinct from timeouts.' );
 
 echo "Editor body FAQ request behavior passed.\n";

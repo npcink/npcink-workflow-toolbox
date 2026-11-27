@@ -1,5 +1,5 @@
 <?php
-/** Copy-only FAQ suggestions grounded in the current editor body. */
+/** Read-only FAQ suggestions grounded in the current editor body. */
 
 namespace Npcink_Toolbox;
 
@@ -82,6 +82,9 @@ final class Editor_Body_FAQ {
 		$trace  = 'editor_body_faq_' . wp_generate_uuid4();
 		$remote = npcink_cloud_addon_execute_toolbox_content_support_runtime( $payload, $trace, $trace );
 		if ( ! is_array( $remote ) || 'succeeded' !== ( $remote['data']['status'] ?? null ) ) {
+			if ( self::is_timeout( $remote ) ) {
+				return new WP_Error( 'npcink_toolbox_faq_timeout', __( 'FAQ generation timed out. Nothing was written.', 'npcink-workflow-toolbox' ), array( 'status' => 504 ) );
+			}
 			return new WP_Error( 'npcink_toolbox_faq_cloud', __( 'FAQ generation is temporarily unavailable. Try again later.', 'npcink-workflow-toolbox' ), array( 'status' => 502 ) );
 		}
 		$result = $remote['data']['result'] ?? null;
@@ -101,6 +104,22 @@ final class Editor_Body_FAQ {
 		);
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;
+	}
+
+	private static function is_timeout( $remote ): bool {
+		if ( is_array( $remote ) ) {
+			return 'provider.timeout' === ( $remote['data']['error_code'] ?? null );
+		}
+		if ( ! is_wp_error( $remote ) ) {
+			return false;
+		}
+		$data = $remote->get_error_data();
+		if ( 'provider.timeout' === ( $data['cloud_error_code'] ?? null ) || 'provider.timeout' === ( $data['cloud_error_data']['error_code'] ?? null ) ) {
+			return true;
+		}
+		// The installed Addon wraps cURL transport timeouts in a generic request error.
+		return 'cloud_runtime_request_failed' === $remote->get_error_code()
+			&& 1 === preg_match( '/\bcURL error 28\b/i', $remote->get_error_message() );
 	}
 
 	private static function too_long(): WP_Error {
@@ -158,7 +177,8 @@ final class Editor_Body_FAQ {
 		// Compare complete, explicitly punctuated questions, not fragments of prose.
 		foreach ( preg_split( '/\R|(?<=[!?。！？])|(?<=\.)\h+/u', $body ) ?: array() as $sentence ) {
 			$sentence = self::compact( $sentence );
-			if ( preg_match( '/[?？]$/u', $sentence ) ) {
+			if ( preg_match( '/[?？]$|^Q\s*[:：]/iu', $sentence ) ) {
+				$sentence                                = preg_replace( '/^Q\s*[:：]\s*/iu', '', $sentence ) ?? $sentence;
 				$keys[ self::question_key( $sentence ) ] = true;
 			}
 		}

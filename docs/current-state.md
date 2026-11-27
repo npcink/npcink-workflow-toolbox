@@ -204,7 +204,8 @@ above closes them and the five warnings. See [Known Issues](known-issues.md).
 This is source/package verification, not a new WordPress.org release.
 
 **Current-article FAQ preview — 2026-11-25:** the operator approved a narrow
-[copy-only article editor action](editor-body-faq-v1.md). It is separate from
+[article editor action](editor-body-faq-v1.md) with copy and explicit native
+editor insertion at the end of the current article. It is separate from
 the normal Article check request. The SEO/AEO/GEO specialist pause remains.
 
 **Article check convergence — 2026-11-09:** the operator approved four default

@@ -494,9 +494,11 @@ The standalone discoverability button may render post-publish optimization
 tasks and expose the same SEO Adapter/Core apply action. Excerpt and slug
 suggestions may update the current editor draft only after an explicit operator
 click; slug application must show a permalink-risk confirmation, with stronger
-warning for already published posts. FAQ, answer-summary, GEO-summary, and
-schema suggestions remain review notes or copyable candidates unless a
-separate governed write path exists.
+warning for already published posts. Answer-summary, GEO-summary, and schema
+suggestions remain review notes or copyable candidates unless a separate
+governed write path exists. The [current-article FAQ action](editor-body-faq-v1.md)
+may additionally append explicitly selected, reviewed Q&A as visible native
+blocks in the one current editor under ADR-006, without any Toolbox persistence.
 A future direct apply path for one current post's excerpt plus existing
 category/tag ids must not be treated as Local Admin Consent expansion. It
 would first require a `strong_local_confirmation` UX and audit contract with

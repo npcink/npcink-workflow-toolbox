@@ -1,8 +1,8 @@
 # Current-article FAQ preview
 
-Toolbox owns the Gutenberg preview and clipboard action. The author explicitly
-requests generation under Article check. Existing Cloud Addon content-support
-transport runs one inline text request; no new provider, ability, runtime or
+Toolbox owns the Gutenberg preview, insertion, and clipboard actions. The author explicitly
+requests generation in the FAQ row immediately below Site citation suggestions.
+The existing Cloud Addon transport runs one inline text request; no new provider, ability, runtime or
 Core write handoff is needed. The sidebar explains the transfer before the click.
 
 `POST /editor/content-support` accepts the JSON fields `intent: "body_faq"`,
@@ -18,6 +18,14 @@ metadata is not forwarded. Only plain body text is supplied as evidence: no
 post ID, title, excerpt, site profile, knowledge retrieval, external search,
 media or hidden block attributes.
 
+Known provider and HTTP transport timeouts surface a safe FAQ timeout message.
+The author can retry manually; the same model budget and no-retry policy apply.
+The Cloud execution budget is 30 seconds. An Addon with FAQ transport headroom
+uses a 40-second minimum HTTP timeout for the fixed content-support contract
+with the `editor_body_faq_` idempotency namespace; the browser waits up to 45
+seconds. The margin is local to the Addon and does not change the signed Cloud
+payload or the deadline for other content-support requests.
+
 Successful `editor_body_faq.v1` returns `status` (`ready` or `empty`), the local
 `post_id`, `items` (0–3 `{question, answer, evidence}`), `suggestion_only` posture,
 and `direct_wordpress_write: false`. Invalid provider output is distinct from
@@ -31,13 +39,21 @@ are suppressed; matching
 words within ordinary prose are not. The author reviews each answer against
 its evidence. No rendered or model-supplied HTML is inserted.
 
-Only checked question/answer text goes to the clipboard. The UI disables copy
-when the current post/body no longer matches the request and checks again on
-copy. Results are temporary. The author pastes and saves manually. No automatic
-insertion, save, post metadata, schema, batch generation or specialist unpause.
+Checking a question does not edit the article. An explicit **Add selected FAQ
+to the end** click appends only the checked question/answer pairs to the current
+article's visible, editable Gutenberg state in one action. It uses a native H2
+section heading (or reuses a final FAQ section with recognizable H3 question
+and answer paragraph pairs), H3 questions prefixed `Q:`, and
+answer paragraphs prefixed `A:`. Candidate text is encoded as text, never as
+model-supplied HTML; evidence stays in the preview. The action checks the exact
+post/body and root block permissions and can be undone with native editor Undo.
+The secondary clipboard action still copies only the checked plain-text pairs.
+Both actions expire when the post/body changes. Results are temporary. The
+author alone saves or publishes through WordPress (`native_editor_commit`). No
+backend write, post metadata, schema, batch generation or specialist unpause.
 
 Verify permissions, body-only payload, empty/error separation, duplicate and
-missing evidence rejection, and stale response/copy blocking in focused tests.
+missing evidence rejection, and stale response/copy/insertion blocking in focused tests.
 The development smoke uses isolated WordPress/Gutenberg and a controlled
 provider. This validates request, editor and clipboard behavior, not Cloud
 connectivity, answer quality, or production availability.
@@ -59,3 +75,15 @@ Both used `gpt-6.1-sol`, one provider call each, no fallback and `pii` /
 `no_store`. The outbound source matched only the synthetic body, and the local
 post fingerprint was unchanged. This is a two-sample result on a development
 runtime, not general answer-quality, installed-browser or production acceptance.
+
+## Local integration check (2026-11-27)
+
+On the local `magick-ai.local` credential-check snapshot with FAQ adoption and
+Addon timeout headroom, the authenticated Gutenberg smoke used a temporary draft
+with a handwritten final FAQ and deterministic candidate responses. It verified
+entry placement, the credential guard, selected-only copy and insertion,
+two appends under one heading, native Undo, no save request or stored-body
+change before Save draft, persistence after reopening, and the local theme's
+authenticated draft preview. The controls fit at 1440 px and 390 px. The draft
+was never published and was removed after the check. This does not measure
+current Cloud response time or model quality.
