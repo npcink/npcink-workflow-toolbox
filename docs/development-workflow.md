@@ -433,6 +433,25 @@ The [2026-10-26 five-session audit](session-closeout-audit-2026-10-26.md)
 applies this gate, including the retired local OCR route. This is a Git and
 documentation handoff rule, not a new runtime, approval store or write lane.
 
+### Installed WordPress asset verification
+
+When reviewing a local plugin update, build from the exact reviewed commit
+in an isolated directory, retain the prior installation for rollback, and
+record the package revision independently of the development checkout.
+After switching, confirm the actual PHP load path, then inspect the CSS and
+JS URLs emitted by the logged-in admin page. Confirm those URLs serve the
+expected package bytes, the stylesheet applies, and the target control is
+usable after initialization. A successful homepage, CLI activation or direct
+request to a guessed asset URL does not prove the page uses that asset.
+
+If a link target changed and the page emits an old filesystem path, check
+for stale PHP opcode or realpath state. After identifying the affected local
+site, reload only its PHP workers and repeat the logged-in check. If the
+link-based install is unreliable, use a real plugin directory and retain a
+rollback copy. For an old admin bookmark, verify both the authorized redirect
+and the absence of a separate menu; a redirect to the login screen is not
+acceptance. See the [credential check installation](article-credential-check-closeout-2026-11-27.md#evidence-and-installation).
+
 ### Evidence rules for external audits
 
 - Verify each finding against an exact revision and the actual entry point,

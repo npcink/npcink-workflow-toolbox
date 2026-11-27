@@ -19,7 +19,8 @@ editor findings can be reviewed and replaced in native editor state; the
 administrator site scan covers saved titles, excerpts and bodies without
 uploading or editing them. Article check and FAQ recheck derived outbound text
 in WordPress, blocking known formats and only warning on generic assignments.
-See [the v1 contract](article-credential-check-v1.md).
+See [the v1 contract](article-credential-check-v1.md) and the
+[installation and recovery handoff](article-credential-check-closeout-2026-11-27.md).
 
 **Smart Ask live acceptance update — 2026-11-26:** PR [#431](https://github.com/npcink/npcink-workflow-toolbox/pull/431)
 is merged at `05557ed308bea4c476d8823aac7d39b584aa050e` and the active local
