@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -46,6 +46,28 @@ try {
 		if (name !== 'editor-content-format') {
 			assertEarlyFailure(name, { WP_PATH: root }, /Set WP_BASE_URL/);
 		}
+	}
+
+	const log = join(sandbox, 'cli log');
+	const artifacts = join(sandbox, 'artifacts');
+	writeFileSync(php, '#!/bin/sh\nprintf "%s\\n" "$@" >> "$CLI_LOG"\nprintf "%s\\n" "https://other.local"\n');
+	const readingEnv = { ...env, CLI_LOG: log, SMOKE_ARTIFACT_DIR: artifacts, NPCINK_RELATED_READING_SANDBOX: '1', SOURCE_POST_ID: '42' };
+	assertEarlyFailure('related-reading', { ...readingEnv, NPCINK_RELATED_READING_SANDBOX: '' }, /disposable-sandbox acknowledgement/);
+	assertEarlyFailure('related-reading-real-site', { ...readingEnv, WP_PATH: root, WP_BASE_URL: 'https://reading.local', SOURCE_POST_ID: '0' }, /positive SOURCE_POST_ID/);
+	assertEarlyFailure('related-reading-real-site', { ...readingEnv, WP_PATH: root, WP_BASE_URL: 'https://reading.test' }, /restricted to a local site/);
+	for (const name of ['related-reading', 'related-reading-real-site']) {
+		assertEarlyFailure(name, readingEnv, /Set WP_PATH/);
+		assertEarlyFailure(name, { ...readingEnv, WP_PATH: sandbox }, /containing wp-load.php/);
+		assertEarlyFailure(name, { ...readingEnv, WP_PATH: root }, /Set WP_BASE_URL/);
+		assertEarlyFailure(name, { ...readingEnv, WP_PATH: root, WP_BASE_URL: 'https://reading.local/?query=1' }, /without credentials/);
+		assert.equal(existsSync(log), false, name);
+		assertEarlyFailure(name, { ...readingEnv, WP_PATH: root, WP_BASE_URL: 'https://reading.local/' }, /CLI.*browser.*same/);
+		assert.deepEqual(readFileSync(log, 'utf8').trim().split('\n'), [
+			'-d', 'display_errors=0', '-d', 'error_reporting=8191', '-f', wp, '--',
+			`--path=${root}`, '--no-color', 'option', 'get', 'home',
+		], name);
+		assert.equal(existsSync(artifacts), false, name);
+		rmSync(log);
 	}
 } finally {
 	rmSync(sandbox, { recursive: true, force: true });

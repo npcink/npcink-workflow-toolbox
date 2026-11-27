@@ -37,9 +37,12 @@ and repeated research stay frozen under the decision's restart rules.
 - **Remaining audit maintenance (Toolbox tooling).** The four insight-pack Cloud
   QA wrappers, the five-plugin acceptance, and the Site Knowledge Cloud Addon
   bridge smoke now require an explicit WordPress root. The last two are checked
-  offline before any real WP-CLI use. Other browser smoke
-  defaults should be removed in focused groups; validate each group without
-  connecting to a live site by default. PHPStan 2.3.7 landed independently in
+  offline before any real WP-CLI use. Both related-reading browser smokes now
+  require an explicit WordPress root and site URL, and use portable WP-CLI
+  settings. The offline browser target gate verifies that a mismatch stops
+  before fixture writes; real-site acceptance is separate. Revisit other
+  machine-specific defaults in focused groups when they affect a supported
+  command. PHPStan 2.3.7 landed independently in
   [#414](https://github.com/npcink/npcink-workflow-toolbox/pull/414) with the
   same 48 baseline rules at that revision. The first focused reduction leaves
   46 rules: the Site Check handling panel always supplies its internally built

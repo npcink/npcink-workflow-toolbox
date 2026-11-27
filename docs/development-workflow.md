@@ -642,11 +642,16 @@ Set `NPCINK_RECOMMENDATION_VERSION=v2` when the tested runtime reports v2;
 the harness deliberately rejects a mismatched expected ranking version.
 Copied source drafts preserve title, excerpt and body so test identifiers do
 not consume bounded query text. The distinct
-`composer smoke:related-reading-real-site-browser` command accepts `.local`
+`composer smoke:related-reading-browser` fixture also requires an explicit
+`WP_PATH` and `WP_BASE_URL`, plus `NPCINK_RELATED_READING_SANDBOX=1`.
+The separate `composer smoke:related-reading-real-site-browser` command accepts `.local`
 sites only, creates one disposable draft from `SOURCE_POST_ID`, uses real
 Cloud results and verifies list insertion, Undo, native save, reload and
 developer-feedback receipts. Supply matching `WP_PATH`/`WP_BASE_URL`, PHP/WP
-CLI/socket settings and a fresh `SMOKE_ARTIFACT_DIR`; run browser smokes serially.
+CLI/socket overrides as needed and a fresh `SMOKE_ARTIFACT_DIR`; run browser
+smokes serially. Both commands use the shared WP-CLI runner and compare the
+CLI site's `home` with the browser URL before any fixture write. The offline
+`composer test:browser-smoke-target` gate covers rejection and forwarding only.
 See [original-site acceptance](recommendation-original-site-acceptance-2026-10-28.md)
 for the reproducible invocation, failed attempts and corpus limitation.
 
