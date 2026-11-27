@@ -1687,6 +1687,21 @@
 	line-height: 1.35;
 }
 
+.npcink-toolbox-editor-support__faq-status:not(:empty),
+.npcink-toolbox-editor-support__faq-notice {
+	margin-block-start: 12px;
+}
+
+.npcink-toolbox-editor-support__faq-notice .components-notice {
+	margin: 0;
+}
+
+.npcink-toolbox-editor-support__faq-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
 .npcink-toolbox-editor-support__image-modal .components-modal__content {
 	width: min(1240px, calc(100vw - 32px));
 	min-width: 0;
