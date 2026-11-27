@@ -2,21 +2,19 @@
 // Environment-dependent real Gutenberg smoke. Retrieval is a deterministic
 // fixture; target REST reads, editing and native save use real WordPress.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { requireSmokeBaseUrl, requireSmokeWordPressPath, runSmokeWpCli } from './browser-smoke-target.mjs';
+assert.equal(process.env.NPCINK_RELATED_READING_SANDBOX, '1', 'Explicit disposable-sandbox acknowledgement is required');
+const root = requireSmokeWordPressPath();
+const base = requireSmokeBaseUrl();
+function wp(...args) {
+ return runSmokeWpCli(root, args);
+}
+assert.equal(wp('option', 'get', 'home').replace(/\/+$/, ''), base, 'CLI database and browser URL must identify the same isolated site');
 const require = createRequire(import.meta.url);
 const { chromium } = require(require.resolve('playwright', { paths: String(process.env.NODE_PATH || '').split(':').filter(Boolean) }));
-assert.equal(process.env.NPCINK_RELATED_READING_SANDBOX, '1', 'Explicit disposable-sandbox acknowledgement is required');
-const root = process.env.WP_PATH;
-assert.ok(root, 'WP_PATH must identify a disposable local test installation');
-const base = process.env.WP_BASE_URL || 'http://127.0.0.1:8936';
-const php = process.env.WP_CLI_PHP || 'php';
-function wp(...args) {
- return execFileSync(php, ['-d', 'display_errors=0', '-d', 'error_reporting=8191', process.env.WP_CLI_BIN || '/opt/homebrew/bin/wp', '--path=' + root, '--no-color', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
-}
-assert.equal(wp('option', 'get', 'home').replace(/\/$/, ''), base.replace(/\/$/, ''), 'CLI database and browser URL must identify the same isolated site');
 const fixtureIds = [];
 const token = randomBytes(24).toString('hex');
 const loginFile = `${root}/reading-login-${token}.php`;

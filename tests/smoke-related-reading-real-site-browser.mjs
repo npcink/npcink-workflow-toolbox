@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 // Real local-site Cloud retrieval; writes only one disposable draft. No response fixtures.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { randomBytes, createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createFreshCloudProbe } from './fresh-cloud-probe.mjs';
-const require = createRequire(import.meta.url);
-const { chromium } = require(require.resolve('playwright', { paths: String(process.env.NODE_PATH || '').split(':').filter(Boolean) }));
-const root = process.env.WP_PATH;
-const base = process.env.WP_BASE_URL;
+import { requireSmokeBaseUrl, requireSmokeWordPressPath, runSmokeWpCli } from './browser-smoke-target.mjs';
+const root = requireSmokeWordPressPath();
+const base = requireSmokeBaseUrl();
 const sourceId = Number(process.env.SOURCE_POST_ID);
-assert.ok(root && base && Number.isInteger(sourceId) && sourceId > 0, 'WP_PATH, WP_BASE_URL and positive SOURCE_POST_ID required');
+assert.ok(Number.isInteger(sourceId) && sourceId > 0, 'A positive SOURCE_POST_ID is required');
 assert.ok(new URL(base).hostname.endsWith('.local'), 'This acceptance harness is restricted to a local site');
 function wp(...args) {
- return execFileSync(process.env.WP_CLI_PHP || 'php', ['-d', 'display_errors=0', '-d', 'error_reporting=8191', '-d', `mysqli.default_socket=${process.env.WP_DB_SOCKET || ''}`, process.env.WP_CLI_BIN || '/opt/homebrew/bin/wp', '--path=' + root, '--no-color', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+ return runSmokeWpCli(root, args);
 }
-assert.equal(wp('option', 'get', 'home').replace(/\/$/, ''), base.replace(/\/$/, ''), 'CLI and browser target the same local site');
+assert.equal(wp('option', 'get', 'home').replace(/\/+$/, ''), base, 'CLI and browser target the same local site');
+const require = createRequire(import.meta.url);
+const { chromium } = require(require.resolve('playwright', { paths: String(process.env.NODE_PATH || '').split(':').filter(Boolean) }));
 const source = JSON.parse(wp('post', 'get', String(sourceId), '--format=json'));
 assert.equal(source.post_status, 'publish');
 const sourceHash = createHash('sha256').update(source.post_content).digest('hex');
