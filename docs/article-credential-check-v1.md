@@ -5,10 +5,11 @@ WordPress article content:
 
 - **Current article:** Check credentials under Article check scans the edited
   title, excerpt, serialized body and loaded block attributes. Its report
-  shows only rule types and locations. Each reviewed plain-text value in a
+  shows only rule types and locations, including matches split by inline
+  formatting. Each reviewed plain-text value in a
   supported, editable block can be replaced with a fixed placeholder. Other
   matches, including key files, connection strings, encoded text and link
-  attributes, require manual edits. The author reviews, undoes or saves with
+  attributes or inline formatting, require manual edits. The author reviews, undoes or saves with
   WordPress. The native first-publish confirmation panel warns without blocking.
 - **Site scan:** Toolbox Start contains the administrator-only scan of saved
   article titles, excerpts and bodies, collapsed by default. There is no separate Articles menu item; a

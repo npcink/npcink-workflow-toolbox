@@ -20,6 +20,22 @@ assert.equal(items.length, 4);
 assert.equal(items[2].span, undefined, 'HTML attributes are manual only');
 assert.equal(items[3].span, null, 'Encoded text is manual only');
 assert.equal(scan({ ...source, content: 'a'.repeat(config.maxBytes + 1) }).partial, true);
+const splitToken = `${token.slice(0, 2)}<strong>${token.slice(2)}</strong>`;
+const formatted = { ...link, attributes: { content: splitToken } };
+const splitBody = { intent: 'body_faq', post_id: 7, content: `<!-- wp:paragraph --><p>${splitToken}</p><!-- /wp:paragraph -->` };
+const formattedFinding = scan({ ...source, content: splitBody.content, blocks: [formatted] }).items[0];
+assert.equal(formattedFinding.block.clientId, 'c2');
+assert.equal(formattedFinding.span, undefined, 'Never replace using projected offsets');
+assert.equal(scan({ ...source, excerpt: splitToken, blocks: [] }).items[0].location, 'Excerpt');
+assert.equal(scan({ ...source, content: splitBody.content, blocks: [] }).items[0].location, 'Article body (manual review)');
+for (const intent of ['body_faq', 'publish_preflight']) {
+	const payload = { ...splitBody, intent };
+	assert.throws(() => guardTransfer('/editor/content-support', payload), { code: 'npcink_article_credential_check_hit' });
+	const [finding] = transferFindings(payload, [formatted]).items;
+	assert.equal(finding.block.clientId, 'c2');
+	assert.equal(finding.span, undefined);
+	assert.doesNotThrow(() => guardTransfer('/editor/content-support', { ...payload, content: `<p>gh</p><p>${token.slice(2)}</p>` }));
+}
 
 let current = block;
 let postId = 7;

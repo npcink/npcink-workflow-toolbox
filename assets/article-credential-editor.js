@@ -29,6 +29,16 @@
 		});
 	}
 
+	function withoutMarkup(text) {
+		// Keep the same block separators as the PHP projection without rendering article HTML.
+		return text.replace(/<!--(?:[^-]|-(?!->))*-->|<\/?[a-z][\w:-]*(?=[\s/>])(?:[^<>"']|"[^"]*"|'[^']*')*>/gi, (tag) =>
+			/^<(?:br(?=[\s/>])|\/(?:p|h[1-6]|li|div|pre|blockquote|td|th|tr|figcaption)\s*>)/i.test(tag) ? '\n' : '');
+	}
+
+	function matchesEither(text, projected, rule) {
+		return matches(text, rule).length || (projected !== text && matches(projected, rule).length);
+	}
+
 	function matches(text, rule, firstOnly = true) {
 		const decoded = decode(text);
 		const found = [];
@@ -63,18 +73,22 @@
 
 	function transferStatus(payload) {
 		let bytes = 0;
-		for (const { text } of transferFields(payload)) {
+		for (const { kind, text, client_id: clientId } of transferFields(payload)) {
 			if (typeof text !== 'string') continue;
 			bytes += encoder.encode(text).length;
 			if (bytes > config.maxBytes * 2) return limitCode;
-			if (rules.some((rule) => !rule.advisory && matches(text, rule).length)) return hitCode;
+			const projected = kind === 'body' && !clientId ? withoutMarkup(text) : text;
+			if (rules.some((rule) => !rule.advisory && matchesEither(text, projected, rule))) return hitCode;
 		}
 		return '';
 	}
 
 	function hasAdvisory(fields) {
-		return fields.some((text) => typeof text === 'string' && text.length <= config.maxBytes && encoder.encode(text).length <= config.maxBytes
-			&& rules.some((rule) => rule.advisory && matches(text, rule).length));
+		return fields.some((text) => {
+			if (typeof text !== 'string' || text.length > config.maxBytes || encoder.encode(text).length > config.maxBytes) return false;
+			const projected = withoutMarkup(text);
+			return rules.some((rule) => rule.advisory && matchesEither(text, projected, rule));
+		});
 	}
 
 	function Advisory({ bodyOnly = false, selection = '' } = {}) {
@@ -113,8 +127,9 @@
 			if (typeof text !== 'string') continue;
 			bytes += encoder.encode(text).length;
 			if (bytes > config.maxBytes * 2) { partial = true; break; }
+			const projected = kind === 'body' && !clientId ? withoutMarkup(text) : text;
 			for (const rule of rules) {
-				if (!matches(text, rule).length) continue;
+				if (!matchesEither(text, projected, rule)) continue;
 				if (kind === 'title' || kind === 'excerpt' || kind === 'selection' || kind === 'instruction') {
 					const locations = { title: __('Title', 'npcink-workflow-toolbox'), excerpt: __('Excerpt', 'npcink-workflow-toolbox'), selection: __('Selected text', 'npcink-workflow-toolbox'), instruction: __('Instruction', 'npcink-workflow-toolbox') };
 					push({ location: locations[kind], rule });
@@ -132,6 +147,7 @@
 					matchingValues(text, rule, collect);
 					const decoded = decode(text);
 					if (decoded !== text) matchingValues(decoded, rule, collect);
+					if (projected !== text) matchingValues(decode(projected), rule, collect);
 					body.set(rule, { values, located: new Set() });
 				}
 			}
@@ -148,6 +164,7 @@
 			const serialized = JSON.stringify(attrs);
 			blockBytes += encoder.encode(serialized).length;
 			if (index > 5000 || blockBytes > config.maxBytes) { partial = true; break; }
+			const projected = withoutMarkup(value);
 			for (const [rule, { values, located }] of body) {
 				const editable = block.isValid !== false && rule.replacement && !/[<>]/.test(value);
 				const covered = new Set();
@@ -159,11 +176,13 @@
 					located.add(exact);
 					push({ location, rule, block, field, span });
 				}
-				matchingValues(decode(serialized), rule, (exact) => {
+				const locate = (exact) => {
 					if (!values.has(exact)) return;
 					located.add(exact);
 					if (!covered.has(exact)) push({ location, rule, block });
-				});
+				};
+				matchingValues(decode(serialized), rule, locate);
+				if (projected !== value) matchingValues(decode(projected), rule, locate);
 			}
 			for (const rule of byBlock.get(block.clientId) || []) {
 				if (![...rows.values()].some((row) => row.block === block && row.rule === rule)) push({ location, rule, block });
@@ -186,7 +205,8 @@
 			else partial = true;
 		};
 		for (const [text, location] of [[title, __('Title', 'npcink-workflow-toolbox')], [excerpt, __('Excerpt', 'npcink-workflow-toolbox')]]) {
-			for (const rule of rules) if (matches(text, rule).length) push({ location, rule });
+			const projected = withoutMarkup(text);
+			for (const rule of rules) if (matchesEither(text, projected, rule)) push({ location, rule });
 		}
 		const stack = [...blocks].reverse();
 		let index = 0;
@@ -200,11 +220,12 @@
 			bytes += encoder.encode(serialized).length;
 			if (bytes > config.maxBytes || index > 5000) { partial = true; break; }
 			const text = fieldText(attrs[field]);
+			const projected = withoutMarkup(text);
 			const editable = block.isValid !== false && !/[<>]/.test(text);
 			for (const rule of rules) {
 				const inBlock = matches(serialized, rule);
 				const inField = matches(text, rule, !rule.replacement || !editable);
-				if (!inBlock.length && !inField.length) continue;
+				if (!inBlock.length && !inField.length && (projected === text || !matches(projected, rule).length)) continue;
 				unknown.add(rule.id);
 				if (editable && rule.replacement && inField.length) {
 					for (const span of inField) push({ location, rule, block, field, span });
@@ -215,8 +236,9 @@
 			}
 			for (let i = (block.innerBlocks || []).length - 1; i >= 0; i--) stack.push(block.innerBlocks[i]);
 		}
+		const projected = withoutMarkup(content);
 		for (const rule of rules) {
-			if (!unknown.has(rule.id) && matches(content, rule).length) push({ location: __('Article body (manual review)', 'npcink-workflow-toolbox'), rule });
+			if (!unknown.has(rule.id) && matchesEither(content, projected, rule)) push({ location: __('Article body (manual review)', 'npcink-workflow-toolbox'), rule });
 		}
 		return { items, partial };
 	}
