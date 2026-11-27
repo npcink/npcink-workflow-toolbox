@@ -543,8 +543,11 @@ for `v1.13.3`; annotated tag object
 Bump the pin deliberately, recording the new tag-to-commit pair, the same
 way any other CI dependency is bumped.
 
-This pin fixes the Action source commit, not the installed CLI version. The
-Action defaults `ocr_version` to `latest` and installs that CLI dynamically.
+The Action source pin does not pin the installed CLI. The template and
+Toolbox workflow explicitly set `ocr_version: '1.14.4'` for every retry
+attempt instead of accepting the Action's `latest` default. Update the Action
+SHA and the CLI version deliberately and independently; keep all attempts on
+the same CLI version. Existing repository copies are unchanged until synced.
 The v1.13.0 and v1.13.3 Action definitions are byte-identical; updating the
 source pin does not prove a fix for the observed CLI HTTP 400 failures or
 restore advisory review delivery.
