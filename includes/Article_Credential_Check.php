@@ -69,16 +69,16 @@ final class Article_Credential_Check {
 			'npcink-toolbox-credential-admin',
 			'NpcinkArticleCredentialAdmin',
 			array(
-				'url'    => admin_url( 'admin-ajax.php' ),
-				'action' => self::ACTION,
-				'nonce'  => wp_create_nonce( self::ACTION ),
-				'labels' => array_map( static fn( array $rule ): string => $rule['label'], Article_Credential_Rules::definitions() ),
+				'url'       => admin_url( 'admin-ajax.php' ),
+				'action'    => self::ACTION,
+				'nonce'     => wp_create_nonce( self::ACTION ),
+				'labels'    => array_map( static fn( array $rule ): string => $rule['label'], Article_Credential_Rules::definitions() ),
 				'locations' => array(
 					'title'   => __( 'Title', 'npcink-workflow-toolbox' ),
 					'excerpt' => __( 'Excerpt', 'npcink-workflow-toolbox' ),
 					'body'    => __( 'Body', 'npcink-workflow-toolbox' ),
 				),
-				'advisory' => array_keys( array_filter( Article_Credential_Rules::definitions(), static fn( array $rule ): bool => ! empty( $rule['advisory'] ) ) ),
+				'advisory'  => array_keys( array_filter( Article_Credential_Rules::definitions(), static fn( array $rule ): bool => ! empty( $rule['advisory'] ) ) ),
 			)
 		);
 	}
@@ -170,13 +170,20 @@ final class Article_Credential_Check {
 			}
 			++$scanned;
 			$findings = array();
-			foreach ( array( 'title' => $saved->post_title, 'excerpt' => $saved->post_excerpt, 'body' => $saved->post_content ) as $field => $text ) {
+			foreach ( array(
+				'title'   => $saved->post_title,
+				'excerpt' => $saved->post_excerpt,
+				'body'    => $saved->post_content,
+			) as $field => $text ) {
 				if ( '' === $text ) {
 					continue;
 				}
 				$types = array_unique( array_merge( Article_Credential_Rules::categories( $text ), Article_Credential_Rules::categories( Article_Credential_Rules::without_markup( $text ) ) ) );
 				foreach ( $types as $type ) {
-					$findings[] = array( 'field' => $field, 'type' => $type );
+					$findings[] = array(
+						'field' => $field,
+						'type'  => $type,
+					);
 				}
 			}
 			if ( $findings ) {

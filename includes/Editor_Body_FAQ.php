@@ -133,7 +133,7 @@ final class Editor_Body_FAQ {
 	private static function body_text( string $content ): string {
 		// Preserve real block boundaries without rendering dynamic blocks or shortcodes.
 		$text = html_entity_decode( Article_Credential_Rules::without_markup( $content ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		$text    = preg_replace( '/[\h\x00-\x08\x0B\x0C\x0E-\x1F]+/u', ' ', $text ) ?? '';
+		$text = preg_replace( '/[\h\x00-\x08\x0B\x0C\x0E-\x1F]+/u', ' ', $text ) ?? '';
 		return trim( preg_replace( '/\h*\R\s*/u', "\n", $text ) ?? '' );
 	}
 
