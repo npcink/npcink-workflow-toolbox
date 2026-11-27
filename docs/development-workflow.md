@@ -139,12 +139,29 @@ This gate is not a new product feature. Do not add summary/category/tag
 generation, a second write path, a local queue, workflow runtime, Cloud
 WordPress writes, or Core final execution to satisfy it.
 
+## CI and Merge Protection
+
+The `PHP contracts` job runs the default suite and WordPress.org guard.
+`Static analysis (advisory)` runs PHPStan, PHPCS and the default suite on PHP
+8.4. Keep running the analysis for affected changes: an advisory job still
+reports failures. Workflow job names and comments do not define GitHub merge
+protection.
+
+On 2026-11-27, GitHub's `master` branch protection reported strict required
+status checks `PHP contracts` and `PR body contract`; no branch ruleset added
+a required status check. Recheck the live rule before changing a check name
+or publishing gate. This observation does not change either configuration.
+
 ## Local AI Review
 
-The [active review policy](platform/ai-code-review-standard-v1.md) follows the
-2026-11-03 operator decision: the configured Qwen or DeepSeek model provides
-local advisory review; required deterministic CI checks remain mandatory. Cloud AI review and the earlier
-OpenCodeReview lane are retired.
+The [active review policy](platform/ai-code-review-standard-v1.md) authorizes
+the configured Qwen, DeepSeek or exact `gpt-6.1-sol` model for local advisory
+review. Required deterministic checks remain mandatory. Cloud AI review and
+the earlier OpenCodeReview lane are retired.
+
+On 2026-11-27, GitHub Actions reported `.github/workflows/ocr-review.yml` as
+`disabled_manually`. Its source is retained as a historical template, not an
+active gate. Do not re-enable, rerun or configure its secrets for current PRs.
 
 After committing the focused diff, run one bounded review using a new receipt
 path outside the tracked source tree:
@@ -1461,6 +1478,13 @@ rollback materials outside disposable worktrees. Never clean another task's
 resources based on age, name or clean status alone.
 
 ## Operator Maintenance Closeout
+
+For external audit feedback, record the report's revision and target before
+checking its claims against current source and the owning contract. Classify
+each item as fixed, already resolved, deferred, or still unverified. Move
+actionable follow-ups and their restart conditions to [Known Issues](known-issues.md#open);
+keep dated reports as evidence, not as a second work queue. Keep Current State
+short and use the [catalog](catalog.md) to preserve historical discoverability.
 
 Feature-convergence and integration closeouts must separate implemented fixes,
 intentional pauses, conditional release/quality acceptance and unresolved incidents.

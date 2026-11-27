@@ -28,19 +28,20 @@ are separate acceptance questions. The operator uses the product, provides
 ordinary feedback, and makes final decisions; developer evidence is not human
 adoption evidence.
 
-The admin surface has **Start**, **Site & Ask**, and **Image Handling** tabs;
+The admin surface has **Start**, **Site & Ask**, and **Image Processing** tabs
+(`tools` is the stable Image Processing slug);
 Site & Ask defaults to Smart Ask. Site Profile and manual Site Check are
 support-only views; Start support details and legacy URLs keep them accessible.
 See the [current IA](admin-ia-site-and-ask-v1.md).
 SEO/AEO/GEO specialist entrypoints, Cloud inspection/site analysis, new audio
-generation, and media optimization remain paused under the
+generation, and advanced-media batch/legacy execution remain paused under the
 [specialist pause](seo-specialist-pause-implementation-2026-10-18.md) and
 [runtime pause policy](reversible-feature-pauses-v1.md). Local checks, existing
 audio playback, backup recovery, ordinary content/image/ALT assistance, and
 Site Knowledge remain available. Retained contracts below do not enable
 paused features. Source, developer acceptance, packages, production, and
-ordinary usage must be reported separately; [Current State](current-state.md)
-records the latest release evidence.
+ordinary usage must be reported separately; see
+[Version and Evidence Identities](version-and-evidence-identities.md).
 
 ## One-Sentence Positioning
 

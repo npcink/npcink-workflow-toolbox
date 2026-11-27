@@ -1,5 +1,22 @@
 # Npcink Workflow Toolbox
 
+Npcink Workflow Toolbox turns proven AI-assisted WordPress operations into
+fixed, review-first tools for authors and site operators. It provides editor
+assistance, Cloud-managed web search, Cloud-managed image-source candidates,
+and governed handoffs, not a publishing or workflow execution engine.
+
+**In the current source:** the editor loop centers on formatting, Article Check
+with contextual ALT, site citations and images. The admin tabs are **Start**,
+**Site & Ask**, and **Image Processing** (`toolbox_tab=tools`). Current defaults,
+paused capabilities and development entry points are in [Current State](docs/current-state.md).
+GitHub source, an installed WordPress site and the public package are separate;
+see [version and evidence identities](docs/version-and-evidence-identities.md).
+
+**Developing:** start from [AGENTS.md](AGENTS.md) and the
+[documentation guide](docs/README.md). Use `composer test` for static contracts
+and `composer test:all` for the default gate. The retained contracts below are
+not a list of default or enabled features.
+
 The editor sidebar hides duplicate category/tag shortcuts supplied by the
 WordPress AI plugin. Its compact menu keeps descriptions across the full width
 and detailed preflight scope optional, with Cloud text-transfer guidance visible.
@@ -40,10 +57,7 @@ actions. OpenClaw or another client submits the Toolbox plan through Adapter to
 Core, and Toolkit performs the approved WordPress write. Toolbox keeps search,
 candidate review, attribution, preview, and read-only planning.
 
-Npcink Workflow Toolbox turns proven AI-assisted WordPress operations into
-fixed, review-only buttons for site operators, including Cloud-managed web
-search, Cloud-managed image-source candidates, Cloud-managed site knowledge,
-and governed handoff flows. The WordPress.org release slug is
+The WordPress.org release slug is
 `npcink-workflow-toolbox`. The first-version runtime contracts keep the
 existing `npcink-toolbox` REST namespace, ability ids, option names, and hook
 names for compatibility with Core, Adapter, Cloud, and existing site
@@ -648,9 +662,9 @@ approve, execute, mutate SEO fields, or retry failures.
 See [Editor Progressive Recommendations Closeout](docs/archive/2026-06/editor-progressive-recommendations-closeout.md)
 for the local prefetch contract, quality rules, and verification record.
 Current-article image ALT/caption review belongs in the editor sidebar, where
-the post context and used images are available. The backend Image Handling tab
-only exposes a selected media-library review set for recent images with weak
-ALT or caption metadata. For missing ALT only, each visually confirmed row can
+the post context and used images are available. The former backend ALT review
+surface (then under Image Handling) is retired; the following describes its
+retained contract, not a current admin entry. For missing ALT only, each visually confirmed row could
 build `npcink-abilities-toolkit/build-media-alt-apply-plan` through Adapter and
 submit the returned `media_alt_apply_plan.v1` to Core `/proposals/from-plan`.
 Toolbox stops after proposal creation and does not request
@@ -784,23 +798,16 @@ Internal-link candidate assembly is delegated to
 `npcink-abilities-toolkit/resolve-internal-link-targets`; Toolbox only passes
 editor context plus optional Cloud Site Knowledge evidence and renders the
 review/copy/open surface.
-The admin **Image Handling** tab now defaults to ALT review. The Batch Optimize
-Images workbench and optimize-selected-images bulk action are withdrawn. Single-image ALT and optimization
-actions start from the media-library attachment details panel or media list row
-actions, then carry that attachment into the same selected-image workbenches
-used for batches. Admin URLs use the canonical `toolbox_tab` and `toolbox_tool` parameters only;
-the historical `tab`/`tool` alias URLs (`tab=image&tool=optimize`,
-`tool=bulk-alt`, `tool=batch-optimize`, `toolbox_tool=media-derivative`) were
-removed in the pre-release cleanup. Toolbox no longer exposes a standalone
-one-image picker page. Media library bulk actions can send selected images to
-`toolbox_tab=tools&toolbox_tool=media-alt-caption-review` or
-`toolbox_tab=tools&toolbox_tool=media-batch-optimize`. Site helpers
-remain secondary low-frequency checks, while content preparation and reviewed
-handoffs live in their own admin surface.
+**Image Processing** (formerly Image Handling) defaults to single-image
+compression, including format conversion, with watermark as a peer task.
+The stable `tools` tab slug remains. Backend ALT review and batch optimization
+entrypoints are retired or paused; legacy compatibility links do not enable
+them. See the [admin IA](docs/admin-ia-site-and-ask-v1.md) and the
+[single-image contract](docs/processed-image-save-as-new-v1.md).
 
 `media_optimization_v1` names the fixed governed image optimization workflow,
-not a new workflow runtime or persistent run store. The default Media Library
-Optimization surface follows ADR-015: Toolbox stores one bounded
+not a new workflow runtime or persistent run store. The paused ADR-015 batch
+contract records how Toolbox stores one bounded
 `toolbox_media_optimization_batch.v1` manifest, Cloud qualifies `auto_safe.v1`
 WebP results, the administrator confirms the exact manifest once, and the
 foreground browser loop delegates each qualified replacement or restore to
@@ -937,10 +944,10 @@ Standalone Cloud diagnostics are not exposed in Toolbox. Cloud Addon owns the
 WordPress-side Cloud connection, hosted runtime status, search/image-source
 diagnostics, entitlement, quota, billing, request logs, and service health
 detail. Toolbox keeps Cloud-backed calls inside explicit product workflows.
-URL repair handoffs and ADR-015 batch history remain in **Image Handling**.
-Single-image replacement and restore use the governed external-client path;
-Toolbox exposes no local workbench or compatibility route. The default exact-
-manifest batch creates no Core proposal.
+The paused ADR-015 batch contract remains separate from current **Image
+Processing**. The [single-image workbench](docs/processed-image-save-as-new-v1.md)
+previews an artifact and can submit a reviewed proposal through Adapter/Core;
+it does not execute replacement or restore locally.
 
 Provider responses return normalized fields by default. Set **Include provider
 raw responses** to include redacted raw provider payloads for debugging.

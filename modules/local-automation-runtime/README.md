@@ -2,6 +2,12 @@
 
 Status: Phase 1 bundled skeleton plus Phase 2 Basic WP-Cron local fallback preview.
 
+`module.php` retains the `phase_1_contract_only` module marker and
+`RUNTIME_ENABLED=false`. These describe the bundled contract and the lack of
+workflow execution, not the absence of the disabled-by-default Phase 2 Basic
+dry-run hook listed below. No behavior, contract identifiers or constants are
+changed by this clarification.
+
 This module carries the future `npcink-local-automation-runtime` contract inside
 the Toolbox release package without making Toolbox a runtime owner.
 

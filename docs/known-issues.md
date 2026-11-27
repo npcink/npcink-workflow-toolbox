@@ -43,7 +43,10 @@ and repeated research stay frozen under the decision's restart rules.
   sent. Do not retry until the owner restores the runtime and can provide
   request-level Cloud evidence; then replay only those two questions once each.
 
-- **Remaining audit maintenance (Toolbox tooling).** The four insight-pack Cloud
+- **Remaining audit maintenance (Toolbox tooling).** The PHPStan baseline has
+  46 rules after [#427](https://github.com/npcink/npcink-workflow-toolbox/pull/427).
+  Reduce one verified root-cause group at a time without weakening external-input
+  guards or contract-pinned methods. The four insight-pack Cloud
   QA wrappers, the five-plugin acceptance, and the Site Knowledge Cloud Addon
   bridge smoke now require an explicit WordPress root. The last two are checked
   offline before any real WP-CLI use. Both related-reading browser smokes now
@@ -53,12 +56,10 @@ and repeated research stay frozen under the decision's restart rules.
   machine-specific defaults in focused groups when they affect a supported
   command. PHPStan 2.3.7 landed independently in
   [#414](https://github.com/npcink/npcink-workflow-toolbox/pull/414) with the
-  same 48 baseline rules at that revision. The first focused reduction leaves
-  46 rules: the Site Check handling panel always supplies its internally built
+  same 48 baseline rules at that revision. The first focused reduction proved
+  that the Site Check handling panel always supplies its internally built
   `finding` array, including an empty array when there is no matching finding.
-  Reduce by one verified root-cause group at a time, preserving external-input
-  guards and contract-pinned methods. Hold
-  PHPCompatibility at 9.3.5; reassess only with a compatible stable release.
+  Hold PHPCompatibility at 9.3.5; reassess only with a compatible stable release.
   PHP 8.0/8.4 deterministic CI and focused Smart Ask/Site Check fixtures on
   PHP 8.2.35/8.5.6 are not installed WordPress runtime evidence.
   [Audit dispositions](smart-ask-audit-closeout-2026-11-26.md).
