@@ -11099,3 +11099,7 @@ msgstr ""
 #: assets/article-credential-editor.js
 msgid "Possible password or token assignment. Review before sending; this warning does not block sending."
 msgstr ""
+
+#: includes/Editor_Code_Format.php assets/editor-content-format.js
+msgid "The code preview is unavailable. The original code is unchanged."
+msgstr ""

@@ -2,7 +2,7 @@
 	'use strict';
 
 	const { createElement: h, useState, useRef, useEffect } = wp.element;
-	const { Button, Notice } = wp.components;
+	const { Button, Modal, Notice, SelectControl } = wp.components;
 	const i18n = wp.i18n || {};
 	const __ = typeof i18n.__ === 'function' ? i18n.__ : (text) => text;
 	const permitted = ['core/paragraph', 'core/heading', 'core/list', 'core/list-item', 'core/quote', 'core/code', 'core/preformatted'];
@@ -322,9 +322,142 @@
 				undo ? h(Button, { variant: 'tertiary', icon: 'undo', label: t('Undo this text formatting'), showTooltip: true, disabled: busy, onClick: restore }) : null),
 			h(Description, { text: t('Adjust spacing and layout only.') }),
 			notice ? h(Feedback, { notice, onRemove: () => setNotice(null) }) : null,
+			window.NpcinkToolboxEditorSupport?.codeFormatPilot === '1' ? h(CodeFormat, { disabled: disabled || busy }) : null,
 			// Keep the live region mounted before its text changes. It occupies no row.
 			h('span', { className: 'screen-reader-text', role: 'status', 'aria-live': 'polite', 'aria-atomic': true },
 				notice?.compact ? notice.text + (notice.skipped && notice.metrics?.length ? ' ' + t('Protected content was skipped.') : '') : ''));
+	}
+
+	const codeLanguages = ['javascript', 'css', 'json'];
+	const compareStyle = { maxBlockSize: '24vh', overflow: 'auto', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' };
+
+	function selectedCode(select) {
+		const editor = select('core/editor');
+		const blocks = select('core/block-editor');
+		const id = blocks.getSelectedBlockClientId();
+		const block = id && blocks.getBlock(id);
+		const postId = editor.getCurrentPostId();
+		if (!postId || !block || block.name !== 'core/code' || block.isValid === false
+			|| blocks.getBlockRootClientId(id) !== '' || blocks.getBlockEditingMode(id) === 'disabled'
+			|| block.attributes.metadata?.bindings || block.innerBlocks.length) return null;
+		return { block, id, postId };
+	}
+
+	function codeText(block) {
+		const content = block.attributes.content;
+		const html = typeof content === 'string' ? content : content?.toHTMLString?.({ preserveWhiteSpace: true });
+		// Plain native Code only: do not normalize styled code, markup, or BRs.
+		if (typeof html !== 'string' || html.includes('<')) return null;
+		const value = wp.richText.create({ html });
+		return value.text;
+	}
+
+	function CodeFormat({ disabled }) {
+		const target = wp.data.useSelect(selectedCode, []);
+		const [opened, setOpened] = useState(null);
+		const [applied, setApplied] = useState(false);
+		if (!target && !opened && !applied) return null;
+		return h('div', { className: 'npcink-toolbox-editor-support__flow-feedback' },
+			target ? h(Button, { variant: 'tertiary', disabled, onClick: () => {
+				setApplied(false);
+				setOpened(target);
+			} }, t('Format this code block…')) : null,
+			opened ? h(CodePreview, { target: opened, close: () => setOpened(null), applied: () => {
+				setOpened(null);
+				setApplied(true);
+			} }) : null,
+			applied ? h('p', { role: 'status' }, t('Code replaced in the editor. Use editor Undo to revert.')) : null);
+	}
+
+	function CodePreview({ target, close, applied }) {
+		const [language, setLanguage] = useState('');
+		const [result, setResult] = useState(null);
+		const [message, setMessage] = useState('');
+		const [busy, setBusy] = useState(false);
+		const active = useRef(null);
+		const stale = useRef(false);
+		const code = codeText(target.block);
+		const eligible = typeof code === 'string' && code.trim() && !code.includes('\0') && new TextEncoder().encode(code).length <= 16384;
+		function stillSelected() {
+			const current = selectedCode(wp.data.select);
+			return current?.block === target.block && current.id === target.id && current.postId === target.postId;
+		}
+		useEffect(() => {
+			function checkSelection() { if (!stillSelected()) stale.current = true; }
+			const stop = wp.data.subscribe(checkSelection);
+			checkSelection();
+			return () => { stop(); active.current?.abort(); active.current = null; };
+		}, []);
+
+		function isCurrent() {
+			if (!stale.current && stillSelected()) return true;
+			setResult(null);
+			setMessage(t('The selected code block changed. Close this preview and try again.'));
+			return false;
+		}
+
+		async function preview() {
+			if (active.current || !eligible || !codeLanguages.includes(language) || !isCurrent()) return;
+			const controller = new AbortController();
+			active.current = controller;
+			setBusy(true);
+			setResult(null);
+			setMessage('');
+			const timeout = window.setTimeout(() => controller.abort(), 15000);
+			try {
+				const config = window.NpcinkToolboxEditorSupport;
+				const next = await wp.apiFetch({
+					url: config.restUrl.replace(/\/$/, '') + '/editor/content-support', method: 'POST',
+					headers: { 'X-WP-Nonce': config.nonce }, signal: controller.signal,
+					data: { intent: 'format_code_block', post_id: target.postId, language, code },
+				});
+				if (active.current !== controller || !isCurrent()) return;
+				if (controller.signal.aborted) throw new Error();
+				if (next?.contract_version !== 'code_format_candidate.v1' || next.language !== language
+					|| next.persisted !== false || next.direct_wordpress_write !== false || typeof next.candidate !== 'string'
+					|| !next.candidate.trim() || next.candidate.includes('\0') || new TextEncoder().encode(next.candidate).length > 65536
+					|| (next.candidate === code ? !['UNCHANGED', 'SKIPPED'].includes(next.status) : next.status !== 'CHANGED')) throw new Error();
+				if (next.status === 'CHANGED') setResult(next.candidate);
+				else setMessage(next.status === 'UNCHANGED' ? t('This code is already formatted.') : t('This code could not be formatted safely. It was not changed.'));
+			} catch {
+				if (active.current === controller) setMessage(t('The code preview is unavailable. The original code is unchanged.'));
+			} finally {
+				window.clearTimeout(timeout);
+				if (active.current === controller) { active.current = null; setBusy(false); }
+			}
+		}
+
+		function applyCode() {
+			if (result === null || !isCurrent()) return;
+			const content = wp.richText.toHTMLString({ value: wp.richText.create({ text: result }), preserveWhiteSpace: true });
+			// Confirm that native serialization keeps the reviewed text and attributes.
+			const attrs = { ...target.block.attributes, content };
+			const parsed = wp.blocks.parse(wp.blocks.serialize([{ ...target.block, attributes: attrs }]));
+			if (parsed.length !== 1 || parsed[0].name !== 'core/code' || parsed[0].isValid === false
+				|| !equalAttributes(parsed[0].attributes, attrs) || codeText(parsed[0]) !== result) {
+				setResult(null);
+				setMessage(t('This code could not be formatted safely. It was not changed.'));
+				return;
+			}
+			wp.data.dispatch('core/block-editor').updateBlockAttributes(target.id, { content });
+			applied();
+		}
+
+		return h(Modal, { title: t('Format this code block'), onRequestClose: close },
+			h(SelectControl, {
+				label: t('Code language'), value: language, disabled: busy,
+				help: t('Only this code block is sent to Npcink Cloud. Do not send secrets.'),
+				options: [{ value: '', label: t('Select a language') }, ...['JavaScript', 'CSS', 'JSON'].map((label, i) => ({ label, value: codeLanguages[i] }))],
+				onChange: (value) => { setLanguage(value); setMessage(''); setResult(null); },
+			}),
+			!eligible ? h('p', null, t('Select a nonempty plain code block of up to 16 KiB.')) : null,
+			message ? h('p', { role: 'status' }, message) : null,
+			result !== null ? h('div', null,
+				h('strong', null, t('Before formatting')), h('pre', { style: compareStyle, tabIndex: 0, 'aria-label': t('Before formatting') }, h('code', null, code)),
+				h('strong', null, t('After formatting')), h('pre', { style: compareStyle, tabIndex: 0, 'aria-label': t('After formatting') }, h('code', null, result))) : null,
+			h(Button, { variant: 'secondary', onClick: close }, t('Cancel')), ' ',
+			result === null ? h(Button, { variant: 'primary', isBusy: busy, disabled: busy || !eligible || !language, onClick: preview }, t('Preview with Cloud'))
+				: h(Button, { variant: 'primary', onClick: applyCode }, t('Apply to this code block')));
 	}
 
 	window.NpcinkToolboxContentFormat = { Control, Description, prepare, onlyInsertedSpaces, formatFeedback };

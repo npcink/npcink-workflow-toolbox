@@ -52,7 +52,7 @@ final class Editor_Content_Support {
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-format',
 			NPCINK_TOOLBOX_URL . $format_path,
-			array( 'wp-api-fetch', 'wp-blocks', 'wp-components', 'wp-data', 'wp-editor', 'wp-element', 'wp-block-editor', 'wp-i18n' ),
+			array( 'wp-api-fetch', 'wp-blocks', 'wp-components', 'wp-data', 'wp-editor', 'wp-element', 'wp-block-editor', 'wp-i18n', 'wp-rich-text' ),
 			$this->asset_version( $format_path ),
 			true
 		);
@@ -160,6 +160,7 @@ final class Editor_Content_Support {
 				'cloudAddonSiteKnowledgeUrl' => esc_url_raw( admin_url( 'admin.php?page=npcink-cloud-addon&tab=site_knowledge' ) ),
 				'coreAdminUrl'               => esc_url_raw( admin_url( 'admin.php?page=npcink-governance-core' ) ),
 				'sourceDraftingAvailable'    => ! Settings::cloud_feature_paused( 'source_drafting' ),
+				'codeFormatPilot'            => Editor_Code_Format::enabled() ? '1' : '0',
 				'canSubmitMetadataHandoff'   => current_user_can( Rest_Controller::default_capability_for_scope( 'cap.toolbox.workflow_suggest' ) ),
 				'showRuntimeDiagnostics'     => $this->show_runtime_diagnostics(),
 				'locale'                     => function_exists( 'determine_locale' ) ? determine_locale() : get_locale(),

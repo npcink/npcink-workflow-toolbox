@@ -249,6 +249,10 @@ no feature removal, data migration, deployment or release.
 
 ## Scope Matrix
 
+On 2026-11-25 the operator approved an opt-in [single code block formatting
+pilot](editor-code-format-pilot-v1.md). This exception does not authorize default
+enablement, batch formatting, new models or rollout.
+
 | Feature or workstream | Disposition | Permitted follow-up |
 | --- | --- | --- |
 | Article preflight, read-only language/logic/context hints and formatting | Maintain the current editor loop | Reproduce concrete failures or ordinary-use feedback; fix the affected behavior and verify preservation, freshness and native save as applicable. |
