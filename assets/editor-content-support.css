@@ -667,7 +667,7 @@
 
 .npcink-toolbox-editor-support__article-checkup-group h5 {
 	margin: 0 0 6px;
-	font-size: 11px;
+	font-size: 12px;
 	line-height: 1.3;
 	text-transform: uppercase;
 	color: #50575e;
@@ -1118,7 +1118,7 @@
 	background: #f6f7f7;
 	border: 1px solid #dcdcde;
 	border-radius: 3px;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.3;
 }
@@ -1164,7 +1164,7 @@
 	border-radius: 3px;
 	background: #f6f7f7;
 	color: #50575e;
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.35;
 }
@@ -1206,7 +1206,7 @@
 .npcink-toolbox-editor-support__contextual-alt-context small,
 .npcink-toolbox-editor-support__contextual-alt-field > span {
 	color: #1d2327;
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.35;
 }
@@ -1216,7 +1216,7 @@
 .npcink-toolbox-editor-support__contextual-alt-decorative,
 .npcink-toolbox-editor-support__contextual-alt-boundary {
 	color: #50575e;
-	font-size: 11px;
+	font-size: 12px;
 	line-height: 1.45;
 }
 

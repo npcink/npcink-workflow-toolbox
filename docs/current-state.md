@@ -7,6 +7,12 @@ a canonical contract doc disagree, the contract doc wins.
 
 Last reviewed: 2026-11-26.
 
+**Visual audit maintenance (2026-11-27):** Site Check support links lead with
+their selected task, rescan appears once per report, the suite overview stacks
+on narrow screens, and Article Check keeps a short keyboard-expandable
+description. See the [audit dispositions](visual-audit-maintenance-2026-11-27.md)
+for covered states and follow-up. Runtime pauses and write boundaries remain.
+
 **Smart Ask live acceptance update — 2026-11-26:** PR [#431](https://github.com/npcink/npcink-workflow-toolbox/pull/431)
 is merged at `05557ed308bea4c476d8823aac7d39b584aa050e` and the active local
 snapshot points to that tree. The post-refresh Site Ops browser smoke passed.

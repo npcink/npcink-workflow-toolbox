@@ -9604,6 +9604,9 @@ msgstr ""
 msgid "This Cloud feature is temporarily paused."
 msgstr ""
 
+msgid "Analysis is temporarily paused. This brief uses local rules only."
+msgstr ""
+
 msgid "Cloud analysis is temporarily paused. This brief uses local rules only."
 msgstr ""
 
@@ -10207,7 +10210,7 @@ msgstr ""
 msgid "Article check"
 msgstr ""
 
-msgid "Check specific text issues and image ALT. Bounded article text is sent to Cloud for read-only review."
+msgid "Review text and image ALT with Cloud."
 msgstr ""
 
 msgid "No repeated punctuation hints in the checked text."
@@ -10237,7 +10240,7 @@ msgstr ""
 msgid "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"
 msgstr ""
 
-msgid "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
+msgid "Cloud receives a limited amount of article text for read-only review. The check flags evidence-based punctuation, wording, logic, and context issues. It does not verify external facts, suggest general style or length changes, or check code, media, or unsupported blocks. Review, edit, and save the draft yourself. No findings does not mean it is ready to publish."
 msgstr ""
 
 msgid "完成"

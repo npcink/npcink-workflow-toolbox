@@ -20,6 +20,15 @@ and repeated research stay frozen under the decision's restart rules.
 
 ## Open
 
+- **Deferred visual audit coverage (Toolbox admin and editor, 2026-11-27).**
+  Start action hierarchy, H1 translation and shared tokens were deferred;
+  mobile editor sidebar entry and media compare/restore states were not
+  verified. If new evidence shows a supported regression, the Toolbox surface
+  owner should identify the installed revision, reproduce the actual entry
+  and state, and verify the primary action and return path. Media runtime
+  and restore ownership stay in their existing contracts; the freeze does not
+  authorize reactivation or a new live audit. [Source and dispositions](visual-audit-maintenance-2026-11-27.md).
+
 - **Smart Ask representative usefulness / production API acceptance (Toolbox / Cloud, 2026-11-10).**
   The old routing blocker is closed below. Two bounded developer checks establish
   existing content/environment wiring, not arbitrary-question source selection

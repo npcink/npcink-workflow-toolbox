@@ -578,7 +578,6 @@ abstract class Admin_Page_Site_Ops_Panel {
 								<?php endif; ?>
 							</dl>
 							<?php $this->render_site_ops_action_buttons( $finding, 'decision' ); ?>
-							<?php $this->render_site_ops_acceptance_line( 'decision' ); ?>
 							<?php if ( 'core_handoff_candidate' === $boundary ) : ?>
 								<?php $this->render_site_ops_handoff_candidate_preview( $finding ); ?>
 							<?php endif; ?>
@@ -913,7 +912,6 @@ abstract class Admin_Page_Site_Ops_Panel {
 					<span><?php echo esc_html( $owner ); ?></span>
 				<?php endif; ?>
 			</div>
-			<?php $this->render_site_ops_acceptance_line(); ?>
 		</article>
 		<?php
 	}
@@ -921,9 +919,9 @@ abstract class Admin_Page_Site_Ops_Panel {
 	/**
 	 * Renders the bounded local rescan step that verifies a handled finding.
 	 */
-	private function render_site_ops_acceptance_line( string $context = 'row' ): void {
+	protected function render_site_ops_acceptance_line(): void {
 		?>
-		<div class="npcink-toolbox__ops-acceptance-line npcink-toolbox__ops-acceptance-line--<?php echo esc_attr( sanitize_html_class( $context ) ); ?>">
+		<div class="npcink-toolbox__ops-acceptance-line">
 			<strong><?php esc_html_e( 'Acceptance check', 'npcink-workflow-toolbox' ); ?></strong>
 			<span><?php esc_html_e( 'After handling the selected item through the allowed manual or review path, rescan and confirm it no longer matches this finding or the affected count has decreased. This is a current bounded check, not a saved completion record.', 'npcink-workflow-toolbox' ); ?></span>
 			<a class="button button-small" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Rescan to verify', 'npcink-workflow-toolbox' ); ?></a>

@@ -9725,6 +9725,9 @@ msgstr "检查操作者维护的站点上下文是否具有普通内容建议所
 msgid "This Cloud feature is temporarily paused."
 msgstr "此 Cloud 功能已暂时停用。"
 
+msgid "Analysis is temporarily paused. This brief uses local rules only."
+msgstr "分析已暂时停用，本次仅使用本地规则。"
+
 msgid "Cloud analysis is temporarily paused. This brief uses local rules only."
 msgstr "Cloud 分析已暂时停用，此摘要仅使用本地规则。"
 
@@ -10711,8 +10714,8 @@ msgstr "文章检查"
 msgid "Check"
 msgstr "检查"
 
-msgid "Check specific text issues and image ALT. Bounded article text is sent to Cloud for read-only review."
-msgstr "检查具体文字问题和图片 ALT；运行时将有界文章文本发送至 Cloud 只读审阅。"
+msgid "Review text and image ALT with Cloud."
+msgstr "用 Cloud 检查正文和图片 ALT。"
 
 msgid "No repeated punctuation hints in the checked text."
 msgstr "本次已检查文本没有重复标点提示。"
@@ -10741,8 +10744,8 @@ msgstr "本地重复标点：%1$d / %2$d 段%3$s。"
 msgid "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"
 msgstr "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"
 
-msgid "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
-msgstr "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
+msgid "Cloud receives a limited amount of article text for read-only review. The check flags evidence-based punctuation, wording, logic, and context issues. It does not verify external facts, suggest general style or length changes, or check code, media, or unsupported blocks. Review, edit, and save the draft yourself. No findings does not mean it is ready to publish."
+msgstr "运行时只将限定范围的文章文本发送到 Cloud 进行只读审阅。只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"
 
 msgid "完成"
 msgstr "完成"

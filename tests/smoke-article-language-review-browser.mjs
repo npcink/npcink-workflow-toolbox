@@ -143,7 +143,12 @@ try {
 		await review.waitFor();
 		for (const detail of await review.locator('details').all()) await detail.locator('summary').click();
 	};
-	assert.match(await page.locator('.npcink-toolbox-editor-support').innerText(), /发送至 Cloud|sent to Cloud/);
+	const description = page.locator('.npcink-toolbox-editor-support__flow').filter({ hasText: /Article check|文章检查/ }).locator('.npcink-toolbox-editor-support__flow-description');
+	const expand = description.getByRole('button', { name: /Expand|展开/ });
+	await expand.focus();
+	await expand.press('Enter');
+	assert.match(await description.innerText(), /发送到 Cloud 进行只读审阅|Cloud receives a limited amount of article text for read-only review/);
+	await description.getByRole('button', { name: /Collapse|收起/ }).press('Enter');
 	await start();
 	await review.waitFor();
 	await locate().waitFor();

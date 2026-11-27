@@ -5,6 +5,7 @@ Start from the active documents below before changing code.
 
 ## Current Reviews And Proposals
 
+- [Visual audit maintenance: 2026-11-27](visual-audit-maintenance-2026-11-27.md) — scoped presentation repairs, deferred findings and acceptance limits.
 - [Current State](current-state.md) — last reviewed 2026-11-26; includes the merged Smart Ask corrections without expanding the feature freeze.
 - [Smart Ask audit closeout — 2026-11-26](smart-ask-audit-closeout-2026-11-26.md) — review dispositions, #431 installed evidence, blocked live API acceptance, and safe local snapshot and branch cleanup procedures.
 - [Editor and Smart Ask text budgets — 2026-11-17](editor-text-budgets-2026-11-17.md) — approved Unicode/input/output limits, end-to-end regressions and candidate evidence.
