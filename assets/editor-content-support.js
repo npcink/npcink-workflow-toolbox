@@ -714,6 +714,7 @@
 	}
 
 	async function postJsonWithTimeout(path, payload, timeoutMs, timeoutMessage, timeoutCode, externalSignal) {
+		window.NpcinkToolboxCredentialCheck?.guardTransfer(path, payload);
 		if (externalSignal && externalSignal.aborted) {
 			throw { code: 'npcink_toolbox_request_cancelled', message: __('Request cancelled. Nothing was written.', 'npcink-workflow-toolbox') };
 		}
@@ -4240,6 +4241,20 @@
 		return snapshot;
 	}
 
+	function articleCheckTransferSource() {
+		const editor = data.select('core/editor');
+		const blockEditor = data.select('core/block-editor');
+		return {
+			intent: 'publish_preflight',
+			post_id: editor.getCurrentPostId(),
+			title: normalizeText(editor.getEditedPostAttribute('title')),
+			excerpt: normalizeText(editor.getEditedPostAttribute('excerpt')),
+			content: normalizeText(editor.getEditedPostAttribute('content')),
+			selected_block_text: selectedBlockText(blockEditor.getSelectedBlock?.()),
+			article_review_snapshot: articleReviewSnapshot(editor, blockEditor.getBlocks()),
+		};
+	}
+
 	function articleReviewEditorIdentity() {
 		const editor = data.select('core/editor');
 		// Gutenberg selectors memoize immutable blocks. Reference changes catch
@@ -5969,11 +5984,16 @@
 		});
 	}
 
+	function bodyFaqPayload(source = bodyFaqSource()) {
+		return { intent: 'body_faq', ...source };
+	}
+
 	function BodyFaqPreview({ onClose }) {
 		const [phase, setPhase] = useState('idle');
 		const [items, setItems] = useState([]);
 		const [selected, setSelected] = useState({});
 		const [notice, setNotice] = useState(null);
+		const [blockedTransfer, setBlockedTransfer] = useState(null);
 		const active = useRef(null);
 
 		function invalidate() {
@@ -6004,6 +6024,7 @@
 			setItems([]);
 			setSelected({});
 			setNotice(null);
+			setBlockedTransfer(null);
 			if (!source.post_id || !plainTextFromHtml(source.content)) {
 				setPhase('error');
 				setNotice({ status: 'error', message: __('Add body text before generating FAQ suggestions.', 'npcink-workflow-toolbox') });
@@ -6013,8 +6034,9 @@
 			const request = { source, controller, pending: true };
 			active.current = request;
 			setPhase('running');
+			const payload = bodyFaqPayload(source);
 			try {
-				const response = await postJsonWithTimeout('/editor/content-support', { intent: 'body_faq', ...source }, 45000, __('FAQ generation timed out. Nothing was written.', 'npcink-workflow-toolbox'), 'npcink_toolbox_faq_timeout', controller?.signal);
+				const response = await postJsonWithTimeout('/editor/content-support', payload, 45000, __('FAQ generation timed out. Nothing was written.', 'npcink-workflow-toolbox'), 'npcink_toolbox_faq_timeout', controller?.signal);
 				if (active.current !== request) return;
 				if (!bodyFaqMatches(source, bodyFaqSource())) {
 					invalidate();
@@ -6033,7 +6055,12 @@
 				if (active.current !== request) return;
 				active.current = null;
 				setPhase('error');
-				const safeCode = ['npcink_toolbox_faq_input', 'npcink_toolbox_faq_empty_body', 'npcink_toolbox_faq_too_long', 'npcink_toolbox_faq_forbidden', 'npcink_toolbox_faq_result', 'npcink_toolbox_faq_unavailable', 'npcink_toolbox_faq_timeout'];
+				const blocked = window.NpcinkToolboxCredentialCheck?.captureBlock(error, payload);
+				if (blocked) {
+					setBlockedTransfer(blocked);
+					return;
+				}
+				const safeCode = ['npcink_toolbox_faq_input', 'npcink_toolbox_faq_empty_body', 'npcink_toolbox_faq_too_long', 'npcink_toolbox_faq_forbidden', 'npcink_toolbox_faq_result', 'npcink_toolbox_faq_unavailable', 'npcink_toolbox_faq_timeout', 'npcink_article_credential_check_hit', 'npcink_article_credential_check_limit'];
 				setNotice({ status: 'error', message: safeCode.includes(error?.code) && error.message ? error.message : __('FAQ generation is temporarily unavailable. Try again later.', 'npcink-workflow-toolbox') });
 			}
 		}
@@ -6092,8 +6119,13 @@
 			}
 		}
 
+		if (blockedTransfer) return createElement(window.NpcinkToolboxCredentialCheck.TransferRecovery, {
+			blocked: blockedTransfer, readPayload: bodyFaqPayload, onContinue: generate, onCancel: onClose, faq: true,
+		});
+
 		return createElement(Modal, { title: __('FAQ from article body', 'npcink-workflow-toolbox'), onRequestClose: onClose, size: 'medium' },
 			createElement('p', null, __('Generating sends only the current article body to Cloud, including unsaved edits.', 'npcink-workflow-toolbox')),
+			window.NpcinkToolboxCredentialCheck ? createElement(window.NpcinkToolboxCredentialCheck.Advisory, { bodyOnly: true }) : null,
 			createElement(Button, { type: 'button', variant: phase === 'ready' ? 'secondary' : 'primary', isBusy: phase === 'running', disabled: phase === 'running', onClick: generate }, __('Generate FAQ', 'npcink-workflow-toolbox')),
 			createElement('div', { className: 'npcink-toolbox-editor-support__faq-status', role: 'status' },
 				phase === 'running' ? __('Generating FAQ suggestions…', 'npcink-workflow-toolbox') :
@@ -7077,6 +7109,7 @@
 		}), []);
 
 		const [error, setError] = useState('');
+		const [blockedReview, setBlockedReview] = useState(null);
 		const [requestNotice, setRequestNotice] = useState(null);
 		const [supportView, setSupportView] = useState('menu');
 		const [contextualResult, setContextualResult] = useState(false);
@@ -7553,6 +7586,7 @@
 					setActiveFlowIntent(displayIntent);
 					setRunning(intent);
 						setError('');
+						setBlockedReview(null);
 						setRequestNotice(null);
 						setPreflightModalOpen(false);
 						if (runOptions.preserveResult) {
@@ -7588,6 +7622,7 @@
 					setTitleApplyStatus(null);
 					setExcerptApplyStatus(null);
 					setSlugApplyStatus(null);
+					let reviewPayload;
 					try {
 						let userInstruction = flowAcceptsUserInstruction(intent) ? String(flowInstructions[intent] || '').trim() : '';
 						if (isAudioIntent(intent)) {
@@ -7628,7 +7663,11 @@
 							source_stage: intent === 'source_adaptation_review' ? sourceStage : '',
 						force_refresh: intent === 'source_adaptation_review' && sourceStage === 'extract' && Boolean(runOptions.forceRefresh),
 				});
-					if (intent === 'publish_preflight') payload.article_review_snapshot = articleReviewSnapshot(data.select('core/editor'), data.select('core/block-editor').getBlocks());
+					if (intent === 'publish_preflight') {
+						reviewPayload = articleCheckTransferSource();
+						Object.assign(payload, reviewPayload);
+						reviewPayload = payload;
+					}
 					if (intent === 'image_alt_suggestions') {
 						const allOccurrences = Array.isArray(runContext.media_items) ? runContext.media_items : [];
 						const occurrenceOffset = Math.max(0, Number(runOptions.altOffset || 0));
@@ -7757,7 +7796,9 @@
 						} else if (requestError && requestError.code === 'npcink_toolbox_request_cancelled') {
 							setRequestNotice({ kind: 'info', message: requestError.message });
 						} else {
-							setError(requestError && requestError.message ? requestError.message : __('Request failed.', 'npcink-workflow-toolbox'));
+							const blocked = window.NpcinkToolboxCredentialCheck?.captureBlock(requestError, reviewPayload);
+							if (blocked) setBlockedReview({ ...blocked, reopen: Boolean(runOptions.reopenPreflightModal) });
+							else setError(requestError && requestError.message ? requestError.message : __('Request failed.', 'npcink-workflow-toolbox'));
 							setSupportView(intent === 'source_adaptation_review' ? 'menu' : 'result');
 							if (intent === 'source_adaptation_review') {
 								setSourceWorkflowModalOpen(true);
@@ -9223,8 +9264,10 @@
 								onClick: () => runFlow('publish_preflight', { reopenPreflightModal: true }),
 							},
 							running === 'publish_preflight' ? __('Running', 'npcink-workflow-toolbox') : __('Rerun preflight', 'npcink-workflow-toolbox')
-						)
+						),
+						window.NpcinkToolboxCredentialCheck ? createElement(window.NpcinkToolboxCredentialCheck.Control, { disabled: Boolean(running) }) : null
 					),
+					window.NpcinkToolboxCredentialCheck ? createElement(window.NpcinkToolboxCredentialCheck.Advisory, { selection: postContext.selected_block_text }) : null,
 					renderPreflightDetailPanel(result, resultControls)
 				);
 			}
@@ -9977,6 +10020,10 @@
 						) : null,
 							requestNotice ? createElement(Notice, { status: requestNotice.kind === 'info' ? 'info' : 'warning', isDismissible: false }, requestNotice.message) : null,
 							error ? createElement(Notice, { status: 'error', isDismissible: false }, error) : null,
+							blockedReview && !running ? createElement(window.NpcinkToolboxCredentialCheck.TransferRecovery, {
+								blocked: blockedReview, readPayload: () => ({ selected_text: postContext.selected_text, user_instruction: '', ...articleCheckTransferSource() }),
+								onContinue: () => runFlow('publish_preflight', { reopenPreflightModal: blockedReview.reopen }),
+							}) : null,
 							result ? renderResult(result, resultControls) : null
 					) : createElement(
 						'div',
@@ -9997,7 +10044,7 @@
 									: (running === flow.intent ? __('Running', 'npcink-workflow-toolbox') : (flow.intent === 'publish_preflight' ? __('Check article', 'npcink-workflow-toolbox') : __('Run', 'npcink-workflow-toolbox'))));
 							const row = createElement(
 								'div',
-								{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : ''), key: flow.intent },
+								{ className: 'npcink-toolbox-editor-support__flow' + (flow.intent === 'internal_links' ? ' npcink-toolbox-editor-support__flow--links' : '') + (flow.intent === 'publish_preflight' ? ' npcink-toolbox-editor-support__flow--preflight' : ''), key: flow.intent },
 								createElement('div', { className: 'npcink-toolbox-editor-support__flow-main' },
 									createElement('strong', { title: flow.description }, flow.label),
 									flow.intent === 'source_adaptation_review' && (sourceExtractionComplete || sourceAdaptationComplete || sourceDraftComplete) ? createElement(
@@ -10016,11 +10063,13 @@
 										onClick: () => flow.intent === 'source_adaptation_review' ? openSourceAdaptationReview() : runFlow(flow.intent),
 										'aria-label': flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel + ' ' + flow.label,
 									}, flow.intent === 'internal_links' ? __('Body links', 'npcink-workflow-toolbox') : flowActionLabel),
+									flow.intent === 'publish_preflight' && window.NpcinkToolboxCredentialCheck ? createElement(window.NpcinkToolboxCredentialCheck.Control, { disabled: Boolean(running) }) : null,
 									flow.intent === 'internal_links' ? createElement(Button, {
 										type: 'button', variant: 'secondary', disabled: Boolean(running),
 										onClick: () => runFlow('related_content'),
 									}, __('Related reading', 'npcink-workflow-toolbox')) : null
 								),
+								flow.intent === 'publish_preflight' && window.NpcinkToolboxCredentialCheck ? createElement(window.NpcinkToolboxCredentialCheck.Advisory, { selection: postContext.selected_block_text }) : null,
 								createElement(window.NpcinkToolboxContentFormat.Description, { text: flow.description, details: flow.details })
 							);
 							return flow.intent === 'internal_links' ? createElement(

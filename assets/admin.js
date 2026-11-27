@@ -9320,7 +9320,7 @@
 	}
 
 	function openSystemStatusDetails() {
-		const details = document.querySelector('.npcink-toolbox__start-advanced');
+		const details = document.querySelector('[data-toolbox-start-readiness] .npcink-toolbox__start-support');
 		if (details) {
 			details.open = true;
 		}

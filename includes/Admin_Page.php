@@ -23,6 +23,8 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	private const PARENT_MENU_SLUG = 'npcink-ai';
 	private const MENU_CAPABILITY  = 'manage_options';
 
+	private const CREDENTIAL_SECTION = 'article-credentials';
+
 	private string $hook_suffix          = '';
 	private string $overview_hook_suffix = '';
 
@@ -53,6 +55,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	public function register_menu(): void {
+		global $pagenow, $plugin_page;
+
+		// Core checks plugin-page access before admin_init, so handle old bookmarks here.
+		if ( 'edit.php' === $pagenow && 'npcink-toolbox-article-credentials' === $plugin_page && current_user_can( self::MENU_CAPABILITY ) ) {
+			wp_safe_redirect( $this->toolbox_admin_url( array( 'toolbox_tab' => 'start', 'toolbox_support' => self::CREDENTIAL_SECTION ) ) . '#npcink-toolbox-article-credentials' );
+			exit;
+		}
+
 		$this->hook_suffix = add_submenu_page(
 			self::PARENT_MENU_SLUG,
 			__( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ),
@@ -177,6 +187,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			NPCINK_TOOLBOX_DIR . 'languages'
 		);
 		wp_enqueue_media();
+		if ( current_user_can( self::MENU_CAPABILITY ) ) {
+			( new Article_Credential_Check() )->enqueue_admin();
+		}
 
 		wp_localize_script(
 			'npcink-toolbox-admin',
@@ -751,6 +764,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					</article>
 				<?php endforeach; ?>
 			</div>
+			<?php if ( current_user_can( self::MENU_CAPABILITY ) ) : ?>
+				<details class="npcink-toolbox__start-advanced npcink-toolbox__credential-check" id="npcink-toolbox-article-credentials"<?php echo self::CREDENTIAL_SECTION === $this->query_text_param( 'toolbox_support' ) ? ' open' : ''; ?>>
+					<summary><span><?php esc_html_e( 'Article credential check', 'npcink-workflow-toolbox' ); ?></span></summary>
+					<?php Article_Credential_Check::render_admin(); ?>
+				</details>
+			<?php endif; ?>
 		</section>
 		<?php
 	}

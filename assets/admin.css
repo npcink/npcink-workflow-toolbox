@@ -539,6 +539,14 @@
 	line-height: 1.35;
 }
 
+.npcink-toolbox__credential-check > summary {
+	display: list-item;
+}
+
+.npcink-toolbox__credential-check > div {
+	padding: 0 14px 14px;
+}
+
 .npcink-toolbox__start-advanced[data-toolbox-watermark-settings] > summary {
 	display: list-item;
 	list-style: disclosure-closed inside;

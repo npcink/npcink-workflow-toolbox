@@ -11398,3 +11398,195 @@ msgstr "问答已添加到文末。检查后请手动保存或更新。"
 #: assets/editor-content-support.js
 msgid "Could not add the FAQ to the end of this article. Check the editor or copy the selected answers."
 msgstr "无法将问答添加到文末。请检查编辑器限制，或复制选中的问答。"
+
+#: assets/article-credential-admin.js:18
+msgid "Checked: %1$d. Skipped: %2$d. Articles with possible credentials: %3$d."
+msgstr "已检查 %1$d 篇，跳过 %2$d 篇，疑似含凭据 %3$d 篇。"
+
+#: assets/article-credential-admin.js:24
+msgid "Edit article #%d"
+msgstr "编辑文章 #%d"
+
+#: assets/article-credential-admin.js:53
+msgid "Scanning saved articles..."
+msgstr "正在检查已保存的文章…"
+
+#: assets/article-credential-admin.js:75 assets/article-credential-admin.js:81
+msgid "Scan stopped. Results are partial."
+msgstr "检查已停止，当前仅显示部分结果。"
+
+#: assets/article-credential-admin.js:76
+msgid "Scan finished with gaps."
+msgstr "检查已结束，有文章未检查。"
+
+#: assets/article-credential-admin.js:77
+msgid "Scan finished."
+msgstr "检查完成。"
+
+#: assets/article-credential-admin.js:77
+msgid "No potential credentials found in the checked fields."
+msgstr "在已检查字段中未发现疑似凭据。"
+
+#: assets/article-credential-admin.js:81
+msgid "Scan interrupted. Resume to finish checking the remaining articles."
+msgstr "检查中断，可以继续检查剩余文章。"
+
+#: assets/article-credential-admin.js:84
+msgid "Resume scan"
+msgstr "继续检查"
+
+#: assets/article-credential-admin.js:84 includes/Article_Credential_Check.php:95
+msgid "Scan site articles"
+msgstr "检查全站文章"
+
+#: assets/article-credential-editor.js:14
+msgid "Credential check incomplete. Some content or findings could not be shown."
+msgstr "凭据检查不完整：部分内容未检查，或部分结果未显示。"
+
+#: assets/article-credential-editor.js:15
+msgid "If already shared, revoke or rotate the credential. Replacing it here does not invalidate it."
+msgstr "如果凭据已经外泄，请撤销或轮换。替换文章中的值不会让原凭据失效。"
+
+#: assets/article-credential-editor.js:59 includes/Article_Credential_Check.php:53
+msgid "The article is too large for the credential check. Nothing was sent to Cloud."
+msgstr "文章超出凭据检查上限，未发送到云端。"
+
+#: assets/article-credential-editor.js:60 includes/Article_Credential_Check.php:56
+msgid "Possible credential found. Review it with Check credentials before sending the article to Cloud."
+msgstr "发现疑似凭据。请先点击「检查凭据」核对，再发送到云端。"
+
+#: assets/article-credential-editor.js:83
+msgid "Block %d"
+msgstr "区块 %d"
+
+#: assets/article-credential-editor.js:104
+msgid "Article body (manual review)"
+msgstr "正文（请手动核对）"
+
+#: assets/article-credential-editor.js:147 assets/article-credential-editor.js:181 includes/Article_Credential_Check.php:63 includes/Article_Credential_Check.php:92
+msgid "Article credential check"
+msgstr "文章凭据检查"
+
+#: assets/article-credential-editor.js:154
+msgid "Masked value"
+msgstr "原值已隐藏"
+
+#: assets/article-credential-editor.js:158
+msgid "Locate block"
+msgstr "定位区块"
+
+#: assets/article-credential-editor.js:160
+msgid "Replaced in the editor. Review and save the article manually."
+msgstr "已在编辑器中替换。请核对后手动保存。"
+
+#: assets/article-credential-editor.js:161
+msgid "The block changed or cannot be edited. Run the check again."
+msgstr "区块已变更或不可编辑，请重新检查。"
+
+#: assets/article-credential-editor.js:162
+msgid "Replace this value"
+msgstr "替换此值"
+
+#: assets/article-credential-editor.js:171
+msgid "Check credentials"
+msgstr "检查凭据"
+
+#: assets/article-credential-editor.js:183
+msgid "Possible credentials found in this article."
+msgstr "这篇文章中发现疑似凭据。"
+
+#: includes/Article_Credential_Check.php:88
+msgid "You do not have permission to scan articles."
+msgstr "你没有检查全站文章的权限。"
+
+#: includes/Article_Credential_Check.php:93
+msgid "Checks saved article titles, excerpts and bodies, including drafts and private articles you can edit. Nothing is sent to Cloud or changed."
+msgstr "检查已保存文章的标题、摘要和正文，包括你可以编辑的草稿和私密文章。不会上传云端或修改文章。"
+
+#: includes/Article_Credential_Check.php:94
+msgid "If a real credential was already shared, revoke or rotate it before editing the article."
+msgstr "如果真实凭据已经泄露，请先撤销或轮换，再修改文章。"
+
+#: includes/Article_Credential_Check.php:96
+msgid "Stop scan"
+msgstr "停止检查"
+
+#: includes/Article_Credential_Check.php:99
+msgid "Article"
+msgstr "文章"
+
+#: includes/Article_Credential_Check.php:99
+msgid "Possible credential types"
+msgstr "疑似凭据类型"
+
+#: includes/Article_Credential_Check.php:102
+msgid "Enable JavaScript to run the scan."
+msgstr "请启用 JavaScript 后再运行检查。"
+
+#: includes/Article_Credential_Rules.php:18
+msgid "API key"
+msgstr "API 密钥"
+
+#: includes/Article_Credential_Rules.php:24
+msgid "Access token"
+msgstr "访问令牌"
+
+#: includes/Article_Credential_Rules.php:30
+msgid "Private key (review manually)"
+msgstr "私钥（请手动核对）"
+
+#: includes/Article_Credential_Rules.php:36
+msgid "Connection string with password (review manually)"
+msgstr "带密码的连接串（请手动核对）"
+
+#: assets/article-credential-editor.js:300
+msgid "Continue generating FAQ"
+msgstr "继续生成 FAQ"
+
+#: assets/article-credential-editor.js:300
+msgid "Continue article review"
+msgstr "继续审阅"
+
+#: assets/article-credential-editor.js:302
+msgid "WordPress blocked the request, but the browser could not locate the credential. Review and edit the content before trying again."
+msgstr "WordPress 已拦截请求，但浏览器未能定位凭据。请核对并修改内容后再试。"
+
+#: assets/article-credential-editor.js:305
+msgid "Possible credentials found. Nothing was sent to Cloud."
+msgstr "发现疑似凭据，未发送到云端。"
+
+#: assets/article-credential-editor.js:306
+msgid "No known credential formats found in the content to send."
+msgstr "待发送内容中未发现已知格式的凭据。"
+
+#: assets/article-credential-editor.js:311
+msgid "Review and fix"
+msgstr "查看并处理"
+
+#: assets/article-credential-editor.js:317
+msgid "Return to editor"
+msgstr "返回编辑器"
+
+#: includes/Article_Credential_Check.php
+msgid "Body"
+msgstr "正文"
+
+#: includes/Article_Credential_Rules.php
+msgid "Password or token assignment"
+msgstr "疑似密码或令牌赋值"
+
+#: assets/article-credential-admin.js assets/article-credential-editor.js
+msgid "%s (advisory only)"
+msgstr "%s（仅提醒）"
+
+#: assets/article-credential-editor.js
+msgid "Selected text"
+msgstr "选中的文字"
+
+#: assets/article-credential-editor.js
+msgid "Instruction"
+msgstr "输入的指令"
+
+#: assets/article-credential-editor.js
+msgid "Possible password or token assignment. Review before sending; this warning does not block sending."
+msgstr "发现疑似密码或令牌赋值。建议发送前核对，此提醒不会阻止发送。"

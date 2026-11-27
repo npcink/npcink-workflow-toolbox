@@ -32,6 +32,8 @@ command -v node >/dev/null 2>&1 || {
 
 js_bundles=(
 	"assets/admin.js"
+	"assets/article-credential-admin.js"
+	"assets/article-credential-editor.js"
 	"assets/editor-content-format.js"
 	"assets/editor-content-support.js"
 	"assets/editor-content-support/text-utils.js"

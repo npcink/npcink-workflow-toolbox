@@ -198,16 +198,24 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		}
 
 		if ( 'publish_preflight' === $intent ) {
+			$review_blocks    = $this->editor_article_review_blocks_from_request( $request );
+			$search_topic     = sanitize_text_field( $query );
+			$knowledge_query  = sanitize_textarea_field( $query );
+			// Check every derived outbound field before starting any remote section.
+			$credential_error = Article_Credential_Check::guard_fields( array_merge( array( $search_topic, $knowledge_query ), array_column( $review_blocks, 'text' ) ) );
+			if ( null !== $credential_error ) {
+				return $credential_error;
+			}
 			$result['sections']['discoverability']         = $this->editor_support_section(
 				$this->editor_cached_content_discoverability(
 					array(
 						'post_id'                 => absint( $context['post_id'] ?? 0 ),
 						'title'                   => (string) ( $context['title'] ?? '' ),
-						'topic'                   => $query,
+						'topic'                   => $search_topic,
 						'excerpt'                 => (string) ( $context['excerpt'] ?? '' ),
 						'content'                 => (string) ( $context['content_text'] ?? '' ),
 						'external_search_intent'  => 'fact_check',
-						'include_external_search' => true,
+						'include_external_search' => '' !== $search_topic,
 					)
 				)
 			);
@@ -215,7 +223,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 			$duplicate_check                               = $this->editor_support_section(
 				$this->editor_cached_site_knowledge(
 					array(
-						'query'           => $query,
+						'query'           => $knowledge_query,
 						'intent'          => 'duplicate_check',
 						'current_post_id' => absint( $context['post_id'] ?? 0 ),
 						'max_results'     => 5,
@@ -226,7 +234,7 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 				$result['sections'],
 				$this->publish_preflight->build_sections( $context, $result['sections']['discoverability'], $duplicate_check, $local_checkup )
 			);
-			$result['sections']['article_language_review'] = $this->editor_article_cloud_language_review( $request );
+			$result['sections']['article_language_review'] = $this->editor_article_cloud_language_review( $request, $review_blocks );
 		}
 
 		$result['recommendation_set']  = Rest_Editor_Progressive_Recommendations::editor_recommendation_set( $context, $intent, $result['sections'] );
@@ -1994,9 +2002,8 @@ final class Rest_Editor_Content_Support extends Rest_Editor_Flow_Cache {
 		return $checks;
 	}
 
-	private function editor_article_cloud_language_review( WP_REST_Request $request ): array {
+	private function editor_article_cloud_language_review( WP_REST_Request $request, array $source_blocks ): array {
 		$requested_checks = $this->editor_article_review_checks( $request );
-		$source_blocks    = $this->editor_article_review_blocks_from_request( $request );
 		$blocks           = array();
 		$block_map        = array();
 		foreach ( $source_blocks as $source ) {

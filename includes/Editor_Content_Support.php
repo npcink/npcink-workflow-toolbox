@@ -117,10 +117,28 @@ final class Editor_Content_Support {
 			$writing_pack_dependencies[] = 'npcink-toolbox-editor-content-support-writing-pack';
 		}
 
+		$credential_path = $this->asset_path( 'assets/article-credential-editor.js' );
+		wp_enqueue_script(
+			'npcink-toolbox-credential-editor',
+			NPCINK_TOOLBOX_URL . $credential_path,
+			array( 'wp-block-editor', 'wp-components', 'wp-data', 'wp-editor', 'wp-element', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ),
+			$this->asset_version( $credential_path ),
+			true
+		);
+		wp_set_script_translations( 'npcink-toolbox-credential-editor', 'npcink-workflow-toolbox', NPCINK_TOOLBOX_DIR . 'languages' );
+		wp_localize_script(
+			'npcink-toolbox-credential-editor',
+			'NpcinkArticleCredentialRules',
+			array(
+				'maxBytes' => Article_Credential_Rules::MAX_BYTES,
+				'rules'    => Article_Credential_Rules::definitions(),
+			)
+		);
+
 		wp_enqueue_script(
 			'npcink-toolbox-editor-content-support',
 			NPCINK_TOOLBOX_URL . $script_path,
-			array_merge( array( 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-related-reading', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ), $writing_pack_dependencies ),
+			array_merge( array( 'npcink-toolbox-credential-editor', 'npcink-toolbox-editor-content-format', 'npcink-toolbox-editor-content-support-internal-links', 'npcink-toolbox-editor-content-support-related-reading', 'npcink-toolbox-editor-content-support-audio', 'wp-api-fetch', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-edit-post', 'wp-editor', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-plugins', 'wp-rich-text' ), $writing_pack_dependencies ),
 			$this->asset_version( $script_path ),
 			true
 		);

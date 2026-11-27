@@ -325,7 +325,8 @@
 	padding-inline-start: 20px;
 }
 
-.npcink-toolbox-editor-support__flow--links .npcink-toolbox-editor-support__flow-actions {
+.npcink-toolbox-editor-support__flow--links .npcink-toolbox-editor-support__flow-actions,
+.npcink-toolbox-editor-support__flow--preflight .npcink-toolbox-editor-support__flow-actions {
 	grid-column: 1 / -1;
 }
 
