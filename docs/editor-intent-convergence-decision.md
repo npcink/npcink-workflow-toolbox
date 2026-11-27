@@ -12,6 +12,13 @@ retired; this amendment does not restore any other legacy surface.
 
 Date proposed: 2026-10-07. Accepted: 2026-10-07.
 
+## 2026-11-27 Article Check sidebar readability
+
+Keep the two-line preview and keyboard disclosure. Lead with the short text/ALT
+scope and Cloud label; expansion keeps the bounded read-only text transfer,
+review limits, and manual save guidance. Raise the Article Check and contextual
+ALT labels used for review to 12px without changing the request or save path.
+
 ## 2026-11-09 Frozen-feature release containment
 
 Source-material drafting is now **server-paused**, in addition to being hidden

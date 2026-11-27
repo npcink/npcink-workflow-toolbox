@@ -23,14 +23,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	private const PARENT_MENU_SLUG = 'npcink-ai';
 	private const MENU_CAPABILITY  = 'manage_options';
 
-	private string $hook_suffix = '';
+	private string $hook_suffix          = '';
+	private string $overview_hook_suffix = '';
 
 	public function __construct( Settings $settings ) {
 		$this->settings = $settings;
 	}
 
 	public function register_navigation(): void {
-		add_menu_page(
+		$this->overview_hook_suffix = add_menu_page(
 			__( 'Npcink AI', 'npcink-workflow-toolbox' ),
 			__( 'Npcink AI', 'npcink-workflow-toolbox' ),
 			self::MENU_CAPABILITY,
@@ -94,15 +95,15 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<h1><?php esc_html_e( 'Npcink AI', 'npcink-workflow-toolbox' ); ?></h1>
 			<p><?php esc_html_e( 'Installed Npcink WordPress tools and their independent administration surfaces.', 'npcink-workflow-toolbox' ); ?></p>
 			<h2><?php esc_html_e( 'Installed Surfaces', 'npcink-workflow-toolbox' ); ?></h2>
-			<table class="widefat striped" style="max-width: 920px;">
-				<thead>
-					<tr>
-						<th scope="col"><?php esc_html_e( 'Surface', 'npcink-workflow-toolbox' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Purpose', 'npcink-workflow-toolbox' ); ?></th>
-						<th scope="col"><?php esc_html_e( 'Action', 'npcink-workflow-toolbox' ); ?></th>
+			<table class="widefat striped npcink-suite-overview" role="table">
+				<thead role="rowgroup">
+					<tr role="row">
+						<th scope="col" role="columnheader"><?php esc_html_e( 'Surface', 'npcink-workflow-toolbox' ); ?></th>
+						<th scope="col" role="columnheader"><?php esc_html_e( 'Purpose', 'npcink-workflow-toolbox' ); ?></th>
+						<th scope="col" role="columnheader"><?php esc_html_e( 'Action', 'npcink-workflow-toolbox' ); ?></th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody role="rowgroup">
 					<?php
 					$this->render_suite_overview_row( __( 'Core', 'npcink-workflow-toolbox' ), __( 'Review proposals, approval decisions, commit preflight, audit, and client access tokens.', 'npcink-workflow-toolbox' ), 'npcink-governance-core' );
 					$this->render_suite_overview_row( __( 'Adapter', 'npcink-workflow-toolbox' ), __( 'Connect OpenClaw and compatible AI clients through the Adapter surface.', 'npcink-workflow-toolbox' ), 'npcink-ai-client-adapter' );
@@ -118,14 +119,14 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 
 	private function render_suite_overview_row( string $label, string $description, string $slug ): void {
 		?>
-		<tr>
-			<th scope="row"><?php echo esc_html( $label ); ?></th>
-			<td><?php echo esc_html( $description ); ?></td>
-			<td>
+		<tr role="row">
+			<th scope="row" role="rowheader"><?php echo esc_html( $label ); ?></th>
+			<td role="cell"><?php echo esc_html( $description ); ?></td>
+			<td role="cell">
 				<?php if ( $this->is_suite_submenu_registered( $slug ) ) : ?>
 					<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=' . $slug ) ); ?>"><?php esc_html_e( 'Open', 'npcink-workflow-toolbox' ); ?></a>
 				<?php else : ?>
-					<span style="color: #646970;"><?php esc_html_e( 'Not installed', 'npcink-workflow-toolbox' ); ?></span>
+					<span class="npcink-suite-overview__unavailable"><?php esc_html_e( 'Not installed', 'npcink-workflow-toolbox' ); ?></span>
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -145,12 +146,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 	}
 
 	public function enqueue( string $hook_suffix ): void {
-		if ( $hook_suffix !== $this->hook_suffix ) {
+		if ( $hook_suffix !== $this->hook_suffix && $hook_suffix !== $this->overview_hook_suffix ) {
 			return;
 		}
 
-		$style_path  = $this->asset_path( 'assets/admin.css' );
-		$script_path = $this->asset_path( 'assets/admin.js' );
+		$style_path = $this->asset_path( 'assets/admin.css' );
 
 		wp_enqueue_style(
 			'npcink-toolbox-admin',
@@ -159,6 +159,11 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			$this->asset_version( $style_path )
 		);
 
+		if ( $hook_suffix !== $this->hook_suffix ) {
+			return;
+		}
+
+		$script_path = $this->asset_path( 'assets/admin.js' );
 		wp_enqueue_script(
 			'npcink-toolbox-admin',
 			NPCINK_TOOLBOX_URL . $script_path,
@@ -483,6 +488,9 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 		$cloud_ready           = $this->settings->cloud_runtime_available();
 		$active_tab            = $this->requested_toolbox_tab();
 		$active_site_check_tab = $this->requested_site_check_tab();
+		$site_check_requested  = 'site-and-ask' === $active_tab && $this->site_check_requested();
+		$preferences_requested = 'site-and-ask' === $active_tab && 'content-preferences' === $this->query_text_param( 'toolbox_support' );
+		$support_view          = $site_check_requested || $preferences_requested;
 		$nightly_preview       = 'site-and-ask' === $active_tab && 'scheduled-review' === $active_site_check_tab ? $this->nightly_inspection_preview_from_request() : null;
 		$site_ops_preview      = 'site-and-ask' === $active_tab ? $this->site_ops_insights_preview_from_request( $content_context, $cloud_ready ) : null;
 		?>
@@ -490,7 +498,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			<h1><?php esc_html_e( 'Npcink Workflow Toolbox', 'npcink-workflow-toolbox' ); ?></h1>
 			<p class="npcink-toolbox__scope"><?php esc_html_e( 'Ask about your site or work with images. AI suggestions require human review.', 'npcink-workflow-toolbox' ); ?></p>
 			<?php
-			if ( ! $cloud_ready ) {
+			if ( ! $cloud_ready && ! $support_view ) {
 				$this->render_cloud_runtime_notice();
 			}
 			if ( '' !== $this->query_text_param( 'settings-updated' ) ) {
@@ -498,22 +506,24 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 			}
 			?>
 
-			<nav class="npcink-ai-tabs npcink-toolbox__tabs" data-toolbox-tabs aria-label="<?php esc_attr_e( 'Toolbox sections', 'npcink-workflow-toolbox' ); ?>">
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'site-and-ask' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="site-and-ask" aria-selected="<?php echo 'site-and-ask' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'site-and-ask' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></button>
-				<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Processing', 'npcink-workflow-toolbox' ); ?></button>
+			<nav class="npcink-ai-tabs npcink-toolbox__tabs" <?php echo $support_view ? '' : 'data-toolbox-tabs'; ?> aria-label="<?php esc_attr_e( 'Toolbox sections', 'npcink-workflow-toolbox' ); ?>">
+				<?php if ( $support_view ) : ?>
+					<a class="npcink-ai-tab npcink-toolbox__tab" href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=start' ) ); ?>"><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></a>
+					<a class="npcink-ai-tab npcink-toolbox__tab npcink-ai-tab-active is-active" href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask' ) ); ?>"><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></a>
+					<a class="npcink-ai-tab npcink-toolbox__tab" href="<?php echo esc_url( admin_url( 'admin.php?page=npcink-toolbox&toolbox_tab=tools' ) ); ?>"><?php esc_html_e( 'Image Processing', 'npcink-workflow-toolbox' ); ?></a>
+				<?php else : ?>
+					<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'start' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="start" aria-selected="<?php echo 'start' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'start' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Start', 'npcink-workflow-toolbox' ); ?></button>
+					<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'site-and-ask' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="site-and-ask" aria-selected="<?php echo 'site-and-ask' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'site-and-ask' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?></button>
+					<button type="button" class="npcink-ai-tab npcink-toolbox__tab<?php echo 'tools' === $active_tab ? ' npcink-ai-tab-active is-active' : ''; ?>" data-toolbox-tab-target="tools" aria-selected="<?php echo 'tools' === $active_tab ? 'true' : 'false'; ?>" <?php echo 'tools' === $active_tab ? 'aria-current="page"' : ''; ?>><?php esc_html_e( 'Image Processing', 'npcink-workflow-toolbox' ); ?></button>
+				<?php endif; ?>
 			</nav>
 
 			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="start" aria-label="<?php esc_attr_e( 'Toolbox start', 'npcink-workflow-toolbox' ); ?>"<?php echo 'start' === $active_tab ? '' : ' hidden'; ?>>
 				<?php $this->render_start_panel( $content_context, $cloud_ready ); ?>
 			</section>
 
-			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Smart Ask', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
-				<?php if ( 'content-preferences' === $this->query_text_param( 'toolbox_support' ) ) : ?>
-					<?php $this->render_content_context_form( $content_context ); ?>
-				<?php endif; ?>
-				<?php $this->render_smart_ask_panel(); ?>
-				<?php if ( $this->site_check_requested() ) : ?>
+			<section class="npcink-toolbox__panel" data-toolbox-tab-panel="site-and-ask" aria-label="<?php esc_attr_e( 'Site & Ask', 'npcink-workflow-toolbox' ); ?>"<?php echo 'site-and-ask' === $active_tab ? '' : ' hidden'; ?>>
+				<?php if ( $site_check_requested ) : ?>
 				<section class="npcink-toolbox__site-check-fold" id="npcink-toolbox-site-check" data-toolbox-site-check-fold aria-label="<?php esc_attr_e( 'Site check', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__panel-header">
 						<h2><?php esc_html_e( 'Site Check', 'npcink-workflow-toolbox' ); ?></h2>
@@ -521,6 +531,10 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 					</div>
 					<?php $this->render_operations_insights_panel( $site_ops_preview, $content_context, $cloud_ready, $settings, $nightly_preview, $active_site_check_tab ); ?>
 				</section>
+				<?php elseif ( $preferences_requested ) : ?>
+					<?php $this->render_content_context_form( $content_context ); ?>
+				<?php else : ?>
+					<?php $this->render_smart_ask_panel(); ?>
 				<?php endif; ?>
 			</section>
 
@@ -887,7 +901,7 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 				<section class="npcink-toolbox__ops-status-row" aria-label="<?php esc_attr_e( 'Site Check readiness', 'npcink-workflow-toolbox' ); ?>">
 					<div class="npcink-toolbox__ops-status-main">
 						<span><strong><?php esc_html_e( 'Local scan', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( $scan_status ); ?></span>
-						<span><strong><?php esc_html_e( 'Cloud', 'npcink-workflow-toolbox' ); ?></strong><?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Cloud analysis is temporarily paused. This brief uses local rules only.', 'npcink-workflow-toolbox' ) : ( $cloud_ready ? __( 'Available when needed', 'npcink-workflow-toolbox' ) : __( 'Optional', 'npcink-workflow-toolbox' ) ) ); ?></span>
+						<span><strong><?php esc_html_e( 'Cloud', 'npcink-workflow-toolbox' ); ?></strong> <?php echo esc_html( Settings::cloud_feature_paused( 'cloud_inspection' ) ? __( 'Analysis is temporarily paused. This brief uses local rules only.', 'npcink-workflow-toolbox' ) : ( $cloud_ready ? __( 'Available when needed', 'npcink-workflow-toolbox' ) : __( 'Optional', 'npcink-workflow-toolbox' ) ) ); ?></span>
 						<span><strong><?php esc_html_e( 'Site changes', 'npcink-workflow-toolbox' ); ?></strong><?php esc_html_e( 'Suggestions only', 'npcink-workflow-toolbox' ); ?></span>
 					</div>
 					<div class="npcink-toolbox__ops-status-actions">
@@ -895,10 +909,12 @@ final class Admin_Page extends Admin_Page_Site_Ops_Panel {
 							<a class="button button-primary" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Generate site check', 'npcink-workflow-toolbox' ); ?></a>
 						<?php else : ?>
 							<a class="button button-primary" data-toolbox-check-to-ask href="<?php echo esc_url( $this->smart_ask_url( 'site_ops', $this->site_check_smart_ask_seed( $findings ) ) ); ?>"><?php esc_html_e( 'Ask about this check', 'npcink-workflow-toolbox' ); ?></a>
-							<a class="button" href="<?php echo esc_url( $this->site_ops_insights_preview_url() ); ?>"><?php esc_html_e( 'Rescan', 'npcink-workflow-toolbox' ); ?></a>
 						<?php endif; ?>
 					</div>
 				</section>
+				<?php if ( null !== $preview && ! isset( $preview['error'] ) ) : ?>
+					<?php $this->render_site_ops_acceptance_line(); ?>
+				<?php endif; ?>
 
 				<details class="npcink-toolbox__ops-loop-disclosure">
 					<summary><?php esc_html_e( 'How to use Site Check', 'npcink-workflow-toolbox' ); ?></summary>

@@ -2,6 +2,14 @@
 
 状态：Active（IA-1 起；2026-10-22 折叠站点检查顶栏）。产品边界仍以 [deidentified-assistant-boundary-v1.md](deidentified-assistant-boundary-v1.md) 为准；视觉 token 见 [admin-ui-design-standard-v1.md](admin-ui-design-standard-v1.md)。当前展示规则以下方最新覆盖决议为准。
 
+## 支持页任务优先（2026-11-27）
+
+从支持详情或旧链接进入站点检查、巡检预览、站点画像时，只显示所选支持任务。
+顶栏可返回普通「站点与提问」；检查结果的「去提问」仍携带可编辑的种子问题。
+重扫说明和入口在检查结果层显示一次，问题卡继续保留各自的处理动作。
+Npcink AI 概览在 480px 及以下纵向排列各行，保留原有表头语义与入口。
+不改变检查规则、运行暂停、支持入口可见性或写入权限。
+
 ## Legacy backup settings removed — 2026-11-13
 
 Operator-approved: remove the entire Image Processing backup-settings disclosure,

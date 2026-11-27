@@ -454,6 +454,26 @@ documentation handoff rule, not a new runtime, approval store or write lane.
 See the [Smart Ask audit handoff](smart-ask-audit-closeout-2026-11-26.md#final-audit-handoff-2026-11-26)
 for the applied decisions and the boundary between audit and acceptance.
 
+### Evidence rules for visual audits
+
+- Record the report snapshot, exact checked revision, installed target,
+  locale, viewport and UI state. Label findings fixed, deferred or unverified;
+  do not promote a screenshot of a paused or incomplete state to a failure of
+  a supported runtime.
+- Check DOM and keyboard order as well as screenshots and overflow. Assert
+  that the requested task's primary action is in the initial viewport, old
+  deep links still work and users can return to the ordinary entry. Check the
+  initial and populated states, including the responsive breakpoint itself.
+- Put a report-wide action at report level once; keep findings' own next
+  actions at finding level. For shortened copy, verify keyboard expansion and
+  collapse in the source language and the affected translation. Keep data-use
+  scope and manual-write boundaries accessible before invoking the action.
+- Distinguish isolated WordPress browser results from physical device,
+  assistive technology, live Cloud and production evidence. Record omissions
+  rather than expanding the task to make the audit appear complete.
+
+See the [2026-11-27 visual audit maintenance record](visual-audit-maintenance-2026-11-27.md).
+
 ## WordPress Smoke Gate
 
 When a local WordPress site and WP-CLI are available, mount or install the

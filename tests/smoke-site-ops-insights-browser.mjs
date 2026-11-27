@@ -351,11 +351,32 @@ try {
 			supportLink.click(),
 		]);
 		await siteCheckFold.waitFor({ state: 'visible' });
+		assert(await page.locator('[data-toolbox-smart-ask]').count() === 0, 'Explicit Site Check does not render the Ask form.');
 		pass('Support link opens the manual report.');
 		await page.reload({ waitUntil: 'domcontentloaded' });
 		assert(await page.locator('[data-toolbox-site-check-fold]').isVisible(), 'Support report remains reachable after reload.');
-		await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask`, { waitUntil: 'domcontentloaded' });
+		await Promise.all([
+			page.waitForURL(url => !url.searchParams.has('toolbox_support') && url.searchParams.get('toolbox_tab') === 'site-and-ask'),
+			page.locator('.npcink-toolbox__tabs a[href$="toolbox_tab=site-and-ask"]').click(),
+		]);
 		assert(await page.locator('[data-toolbox-smart-ask]').isVisible() && await page.locator('[data-toolbox-site-check-fold]').count() === 0, 'Ordinary Site & Ask renders the question shell without Site Check.');
+		for (const width of [390, 480, 782, 1440]) {
+			await page.setViewportSize({ width, height: 844 });
+			await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-ai`, { waitUntil: 'domcontentloaded' });
+			const overview = page.locator('.npcink-suite-overview');
+			assert(await overview.locator('tbody tr').first().evaluate((row, stacks) => getComputedStyle(row).display === (stacks ? 'grid' : 'table-row'), width <= 480), `Overview uses the intended row layout at ${width}px.`);
+			assert(await overview.locator('a[href$="page=npcink-toolbox"]').isVisible(), `Overview keeps the Toolbox link at ${width}px.`);
+			for (const [query, action] of [
+				['toolbox_support=site-check', '.npcink-toolbox__ops-status-actions .button-primary'],
+				['site_check_tab=scheduled-review', '[data-toolbox-site-check-panel="scheduled-review"] .button-primary'],
+			['toolbox_support=content-preferences', '[data-toolbox-tab-panel="site-and-ask"] > .npcink-toolbox__panel-header h2'],
+			]) {
+				await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask&${query}`, { waitUntil: 'domcontentloaded' });
+				const box = await page.locator(action).first().boundingBox();
+				assert(box && box.y >= 0 && box.y + box.height <= 844 && await page.locator('[data-toolbox-smart-ask]').count() === 0, `${query} puts its requested task in the first viewport at ${width}px.`);
+			}
+		}
+		await page.goto(`${baseUrl}/wp-admin/admin.php?page=npcink-toolbox&toolbox_tab=site-and-ask`, { waitUntil: 'domcontentloaded' });
 		for (const width of [1440, 390]) {
 			await page.setViewportSize({ width, height: 1000 });
 			assert(await page.locator('.npcink-toolbox').evaluate(element => element.scrollWidth <= element.clientWidth), `Default Ask fits the ${width}px viewport.`);
@@ -410,7 +431,7 @@ try {
 		assert(await page.locator('[data-toolbox-site-ops-insights] .npcink-toolbox__ops-report-toolbar').count() === 0, 'Generated report does not keep a report-internal rescan toolbar.');
 		const statusActionText = await page.locator('.npcink-toolbox__ops-status-row .npcink-toolbox__ops-status-actions').innerText();
 		const statusText = await page.locator('.npcink-toolbox__ops-status-main').innerText();
-		assert(/Current snapshot is ready|当前快照已生成/.test(statusText) && /Ask about this check|去提问/.test(statusActionText) && /Rescan|重新扫描/.test(statusActionText), 'Generated report keeps snapshot status and scan actions in the status row.');
+		assert(/Current snapshot is ready|当前快照已生成/.test(statusText) && /Ask about this check|去提问/.test(statusActionText), 'Generated report keeps snapshot status and the Ask action in the status row.');
 
 		const summaryDetails = page.locator('.npcink-toolbox__ops-scan-details').nth(0);
 		const handlingDetails = page.locator('.npcink-toolbox__ops-scan-details').nth(1);
@@ -432,7 +453,7 @@ try {
 		assert(/Why it matters|为什么重要|为何重要/.test(overviewText) && /Affected examples|受影响示例/.test(overviewText), 'Decision queue explains why each issue matters and who is affected.');
 		assert(/First safe action|第一步安全操作|先做什么/.test(overviewText) && /Handling|处理方式/.test(overviewText), 'Decision queue explains the first safe action and handling path.');
 		assert(await page.locator('[data-toolbox-ops-panel="overview"] .npcink-toolbox__ops-next-actions .button').count() > 0, 'Decision queue exposes safe first-action buttons instead of text-only recommendations.');
-		assert(/High priority|高优先级|Medium priority|中优先级/.test(overviewText), 'Decision queue shows priority as a readable label.');
+		assert(/High priority|高优先级|Medium priority|中优先级|Needs review|需审阅/.test(overviewText), 'Decision queue shows priority as a readable label.');
 		assert(/View review candidate|查看审核候选/.test(overviewText), 'Review-workflow cards expose a folded handoff candidate preview.');
 		assert(/View handling rules and limits|查看处理规则与限制/.test(overviewText), 'Decision queue keeps detailed handling boundaries behind a plain-language disclosure.');
 		assert(!/proposal_ready=false/.test(overviewRawText || ''), 'Default decision queue does not expose raw proposal flags.');
@@ -479,8 +500,10 @@ try {
 		assert(await firstContentFinding.locator('.npcink-toolbox__ops-priority-heading .npcink-toolbox__ops-handling-pill').count() === 1, 'Content finding keeps handling beside its title and priority.');
 		assert(await firstContentFinding.locator('.npcink-toolbox__ops-action-line .npcink-toolbox__ops-next-actions .button').count() > 0, 'Content finding keeps the existing action button on the next-step line.');
 		assert(await contentPanel.locator('.npcink-toolbox__ops-dimension-rules').count() === 1, 'Content analysis folds repeated handling rules into one disclosure.');
-		assert(/Acceptance check|验收检查/.test(contentText) && /Rescan to verify|重新扫描验证/.test(contentText), 'Content analysis explains how to verify a handled finding with the existing local rescan.');
-		assert(await firstContentFinding.locator('.npcink-toolbox__ops-acceptance-line .button').count() === 1, 'Content finding keeps a bounded rescan verification action without a completion button.');
+		const acceptance = page.locator('.npcink-toolbox__ops-acceptance-line');
+		assert(await acceptance.count() === 1 && /Acceptance check|验收检查/.test(await acceptance.innerText()), 'The report explains verification once, outside the finding cards.');
+		const rescan = acceptance.getByRole('link', { name: /Rescan to verify|重新扫描验证/ });
+		assert(await rescan.isVisible() && new URL(await rescan.evaluate(link => link.href)).searchParams.get('site_ops_insights_preview') === '1', 'The single Rescan to verify action opens the existing bounded local scan.');
 		await page.setViewportSize({ width: 1440, height: 1100 });
 		mkdirSync(dirname(contentDesktopScreenshotPath), { recursive: true });
 		await contentPanel.screenshot({ path: contentDesktopScreenshotPath, animations: 'disabled', timeout: 15000 });

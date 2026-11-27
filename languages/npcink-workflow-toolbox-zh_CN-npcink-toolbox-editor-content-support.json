@@ -27,7 +27,7 @@
       "语境": ["语境"],
       "失败": ["失败"],
       "完成": ["完成"],
-      "只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。": ["只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"],
+      "Cloud receives a limited amount of article text for read-only review. The check flags evidence-based punctuation, wording, logic, and context issues. It does not verify external facts, suggest general style or length changes, or check code, media, or unsupported blocks. Review, edit, and save the draft yourself. No findings does not mean it is ready to publish.": ["运行时只将限定范围的文章文本发送到 Cloud 进行只读审阅。只提示有原文证据的标点、语句、逻辑和语境问题；不核验外部事实，不提供泛化风格或篇幅建议。代码、多媒体及不支持的块不参与。作者自行判断、修改并保存；没有提示不代表可以发布。"],
       "不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。": ["不核验外部事实；没有提示不代表文章正确、安全或可以发布。修改由作者完成。"],
       "本地重复标点：%1$d / %2$d 段%3$s。": ["本地重复标点：%1$d / %2$d 段%3$s。"],
       "检查详情": ["检查详情"],
@@ -37,7 +37,7 @@
       "未完成（拒绝）": ["未完成（拒绝）"],
       "Editor defaults are formatting, article check, site citations, and images. ALT review is in article check; source drafting and category/tag shortcuts are hidden.": ["编辑器默认提供正文整理、文章检查、站内引用建议和文章配图。ALT 审阅位于文章检查中；根据资料起草及分类、标签快捷入口已隐藏。"],
       "No repeated punctuation hints in the checked text.": ["本次已检查文本没有重复标点提示。"],
-      "Check specific text issues and image ALT. Bounded article text is sent to Cloud for read-only review.": ["检查具体文字问题和图片 ALT；运行时将有界文章文本发送至 Cloud 只读审阅。"],
+      "Review text and image ALT with Cloud.": ["用 Cloud 检查正文和图片 ALT。"],
       "Article check": ["文章检查"],
       "": {
         "domain": "messages",
