@@ -59,3 +59,45 @@ the upstream body FAQ action and translations. The installed smoke passed on
 the synthetic fixture and two copied public blog blocks (14401 CSS and 13140
 JavaScript), including native Undo and no saved mutation. The blog sources
 were not modified. Manual evaluation of the proposed formatting remains open.
+
+## Source handoff and open gates (2026-11-27)
+
+| Repository | Source status | Pilot branches and worktrees |
+| --- | --- | --- |
+| Toolbox | [#439](https://github.com/npcink/npcink-workflow-toolbox/pull/439) merged at `c7a028668f744e6922b2fee1c0a83b1d89610098`. | Implementation branches and temporary worktrees removed. |
+| Cloud Addon | [#387](https://github.com/npcink/npcink-cloud-addon/pull/387) merged at `fc14510be0f06a6b33eae15079ec718850455032`. | Implementation branches and temporary worktrees removed. |
+| Cloud | [#1458](https://github.com/npcink/npcink-ai-cloud/pull/1458) committed and pushed at `255b599114418b33c2fe1175de620d51a9121cb3`. Protected auto-merge is enabled, but the PR is blocked. | Keep `codex/article-code-format-pilot` and its clean, locked local worktree until the squash is verified. |
+
+Cloud's exact-head source matrix failed at `backend`. The failed checks point
+to existing image-security gates: the `CVE-2026-119170` exception expired on
+2026-11-22, and the authoritative verification window had expired. The 150
+focused Cloud runtime tests and local installed browser smoke are useful
+development evidence, not substitutes for that gate. Do not extend or bypass
+the exception in this pilot. Once image security is repaired on `master`,
+recheck the PR against that baseline, verify the exact-head matrix and the
+squashed changes on GitHub `master`, then remove only the task's Cloud branch
+and worktree. Check head identity, worktree contents and installation references
+before deletion; preserve recovery evidence outside disposable worktrees.
+
+No shared M4 acceptance, human formatting-quality sign-off, production
+deployment, or default enablement was completed by this source handoff.
+Before broader availability, also revisit the bounded database transaction
+held while the Cloud formatter runs, as recorded in the Cloud PR review.
+
+## Lessons for similar editor tools
+
+- Diagnose display and source separately. Scrolling or wrapping belongs to
+  rendering unless there is a separate reason to edit source. Keep ordinary
+  body formatting's code protection; when a pinned parser can perform the
+  requested normalization, do not introduce a generative model or fallback.
+- Keep preview separate from adoption. Verify the selected block and snapshot
+  again on Apply, reject stale results, and test Undo, adjacent-block
+  preservation, and unchanged saved content through the installed editor and
+  real signed transport. Do not treat parser checks as human quality sign-off.
+- Whenever PHP references for translatable strings move, check both PO and POT
+  against the final branch. Addon's first freshness gate caught stale POT
+  references; updating the translation files, not retrying, cleared it.
+- Report local behavior, exact-head CI, installed runtime, human acceptance,
+  and release as distinct results. An unrelated baseline gate can block source
+  merge even when feature-specific tests pass. See the shared
+  [article review delivery rules](article-review-delivery-lessons-v1.md).
