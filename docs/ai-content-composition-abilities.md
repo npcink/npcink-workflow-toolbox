@@ -2,6 +2,11 @@
 
 Status: active first-version contract.
 
+**Availability:** Examples below that call the content validator, specialist
+discoverability brief, or article writing pack are historical. These abilities
+are not registered while paused; the basic site-guidance read and reviewed
+write-plan handoffs are separate. See [current availability](content-discoverability-context.md).
+
 This document defines how other AI callers should compose Toolbox abilities
 when they need external research, image candidates, vector context, content
 guidance, or article planning.

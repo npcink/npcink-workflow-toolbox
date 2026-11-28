@@ -432,9 +432,9 @@ projection and emits per-attachment
 recognition staleness. It performs no media or content writes and owns no
 queue, retry, run record, or scheduler truth.
 
-The retired `/flows/article-brief` route has been removed; OpenClaw and other
-external AI callers should use `npcink-toolbox/build-ai-article-writing-pack`
-and the editor content-support routes instead.
+The retired `/flows/article-brief` route has been removed. Normal editorial
+work stays in the editor content-support routes; there is no replacement
+writing-pack ability during the pause.
 
 The status route distinguishes registered Toolbox surfaces from currently
 available Cloud execution. Cloud-backed actions report `registered`,
@@ -526,9 +526,6 @@ authorization:
 - `npcink-toolbox/build-nightly-inspection-review-plan`
 - `npcink-toolbox/build-media-derivative-handoff`
 - `npcink-toolbox/get-content-discoverability-context`
-- `npcink-toolbox/validate-content-discoverability-context`
-- `npcink-toolbox/build-content-discoverability-brief`
-- `npcink-toolbox/build-ai-article-writing-pack`
 
 The `/vector-search`, `/knowledge-search`, `/flows/article-brief`, and
 `/flows/article-assistant` compatibility REST routes have been removed; the
@@ -564,21 +561,13 @@ which must not contain provider keys, private credentials, request logs, quota
 state, billing records, or write authorization. Provider keys and routing
 belong in Cloud/Addons or dedicated connector owners, not in Site Context.
 
-The context is exposed only as read-only, suggestion-only guidance through
-`npcink-toolbox/get-content-discoverability-context`. Third-party AI callers
-may also call `npcink-toolbox/validate-content-discoverability-context` to
-check filling quality and `npcink-toolbox/build-content-discoverability-brief`
-to get the primary lightweight content-support contract: SEO/AEO/GEO guidance,
-taxonomy/tag candidates, internal-link hints, proposal fields, and conservative
-candidates from supplied post or topic input. Final WordPress writes still
-require Core proposal approval.
-
-For natural-language article requests from OpenClaw or another external AI,
-`npcink-toolbox/build-ai-article-writing-pack` composes the context,
-validation result, discoverability brief, writing instructions, and guardrails
-into one suggestion-only pack. It is a convenience fallback for broad prompts,
-not the default SEO/AEO/GEO, taxonomy, link, image, or publish-readiness
-surface.
+Basic guidance remains readable through
+`npcink-toolbox/get-content-discoverability-context`. The content-context
+validator (`npcink-toolbox/validate-content-discoverability-context`) and writing
+pack (`npcink-toolbox/build-ai-article-writing-pack`) are paused and not registered
+as callable abilities. The specialist discoverability brief remains paused.
+Stored guidance and internal preparation logic are retained. See the
+[availability contract](docs/content-discoverability-context.md).
 
 The legacy Article Assistant REST flow and its local `article_draft_v1`
 workbench composition have been removed with the compatibility cleanup.

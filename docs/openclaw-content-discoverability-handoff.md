@@ -1,6 +1,10 @@
 # OpenClaw Content Discoverability Handoff
 
-Status: active handoff prompt source.
+Status: historical handoff prompt; not an active recipe.
+
+The standalone validation, specialist brief and article writing-pack IDs are
+not registered while paused. Do not schedule, call, or retry the old sequence.
+See [current availability](content-discoverability-context.md).
 
 This document gives OpenClaw and `npcink-openclaw-adapter` the fixed SEO, AEO, and
 GEO suggestion flow for Toolbox content context. It is prompt guidance and

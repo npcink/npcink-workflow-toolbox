@@ -166,18 +166,6 @@
       "boundary_note": "Reads non-secret site context; specialist rules are masked during the reversible pause and stored preferences are retained."
     },
     {
-      "ability_id": "npcink-toolbox/validate-content-discoverability-context",
-      "required_scope": "cap.toolbox.context.read",
-      "owner": "toolbox_context_surface",
-      "composition_role": "context_preflight",
-      "data_classification": "public_context",
-      "provider_execution": "none",
-      "write_posture": "suggestion_only",
-      "final_write_path": "core_proposal_required",
-      "direct_wordpress_write": false,
-      "boundary_note": "Checks content context readiness for AI suggestion workflows; no context mutation or write authority."
-    },
-    {
       "ability_id": "npcink-toolbox/build-content-discoverability-brief",
       "required_scope": "cap.toolbox.workflow_suggest",
       "owner": "toolbox_context_surface",
@@ -188,18 +176,6 @@
       "final_write_path": "core_proposal_required",
       "direct_wordpress_write": false,
       "boundary_note": "Paused from 2026-10-18: omitted from native and Toolkit-wrapper registration; direct calls fail before search. Implementation and contract id are retained."
-    },
-    {
-      "ability_id": "npcink-toolbox/build-ai-article-writing-pack",
-      "required_scope": "cap.toolbox.workflow_suggest",
-      "owner": "toolbox_context_surface",
-      "composition_role": "ai_article_writing_pack",
-      "data_classification": "planning_artifact",
-      "provider_execution": "none",
-      "write_posture": "suggestion_only",
-      "final_write_path": "core_proposal_required",
-      "direct_wordpress_write": false,
-      "boundary_note": "Builds one article writing context pack from operator context; not a drafting runtime or WordPress write path."
     },
     {
       "ability_id": "npcink-toolbox/answer-site-content",
@@ -223,7 +199,9 @@
     "npcink-toolbox/build-media-alt-caption-review-plan",
     "npcink-toolbox/build-content-metadata-apply-plan",
     "npcink-toolbox/build-image-candidate-adoption-plan",
-    "npcink-toolbox/web-research"
+    "npcink-toolbox/web-research",
+    "npcink-toolbox/validate-content-discoverability-context",
+    "npcink-toolbox/build-ai-article-writing-pack"
   ],
   "external_toolkit_targets": [
     "npcink-abilities-toolkit/build-image-candidate-adoption-plan",

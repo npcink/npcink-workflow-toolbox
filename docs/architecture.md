@@ -297,9 +297,9 @@ human-readable catalog and must stay aligned with that table and
 - `npcink-toolbox/build-nightly-inspection-review-plan`
 - `npcink-toolbox/build-media-derivative-handoff`
 - `npcink-toolbox/get-content-discoverability-context`
-- `npcink-toolbox/validate-content-discoverability-context`
-- `npcink-toolbox/build-content-discoverability-brief`
-- `npcink-toolbox/build-ai-article-writing-pack`
+
+The validator, specialist brief, and writing pack are not registered during the
+pause. See [current availability](content-discoverability-context.md).
 
 Toolkit planner targets referenced by Toolbox, but not registered as Toolbox
 wrapper abilities:

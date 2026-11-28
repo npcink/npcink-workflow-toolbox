@@ -2701,10 +2701,10 @@ toolbox_assert( false !== strpos( $client, 'proposal_template' ) && false !== st
 toolbox_assert( false !== strpos( $client, "'brief_ability_id'       => 'npcink-toolbox/build-content-discoverability-brief'" ), 'Content discoverability brief returns ability handoff metadata.' );
 toolbox_assert( false !== strpos( $client, 'build_ai_article_writing_pack' ), 'Provider client can build AI article writing packs.' );
 toolbox_assert( false !== strpos( $client, "'artifact_type'               => 'ai_article_writing_pack'" ), 'AI article writing pack declares its artifact type.' );
-toolbox_assert( false !== strpos( $client, "'composition_role'    => 'ai_article_writing_pack'" ), 'AI article writing pack declares its composition role.' );
+toolbox_assert( 1 === preg_match( "/'composition_role'\s*=>\s*'ai_article_writing_pack'/", $client ), 'Internal article writing pack declares its composition role.' );
 toolbox_assert( false !== strpos( $client, "'primary_contract'            => false" ) && false !== strpos( $client, "'contract_role'               => 'openclaw_natural_language_fallback'" ), 'AI article writing pack is marked as a fallback contract.' );
 toolbox_assert( false !== strpos( $client, 'article_prompt_pack' ) && false !== strpos( $client, 'suggested_article_structure' ), 'AI article writing pack returns prompt guidance and structure.' );
-toolbox_assert( false !== strpos( $client, "'pack_ability_id'        => 'npcink-toolbox/build-ai-article-writing-pack'" ), 'AI article writing pack returns ability handoff metadata.' );
+toolbox_assert( false === strpos( $client, "'pack_ability_id'" ) && false === strpos( $client, "'validation_ability_id'" ), 'Internal preparation artifacts do not advertise the unregistered ability IDs.' );
 
 $settings = file_get_contents( $root . '/includes/Settings.php' );
 toolbox_assert( false === strpos( $settings, 'BAAI/bge-m3' ), 'Local Settings no longer store a default embedding model.' );
@@ -2854,13 +2854,9 @@ toolbox_assert( false !== strpos( $abilities, "'composition_role'    => 'core_ar
 toolbox_assert( false !== strpos( $abilities, "'local_recipe_id'     => 'article_draft_v1'" ) && false !== strpos( $abilities, "'ability_recipe_ref'  => 'npcink-abilities-toolkit/recipes/article-draft'" ), 'Article write plan ability declares the local Ability recipe reference.' );
 toolbox_assert( false !== strpos( $abilities, "'composition_role'    => 'media_derivative_operator_handoff'" ), 'Media derivative handoff ability declares its content composition role.' );
 toolbox_assert( false !== strpos( $abilities, "'composition_role'    => 'site_context'" ), 'Content context ability declares its content composition role.' );
-toolbox_assert( false !== strpos( $abilities, "'composition_role'    => 'context_preflight'" ), 'Context validation ability declares its content composition role.' );
 toolbox_assert( false !== strpos( $abilities, "'composition_role'    => 'seo_aeo_geo_brief'" ), 'Content discoverability brief ability declares its content composition role.' );
-toolbox_assert( false !== strpos( $abilities, "'composition_role'    => 'ai_article_writing_pack'" ), 'AI article writing pack ability declares its content composition role.' );
 toolbox_assert( false !== strpos( $abilities, 'core_proposal_handoff' ), 'Article write plan ability declares Core proposal handoff posture.' );
-toolbox_assert( false !== strpos( $abilities, 'validate_content_discoverability_context' ), 'Content context validation ability has an execution callback.' );
 toolbox_assert( false !== strpos( $abilities, 'build_content_discoverability_brief' ), 'Content discoverability brief ability has an execution callback.' );
-toolbox_assert( false !== strpos( $abilities, 'build_ai_article_writing_pack' ), 'AI article writing pack ability has an execution callback.' );
 toolbox_assert( false !== strpos( $abilities, 'build_article_batch_write_plan' ) && false !== strpos( $abilities, 'npcink-toolbox/build-article-batch-write-plan' ), 'Article batch write plan ability has an execution callback.' );
 toolbox_assert( false !== strpos( $abilities, 'build_article_media_batch_write_plan' ) && false !== strpos( $abilities, 'npcink-toolbox/build-article-media-batch-write-plan' ), 'Article plus media batch write plan ability has an execution callback.' );
 toolbox_assert( false !== strpos( $abilities, 'search_site_knowledge' ) && false !== strpos( $abilities, 'get_site_knowledge_status' ) && false !== strpos( $abilities, 'request_site_knowledge_sync' ), 'Site knowledge abilities have execution callbacks.' );
@@ -2962,7 +2958,9 @@ toolbox_assert( false !== strpos( $connector_exposure_doc, 'Cloud-managed web se
 toolbox_assert( false === strpos( $connector_exposure_doc, 'Tavily and Bocha' ) && false === strpos( $connector_exposure_doc, 'bounded post-search enhancement' ), 'Connector exposure documentation removes local Bocha and Jina Reader boundaries.' );
 toolbox_assert( false !== strpos( $connector_exposure_doc, '`search-site-knowledge` for semantic site search' ) && false !== strpos( $connector_exposure_doc, 'cap.toolbox.knowledge.search' ), 'Connector exposure documentation records site knowledge abilities and scopes.' );
 toolbox_assert( false !== strpos( $connector_exposure_doc, 'Do not add `confirm_token`, `write_confirmed`' ), 'Connector exposure documentation blocks direct write confirmation contracts.' );
-toolbox_assert( false !== strpos( $connector_exposure_doc, 'npcink-toolbox/build-content-discoverability-brief' ), 'Connector exposure documentation lists the content discoverability brief ability.' );
+foreach ( array( 'npcink-toolbox/validate-content-discoverability-context', 'npcink-toolbox/build-ai-article-writing-pack', 'npcink-toolbox/build-content-discoverability-brief' ) as $paused_ability_id ) {
+	toolbox_assert( false === strpos( $connector_exposure_doc, '- `' . $paused_ability_id . '`' ), 'Connector exposure documentation does not list a paused ability as callable: ' . $paused_ability_id );
+}
 
 $content_context_doc              = file_get_contents( $root . '/docs/content-discoverability-context.md' );
 $nightly_pro_cloud_acceptance_doc = file_get_contents( $root . '/docs/nightly-inspection-pro-cloud-runtime-acceptance.md' );
@@ -3004,7 +3002,7 @@ toolbox_assert( false !== strpos( $content_context_doc, 'npcink-toolbox/build-co
 toolbox_assert( false !== strpos( $content_context_doc, 'npcink-toolbox/build-ai-article-writing-pack' ), 'Content context documentation records the article writing pack ability id.' );
 toolbox_assert( false !== strpos( $content_context_doc, 'primary lightweight SEO/AEO/GEO contract' ) && false !== strpos( $content_context_doc, 'special_cases' ), 'Content context documentation records the lightweight contract and special cases.' );
 toolbox_assert( false !== strpos( $content_context_doc, 'does not call a model and does not write WordPress data' ), 'Content context documentation keeps brief generation bounded.' );
-toolbox_assert( false !== strpos( $content_context_doc, 'wp eval-file tests/smoke-content-discoverability.php' ), 'Content context documentation records the local readiness smoke command.' );
+toolbox_assert( false !== strpos( $content_context_doc, 'eval-file tests/smoke-content-discoverability.php' ), 'Content context documentation records the local availability smoke command.' );
 toolbox_assert( false !== strpos( $development_workflow, 'composer smoke:metadata-delta' ) && false !== strpos( $development_workflow, 'content_metadata_delta' ), 'Development workflow documents the Content Metadata Delta smoke command.' );
 toolbox_assert( false !== strpos( $development_workflow, 'composer test:editor-progressive-js' ) && false !== strpos( $development_workflow, 'composer smoke:editor-progressive-recommendations' ) && false !== strpos( $development_workflow, 'composer smoke:editor-progressive-local-matrix' ) && false !== strpos( $development_workflow, 'progressive_recommendations' ) && false !== strpos( $development_workflow, 'no stopword-only taxonomy evidence' ), 'Development workflow documents the editor progressive recommendations smoke commands.' );
 toolbox_assert( false !== strpos( $development_workflow, 'composer smoke:editor-progressive-browser' ) && false !== strpos( $development_workflow, 'running local WordPress site' ) && false !== strpos( $development_workflow, 'outside `composer test:all`' ), 'Development workflow documents the optional editor progressive browser smoke boundary.' );
@@ -3047,8 +3045,8 @@ $content_context_smoke = file_get_contents( $root . '/tests/smoke-content-discov
 toolbox_assert( false !== $content_context_smoke && false !== strpos( $content_context_smoke, 'npcink_abilities_toolkit_get_registered' ), 'Content context smoke checks the Npcink Abilities Toolkit registry.' );
 toolbox_assert( false !== strpos( $content_context_smoke, 'npcink_ai_open_platform_ability_catalog' ) && false !== strpos( $content_context_smoke, 'npcink_ai_open_platform_get_ability_catalog' ), 'Content context smoke checks Npcink catalog projection.' );
 toolbox_assert( false !== strpos( $content_context_smoke, 'npcink_ai_open_platform_get_projection_matrix' ) && false !== strpos( $content_context_smoke, 'Core-side allowed_channels/tool-name admission is required' ), 'Content context smoke reports Agent Gateway admission status without owning it.' );
-toolbox_assert( false !== strpos( $content_context_smoke, "direct_wordpress_write'] ?? true" ) && false !== strpos( $content_context_smoke, "'suggestion_only'" ), 'Content context smoke verifies suggestion-only no-write outputs.' );
-toolbox_assert( false !== strpos( $content_context_smoke, 'build-ai-article-writing-pack' ) && false !== strpos( $content_context_smoke, 'ai_article_writing_pack' ), 'Content context smoke verifies the AI article writing pack.' );
+toolbox_assert( false !== strpos( $content_context_smoke, "direct_wordpress_write'] ?? true" ) && false !== strpos( $content_context_smoke, 'is readonly.' ), 'Content context smoke verifies that the remaining ability is read-only.' );
+toolbox_assert( false !== strpos( $content_context_smoke, 'build-ai-article-writing-pack' ) && false !== strpos( $content_context_smoke, 'validate-content-discoverability-context' ) && false !== strpos( $content_context_smoke, '404 === $response->get_status()' ), 'Content context smoke proves paused entrypoints do not execute through WordPress REST.' );
 toolbox_assert( false === strpos( $content_context_smoke, 'update_post_meta' ) && false === strpos( $content_context_smoke, 'wp_update_post' ), 'Content context smoke does not write WordPress content.' );
 
 $article_core_smoke = file_get_contents( $root . '/tests/smoke-article-draft-core-proof.php' );
