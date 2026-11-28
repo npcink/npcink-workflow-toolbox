@@ -941,10 +941,14 @@ $pause_abilities = new Npcink_Toolbox\Abilities( $pause_settings, $pause_client 
 $pause_abilities->register_native_abilities();
 $pause_abilities->register_with_npcink_abilities_toolkit();
 foreach ( array( 'pause_native_abilities', 'pause_helper_abilities' ) as $registration_lane ) {
-    npcink_toolbox_progressive_assert( ! in_array( 'npcink-toolbox/build-content-discoverability-brief', $GLOBALS[ $registration_lane ], true ) && in_array( 'npcink-toolbox/get-content-discoverability-context', $GLOBALS[ $registration_lane ], true ), 'Specialist discovery is absent while generic context remains in ' . $registration_lane . '.' );
+	npcink_toolbox_progressive_assert( in_array( 'npcink-toolbox/get-content-discoverability-context', $GLOBALS[ $registration_lane ], true ), 'Generic context remains available in ' . $registration_lane . '.' );
+	foreach ( array( 'npcink-toolbox/build-content-discoverability-brief', 'npcink-toolbox/validate-content-discoverability-context', 'npcink-toolbox/build-ai-article-writing-pack' ) as $paused_id ) {
+		npcink_toolbox_progressive_assert( ! in_array( $paused_id, $GLOBALS[ $registration_lane ], true ), $paused_id . ' is not registered in ' . $registration_lane . '.' );
+	}
 }
 
 npcink_toolbox_progressive_assert( ! isset( $pause_pack['handoff']['brief_ability_id'] ) && false === strpos( implode( ' ', $pause_pack['handoff']['next_steps'] ), 'SEO/AEO/GEO' ), 'Retained writing packs do not send clients to a paused specialist ability or next step.' );
+npcink_toolbox_progressive_assert( ! array_key_exists( 'pack_ability_id', $pause_pack['handoff'] ) && ! array_key_exists( 'validation_ability_id', $pause_pack['discoverability_brief']['handoff'] ) && 'npcink-toolbox/build-article-write-plan' === $pause_pack['handoff']['write_plan_ability_id'], 'Retained artifacts do not advertise either unregistered entrypoint and preserve the governed write-plan handoff.' );
 foreach ( array( 'discoverability', 'publish_preflight' ) as $diagnostic_scenario ) {
     $diagnostic = $pause_client->diagnose_automatic_web_search( array( 'topic' => 'Generic source research', 'scenario' => $diagnostic_scenario ) );
     npcink_toolbox_progressive_assert( is_array( $diagnostic ) && 'web_search_diagnostics' === ( $diagnostic['artifact_type'] ?? '' ), 'Generic web-search diagnostics remain callable during the specialist pause: ' . $diagnostic_scenario );

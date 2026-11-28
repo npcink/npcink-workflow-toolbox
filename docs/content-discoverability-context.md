@@ -4,14 +4,20 @@ Status: compatibility contract; specialist entrypoints paused from 2026-10-18.
 
 The SEO/AEO/GEO form sections, discoverability brief registration, specialist
 Provider calls and SEO handoff are paused. Existing options are retained;
-normal Site Profile saves preserve hidden values exactly. Context reads and
-validation remain for generic writing support, with specialist rules masked and
-no specialist readiness requirements. Direct brief calls return
+normal Site Profile saves preserve hidden values exactly. Basic context reads
+remain available, with specialist rules masked. The validation and writing-pack
+abilities are not registered in either the native or Toolkit registration lane;
+their implementations and saved data remain. Direct internal brief calls return
 `npcink_toolbox_feature_paused` (409) before search or cache access. General
 writing preparation uses shared source/context composition without GEO sections
 or instructions. The contract below records retained shapes for future review;
 it does not re-enable the paused feature. See the
 [pause implementation record](seo-specialist-pause-implementation-2026-10-18.md).
+
+The interface shapes and invocation examples below are historical except for
+`npcink-toolbox/get-content-discoverability-context` and the local smoke command.
+Do not call `npcink-toolbox/validate-content-discoverability-context` or
+`npcink-toolbox/build-ai-article-writing-pack` while they are paused.
 
 This document records the SEO, AEO, and GEO context surface for future AI
 sessions. The feature exists so a WordPress operator can fill in site facts and
@@ -234,28 +240,15 @@ After the operator fills the content context, run the local smoke through
 WP-CLI:
 
 ```bash
-wp eval-file tests/smoke-content-discoverability.php -- [post_id]
+wp --user=<administrator> eval-file tests/smoke-content-discoverability.php
 ```
 
-The optional `post_id` lets the operator test a specific draft or post. Without
-it, the smoke uses the most recently modified local post it can read. The script
-does not print the context body, post title, or generated suggestions; it only
-prints pass/fail status and the sampled post id.
-
-The smoke verifies:
-
-- the four content discoverability and writing-pack abilities are registered through
-  `npcink_abilities_toolkit_get_registered()`;
-- each ability is read-only, REST-discoverable, projected into the Npcink
-  compatibility catalog, exposes no provider secrets, and declares no direct
-  WordPress write path;
-- the saved content context validates as `ready` or `ready_with_warnings`;
-- `build-content-discoverability-brief` can build one suggestion-only brief for
-  a real local post and exposes `seo`, `aeo`, `geo`, `exceptions`, and
-  `special_cases`;
-- `build-ai-article-writing-pack` can build one suggestion-only writing pack for
-  the same local post;
-- the optional Agent Gateway projection matrix is inspected when available.
+The smoke reads only basic site guidance and checks local registry, catalog and
+authenticated WordPress REST behavior. The paused IDs must be absent from
+`npcink_abilities_toolkit_get_registered()` and the native registry; direct
+REST detail and run requests must return 404. It does not select a post,
+print site guidance, or invoke a provider. The optional Agent Gateway projection
+matrix is inspected when available.
 
 Agent Gateway/OpenClaw direct tool exposure is intentionally reported as a
 status, not forced by Toolbox. Core/Agent Gateway still owns the `wp_*` tool

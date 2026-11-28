@@ -100,7 +100,7 @@ final class Abilities {
 
 	private function definitions(): array {
 		return array(
-			'npcink-toolbox/search-image-source'           => $this->definition(
+			'npcink-toolbox/search-image-source'         => $this->definition(
 				__( 'Search Image Source', 'npcink-workflow-toolbox' ),
 				__( 'Search configured image source candidates without importing media.', 'npcink-workflow-toolbox' ),
 				array( 'query' ),
@@ -110,7 +110,7 @@ final class Abilities {
 					'composition_role' => 'image_source_candidates',
 				)
 			),
-			'npcink-toolbox/generate-image'                => $this->definition(
+			'npcink-toolbox/generate-image'              => $this->definition(
 				__( 'Request Hosted Image Candidate', 'npcink-workflow-toolbox' ),
 				__( 'Request a Cloud-hosted generated image candidate after operator prompt review, without importing media or owning the generation runtime.', 'npcink-workflow-toolbox' ),
 				array( 'prompt' ),
@@ -122,7 +122,7 @@ final class Abilities {
 					'write_posture'      => 'candidate_only_core_approval_required',
 				)
 			),
-			'npcink-toolbox/answer-site-content'           => $this->definition(
+			'npcink-toolbox/answer-site-content'         => $this->definition(
 				__( 'Answer from site content', 'npcink-workflow-toolbox' ),
 				__( 'Answer one question using indexed public posts and pages, with verified source references and no WordPress writes.', 'npcink-workflow-toolbox' ),
 				array( 'question' ),
@@ -149,7 +149,7 @@ final class Abilities {
 				Site_Content_Answer::output_schema(),
 				false
 			),
-			'npcink-toolbox/search-site-knowledge'         => $this->definition(
+			'npcink-toolbox/search-site-knowledge'       => $this->definition(
 				__( 'Search Site Knowledge', 'npcink-workflow-toolbox' ),
 				__( 'Search Cloud-managed site knowledge for semantic search, related content, writing context, internal links, or refresh suggestions without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'query' ),
@@ -162,7 +162,7 @@ final class Abilities {
 					'cloud_contract'      => 'site_knowledge_search.v1',
 				)
 			),
-			'npcink-toolbox/cloud-web-search'              => $this->definition(
+			'npcink-toolbox/cloud-web-search'            => $this->definition(
 				__( 'Cloud Web Search', 'npcink-workflow-toolbox' ),
 				__( 'Run Cloud-managed web search or Zhihu hot-topic atoms for external evidence and topic selection without exposing local provider keys or writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'query' ),
@@ -203,7 +203,7 @@ final class Abilities {
 					),
 				)
 			),
-			'npcink-toolbox/get-site-knowledge-status'     => $this->definition(
+			'npcink-toolbox/get-site-knowledge-status'   => $this->definition(
 				__( 'Get Site Knowledge Status', 'npcink-workflow-toolbox' ),
 				__( 'Read Cloud-managed site knowledge coverage and sync status without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array(),
@@ -216,7 +216,7 @@ final class Abilities {
 					'cloud_contract'      => 'site_knowledge_status.v1',
 				)
 			),
-			'npcink-toolbox/request-site-knowledge-sync'   => $this->definition(
+			'npcink-toolbox/request-site-knowledge-sync' => $this->definition(
 				__( 'Request Site Knowledge Sync', 'npcink-workflow-toolbox' ),
 				__( 'Request a Cloud-managed public Site Knowledge refresh from bounded public WordPress content without writing WordPress content or managing index lifecycle.', 'npcink-workflow-toolbox' ),
 				array(),
@@ -229,7 +229,7 @@ final class Abilities {
 					'cloud_contract'      => 'site_knowledge_sync.v1',
 				)
 			),
-			'npcink-toolbox/build-article-write-plan'      => $this->definition(
+			'npcink-toolbox/build-article-write-plan'    => $this->definition(
 				__( 'Build Article Write Plan', 'npcink-workflow-toolbox' ),
 				__( 'Build a Core-ready article_write_plan for a reviewed draft without writing WordPress content.', 'npcink-workflow-toolbox' ),
 				array( 'title', 'content_markdown' ),
@@ -330,19 +330,6 @@ final class Abilities {
 					'write_posture'       => 'suggestion_only',
 				)
 			),
-			'npcink-toolbox/validate-content-discoverability-context' => $this->definition(
-				__( 'Validate Site Content Context', 'npcink-workflow-toolbox' ),
-				__( 'Check whether the operator-maintained site context has enough fields for ordinary content suggestions.', 'npcink-workflow-toolbox' ),
-				array(),
-				array( $this, 'validate_content_discoverability_context' ),
-				'cap.toolbox.context.read',
-				array(
-					'data_classification' => 'public_context',
-					'composition_role'    => 'context_preflight',
-					'provider_execution'  => 'none',
-					'write_posture'       => 'suggestion_only',
-				)
-			),
 			'npcink-toolbox/build-content-discoverability-brief' => $this->definition(
 				__( 'Build Discoverability Suggestions', 'npcink-workflow-toolbox' ),
 				__( 'Build suggestion-only SEO, AEO, and GEO guidance from operator context and supplied post or topic input without writing WordPress content.', 'npcink-workflow-toolbox' ),
@@ -352,19 +339,6 @@ final class Abilities {
 				array(
 					'data_classification' => 'planning_artifact',
 					'composition_role'    => 'seo_aeo_geo_brief',
-					'provider_execution'  => 'none',
-					'write_posture'       => 'suggestion_only',
-				)
-			),
-			'npcink-toolbox/build-ai-article-writing-pack' => $this->definition(
-				__( 'Build AI Article Writing Pack', 'npcink-workflow-toolbox' ),
-				__( 'Build one suggestion-only article writing context pack from operator SEO, AEO, and GEO context without writing WordPress content.', 'npcink-workflow-toolbox' ),
-				array(),
-				array( $this, 'build_ai_article_writing_pack' ),
-				'cap.toolbox.workflow_suggest',
-				array(
-					'data_classification' => 'planning_artifact',
-					'composition_role'    => 'ai_article_writing_pack',
 					'provider_execution'  => 'none',
 					'write_posture'       => 'suggestion_only',
 				)
@@ -496,16 +470,8 @@ final class Abilities {
 		return $this->settings->get_content_context_for_ability();
 	}
 
-	public function validate_content_discoverability_context( $input = array() ) {
-		return $this->settings->validate_content_context_for_ability();
-	}
-
 	public function build_content_discoverability_brief( $input = array() ) {
 		return $this->client->build_content_discoverability_brief( is_array( $input ) ? $input : array() );
-	}
-
-	public function build_ai_article_writing_pack( $input = array() ) {
-		return $this->client->build_ai_article_writing_pack( is_array( $input ) ? $input : array() );
 	}
 
 	private function can_execute_ability( string $ability_id, string $required_scope = '' ): bool {

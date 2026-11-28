@@ -3,7 +3,7 @@
  * Local WordPress smoke for content discoverability abilities.
  *
  * Run with WP-CLI:
- * wp eval-file tests/smoke-content-discoverability.php -- [post_id]
+ * wp --user=<administrator> eval-file tests/smoke-content-discoverability.php
  *
  * @package Npcink_Toolbox
  */
@@ -14,10 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $toolbox_smoke_target_abilities = array(
-	'npcink-toolbox/get-content-discoverability-context'      => 'cap.toolbox.context.read',
-	'npcink-toolbox/validate-content-discoverability-context' => 'cap.toolbox.context.read',
-	'npcink-toolbox/build-content-discoverability-brief'      => 'cap.toolbox.workflow_suggest',
-	'npcink-toolbox/build-ai-article-writing-pack'            => 'cap.toolbox.workflow_suggest',
+	'npcink-toolbox/get-content-discoverability-context' => 'cap.toolbox.context.read',
+);
+$toolbox_smoke_paused_abilities = array(
+	'npcink-toolbox/build-content-discoverability-brief',
+	'npcink-toolbox/validate-content-discoverability-context',
+	'npcink-toolbox/build-ai-article-writing-pack',
 );
 
 function toolbox_content_smoke_pass( string $message ): void {
@@ -103,26 +105,6 @@ function toolbox_content_smoke_catalog(): array {
 	return is_array( $catalog ) ? $catalog : array();
 }
 
-function toolbox_content_smoke_find_sample_post_id( array $script_args ): int {
-	$requested = absint( $script_args[0] ?? 0 );
-	if ( $requested > 0 && get_post( $requested ) ) {
-		return $requested;
-	}
-
-	$posts = get_posts(
-		array(
-			'post_type'      => 'post',
-			'post_status'    => array( 'draft', 'publish', 'pending', 'future', 'private' ),
-			'posts_per_page' => 1,
-			'orderby'        => 'modified',
-			'order'          => 'DESC',
-			'fields'         => 'ids',
-		)
-	);
-
-	return absint( $posts[0] ?? 0 );
-}
-
 function toolbox_content_smoke_find_agent_gateway_tools( array $target_ability_ids ): array {
 	if ( ! function_exists( 'npcink_ai_open_platform_get_projection_matrix' ) ) {
 		return array(
@@ -158,12 +140,11 @@ function toolbox_content_smoke_find_agent_gateway_tools( array $target_ability_i
 	);
 }
 
-$script_args = isset( $args ) && is_array( $args ) ? $args : array();
-
 toolbox_content_smoke_assert(
 	function_exists( 'npcink_abilities_toolkit_get_registered' ),
 	'Npcink Abilities Toolkit registry is available.'
 );
+toolbox_content_smoke_assert( current_user_can( 'manage_options' ), 'An administrator is selected through WP-CLI --user.' );
 
 $definitions = npcink_abilities_toolkit_get_registered();
 $definitions = is_array( $definitions ) ? $definitions : array();
@@ -190,56 +171,19 @@ foreach ( array_keys( $toolbox_smoke_target_abilities ) as $ability_id ) {
 	toolbox_content_smoke_assert( 'wp_ability' === (string) ( $row['executor_type'] ?? '' ), "{$ability_id} projects as a wp_ability executor." );
 }
 
-$validation = toolbox_content_smoke_call( $definitions, 'npcink-toolbox/validate-content-discoverability-context' );
-$validation = is_array( $validation ) ? $validation : array();
-$status     = sanitize_key( (string) ( $validation['status'] ?? '' ) );
-toolbox_content_smoke_assert(
-	in_array( $status, array( 'ready', 'ready_with_warnings' ), true ),
-	"Content discoverability context is usable for AI callers ({$status})."
-);
+$context = toolbox_content_smoke_call( $definitions, 'npcink-toolbox/get-content-discoverability-context' );
+toolbox_content_smoke_assert( is_array( $context ) && array_key_exists( 'site_positioning', $context ), 'Site content guidance remains readable.' );
+$active_detail = rest_do_request( new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/npcink-toolbox/get-content-discoverability-context' ) );
+toolbox_content_smoke_assert( 200 === $active_detail->get_status(), 'Site content guidance remains visible in authenticated WordPress REST discovery.' );
 
-$sample_post_id = toolbox_content_smoke_find_sample_post_id( $script_args );
-toolbox_content_smoke_assert( $sample_post_id > 0, 'A local post is available for the sample brief.' );
-toolbox_content_smoke_info( 'Sample post id: ' . $sample_post_id );
-
-$brief = toolbox_content_smoke_call(
-	$definitions,
-	'npcink-toolbox/build-content-discoverability-brief',
-	array(
-		'post_id' => $sample_post_id,
-	)
-);
-if ( is_wp_error( $brief ) ) {
-	toolbox_content_smoke_fail( 'Brief build returned WP_Error: ' . $brief->get_error_code() );
+foreach ( $toolbox_smoke_paused_abilities as $ability_id ) {
+	toolbox_content_smoke_assert( ! isset( $definitions[ $ability_id ] ) && ! wp_has_ability( $ability_id ), "{$ability_id} is absent from both registries." );
+	toolbox_content_smoke_assert( ! isset( $catalog_index[ $ability_id ] ), "{$ability_id} is absent from the Npcink compatibility catalog." );
+	foreach ( array( '', '/run' ) as $suffix ) {
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/' . $ability_id . $suffix ) );
+		toolbox_content_smoke_assert( 404 === $response->get_status(), "WordPress REST returns 404 for {$ability_id}{$suffix}." );
+	}
 }
-$brief = is_array( $brief ) ? $brief : array();
-
-toolbox_content_smoke_assert( 'content_discoverability_brief' === (string) ( $brief['artifact_type'] ?? '' ), 'Sample brief declares content_discoverability_brief.' );
-toolbox_content_smoke_assert( true === (bool) ( $brief['primary_contract'] ?? false ), 'Sample brief is the primary SEO/AEO/GEO contract.' );
-toolbox_content_smoke_assert( 'suggestion_only' === (string) ( $brief['write_posture'] ?? '' ), 'Sample brief is suggestion-only.' );
-toolbox_content_smoke_assert( false === (bool) ( $brief['direct_wordpress_write'] ?? true ), 'Sample brief disables direct WordPress writes.' );
-toolbox_content_smoke_assert( is_array( $brief['seo'] ?? null ) && is_array( $brief['aeo'] ?? null ) && is_array( $brief['geo'] ?? null ), 'Sample brief exposes SEO/AEO/GEO sections.' );
-toolbox_content_smoke_assert( is_array( $brief['exceptions'] ?? null ) && is_array( $brief['special_cases'] ?? null ), 'Sample brief exposes exceptions and special cases.' );
-toolbox_content_smoke_assert( ! empty( $brief['proposal_template'] ) && is_array( $brief['proposal_template'] ), 'Sample brief returns a proposal template.' );
-toolbox_content_smoke_assert( ! empty( $brief['handoff'] ) && is_array( $brief['handoff'] ), 'Sample brief returns governed handoff metadata.' );
-
-$pack = toolbox_content_smoke_call(
-	$definitions,
-	'npcink-toolbox/build-ai-article-writing-pack',
-	array(
-		'post_id' => $sample_post_id,
-	)
-);
-if ( is_wp_error( $pack ) ) {
-	toolbox_content_smoke_fail( 'Article writing pack build returned WP_Error: ' . $pack->get_error_code() );
-}
-$pack = is_array( $pack ) ? $pack : array();
-
-toolbox_content_smoke_assert( 'ai_article_writing_pack' === (string) ( $pack['artifact_type'] ?? '' ), 'Sample writing pack declares ai_article_writing_pack.' );
-toolbox_content_smoke_assert( false === (bool) ( $pack['primary_contract'] ?? true ), 'Sample writing pack is a fallback contract.' );
-toolbox_content_smoke_assert( 'suggestion_only' === (string) ( $pack['write_posture'] ?? '' ), 'Sample writing pack is suggestion-only.' );
-toolbox_content_smoke_assert( false === (bool) ( $pack['direct_wordpress_write'] ?? true ), 'Sample writing pack disables direct WordPress writes.' );
-toolbox_content_smoke_assert( ! empty( $pack['article_prompt_pack'] ) && is_array( $pack['article_prompt_pack'] ), 'Sample writing pack returns article prompt guidance.' );
 
 $agent_gateway = toolbox_content_smoke_find_agent_gateway_tools( array_keys( $toolbox_smoke_target_abilities ) );
 if ( empty( $agent_gateway['available'] ) ) {

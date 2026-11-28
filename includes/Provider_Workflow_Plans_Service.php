@@ -1561,7 +1561,6 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 			'handoff'                 => array(
 				'brief_ability_id'       => 'npcink-toolbox/build-content-discoverability-brief',
 				'context_ability_id'     => 'npcink-toolbox/get-content-discoverability-context',
-				'validation_ability_id'  => 'npcink-toolbox/validate-content-discoverability-context',
 				'final_writes'           => 'core_proposal_required',
 				'direct_wordpress_write' => false,
 			),
@@ -1662,7 +1661,6 @@ final class Provider_Workflow_Plans_Service extends Provider_Client_Support {
 				'Do not write WordPress data. Final WordPress writes must go through Core proposal approval and commit preflight.',
 			),
 			'handoff'                     => array(
-				'pack_ability_id'        => 'npcink-toolbox/build-ai-article-writing-pack',
 				'brief_ability_id'       => 'npcink-toolbox/build-content-discoverability-brief',
 				'write_plan_ability_id'  => 'npcink-toolbox/build-article-write-plan',
 				'final_writes'           => 'core_proposal_required',

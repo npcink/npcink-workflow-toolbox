@@ -50,9 +50,6 @@ abilities such as:
 - `npcink-toolbox/build-nightly-inspection-review-plan`
 - `npcink-toolbox/build-media-derivative-handoff`
 - `npcink-toolbox/get-content-discoverability-context`
-- `npcink-toolbox/validate-content-discoverability-context`
-- `npcink-toolbox/build-content-discoverability-brief`
-- `npcink-toolbox/build-ai-article-writing-pack`
 
 External Toolkit target abilities may appear in Toolbox handoff artifacts, but
 they are not registered or owned by Toolbox. For example,
@@ -67,21 +64,16 @@ is executed by Npcink Cloud, not by a local Toolbox provider route.
 For SEO, AEO, and GEO context readiness, operators can run:
 
 ```bash
-wp eval-file tests/smoke-content-discoverability.php -- [post_id]
+wp --user=<administrator> eval-file tests/smoke-content-discoverability.php
 ```
 
-This smoke verifies the content discoverability ability registrations, local
-Npcink catalog projection, context validation, and one suggestion-only brief.
-It may also report Agent Gateway direct tool-map status when the host projection
-matrix is present. Missing `wp_*` Agent Gateway exposure is a host-side
-admission task, not a Toolbox route or registry task.
-
-For SEO, AEO, and GEO usage, human operators use the editor sidebar
-**Discoverability suggestions** button. External AI callers should treat
-`npcink-toolbox/build-content-discoverability-brief` as the machine contract
-behind that editor-facing flow. It exposes `seo`, `aeo`, `geo`, `exceptions`,
-`special_cases`, and proposal fields. `build-ai-article-writing-pack` is only a
-convenience fallback for broad natural-language article requests.
+This smoke verifies that basic site guidance remains available, while
+`npcink-toolbox/validate-content-discoverability-context`,
+`npcink-toolbox/build-ai-article-writing-pack`, and the already-paused specialist
+brief are absent from WordPress and Npcink discovery. Authenticated WordPress
+Abilities REST requests to those IDs return 404. Older OpenClaw examples that
+call them are historical, not alternate entrypoints. Agent Gateway admission
+for the remaining read interface is a host-side decision.
 
 The caller must not receive provider API keys. Durable provider secrets,
 key rotation, quotas, billing data, request logs, and provider routing belong

@@ -2,6 +2,10 @@
 
 Status: active handoff note for future AI sessions.
 
+The standalone validation, specialist brief, and writing-pack examples record
+the first-version contract only. Those IDs are not registered during the pause.
+See [current availability](content-discoverability-context.md).
+
 This file summarizes the first working shape of `npcink-toolbox` after the
 provider, Abilities API, settings, lifecycle, and local smoke-test work.
 
